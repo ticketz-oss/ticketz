@@ -1,0 +1,6 @@
+/node_modules
+/dist
+/.well-known
+/.env
+/package-lock.json
+/build
