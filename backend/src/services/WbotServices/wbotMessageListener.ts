@@ -332,6 +332,7 @@ export const getBodyMessage = (msg: proto.IWebMessageInfo): string | null => {
       ),
       liveLocationMessage: `Latitude: ${msg.message.liveLocationMessage?.degreesLatitude} - Longitude: ${msg.message.liveLocationMessage?.degreesLongitude}`,
       documentMessage: msg.message?.documentMessage?.title,
+      documentWithCaptionMessage: msg.message?.documentWithCaptionMessage?.message?.documentMessage?.caption,
       audioMessage: "Áudio",
       listMessage: getBodyButton(msg) || msg.message.listResponseMessage?.title,
       listResponseMessage: msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId,
@@ -428,6 +429,7 @@ const downloadMedia = async (msg: proto.IWebMessageInfo) => {
     msg.message?.videoMessage ||
     msg.message?.stickerMessage ||
     msg.message?.documentMessage ||
+    msg.message?.documentWithCaptionMessage?.message?.documentMessage ||
     msg.message?.extendedTextMessage?.contextInfo?.quotedMessage?.imageMessage;
 
   const messageType = msg.message?.documentMessage
@@ -448,6 +450,7 @@ const downloadMedia = async (msg: proto.IWebMessageInfo) => {
         msg.message.audioMessage ||
         msg.message.videoMessage ||
         msg.message.documentMessage ||
+        msg.message.documentWithCaptionMessage?.message?.documentMessage ||
         msg.message.imageMessage ||
         msg.message.stickerMessage ||
         msg.message.extendedTextMessage?.contextInfo.quotedMessage.imageMessage ||
@@ -700,6 +703,7 @@ const isValidMsg = (msg: proto.IWebMessageInfo): boolean => {
       msgType === "videoMessage" ||
       msgType === "imageMessage" ||
       msgType === "documentMessage" ||
+      msgType === "documentWithCaptionMessage" ||
       msgType === "stickerMessage" ||
       msgType === "buttonsResponseMessage" ||
       msgType === "buttonsMessage" ||
@@ -1389,6 +1393,7 @@ const handleMessage = async (
       msg.message?.imageMessage ||
       msg.message?.videoMessage ||
       msg.message?.documentMessage ||
+      msg.message?.documentWithCaptionMessage ||
       msg.message.stickerMessage;
     if (msg.key.fromMe) {
       if (/\u200e/.test(bodyMessage)) return;
