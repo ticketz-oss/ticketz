@@ -29,5 +29,5 @@ Por melhor esforço, procurarei sempre listar aqui as contribuições incorporad
 autorias, porém o melhor local para observar o que foi feito é o histórico
 do repositório.
 
-* #83f6713 Aceita documento anexado com legenda -- @allgood)
-* #e8f4d32 Aceita mensagens editadas -- [cherry pick de @Vinicius-Marques6](https://github.com/canove/whaticket-community/pull/605)
+* [83f6713](https://github.com/allgood/whaticket-saas-open/commit/83f67132c234f528c13540b3de529ccb54cc3e6a) Aceita documento anexado com legenda -- @allgood)
+* [e8f4d32](https://github.com/allgood/whaticket-saas-open/commit/e8f4d325f46133a2ea828dfe8ca7470f44243bf5) Aceita mensagens editadas -- cherry pick de @Vinicius-Marques6 canove/whaticket-community#605
