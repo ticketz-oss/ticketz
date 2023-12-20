@@ -736,12 +736,17 @@ const messages = {
       },
       messageOptionsMenu: {
         delete: "Deletar",
+        history: "Histórico",
         reply: "Responder",
         confirmationModal: {
           title: "Apagar mensagem?",
           message: "Esta ação não pode ser revertida.",
         },
       },
+	  messageHistoryModal: {
+		  close: "Fechar",
+		  title: "Histórico de edição da mensagem"
+	  },
       backendErrors: {
         ERR_NO_OTHER_WHATSAPP: "Deve haver pelo menos um WhatsApp padrão.",
         ERR_NO_DEF_WAPP_FOUND:

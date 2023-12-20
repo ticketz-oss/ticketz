@@ -8,10 +8,12 @@ import ConfirmationModal from "../ConfirmationModal";
 import { Menu } from "@material-ui/core";
 import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessageContext";
 import toastError from "../../errors/toastError";
+import MessageHistoryModal from "../MessageHistoryModal";
 
 const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
 	const { setReplyingMessage } = useContext(ReplyMessageContext);
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
+	const [messageHistoryOpen, setMessageHistoryOpen] = useState(false);
 
 	const handleDeleteMessage = async () => {
 		try {
@@ -30,6 +32,11 @@ const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
 		setConfirmationOpen(true);
 		handleClose();
 	};
+	
+	const handleOpenMessageHistoryModal = (e) => {
+		setMessageHistoryOpen(true);
+		handleClose();
+	}
 
 	return (
 		<>
@@ -41,6 +48,12 @@ const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
 			>
 				{i18n.t("messageOptionsMenu.confirmationModal.message")}
 			</ConfirmationModal>
+			<MessageHistoryModal
+                open={messageHistoryOpen}
+                onClose={setMessageHistoryOpen}
+                oldMessages={message.oldMessages}
+            >
+            </MessageHistoryModal>
 			<Menu
 				anchorEl={anchorEl}
 				getContentAnchorEl={null}
@@ -59,6 +72,11 @@ const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
 					<MenuItem onClick={handleOpenConfirmationModal}>
 						{i18n.t("messageOptionsMenu.delete")}
 					</MenuItem>
+				)}
+				{message.oldMessages?.length > 0 && (
+					<MenuItem key="history" onClick={handleOpenMessageHistoryModal}>
+	                    {i18n.t("messageOptionsMenu.history")}
+				    </MenuItem>
 				)}
 				<MenuItem onClick={hanldeReplyMessage}>
 					{i18n.t("messageOptionsMenu.reply")}

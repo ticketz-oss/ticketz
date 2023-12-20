@@ -6,6 +6,7 @@ import Ticket from "../models/Ticket";
 import Whatsapp from "../models/Whatsapp";
 import ContactCustomField from "../models/ContactCustomField";
 import Message from "../models/Message";
+import OldMessage from "../models/OldMessage";
 import Queue from "../models/Queue";
 import WhatsappQueue from "../models/WhatsappQueue";
 import UserQueue from "../models/UserQueue";
@@ -45,6 +46,7 @@ const models = [
   Contact,
   Ticket,
   Message,
+  OldMessage,
   Whatsapp,
   ContactCustomField,
   Setting,

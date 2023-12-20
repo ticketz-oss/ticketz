@@ -8,12 +8,14 @@ import {
   PrimaryKey,
   Default,
   BelongsTo,
-  ForeignKey
+  ForeignKey,
+  HasMany,
 } from "sequelize-typescript";
 import Contact from "./Contact";
 import Ticket from "./Ticket";
 import Company from "./Company";
 import Queue from "./Queue";
+import OldMessage from "./OldMessage";
 
 @Table
 class Message extends Model<Message> {
@@ -111,6 +113,9 @@ class Message extends Model<Message> {
 
   @BelongsTo(() => Queue)
   queue: Queue;
+  
+  @HasMany(() => OldMessage)
+  oldMessages: OldMessage[];
 }
 
 export default Message;

@@ -21,6 +21,7 @@ import {
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
 import Message from "../../models/Message";
+import OldMessage from "../../models/OldMessage";
 
 import { getIO } from "../../libs/socket";
 import CreateMessageService from "../MessageServices/CreateMessageService";
@@ -663,6 +664,16 @@ export const verifyMessage = async (
     lastMessage: body
   });
 
+  if (isEdited) {
+	  let editedMsg = await Message.findByPk(messageData.id); 
+	  const oldMessage = {
+		  messageId: messageData.id,
+		  body: editedMsg.body
+	  }
+	  
+	  await OldMessage.upsert(oldMessage);
+  }
+  
   await CreateMessageService({ messageData, companyId: ticket.companyId });
 
   if (!msg.key.fromMe && ticket.status === "closed") {
