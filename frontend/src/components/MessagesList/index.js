@@ -3,7 +3,7 @@ import React, { useState, useEffect, useReducer, useRef } from "react";
 import { isSameDay, parseISO, format } from "date-fns";
 import clsx from "clsx";
 
-import { green } from "@material-ui/core/colors";
+import { green, blue } from "@material-ui/core/colors";
 import {
   Avatar,
   Button,
@@ -260,6 +260,13 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: 4,
   },
 
+  ackDoneReadIcon: {
+    color: blue[500],
+    fontSize: 18,
+    verticalAlign: "middle",
+    marginLeft: 4,
+  },
+
   downloadMedia: {
     display: "flex",
     alignItems: "center",
@@ -484,9 +491,12 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     if (message.ack === 2) {
       return <DoneAll fontSize="small" className={classes.ackIcons} />;
     }
-    if (message.ack === 3 || message.ack === 4) {
+    if (message.ack === 3) {
       return <DoneAll fontSize="small" className={classes.ackDoneAllIcon} />;
     }
+    if (message.ack === 4) {
+      return <DoneAll fontSize="small" className={classes.ackDoneReadIcon} />;
+	}
   };
 
   const renderDailyTimestamps = (message, index) => {
