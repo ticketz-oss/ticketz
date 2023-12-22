@@ -736,6 +736,7 @@ const messages = {
       },
       messageOptionsMenu: {
         delete: "Deletar",
+        edit: "Editar",
         history: "Histórico",
         reply: "Responder",
         confirmationModal: {
@@ -763,6 +764,7 @@ const messages = {
         ERR_SENDING_WAPP_MSG:
           "Erro ao enviar mensagem do WhatsApp. Verifique a página de conexões.",
         ERR_DELETE_WAPP_MSG: "Não foi possível excluir a mensagem do WhatsApp.",
+        ERR_EDITING_WAPP_MSG: "Não foi possível editar a mensagem do WhatsApp.",
         ERR_OTHER_OPEN_TICKET: "Já existe um tíquete aberto para este contato.",
         ERR_SESSION_EXPIRED: "Sessão expirada. Por favor entre.",
         ERR_USER_CREATION_DISABLED:

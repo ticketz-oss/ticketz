@@ -30,6 +30,7 @@ import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessa
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import toastError from "../../errors/toastError";
+import { EditMessageContext } from "../../context/EditingMessage/EditingMessageContext";
 
 import useQuickMessages from "../../hooks/useQuickMessages";
 
@@ -468,23 +469,29 @@ const MessageInputCustom = (props) => {
   const inputRef = useRef();
   const { setReplyingMessage, replyingMessage } =
     useContext(ReplyMessageContext);
+  const { setEditingMessage, editingMessage } = useContext(
+		EditMessageContext
+	);  
   const { user } = useContext(AuthContext);
 
   const [signMessage, setSignMessage] = useLocalStorage("signOption", true);
 
   useEffect(() => {
     inputRef.current.focus();
-  }, [replyingMessage]);
+    if (editingMessage) {
+		setInputMessage(editingMessage.body);
+	}
+  }, [replyingMessage, editingMessage]);
 
   useEffect(() => {
     inputRef.current.focus();
     return () => {
-      setInputMessage("");
       setShowEmoji(false);
       setMedias([]);
       setReplyingMessage(null);
+      setEditingMessage(null);
     };
-  }, [ticketId, setReplyingMessage]);
+  }, [ticketId, setReplyingMessage, setEditingMessage]);
 
   // const handleChangeInput = e => {
   // 	if (isObject(e) && has(e, 'value')) {
@@ -608,7 +615,12 @@ const MessageInputCustom = (props) => {
       quotedMsg: replyingMessage,
     };
     try {
-      await api.post(`/messages/${ticketId}`, message);
+		if (editingMessage !== null) {
+			await api.post(`/messages/edit/${editingMessage.id}`, message);
+		}
+		else {
+			await api.post(`/messages/${ticketId}`, message);
+		}
     } catch (err) {
       toastError(err);
     }
@@ -617,6 +629,7 @@ const MessageInputCustom = (props) => {
     setShowEmoji(false);
     setLoading(false);
     setReplyingMessage(null);
+    setEditingMessage(null);
   };
 
   const handleStartRecording = async () => {
@@ -678,20 +691,27 @@ const MessageInputCustom = (props) => {
               [classes.replyginSelfMsgSideColor]: !message.fromMe,
             })}
           ></span>
-          <div className={classes.replyginMsgBody}>
-            {!message.fromMe && (
-              <span className={classes.messageContactName}>
-                {message.contact?.name}
-              </span>
-            )}
-            {message.body}
-          </div>
+          {replyingMessage && (
+	          <div className={classes.replyginMsgBody}>
+	            {!message.fromMe && (
+	              <span className={classes.messageContactName}>
+	                {message.contact?.name}
+	              </span>
+	            )}
+	            {message.body}
+	          </div>
+			  )
+		  }
         </div>
         <IconButton
           aria-label="showRecorder"
           component="span"
           disabled={disableOption}
-          onClick={() => setReplyingMessage(null)}
+          onClick={() => {
+              setReplyingMessage(null);
+              setEditingMessage(null);
+              setInputMessage("");
+          }}
         >
           <ClearIcon className={classes.sendMessageIcons} />
         </IconButton>
@@ -735,7 +755,7 @@ const MessageInputCustom = (props) => {
   else {
     return (
       <Paper square elevation={0} className={classes.mainWrapper}>
-        {replyingMessage && renderReplyingMessage(replyingMessage)}
+        {(replyingMessage && renderReplyingMessage(replyingMessage)) || (editingMessage && renderReplyingMessage(editingMessage))}
         <div className={classes.newMessageBox}>
           <EmojiOptions
             disabled={disableOption}

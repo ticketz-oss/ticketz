@@ -33,6 +33,7 @@ import whatsBackground from "../../assets/wa-background.png";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import { socketConnection } from "../../services/socket";
+import { i18n } from "../../translate/i18n";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -655,7 +656,6 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
 
 
   const renderMessages = () => {
-    if (messagesList.length > 0) {
       const viewMessagesList = messagesList.map((message, index) => {
         if (!message.fromMe) {
           return (
@@ -687,7 +687,10 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                 {message.body.includes('data:image') ? messageLocation(message.body, message.createdAt)
                   :
                   isVCard(message.body) ?
-                    <div className={[classes.textContentItem, { marginRight: 0 }]}>
+                    <div
+                      className={[clsx(classes.textContentItem, {
+                        [classes.textContentItemEdited] : message.isEdited
+                      }), { marginRight: 0 }]}>
                       {vCard(message.body)}
                     </div>
 
@@ -698,7 +701,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                       {message.quotedMsg && renderQuotedMessage(message)}
                       <MarkdownWrapper>{message.body}</MarkdownWrapper>
                       <span className={classes.timestamp}>
-                        {message.isEdited && <span>Editada </span>}
+                        {message.isEdited && <span> {i18n.t("message.edited")} </span>}
                         {format(parseISO(message.createdAt), "HH:mm")}
                       </span>
                     </div>)}
@@ -749,7 +752,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                   message.quotedMsg && renderQuotedMessage(message)}
                   <MarkdownWrapper>{message.body}</MarkdownWrapper>
                   <span className={classes.timestamp}>
-                    {message.isEdited && <span>Editada </span>}
+                    {message.isEdited && <span> {i18n.t("message.edited")} </span>}
                     {format(parseISO(message.createdAt), "HH:mm")}
                     {renderMessageAck(message)}
                   </span>
@@ -760,9 +763,6 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
         }
       });
       return viewMessagesList;
-    } else {
-      return <div>Say hello to your new contact!</div>;
-    }
   };
 
   return (
