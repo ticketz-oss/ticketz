@@ -15,6 +15,7 @@ import SendWhatsAppMedia from "../services/WbotServices/SendWhatsAppMedia";
 import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import CheckContactNumber from "../services/WbotServices/CheckNumber";
 import CheckIsValidContact from "../services/WbotServices/CheckIsValidContact";
+import EditWhatsAppMessage from "../services/WbotServices/EditWhatsAppMessage";
 
 import {sendFacebookMessageMedia} from "../services/FacebookServices/sendFacebookMessageMedia";
 import sendFaceMessage from "../services/FacebookServices/sendFacebookMessage";
@@ -107,6 +108,22 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   return res.send();
 };
+
+export const edit = async (req: Request, res: Response): Promise<Response> => {
+  const { messageId } = req.params;
+  const { companyId } = req.user;
+  const { body }: MessageData = req.body;
+
+  const { ticketId , message } = await EditWhatsAppMessage({messageId, body});
+
+  const io = getIO();
+  io.to(ticketId.toString()).emit(`company-${companyId}-appMessage`, {
+    action: "update",
+    message
+  });
+
+  return res.send();
+}
 
 export const remove = async (
   req: Request,
