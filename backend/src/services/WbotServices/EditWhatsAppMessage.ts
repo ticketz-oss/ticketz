@@ -4,6 +4,7 @@ import AppError from "../../errors/AppError";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
 import GetWbotMessage from "../../helpers/GetWbotMessage";
 import Message from "../../models/Message";
+import OldMessage from "../../models/OldMessage";
 import Ticket from "../../models/Ticket";
 
 import formatBody from "../../helpers/Mustache";
@@ -39,15 +40,23 @@ const EditWhatsAppMessage = async ({
   const msg = JSON.parse(message.dataJson);
   
   try {
-	const sentMessage = await wbot.sendMessage(message.remoteJid, {
+	await wbot.sendMessage(message.remoteJid, {
 	  text: body,
 	  edit: msg.key,
 	},{});
 	
+    const oldMessage = {
+      messageId: messageId,
+      body: message.body
+	}
+
+    await OldMessage.upsert(oldMessage);
+
 	message.update({ body: body, isEdited: true});
 	
     return { ticketId: message.ticketId , message: message };
   } catch (err) {
+	console.log(err);
     throw new AppError("ERR_EDITING_WAPP_MSG");
   }
 
