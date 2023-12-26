@@ -14,7 +14,9 @@ import MessageHistoryModal from "../MessageHistoryModal";
 
 const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
 	const { setReplyingMessage } = useContext(ReplyMessageContext);
-	const { setEditingMessage } = useContext(EditMessageContext);
+ 	const editingContext = useContext(EditMessageContext);
+ 	const setEditingMessage = editingContext ? editingContext.setEditingMessage : null;
+ 	
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
 	const [messageHistoryOpen, setMessageHistoryOpen] = useState(false);
 
