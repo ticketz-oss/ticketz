@@ -701,6 +701,10 @@ const messages = {
           "Reabra ou aceite esse ticket para enviar uma mensagem.",
         signMessage: "Assinar",
       },
+      message: {
+        edited: "Editada"
+      },
+
       contactDrawer: {
         header: "Dados do contato",
         buttons: {
