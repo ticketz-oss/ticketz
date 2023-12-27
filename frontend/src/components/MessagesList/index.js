@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer, useRef } from "react";
+import React, { useState, useEffect, useReducer, useRef, useContext } from "react";
 
 import { isSameDay, parseISO, format } from "date-fns";
 import clsx from "clsx";
@@ -32,7 +32,7 @@ import whatsBackground from "../../assets/wa-background.png";
 
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
-import { socketConnection } from "../../services/socket";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import { i18n } from "../../translate/i18n";
 
 
@@ -344,6 +344,8 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
   const messageOptionsMenuOpen = Boolean(anchorEl);
   const currentTicketId = useRef(ticketId);
 
+  const socketManager = useContext(SocketContext);
+
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
@@ -383,27 +385,39 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
   }, [pageNumber, ticketId]);
 
   useEffect(() => {
+	if (!ticket.id) {
+		return;
+	}
+	  
     const companyId = localStorage.getItem("companyId");
-    const socket = socketConnection({ companyId });
+    
+    const socket = socketManager.GetSocket(companyId);
 
-    socket.on("connect", () => socket.emit("joinChatBox", `${ticket.id}`));
+    const onConnect = () => {
+		socket.emit("joinChatBox", `${ticket.id}`);
+	}
+	
+	socketManager.onConnect(onConnect);
 
-    socket.on(`company-${companyId}-appMessage`, (data) => {
+    const onAppMessage = (data) => {
+	  console.log("AppMessage", data);
       if (data.action === "create") {
         dispatch({ type: "ADD_MESSAGE", payload: data.message });
         scrollToBottom();
       }
 
       if (data.action === "update") {
-        // console.loh(data)
         dispatch({ type: "UPDATE_MESSAGE", payload: data.message });
       }
-    });
+    }
+
+    socket.on(`company-${companyId}-appMessage`, onAppMessage);
 
     return () => {
-      socket.disconnect();
+      socket.off("connect", onConnect);
+      socket.off(`company-${companyId}-appMessage`, onAppMessage);
     };
-  }, [ticketId, ticket]);
+  }, [ticketId, ticket, socketManager]);
 
   const loadMore = () => {
     setPageNumber((prevPageNumber) => prevPageNumber + 1);

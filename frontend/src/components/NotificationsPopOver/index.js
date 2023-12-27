@@ -18,7 +18,7 @@ import { i18n } from "../../translate/i18n";
 import useTickets from "../../hooks/useTickets";
 import alertSound from "../../assets/sound.mp3";
 import { AuthContext } from "../../context/Auth/AuthContext";
-import { socketConnection } from "../../services/socket";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const useStyles = makeStyles((theme) => ({
   tabContainer: {
@@ -59,6 +59,8 @@ const NotificationsPopOver = (props) => {
   const soundAlertRef = useRef();
 
   const historyRef = useRef(history);
+  
+  const socketManager = useContext(SocketContext);
 
 	useEffect(() => {
 		soundAlertRef.current = play;
@@ -80,13 +82,15 @@ const NotificationsPopOver = (props) => {
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
-    const socket = socketConnection({ companyId });
+    const socket = socketManager.GetSocket(companyId);
 
     const queueIds = queues.map((q) => q.id);
 
-    socket.on("connect", () => socket.emit("joinNotification"));
+    const onConnectNotificationsPopover = () => {
+		socket.emit("joinNotification");
+	}
 
-    socket.on(`company-${companyId}-ticket`, (data) => {
+	const onCompanyTicketNotificationsPopover = (data) => {
       if (data.action === "updateUnread" || data.action === "delete") {
 				setNotifications(prevState => {
 					const ticketIndex = prevState.findIndex(t => t.id === data.ticketId);
@@ -109,9 +113,9 @@ const NotificationsPopOver = (props) => {
 					return prevState;
 				});
       }
-    });
-
-    socket.on(`company-${companyId}-appMessage`, (data) => {
+    };
+    
+    const onCompanyAppMessageNotificationsPopover = (data) => {
       
 			if (
 				data.action === "create" &&
@@ -137,12 +141,18 @@ const NotificationsPopOver = (props) => {
 
 				handleNotifications(data);
 			}
-    });
+    }
+
+    socketManager.onConnect(onConnectNotificationsPopover);
+    socket.on(`company-${companyId}-ticket`, onCompanyTicketNotificationsPopover);
+    socket.on(`company-${companyId}-appMessage`, onCompanyAppMessageNotificationsPopover);
 
     return () => {
-      socket.disconnect();
+       socket.off("connect", onConnectNotificationsPopover);
+       socket.off(`company-${companyId}-ticket`, onCompanyTicketNotificationsPopover);
+       socket.off(`company-${companyId}-appMessage`, onCompanyAppMessageNotificationsPopover);
     };
-  }, [user, profile, queues]);
+  }, [user, profile, queues, socketManager]);
 
   const handleNotifications = (data) => {
     const { message, contact, ticket } = data;

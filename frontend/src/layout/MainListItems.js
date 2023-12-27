@@ -37,7 +37,7 @@ import BorderColorIcon from '@material-ui/icons/BorderColor';
 import { WhatsAppsContext } from "../context/WhatsApp/WhatsAppsContext";
 import { AuthContext } from "../context/Auth/AuthContext";
 import { Can } from "../components/Can";
-import { socketConnection } from "../services/socket";
+import { SocketContext } from "../context/Socket/SocketContext";
 import { isArray } from "lodash";
 import api from "../services/api";
 import toastError from "../errors/toastError";
@@ -145,6 +145,8 @@ const MainListItems = (props) => {
   const [searchParam] = useState("");
   const [chats, dispatch] = useReducer(reducer, []);
 
+  const socketManager = useContext(SocketContext);
+
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
@@ -160,20 +162,22 @@ const MainListItems = (props) => {
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
-    const socket = socketConnection({ companyId });
+    const socket = socketManager.GetSocket(companyId);
 
-    socket.on(`company-${companyId}-chat`, (data) => {
+    const onCompanyChatMainListItems = (data) => {
       if (data.action === "new-message") {
         dispatch({ type: "CHANGE_CHAT", payload: data });
       }
       if (data.action === "update") {
         dispatch({ type: "CHANGE_CHAT", payload: data });
       }
-    });
+    }
+
+    socket.on(`company-${companyId}-chat`, onCompanyChatMainListItems);
     return () => {
-      socket.disconnect();
+	    socket.off(`company-${companyId}-chat`, onCompanyChatMainListItems);
     };
-  }, []);
+  }, [socketManager]);
 
   useEffect(() => {
     let unreadsCount = 0;

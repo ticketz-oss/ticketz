@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useHistory } from "react-router-dom";
 import QRCode from 'react-qr-code';
 import { SuccessContent, Total } from './style';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { FaCopy, FaCheckCircle } from 'react-icons/fa';
-import { socketConnection } from "../../../services/socket";
+import { SocketContext } from "../../../context/Socket/SocketContext";
 import { useDate } from "../../../hooks/useDate";
 import { toast } from "react-toastify";
 
@@ -17,10 +17,13 @@ function CheckoutSuccess(props) {
 
   const { dateToClient } = useDate();
 
+  const socketManager = useContext(SocketContext);
+
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
-    const socket = socketConnection({ companyId });
-    socket.on(`company-${companyId}-payment`, (data) => {
+    const socket = socketManager.GetSocket(companyId);
+
+    const onCompanyPayment = (data) => {
 
       if (data.action === "CONCLUIDA") {
         toast.success(`Sua licença foi renovada até ${dateToClient(data.company.dueDate)}!`);
@@ -28,8 +31,14 @@ function CheckoutSuccess(props) {
           history.push("/");
         }, 4000);
       }
-    });
-  }, [history, dateToClient]);
+    }
+
+    socket.on(`company-${companyId}-payment`, onCompanyPayment);
+    
+    return () => {
+      socket.off("connect", onCompanyPayment);
+    }
+  }, [history, dateToClient, socketManager]);
 
   const handleCopyQR = () => {
     setTimeout(() => {

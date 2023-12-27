@@ -7,6 +7,7 @@ import { ptBR } from "@material-ui/core/locale";
 import { createTheme, ThemeProvider } from "@material-ui/core/styles";
 import { useMediaQuery } from "@material-ui/core";
 import ColorModeContext from "./layout/themeContext";
+import { SocketContext, socketManager } from './context/Socket/SocketContext';
 
 import Routes from "./routes";
 
@@ -102,7 +103,9 @@ const App = () => {
         <ColorModeContext.Provider value={{ colorMode }}>
             <ThemeProvider theme={theme}>
                 <QueryClientProvider client={queryClient}>
-                    <Routes />
+                	<SocketContext.Provider value={socketManager}>
+	                    <Routes />
+	                </SocketContext.Provider>
                 </QueryClientProvider>
             </ThemeProvider>
         </ColorModeContext.Provider>

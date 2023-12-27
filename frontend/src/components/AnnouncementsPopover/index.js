@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState } from "react";
+import React, { useEffect, useReducer, useState, useContext } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import toastError from "../../errors/toastError";
 import Popover from "@material-ui/core/Popover";
@@ -23,7 +23,7 @@ import {
 import api from "../../services/api";
 import { isArray } from "lodash";
 import moment from "moment";
-import { socketConnection } from "../../services/socket";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const useStyles = makeStyles((theme) => ({
 contend:{minWidth: 300,maxWidth: 500,},
@@ -140,6 +140,8 @@ export default function AnnouncementsPopover() {
   const [announcement, setAnnouncement] = useState({});
   const [showAnnouncementDialog, setShowAnnouncementDialog] = useState(false);
 
+  const socketManager = useContext(SocketContext);
+  
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
@@ -156,9 +158,9 @@ export default function AnnouncementsPopover() {
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
-    const socket = socketConnection({ companyId });
+    const socket = socketManager.GetSocket(companyId);
 
-    socket.on(`company-announcement`, (data) => {
+	const onCompanyAnnouncement = (data) => {
       if (data.action === "update" || data.action === "create") {
         dispatch({ type: "UPDATE_ANNOUNCEMENTS", payload: data.record });
         setInvisible(false);
@@ -166,11 +168,14 @@ export default function AnnouncementsPopover() {
       if (data.action === "delete") {
         dispatch({ type: "DELETE_ANNOUNCEMENT", payload: +data.id });
       }
-    });
-    return () => {
-      socket.disconnect();
     };
-  }, []);
+
+    socket.on(`company-announcement`, onCompanyAnnouncement);
+
+    return () => {
+      socket.off(`company-announcement`, onCompanyAnnouncement);
+    };
+  }, [socketManager]);
 
   const fetchAnnouncements = async () => {
     try {

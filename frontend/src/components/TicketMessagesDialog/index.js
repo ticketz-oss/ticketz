@@ -17,7 +17,7 @@ import MessagesList from "../MessagesList";
 import { ReplyMessageProvider } from "../../context/ReplyingMessage/ReplyingMessageContext";
 import TicketHeader from "../TicketHeader";
 import TicketInfo from "../TicketInfo";
-import { socketConnection } from "../../services/socket";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const drawerWidth = 320;
 
@@ -66,6 +66,8 @@ export default function TicketMessagesDialog({ open, handleClose, ticketId }) {
   const [loading, setLoading] = useState(true);
   const [contact, setContact] = useState({});
   const [ticket, setTicket] = useState({});
+  
+  const socketManager = useContext(SocketContext);
 
   useEffect(() => {
     let delayDebounceFn = null;
@@ -106,12 +108,16 @@ export default function TicketMessagesDialog({ open, handleClose, ticketId }) {
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
     let socket = null;
+    let onReturn = () => {};
 
     if (open) {
-      socket = socketConnection({ companyId });
-      socket.on("connect", () => socket.emit("joinChatBox", `${ticket.id}`));
+      socket = socketManager.GetSocket(companyId);
 
-      socket.on(`company-${companyId}-ticket`, (data) => {
+      const onConnectTicketMessagesDialog = () => {
+		  socket.emit("joinChatBox", `${ticket.id}`);
+	  }
+
+      const onCompanyTicketMessagesDialog = (data) => {
         if (data.action === "update") {
           setTicket(data.ticket);
         }
@@ -120,9 +126,9 @@ export default function TicketMessagesDialog({ open, handleClose, ticketId }) {
           toast.success("Ticket deleted sucessfully.");
           history.push("/tickets");
         }
-      });
-
-      socket.on(`company-${companyId}-contact`, (data) => {
+      }
+      
+      const onCompanyContactMessagesDialog = (data) => {
         if (data.action === "update") {
           setContact((prevState) => {
             if (prevState.id === data.contact?.id) {
@@ -131,15 +137,23 @@ export default function TicketMessagesDialog({ open, handleClose, ticketId }) {
             return prevState;
           });
         }
-      });
+      }
+
+      onReturn = () => {
+        if (socket !== null) {
+	      socket.off("connect", onConnectTicketMessagesDialog);
+	      socket.off(`company-${companyId}-ticket`, onCompanyTicketMessagesDialog);
+	      socket.off(`company-${companyId}-contact`, onCompanyContactMessagesDialog);
+        }
+      } 
+
+      socketManager.onConnect(onConnectTicketMessagesDialog);
+      socket.on(`company-${companyId}-ticket`, onCompanyTicketMessagesDialog);
+      socket.on(`company-${companyId}-contact`, onCompanyContactMessagesDialog);
     }
 
-    return () => {
-      if (socket !== null) {
-        socket.disconnect();
-      }
-    };
-  }, [ticketId, ticket, history, open]);
+    return onReturn;
+  }, [ticketId, ticket, history, open, socketManager]);
 
   const handleDrawerOpen = () => {
     setDrawerOpen(true);

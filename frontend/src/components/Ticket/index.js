@@ -18,7 +18,7 @@ import { EditMessageProvider } from "../../context/EditingMessage/EditingMessage
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { TagsContainer } from "../TagsContainer";
-import { socketConnection } from "../../services/socket";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const drawerWidth = 320;
 
@@ -69,6 +69,8 @@ const Ticket = () => {
   const [contact, setContact] = useState({});
   const [ticket, setTicket] = useState({});
 
+  const socketManager = useContext(SocketContext);
+
   useEffect(() => {
     setLoading(true);
     const delayDebounceFn = setTimeout(() => {
@@ -100,11 +102,16 @@ const Ticket = () => {
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
-    const socket = socketConnection({ companyId });
+    
+    const socket = socketManager.GetSocket(companyId);
 
-    socket.on("connect", () => socket.emit("joinChatBox", `${ticket.id}`));
+    const onConnectTicket = () => {
+		socket.emit("joinChatBox", `${ticket.id}`);
+	}
+	
+	socketManager.onConnect(onConnectTicket);
 
-    socket.on(`company-${companyId}-ticket`, (data) => {
+    const onCompanyTicket = (data) => {
       if (data.action === "update") {
         setTicket(data.ticket);
       }
@@ -113,9 +120,9 @@ const Ticket = () => {
         toast.success("Ticket deleted sucessfully.");
         history.push("/tickets");
       }
-    });
+    };
 
-    socket.on(`company-${companyId}-contact`, (data) => {
+    const onCompanyContact = (data) => {
       if (data.action === "update") {
         setContact((prevState) => {
           if (prevState.id === data.contact?.id) {
@@ -124,12 +131,18 @@ const Ticket = () => {
           return prevState;
         });
       }
-    });
+    };
+
+    socket.on(`company-${companyId}-ticket`, onCompanyTicket);
+
+    socket.on(`company-${companyId}-contact`, onCompanyContact);
 
     return () => {
-      socket.disconnect();
+      socket.off("connect", onConnectTicket);
+      socket.off(`company-${companyId}-ticket`, onCompanyTicket);
+      socket.off(`company-${companyId}-contact`, onCompanyContact);
     };
-  }, [ticketId, ticket, history]);
+  }, [ticketId, ticket, history, socketManager]);
 
   const handleDrawerOpen = () => {
     setDrawerOpen(true);

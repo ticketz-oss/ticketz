@@ -33,7 +33,7 @@ import toastError from "../errors/toastError";
 import AnnouncementsPopover from "../components/AnnouncementsPopover";
 
 import logo from "../assets/logo.png";
-import { socketConnection } from "../services/socket";
+import { SocketContext } from "../context/Socket/SocketContext";
 import ChatPopover from "../pages/Chat/ChatPopover";
 
 import { useDate } from "../hooks/useDate";
@@ -192,6 +192,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
 
   const { dateToClient } = useDate();
 
+  const socketManager = useContext(SocketContext);
 
   //################### CODIGOS DE TESTE #########################################
   // useEffect(() => {
@@ -258,9 +259,9 @@ const LoggedInLayout = ({ children, themeToggle }) => {
     const companyId = localStorage.getItem("companyId");
     const userId = localStorage.getItem("userId");
 
-    const socket = socketConnection({ companyId });
+    const socket = socketManager.GetSocket(companyId);
 
-    socket.on(`company-${companyId}-auth`, (data) => {
+    const onCompanyAuthLayout = (data) => {
       if (data.user.id === +userId) {
         toastError("Sua conta foi acessada em outro computador.");
         setTimeout(() => {
@@ -268,7 +269,9 @@ const LoggedInLayout = ({ children, themeToggle }) => {
           window.location.reload();
         }, 1000);
       }
-    });
+    }
+
+    socket.on(`company-${companyId}-auth`, onCompanyAuthLayout);
 
     socket.emit("userStatus");
     const interval = setInterval(() => {
@@ -276,7 +279,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
     }, 1000 * 60 * 5);
 
     return () => {
-      socket.disconnect();
+      socket.off(`company-${companyId}-auth`, onCompanyAuthLayout);
       clearInterval(interval);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

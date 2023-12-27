@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useHistory } from "react-router-dom";
 import { has, isArray } from "lodash";
 
@@ -7,13 +7,15 @@ import { toast } from "react-toastify";
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
-import { socketConnection } from "../../services/socket";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import moment from "moment";
 const useAuth = () => {
   const history = useHistory();
   const [isAuth, setIsAuth] = useState(false);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState({});
+
+  const socketManager = useContext(SocketContext);
 
   api.interceptors.request.use(
     (config) => {
@@ -74,16 +76,18 @@ const useAuth = () => {
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
-    const socket = socketConnection({ companyId });
+    const socket = socketManager.GetSocket(companyId);
 
-    socket.on(`company-${companyId}-user`, (data) => {
+    const onCompanyUserUseAuth = (data) => {
       if (data.action === "update" && data.user.id === user.id) {
         setUser(data.user);
       }
-    });
+    }
+
+    socket.on(`company-${companyId}-user`, onCompanyUserUseAuth);
 
     return () => {
-      socket.disconnect();
+      socket.off(`company-${companyId}-user`, onCompanyUserUseAuth);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);

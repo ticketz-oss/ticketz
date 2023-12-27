@@ -1,8 +1,8 @@
-import { useState, useEffect, useReducer } from "react";
+import { useState, useEffect, useReducer, useContext } from "react";
 import toastError from "../../errors/toastError";
 
 import api from "../../services/api";
-import { socketConnection } from "../../services/socket";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_WHATSAPPS") {
@@ -57,6 +57,8 @@ const useWhatsApps = () => {
   const [whatsApps, dispatch] = useReducer(reducer, []);
   const [loading, setLoading] = useState(true);
 
+  const socketManager = useContext(SocketContext);
+
   useEffect(() => {
     setLoading(true);
     const fetchSession = async () => {
@@ -74,30 +76,31 @@ const useWhatsApps = () => {
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
-    const socket = socketConnection({ companyId });
+    const socket = socketManager.GetSocket(companyId);
 
-    socket.on(`company-${companyId}-whatsapp`, (data) => {
+    const onCompanyWhatsapp = (data) => {
       if (data.action === "update") {
         dispatch({ type: "UPDATE_WHATSAPPS", payload: data.whatsapp });
       }
-    });
-
-    socket.on(`company-${companyId}-whatsapp`, (data) => {
       if (data.action === "delete") {
         dispatch({ type: "DELETE_WHATSAPPS", payload: data.whatsappId });
       }
-    });
+    }
 
-    socket.on(`company-${companyId}-whatsappSession`, (data) => {
+    const onCompanyWhatsappSession = (data) => {
       if (data.action === "update") {
         dispatch({ type: "UPDATE_SESSION", payload: data.session });
       }
-    });
+    }
+
+    socket.on(`company-${companyId}-whatsapp`, onCompanyWhatsapp);
+    socket.on(`company-${companyId}-whatsappSession`, onCompanyWhatsappSession);
 
     return () => {
-      socket.disconnect();
+	    socket.off(`company-${companyId}-whatsapp`, onCompanyWhatsapp);
+	    socket.off(`company-${companyId}-whatsappSession`, onCompanyWhatsappSession);
     };
-  }, []);
+  }, [socketManager]);
 
   return { whatsApps, loading };
 };

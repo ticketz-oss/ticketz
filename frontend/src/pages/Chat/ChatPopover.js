@@ -20,7 +20,7 @@ import {
 } from "@material-ui/core";
 import api from "../../services/api";
 import { isArray } from "lodash";
-import { socketConnection } from "../../services/socket";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import { useDate } from "../../hooks/useDate";
 import { AuthContext } from "../../context/Auth/AuthContext";
 
@@ -110,6 +110,8 @@ export default function ChatPopover() {
   const [play] = useSound(notifySound);
   const soundAlertRef = useRef();
 
+  const socketManager = useContext(SocketContext);
+
   useEffect(() => {
     soundAlertRef.current = play;
 
@@ -136,9 +138,9 @@ export default function ChatPopover() {
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
-    const socket = socketConnection({ companyId });
+    const socket = socketManager.GetSocket(companyId);
 
-    socket.on(`company-${companyId}-chat`, (data) => {
+    const onCompanyChatPopover = (data) => {
       if (data.action === "new-message") {
         dispatch({ type: "CHANGE_CHAT", payload: data });
         if (data.newMessage.senderId !== user.id) {
@@ -149,12 +151,15 @@ export default function ChatPopover() {
       if (data.action === "update") {
         dispatch({ type: "CHANGE_CHAT", payload: data });
       }
-    });
+    }
+
+    socket.on(`company-${companyId}-chat`, onCompanyChatPopover);
+
     return () => {
-      socket.disconnect();
+      socket.off(`company-${companyId}-chat`, onCompanyChatPopover);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [socketManager]);
 
   useEffect(() => {
     let unreadsCount = 0;
