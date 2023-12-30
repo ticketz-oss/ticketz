@@ -233,7 +233,7 @@ const TicketListItemCustom = ({ ticket, setUpdate}) => {
   };
 
   const renderTicketInfo = () => {
-    if (ticketUser) {
+    if (ticketUser && ticket.status !== "pending") {
       return (
         <>
           <Badge

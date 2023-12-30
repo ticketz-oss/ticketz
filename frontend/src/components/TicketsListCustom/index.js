@@ -229,7 +229,7 @@ const TicketsListCustom = (props) => {
         });
       }
 
-      if (data.action === "update" && shouldUpdateTicket(data.ticket)) {
+      if (data.action === "update" && shouldUpdateTicket(data.ticket) && data.ticket.status === status) {
         dispatch({
           type: "UPDATE_TICKET",
           payload: data.ticket,
@@ -263,7 +263,7 @@ const TicketsListCustom = (props) => {
         return;
       }
 
-      if (data.action === "create" && shouldUpdateTicket(data.ticket) && data.ticket.status === status) {
+      if (data.action === "create" && shouldUpdateTicket(data.ticket) && ( status === undefined || data.ticket.status === status)) {
         dispatch({
           type: "UPDATE_TICKET_UNREAD_MESSAGES",
           payload: data.ticket,
