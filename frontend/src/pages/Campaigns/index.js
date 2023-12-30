@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 
-import React, { useState, useEffect, useReducer } from "react";
+import React, { useState, useEffect, useReducer, useContext } from "react";
 import { toast } from "react-toastify";
 
 import { useHistory } from "react-router-dom";
@@ -38,7 +38,7 @@ import toastError from "../../errors/toastError";
 import { Grid } from "@material-ui/core";
 import { isArray } from "lodash";
 import { useDate } from "../../hooks/useDate";
-import { socketConnection } from "../../services/socket";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_CAMPAIGNS") {
@@ -112,6 +112,8 @@ const Campaigns = () => {
 
   const { datetimeToClient } = useDate();
 
+  const socketManager = useContext(SocketContext);
+
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
@@ -128,20 +130,22 @@ const Campaigns = () => {
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
-    const socket = socketConnection({ companyId });
+    const socket = socketManager.GetSocket(companyId);
 
-    socket.on(`company-${companyId}-campaign`, (data) => {
+    const onCompanyCampaign = (data) => {
       if (data.action === "update" || data.action === "create") {
         dispatch({ type: "UPDATE_CAMPAIGNS", payload: data.record });
       }
       if (data.action === "delete") {
         dispatch({ type: "DELETE_CAMPAIGN", payload: +data.id });
       }
-    });
+    }
+
+    socket.on(`company-${companyId}-campaign`, onCompanyCampaign);
     return () => {
-      socket.disconnect();
+      socket.off(`company-${companyId}-campaign`, onCompanyCampaign);
     };
-  }, []);
+  }, [socketManager]);
 
   const fetchCampaigns = async () => {
     try {
