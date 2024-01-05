@@ -32,7 +32,7 @@ import { i18n } from "../translate/i18n";
 import toastError from "../errors/toastError";
 import AnnouncementsPopover from "../components/AnnouncementsPopover";
 
-import logo from "../assets/logo.png";
+import logo from "../assets/vector/logo.svg";
 import { SocketContext } from "../context/Socket/SocketContext";
 import ChatPopover from "../pages/Chat/ChatPopover";
 
@@ -48,9 +48,6 @@ const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
     height: "100vh",
-    [theme.breakpoints.down("sm")]: {
-      height: "calc(100vh - 56px)",
-    },
     backgroundColor: theme.palette.fancyBackground,
     '& .MuiButton-outlinedPrimary': {
       color: theme.mode === 'light' ? '#0000FF' : '#FFF',
@@ -72,11 +69,7 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: "0 8px",
     minHeight: "48px",
-    [theme.breakpoints.down("sm")]: {
-      height: "48px"
-    }
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
@@ -115,9 +108,6 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    [theme.breakpoints.down("sm")]: {
-      width: "100%"
-    },
     ...theme.scrollbarStylesSoft
   },
   drawerPaperClose: {
@@ -130,9 +120,6 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.up("sm")]: {
       width: theme.spacing(9),
     },
-    [theme.breakpoints.down("sm")]: {
-      width: "100%"
-    }
   },
   appBarSpacer: {
     minHeight: "48px",
@@ -161,16 +148,12 @@ const useStyles = makeStyles((theme) => ({
     // color: theme.barraSuperior.secondary.main,
   },
   logo: {
-    width: "80%",
-    height: "auto",
-    maxWidth: 180,
-    [theme.breakpoints.down("sm")]: {
-      width: "auto",
-      height: "80%",
-      maxWidth: 180,
-    },
-    logo: theme.logo
+    maxWidth: 192,
+    logo: theme.logo,
   },
+  hideLogo: {
+	display: "none",
+  }
 }));
 
 const LoggedInLayout = ({ children, themeToggle }) => {
@@ -344,7 +327,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
         open={drawerOpen}
       >
         <div className={classes.toolbarIcon}>
-          <img src={logo} className={classes.logo} alt="logo" />
+          <img src={logo} className={drawerOpen ? classes.logo : classes.hideLogo } alt="logo" />
           <IconButton onClick={() => setDrawerOpen(!drawerOpen)}>
             <ChevronLeftIcon />
           </IconButton>

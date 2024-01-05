@@ -14,7 +14,7 @@ import Container from "@material-ui/core/Container";
 import { i18n } from "../../translate/i18n";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
-import logo from "../../assets/logo.png";
+import logo from "../../assets/vector/logo.svg";
 
 
 const Copyright = () => {
@@ -34,8 +34,7 @@ const useStyles = makeStyles(theme => ({
 	root: {
 		width: "100vw",
 		height: "100vh",
-		//background: "linear-gradient(to right, #76EE00 , #76EE00 , #458B00)",
-		backgroundImage: "url(https://equipechat.com/imagens/equipechat.jpg)",
+		background: "linear-gradient(to right, #ffffff , #cfcfff , #0000ff)",
 		backgroundRepeat: "no-repeat",
 		backgroundSize: "100% 100%",
 		backgroundPosition: "center",

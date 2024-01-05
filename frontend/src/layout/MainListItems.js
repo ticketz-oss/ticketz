@@ -19,6 +19,7 @@ import CalendarToday from "@material-ui/icons/CalendarToday";
 import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
 import CodeRoundedIcon from "@material-ui/icons/CodeRounded";
 import EventIcon from "@material-ui/icons/Event";
+import InfoIcon from "@material-ui/icons/Info";
 import DarkMode from "../components/DarkMode";
 
 import LocalOfferIcon from "@material-ui/icons/LocalOffer";
@@ -354,6 +355,11 @@ const MainListItems = (props) => {
               to="/helps"
               primary={i18n.t("mainDrawer.listItems.helps")}
               icon={<HelpOutlineIcon />}
+            />
+            <ListItemLink
+              to="/about"
+              primary={i18n.t("mainDrawer.listItems.about")}
+              icon={<InfoIcon />}
             />
           </>
         </>
