@@ -4,3 +4,6 @@
 /.well-known
 /.env
 /package-lock.json
+/.externalToolBuilders/
+/.project
+/.settings/

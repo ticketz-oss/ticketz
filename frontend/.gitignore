@@ -4,3 +4,4 @@
 /.env
 /package-lock.json
 /build
+/.project
