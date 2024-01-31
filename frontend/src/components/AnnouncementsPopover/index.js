@@ -24,6 +24,7 @@ import api from "../../services/api";
 import { isArray } from "lodash";
 import moment from "moment";
 import { SocketContext } from "../../context/Socket/SocketContext";
+import config from "../../services/config";
 
 const useStyles = makeStyles((theme) => ({
 contend:{minWidth: 300,maxWidth: 500,},
@@ -40,7 +41,7 @@ contend:{minWidth: 300,maxWidth: 500,},
 function AnnouncementDialog({ announcement, open, handleClose }) {
  const classes=useStyles()
   const getMediaPath = (filename) => {
-    return `${process.env.REACT_APP_BACKEND_URL}/public/${filename}`;
+    return `${config.REACT_APP_BACKEND_URL}/public/${filename}`;
   };
   return (
     <Dialog
@@ -224,7 +225,7 @@ export default function AnnouncementsPopover() {
   };
 
   const getMediaPath = (filename) => {
-    return `${process.env.REACT_APP_BACKEND_URL}/public/${filename}`;
+    return `${config.REACT_APP_BACKEND_URL}/public/${filename}`;
   };
 
   const handleShowAnnouncementDialog = (record) => {
