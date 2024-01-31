@@ -42,10 +42,33 @@ Por melhor esforço, procurarei sempre listar aqui as contribuições incorporad
 autorias, porém o melhor local para observar o que foi feito é o histórico
 do repositório.
 
-* [83f6713](https://github.com/allgood/ticketz/commit/83f67132c234f528c13540b3de529ccb54cc3e6a) Aceita documento anexado com legenda -- @allgood)
+* [83f6713](https://github.com/allgood/ticketz/commit/83f67132c234f528c13540b3de529ccb54cc3e6a) Aceita documento anexado com legenda)
 * [e8f4d32](https://github.com/allgood/ticketz/commit/e8f4d325f46133a2ea828dfe8ca7470f44243bf5) Aceita mensagens editadas -- cherry pick de @Vinicius-Marques6 canove/whaticket-community#605
 * [60455d9](https://github.com/allgood/ticketz/commit/60455d9416975a0d1806968815d28f5195d15e64) Mantém aberto e utiliza apenas um websocket com o backend
 * [30526b6](https://github.com/allgood/ticketz/commit/30526b6cd6d92e3204e97ff194ef57b7def69979) Um ticket novo ao invés de reabrir ticket fechado
+* [2b58d6c](https://github.com/allgood/ticketz/commit/2b58d6c1c424bbcb060f9cc7196bfde4b42926ff) Execução através do docker compose - **Múltiplos commits até esse ponto**
+
+## Executando localmente pelo docker
+
+Tendo o Docker e o Git instalados, basta clonar este repositório e executar
+os comandos abaixo:
+
+```
+git clone https://github.com/allgood/ticketz.git
+cd ticketz.git
+docker compose build
+```
+
+Após isso, e sempre que quiser executar novamente os containers, basta rodar
+o seguinte comando (sempre dentro da pasta do projeto):
+
+```
+docker compose up
+```
+
+Após isso, o Ticketz estará acessível pelo endereço http://localhost:3000
+
+O usuário padrão é admin@admin.com e a senha padrão é 123456
 
 
 Facilitou sua vida?
