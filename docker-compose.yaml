@@ -3,14 +3,25 @@ version: '3'
 networks:
   ticketz:
 
+volumes:
+  postgres_data:
+  redis_data:
+  backend_public:
+
 services:
 
   backend:
     build:
       context: ./backend
       dockerfile: ./Dockerfile
+    volumes:
+      - backend_public:/usr/src/app/public
     env_file:
       - .env-backend
+    restart: always
+    depends_on:
+      - postgres
+      - redis
     ports:
       - ${BACKEND_PORT:-8080}:3000
     networks:
@@ -24,13 +35,16 @@ services:
       dockerfile: ./Dockerfile
     environment:
       - REACT_APP_BACKEND_URL=${BACKEND_URL:-http://127.0.0.1:8080/}
+    restart: always
+    depends_on:
+      - backend
     networks:
       - ticketz
 
   postgres:
     image: postgres:16-alpine
     volumes:
-      - ./.docker/data/:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-ticketz}
       - POSTGRES_DB=${POSTGRES_DB:-ticketz}
@@ -43,9 +57,12 @@ services:
       - ticketz
 
   redis:
-    image: redis:7-alpine
+    image: redis:alpine
+    command: redis-server --appendonly yes
     expose:
       - 6379
     restart: always
+    volumes:
+      - redis_data:/data
     networks:
       - ticketz
