@@ -3,9 +3,6 @@ import { getWbot, removeWbot } from "../libs/wbot";
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
 import UpdateWhatsAppService from "../services/WhatsappService/UpdateWhatsAppService";
-import DeleteBaileysService from "../services/BaileysServices/DeleteBaileysService";
-import DeleteWhatsAppService from "../services/WhatsappService/DeleteWhatsAppService";
-import { cacheLayer } from "../libs/cache";
 
 const store = async (req: Request, res: Response): Promise<Response> => {
   const { whatsappId } = req.params;
