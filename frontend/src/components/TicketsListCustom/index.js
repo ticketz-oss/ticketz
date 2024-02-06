@@ -163,6 +163,7 @@ const TicketsListCustom = (props) => {
     selectedQueueIds,
     updateCount,
     style,
+    setTabOpen,
   } = props;
   const classes = useStyles();
   const [pageNumber, setPageNumber] = useState(1);
@@ -257,7 +258,7 @@ const TicketsListCustom = (props) => {
       const queueIds = queues.map((q) => q.id);
       if (
         profile === "user" &&
-        (queueIds.indexOf(data.ticket.queue?.id) === -1 ||
+        (queueIds.indexOf(data.ticket?.queue?.id) === -1 ||
           data.ticket.queue === null)
       ) {
         return;
@@ -339,7 +340,7 @@ const TicketsListCustom = (props) => {
           ) : (
             <>
               {ticketsList.map((ticket) => (
-                <TicketListItem ticket={ticket} setUpdate={setUpdate} key={ticket.id} />
+                <TicketListItem ticket={ticket} setTabOpen={setTabOpen} key={ticket.id} />
               ))}
             </>
           )}

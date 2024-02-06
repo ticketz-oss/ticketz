@@ -213,7 +213,7 @@ const TicketsManager = () => {
 					showAll={showAllTickets}
 					selectedQueueIds={selectedQueueIds}
 				/>
-				<TicketsList status="pending" selectedQueueIds={selectedQueueIds} />
+				<TicketsList status="pending" selectedQueueIds={selectedQueueIds} setTab={setTab} />
 			</TabPanel>
 			<TabPanel value={tab} name="closed" className={classes.ticketsWrapper}>
 				<TicketsList

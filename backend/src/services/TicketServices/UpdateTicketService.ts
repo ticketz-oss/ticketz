@@ -238,7 +238,7 @@ const   UpdateTicketService = async ({
       });
 
     } else
-      if (ticket.status !== oldStatus || ticket.user?.id !== oldUserId) {
+      if (ticket.status === "closed" && ticket.status !== oldStatus) {
         io.to(oldStatus).emit(`company-${companyId}-ticket`, {
           action: "delete",
           ticketId: ticket.id

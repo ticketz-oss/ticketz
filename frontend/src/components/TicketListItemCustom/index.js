@@ -150,10 +150,9 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const TicketListItemCustom = ({ ticket, setUpdate}) => {
+const TicketListItemCustom = ({ ticket, setTabOpen }) => {
   const classes = useStyles();
   const history = useHistory();
-  const [loading, setLoading] = useState(false);
   const [ticketUser, setTicketUser] = useState(null);
   const [whatsAppName, setWhatsAppName] = useState(null);
 
@@ -184,7 +183,6 @@ const TicketListItemCustom = ({ ticket, setUpdate}) => {
   }, []);
 
   const handleCloseTicket = async (id) => {
-    setLoading(true);
     try {
       await api.put(`/tickets/${id}`, {
         status: "closed",
@@ -192,38 +190,23 @@ const TicketListItemCustom = ({ ticket, setUpdate}) => {
         userId: user?.id,
       });
     } catch (err) {
-      setLoading(false);
       toastError(err);
     }
-    if (isMounted.current) {
-      setLoading(false);
-    }
-
     history.push(`/tickets/`);
-    setUpdate(Math.random())
-    
-    setLoading(false);
   };
 
-  const handleAcepptTicket = async (id) => {
-    setLoading(true);
-  
+  const handleAcceptTicket = async (id) => {
     try {
       await api.put(`/tickets/${id}`, {
         status: "open",
         userId: user?.id,
       });
     } catch (err) {
-      setLoading(false);
       toastError(err);
-    }
-    if (isMounted.current) {
-      setLoading(false);
     }
 
     history.push(`/tickets/${ticket.uuid}`);
-    setUpdate(Math.random())
-    setLoading(false);
+    setTabOpen("open");
   };
 
   const handleSelectTicket = (ticket) => {
@@ -430,7 +413,7 @@ const TicketListItemCustom = ({ ticket, setUpdate}) => {
           {ticket.status === "pending" && (
             <Tooltip title="Aceitar Conversa">
               <DoneIcon
-                onClick={() => handleAcepptTicket(ticket.id)}
+                onClick={() => handleAcceptTicket(ticket.id)}
                 fontSize="small"
                 style={{
                   color: '#fff',

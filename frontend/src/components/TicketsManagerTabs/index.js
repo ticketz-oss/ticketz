@@ -306,12 +306,14 @@ const TicketsManagerTabs = () => {
             selectedQueueIds={selectedQueueIds}
             updateCount={(val) => setOpenCount(val)}
             style={applyPanelStyle("open")}
+            setTabOpen={setTabOpen}
           />
           <TicketsList
             status="pending"
             selectedQueueIds={selectedQueueIds}
             updateCount={(val) => setPendingCount(val)}
             style={applyPanelStyle("pending")}
+            setTabOpen={setTabOpen}
           />
         </Paper>
       </TabPanel>
