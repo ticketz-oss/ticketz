@@ -5,7 +5,8 @@ COPY . .
 
 ENV NODE_OPTIONS --openssl-legacy-provider
 
-RUN    npm install \
+RUN    npm config set maxsockets=5 \
+    && npm install \
     && npm run build
 
 FROM nginx:alpine

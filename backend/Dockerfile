@@ -10,6 +10,7 @@ RUN    wget -O /usr/local/bin/dumb-init https://github.com/Yelp/dumb-init/releas
     && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && ls -lah \
+    && npm config set maxsockets=5 \
     && npm install \
     && npm run build
 

@@ -48,28 +48,62 @@ do repositório.
 * [30526b6](https://github.com/allgood/ticketz/commit/30526b6cd6d92e3204e97ff194ef57b7def69979) Um ticket novo ao invés de reabrir ticket fechado
 * [2b58d6c](https://github.com/allgood/ticketz/commit/2b58d6c1c424bbcb060f9cc7196bfde4b42926ff) Execução através do docker compose - **Múltiplos commits até esse ponto**
 
-## Executando localmente pelo docker
+Rodando o projeto:
+------------------
 
-Tendo o Docker e o Git instalados, basta clonar este repositório e executar
-os comandos abaixo:
+O projeto atualmente suporta execução utilizando containers Docker, para a
+instalação é necessário ter o Docker Community Edition e o cliente Git
+instalados. O ideal é buscar a melhor forma de instalar estes recursos no
+sistema operacional de sua preferência. (Não testei em windows, mas tendo
+Git e Docker, deve funcionar)
 
-```
+Em ambos os casos é necessário clonar o repositório, necessário então abrir
+um terminal de comandos:
+
+```bash
 git clone https://github.com/allgood/ticketz.git
-cd ticketz.git
-docker compose build
+cd ticketz
 ```
 
-Após isso, e sempre que quiser executar novamente os containers, basta rodar
-o seguinte comando (sempre dentro da pasta do projeto):
+## Rodando localmente
 
-```
-docker compose up
+Para executar o sistema no servidor local, ficando ele acessível apenas na
+própria máquina (para testes), basta então rodar o comando:
+
+```bash
+docker compose -f docker-compose-local.yaml up
 ```
 
-Após isso, o Ticketz estará acessível pelo endereço http://localhost:3000
+Na primeira execução o sistema vai inicializar os bancos de dados e tabelas,
+e após alguns minutos o Ticketz estará acessível pelo endereço http://localhost:3000
 
 O usuário padrão é admin@admin.com e a senha padrão é 123456
 
+A execução pode ser interrompida com Ctrl-C, para iniciar novamente basta
+repetir o último comando.
+
+## Rodando e servindo na internet
+
+Tendo um servidor acessível pela internet, é necessário ajustar dois nomes
+de DNS a sua escolha, um para o backend e outro para o frontend, por
+exemplo:
+
+backend: api.ticketz.exemplo.com.br
+frontend: ticketz.exemplo.com.br
+
+É necessário editar os arquivos `.env-backend-acme` e `.env-frontend-acme`
+definindo ambos estes nomes.
+
+Estando então na pasta raiz do projeto, basta executar o comando:
+
+```bash
+docker compose -f docker-compose-acme.yaml up -d
+```
+
+Na primeira execução o sistema vai inicializar os bancos de dados e tabelas,
+e após alguns minutos o Ticketz estará acessível pelo endereço do frontend.
+
+O usuário padrão é admin@admin.com e a senha padrão é 123456
 
 Facilitou sua vida?
 -------------------

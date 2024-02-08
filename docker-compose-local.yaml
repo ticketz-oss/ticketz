@@ -17,7 +17,7 @@ services:
     volumes:
       - backend_public:/usr/src/app/public
     env_file:
-      - .env-backend
+      - .env-backend-local
     restart: always
     depends_on:
       - postgres
@@ -33,8 +33,8 @@ services:
     build:
       context: ./frontend
       dockerfile: ./Dockerfile
-    environment:
-      - REACT_APP_BACKEND_URL=${BACKEND_URL:-http://127.0.0.1:8080/}
+    env_file:
+      - .env-frontend-local
     restart: always
     depends_on:
       - backend

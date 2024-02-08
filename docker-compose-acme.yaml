@@ -1,0 +1,112 @@
+version: '3'
+
+networks:
+  ticketz:
+  nginx-proxy:
+
+volumes:
+  ngx_conf:
+  ngx_vhost:
+  ngx_html:
+  ngx_dhparam:
+  ngx_certs:
+  ngx_acme:
+  redis_data:
+  postgres_data:
+  backend_public:
+    
+services:
+
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy
+    container_name: ticketz-nginx-proxy
+    restart: always
+    ports:
+      - "11080:80"
+      - "11443:443"
+      
+    volumes:
+      - ngx_conf:/etc/nginx/conf.d
+      - ngx_vhost:/etc/nginx/vhost.d
+      - ngx_html:/usr/share/nginx/html
+      - ngx_dhparam:/etc/nginx/dhparam
+      - ngx_certs:/etc/nginx/certs:ro
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      - nginx-proxy
+
+  acme-companion:
+    image: nginxproxy/acme-companion
+    container_name: ticketz-acme-companion
+    restart: always
+    depends_on:
+      - nginx-proxy
+    volumes:
+      - ngx_vhost:/etc/nginx/vhost.d
+      - ngx_html:/usr/share/nginx/html
+      - ngx_dhparam:/etc/nginx/dhparam:ro
+      - ngx_certs:/etc/nginx/certs
+      - ngx_acme:/etc/acme.sh
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - NGINX_PROXY_CONTAINER=ticketz-nginx-proxy
+      - ACME_CA_URI=https://acme-staging-v02.api.letsencrypt.org/directory
+    networks:
+      - nginx-proxy
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
+    volumes:
+      - backend_public:/usr/src/app/public
+    env_file:
+      - .env-backend-acme
+    restart: always
+    depends_on:
+      - acme-companion
+      - postgres
+      - redis
+    networks:
+      - ticketz
+      - nginx-proxy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+    env_file:
+      - .env-frontend-acme
+    restart: always
+    depends_on:
+      - acme-companion
+      - backend
+    networks:
+      - ticketz
+      - nginx-proxy
+
+  postgres:
+    image: postgres:16-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-ticketz}
+      - POSTGRES_DB=${POSTGRES_DB:-ticketz}
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - TZ=${TZ:-America/Sao_Paulo}
+    expose:
+      - 5432
+    restart: always
+    networks:
+      - ticketz
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    expose:
+      - 6379
+    restart: always
+    volumes:
+      - redis_data:/data
+    networks:
+      - ticketz
