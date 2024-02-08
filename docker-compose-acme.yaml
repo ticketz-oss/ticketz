@@ -50,7 +50,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - NGINX_PROXY_CONTAINER=ticketz-nginx-proxy
-      - ACME_CA_URI=https://acme-staging-v02.api.letsencrypt.org/directory
     networks:
       - nginx-proxy
 
