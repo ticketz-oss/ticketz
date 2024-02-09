@@ -94,14 +94,20 @@ frontend: ticketz.exemplo.com.br
 É necessário editar os arquivos `.env-backend-acme` e `.env-frontend-acme`
 definindo ambos estes nomes.
 
+Este guia presume que o terminal está aberto e logado com um usuário comum
+que tem permissão para utilizar o comando `sudo` para executar comandos como
+root.
+
 Estando então na pasta raiz do projeto, basta executar o comando:
 
 ```bash
-docker compose -f docker-compose-acme.yaml up -d
+sudo docker compose -f docker-compose-acme.yaml up -d
 ```
 
-Na primeira execução o sistema vai inicializar os bancos de dados e tabelas,
-e após alguns minutos o Ticketz estará acessível pelo endereço do frontend.
+Na primeira execução o Docker irá fazer a compilação do código e criação dos
+conteiners, e após isso o ticketz vai inicializar os bancos de dados e
+tabelas. Esta operação pode levar bastante tempo, depois disso o Ticketz
+estará acessível pelo endereço fornecido para oo frontend.
 
 O usuário padrão é admin@admin.com e a senha padrão é 123456
 
