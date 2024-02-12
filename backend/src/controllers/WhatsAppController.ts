@@ -1,10 +1,6 @@
 import { Request, Response } from "express";
-import { cacheLayer } from "../libs/cache";
 import { getIO } from "../libs/socket";
-import { getWbot, removeWbot } from "../libs/wbot";
-import Whatsapp from "../models/Whatsapp";
-import DeleteBaileysService from "../services/BaileysServices/DeleteBaileysService";
-import { getAccessTokenFromPage, getPageProfile, subscribeApp } from "../services/FacebookServices/graphAPI";
+import { removeWbot } from "../libs/wbot";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
 
 import CreateWhatsAppService from "../services/WhatsappService/CreateWhatsAppService";
@@ -24,25 +20,12 @@ interface WhatsappData {
   status?: string;
   isDefault?: boolean;
   token?: string;
+  sendIdQueue?: number;
+  timeSendQueue?: number;
 }
 
 interface QueryParams {
   session?: number | string;
-}
-
-interface InstagramBusinessAccount {
-  id: string;
-  username: string;
-  name: string;
-}
-
-interface Root {
-  name: string;
-  // eslint-disable-next-line camelcase
-  access_token: string;
-  // eslint-disable-next-line camelcase
-  instagram_business_account: InstagramBusinessAccount;
-  id: string;
 }
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
@@ -62,7 +45,9 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     complationMessage,
     outOfHoursMessage,
     queueIds,
-    token
+    token,
+    timeSendQueue,
+    sendIdQueue,
   }: WhatsappData = req.body;
   const { companyId } = req.user;
 
@@ -75,7 +60,9 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     outOfHoursMessage,
     queueIds,
     companyId,
-    token
+    token,
+    timeSendQueue,
+    sendIdQueue,
   });
 
   StartWhatsAppSession(whatsapp, companyId);
@@ -96,131 +83,6 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   return res.status(200).json(whatsapp);
 };
 
-export const storeFacebook = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
-  const {
-    facebookUserId,
-    facebookUserToken,
-    addInstagram
-  }: {
-    facebookUserId: string;
-    facebookUserToken: string;
-    addInstagram: boolean;
-  } = req.body;
-  const { companyId } = req.user;
-
-  const { data } = await getPageProfile(facebookUserId, facebookUserToken);
-
-  if (data.length === 0) {
-    return res.status(400).json({
-      error: "Facebook page not found"
-    });
-  }
-  const io = getIO();
-
-  const pages = [];
-  for await (const page of data) {
-    const { name, access_token, id, instagram_business_account } = page;
-
-
-    const acessTokenPage = await getAccessTokenFromPage(access_token);
-
-    if (instagram_business_account && addInstagram) {
-      const {
-        id: instagramId,
-        username,
-        name: instagramName
-      } = instagram_business_account;
-      pages.push({
-        name: `Insta ${username || instagramName}`,
-        facebookUserId: facebookUserId,
-        facebookPageUserId: instagramId,
-        facebookUserToken: acessTokenPage,
-        tokenMeta: facebookUserToken,
-        isDefault: false,
-        channel: "instagram",
-        status: "CONNECTED",
-        greetingMessage: "",
-        farewellMessage: "",
-        queueIds: [],
-        isMultidevice: false,
-        companyId
-      });
-
-      // await subscribeApp(instagramId, acessTokenPage);
-
-
-      pages.push({
-        name,
-        facebookUserId: facebookUserId,
-        facebookPageUserId: id,
-        facebookUserToken: acessTokenPage,
-        tokenMeta: facebookUserToken,
-        isDefault: false,
-        channel: "facebook",
-        status: "CONNECTED",
-        greetingMessage: "",
-        farewellMessage: "",
-        queueIds: [],
-        isMultidevice: false,
-        companyId
-      });
-
-      await subscribeApp(id, acessTokenPage);
-
-    }
-
-    if (!instagram_business_account) {
-      pages.push({
-        name,
-        facebookUserId: facebookUserId,
-        facebookPageUserId: id,
-        facebookUserToken: acessTokenPage,
-        tokenMeta: facebookUserToken,
-        isDefault: false,
-        channel: "facebook",
-        status: "CONNECTED",
-        greetingMessage: "",
-        farewellMessage: "",
-        queueIds: [],
-        isMultidevice: false,
-        companyId
-      });
-
-      await subscribeApp(page.id, acessTokenPage);
-    }
-  }
-
-
-  for await (const pageConection of pages) {
-    const exist = await Whatsapp.findOne({
-      where: {
-        facebookPageUserId: pageConection.facebookPageUserId
-      }
-    });
-
-    if (exist) {
-      await exist.update({
-        ...pageConection
-      });
-    }
-
-    if (!exist) {
-      const { whatsapp } = await CreateWhatsAppService(pageConection);
-
-      io.emit(`company-${companyId}-whatsapp`, {
-        action: "update",
-        whatsapp
-      });
-    }
-  }
-  return res.status(200);
-};
-
-
-
 export const show = async (req: Request, res: Response): Promise<Response> => {
   const { whatsappId } = req.params;
   const { companyId } = req.user;
@@ -238,6 +100,7 @@ export const update = async (
   const { whatsappId } = req.params;
   const whatsappData = req.body;
   const { companyId } = req.user;
+
   const { whatsapp, oldDefaultWhatsapp } = await UpdateWhatsAppService({
     whatsappData,
     whatsappId,
@@ -266,47 +129,17 @@ export const remove = async (
 ): Promise<Response> => {
   const { whatsappId } = req.params;
   const { companyId } = req.user;
+
+  await ShowWhatsAppService(whatsappId, companyId);
+
+  await DeleteWhatsAppService(whatsappId);
+  removeWbot(+whatsappId);
+
   const io = getIO();
+  io.emit(`company-${companyId}-whatsapp`, {
+    action: "delete",
+    whatsappId: +whatsappId
+  });
 
-  const whatsapp = await ShowWhatsAppService(whatsappId, companyId);
-
-  if (whatsapp.channel === "whatsapp") {
-    await DeleteBaileysService(whatsappId);
-    await DeleteWhatsAppService(whatsappId);
-    await cacheLayer.delFromPattern(`sessions:${whatsappId}:*`);
-    removeWbot(+whatsappId);
-
-    io.emit(`company-${companyId}-whatsapp`, {
-      action: "delete",
-      whatsappId: +whatsappId
-    });
-
-  }
-
-  if (whatsapp.channel === "facebook" || whatsapp.channel === "instagram") {
-    const { facebookUserToken } = whatsapp;
-
-    const getAllSameToken = await Whatsapp.findAll({
-
-      where: {
-        facebookUserToken
-      }
-    });
-
-    await Whatsapp.destroy({
-      where: {
-        facebookUserToken
-      }
-    });
-
-    for await (const whatsapp of getAllSameToken) {
-      io.emit(`company-${companyId}-whatsapp`, {
-        action: "delete",
-        whatsappId: whatsapp.id
-      });
-    }
-
-  }
-
-  return res.status(200).json({ message: "Session disconnected." });
+  return res.status(200).json({ message: "Whatsapp deleted." });
 };

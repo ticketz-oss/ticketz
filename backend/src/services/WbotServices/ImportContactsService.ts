@@ -48,8 +48,7 @@ const ImportContactsService = async (companyId: number): Promise<void> => {
     ? JSON.parse(phoneContacts)
     : phoneContacts;
 
-    console.log(isArray(phoneContacts))
-  if (Array.isArray(phoneContactsList)) {
+  if (isArray(phoneContactsList)) {
     phoneContactsList.forEach(async ({ id, name, notify }) => {
       if (id === "status@broadcast" || id.includes("g.us")) return;
       const number = id.replace(/\D/g, "");
@@ -58,7 +57,6 @@ const ImportContactsService = async (companyId: number): Promise<void> => {
         where: { number, companyId }
       });
 
-      console.log(existingContact)
       if (existingContact) {
         // Atualiza o nome do contato existente
         existingContact.name = name || notify;

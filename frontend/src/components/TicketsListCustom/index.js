@@ -166,9 +166,7 @@ const TicketsListCustom = (props) => {
   } = props;
   const classes = useStyles();
   const [pageNumber, setPageNumber] = useState(1);
-  const [update, setUpdate] = useState(0);
   const [ticketsList, dispatch] = useReducer(reducer, []);
-  const [ticketsListUpdated, setTicketsListUpdated] = useState([]);
   const { user } = useContext(AuthContext);
   const { profile, queues } = user;
 
@@ -220,6 +218,7 @@ const TicketsListCustom = (props) => {
     });
 
     socket.on(`company-${companyId}-ticket`, (data) => {
+      console.log(data)
       if (data.action === "updateUnread") {
         dispatch({
           type: "RESET_UNREAD",
@@ -235,18 +234,12 @@ const TicketsListCustom = (props) => {
       }
 
       if (data.action === "update" && notBelongsToUserQueues(data.ticket)) {
-        dispatch({ type: "DELETE_TICKET", payload: data.ticket?.id });
+        dispatch({ type: "DELETE_TICKET", payload: data.ticket.id });
       }
 
       if (data.action === "delete") {
-        dispatch({ type: "DELETE_TICKET", payload: data?.ticketId });
-        
-      }
-
-      if (data.action === "removeFromList") {
         dispatch({ type: "DELETE_TICKET", payload: data.ticketId });
       }
-
     });
 
     socket.on(`company-${companyId}-appMessage`, (data) => {
@@ -288,7 +281,6 @@ const TicketsListCustom = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticketsList]);
 
-
   const loadMore = () => {
     setPageNumber((prevState) => prevState + 1);
   };
@@ -325,7 +317,7 @@ const TicketsListCustom = (props) => {
           ) : (
             <>
               {ticketsList.map((ticket) => (
-                <TicketListItem ticket={ticket} setUpdate={setUpdate} key={ticket.id} />
+                <TicketListItem ticket={ticket} key={ticket.id} />
               ))}
             </>
           )}

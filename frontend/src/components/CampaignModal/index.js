@@ -40,6 +40,11 @@ const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
     flexWrap: "wrap",
+	backgroundColor: "#fff"
+  },
+  
+  tabmsg: {
+	  backgroundColor: theme.palette.campaigntab,
   },
 
   textField: {
@@ -475,12 +480,11 @@ const CampaignModal = ({
                       value={messageTab}
                       indicatorColor="primary"
                       textColor="primary"
+					  className={classes.tabmsg}
                       onChange={(e, v) => setMessageTab(v)}
                       variant="fullWidth"
                       centered
                       style={{
-                        background: "#f2f2f2",
-                        border: "1px solid #e6e6e6",
                         borderRadius: 2,
                       }}
                     >

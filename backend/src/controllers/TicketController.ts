@@ -10,7 +10,6 @@ import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import UpdateTicketService from "../services/TicketServices/UpdateTicketService";
 import ListTicketsServiceKanban from "../services/TicketServices/ListTicketsServiceKanban";
 
-
 type IndexQuery = {
   searchParam: string;
   pageNumber: string;
@@ -76,10 +75,31 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     userId,
     queueIds,
     withUnreadMessages,
-    companyId
+    companyId,
+
+
+  });
+  return res.status(200).json({ tickets, count, hasMore });
+};
+
+export const store = async (req: Request, res: Response): Promise<Response> => {
+  const { contactId, status, userId, queueId }: TicketData = req.body;
+  const { companyId } = req.user;
+
+  const ticket = await CreateTicketService({
+    contactId,
+    status,
+    userId,
+    companyId,
+    queueId
   });
 
-  return res.status(200).json({ tickets, count, hasMore });
+  const io = getIO();
+  io.to(ticket.status).emit(`company-${companyId}-ticket`, {
+    action: "update",
+    ticket
+  });
+  return res.status(200).json(ticket);
 };
 
 export const kanban = async (req: Request, res: Response): Promise<Response> => {
@@ -104,7 +124,6 @@ export const kanban = async (req: Request, res: Response): Promise<Response> => 
   let tagsIds: number[] = [];
   let usersIds: number[] = [];
 
-
   if (queueIdsStringified) {
     queueIds = JSON.parse(queueIdsStringified);
   }
@@ -116,8 +135,7 @@ export const kanban = async (req: Request, res: Response): Promise<Response> => 
   if (userIdsStringified) {
     usersIds = JSON.parse(userIdsStringified);
   }
-
-
+  
   const { tickets, count, hasMore } = await ListTicketsServiceKanban({
     searchParam,
     tags: tagsIds,
@@ -134,30 +152,7 @@ export const kanban = async (req: Request, res: Response): Promise<Response> => 
 
   });
 
-  //console.log("ticket controller 82");
-  
   return res.status(200).json({ tickets, count, hasMore });
-};
-
-export const store = async (req: Request, res: Response): Promise<Response> => {
-  const { contactId, status, userId, queueId }: TicketData = req.body;
-  const { companyId } = req.user;
-
-  const ticket = await CreateTicketService({
-    contactId,
-    status,
-    userId,
-    companyId,
-    queueId
-  });
-
-  const io = getIO();
-  io.to(ticket.status).emit(`company-${companyId}-ticket`, {
-    action: "update",
-    ticket
-  });
-
-  return res.status(200).json(ticket);
 };
 
 export const show = async (req: Request, res: Response): Promise<Response> => {
@@ -165,7 +160,6 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.user;
 
   const contact = await ShowTicketService(ticketId, companyId);
-
   return res.status(200).json(contact);
 };
 
@@ -193,6 +187,7 @@ export const update = async (
     ticketId,
     companyId
   });
+
 
   return res.status(200).json(ticket);
 };

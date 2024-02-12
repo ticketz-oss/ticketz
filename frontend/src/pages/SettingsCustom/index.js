@@ -32,6 +32,7 @@ const useStyles = makeStyles((theme) => ({
     flex: 1,
   },
   tab: {
+    backgroundColor: theme.palette.options,
     borderRadius: 4,
   },
   paper: {

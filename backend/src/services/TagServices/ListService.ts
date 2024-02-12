@@ -7,7 +7,6 @@ interface Request {
   companyId: number;
   searchParam?: string;
   pageNumber?: string | number;
-  kanban?: number;
 }
 
 interface Response {
@@ -19,8 +18,7 @@ interface Response {
 const ListService = async ({
   companyId,
   searchParam,
-  pageNumber = "1",
-  kanban = 0
+  pageNumber = "1"
 }: Request): Promise<Response> => {
   let whereCondition = {};
   const limit = 20;
@@ -30,14 +28,13 @@ const ListService = async ({
     whereCondition = {
       [Op.or]: [
         { name: { [Op.like]: `%${searchParam}%` } },
-        { color: { [Op.like]: `%${searchParam}%` } },
-        { kanban: { [Op.like]: `%${searchParam}%` } }
+        { color: { [Op.like]: `%${searchParam}%` } }
       ]
     };
   }
 
   const { count, rows: tags } = await Tag.findAndCountAll({
-    where: { ...whereCondition, companyId, kanban },
+    where: { ...whereCondition, companyId },
     limit,
     offset,
     order: [["name", "ASC"]],
@@ -52,7 +49,6 @@ const ListService = async ({
       'id',
       'name',
       'color',
-      'kanban',
       [fn('count', col('ticketTags.tagId')), 'ticketsCount']
     ],
     group: ['Tag.id']

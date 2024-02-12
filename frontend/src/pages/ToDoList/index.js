@@ -30,8 +30,8 @@ const useStyles = makeStyles({
     width: '100%',
     height: '100%',
     marginTop: '1rem',
+    backgroundColor: '#f5f5f5',
     borderRadius: '5px',
-    color: "#888"
   },
   list: {
     marginBottom: '5px'

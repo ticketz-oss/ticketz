@@ -173,7 +173,7 @@ const MessagesAPI = () => {
         enableReinitialize={true}
         onSubmit={(values, actions) => {
           setTimeout(async () => {
-        
+            console.log(values, file)
             await handleSendMediaMessage(values);
             actions.setSubmitting(false);
             actions.resetForm()

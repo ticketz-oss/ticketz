@@ -1,6 +1,5 @@
 import Mustache from "mustache";
 import Contact from "../models/Contact";
-import Ticket from "../models/Ticket";
 
 export const greeting = (): string => {
   const greetings = ["Boa madrugada", "Bom dia", "Boa tarde", "Boa noite"];
@@ -9,7 +8,7 @@ export const greeting = (): string => {
   return greetings[(h / 6) >> 0];
 };
 
-export default (body: string, contact: Contact, ticket?: Ticket): string => {
+export default (body: string, contact: Contact): string => {
   let ms = "";
 
   const Hr = new Date();
@@ -34,17 +33,6 @@ export default (body: string, contact: Contact, ticket?: Ticket): string => {
     ms = "Boa madrugada";
   }
 
-  const setor =
-    ticket?.queueId === undefined || ticket.queueId === null
-      ? ""
-      : ticket.queue.name;
-
-  const usuario =
-    ticket?.userId === undefined || ticket.userId === null
-      ? ""
-      : ticket.user.name;
-
-
   const protocol = yy + mm + dd + String(hh) + min + ss;
 
   const hora = `${hh}:${min}:${ss}`;
@@ -54,9 +42,7 @@ export default (body: string, contact: Contact, ticket?: Ticket): string => {
     gretting: greeting(),
     ms,
     protocol,
-    hora,
-    fila: setor,
-    usuario,
+    hora
   };
   return Mustache.render(body, view);
 };

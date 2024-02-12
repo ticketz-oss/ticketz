@@ -1,4 +1,4 @@
-import { WAMessage, AnyMessageContent } from "@adiwajshing/baileys";
+import { WAMessage, AnyMessageContent } from "@whiskeysockets/baileys";
 import * as Sentry from "@sentry/node";
 import fs from "fs";
 import { exec } from "child_process";

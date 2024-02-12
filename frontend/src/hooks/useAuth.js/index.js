@@ -74,17 +74,21 @@ const useAuth = () => {
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
+    if (companyId) {
+   
     const socket = socketConnection({ companyId });
 
-    socket.on(`company-${companyId}-user`, (data) => {
-      if (data.action === "update" && data.user.id === user.id) {
-        setUser(data.user);
-      }
-    });
-
+      socket.on(`company-${companyId}-user`, (data) => {
+        if (data.action === "update" && data.user.id === user.id) {
+          setUser(data.user);
+        }
+      });
+    
+    
     return () => {
       socket.disconnect();
     };
+  }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
@@ -110,13 +114,11 @@ const useAuth = () => {
       const dueDate = data.user.company.dueDate;
       const hoje = moment(moment()).format("DD/MM/yyyy");
       const vencimento = moment(dueDate).format("DD/MM/yyyy");
-      
+
       var diff = moment(dueDate).diff(moment(moment()).format());
 
       var before = moment(moment().format()).isBefore(dueDate);
       var dias = moment.duration(diff).asDays();
-      var diasVenc = vencimento.valueOf() - hoje.valueOf()
-      console.log("🚀 Console Log : diasVenc", diasVenc);
 
       if (before === true) {
         localStorage.setItem("token", JSON.stringify(data.token));
@@ -133,7 +135,6 @@ const useAuth = () => {
         history.push("/tickets");
         setLoading(false);
       } else {
-        
         toastError(`Opss! Sua assinatura venceu ${vencimento}.
 Entre em contato com o Suporte para mais informações! `);
         setLoading(false);

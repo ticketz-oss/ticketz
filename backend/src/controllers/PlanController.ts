@@ -14,7 +14,6 @@ import DeletePlanService from "../services/PlanService/DeletePlanService";
 type IndexQuery = {
   searchParam: string;
   pageNumber: string;
-  listPublic: string;
 };
 
 type StorePlanData = {
@@ -24,7 +23,6 @@ type StorePlanData = {
   connections: number | 0;
   queues: number | 0;
   value: number;
-  isPublic: boolean;
 };
 
 type UpdatePlanData = {
@@ -34,29 +32,22 @@ type UpdatePlanData = {
   connections?: number;
   queues?: number;
   value?: number;
-  isPublic?: boolean;
 };
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
-  const { searchParam, pageNumber, listPublic } = req.query as IndexQuery;
-
+  const { searchParam, pageNumber } = req.query as IndexQuery;
 
   const { plans, count, hasMore } = await ListPlansService({
     searchParam,
-    pageNumber,
-    listPublic
+    pageNumber
   });
-  console.log(plans)
+
   return res.json({ plans, count, hasMore });
 };
 
 export const list = async (req: Request, res: Response): Promise<Response> => {
+  const plans: Plan[] = await FindAllPlanService();
 
-  const {listPublic} = req.query as IndexQuery;;
-
-  const plans: Plan[] = await FindAllPlanService(listPublic);
-
-  console.log(listPublic)
   return res.status(200).json(plans);
 };
 
@@ -108,7 +99,7 @@ export const update = async (
     throw new AppError(err.message);
   }
 
-  const { id, name, users, connections, queues, value, isPublic } = planData;
+  const { id, name, users, connections, queues, value } = planData;
 
   const plan = await UpdatePlanService({
     id,
@@ -116,8 +107,7 @@ export const update = async (
     users,
     connections,
     queues,
-    value,
-    isPublic
+    value
   });
 
   // const io = getIO();

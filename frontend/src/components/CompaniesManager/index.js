@@ -312,10 +312,10 @@ export function CompanyForm(props) {
                     margin="dense"
                   >
                     <MenuItem value="MENSAL">Mensal</MenuItem>
-                    <MenuItem value="BIMESTRAL">Bimestral</MenuItem>
-                    <MenuItem value="TRIMESTRAL">Trimestral</MenuItem>
-                    <MenuItem value="SEMESTRAL">Semestral</MenuItem>
-                    <MenuItem value="ANUAL">Anual</MenuItem>
+                    {/*<MenuItem value="BIMESTRAL">Bimestral</MenuItem>*/}
+                    {/*<MenuItem value="TRIMESTRAL">Trimestral</MenuItem>*/}
+                    {/*<MenuItem value="SEMESTRAL">Semestral</MenuItem>*/}
+                    {/*<MenuItem value="ANUAL">Anual</MenuItem>*/}
                   </Field>
                 </FormControl>
               </Grid>

@@ -25,6 +25,7 @@ import checkoutFormModel from "./FormModel/checkoutFormModel";
 import formInitialValues from "./FormModel/formInitialValues";
 
 import useStyles from "./styles";
+import Invoices from "../../pages/Financeiro";
 
 
 export default function CheckoutPage(props) {
@@ -36,7 +37,7 @@ export default function CheckoutPage(props) {
   const classes = useStyles();
   const [activeStep, setActiveStep] = useState(1);
   const [datePayment, setDatePayment] = useState(null);
-  const [invoiceId, ] = useState(props.Invoice.id);
+  const [invoiceId, setinvoiceId] = useState(props.Invoice.id);
   const currentValidationSchema = validationSchema[activeStep];
   const isLastStep = activeStep === steps.length - 1;
   const { user } = useContext(AuthContext);
@@ -87,12 +88,10 @@ function _renderStepContent(step, setFieldValue, setActiveStep, values ) {
 
       const { data } = await api.post("/subscription", newValues);
       setDatePayment(data)
-      actions.setSubmitting(true);
+      actions.setSubmitting(false);
       setActiveStep(activeStep + 1);
       toast.success("Assinatura realizada com sucesso!, aguardando a realização do pagamento");
     } catch (err) {
-      actions.setSubmitting(false);
-     
       toastError(err);
     }
   }

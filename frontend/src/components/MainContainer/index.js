@@ -2,17 +2,12 @@ import React from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
-import WhatsappBackground from "../../assets/wa-background.png"
 
 const useStyles = makeStyles(theme => ({
 	mainContainer: {
 		flex: 1,
 		padding: theme.spacing(2),
 		height: `calc(100% - 48px)`,
-		backgroundImage: `url(${WhatsappBackground})`,
-		backgroundPosition: 'center', 
-		backgroundSize: 'cover', 
-		backgroundRepeat: 'no-repeat',
 	},
 
 	contentWrapper: {

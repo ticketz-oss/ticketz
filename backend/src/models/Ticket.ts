@@ -35,9 +35,6 @@ class Ticket extends Model<Ticket> {
   @Column({ defaultValue: "pending" })
   status: string;
 
-  @Column({ defaultValue: "whatsapp" })
-  channel: string;
-
   @Column
   unreadMessages: number;
 
@@ -71,7 +68,6 @@ class Ticket extends Model<Ticket> {
   @ForeignKey(() => Whatsapp)
   @Column
   whatsappId: number;
-
 
   @BelongsTo(() => Whatsapp)
   whatsapp: Whatsapp;

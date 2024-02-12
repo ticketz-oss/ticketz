@@ -10,6 +10,6 @@ export function socketConnection(params) {
     transports: ["websocket", "polling", "flashsocket"],
     pingTimeout: 18000,
     pingInterval: 18000,
-    query: isObject(params) ? { ...params, userId } : { userId },
+    query: isObject(params) ? { ...params} : { userId: params.userId },
   });
 }

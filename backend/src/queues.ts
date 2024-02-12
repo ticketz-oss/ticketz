@@ -6,7 +6,7 @@ import { logger } from "./utils/logger";
 import moment from "moment";
 import Schedule from "./models/Schedule";
 import Contact from "./models/Contact";
-import { Op, QueryTypes } from "sequelize";
+import { Op, QueryTypes, Sequelize } from "sequelize";
 import GetDefaultWhatsApp from "./helpers/GetDefaultWhatsApp";
 import Campaign from "./models/Campaign";
 import ContactList from "./models/ContactList";
@@ -22,6 +22,7 @@ import path from "path";
 import User from "./models/User";
 import Company from "./models/Company";
 import Plan from "./models/Plan";
+import Ticket from "./models/Ticket";
 const nodemailer = require('nodemailer');
 const CronJob = require('cron').CronJob;
 
@@ -49,6 +50,7 @@ interface DispatchCampaignData {
 
 export const userMonitor = new Queue("UserMonitor", connection);
 
+export const queueMonitor = new Queue("QueueMonitor", connection);
 
 export const messageQueue = new Queue("MessageQueue", connection, {
   limiter: {
@@ -84,6 +86,110 @@ async function handleSendMessage(job) {
     throw e;
   }
 }
+
+async function handleVerifyQueue(job) {
+  logger.info("Buscando atendimentos perdidos nas filas");
+  try {
+    const companies = await Company.findAll({
+      attributes: ['id', 'name'],
+      where: {
+        status: true,
+        dueDate: {
+          [Op.gt]: Sequelize.literal('CURRENT_DATE')
+        }
+      },
+      include: [
+        {
+          model: Whatsapp, attributes: ["id", "name", "status", "timeSendQueue", "sendIdQueue"], where: {
+            timeSendQueue: {
+              [Op.gt]: 0
+            }
+          }
+        },
+      ]
+    });
+
+    companies.map(async c => {
+      c.whatsapps.map(async w => {
+
+        if (w.status === "CONNECTED") {
+
+          var companyId = c.id;
+
+          const moveQueue = w.timeSendQueue ? w.timeSendQueue : 0;
+          const moveQueueId = w.sendIdQueue;
+          const moveQueueTime = moveQueue;
+          const idQueue = moveQueueId;
+          const timeQueue = moveQueueTime;
+
+          if (moveQueue > 0) {
+
+            if (!isNaN(idQueue) && Number.isInteger(idQueue) && !isNaN(timeQueue) && Number.isInteger(timeQueue)) {
+
+              const tempoPassado = moment().subtract(timeQueue, "minutes").utc().format();
+              // const tempoAgora = moment().utc().format();
+
+              const { count, rows: tickets } = await Ticket.findAndCountAll({
+                where: {
+                  status: "pending",
+                  queueId: null,
+                  companyId: companyId,
+                  whatsappId: w.id,
+                  updatedAt: {
+                    [Op.lt]: tempoPassado
+                  }
+                },
+                include: [
+                  {
+                    model: Contact,
+                    as: "contact",
+                    attributes: ["id", "name", "number", "email", "profilePicUrl"],
+                    include: ["extraInfo"]
+                  }
+                ]
+              });
+
+              if (count > 0) {
+                tickets.map(async ticket => {
+                  await ticket.update({
+                    queueId: idQueue
+                  });
+
+                  await ticket.reload();
+
+                  const io = getIO();
+                  io.to(ticket.status)
+                    .to("notification")
+                    .to(ticket.id.toString())
+                    .emit(`company-${companyId}-ticket`, {
+                      action: "update",
+                      ticket,
+                      ticketId: ticket.id
+                    });
+
+                  // io.to("pending").emit(`company-${companyId}-ticket`, {
+                  //   action: "update",
+                  //   ticket,
+                  // });
+
+                  logger.info(`Atendimento Perdido: ${ticket.id} - Empresa: ${companyId}`);
+                });
+              } else {
+                logger.info(`Nenhum atendimento perdido encontrado - Empresa: ${companyId}`);
+              }
+            } else {
+              logger.info(`Condição não respeitada - Empresa: ${companyId}`);
+            }
+          }
+        }
+      });
+    });
+  } catch (e: any) {
+    Sentry.captureException(e);
+    logger.error("SearchForQueue -> VerifyQueue: error", e.message);
+    throw e;
+  }
+};
 
 async function handleVerifySchedules(job) {
   try {
@@ -397,6 +503,7 @@ async function verifyAndFinalizeCampaign(campaign) {
 
   const io = getIO();
   io.emit(`company-${campaign.companyId}-campaign`, {
+    action: "update",
     record: campaign
   });
 }
@@ -579,6 +686,7 @@ async function handleDispatchCampaign(job) {
   } catch (err: any) {
     Sentry.captureException(err);
     logger.error(err.message);
+    console.log(err.stack);
   }
 }
 
@@ -600,7 +708,8 @@ async function handleLoginStatus(job) {
 
 
 async function handleInvoiceCreate() {
-  const job = new CronJob('0 * * * * *', async () => {
+  logger.info("Iniciando geração de boletos");
+  const job = new CronJob('*/5 * * * * *', async () => {
 
 
     const companies = await Company.findAll();
@@ -631,34 +740,34 @@ async function handleInvoiceCreate() {
             { type: QueryTypes.INSERT }
           );
 
-/*           let transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-              user: 'email@gmail.com',
-              pass: 'senha'
-            }
-          });
-
-          const mailOptions = {
-            from: 'heenriquega@gmail.com', // sender address
-            to: `${c.email}`, // receiver (use array of string for a list)
-            subject: 'Fatura gerada - Sistema', // Subject line
-            html: `Olá ${c.name} esté é um email sobre sua fatura!<br>
-<br>
-Vencimento: ${vencimento}<br>
-Valor: ${plan.value}<br>
-Link: ${process.env.FRONTEND_URL}/financeiro<br>
-<br>
-Qualquer duvida estamos a disposição!
-            `// plain text body
-          };
-
-          transporter.sendMail(mailOptions, (err, info) => {
-            if (err)
-              console.log(err)
-            else
-              console.log(info);
-          }); */
+          /*           let transporter = nodemailer.createTransport({
+                      service: 'gmail',
+                      auth: {
+                        user: 'email@gmail.com',
+                        pass: 'senha'
+                      }
+                    });
+          
+                    const mailOptions = {
+                      from: 'heenriquega@gmail.com', // sender address
+                      to: `${c.email}`, // receiver (use array of string for a list)
+                      subject: 'Fatura gerada - Sistema', // Subject line
+                      html: `Olá ${c.name} esté é um email sobre sua fatura!<br>
+          <br>
+          Vencimento: ${vencimento}<br>
+          Valor: ${plan.value}<br>
+          Link: ${process.env.FRONTEND_URL}/financeiro<br>
+          <br>
+          Qualquer duvida estamos a disposição!
+                      `// plain text body
+                    };
+          
+                    transporter.sendMail(mailOptions, (err, info) => {
+                      if (err)
+                        console.log(err)
+                      else
+                        console.log(info);
+                    }); */
 
         }
 
@@ -685,7 +794,7 @@ export async function startQueueProcess() {
 
   sendScheduledMessages.process("SendMessage", handleSendScheduledMessage);
 
-  campaignQueue.process("VerifyCampaignsDaatabase", handleVerifyCampaigns);
+  campaignQueue.process("VerifyCampaigns", handleVerifyCampaigns);
 
   campaignQueue.process("ProcessCampaign", handleProcessCampaign);
 
@@ -695,6 +804,7 @@ export async function startQueueProcess() {
 
   userMonitor.process("VerifyLoginStatus", handleLoginStatus);
 
+  queueMonitor.process("VerifyQueueStatus", handleVerifyQueue);
 
 
 
@@ -708,7 +818,7 @@ export async function startQueueProcess() {
   );
 
   campaignQueue.add(
-    "VerifyCampaignsDaatabase",
+    "VerifyCampaigns",
     {},
     {
       repeat: { cron: "*/20 * * * * *" },

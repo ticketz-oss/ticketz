@@ -26,6 +26,10 @@ module.exports = {
         type: DataTypes.INTEGER,
         defaultValue: 0
       },
+      value: {
+        type: DataTypes.FLOAT,
+        defaultValue: 0
+      },
       createdAt: {
         type: DataTypes.DATE,
         allowNull: false

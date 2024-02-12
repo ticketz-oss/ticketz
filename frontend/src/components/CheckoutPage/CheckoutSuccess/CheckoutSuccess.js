@@ -29,7 +29,7 @@ function CheckoutSuccess(props) {
         }, 4000);
       }
     });
-  }, [history, dateToClient]);
+  }, [history]);
 
   const handleCopyQR = () => {
     setTimeout(() => {

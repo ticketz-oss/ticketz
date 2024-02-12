@@ -49,12 +49,6 @@ class QueueOption extends Model<QueueOption> {
 
   @BelongsTo(() => QueueOption, { foreignKey: 'parentId' })
   parent: QueueOption;
-
-  @Column
-  mediaPath: string;
-
-  @Column
-  mediaName: string;
 }
 
 export default QueueOption;

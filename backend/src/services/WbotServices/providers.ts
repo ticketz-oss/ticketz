@@ -1,4 +1,4 @@
-import { proto, WASocket } from "@adiwajshing/baileys";
+import { proto, WASocket } from "@whiskeysockets/baileys";
 import Contact from "../../models/Contact";
 import Setting from "../../models/Setting";
 import Ticket from "../../models/Ticket";
@@ -10,7 +10,7 @@ import puppeteer from "puppeteer";
 import axios from 'axios';
 import UpdateTicketService from "../TicketServices/UpdateTicketService";
 import fs from 'fs';
-    
+
 export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, companyId: number, contact: Contact, wbot: WASocket) => {
   const filaescolhida = ticket.queue?.name
   if (filaescolhida === "2ª Via de Boleto" || filaescolhida === "2 Via de Boleto") {
@@ -185,7 +185,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
                         await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, bodyPdfQr);
                         await sleep(2000)
 
-                        //GERA O PDF                                    
+                        //GERA O PDF
                         const nomePDF = `Boleto-${nome}-${dia}-${mes}-${ano}.pdf`;
                         (async () => {
                           const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
@@ -756,7 +756,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
                   };
                   //await sleep(2000)
                   //await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, bodyBoleto);
-                  //LINHA DIGITAVEL                    
+                  //LINHA DIGITAVEL
                   if (impresso !== "S") {
                     //IMPRIME BOLETO PARA GERAR CODIGO BARRAS
                     var boletopdf = {
@@ -866,7 +866,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
                           };
                           await sleep(2000)
                           await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, bodyqrcode);
-                          //REALIZANDO O DESBLOQUEIO   
+                          //REALIZANDO O DESBLOQUEIO
                           var optionsdesbloqeuio = {
                             method: 'POST',
                             url: `${urlixc}/webservice/v1/desbloqueio_confianca`,
@@ -929,7 +929,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
                               }).catch(function (error) {
                                 console.error(error);
                               });
-                              //FIM DA DESCONEXÃO 
+                              //FIM DA DESCONEXÃO
                             } else {
                               var msgerrolbieracao = response.data.mensagem
                               const bodyerro = {
@@ -1029,7 +1029,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
                           };
                           await sleep(2000)
                           await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, bodyqrcode);
-                          //REALIZANDO O DESBLOQUEIO   
+                          //REALIZANDO O DESBLOQUEIO
                           var optionsdesbloqeuio = {
                             method: 'POST',
                             url: `${urlixc}/webservice/v1/desbloqueio_confianca`,
@@ -1115,7 +1115,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
                               }).catch(function (error) {
                                 console.error(error);
                               });
-                              //FIM DA DESCONEXÃO 
+                              //FIM DA DESCONEXÃO
                             } else {
                               const bodyerro = {
                                 text: formatBody(`Ops! Ocorreu um erro e nao consegui desbloquear! Digite *#* e fale com um atendente!`, contact),
@@ -1152,7 +1152,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
                         await sleep(2000)
                         await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, bodyerro);
                       });
-                      ///VE SE ESTA BLOQUEADO PARA LIBERAR!                            
+                      ///VE SE ESTA BLOQUEADO PARA LIBERAR!
                     }
                   }).catch(function (error) {
                     console.error(error);
@@ -1361,7 +1361,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
                     };
                     await sleep(2000)
                     await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, bodyqrcode);
-                    //REALIZANDO O DESBLOQUEIO   
+                    //REALIZANDO O DESBLOQUEIO
                     var optionsdesbloqeuio = {
                       method: 'POST',
                       url: `${urlixc}/webservice/v1/desbloqueio_confianca`,
@@ -1448,7 +1448,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
                         }).catch(function (error) {
                           console.error(error);
                         });
-                        //FIM DA DESCONEXÃO 
+                        //FIM DA DESCONEXÃO
 
                       } else {
                         const bodyerro = {
@@ -1467,7 +1467,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
                                  const bodyerro = {
                   text: formatBody(`Ops! Ocorreu um erro e nao consegui desbloquear! Digite *#* e fale com um atendente!`
                                  await sleep(2000)
-                                 await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,bodyerro);  
+                                 await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,bodyerro);
                              } */
 
                     }).catch(async function (error) {

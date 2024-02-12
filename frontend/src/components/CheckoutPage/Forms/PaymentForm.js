@@ -9,6 +9,9 @@ import StarIcon from '@material-ui/icons/StarBorder';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 
+import IconButton from '@material-ui/core/IconButton';
+import MinimizeIcon from '@material-ui/icons/Minimize';
+import AddIcon from '@material-ui/icons/Add';
 
 import usePlans from "../../../hooks/usePlans";
 import useCompanies from "../../../hooks/useCompanies";
@@ -68,7 +71,37 @@ export default function Pricing(props) {
     activeStep,
   } = props;
 
- 
+  const handleChangeAdd = (event, newValue) => {
+    if (newValue < 3) return
+
+    const newPrice = 11.00;
+
+    setUsersPlans(newValue);
+    setCustomValuePlans(customValuePlans + newPrice);
+  }
+
+  const handleChangeMin = (event, newValue) => {
+    if (newValue < 3) return
+
+    const newPrice = 11;
+
+    setUsersPlans(newValue);
+    setCustomValuePlans(customValuePlans - newPrice);
+  }
+
+  const handleChangeConnectionsAdd = (event, newValue) => {
+    if (newValue < 3) return
+    const newPrice = 20.00;
+    setConnectionsPlans(newValue);
+    setCustomValuePlans(customValuePlans + newPrice);
+  }
+
+  const handleChangeConnectionsMin = (event, newValue) => {
+    if (newValue < 3) return
+    const newPrice = 20;
+    setConnectionsPlans(newValue);
+    setCustomValuePlans(customValuePlans - newPrice);
+  }
 
   const { list, finder } = usePlans();
   const { find } = useCompanies();

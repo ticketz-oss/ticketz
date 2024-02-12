@@ -25,9 +25,7 @@ import { has, isObject } from "lodash";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
 import withWidth, { isWidthUp } from "@material-ui/core/withWidth";
-import WhatsappBackground from "../../assets/wa-background.png"
-import { i18n } from "../../translate/i18n";
-import Title from "../../components/Title";
+
 const useStyles = makeStyles((theme) => ({
   mainContainer: {
     display: "flex",
@@ -38,16 +36,12 @@ const useStyles = makeStyles((theme) => ({
     height: `calc(100% - 48px)`,
     overflowY: "hidden",
     border: "1px solid rgba(0, 0, 0, 0.12)",
-    backgroundImage: `url(${WhatsappBackground})`,
-		backgroundPosition: 'center', 
-		backgroundSize: 'cover', 
-		backgroundRepeat: 'no-repeat', 
   },
   gridContainer: {
     flex: 1,
     height: "100%",
     border: "1px solid rgba(0, 0, 0, 0.12)",
-    backgroundColor: "inherit",
+    backgroundColor: theme.palette.dark,
   },
   gridItem: {
     height: "100%",
@@ -336,11 +330,9 @@ function Chat(props) {
 
   const renderGrid = () => {
     return (
-      <>
-      <Title>{i18n.t("internalChat.title")}</Title>
       <Grid className={classes.gridContainer} container>
         <Grid className={classes.gridItem} md={3} item>
-         
+          
             <div className={classes.btnContainer}>
               <Button
                 onClick={() => {
@@ -353,7 +345,7 @@ function Chat(props) {
                 Nova
               </Button>
             </div>
-        
+          
           <ChatList
             chats={chats}
             pageInfo={chatsPageInfo}
@@ -380,7 +372,6 @@ function Chat(props) {
           )}
         </Grid>
       </Grid>
-      </>
     );
   };
 

@@ -13,8 +13,6 @@ import Button from "@material-ui/core/Button";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
-import FlagIcon from '@material-ui/icons/Flag';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import IconButton from "@material-ui/core/IconButton";
@@ -97,7 +95,6 @@ const Tags = () => {
   const classes = useStyles();
 
   const { user } = useContext(AuthContext);
-  const { id, profile, name } = user;
 
   const [loading, setLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
@@ -114,7 +111,7 @@ const Tags = () => {
       const { data } = await api.get("/tags/", {
         params: { searchParam, pageNumber },
       });
-      dispatch({ type: "LOAD_TAGS", payload: data.tags, kanban: 0  });
+      dispatch({ type: "LOAD_TAGS", payload: data.tags });
       setHasMore(data.hasMore);
       setLoading(false);
     } catch (err) {
@@ -216,7 +213,6 @@ const Tags = () => {
         reload={fetchTags}
         aria-labelledby="form-dialog-title"
         tagId={selectedTag && selectedTag.id}
-        kanban={0}
       />
       <MainHeader>
         <Title>{i18n.t("tags.title")}</Title>
@@ -251,7 +247,6 @@ const Tags = () => {
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell align="center">"ID"</TableCell>
               <TableCell align="center">{i18n.t("tags.table.name")}</TableCell>
               <TableCell align="center">
                 {i18n.t("tags.table.tickets")}
@@ -263,11 +258,8 @@ const Tags = () => {
           </TableHead>
           <TableBody>
             <>
-              {tags
-    			.sort((a, b) => b.id - a.id) // Sort the tags array in descending order based on the id
-    			.map((tag) => (
+              {tags.map((tag) => (
                 <TableRow key={tag.id}>
-                  <TableCell align="center">{tag.id}</TableCell>
                   <TableCell align="center">
                     <Chip
                       variant="outlined"
@@ -280,18 +272,11 @@ const Tags = () => {
                       size="small"
                     />
                   </TableCell>
-				  <TableCell align="center">{tag.ticketsCount}</TableCell>
+                  <TableCell align="center">{tag.ticketsCount}</TableCell>
                   <TableCell align="center">
-                  <>
-                  {((user.profile === "admin" || user.profile === "supervisor")) && (
                     <IconButton size="small" onClick={() => handleEditTag(tag)}>
                       <EditIcon />
                     </IconButton>
-                    
-                  )}
-          
-                    
-                  {((user.profile === "admin" || user.profile === "supervisor")) && (
 
                     <IconButton
                       size="small"
@@ -302,11 +287,6 @@ const Tags = () => {
                     >
                       <DeleteOutlineIcon />
                     </IconButton>
-                    
-                    )}
-                    
-                 </>
-                 
                   </TableCell>
                 </TableRow>
               ))}

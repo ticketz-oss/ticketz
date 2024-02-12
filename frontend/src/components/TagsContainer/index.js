@@ -5,7 +5,7 @@ import { isArray, isString } from "lodash";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 
-export function TagsContainer ({ ticket }) {
+export function TagsContainer({ ticket }) {
 
     const [tags, setTags] = useState([]);
     const [selecteds, setSelecteds] = useState([]);
@@ -78,7 +78,7 @@ export function TagsContainer ({ ticket }) {
     }
 
     return (
-        <Paper style={{padding: 12}}>
+        <Paper style={{ padding: 12 }}>
             <Autocomplete
                 multiple
                 size="small"
@@ -91,8 +91,16 @@ export function TagsContainer ({ ticket }) {
                     value.map((option, index) => (
                         <Chip
                             variant="outlined"
-                            style={{backgroundColor: option.color || '#eee', textShadow: '1px 1px 1px #000', color: 'white'}}
-                            label={option.name}
+                            style={{
+                                background: option.color || '#eee',
+                                color: "#FFF",
+                                marginRight: 1,
+                                fontWeight: 600,
+                                borderRadius: 3,
+                                fontSize: "0.8em",
+                                whiteSpace: "nowrap"
+                            }}
+                            label={option.name.toUpperCase()}
                             {...getTagProps({ index })}
                             size="small"
                         />
@@ -102,7 +110,7 @@ export function TagsContainer ({ ticket }) {
                     <TextField {...params} variant="outlined" placeholder="Tags" />
                 )}
                 PaperComponent={({ children }) => (
-                    <Paper style={{width: 400, marginLeft: 12}}>
+                    <Paper style={{ width: 400, marginLeft: 12 }}>
                         {children}
                     </Paper>
                 )}

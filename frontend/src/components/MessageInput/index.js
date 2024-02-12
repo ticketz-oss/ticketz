@@ -33,7 +33,7 @@ const Mp3Recorder = new MicRecorder({ bitRate: 128 });
 
 const useStyles = makeStyles(theme => ({
 	mainWrapper: {
-		background: "#eee",
+		backgroundColor: theme.palette.bordabox, //DARK MODE PLW DESIGN//
 		display: "flex",
 		flexDirection: "column",
 		alignItems: "center",
@@ -180,9 +180,6 @@ const MessageInput = ({ ticketStatus }) => {
 
 	const [signMessage, setSignMessage] = useLocalStorage("signOption", true);
 
-	const disabeldOption = () =>{
-		return loading || ticketStatus === 'closed';
-	}
 	useEffect(() => {
 		inputRef.current.focus();
 	}, [replyingMessage]);
@@ -335,7 +332,7 @@ const MessageInput = ({ ticketStatus }) => {
 				<IconButton
 					aria-label="showRecorder"
 					component="span"
-					disabled={disabeldOption}
+					disabled={loading || ticketStatus !== "open"}
 					onClick={() => setReplyingMessage(null)}
 				>
 					<ClearIcon className={classes.sendMessageIcons} />
@@ -369,7 +366,7 @@ const MessageInput = ({ ticketStatus }) => {
 					aria-label="send-upload"
 					component="span"
 					onClick={handleUploadMedia}
-					disabled={disabeldOption}
+					disabled={loading}
 				>
 					<SendIcon className={classes.sendMessageIcons} />
 				</IconButton>
@@ -383,7 +380,7 @@ const MessageInput = ({ ticketStatus }) => {
 					<IconButton
 						aria-label="emojiPicker"
 						component="span"
-						disabled={disabeldOption}
+						disabled={loading || recording || ticketStatus !== "open"}
 						onClick={e => setShowEmoji(prevState => !prevState)}
 					>
 						<MoodIcon className={classes.sendMessageIcons} />
@@ -411,7 +408,7 @@ const MessageInput = ({ ticketStatus }) => {
 						<IconButton
 							aria-label="upload"
 							component="span"
-							disabled={disabeldOption}
+							disabled={loading || recording || ticketStatus !== "open"}
 						>
 							<AttachFileIcon className={classes.sendMessageIcons} />
 						</IconButton>
@@ -448,7 +445,7 @@ const MessageInput = ({ ticketStatus }) => {
 							maxRows={5}
 							value={inputMessage}
 							onChange={handleChangeInput}
-							disabled={disabeldOption}
+							disabled={recording || loading || ticketStatus !== "open"}
 							onPaste={e => {
 								ticketStatus === "open" && handleInputPaste(e);
 							}}
@@ -465,7 +462,7 @@ const MessageInput = ({ ticketStatus }) => {
 							aria-label="sendMessage"
 							component="span"
 							onClick={handleSendMessage}
-							disabled={disabeldOption}
+							disabled={loading}
 						>
 							<SendIcon className={classes.sendMessageIcons} />
 						</IconButton>
@@ -475,7 +472,7 @@ const MessageInput = ({ ticketStatus }) => {
 								aria-label="cancelRecording"
 								component="span"
 								fontSize="large"
-								disabled={disabeldOption}
+								disabled={loading}
 								onClick={handleCancelAudio}
 							>
 								<HighlightOffIcon className={classes.cancelAudioIcon} />
@@ -492,7 +489,7 @@ const MessageInput = ({ ticketStatus }) => {
 								aria-label="sendRecordedAudio"
 								component="span"
 								onClick={handleUploadAudio}
-								disabled={disabeldOption}
+								disabled={loading}
 							>
 								<CheckCircleOutlineIcon className={classes.sendAudioIcon} />
 							</IconButton>
@@ -501,7 +498,7 @@ const MessageInput = ({ ticketStatus }) => {
 						<IconButton
 							aria-label="showRecorder"
 							component="span"
-							disabled={disabeldOption}
+							disabled={loading || ticketStatus !== "open"}
 							onClick={handleStartRecording}
 						>
 							<MicIcon className={classes.sendMessageIcons} />

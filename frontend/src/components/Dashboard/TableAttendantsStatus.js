@@ -52,10 +52,6 @@ export default function TableAttendantsStatus(props) {
                 <TableCell align="center" title="1 - Insatisfeito, 2 - Satisfeito, 3 - Muito Satisfeito" className={classes.pointer}>
                     <RatingBox rating={a.rating} />
                 </TableCell>
-                <TableCell align="center">{a.tickets}</TableCell>
-                <TableCell align="center">{a.openCount}</TableCell>
-                <TableCell align="center">{a.closeCount}</TableCell>
-                <TableCell align="center">{formatTime(a.avgWaitTime, 2)}</TableCell>
                 <TableCell align="center">{formatTime(a.avgSupportTime, 2)}</TableCell>
                 <TableCell align="center">
                     { a.online ?
@@ -78,10 +74,6 @@ export default function TableAttendantsStatus(props) {
                     <TableRow>
                         <TableCell>Nome</TableCell>
                         <TableCell align="center">Avaliações</TableCell>
-                        <TableCell align="center">Total de Atendimentos</TableCell>
-                        <TableCell align="center">Acontecendo</TableCell>
-                        <TableCell align="center">Finalizados</TableCell>
-                        <TableCell align="center">T.M. de Espera</TableCell>
                         <TableCell align="center">T.M. de Atendimento</TableCell>
                         <TableCell align="center">Status (Atual)</TableCell>
                     </TableRow>

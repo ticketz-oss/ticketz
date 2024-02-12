@@ -131,6 +131,7 @@ const TicketListItem = ({ ticket }) => {
     }
     history.push(`/tickets/${ticket.uuid}`);
   };
+  console.log("🚀 Console Log : ticket.lastMessage", ticket.lastMessage);
 
   const handleSelectTicket = (ticket) => {
     history.push(`/tickets/${ticket.uuid}`);
@@ -182,7 +183,7 @@ const TicketListItem = ({ ticket }) => {
                   color="primary"
                 />
               )}
-              {ticket.lastMessage && (
+{/*               {ticket.lastMessage && (
                 <Typography
                   className={classes.lastMessageTime}
                   component="span"
@@ -195,10 +196,10 @@ const TicketListItem = ({ ticket }) => {
                     <>{format(parseISO(ticket.updatedAt), "dd/MM/yyyy")}</>
                   )}
                 </Typography>
-              )}
+              )} */}
             </span>
           }
-          secondary={
+/*           secondary={
             <span className={classes.contactNameWrapper}>
               <Typography
                 className={classes.contactLastMessage}
@@ -210,7 +211,7 @@ const TicketListItem = ({ ticket }) => {
                 {ticket.lastMessage ? (
                   <MarkdownWrapper>{ticket.lastMessage}</MarkdownWrapper>
                 ) : (
-                  <br />
+                  <MarkdownWrapper></MarkdownWrapper>
                 )}
               </Typography>
 
@@ -222,7 +223,7 @@ const TicketListItem = ({ ticket }) => {
                 }}
               />
             </span>
-          }
+          } */
         />
         {ticket.status === "pending" && (
           <ButtonWithSpinner

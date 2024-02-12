@@ -70,10 +70,6 @@ class Whatsapp extends Model<Whatsapp> {
   @Column(DataType.TEXT)
   ratingMessage: string;
 
-  @Default("")
-  @Column(DataType.TEXT)
-  transferMessage: string;
-
   @Column({ defaultValue: "stable" })
   provider: string;
 
@@ -107,20 +103,13 @@ class Whatsapp extends Model<Whatsapp> {
   @Column
   token: string;
 
-  @Column(DataType.TEXT)
-  facebookUserId: string;
+  @Default(0)
+  @Column
+  timeSendQueue: number;
 
-  @Column(DataType.TEXT)
-  facebookUserToken: string;
+  @Column
+  sendIdQueue: number;
 
-  @Column(DataType.TEXT)
-  facebookPageUserId: string;
-
-  @Column(DataType.TEXT)
-  tokenMeta: string;
-
-  @Column(DataType.TEXT)
-  channel: string;
 }
 
 export default Whatsapp;

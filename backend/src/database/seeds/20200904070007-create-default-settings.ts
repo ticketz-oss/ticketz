@@ -15,6 +15,22 @@ module.exports = {
                             createdAt: new Date(),
                             updatedAt: new Date()
                         },
+						{
+						  key: "sendGreetingAccepted",
+						  value: "disabled",
+						  companyId: 1,
+						  createdAt: new Date(),
+						  updatedAt: new Date(),
+						  
+						},
+						{
+						  key: "sendMsgTransfTicket",
+						  value: "disabled",
+						  companyId: 1,
+						  createdAt: new Date(),
+						  updatedAt: new Date(),
+						  
+						},						
                         {
                             key: "userRating",
                             value: "disabled",

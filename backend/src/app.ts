@@ -13,8 +13,6 @@ import routes from "./routes";
 import { logger } from "./utils/logger";
 import { messageQueue, sendScheduledMessages } from "./queues";
 
-
-
 Sentry.init({ dsn: process.env.SENTRY_DSN });
 
 const app = express();
@@ -37,6 +35,7 @@ app.use("/public", express.static(uploadConfig.directory));
 app.use(routes);
 
 app.use(Sentry.Handlers.errorHandler());
+
 app.use(async (err: Error, req: Request, res: Response, _: NextFunction) => {
   if (err instanceof AppError) {
     logger.warn(err);

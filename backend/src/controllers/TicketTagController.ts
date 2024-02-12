@@ -50,6 +50,7 @@ export const remove = async (req: Request, res: Response): Promise<Response> => 
 
     // Remove the tagIds with kanban = 1 from TicketTags
     const tagIdsWithKanbanOne = tagsWithKanbanOne.map((tag) => tag.id);
+    if (tagIdsWithKanbanOne)
     await TicketTag.destroy({ where: { ticketId, tagId: tagIdsWithKanbanOne } });
 
     return res.status(200).json({ message: 'Ticket tags removed successfully.' });

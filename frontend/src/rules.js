@@ -5,7 +5,7 @@ const rules = {
 
 	admin: {
 		static: [
-			//"dashboard:view",
+			"dashboard:view",
 			"drawer-admin-items:view",
 			"tickets-manager:showall",
 			"user-modal:editProfile",

@@ -9,20 +9,14 @@ import {
     TableBody,
     TableCell,
     TableRow,
-    IconButton,
-    FormControlLabel,
-    Checkbox,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem
+    IconButton
 } from "@material-ui/core";
 import { Formik, Form, Field } from 'formik';
 import ButtonWithSpinner from "../ButtonWithSpinner";
 import ConfirmationModal from "../ConfirmationModal";
 import CurrencyInput from "../CurrencyInput";
 import InputMask from 'react-input-mask'
-import { CheckBox, Edit as EditIcon } from "@material-ui/icons";
+import { Edit as EditIcon } from "@material-ui/icons";
 import CurrencyFormat from 'react-currency-format';
 import MaskedInput from 'react-text-mask'
 
@@ -76,8 +70,7 @@ export function PlanManagerForm(props) {
         users: 0,
         connections: 0,
         queues: 0,
-        value: 0,
-        isPublic: true
+        value: 0
     });
 
     useEffect(() => {
@@ -112,22 +105,6 @@ export function PlanManagerForm(props) {
                                 className={classes.fullWidth}
                                 margin="dense"
                             />
-                        </Grid>
-                        <Grid xs={12} sm={6} md={4} item>
-                        <FormControl margin="dense" variant="outlined" fullWidth>
-                            <InputLabel htmlFor="status-selection">Público</InputLabel>
-                            <Field
-                                as={Select}
-                                id="status-selection"
-                                label="isPublic"
-                                labelId="status-selection-label"
-                                name="isPublic"
-                                margin="dense"
-                            >
-                                <MenuItem value={true}>Sim</MenuItem>
-                                <MenuItem value={false}>Não</MenuItem>
-                            </Field>
-                            </FormControl>
                         </Grid>
                         <Grid xs={12} sm={6} md={4} item>
                             <Field
@@ -216,7 +193,6 @@ export function PlansManagerGrid(props) {
                         <TableCell align="center" style={{ width: '1%' }}>#</TableCell>
                         <TableCell align="left">Nome</TableCell>
                         <TableCell align="center">Usuários</TableCell>
-                        <TableCell align="center">Público</TableCell>
                         <TableCell align="center">Conexões</TableCell>
                         <TableCell align="center">Filas</TableCell>
                         <TableCell align="center">Valor</TableCell>
@@ -232,7 +208,6 @@ export function PlansManagerGrid(props) {
                             </TableCell>
                             <TableCell align="left">{row.name || '-'}</TableCell>
                             <TableCell align="center">{row.users || '-'}</TableCell>
-                            <TableCell align="center">{row.isPublic ? "Sim": "Não" || '-'}</TableCell>
                             <TableCell align="center">{row.connections || '-'}</TableCell>
                             <TableCell align="center">{row.queues || '-'}</TableCell>
                             <TableCell align="center">{row.value.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }) || '-'}</TableCell>
@@ -271,7 +246,6 @@ export default function PlansManager() {
         setLoading(true)
         try {
             const planList = await list()
-            console.log(planList)
             setRecords(planList)
         } catch (e) {
             toast.error('Não foi possível carregar a lista de registros')
@@ -286,10 +260,8 @@ export default function PlansManager() {
             name: data.name,
             queues: data.queues,
             users: data.users,
-            value: data.value.replace(",", "."),
-            isPublic: data.isPublic
+            value: data.value.replace(",", ".")
         }
-        console.log(datanew)
         setLoading(true)
         try {
             if (data.id !== undefined) {
@@ -329,8 +301,7 @@ export default function PlansManager() {
             users: 0,
             connections: 0,
             queues: 0,
-            value: 0,
-            isPublic: true
+            value: 0
         })
     }
 
@@ -341,8 +312,7 @@ export default function PlansManager() {
             users: data.users || 0,
             connections: data.connections || 0,
             queues: data.queues || 0,
-            value: data.value.toLocaleString('pt-br', { minimumFractionDigits: 2 }) || 0,
-            isPublic: data.isPublic
+            value: data.value.toLocaleString('pt-br', { minimumFractionDigits: 2 }) || 0
         })
     }
 

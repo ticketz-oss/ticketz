@@ -3,6 +3,8 @@ import { makeStyles } from "@material-ui/core/styles";
 import toastError from "../../errors/toastError";
 import Popover from "@material-ui/core/Popover";
 import AnnouncementIcon from "@material-ui/icons/Announcement";
+import Notifications from "@material-ui/icons/Notifications"
+
 import {
   Avatar,
   Badge,
@@ -26,11 +28,10 @@ import moment from "moment";
 import { socketConnection } from "../../services/socket";
 
 const useStyles = makeStyles((theme) => ({
-contend:{minWidth: 300,maxWidth: 500,},
   mainPaper: {
     flex: 1,
-    maxHeight: 300,
-    maxWidth: 500,
+    maxHeight: 3000,
+    maxWidth: 5000,
     padding: theme.spacing(1),
     overflowY: "scroll",
     ...theme.scrollbarStyles,
@@ -38,7 +39,6 @@ contend:{minWidth: 300,maxWidth: 500,},
 }));
 
 function AnnouncementDialog({ announcement, open, handleClose }) {
- const classes=useStyles()
   const getMediaPath = (filename) => {
     return `${process.env.REACT_APP_BACKEND_URL}/public/${filename}`;
   };
@@ -50,14 +50,14 @@ function AnnouncementDialog({ announcement, open, handleClose }) {
       aria-describedby="alert-dialog-description"
     >
       <DialogTitle id="alert-dialog-title">{announcement.title}</DialogTitle>
-      <DialogContent className={classes.contend}>
+      <DialogContent>
         {announcement.mediaPath && (
           <div
             style={{
               border: "1px solid #f1f1f1",
               margin: "0 auto 20px",
               textAlign: "center",
-              width: "90%",
+              width: "400px",
               height: 300,
               backgroundImage: `url(${getMediaPath(announcement.mediaPath)})`,
               backgroundRepeat: "no-repeat",
@@ -242,13 +242,14 @@ export default function AnnouncementsPopover() {
         variant="contained"
         aria-describedby={id}
         onClick={handleClick}
+        style={{ color: "white" }}
       >
         <Badge
           color="secondary"
           variant="dot"
           invisible={invisible || announcements.length < 1}
         >
-          <AnnouncementIcon style={{ color: "white" }} />
+          <Notifications />
         </Badge>
       </IconButton>
       <Popover
@@ -280,7 +281,7 @@ export default function AnnouncementsPopover() {
                 <ListItem
                   key={key}
                   style={{
-                    // background: key % 2 === 0 ? "#ededed" : "white",
+                    //background: key % 2 === 0 ? "#ededed" : "white",
                     border: "1px solid #eee",
                     borderLeft: borderPriority(item.priority),
                     cursor: "pointer",

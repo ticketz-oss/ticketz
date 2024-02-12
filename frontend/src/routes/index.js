@@ -20,6 +20,7 @@ import ContactLists from "../pages/ContactLists/";
 import ContactListItems from "../pages/ContactListItems/";
 // import Companies from "../pages/Companies/";
 import QuickMessages from "../pages/QuickMessages/";
+import Kanban from "../pages/Kanban";
 import { AuthProvider } from "../context/Auth/AuthContext";
 import { TicketsContextProvider } from "../context/Tickets/TicketsContext";
 import { WhatsAppsProvider } from "../context/WhatsApp/WhatsAppsContext";
@@ -33,8 +34,6 @@ import Chat from "../pages/Chat";
 import ToDoList from "../pages/ToDoList/";
 import Subscription from "../pages/Subscription/";
 
-import Kanban from "../pages/Kanban";
-import TagsKanban from "../pages/TagsKanban";
 
 const Routes = () => {
   const [showCampaigns, setShowCampaigns] = useState(false);
@@ -77,14 +76,14 @@ const Routes = () => {
                 />
                 <Route
                   exact
-                  path="/schedules"
-                  component={Schedules}
-                  isPrivate
-                />
-                <Route
-                  exact
                   path="/todolist"
                   component={ToDoList}
+                  isPrivate
+                  />
+                <Route
+                  exact
+                  path="/schedules"
+                  component={Schedules}
                   isPrivate
                 />
                 <Route exact path="/tags" component={Tags} isPrivate />
@@ -101,6 +100,12 @@ const Routes = () => {
                   exact
                   path="/settings"
                   component={SettingsCustom}
+                  isPrivate
+                />
+				        <Route 
+                  exact
+                  path="/kanban"
+                  component={Kanban}
                   isPrivate
                 />
                 <Route
@@ -122,21 +127,6 @@ const Routes = () => {
                   component={Subscription}
                   isPrivate
                 />
-                
-                <Route
-                  exact
-                  path="/Kanban"
-                  component={Kanban}
-                  isPrivate
-                />
-                
-                <Route
-                  exact
-                  path="/tagsKanban"
-                  component={TagsKanban}
-                  isPrivate
-                />
-
                 <Route exact path="/chats/:id?" component={Chat} isPrivate />
                 {showCampaigns && (
                   <>
@@ -170,7 +160,6 @@ const Routes = () => {
                       component={CampaignsConfig}
                       isPrivate
                     />
-                    
                   </>
                 )}
               </LoggedInLayout>

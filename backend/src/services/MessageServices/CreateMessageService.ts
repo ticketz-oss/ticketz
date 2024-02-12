@@ -1,6 +1,7 @@
 import { getIO } from "../../libs/socket";
 import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
+import Whatsapp from "../../models/Whatsapp";
 
 interface MessageData {
   id: string;
@@ -13,7 +14,6 @@ interface MessageData {
   mediaUrl?: string;
   ack?: number;
   queueId?: number;
-  channel?: string;
 }
 interface Request {
   messageData: MessageData;
@@ -32,7 +32,15 @@ const CreateMessageService = async ({
       {
         model: Ticket,
         as: "ticket",
-        include: ["contact", "queue"]
+        include: [
+          "contact",
+          "queue",
+          {
+            model: Whatsapp,
+            as: "whatsapp",
+            attributes: ["name"]
+          }
+        ]
       },
       {
         model: Message,

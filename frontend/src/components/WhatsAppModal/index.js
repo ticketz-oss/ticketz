@@ -16,20 +16,17 @@ import {
   TextField,
   Switch,
   FormControlLabel,
-  FormControl,
-  FormGroup,
-  Typography,
-  Tooltip,
-  Paper,
   Grid,
-  Checkbox,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@material-ui/core";
 
 import api from "../../services/api";
 import { i18n } from "../../translate/i18n";
 import toastError from "../../errors/toastError";
 import QueueSelect from "../QueueSelect";
-import HelpOutlineOutlinedIcon from "@material-ui/icons/HelpOutlineOutlined";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -73,13 +70,15 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
     complationMessage: "",
     outOfHoursMessage: "",
     ratingMessage: "",
-    transferMessage: "",
     isDefault: false,
     token: "",
     provider: "beta",
+    timeSendQueue: 0,
+    sendIdQueue: 0,
   };
   const [whatsApp, setWhatsApp] = useState(initialState);
   const [selectedQueueIds, setSelectedQueueIds] = useState([]);
+  const [queues, setQueues] = useState([]);
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -87,6 +86,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 
       try {
         const { data } = await api.get(`whatsapp/${whatsAppId}?session=0`);
+        console.log(data)
         setWhatsApp(data);
 
         const whatsQueueIds = data.queues?.map((queue) => queue.id);
@@ -97,6 +97,17 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
     };
     fetchSession();
   }, [whatsAppId]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await api.get("/queue");
+        setQueues(data);
+      } catch (err) {
+        toastError(err);
+      }
+    })();
+  }, []);
 
   const handleSaveWhatsApp = async (values) => {
     const whatsappData = { ...values, queueIds: selectedQueueIds };
@@ -126,7 +137,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
       <Dialog
         open={open}
         onClose={handleClose}
-        maxWidth="sm"
+        maxWidth="md"
         fullWidth
         scroll="paper"
       >
@@ -199,13 +210,6 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                   />
                 </div>
                 <div>
-                 <Typography style={{fontSize: "11px"}}>
-                  {`Variaveis: ( {{ms}}=> Turno, 
-                  {{name}}=> Nome do contato, 
-                  {{protocol}}=> protocolo, {{hora}}=> hora )`}
-                 </Typography>
-                </div>
-                <div>
                   <Field
                     as={TextField}
                     label={i18n.t("queueModal.form.complationMessage")}
@@ -220,26 +224,6 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                     }
                     helperText={
                       touched.complationMessage && errors.complationMessage
-                    }
-                    variant="outlined"
-                    margin="dense"
-                  />
-                </div>
-                <div>
-                  <Field
-                    as={TextField}
-                    label={i18n.t("queueModal.form.transferMessage")}
-                    type="transferMessage"
-                    multiline
-                    rows={4}
-                    fullWidth
-                    name="transferMessage"
-                    error={
-                      touched.transferMessage &&
-                      Boolean(errors.transferMessage)
-                    }
-                    helperText={
-                      touched.transferMessage && errors.transferMessage
                     }
                     variant="outlined"
                     margin="dense"
@@ -297,6 +281,55 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                   selectedQueueIds={selectedQueueIds}
                   onChange={(selectedIds) => setSelectedQueueIds(selectedIds)}
                 />
+                <div>
+                  <h3>{i18n.t("whatsappModal.form.queueRedirection")}</h3>
+                  <p>{i18n.t("whatsappModal.form.queueRedirectionDesc")}</p>
+                  <Grid spacing={2} container>
+
+                    <Grid xs={6} md={6} item>
+                      <FormControl
+                        variant="outlined"
+                        margin="dense"
+                        className={classes.FormControl}
+                        fullWidth
+                      >
+                        <InputLabel id="sendIdQueue-selection-label">
+                          {i18n.t("whatsappModal.form.sendIdQueue")}
+                        </InputLabel>
+                        <Field
+                          as={Select}
+                          name="sendIdQueue"
+                          id="sendIdQueue"
+                          label={i18n.t("whatsappModal.form.sendIdQueue")}
+                          placeholder={i18n.t("whatsappModal.form.sendIdQueue")}
+                          labelId="sendIdQueue-selection-label"
+                        >
+                          <MenuItem value={0}>&nbsp;</MenuItem>
+                          {queues.map(queue => (
+                            <MenuItem key={queue.id} value={queue.id}>
+                              {queue.name}
+                            </MenuItem>
+                          ))}
+                        </Field>
+                      </FormControl>
+
+                    </Grid>
+
+                    <Grid xs={6} md={6} item>
+                      <Field
+                        as={TextField}
+                        label={i18n.t("whatsappModal.form.timeSendQueue")}
+                        fullWidth
+                        name="timeSendQueue"
+                        variant="outlined"
+                        margin="dense"
+                        error={touched.timeSendQueue && Boolean(errors.timeSendQueue)}
+                        helperText={touched.timeSendQueue && errors.timeSendQueue}
+                      />
+                    </Grid>
+
+                  </Grid>
+                </div>
               </DialogContent>
               <DialogActions>
                 <Button

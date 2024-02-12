@@ -15,9 +15,10 @@ interface WhatsappData {
   complationMessage?: string;
   outOfHoursMessage?: string;
   ratingMessage?: string;
-  transferMessage?: string;
   queueIds?: number[];
   token?: string;
+  sendIdQueue?: number;
+  timeSendQueue?: number;
 }
 
 interface Request {
@@ -51,9 +52,10 @@ const UpdateWhatsAppService = async ({
     complationMessage,
     outOfHoursMessage,
     ratingMessage,
-    transferMessage,
     queueIds = [],
-    token
+    token,
+    timeSendQueue,
+    sendIdQueue = null,
   } = whatsappData;
 
   try {
@@ -82,8 +84,7 @@ const UpdateWhatsAppService = async ({
   }
 
   const whatsapp = await ShowWhatsAppService(whatsappId, companyId);
-  // console.log(transferMessage)
-  console.log(whatsapp)
+
   await whatsapp.update({
     name,
     status,
@@ -95,7 +96,8 @@ const UpdateWhatsAppService = async ({
     isDefault,
     companyId,
     token,
-    transferMessage,
+    timeSendQueue,
+    sendIdQueue,
   });
 
   await AssociateWhatsappQueue(whatsapp, queueIds);

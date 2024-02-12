@@ -8,8 +8,6 @@ interface PlanData {
   connections: number;
   queues: number;
   value: number;
-  isPublic: boolean;
-
 }
 
 const CreatePlanService = async (planData: PlanData): Promise<Plan> => {

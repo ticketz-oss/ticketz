@@ -2,7 +2,7 @@ import {
   WASocket,
   BinaryNode,
   Contact as BContact,
-} from "@adiwajshing/baileys";
+} from "@whiskeysockets/baileys";
 import * as Sentry from "@sentry/node";
 
 import { Op } from "sequelize";
@@ -45,10 +45,10 @@ const wbotMonitor = async (
         });
 
         if (sendMsgCall.value === "disabled") {
-          // await wbot.sendMessage(node.attrs.from, {
-          //   text:
-          //     "*Mensagem Automática:*\n\nAs chamadas de voz e vídeo estão desabilitas para esse WhatsApp, favor enviar uma mensagem de texto. Obrigado",
-          // });
+          await wbot.sendMessage(node.attrs.from, {
+            text:
+              "*Mensagem Automática:*\n\nAs chamadas de voz e vídeo estão desabilitas para esse WhatsApp, favor enviar uma mensagem de texto. Obrigado",
+          });
 
           const number = node.attrs.from.replace(/\D/g, "");
 
@@ -87,7 +87,7 @@ const wbotMonitor = async (
           await ticket.update({
             lastMessage: body,
           });
-
+          
 
           if(ticket.status === "closed") {
             await ticket.update({
@@ -108,9 +108,6 @@ const wbotMonitor = async (
       });
     });
 
-    //wbot.ev.on("contacts.set", async (contacts: IContact) => {
-    //  console.log("set", contacts);
-    //});
   } catch (err) {
     Sentry.captureException(err);
     logger.error(err);

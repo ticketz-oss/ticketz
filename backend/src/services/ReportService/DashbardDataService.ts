@@ -31,7 +31,6 @@ export default async function DashboardDataService(
         ct.number "contactNumber",
         (tt."finishedAt" is not null) "finished",
         (tt."userId" is null and tt."finishedAt" is null) "pending",
-        (tt."startedAt" is not null and tt."finishedAt" is null) "open",
         coalesce((
           (date_part('day', age(coalesce(tt."ratingAt", tt."finishedAt") , tt."startedAt")) * 24 * 60) +
           (date_part('hour', age(coalesce(tt."ratingAt", tt."finishedAt"), tt."startedAt")) * 60) +
@@ -86,32 +85,19 @@ export default async function DashboardDataService(
         u.id,
         u.name,
         coalesce(att."avgSupportTime", 0) "avgSupportTime",
-        coalesce(att."avgWaitTime", 0) "avgWaitTime",
         att.tickets,
         att.rating,
-        att.online,
-        att."closeCount",
-        att."openCount"
-	from "Users" u
+        att.online
+      from "Users" u
       left join (
         select
           u1.id,
           u1."name",
           u1."online",
           avg(t."supportTime") "avgSupportTime",
-          avg(t."waitTime") "avgWaitTime",
           count(t."id") tickets,
-          coalesce(avg(ur.rate), 0) rating,
-		(
-          select count(distinct "id")
-          from traking
-          where "finishedAt" is not null and "companyId" = ? and "userId" = u1.id
-        )  AS "closeCount"   , 		(
-          select count(distinct "id")
-          from traking
-          where "startedAt" is not null and "finishedAt" is null and "companyId" = ? and "userId" = u1.id
-        )  AS "openCount"
-		  from "Users" u1
+          coalesce(avg(ur.rate), 0) rating
+        from "Users" u1
         left join traking t on t."userId" = u1.id
         left join "UserRatings" ur on ur."userId" = t."userId" and ur."createdAt"::date = t."finishedAt"::date
         group by 1, 2
@@ -128,22 +114,20 @@ export default async function DashboardDataService(
   const replacements: any[] = [companyId];
 
   if (_.has(params, "days")) {
-    where += ` and tt."createdAt" >= (now() - '? days'::interval)`;
+    where += ` and tt."queuedAt" >= (now() - '? days'::interval)`;
     replacements.push(parseInt(`${params.days}`.replace(/\D/g, ""), 10));
   }
 
   if (_.has(params, "date_from")) {
-    where += ` and tt."createdAt" >= ?`;
+    where += ` and tt."queuedAt" >= ?`;
     replacements.push(`${params.date_from} 00:00:00`);
   }
 
   if (_.has(params, "date_to")) {
-    where += ` and tt."createdAt" <= ?`;
+    where += ` and tt."finishedAt" <= ?`;
     replacements.push(`${params.date_to} 23:59:59`);
   }
 
-  replacements.push(companyId);
-  replacements.push(companyId);
   replacements.push(companyId);
   replacements.push(companyId);
   replacements.push(companyId);

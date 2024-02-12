@@ -31,11 +31,12 @@ const useStyles = makeStyles((theme) => ({
     height: 240,
   },
   tab: {
+    backgroundColor: theme.palette.options,  //DARK MODE PLW DESIGN//
     borderRadius: 4,
     width: "100%",
     "& .MuiTab-wrapper": {
-      color: "#128c7e"
-    },
+      color: theme.palette.fontecor,
+    },   //DARK MODE PLW DESIGN//
     "& .MuiTabs-flexContainer": {
       justifyContent: "center"
     }
@@ -106,6 +107,14 @@ export default function Options(props) {
 
   const [asaasType, setAsaasType] = useState("");
   const [loadingAsaasType, setLoadingAsaasType] = useState(false);
+  
+  // recursos a mais da plw design
+
+  const [SendGreetingAccepted, setSendGreetingAccepted] = useState("disabled");
+  const [loadingSendGreetingAccepted, setLoadingSendGreetingAccepted] = useState(false);
+  
+  const [SettingsTransfTicket, setSettingsTransfTicket] = useState("disabled");
+  const [loadingSettingsTransfTicket, setLoadingSettingsTransfTicket] = useState(false);
 
   const { update } = useSettings();
 
@@ -127,6 +136,21 @@ export default function Options(props) {
       if (CheckMsgIsGroup) {
         setCheckMsgIsGroupType(CheckMsgIsGroup.value);
       }
+	  
+	  {/*PLW DESIGN SAUDAÇÃO*/}
+      const SendGreetingAccepted = settings.find((s) => s.key === "sendGreetingAccepted");
+      if (SendGreetingAccepted) {
+        setSendGreetingAccepted(SendGreetingAccepted.value);
+      }	 
+	  {/*PLW DESIGN SAUDAÇÃO*/}	 
+	  
+	  {/*TRANSFERIR TICKET*/}	
+	  const SettingsTransfTicket = settings.find((s) => s.key === "sendMsgTransfTicket");
+      if (SettingsTransfTicket) {
+        setSettingsTransfTicket(SettingsTransfTicket.value);
+      }
+	  {/*TRANSFERIR TICKET*/}	
+	  
       const chatbotType = settings.find((s) => s.key === "chatBotType");
       if (chatbotType) {
         setChatbotType(chatbotType.value);
@@ -234,7 +258,34 @@ export default function Options(props) {
           scheduleTypeChanged(value);
         } */
   }
+  
+  {/*NOVO CÓDIGO*/}  
+  async function handleSendGreetingAccepted(value) {
+    setSendGreetingAccepted(value);
+    setLoadingSendGreetingAccepted(true);
+    await update({
+      key: "sendGreetingAccepted",
+      value,
+    });
+	toast.success("Operação atualizada com sucesso.");
+    setLoadingSendGreetingAccepted(false);
+  }  
+  
+  
+  {/*NOVO CÓDIGO*/}    
 
+  async function handleSettingsTransfTicket(value) {
+    setSettingsTransfTicket(value);
+    setLoadingSettingsTransfTicket(true);
+    await update({
+      key: "sendMsgTransfTicket",
+      value,
+    });
+
+    toast.success("Operação atualizada com sucesso.");
+    setLoadingSettingsTransfTicket(false);
+  } 
+ 
   async function handleChangeIPIxc(value) {
     setIpIxcType(value);
     setLoadingIpIxcType(true);
@@ -338,7 +389,6 @@ export default function Options(props) {
             >
               <MenuItem value={"disabled"}>Desabilitado</MenuItem>
               <MenuItem value={"queue"}>Gerenciamento Por Fila</MenuItem>
-              <MenuItem value={"company"}>Gerenciamento Por Empresa</MenuItem>
             </Select>
             <FormHelperText>
               {loadingScheduleType && "Atualizando..."}
@@ -398,12 +448,55 @@ export default function Options(props) {
               }}
             >
               <MenuItem value={"text"}>Texto</MenuItem>
+			 {/*<MenuItem value={"button"}>Botão</MenuItem>*/}
+             {/*<MenuItem value={"list"}>Lista</MenuItem>*/}
             </Select>
             <FormHelperText>
               {loadingChatbotType && "Atualizando..."}
             </FormHelperText>
           </FormControl>
         </Grid>
+		{/* ENVIAR SAUDAÇÃO AO ACEITAR O TICKET */}
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="sendGreetingAccepted-label">Enviar saudação ao aceitar o ticket</InputLabel>
+            <Select
+              labelId="sendGreetingAccepted-label"
+              value={SendGreetingAccepted}
+              onChange={async (e) => {
+                handleSendGreetingAccepted(e.target.value);
+              }}
+            >
+              <MenuItem value={"disabled"}>Desabilitado</MenuItem>
+              <MenuItem value={"enabled"}>Habilitado</MenuItem>
+            </Select>
+            <FormHelperText>
+              {loadingSendGreetingAccepted && "Atualizando..."}
+            </FormHelperText>
+          </FormControl>
+        </Grid>
+		{/* ENVIAR SAUDAÇÃO AO ACEITAR O TICKET */}
+		
+		{/* ENVIAR MENSAGEM DE TRANSFERENCIA DE SETOR/ATENDENTE */}
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="sendMsgTransfTicket-label">Enviar mensagem de transferencia de Fila/agente</InputLabel>
+            <Select
+              labelId="sendMsgTransfTicket-label"
+              value={SettingsTransfTicket}
+              onChange={async (e) => {
+                handleSettingsTransfTicket(e.target.value);
+              }}
+            >
+              <MenuItem value={"disabled"}>Desabilitado</MenuItem>
+              <MenuItem value={"enabled"}>Habilitado</MenuItem>
+            </Select>
+            <FormHelperText>
+              {loadingSettingsTransfTicket && "Atualizando..."}
+            </FormHelperText>
+          </FormControl>
+        </Grid>
+		
       </Grid>
       <Grid spacing={3} container>
         <Tabs

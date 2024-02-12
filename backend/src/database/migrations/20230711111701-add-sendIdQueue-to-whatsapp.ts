@@ -2,13 +2,12 @@ import { QueryInterface, DataTypes } from "sequelize";
 
 module.exports = {
   up: (queryInterface: QueryInterface) => {
-    return queryInterface.addColumn("Messages", "channel", {
-      type: DataTypes.TEXT,
-      defaultValue: "whatsapp",
+    return queryInterface.addColumn("Whatsapps", "sendIdQueue", {
+      type: DataTypes.INTEGER
     });
   },
 
   down: (queryInterface: QueryInterface) => {
-    return queryInterface.removeColumn("Messages", "channel");
+    return queryInterface.removeColumn("Whatsapps", "sendIdQueue");
   }
 };

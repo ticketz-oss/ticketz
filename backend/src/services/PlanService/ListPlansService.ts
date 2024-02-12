@@ -1,10 +1,9 @@
-import { Sequelize, Op, Filterable } from "sequelize";
+import { Sequelize, Op } from "sequelize";
 import Plan from "../../models/Plan";
 
 interface Request {
   searchParam?: string;
   pageNumber?: string;
-  listPublic?: string;
 }
 
 interface Response {
@@ -15,10 +14,9 @@ interface Response {
 
 const ListPlansService = async ({
   searchParam = "",
-  pageNumber = "1",
-  listPublic
+  pageNumber = "1"
 }: Request): Promise<Response> => {
-  let whereCondition: Filterable["where"] = {
+  const whereCondition = {
     [Op.or]: [
       {
         name: Sequelize.where(
@@ -31,13 +29,6 @@ const ListPlansService = async ({
   };
   const limit = 20;
   const offset = limit * (+pageNumber - 1);
-
-  if (listPublic === "false") {
-    whereCondition = {
-      ...whereCondition,
-      isPublic: false
-    };
-  }
 
   const { count, rows: plans } = await Plan.findAndCountAll({
     where: whereCondition,
