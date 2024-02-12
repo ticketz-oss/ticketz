@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import express from "express";
 import * as Yup from "yup";
-import Gerencianet from "gn-api-sdk-typescript";
+import EfiPay from "sdk-typescript-apis-efi";
 import AppError from "../errors/AppError";
 
 import options from "../config/Gn";
@@ -13,17 +13,51 @@ import UpdateUserService from "../services/UserServices/UpdateUserService";
 
 const app = express();
 
+const checkAndSetupWebhook = async (efiPay: EfiPay, chave: string, url: string) => {
+
+	const params = {
+		chave: chave 
+	};
+	
+	let createHook = false;
+	
+	try {
+		const hooks = await efiPay.pixDetailWebhook(params);
+	    if (hooks?.webhookUrl !== url) {
+			createHook = true;
+		}
+	} catch (error) {
+		if (error.nome === 'webhook_nao_encontrado') {
+			createHook = true;
+		} else {	
+			throw error;
+		}
+	} 
+
+	if (createHook) {
+		const body = {
+			webhookUrl: url
+		}
+		
+		const result = await efiPay.pixConfigWebhook(params, body);
+		return result;
+	}
+ 
+    return;
+}
+
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
-  const gerencianet = Gerencianet(options);
-  return res.json(gerencianet.getSubscriptions());
+  const efiPay = new EfiPay(options);
+  return res.json(efiPay.getSubscriptions());
 };
 
 export const createSubscription = async (
   req: Request,
   res: Response
   ): Promise<Response> => {
-    const gerencianet = Gerencianet(options);
+    console.log(options);
+    const efiPay = new EfiPay(options);
     const { companyId } = req.user;
 
   const schema = Yup.object().shape({
@@ -62,9 +96,11 @@ export const createSubscription = async (
     solicitacaoPagador: `#Fatura:${invoiceId}`
     };
   try {
-    const pix = await gerencianet.pixCreateImmediateCharge(null, body);
+    const pix = await efiPay.pixCreateImmediateCharge([], body);
+    
+    await checkAndSetupWebhook(efiPay, body.chave, process.env.BACKEND_URL + '/subscription/webhook');
 
-    const qrcode = await gerencianet.pixGenerateQRCode({
+    const qrcode = await efiPay.pixGenerateQRCode({
       id: pix.loc.id
     });
 
@@ -74,31 +110,6 @@ export const createSubscription = async (
       throw new AppError("Company not found", 404);
     }
 
-
-/*     await Subscriptions.create({
-      companyId,
-      isActive: false,
-      userPriceCents: users,
-      whatsPriceCents: connections,
-      lastInvoiceUrl: pix.location,
-      lastPlanChange: new Date(),
-      providerSubscriptionId: pix.loc.id,
-      expiresAt: new Date()
-    }); */
-
-/*     const { id } = req.user;
-    const userData = {};
-    const userId = id;
-    const requestUserId = parseInt(id);
-    const user = await UpdateUserService({ userData, userId, companyId, requestUserId }); */
-
-    /*     const io = getIO();
-        io.emit("user", {
-          action: "update",
-          user
-        }); */
-
-
     return res.json({
       ...pix,
       qrcode,
@@ -107,38 +118,6 @@ export const createSubscription = async (
   } catch (error) {
     console.log(error);
     throw new AppError("Problema encontrado, entre em contato com o suporte!", 400);
-  }
-};
-
-export const createWebhook = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
-  const schema = Yup.object().shape({
-    chave: Yup.string().required(),
-    url: Yup.string().required()
-  });
-
-  if (!(await schema.isValid(req.body))) {
-    throw new AppError("Validation fails", 400);
-  }
-
-  const { chave, url } = req.body;
-
-  const body = {
-    webhookUrl: url
-  };
-
-  const params = {
-    chave
-  };
-
-  try {
-    const gerencianet = Gerencianet(options);
-    const create = await gerencianet.pixConfigWebhook(params, body);
-    return res.json(create);
-  } catch (error) {
-    console.log(error);
   }
 };
 
@@ -152,14 +131,15 @@ export const webhook = async (
     return res.json({ ok: true });
   }
   if (req.body.pix) {
-    const gerencianet = Gerencianet(options);
+	console.log(req);
+    const efiPay = new EfiPay(options);
     req.body.pix.forEach(async (pix: any) => {
-      const detahe = await gerencianet.pixDetailCharge({
+      const detalhe = await efiPay.pixDetailCharge({
         txid: pix.txid
       });
 
-      if (detahe.status === "CONCLUIDA") {
-        const { solicitacaoPagador } = detahe;
+      if (detalhe.status === "CONCLUIDA") {
+        const { solicitacaoPagador } = detalhe;
         const invoiceID = solicitacaoPagador.replace("#Fatura:", "");
         const invoices = await Invoices.findByPk(invoiceID);
         const companyId =invoices.companyId;
@@ -186,7 +166,7 @@ export const webhook = async (
           });
 
           io.emit(`company-${companyId}-payment`, {
-            action: detahe.status,
+            action: detalhe.status,
             company: companyUpdate
           });
         }
