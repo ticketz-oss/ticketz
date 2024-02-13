@@ -54,8 +54,9 @@ Rodando o projeto:
 O projeto atualmente suporta execução utilizando containers Docker, para a
 instalação é necessário ter o Docker Community Edition e o cliente Git
 instalados. O ideal é buscar a melhor forma de instalar estes recursos no
-sistema operacional de sua preferência. (Não testei em windows, mas tendo
-Git e Docker, deve funcionar)
+sistema operacional de sua preferência. [O guia oficial de instalação do
+Docker pode ser encontrado aqui](https://docs.docker.com/engine/install/).
+
 
 Em ambos os casos é necessário clonar o repositório, necessário então abrir
 um terminal de comandos:
