@@ -5,13 +5,14 @@ import { logger } from "./utils/logger";
 import { StartAllWhatsAppsSessions } from "./services/WbotServices/StartAllWhatsAppsSessions";
 import Company from "./models/Company";
 import { startQueueProcess } from "./queues";
-import https from "https"
-import fs from "fs"
+import https from "https";
+import fs from "fs";
 // const privatkey = fs.readFileSync("./certs/key.pem","utf-8")
 // const certificate = fs.readFileSync("./certs/cert.pem","utf-8")
 // const credentials = { key: privatkey, cert: certificate };
 // const server = https.createServer(credentials, app);
 
+import { checkAndSetupWebhooks } from "./controllers/SubscriptionController";
 
 const server = app.listen(process.env.PORT, async () => {
   const companies = await Company.findAll();
@@ -25,6 +26,8 @@ const server = app.listen(process.env.PORT, async () => {
     startQueueProcess();
   });
   logger.info(`Server started on port: ${process.env.PORT}`);
+  
+  checkAndSetupWebhooks();
 });
 
 // server.listen(process.env.PORT, async () => {

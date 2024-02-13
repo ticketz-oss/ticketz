@@ -7,45 +7,60 @@ import AppError from "../errors/AppError";
 import options from "../config/Gn";
 import Company from "../models/Company";
 import Invoices from "../models/Invoices";
-import Subscriptions from "../models/Subscriptions";
 import { getIO } from "../libs/socket";
-import UpdateUserService from "../services/UserServices/UpdateUserService";
+import { logger } from "../utils/logger";
 
 const app = express();
 
-const checkAndSetupWebhook = async (efiPay: EfiPay, chave: string, url: string) => {
 
+const createWebHook = (efiPay: EfiPay) => {
 	const params = {
-		chave: chave 
+	    chave: process.env.EFI_PIX_KEY,
 	};
 	
-	let createHook = false;
-	
-	try {
-		const hooks = await efiPay.pixDetailWebhook(params);
-	    if (hooks?.webhookUrl !== url) {
-			createHook = true;
-		}
-	} catch (error) {
-		if (error.nome === 'webhook_nao_encontrado') {
-			createHook = true;
-		} else {	
-			throw error;
-		}
-	} 
-
-	if (createHook) {
-		const body = {
-			webhookUrl: url
-		}
-		
-		const result = await efiPay.pixConfigWebhook(params, body);
-		return result;
+	const body = {
+		webhookUrl: process.env.BACKEND_URL + '/subscription/webhook'
 	}
- 
-    return;
+	
+	return efiPay.pixConfigWebhook(params, body).then(
+		(ok) => {
+			logger.info({ result: ok }, 'pixConfigWebhook ok');
+		},
+		(error: any) => {
+			logger.error({ result: error }, 'pixConfigWebhook error:');
+		}
+	);
 }
 
+export const checkAndSetupWebhooks = () => {
+    const efiPay = new EfiPay(options);
+	const params = {
+	    chave: process.env.EFI_PIX_KEY,
+	};
+	
+    try {
+	  if (JSON.parse(process.env.EFI_ENABLE_PIX)) {
+		efiPay.pixDetailWebhook(params).then(
+			(hooks: any) => {
+			    if (hooks?.webhookUrl !== process.env.BACKEND_URL + '/subscription/webhook') {
+					createWebHook(efiPay);
+				} else {
+					logger.info({ result: hooks }, 'checkAndSetupWebhooks: webhook correto já instalado');
+				}
+			},
+			(error: any) => {
+				if (error?.nome === 'webhook_nao_encontrado') {
+					createWebHook(efiPay);
+				} else {
+					throw error;
+				}
+			}
+		);
+	  }
+    } catch (error) {
+		logger.error({ result: error }, 'checkAndSetupWebhooks:');
+	}
+}
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const efiPay = new EfiPay(options);
@@ -56,7 +71,6 @@ export const createSubscription = async (
   req: Request,
   res: Response
   ): Promise<Response> => {
-    console.log(options);
     const efiPay = new EfiPay(options);
     const { companyId } = req.user;
 
@@ -92,14 +106,12 @@ export const createSubscription = async (
     valor: {
       original: price.toLocaleString("pt-br", { minimumFractionDigits: 2 }).replace(",", ".")
     },
-    chave: process.env.GERENCIANET_PIX_KEY,
+    chave: process.env.EFI_PIX_KEY,
     solicitacaoPagador: `#Fatura:${invoiceId}`
     };
   try {
     const pix = await efiPay.pixCreateImmediateCharge([], body);
     
-    await checkAndSetupWebhook(efiPay, body.chave, process.env.BACKEND_URL + '/subscription/webhook');
-
     const qrcode = await efiPay.pixGenerateQRCode({
       id: pix.loc.id
     });
@@ -116,7 +128,7 @@ export const createSubscription = async (
 
     });
   } catch (error) {
-    console.log(error);
+    logger.error('createSubscription error:', error);
     throw new AppError("Problema encontrado, entre em contato com o suporte!", 400);
   }
 };
@@ -131,7 +143,7 @@ export const webhook = async (
     return res.json({ ok: true });
   }
   if (req.body.pix) {
-	console.log(req);
+	logger.info({ request: req }, "informação sobre PIX recebida por webhoook");
     const efiPay = new EfiPay(options);
     req.body.pix.forEach(async (pix: any) => {
       const detalhe = await efiPay.pixDetailCharge({
