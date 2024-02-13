@@ -22,8 +22,8 @@ services:
     container_name: ticketz-nginx-proxy
     restart: always
     ports:
-      - "11080:80"
-      - "11443:443"
+      - "80:80"
+      - "443:443"
       
     volumes:
       - ngx_conf:/etc/nginx/conf.d

@@ -85,14 +85,15 @@ repetir o último comando.
 ## Rodando e servindo na internet
 
 Tendo um servidor acessível pela internet, é necessário ajustar dois nomes
-de DNS a sua escolha, um para o backend e outro para o frontend, por
-exemplo:
+de DNS a sua escolha, um para o backend e outro para o frontend, e também um
+endereço de email para cadastro dos certificados, por exemplo:
 
-backend: api.ticketz.exemplo.com.br
-frontend: ticketz.exemplo.com.br
+* **backend:** api.ticketz.exemplo.com.br
+* **frontend:** ticketz.exemplo.com.br
+* **email:** ticketz@exemplo.com.br
 
 É necessário editar os arquivos `.env-backend-acme` e `.env-frontend-acme`
-definindo ambos estes nomes.
+definindo neles estes valores.
 
 Este guia presume que o terminal está aberto e logado com um usuário comum
 que tem permissão para utilizar o comando `sudo` para executar comandos como
