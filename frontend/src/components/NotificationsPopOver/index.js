@@ -19,6 +19,8 @@ import useTickets from "../../hooks/useTickets";
 import alertSound from "../../assets/sound.mp3";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { SocketContext } from "../../context/Socket/SocketContext";
+import Favicon from "react-favicon";
+import zapIcon from "../../assets/vector/favicon.svg";
 
 const useStyles = makeStyles((theme) => ({
   tabContainer: {
@@ -201,8 +203,27 @@ const NotificationsPopOver = (props) => {
     return <div onClick={handleClickAway}>{children}</div>;
   };
 
+  const browserNotification = () => {
+    if (notifications.length > 0) {
+      document.title = "(" + notifications.length + ") ticketz";
+    } else {
+      document.title = "ticketz";
+    }
+    return (
+      <>
+        <Favicon
+          animated={true}
+          url={zapIcon}
+          alertCount={notifications.length}
+          iconSize={195}
+        />
+      </>
+    );
+  };
+
   return (
     <>
+      {browserNotification()}
       <IconButton
         onClick={handleClick}
         
