@@ -13,6 +13,8 @@ import DeleteCompanyService from "../services/CompanyService/DeleteCompanyServic
 import FindAllCompaniesService from "../services/CompanyService/FindAllCompaniesService";
 import User from "../models/User";
 
+import axios from 'axios';
+
 
 type IndexQuery = {
   searchParam: string;
@@ -48,6 +50,19 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
+  if (process.env.RECAPTCHA_SECRET_KEY) {
+	  if (!req.body.captchaToken) {
+		  return res.status(401).json('empty captcha');
+	  }
+	  const response = await axios.post(
+         `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${req.body.captchaToken}`
+      );
+      
+      if (!response.data.success) {
+		  return res.status(401).json('🤖 be gone');
+	  }
+  }
+  
   const newCompany: CompanyData = req.body;
 
   const schema = Yup.object().shape({

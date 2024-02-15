@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import qs from 'query-string'
 
 import * as Yup from "yup";
@@ -30,6 +30,10 @@ import { i18n } from "../../translate/i18n";
 import { openApi } from "../../services/api";
 import toastError from "../../errors/toastError";
 import moment from "moment";
+
+import ReCAPTCHA from "react-google-recaptcha";
+import config from "../../services/config";
+
 const Copyright = () => {
 	return (
 		<Typography variant="body2" color="textSecondary" align="center">
@@ -86,7 +90,12 @@ const SignUp = () => {
 
 	const [user] = useState(initialState);
 	const dueDate = moment().add(3, "day").format();
-	const handleSignUp = async values => {
+
+	const handleSignUp = async (values) => {
+		if (config.RECAPTCHA_SITE_KEY) {
+			Object.assign(values, { captchaToken: await captchaRef.current.executeAsync() });
+		}
+		
 		Object.assign(values, { recurrence: "MENSAL" });
 		Object.assign(values, { dueDate: dueDate });
 		Object.assign(values, { status: "t" });
@@ -112,6 +121,7 @@ const SignUp = () => {
 		fetchData();
 	}, []);
 
+	const captchaRef = useRef(null)
 
 	return (
 		<Container component="main" maxWidth="xs">
@@ -242,6 +252,13 @@ const SignUp = () => {
 				</Formik>
 			</div>
 			<Box mt={5}>{/* <Copyright /> */}</Box>
+			{ config.RECAPTCHA_SITE_KEY &&
+				<ReCAPTCHA
+				  size="invisible"
+				  sitekey={ config.RECAPTCHA_SITE_KEY }
+				  ref={captchaRef}
+				/>
+			}
 		</Container>
 	);
 };
