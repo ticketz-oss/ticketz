@@ -13,14 +13,8 @@ import WhatsappBackground from "../../assets/wa-background.png"
 const useStyles = makeStyles(theme => ({
 	chatContainer: {
 		flex: 1,
-		// backgroundColor: "#eee",
-		padding: theme.spacing(4),
 		height: `calc(100% - 48px)`,
 		overflowY: "hidden",
-		backgroundImage: `url(${WhatsappBackground})`,
-		backgroundPosition: 'center', 
-		backgroundSize: 'cover', 
-		backgroundRepeat: 'no-repeat',
 	},
 
 	chatPapper: {
