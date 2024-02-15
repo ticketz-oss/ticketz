@@ -204,8 +204,13 @@ const NotificationsPopOver = (props) => {
   };
 
   const browserNotification = () => {
+	const numbers = "⓿➊➋➌➍➎➏➐➑➒➓⓫⓬⓭⓮⓯⓰⓱⓲⓳⓴";
     if (notifications.length > 0) {
-      document.title = "(" + notifications.length + ") ticketz";
+		if (notifications.length < 21 ) {
+	      document.title = numbers.substring(notifications.length,notifications.length+1) + " - ticketz";
+        } else {
+	      document.title = "(" + notifications.length + ") ticketz";
+		}		
     } else {
       document.title = "ticketz";
     }
