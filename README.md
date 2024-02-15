@@ -47,6 +47,7 @@ do repositório.
 * [60455d9](https://github.com/allgood/ticketz/commit/60455d9416975a0d1806968815d28f5195d15e64) Mantém aberto e utiliza apenas um websocket com o backend
 * [30526b6](https://github.com/allgood/ticketz/commit/30526b6cd6d92e3204e97ff194ef57b7def69979) Um ticket novo ao invés de reabrir ticket fechado
 * [2b58d6c](https://github.com/allgood/ticketz/commit/2b58d6c1c424bbcb060f9cc7196bfde4b42926ff) Execução através do docker compose - **Múltiplos commits até esse ponto**
+* [851bca1](https://github.com/allgood/ticketz/commit/851bca1b4d048a6f31ad90ad1db67c37dde3bcf3) Suporte recaptcha na inscrição de empresas
 
 Rodando o projeto:
 ------------------
@@ -68,20 +69,31 @@ cd ticketz
 
 ## Rodando localmente
 
-Para executar o sistema no servidor local, ficando ele acessível apenas na
-própria máquina (para testes), basta então rodar o comando:
+Por padrão a configuração está ajustada para executar o sistema apenas no
+próprio computador. Para executar em uma rede local é necessário editar os
+arquivos `.env-backend-local` e `.env-frontend-local` e alterar os endereços
+de backend e frontend de `localhost` para o ip desejado, por exemplo
+`192.168.0.10`
+
+Para executar o sistema basta executar o comando abaixo:
 
 ```bash
-docker compose -f docker-compose-local.yaml up
+docker compose -f docker-compose-local.yaml up -d
 ```
 
 Na primeira execução o sistema vai inicializar os bancos de dados e tabelas,
-e após alguns minutos o Ticketz estará acessível pelo endereço http://localhost:3000
+e após alguns minutos o Ticketz estará acessível pela porta 3000
 
 O usuário padrão é admin@admin.com e a senha padrão é 123456
 
-A execução pode ser interrompida com Ctrl-C, para iniciar novamente basta
-repetir o último comando.
+A aplicação irá se reiniciar automaticamente a cada reboot do servidor.
+
+A execução pode ser interrompida com o comando:
+
+```bash
+docker compose -f docker-compose-local.yaml down
+```
+
 
 ## Rodando e servindo na internet
 
@@ -96,11 +108,16 @@ endereço de email para cadastro dos certificados, por exemplo:
 É necessário editar os arquivos `.env-backend-acme` e `.env-frontend-acme`
 definindo neles estes valores.
 
+Se desejar utilizar reCAPTCHA na inscrição de empresas também é necessário
+inserir as chaves secretas e de site nos arquivos de backend e frontend,
+respectivamente.
+
 Este guia presume que o terminal está aberto e logado com um usuário comum
 que tem permissão para utilizar o comando `sudo` para executar comandos como
 root.
 
-Estando então na pasta raiz do projeto, basta executar o comando:
+Estando então na pasta raiz do projeto, executa-se o seguinte comando para
+iniciar o serviço:
 
 ```bash
 sudo docker compose -f docker-compose-acme.yaml up -d
@@ -112,6 +129,15 @@ tabelas. Esta operação pode levar bastante tempo, depois disso o Ticketz
 estará acessível pelo endereço fornecido para oo frontend.
 
 O usuário padrão é admin@admin.com e a senha padrão é 123456
+
+A aplicação irá se reiniciar automaticamente a cada reboot do servidor.
+
+Para encerrar o serviço utiliza-se o seguinte comando:
+
+```bash
+sudo docker compose -f docker-compose-acme.yaml down
+```
+
 
 Facilitou sua vida?
 -------------------
