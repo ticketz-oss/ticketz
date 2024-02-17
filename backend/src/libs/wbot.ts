@@ -5,12 +5,12 @@ import makeWASocket, {
   fetchLatestBaileysVersion,
   makeInMemoryStore,
   WASocket
-} from "@adiwajshing/baileys";
+} from "@whiskeysockets/baileys";
 import P from "pino";
 
 import Whatsapp from "../models/Whatsapp";
 import { logger } from "../utils/logger";
-import MAIN_LOGGER from "@adiwajshing/baileys/lib/Utils/logger";
+import MAIN_LOGGER from "@whiskeysockets/baileys/lib/Utils/logger";
 import {useMultiFileAuthState} from "../helpers/useMultiFileAuthState";
 import authState from "../helpers/authState";
 import { Boom } from "@hapi/boom";

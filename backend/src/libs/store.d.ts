@@ -10,8 +10,8 @@ import {
   WAMessageCursor,
   WAMessageKey,
   WASocket
-} from "@adiwajshing/baileys";
-import KeyedDB from "@adiwajshing/keyed-db";
+} from "@whiskeysockets/baileys";
+import KeyedDB from "@whiskeysockets/keyed-db";
 
 export interface Store {
   chats: KeyedDB<Chat, string>;

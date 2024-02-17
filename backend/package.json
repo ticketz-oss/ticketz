@@ -18,10 +18,10 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@adiwajshing/baileys": "github:WhiskeysSockets/Baileys",
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@hapi/boom": "^9.1.4",
     "@sentry/node": "^6.18.1",
+    "@whiskeysockets/baileys": "^6.6.0",
     "bcryptjs": "^2.4.3",
     "bull": "^4.1.0",
     "cookie-parser": "^1.4.6",
