@@ -57,7 +57,7 @@ const SetTicketMessagesAsRead = async (ticket: Ticket): Promise<void> => {
 
   const io = getIO();
   if (companyid){
-    io.emit(`company-${companyid}-ticket`, {
+    io.to(`company-${companyid}-mainchannel`).emit(`company-${companyid}-ticket`, {
       action: "updateUnread",
       ticketId: ticket?.id
     });

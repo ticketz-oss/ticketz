@@ -108,14 +108,14 @@ export default function TicketMessagesDialog({ open, handleClose, ticketId }) {
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
     let socket = null;
-    let onReturn = () => {};
+    let onReturn = () => { };
 
     if (open) {
       socket = socketManager.GetSocket(companyId);
 
       const onConnectTicketMessagesDialog = () => {
-		  socket.emit("joinChatBox", `${ticket.id}`);
-	  }
+        socket.emit("joinChatBox", `${ticket.id}`);
+      }
 
       const onCompanyTicketMessagesDialog = (data) => {
         if (data.action === "update") {
@@ -127,7 +127,7 @@ export default function TicketMessagesDialog({ open, handleClose, ticketId }) {
           history.push("/tickets");
         }
       }
-      
+
       const onCompanyContactMessagesDialog = (data) => {
         if (data.action === "update") {
           setContact((prevState) => {
@@ -141,11 +141,12 @@ export default function TicketMessagesDialog({ open, handleClose, ticketId }) {
 
       onReturn = () => {
         if (socket !== null) {
-	      socket.off("connect", onConnectTicketMessagesDialog);
-	      socket.off(`company-${companyId}-ticket`, onCompanyTicketMessagesDialog);
-	      socket.off(`company-${companyId}-contact`, onCompanyContactMessagesDialog);
+          socket.emit("leaveChatBox", `${ticket.id}`);
+          socket.off("connect", onConnectTicketMessagesDialog);
+          socket.off(`company-${companyId}-ticket`, onCompanyTicketMessagesDialog);
+          socket.off(`company-${companyId}-contact`, onCompanyContactMessagesDialog);
         }
-      } 
+      }
 
       socketManager.onConnect(onConnectTicketMessagesDialog);
       socket.on(`company-${companyId}-ticket`, onCompanyTicketMessagesDialog);

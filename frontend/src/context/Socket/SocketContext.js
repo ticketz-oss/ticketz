@@ -20,11 +20,12 @@ const socketManager = {
 
 			this.currentCompanyId = companyId;
 			this.currentUserId = userId;
+			let token = JSON.parse(localStorage.getItem("token"));
 			this.currentSocket = openSocket(config.REACT_APP_BACKEND_URL, {
 				transports: ["websocket"],
 				pingTimeout: 18000,
 				pingInterval: 18000,
-				query: companyId ? { companyId, userId } : { userId },
+				query: { token },
 			});
 			
 			this.currentSocket.onAny((event, ...args) => {

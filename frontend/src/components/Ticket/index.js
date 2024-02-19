@@ -102,14 +102,14 @@ const Ticket = () => {
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
-    
+
     const socket = socketManager.GetSocket(companyId);
 
     const onConnectTicket = () => {
-		socket.emit("joinChatBox", `${ticket.id}`);
-	}
-	
-	socketManager.onConnect(onConnectTicket);
+      socket.emit("joinChatBox", `${ticket.id}`);
+    }
+
+    socketManager.onConnect(onConnectTicket);
 
     const onCompanyTicket = (data) => {
       if (data.action === "update") {
@@ -134,10 +134,10 @@ const Ticket = () => {
     };
 
     socket.on(`company-${companyId}-ticket`, onCompanyTicket);
-
     socket.on(`company-${companyId}-contact`, onCompanyContact);
 
     return () => {
+      socket.emit("leaveChatBox", `${ticket.id}`);
       socket.off("connect", onConnectTicket);
       socket.off(`company-${companyId}-ticket`, onCompanyTicket);
       socket.off(`company-${companyId}-contact`, onCompanyContact);
