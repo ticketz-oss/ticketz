@@ -144,6 +144,6 @@ Facilitou sua vida?
 
 Se este projeto ajudou você em uma tarefa complexa, considere fazer uma doação ao autor pelo PIX abaixo.
 
-![image](https://user-images.githubusercontent.com/6070736/116247400-317e3680-a741-11eb-9434-9f226eec39b5.png)
+![image](https://github.com/allgood/ticketz/assets/6070736/cfcb8916-0c01-4945-ae8c-967ffaa4bc36)
 
 Chave Pix: 80fd8916-1131-4844-917e-2732eaa2ba74
