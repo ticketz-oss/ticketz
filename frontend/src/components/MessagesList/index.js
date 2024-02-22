@@ -402,12 +402,12 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
 
     const onAppMessage = (data) => {
 	  console.log("AppMessage", data);
-      if (data.action === "create") {
+      if (data.action === "create" && data.message.ticketId === currentTicketId) {
         dispatch({ type: "ADD_MESSAGE", payload: data.message });
         scrollToBottom();
       }
 
-      if (data.action === "update") {
+      if (data.action === "update" && data.message.ticketId === currentTicketId) {
         dispatch({ type: "UPDATE_MESSAGE", payload: data.message });
       }
     }
