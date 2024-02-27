@@ -11,7 +11,7 @@ import {
   WAMessageKey,
   WASocket
 } from "@whiskeysockets/baileys";
-import KeyedDB from "@whiskeysockets/keyed-db";
+import KeyedDB from "@adiwajshing/keyed-db";
 
 export interface Store {
   chats: KeyedDB<Chat, string>;
