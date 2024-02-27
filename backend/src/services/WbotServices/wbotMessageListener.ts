@@ -47,7 +47,6 @@ import { campaignQueue, parseToMilliseconds, randomValue } from "../../queues";
 import User from "../../models/User";
 import Setting from "../../models/Setting";
 import { cacheLayer } from "../../libs/cache";
-import { provider } from "./providers";
 import { debounce } from "../../helpers/Debounce";
 import { getMessageOptions } from "./SendWhatsAppMedia";
 
@@ -1468,10 +1467,6 @@ const handleMessage = async (
 
     const ticket = await FindOrCreateTicketService(contact, wbot.id!, unreadMessages, companyId, groupContact);
 
-
-
-    await provider(ticket, msg, companyId, contact, wbot as WASocket);
-
     // voltar para o menu inicial
 
     if (bodyMessage == "#") {
@@ -1483,7 +1478,6 @@ const handleMessage = async (
       await verifyQueue(wbot, msg, ticket, ticket.contact);
       return;
     }
-
 
     const ticketTraking = await FindOrCreateATicketTrakingService({
       ticketId: ticket.id,
