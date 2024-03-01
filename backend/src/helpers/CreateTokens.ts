@@ -7,7 +7,7 @@ export const createAccessToken = (user: User): string => {
 
   return sign(
     {
-      usarname: user.name,
+      username: user.name,
       profile: user.profile,
       id: user.id,
       companyId: user.companyId
