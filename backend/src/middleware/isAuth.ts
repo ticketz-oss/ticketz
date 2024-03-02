@@ -1,6 +1,5 @@
 import { verify } from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
-import { logger } from "../utils/logger";
 import AppError from "../errors/AppError";
 import authConfig from "../config/auth";
 
@@ -23,12 +22,11 @@ const isAuth = (req: Request, res: Response, next: NextFunction): void => {
   const [, token] = authHeader.split(" ");
 
   try {
-    const decoded = verify(token, authConfig.secret);
-    const { id, profile, companyId } = decoded as TokenPayload;
+    req.tokenData = verify(token, authConfig.secret) as TokenPayload;
     req.user = {
-      id,
-      profile,
-      companyId
+      id: req.tokenData.id,
+      profile: req.tokenData.profile,
+      companyId: req.tokenData.companyId
     };
   } catch (err) {
     throw new AppError("Invalid token. We'll try to assign a new one on next request", 403 );

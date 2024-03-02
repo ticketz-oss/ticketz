@@ -9,6 +9,7 @@ import ShowTicketUUIDService from "../services/TicketServices/ShowTicketFromUUID
 import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import UpdateTicketService from "../services/TicketServices/UpdateTicketService";
 import ListTicketsServiceKanban from "../services/TicketServices/ListTicketsServiceKanban";
+import { Mutex } from "async-mutex";
 
 
 type IndexQuery = {
@@ -185,13 +186,14 @@ export const update = async (
   res: Response
 ): Promise<Response> => {
   const { ticketId } = req.params;
-  const ticketData: TicketData = req.body;
-  const { companyId } = req.user;
 
-  const { ticket } = await UpdateTicketService({
-    ticketData,
-    ticketId,
-    companyId
+  const mutex = new Mutex();
+  const { ticket } = await mutex.runExclusive(async () => {
+    return await UpdateTicketService({
+      ticketData: req.body,
+      ticketId,
+      tokenData: req.tokenData
+    });
   });
 
   return res.status(200).json(ticket);

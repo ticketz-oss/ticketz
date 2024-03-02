@@ -14,6 +14,7 @@ import GetTicketWbot from "../../helpers/GetTicketWbot";
 import { verifyMessage } from "../WbotServices/wbotMessageListener";
 import { isNil } from "lodash";
 import sendFaceMessage from "../FacebookServices/sendFacebookMessage";
+import AppError from "../../errors/AppError";
 
 interface TicketData {
   status?: string;
@@ -27,7 +28,15 @@ interface TicketData {
 interface Request {
   ticketData: TicketData;
   ticketId: string | number;
-  companyId: number;
+  companyId?: number | undefined;
+  tokenData?: {
+      id: string;
+      username: string;
+      profile: string;
+      companyId: number;
+      iat: number;
+      exp: number;
+    } | undefined;
 }
 
 interface Response {
@@ -39,9 +48,16 @@ interface Response {
 const   UpdateTicketService = async ({
   ticketData,
   ticketId,
-  companyId
+  tokenData,
+  companyId,
 }: Request): Promise<Response> => {
   try {
+    if (!companyId && !tokenData) {
+      throw new Error("Need companyId or tokenData");
+    }
+    if (tokenData) {
+      companyId = tokenData.companyId;
+    }
     const { status, justClose } = ticketData;
     let { queueId, userId } = ticketData;
     let chatbot: boolean | null = ticketData.chatbot || false;
@@ -58,6 +74,13 @@ const   UpdateTicketService = async ({
     });
 
     const ticket = await ShowTicketService(ticketId, companyId);
+    
+    if (tokenData && ticket.status !== "pending") {
+      if (tokenData.profile !== "admin" && ticket.userId !== parseInt(tokenData.id)) {
+        throw new AppError("Apenas o usuário ativo do ticket ou o Admin podem fazer alterações no ticket");
+      }
+    }
+    
     const ticketTraking = await FindOrCreateATicketTrakingService({
       ticketId,
       companyId,
