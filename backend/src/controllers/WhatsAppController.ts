@@ -12,6 +12,9 @@ import DeleteWhatsAppService from "../services/WhatsappService/DeleteWhatsAppSer
 import ListWhatsAppsService from "../services/WhatsappService/ListWhatsAppsService";
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
 import UpdateWhatsAppService from "../services/WhatsappService/UpdateWhatsAppService";
+import AppError from "../errors/AppError";
+import Ticket from "../models/Ticket";
+import { Op } from "sequelize";
 
 interface WhatsappData {
   name: string;
@@ -271,6 +274,16 @@ export const remove = async (
   const whatsapp = await ShowWhatsAppService(whatsappId, companyId);
 
   if (whatsapp.channel === "whatsapp") {
+    const openTickets: Ticket[] = await whatsapp.$get('tickets', {
+      where: {
+        status: { [Op.or]: [ "open" , "pending" ] }
+      }
+    });
+   
+    if (openTickets.length>0) {
+      throw new AppError("Não é possível remover conexão que contém tickets não resolvidos");
+    }
+   
     await DeleteBaileysService(whatsappId);
     await DeleteWhatsAppService(whatsappId);
     await cacheLayer.delFromPattern(`sessions:${whatsappId}:*`);
