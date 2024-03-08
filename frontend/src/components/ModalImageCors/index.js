@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
+import clsx from "clsx";
 
 import ModalImage from "react-modal-image";
 import api from "../../services/api";
@@ -14,9 +15,14 @@ const useStyles = makeStyles(theme => ({
 		borderBottomLeftRadius: 8,
 		borderBottomRightRadius: 8,
 	},
+	
+	messageMediaDeleted: {
+    filter: "grayscale(1)",
+    opacity: 0.4
+  }
 }));
 
-const ModalImageCors = ({ imageUrl }) => {
+const ModalImageCors = ({ imageUrl , isDeleted }) => {
 	const classes = useStyles();
 	const [fetching, setFetching] = useState(true);
 	const [blobUrl, setBlobUrl] = useState("");
@@ -38,7 +44,9 @@ const ModalImageCors = ({ imageUrl }) => {
 
 	return (
 		<ModalImage
-			className={classes.messageMedia}
+			className={[clsx(classes.messageMedia, {
+        [classes.messageMediaDeleted] : isDeleted
+      })]}
 			smallSrcSet={fetching ? imageUrl : blobUrl}
 			medium={fetching ? imageUrl : blobUrl}
 			large={fetching ? imageUrl : blobUrl}
