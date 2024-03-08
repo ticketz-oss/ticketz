@@ -712,8 +712,18 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                     :
 
 
-                    (<div className={classes.textContentItem}>
+                    (<div className={[clsx(classes.textContentItem, {
+                        [classes.textContentItemDeleted] : message.isDeleted,
+                        [classes.textContentItemEdited] : message.isEdited
+                    }), ]}>
                       {message.quotedMsg && renderQuotedMessage(message)}
+                      {message.isDeleted && (
+                        <Block
+                          color="disabled"
+                          fontSize="small"
+                          className={classes.deletedIcon}
+                        />
+                      )}
                       <MarkdownWrapper>{message.body}</MarkdownWrapper>
                       <span className={classes.timestamp}>
                         {message.isEdited && <span> {i18n.t("message.edited")} </span>}

@@ -766,6 +766,30 @@ export const verifyEditedMessage = async (
     });
 }
 
+export const verifyDeleteMessage = async (
+  msg: proto.Message.IProtocolMessage,
+  ticket: Ticket
+) => {
+  
+  const message = await Message.findByPk(msg.key.id, { include: [ { model: Ticket } ] });
+
+  await message.update({
+    isDeleted: true
+  });
+
+  const io = getIO();
+  io.to(message.ticketId.toString())
+    .to(message.ticket.status)
+    .to("notification")
+    .emit(`company-${ticket.companyId}-appMessage`, {
+      action: "create",
+      message,
+      ticket: message.ticket,
+      contact: message.ticket.contact
+    });
+
+}
+
 const isValidMsg = (msg: proto.IWebMessageInfo): boolean => {
   if (msg.key.remoteJid === "status@broadcast") return false;
   try {
@@ -1591,8 +1615,10 @@ const handleMessage = async (
 
     if (hasMedia) {
       await verifyMediaMessage(msg, ticket, contact);
-    } if (msg.message?.protocolMessage?.editedMessage) {
+    } else if (msg.message?.protocolMessage?.editedMessage) {
       await verifyEditedMessage(msg.message.protocolMessage.editedMessage, ticket, msg.message.protocolMessage.key.id);
+    } else if (msg.message?.protocolMessage?.type === 0) {
+      await verifyDeleteMessage(msg.message.protocolMessage, ticket);
     } else {
       await verifyMessage(msg, ticket, contact);
     }
@@ -1937,7 +1963,11 @@ const verifyCampaignMessageAndCloseTicket = async (
 };
 
 const filterMessages = (msg: WAMessage): boolean => {
+  // receiving edited message
   if (msg.message?.protocolMessage?.editedMessage) return true;
+  // receiving message deletion info
+  if (msg.message?.protocolMessage?.type === 0) return true;
+  // ignore other protocolMessages
   if (msg.message?.protocolMessage) return false;
 
   if (
