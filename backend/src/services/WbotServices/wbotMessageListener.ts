@@ -80,6 +80,10 @@ const getTypeMessage = (msg: proto.IWebMessageInfo): string => {
   return getContentType(msg.message);
 };
 
+const getTypeEditedMessage = (msg: proto.IMessage): string => {
+  return getContentType(msg);
+};
+
 export function validaCpfCnpj(val) {
   if (val.length == 11) {
     var cpf = val.trim();
@@ -641,10 +645,9 @@ export const verifyMessage = async (
   const io = getIO();
   const quotedMsg = await verifyQuotedMessage(msg);
   const body = getBodyMessage(msg);
-  const isEdited = getTypeMessage(msg) == 'editedMessage';
 
   const messageData = {
-    id: isEdited ? msg?.message?.editedMessage?.message?.protocolMessage?.key?.id : msg.key.id,
+    id: msg.key.id,
     ticketId: ticket.id,
     contactId: msg.key.fromMe ? undefined : contact.id,
     body,
@@ -656,23 +659,13 @@ export const verifyMessage = async (
     remoteJid: msg.key.remoteJid,
     participant: msg.key.participant,
     dataJson: JSON.stringify(msg),
-    isEdited: isEdited,
+    isEdited: false,
   };
 
   await ticket.update({
     lastMessage: body
   });
 
-  if (isEdited) {
-	  let editedMsg = await Message.findByPk(messageData.id); 
-	  const oldMessage = {
-		  messageId: messageData.id,
-		  body: editedMsg.body
-	  }
-	  
-	  await OldMessage.upsert(oldMessage);
-  }
-  
   await CreateMessageService({ messageData, companyId: ticket.companyId });
 
   if (!msg.key.fromMe && ticket.status === "closed") {
@@ -700,6 +693,78 @@ export const verifyMessage = async (
       });
   }
 };
+
+export const verifyEditedMessage = async (
+  msg: proto.IMessage,
+  ticket: Ticket,
+  msgId: string,
+) => {
+  const editedType = getTypeEditedMessage(msg);
+
+  let editedText: string;
+  
+  switch (editedType) {
+    case "conversation": {
+      editedText = msg.conversation 
+      break;
+    }
+    case "imageMessage": {
+      editedText = msg.imageMessage.caption;
+      break;
+    }
+    case "documentMessage": {
+      editedText = msg.documentMessage.caption;
+      break;
+    }
+    case "documentWithCaptionMessage": {
+      editedText = msg.documentWithCaptionMessage.message.documentMessage.caption;
+      break;
+    }
+    default: {
+      return;
+    }
+  }
+  
+  let editedMsg = await Message.findByPk(msgId);
+  const messageData = {
+    id: editedMsg.id,
+    ticketId: editedMsg.ticketId,
+    contactId: editedMsg.contactId,
+    body: editedText,
+    fromMe: editedMsg.fromMe,
+    mediaType: editedMsg.mediaType,
+    read: editedMsg.read,
+    quotedMsgId: editedMsg.quotedMsgId,
+    ack: editedMsg.ack,
+    remoteJid: editedMsg.remoteJid,
+    participant: editedMsg.participant,
+    dataJson: editedMsg.dataJson,
+    isEdited: true,
+  };
+
+  const oldMessage = {
+    messageId: messageData.id,
+    body: editedMsg.body
+  }
+
+  await OldMessage.upsert(oldMessage);
+
+  await ticket.update({
+    lastMessage: messageData.body
+  });
+
+  await CreateMessageService({ messageData, companyId: ticket.companyId });
+  
+  const io = getIO();
+
+  io.to(ticket.status)
+    .to(ticket.id.toString())
+    .emit(`company-${ticket.companyId}-ticket`, {
+      action: "update",
+      ticket,
+      ticketId: ticket.id
+    });
+}
 
 const isValidMsg = (msg: proto.IWebMessageInfo): boolean => {
   if (msg.key.remoteJid === "status@broadcast") return false;
@@ -1526,6 +1591,8 @@ const handleMessage = async (
 
     if (hasMedia) {
       await verifyMediaMessage(msg, ticket, contact);
+    } if (msg.message?.protocolMessage?.editedMessage) {
+      await verifyEditedMessage(msg.message.protocolMessage.editedMessage, ticket, msg.message.protocolMessage.key.id);
     } else {
       await verifyMessage(msg, ticket, contact);
     }
@@ -1870,6 +1937,7 @@ const verifyCampaignMessageAndCloseTicket = async (
 };
 
 const filterMessages = (msg: WAMessage): boolean => {
+  if (msg.message?.protocolMessage?.editedMessage) return true;
   if (msg.message?.protocolMessage) return false;
 
   if (
