@@ -256,6 +256,10 @@ const messages = {
 					settings: "Settings",
 				},
 				appBar: {
+          i18n: {
+            language: "English",
+            language_short: "EN"
+          },
 					user: {
 						profile: "Profile",
 						logout: "Logout",
