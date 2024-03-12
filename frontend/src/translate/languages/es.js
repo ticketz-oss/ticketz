@@ -352,6 +352,10 @@ const messages = {
           kanban: "Kanban",
         },
         appBar: {
+          i18n: {
+            language: "Español",
+            language_short: "ES"
+          },
           user: {
             profile: "Perfil",
             logout: "Cerrar sesión",

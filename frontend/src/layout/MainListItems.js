@@ -513,15 +513,6 @@ const MainListItems = (props) => {
         )}
       />
       <Divider />
-      <li>
-        <ListItem 
-        button 
-        dense 
-        onClick={handleClickLogout}> 
-            <ListItemIcon><RotateRight/></ListItemIcon> 
-          <ListItemText primary={i18n.t("mainDrawer.listItems.logout")} />
-        </ListItem>
-      </li>
     </div>
   );
 };
