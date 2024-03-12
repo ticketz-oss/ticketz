@@ -6,7 +6,6 @@ import Board from 'react-trello';
 import { toast } from "react-toastify";
 import { i18n } from "../../translate/i18n";
 import { useHistory } from 'react-router-dom';
-import { socketConnection } from "../../services/socket";
 
 const useStyles = makeStyles(theme => ({
   root: {

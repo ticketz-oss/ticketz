@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer } from "react";
+import React, { useState, useEffect, useReducer, useContext } from "react";
 import { toast } from "react-toastify";
 
 import { makeStyles } from "@material-ui/core/styles";
@@ -29,7 +29,7 @@ import ConfirmationModal from "../../components/ConfirmationModal";
 import toastError from "../../errors/toastError";
 import { Grid } from "@material-ui/core";
 import { isArray } from "lodash";
-import { socketConnection } from "../../services/socket";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_ANNOUNCEMENTS") {
@@ -101,6 +101,8 @@ const Announcements = () => {
   const [searchParam, setSearchParam] = useState("");
   const [announcements, dispatch] = useReducer(reducer, []);
 
+  const socketManager = useContext(SocketContext);
+
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
@@ -117,20 +119,23 @@ const Announcements = () => {
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
-    const socket = socketConnection({ companyId });
+    const socket = socketManager.GetSocket(companyId);
 
-    socket.on(`company-announcement`, (data) => {
+    const onAnnouncement = (data) => {
       if (data.action === "update" || data.action === "create") {
         dispatch({ type: "UPDATE_ANNOUNCEMENTS", payload: data.record });
       }
       if (data.action === "delete") {
         dispatch({ type: "DELETE_ANNOUNCEMENT", payload: +data.id });
       }
-    });
+    }
+    
+    socket.on(`company-announcement`, onAnnouncement);
+    
     return () => {
-      socket.disconnect();
+      socket.off(`company-announcement`, onAnnouncement);
     };
-  }, []);
+  }, [socketManager]);
 
   const fetchAnnouncements = async () => {
     try {

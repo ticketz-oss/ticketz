@@ -43,7 +43,7 @@ import useContactLists from "../../hooks/useContactLists";
 import { Grid } from "@material-ui/core";
 
 import planilhaExemplo from "../../assets/planilha.xlsx";
-import { socketConnection } from "../../services/socket";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_CONTACTS") {
@@ -120,6 +120,8 @@ const ContactListItems = () => {
 
   const { findById: findContactList } = useContactLists();
 
+  const socketManager = useContext(SocketContext);
+
   useEffect(() => {
     findContactList(contactListId).then((data) => {
       setContactList(data);
@@ -154,9 +156,9 @@ const ContactListItems = () => {
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
-    const socket = socketConnection({ companyId });
+    const socket = socketManager.GetSocket(companyId);
 
-    socket.on(`company-${companyId}-ContactListItem`, (data) => {
+    const onContactListItem = (data) => {
       if (data.action === "update" || data.action === "create") {
         dispatch({ type: "UPDATE_CONTACTS", payload: data.record });
       }
@@ -168,21 +170,22 @@ const ContactListItems = () => {
       if (data.action === "reload") {
         dispatch({ type: "LOAD_CONTACTS", payload: data.records });
       }
-    });
+    }
 
-    socket.on(
-      `company-${companyId}-ContactListItem-${contactListId}`,
-      (data) => {
+    const onContactListItemId = (data) => {
         if (data.action === "reload") {
           dispatch({ type: "LOAD_CONTACTS", payload: data.records });
         }
       }
-    );
 
+    socket.on(`company-${companyId}-ContactListItem`, onContactListItem);
+    socket.on(`company-${companyId}-ContactListItem-${contactListId}`, onContactListItemId);
+  
     return () => {
-      socket.disconnect();
+      socket.off(`company-${companyId}-ContactListItem`, onContactListItem);
+      socket.off(`company-${companyId}-ContactListItem-${contactListId}`, onContactListItemId);
     };
-  }, [contactListId]);
+  }, [contactListId, socketManager]);
 
   const handleSearch = (event) => {
     setSearchParam(event.target.value.toLowerCase());

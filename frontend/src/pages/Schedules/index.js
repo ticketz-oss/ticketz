@@ -36,7 +36,7 @@ import ConfirmationModal from "../../components/ConfirmationModal";
 import toastError from "../../errors/toastError";
 import moment from "moment";
 import { capitalize } from "lodash";
-import { socketConnection } from "../../services/socket";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import { AuthContext } from "../../context/Auth/AuthContext";
 
 // A custom hook that builds on useLocation to parse
@@ -133,6 +133,9 @@ const Schedules = () => {
     }
   }, [contactId]);
 
+
+  const socketManager = useContext(SocketContext);
+
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
@@ -154,9 +157,9 @@ const Schedules = () => {
 
   useEffect(() => {
     handleOpenScheduleModalFromContactId();
-    const socket = socketConnection({ companyId: user.companyId });
+    const socket = socketManager.GetSocket(user.companyId);
 
-    socket.on("user", (data) => {
+    const onSchedule = (data) => {
       if (data.action === "update" || data.action === "create") {
         dispatch({ type: "UPDATE_SCHEDULES", payload: data.schedules });
       }
@@ -164,12 +167,14 @@ const Schedules = () => {
       if (data.action === "delete") {
         dispatch({ type: "DELETE_USER", payload: +data.scheduleId });
       }
-    });
+    }
+
+    socket.on(`company-${user.companyId}-schedule`, onSchedule);
 
     return () => {
-      socket.disconnect();
+      socket.off(`company-${user.companyId}-schedule`, onSchedule);
     };
-  }, [handleOpenScheduleModalFromContactId, user]);
+  }, [handleOpenScheduleModalFromContactId, user, socketManager]);
 
   const cleanContact = () => {
     setContactId("");
