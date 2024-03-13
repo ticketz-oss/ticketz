@@ -1,4 +1,5 @@
 import { Server as SocketIO } from "socket.io";
+import { instrument } from "@socket.io/admin-ui";
 import { Server } from "http";
 import AppError from "../errors/AppError";
 import { logger } from "../utils/logger";
@@ -18,12 +19,27 @@ export const initIO = (httpServer: Server): SocketIO => {
     }
   });
 
+  if (process.env.SOCKET_ADMIN && JSON.parse(process.env.SOCKET_ADMIN)) {
+    User.findByPk(1).then(
+      (adminUser) => {
+        instrument(io, {
+          auth: {
+            type: "basic",
+            username: adminUser.email,
+            password: adminUser.passwordHash
+          },
+          mode: "development",
+        });
+      }
+    ); 
+  }  
+  
   io.on("connection", async socket => {
     logger.info("Client Connected");
     const { token } = socket.handshake.query;
     let tokenData = null;
     try {
-      tokenData = verify(token, authConfig.secret);
+      tokenData = verify(token as string, authConfig.secret);
       logger.debug(tokenData, "io-onConnection: tokenData");
     } catch (error) {
       logger.error(error, "Error decoding token");
