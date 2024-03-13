@@ -112,11 +112,11 @@ const Ticket = () => {
     socketManager.onConnect(onConnectTicket);
 
     const onCompanyTicket = (data) => {
-      if (data.action === "update") {
+      if (data.action === "update" && data.ticket.id === ticket.id) {
         setTicket(data.ticket);
       }
 
-      if (data.action === "delete") {
+      if (data.action === "delete" && data.ticketId === ticket.id) {
         toast.success("Ticket deleted sucessfully.");
         history.push("/tickets");
       }
