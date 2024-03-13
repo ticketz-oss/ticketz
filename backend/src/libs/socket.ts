@@ -25,31 +25,31 @@ export const initIO = (httpServer: Server): SocketIO => {
     const { token } = socket.handshake.query;
     let tokenData = null;
     try {
-		tokenData=verify(token, authConfig.secret);
-		logger.debug(tokenData,"io-onConnection: tokenData");
-	} catch (error) {
-		logger.error(error,"Error decoding token");
-		socket.disconnect();
-		return io;
-	}
+      tokenData = verify(token, authConfig.secret);
+      logger.debug(tokenData, "io-onConnection: tokenData");
+    } catch (error) {
+      logger.error(error, "Error decoding token");
+      socket.disconnect();
+      return io;
+    }
     let user: User = null;
     let userId = tokenData.id;
 
     if (userId && userId !== "undefined" && userId !== "null") {
-      user = await User.findByPk(userId, { include: [ Queue ] });
+      user = await User.findByPk(userId, { include: [Queue] });
       if (user) {
         user.online = true;
         await user.save();
       } else {
-		logger.info(`onConnect: User ${userId} not found`);
-		socket.disconnect();
-		return io;
-	  }
+        logger.info(`onConnect: User ${userId} not found`);
+        socket.disconnect();
+        return io;
+      }
     } else {
-		logger.info("onConnect: Missing userId");
-		socket.disconnect();
-		return io;
-	}
+      logger.info("onConnect: Missing userId");
+      socket.disconnect();
+      return io;
+    }
 
     socket.join(`company-${user.companyId}-mainchannel`);
     socket.join(`user-${user.id}`);
@@ -76,7 +76,7 @@ export const initIO = (httpServer: Server): SocketIO => {
       );
     });
     
-    socket.on("leaveChatBox"), async (ticketId: string) => {
+    socket.on("leaveChatBox", async (ticketId: string) => {
       if (!ticketId || ticketId === "undefined") {
         return;
       }
@@ -85,7 +85,7 @@ export const initIO = (httpServer: Server): SocketIO => {
       if (counters.decrementCounter(`ticket-${ticketId}`) === 0) {
         socket.leave(ticketId);
       }
-    }
+    });
 
 	  socket.on("joinNotification", async () => {
       if (counters.incrementCounter("notification") === 1) {
