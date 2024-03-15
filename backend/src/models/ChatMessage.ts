@@ -7,7 +7,8 @@ import {
   PrimaryKey,
   AutoIncrement,
   BelongsTo,
-  ForeignKey
+  ForeignKey,
+  DataType,
 } from "sequelize-typescript";
 import User from "./User";
 import Chat from "./Chat";
@@ -30,8 +31,17 @@ class ChatMessage extends Model<ChatMessage> {
   @Column({ defaultValue: "" })
   message: string;
 
+  @Column(DataType.STRING)
+  get mediaPath(): string | null {
+    if (this.getDataValue("mediaPath")) {
+      return `${process.env.BACKEND_URL}:${process.env.PROXY_PORT
+        }/public/${this.getDataValue("mediaPath")}`;
+    }
+    return null;
+  }
+
   @Column
-  mediaPath: string;
+  mediaType: string;
 
   @Column
   mediaName: string;
