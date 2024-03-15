@@ -8,7 +8,7 @@ import { Button, CircularProgress, Grid, TextField, Typography } from "@material
 import { Field, Form, Formik } from "formik";
 import toastError from "../../errors/toastError";
 import { toast } from "react-toastify";
-import config from "../../services/config";
+import { getBackendURL } from "../../services/config";
 
 const useStyles = makeStyles((theme) => ({
   mainPaper: {
@@ -38,7 +38,7 @@ const MessagesAPI = () => {
   const [file, setFile] = useState({})
 
   const getEndpoint = () => {
-    return config.REACT_APP_BACKEND_URL + '/api/messages/send'
+    return getBackendURL() + '/api/messages/send'
   }
 
   const handleSendTextMessage = async (values) => {
@@ -46,7 +46,7 @@ const MessagesAPI = () => {
     const data = { number, body };
     var options = {
       method: 'POST',
-      url: `${config.REACT_APP_BACKEND_URL}/api/messages/send`,
+      url: `${getBackendURL()}/api/messages/send`,
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${values.token}`
@@ -70,7 +70,7 @@ const MessagesAPI = () => {
       data.append('medias', firstFile);
       var options = {
         method: 'POST',
-        url: `${config.REACT_APP_BACKEND_URL}/api/messages/send`,
+        url: `${getBackendURL()}/api/messages/send`,
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${values.token}`

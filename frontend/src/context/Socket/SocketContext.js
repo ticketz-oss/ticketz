@@ -1,6 +1,6 @@
 import { createContext } from "react";
 import openSocket from "socket.io-client";
-import config from "../../services/config";
+import { getBackendURL } from "../../services/config";
 
 const socketManager = {
 	currentCompanyId: -1,
@@ -21,7 +21,7 @@ const socketManager = {
 			this.currentCompanyId = companyId;
 			this.currentUserId = userId;
 			let token = JSON.parse(localStorage.getItem("token"));
-			this.currentSocket = openSocket(config.REACT_APP_BACKEND_URL, {
+			this.currentSocket = openSocket(getBackendURL(), {
 				transports: ["websocket"],
 				pingTimeout: 18000,
 				pingInterval: 18000,
