@@ -879,7 +879,7 @@ const verifyQueue = async (
     if (firstQueue?.options) {
       chatbot = firstQueue.options.length > 0;
     }
-    if (firstQueue.mediaPath !== null) {
+    if (firstQueue.mediaName && firstQueue.mediaPath !== null) {
       console.log(firstQueue.mediaPath)
 
       const filePath = path.resolve("public", firstQueue.mediaPath);
