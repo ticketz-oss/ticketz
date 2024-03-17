@@ -879,16 +879,29 @@ const verifyQueue = async (
     if (firstQueue?.options) {
       chatbot = firstQueue.options.length > 0;
     }
+
+    if (greetingMessage) {
+      const body = formatBody(greetingMessage, ticket.contact);
+      const sentMessage = await wbot.sendMessage(
+        `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, {
+        text: body,
+      });
+      await verifyMessage(sentMessage, ticket, ticket.contact);
+    }
+
+    if (firstQueue.greetingMessage) {
+      const body = formatBody(firstQueue.greetingMessage, ticket.contact);
+      const sentMessage = await wbot.sendMessage(
+        `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, {
+        text: body,
+      });
+      await verifyMessage(sentMessage, ticket, ticket.contact);
+    }
+
     if (firstQueue.mediaName && firstQueue.mediaPath !== null) {
-      console.log(firstQueue.mediaPath)
-
       const filePath = path.resolve("public", firstQueue.mediaPath);
-
-
       const optionsMsg = await getMessageOptions(firstQueue.mediaName, filePath);
-
       let sentMessage = await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, { ...optionsMsg });
-
       await verifyMediaMessage(sentMessage, ticket, contact);
     }
 
