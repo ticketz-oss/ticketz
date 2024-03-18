@@ -1,5 +1,5 @@
 ###
-# Sobre o projeto
+# Sobre o projetooooo
 
 Ticketz é um comunicador com recursos de CRM e helpdesk que utiliza
 Whatsapp como meio de comunicação com os clientes.
