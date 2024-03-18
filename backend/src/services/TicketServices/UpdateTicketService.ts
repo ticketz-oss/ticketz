@@ -130,7 +130,8 @@ const   UpdateTicketService = async ({
           });
 
 
-          io.to("open")
+          io.to(`company-${ticket.companyId}-open`)
+            .to(`queue-${ticket.queueId}-open`)
             .to(ticketId.toString())
             .emit(`company-${ticket.companyId}-ticket`, {
               action: "delete",
@@ -227,7 +228,7 @@ const   UpdateTicketService = async ({
         startedAt: null,
         userId: null
       });
-      io.emit(`company-${companyId}-ticket`, {
+      io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-ticket`, {
         action: "removeFromList",
         ticketId: ticket?.id
       });
@@ -241,12 +242,12 @@ const   UpdateTicketService = async ({
         whatsappId: ticket.whatsappId,
         userId: ticket.userId
       });
-      io.emit(`company-${companyId}-ticket`, {
+      io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-ticket`, {
         action: "removeFromList",
         ticketId: ticket?.id
       });
 
-      io.emit(`company-${companyId}-ticket`, {
+      io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-ticket`, {
         action: "updateUnread",
         ticketId: ticket?.id
       });
@@ -255,21 +256,25 @@ const   UpdateTicketService = async ({
     await ticketTraking.save();
 
     if (justClose && status == 'closed') {
-      io.emit(`company-${companyId}-ticket`, {
+      io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-ticket`, {
         action: "removeFromList",
         ticketId: ticket?.id
       });
 
     } else
       if (ticket.status === "closed" && ticket.status !== oldStatus) {
-        io.to(oldStatus).emit(`company-${companyId}-ticket`, {
-          action: "delete",
-          ticketId: ticket.id
-        });
+        io.to(`company-${companyId}-${oldStatus}`)
+          .to(`queue-${ticket.queueId}-${oldStatus}`)
+          .emit(`company-${companyId}-ticket`, {
+            action: "delete",
+            ticketId: ticket.id
+          });
       }
 
-    io.to(ticket.status)
-      .to("notification")
+    io.to(`company-${companyId}-${ticket.status}`)
+      .to(`company-${companyId}-notification`)
+      .to(`queue-${ticket.queueId}-${ticket.status}`)
+	  .to(`queue-${ticket.queueId}-notification`)
       .to(ticketId.toString())
       .emit(`company-${companyId}-ticket`, {
         action: "update",

@@ -1,5 +1,5 @@
 {
-  "name": "backend",
+  "name": "ticketz-backend",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -21,6 +21,7 @@
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@hapi/boom": "^9.1.4",
     "@sentry/node": "^6.18.1",
+    "@socket.io/admin-ui": "^0.5.1",
     "@whiskeysockets/baileys": "^6.6.0",
     "async-mutex": "^0.4.1",
     "bcryptjs": "^2.4.3",
@@ -49,7 +50,7 @@
     "sequelize": "^5.22.3",
     "sequelize-cli": "^5.5.1",
     "sequelize-typescript": "^1.1.0",
-    "socket.io": "^3.0.5",
+    "socket.io": "^4.7.4",
     "uuid": "^8.3.2",
     "xlsx": "^0.18.3",
     "yup": "^0.32.11"

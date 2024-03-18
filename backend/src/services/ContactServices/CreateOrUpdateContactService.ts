@@ -44,7 +44,7 @@ const CreateOrUpdateContactService = async ({
   if (contact) {
     contact.update({ profilePicUrl });
 
-    io.emit(`company-${companyId}-contact`, {
+    io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-contact`, {
       action: "update",
       contact
     });
@@ -60,7 +60,7 @@ const CreateOrUpdateContactService = async ({
       channel
     });
 
-    io.emit(`company-${companyId}-contact`, {
+    io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-contact`, {
       action: "create",
       contact
     });

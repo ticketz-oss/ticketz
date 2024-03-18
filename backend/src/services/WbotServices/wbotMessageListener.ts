@@ -394,9 +394,9 @@ export const getQuotedMessageId = (msg: proto.IWebMessageInfo) => {
 const getMeSocket = (wbot: Session): IMe => {
 
   return {
-      id: jidNormalizedUser((wbot as WASocket).user.id),
-      name: (wbot as WASocket).user.name
-    };
+    id: jidNormalizedUser((wbot as WASocket).user.id),
+    name: (wbot as WASocket).user.name
+  };
 };
 
 const getSenderMessage = (
@@ -412,7 +412,7 @@ const getSenderMessage = (
 };
 
 const getContactMessage = async (msg: proto.IWebMessageInfo, wbot: Session) => {
-  
+
   const isGroup = msg.key.remoteJid.includes("g.us");
   const rawNumber = msg.key.remoteJid.replace(/\D/g, "");
   return isGroup
@@ -619,13 +619,16 @@ const verifyMediaMessage = async (
       ],
     });
 
-    io.to("closed").emit(`company-${ticket.companyId}-ticket`, {
-      action: "delete",
-      ticket,
-      ticketId: ticket.id,
-    });
+    io.to(`company-${ticket.companyId}-closed`)
+      .to(`queue-${ticket.queueId}-closed`)
+      .emit(`company-${ticket.companyId}-ticket`, {
+        action: "delete",
+        ticket,
+        ticketId: ticket.id,
+      });
 
-    io.to(ticket.status)
+    io.to(`company-${ticket.companyId}-${ticket.status}`)
+      .to(`queue-${ticket.queueId}-${ticket.status}`)
       .to(ticket.id.toString())
       .emit(`company-${ticket.companyId}-ticket`, {
         action: "update",
@@ -678,13 +681,16 @@ export const verifyMessage = async (
       ]
     });
 
-    io.to("closed").emit(`company-${ticket.companyId}-ticket`, {
-      action: "delete",
-      ticket,
-      ticketId: ticket.id
-    });
+    io.to(`company-${ticket.companyId}-closed`)
+      .to(`queue-${ticket.queueId}-closed`)
+      .emit(`company-${ticket.companyId}-ticket`, {
+        action: "delete",
+        ticket,
+        ticketId: ticket.id
+      });
 
-    io.to(ticket.status)
+    io.to(`company-${ticket.companyId}-${ticket.status}`)
+      .to(`queue-${ticket.queueId}-${ticket.status}`)
       .to(ticket.id.toString())
       .emit(`company-${ticket.companyId}-ticket`, {
         action: "update",
@@ -702,10 +708,10 @@ export const verifyEditedMessage = async (
   const editedType = getTypeEditedMessage(msg);
 
   let editedText: string;
-  
+
   switch (editedType) {
     case "conversation": {
-      editedText = msg.conversation 
+      editedText = msg.conversation
       break;
     }
     case "imageMessage": {
@@ -724,7 +730,7 @@ export const verifyEditedMessage = async (
       return;
     }
   }
-  
+
   let editedMsg = await Message.findByPk(msgId);
   const messageData = {
     id: editedMsg.id,
@@ -754,7 +760,7 @@ export const verifyEditedMessage = async (
   });
 
   await CreateMessageService({ messageData, companyId: ticket.companyId });
-  
+
   const io = getIO();
 
   io.to(ticket.status)
@@ -770,8 +776,19 @@ export const verifyDeleteMessage = async (
   msg: proto.Message.IProtocolMessage,
   ticket: Ticket
 ) => {
-  
-  const message = await Message.findByPk(msg.key.id, { include: [ { model: Ticket } ] });
+
+  const message = await Message.findByPk(msg.key.id, {
+    include: [
+      {
+        model: Ticket,
+        include: [
+          {
+            model: Contact
+          }
+        ]
+      }
+    ]
+  });
 
   await message.update({
     isDeleted: true
@@ -862,16 +879,29 @@ const verifyQueue = async (
     if (firstQueue?.options) {
       chatbot = firstQueue.options.length > 0;
     }
-    if (firstQueue.mediaPath !== null) {
-      console.log(firstQueue.mediaPath)
 
+    if (greetingMessage) {
+      const body = formatBody(greetingMessage, ticket.contact);
+      const sentMessage = await wbot.sendMessage(
+        `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, {
+        text: body,
+      });
+      await verifyMessage(sentMessage, ticket, ticket.contact);
+    }
+
+    if (firstQueue.greetingMessage) {
+      const body = formatBody(firstQueue.greetingMessage, ticket.contact);
+      const sentMessage = await wbot.sendMessage(
+        `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, {
+        text: body,
+      });
+      await verifyMessage(sentMessage, ticket, ticket.contact);
+    }
+
+    if (firstQueue.mediaName && firstQueue.mediaPath !== null) {
       const filePath = path.resolve("public", firstQueue.mediaPath);
-
-
       const optionsMsg = await getMessageOptions(firstQueue.mediaName, filePath);
-
       let sentMessage = await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, { ...optionsMsg });
-
       await verifyMediaMessage(sentMessage, ticket, contact);
     }
 
@@ -986,7 +1016,7 @@ const verifyQueue = async (
     /* Tratamento para envio de mensagem quando a fila está fora do expediente */
     if (choosenQueue.options.length === 0) {
       const queue = await Queue.findByPk(choosenQueue.id);
-      
+
       let currentSchedule;
 
       const settings = await Setting.findOne({
@@ -1005,20 +1035,20 @@ const verifyQueue = async (
         (!currentSchedule || currentSchedule.inActivity === false)
       ) {
 
-          const body = formatBody(`${queue.outOfHoursMessage}\n\n*[ # ]* - Voltar ao Menu Principal`, ticket.contact);
-          const sentMessage = await wbot.sendMessage(
-            `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, {
-            text: body,
-          }
-          );
-          await verifyMessage(sentMessage, ticket, contact);
-          await UpdateTicketService({
-            ticketData: { queueId: null, chatbot },
-            ticketId: ticket.id,
-            companyId: ticket.companyId,
-          });
-          return;
+        const body = formatBody(`${queue.outOfHoursMessage}\n\n*[ # ]* - Voltar ao Menu Principal`, ticket.contact);
+        const sentMessage = await wbot.sendMessage(
+          `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, {
+          text: body,
         }
+        );
+        await verifyMessage(sentMessage, ticket, contact);
+        await UpdateTicketService({
+          ticketData: { queueId: null, chatbot },
+          ticketId: ticket.id,
+          companyId: ticket.companyId,
+        });
+        return;
+      }
 
       const body = formatBody(`\u200e${choosenQueue.greetingMessage}`, ticket.contact
       );
@@ -1031,11 +1061,11 @@ const verifyQueue = async (
 
       if (choosenQueue.mediaPath !== null && choosenQueue.mediaPath !== "") {
         const filePath = path.resolve("public", choosenQueue.mediaPath);
-  
+
         const optionsMsg = await getMessageOptions(choosenQueue.mediaName, filePath);
-  
+
         let sentMessage = await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, { ...optionsMsg });
-  
+
         await verifyMediaMessage(sentMessage, ticket, contact);
       }
     }
@@ -1123,13 +1153,16 @@ export const handleRating = async (
       status: "closed",
     });
 
-    io.to("open").emit(`company-${ticket.companyId}-ticket`, {
-      action: "delete",
-      ticket,
-      ticketId: ticket.id,
-    });
+    io.to(`company-${ticket.companyId}-open`)
+      .to(`queue-${ticket.queueId}-open`)
+      .emit(`company-${ticket.companyId}-ticket`, {
+        action: "delete",
+        ticket,
+        ticketId: ticket.id,
+      });
 
-    io.to(ticket.status)
+    io.to(`company-${ticket.companyId}-${ticket.status}`)
+      .to(`queue-${ticket.queueId}-${ticket.status}`)
       .to(ticket.id.toString())
       .emit(`company-${ticket.companyId}-ticket`, {
         action: "update",
@@ -1197,14 +1230,14 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
     if (option) {
       await ticket.update({ queueOptionId: option?.id });
       // if (option.mediaPath !== null && option.mediaPath !== "")  {
-  
+
       //   const filePath = path.resolve("public", option.mediaPath);
-  
-  
+
+
       //   const optionsMsg = await getMessageOptions(option.mediaName, filePath);
-  
+
       //   let sentMessage = await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, { ...optionsMsg });
-  
+
       //   await verifyMediaMessage(sentMessage, ticket, ticket.contact);
       // }
     }
@@ -1437,15 +1470,15 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
 
         await verifyMessage(sendMsg, ticket, ticket.contact);
 
-        if (currentOption.mediaPath !== null && currentOption.mediaPath !== "")  {
-    
+        if (currentOption.mediaPath !== null && currentOption.mediaPath !== "") {
+
           const filePath = path.resolve("public", currentOption.mediaPath);
-    
-    
+
+
           const optionsMsg = await getMessageOptions(currentOption.mediaName, filePath);
-    
+
           let sentMessage = await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, { ...optionsMsg });
-    
+
           await verifyMediaMessage(sentMessage, ticket, ticket.contact);
         }
       };
@@ -1551,7 +1584,7 @@ const handleMessage = async (
     });
 
     if (unreadMessages === 0 && whatsapp.complationMessage && formatBody(whatsapp.complationMessage, contact).trim().toLowerCase() === lastMessage.body.trim().toLowerCase()) {
-        return;
+      return;
     }
 
     const ticket = await FindOrCreateTicketService(contact, wbot.id!, unreadMessages, companyId, groupContact);
@@ -1580,8 +1613,8 @@ const handleMessage = async (
          * Tratamento para avaliação do atendente
          */
 
-         // dev Ricardo: insistir a responder avaliação
-         const rate_ = Number(bodyMessage);
+        // dev Ricardo: insistir a responder avaliação
+        const rate_ = Number(bodyMessage);
 
          if ((ticket?.lastMessage.includes('_Insatisfeito_') || ticket?.lastMessage.includes('Silakan menilai layanan kami.')) &&  (!isFinite(rate_))) {
              const debouncedSentMessage = debounce(
@@ -1946,13 +1979,16 @@ const verifyCampaignMessageAndCloseTicket = async (
     const ticket = await Ticket.findByPk(messageRecord.ticketId);
     await ticket.update({ status: "closed" });
 
-    io.to("open").emit(`company-${ticket.companyId}-ticket`, {
-      action: "delete",
-      ticket,
-      ticketId: ticket.id,
-    });
+    io.to(`company-${ticket.companyId}-open`)
+      .to(`queue-${ticket.queueId}-open`)
+      .emit(`company-${ticket.companyId}-ticket`, {
+        action: "delete",
+        ticket,
+        ticketId: ticket.id,
+      });
 
-    io.to(ticket.status)
+    io.to(`company-${ticket.companyId}-${ticket.status}`)
+      .to(`queue-${ticket.queueId}-${ticket.status}`)
       .to(ticket.id.toString())
       .emit(`company-${ticket.companyId}-ticket`, {
         action: "update",
@@ -2008,7 +2044,7 @@ const wbotMessageListener = async (wbot: Session, companyId: number): Promise<vo
     });
 
     wbot.ev.on("messages.update", (messageUpdate: WAMessageUpdate[]) => {
-   
+
       if (messageUpdate.length === 0) return;
       messageUpdate.forEach(async (message: WAMessageUpdate) => {
         (wbot as WASocket)!.readMessages([message.key])

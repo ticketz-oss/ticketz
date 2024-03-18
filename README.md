@@ -5,10 +5,18 @@ Whatsapp como meio de comunicação com os clientes.
 
 ## Autoria original
 
-Este projeto foi iniciado em [um projeto Open Source](https://github.com/canove/whaticket-community)
-sob a licença permissiva MIT, e recebeu diversas melhorias por autores não identificados, foi
-comercializado como produto "White Label" e de acordo com informações [deste
-vídeo acabou em algum momento sendo vazado e publicado abertamente](https://www.youtube.com/watch?v=SX_cGD5RLkQ)
+Este projeto foi iniciado em [um projeto Open
+Source](https://github.com/canove/whaticket-community), publicado pelo
+desenvolvedor [Cassio Santos](https://github.com/canove) sob a licença permissiva
+MIT. Depois recebeu diversas melhorias por autores não identificados e foi
+comercializado diretamente entre desenvolvedores e usuários com fornecimento
+de código fonte, e de acordo com informações [deste vídeo acabou em algum momento
+sendo vazado e publicado abertamente](https://www.youtube.com/watch?v=SX_cGD5RLkQ)
+
+Após algumas pesquisas foi ainda identificado que a primeira versão SaaS do
+Whaticket foi criada pelo desenvolvedor [Wender
+Teixeira](https://github.com/w3nder), inclusive uma versão do [https://github.com/unkbot/whaticket-free](Whaticket
+Single) que faz uso da biblioteca Baileys para acesso ao Whatsapp.
 
 É praticamente impossível identificar e creditar os autores das melhorias, [o
 código publicado pelo canal Vem Fazer](https://github.com/vemfazer/whaticket-versao-03-12-canal-vem-fazer)
@@ -31,15 +39,18 @@ repositório ou outra forma de obter o código das suas alterações.
 
 ## Objetivo
 
-Este projeto tem por objetivo melhorar e manter abertas as atualizações sobre o Whaticket SAAS publicado.
-Melhorias desenvolvidas por mim serão sempre colocadas aqui, dependendo
-posso transpor, sempre creditando, códigos e melhorias publicados em outros
-projetos também derivados do Whaticket Community ou do Whaticket SAAS.
+Este projeto tem por objetivo melhorar e manter abertas as atualizações sobre o Whaticket
+SaaS publicado. Principalmente direcionadas à qualidade da aplicação e à
+facilidade de instalação e utilização.
 
-## Contribuições
+As melhorias desenvolvidas por mim serão colocadas aqui, dependendo posso transpor,
+sempre creditando, códigos e melhorias publicados em outros projetos também derivados
+do Whaticket Community ou do Whaticket SaaS.
 
-Por melhor esforço, procurarei sempre listar aqui as contribuições incorporadas, creditando
-autorias, porém o melhor local para observar o que foi feito é o histórico
+## Melhorias
+
+Por melhor esforço, procurarei sempre listar aqui as melhorias incorporadas, creditando
+autorias quando necessário, porém o melhor local para observar o que foi feito é o histórico
 do repositório.
 
 * [83f6713](https://github.com/allgood/ticketz/commit/83f67132c234f528c13540b3de529ccb54cc3e6a) Aceita documento anexado com legenda)
@@ -48,6 +59,12 @@ do repositório.
 * [30526b6](https://github.com/allgood/ticketz/commit/30526b6cd6d92e3204e97ff194ef57b7def69979) Um ticket novo ao invés de reabrir ticket fechado
 * [2b58d6c](https://github.com/allgood/ticketz/commit/2b58d6c1c424bbcb060f9cc7196bfde4b42926ff) Execução através do docker compose - **Múltiplos commits até esse ponto**
 * [851bca1](https://github.com/allgood/ticketz/commit/851bca1b4d048a6f31ad90ad1db67c37dde3bcf3) Suporte recaptcha na inscrição de empresas
+
+## Contribuindo de Volta
+
+Sempre que possível pretendo fazer backport de alguns ajustes feitos aqui
+aos projetos originais
+
 
 Rodando o projeto:
 ------------------
@@ -138,12 +155,19 @@ Para encerrar o serviço utiliza-se o seguinte comando:
 sudo docker compose -f docker-compose-acme.yaml down
 ```
 
+Aviso Importante
+----------------
+
+Este projeto não está afiliado à Meta, WhatsApp ou qualquer outra empresa.
+A utilização do código fornecido é de responsabilidade exclusiva dos usuários
+e não implica em qualquer responsabilidade para o autor ou colaboradores do projeto.
+
 
 Facilitou sua vida?
 -------------------
 
 Se este projeto ajudou você em uma tarefa complexa, considere fazer uma doação ao autor pelo PIX abaixo.
 
-![image](https://github.com/allgood/ticketz/assets/6070736/cfcb8916-0c01-4945-ae8c-967ffaa4bc36)
+![image](https://github.com/ticketz-oss/ticketz/assets/6070736/8e85b263-73ca-4fb4-9bdc-03fff356b6ff)
 
-Chave Pix: 80fd8916-1131-4844-917e-2732eaa2ba74
+Chave Pix: 0699c69d-0951-4686-a5b7-c6cd21aa7e15

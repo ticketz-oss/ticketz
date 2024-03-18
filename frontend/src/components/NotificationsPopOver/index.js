@@ -150,6 +150,7 @@ const NotificationsPopOver = (props) => {
     socket.on(`company-${companyId}-appMessage`, onCompanyAppMessageNotificationsPopover);
 
     return () => {
+       socket.emit("leaveNotification");
        socket.off("connect", onConnectNotificationsPopover);
        socket.off(`company-${companyId}-ticket`, onCompanyTicketNotificationsPopover);
        socket.off(`company-${companyId}-appMessage`, onCompanyAppMessageNotificationsPopover);

@@ -35,7 +35,7 @@ import TagModal from "../../components/TagModal";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import toastError from "../../errors/toastError";
 import { Chip } from "@material-ui/core";
-import { socketConnection } from "../../services/socket";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { CheckCircle } from "@material-ui/icons";
 
@@ -120,6 +120,8 @@ const Tags = () => {
     }
   }, [searchParam, pageNumber]);
 
+  const socketManager = useContext(SocketContext);
+
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
@@ -134,9 +136,9 @@ const Tags = () => {
   }, [searchParam, pageNumber, fetchTags]);
 
   useEffect(() => {
-    const socket = socketConnection({ companyId: user.companyId });
+    const socket = socketManager.GetSocket(user.companyId);
 
-    socket.on(`company${user.companyId}-tag`, (data) => {
+    const onTagsKanban = (data) => {
       if (data.action === "update" || data.action === "create") {
         dispatch({ type: "UPDATE_TAGS", payload: data.tag });
       }
@@ -144,12 +146,14 @@ const Tags = () => {
       if (data.action === "delete") {
         dispatch({ type: "DELETE_TAG", payload: +data.tagId });
       }
-    });
+    }
+
+    socket.on(`company${user.companyId}-tag`, onTagsKanban);
 
     return () => {
-      socket.disconnect();
+      socket.off(`company${user.companyId}-tag`, onTagsKanban);
     };
-  }, [user]);
+  }, [user, socketManager]);
 
   const handleOpenTagModal = () => {
     setSelectedTag(null);

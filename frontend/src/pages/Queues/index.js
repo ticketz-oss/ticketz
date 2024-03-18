@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState } from "react";
+import React, { useEffect, useReducer, useState, useContext } from "react";
 
 import {
   Button,
@@ -25,7 +25,7 @@ import { DeleteOutline, Edit } from "@material-ui/icons";
 import QueueModal from "../../components/QueueModal";
 import { toast } from "react-toastify";
 import ConfirmationModal from "../../components/ConfirmationModal";
-import { socketConnection } from "../../services/socket";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const useStyles = makeStyles((theme) => ({
   mainPaper: {
@@ -94,6 +94,8 @@ const Queues = () => {
   const [selectedQueue, setSelectedQueue] = useState(null);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
 
+  const socketManager = useContext(SocketContext);
+
   useEffect(() => {
     (async () => {
       setLoading(true);
@@ -111,9 +113,9 @@ const Queues = () => {
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
-    const socket = socketConnection({ companyId });
+    const socket = socketManager.GetSocket(companyId);
 
-    socket.on(`company-${companyId}-queue`, (data) => {
+    const onQueue = (data) => {
       if (data.action === "update" || data.action === "create") {
         dispatch({ type: "UPDATE_QUEUES", payload: data.queue });
       }
@@ -121,12 +123,14 @@ const Queues = () => {
       if (data.action === "delete") {
         dispatch({ type: "DELETE_QUEUE", payload: data.queueId });
       }
-    });
+    }
+
+    socket.on(`company-${companyId}-queue`, onQueue);
 
     return () => {
-      socket.disconnect();
+      socket.off(`company-${companyId}-queue`, onQueue);
     };
-  }, []);
+  }, [socketManager]);
 
   const handleOpenQueueModal = () => {
     setQueueModalOpen(true);

@@ -288,6 +288,11 @@ const TicketsListCustom = (props) => {
     socket.on(`company-${companyId}-contact`, onCompanyContact );
 
     return () => {
+      if (status) {
+        socket.emit("leaveTickets", status);
+      } else {
+        socket.emit("leaveNotification");
+      }
       socket.off("connect", onConnectTicketList);
       socket.off(`company-${companyId}-ticket`, onCompanyTicket);
       socket.off(`company-${companyId}-appMessage`, onCompanyAppMessage);

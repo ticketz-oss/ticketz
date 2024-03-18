@@ -120,17 +120,35 @@ export const saveMessage = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
+  const medias = req.files as Express.Multer.File[];
   const { companyId } = req.user;
   const { message } = req.body;
   const { id } = req.params;
   const senderId = +req.user.id;
   const chatId = +id;
 
-  const newMessage = await CreateMessageService({
-    chatId,
-    senderId,
-    message
-  });
+  let newMessage = null;
+
+  if (medias) {
+    await Promise.all(
+      medias.map(async (media: Express.Multer.File) => {
+        newMessage = await CreateMessageService({
+          chatId,
+          senderId,
+          message: media.originalname,
+          mediaPath: media.filename,
+          mediaName: media.originalname,
+          mediaType: media.mimetype.split("/")[0]
+        });
+      })
+    );
+  } else {
+    newMessage = await CreateMessageService({
+      chatId,
+      senderId,
+      message
+    });
+  }
 
   const chat = await Chat.findByPk(chatId, {
     include: [

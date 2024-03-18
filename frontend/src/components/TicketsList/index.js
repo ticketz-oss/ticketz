@@ -11,7 +11,7 @@ import useTickets from "../../hooks/useTickets";
 import { i18n } from "../../translate/i18n";
 import { ListSubheader } from "@material-ui/core";
 import { AuthContext } from "../../context/Auth/AuthContext";
-import { socketConnection } from "../../services/socket";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const useStyles = makeStyles((theme) => ({
   ticketsListWrapper: {
@@ -165,6 +165,8 @@ const TicketsList = ({
   const [ticketsList, dispatch] = useReducer(reducer, []);
   const { user } = useContext(AuthContext);
 
+  const socketManager = useContext(SocketContext);
+
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
@@ -189,7 +191,7 @@ const TicketsList = ({
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
-    const socket = socketConnection({ companyId });
+    const socket = socketManager.GetSocket(companyId);
 
     const shouldUpdateTicket = (ticket) =>
       (!ticket.userId || ticket.userId === user?.id || showAll) &&
@@ -198,15 +200,15 @@ const TicketsList = ({
     const notBelongsToUserQueues = (ticket) =>
       ticket.queueId && selectedQueueIds.indexOf(ticket.queueId) === -1;
 
-    socket.on("connect", () => {
+    const onConnect = (data) => {
       if (status) {
         socket.emit("joinTickets", status);
       } else {
         socket.emit("joinNotification");
       }
-    });
+    }
 
-    socket.on(`company-${companyId}-ticket`, (data) => {
+    const onTicket = (data) => {
       if (data.action === "updateUnread") {
         dispatch({
           type: "RESET_UNREAD",
@@ -228,30 +230,38 @@ const TicketsList = ({
       if (data.action === "delete") {
         dispatch({ type: "DELETE_TICKET", payload: data.ticketId });
       }
-    });
+    }
 
-    socket.on(`company-${companyId}-appMessage`, (data) => {
+    const onAppMessage = (data) => {
       if (data.action === "create" && shouldUpdateTicket(data.ticket)) {
         dispatch({
           type: "UPDATE_TICKET_UNREAD_MESSAGES",
           payload: data.ticket,
         });
       }
-    });
+    }
 
-    socket.on(`company-${companyId}-contact`, (data) => {
+    const onContact = (data) => {
       if (data.action === "update") {
         dispatch({
           type: "UPDATE_TICKET_CONTACT",
           payload: data.contact,
         });
       }
-    });
+    }
+
+    socket.on("connect", onConnect);
+    socket.on(`company-${companyId}-ticket`, onTicket);
+    socket.on(`company-${companyId}-appMessage`, onAppMessage);  
+    socket.on(`company-${companyId}-contact`, onContact);
 
     return () => {
-      socket.disconnect();
+      socket.off("connect", onConnect);
+      socket.off(`company-${companyId}-ticket`, onTicket);
+      socket.off(`company-${companyId}-appMessage`, onAppMessage);  
+      socket.off(`company-${companyId}-contact`, onContact);
     };
-  }, [status, showAll, user, selectedQueueIds]);
+  }, [status, showAll, user, selectedQueueIds, socketManager]);
 
   const loadMore = () => {
     setPageNumber((prevState) => prevState + 1);

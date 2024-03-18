@@ -6,3 +6,4 @@
 /build
 /.project
 /public/config.json
+/public/socket-admin

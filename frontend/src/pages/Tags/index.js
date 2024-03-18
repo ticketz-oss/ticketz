@@ -37,7 +37,7 @@ import TagModal from "../../components/TagModal";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import toastError from "../../errors/toastError";
 import { Chip } from "@material-ui/core";
-import { socketConnection } from "../../services/socket";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import { AuthContext } from "../../context/Auth/AuthContext";
 
 const reducer = (state, action) => {
@@ -122,6 +122,8 @@ const Tags = () => {
     }
   }, [searchParam, pageNumber]);
 
+  const socketManager = useContext(SocketContext);
+
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
@@ -136,9 +138,9 @@ const Tags = () => {
   }, [searchParam, pageNumber, fetchTags]);
 
   useEffect(() => {
-    const socket = socketConnection({ companyId: user.companyId });
+    const socket = socketManager.GetSocket(user.companyId);
 
-    socket.on("user", (data) => {
+    const onUser = (data) => {
       if (data.action === "update" || data.action === "create") {
         dispatch({ type: "UPDATE_TAGS", payload: data.tags });
       }
@@ -146,12 +148,14 @@ const Tags = () => {
       if (data.action === "delete") {
         dispatch({ type: "DELETE_USER", payload: +data.tagId });
       }
-    });
+    }
+    
+    socket.on("user", onUser);
 
     return () => {
-      socket.disconnect();
+      socket.off("user", onUser);
     };
-  }, [user]);
+  }, [user, socketManager]);
 
   const handleOpenTagModal = () => {
     setSelectedTag(null);

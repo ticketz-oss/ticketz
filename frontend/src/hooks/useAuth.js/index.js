@@ -76,6 +76,9 @@ const useAuth = () => {
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
+    if (!companyId) {
+		return () => {};
+	}
     const socket = socketManager.GetSocket(companyId);
 
     const onCompanyUserUseAuth = (data) => {
