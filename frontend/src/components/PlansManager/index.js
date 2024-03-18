@@ -106,7 +106,7 @@ export function PlanManagerForm(props) {
                         <Grid xs={12} sm={6} md={4} item>
                             <Field
                                 as={TextField}
-                                label="Nome"
+                                label="Nama"
                                 name="name"
                                 variant="outlined"
                                 className={classes.fullWidth}
@@ -115,7 +115,7 @@ export function PlanManagerForm(props) {
                         </Grid>
                         <Grid xs={12} sm={6} md={4} item>
                         <FormControl margin="dense" variant="outlined" fullWidth>
-                            <InputLabel htmlFor="status-selection">Público</InputLabel>
+                            <InputLabel htmlFor="status-selection">Umum</InputLabel>
                             <Field
                                 as={Select}
                                 id="status-selection"
@@ -124,15 +124,15 @@ export function PlanManagerForm(props) {
                                 name="isPublic"
                                 margin="dense"
                             >
-                                <MenuItem value={true}>Sim</MenuItem>
-                                <MenuItem value={false}>Não</MenuItem>
+                                <MenuItem value={true}>Ya</MenuItem>
+                                <MenuItem value={false}>Tidak</MenuItem>
                             </Field>
                             </FormControl>
                         </Grid>
                         <Grid xs={12} sm={6} md={4} item>
                             <Field
                                 as={TextField}
-                                label="Valor"
+                                label="Nilai"
                                 name="value"
                                 variant="outlined"
                                 className={classes.fullWidth}
@@ -145,7 +145,7 @@ export function PlanManagerForm(props) {
                         <Grid xs={12} sm={6} md={4} item>
                             <Field
                                 as={TextField}
-                                label="Usuários"
+                                label="Pengguna"
                                 name="users"
                                 variant="outlined"
                                 className={classes.fullWidth}
@@ -156,7 +156,7 @@ export function PlanManagerForm(props) {
                         <Grid xs={12} sm={6} md={4} item>
                             <Field
                                 as={TextField}
-                                label="Conexões"
+                                label="Koneksi"
                                 name="connections"
                                 variant="outlined"
                                 className={classes.fullWidth}
@@ -179,19 +179,19 @@ export function PlanManagerForm(props) {
                             <Grid justifyContent="flex-end" spacing={1} container>
                                 <Grid xs={4} md={1} item>
                                     <ButtonWithSpinner className={classes.fullWidth} loading={loading} onClick={() => onCancel()} variant="contained">
-                                        Limpar
+                                        Bersihkan
                                     </ButtonWithSpinner>
                                 </Grid>
                                 {record.id !== undefined ? (
                                     <Grid xs={4} md={1} item>
                                         <ButtonWithSpinner className={classes.fullWidth} loading={loading} onClick={() => onDelete(record)} variant="contained" color="secondary">
-                                            Excluir
+                                            Hapus
                                         </ButtonWithSpinner>
                                     </Grid>
                                 ) : null}
                                 <Grid xs={4} md={1} item>
                                     <ButtonWithSpinner className={classes.fullWidth} loading={loading} type="submit" variant="contained" color="primary">
-                                        Salvar
+                                        Simpan
                                     </ButtonWithSpinner>
                                 </Grid>
                             </Grid>
@@ -214,12 +214,12 @@ export function PlansManagerGrid(props) {
                 <TableHead>
                     <TableRow>
                         <TableCell align="center" style={{ width: '1%' }}>#</TableCell>
-                        <TableCell align="left">Nome</TableCell>
-                        <TableCell align="center">Usuários</TableCell>
-                        <TableCell align="center">Público</TableCell>
-                        <TableCell align="center">Conexões</TableCell>
-                        <TableCell align="center">Filas</TableCell>
-                        <TableCell align="center">Valor</TableCell>
+                        <TableCell align="left">Nama</TableCell>
+                        <TableCell align="center">Pengguna</TableCell>
+                        <TableCell align="center">Umum</TableCell>
+                        <TableCell align="center">Koneksi</TableCell>
+                        <TableCell align="center">Antrian</TableCell>
+                        <TableCell align="center">Nilai</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
@@ -232,10 +232,10 @@ export function PlansManagerGrid(props) {
                             </TableCell>
                             <TableCell align="left">{row.name || '-'}</TableCell>
                             <TableCell align="center">{row.users || '-'}</TableCell>
-                            <TableCell align="center">{row.isPublic ? "Sim": "Não" || '-'}</TableCell>
+                            <TableCell align="center">{row.isPublic ? "Ya": "Tidak" || '-'}</TableCell>
                             <TableCell align="center">{row.connections || '-'}</TableCell>
                             <TableCell align="center">{row.queues || '-'}</TableCell>
-                            <TableCell align="center">{row.value.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }) || '-'}</TableCell>
+                            <TableCell align="center">{row.value.toLocaleString('pt-br', { style: 'currency', currency: 'IDR' }) || '-'}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
@@ -274,7 +274,7 @@ export default function PlansManager() {
             console.log(planList)
             setRecords(planList)
         } catch (e) {
-            toast.error('Não foi possível carregar a lista de registros')
+            toast.error('Tidak dapat memuat daftar rekaman')
         }
         setLoading(false)
     }
@@ -299,9 +299,9 @@ export default function PlansManager() {
             }
             await loadPlans()
             handleCancel()
-            toast.success('Operação realizada com sucesso!')
+            toast.success('Proses berhasil diselesaikan!')
         } catch (e) {
-            toast.error('Não foi possível realizar a operação. Verifique se já existe uma plano com o mesmo nome ou se os campos foram preenchidos corretamente')
+            toast.error('Operasi tidak dapat dilakukan. Periksa apakah paket dengan nama yang sama sudah ada atau apakah kolom sudah diisi dengan benar')
         }
         setLoading(false)
     }
@@ -312,9 +312,9 @@ export default function PlansManager() {
             await remove(record.id)
             await loadPlans()
             handleCancel()
-            toast.success('Operação realizada com sucesso!')
+            toast.success('Operasi berhasil diselesaikan!')
         } catch (e) {
-            toast.error('Não foi possível realizar a operação')
+            toast.error('Operasi tidak dapat dilakukan')
         }
         setLoading(false)
     }
@@ -371,7 +371,7 @@ export default function PlansManager() {
                 onClose={() => setShowConfirmDialog(false)}
                 onConfirm={() => handleDelete()}
             >
-                Deseja realmente excluir esse registro?
+                Apakah Anda benar-benar ingin menghapus catatan ini?
             </ConfirmationModal>
         </Paper>
     )

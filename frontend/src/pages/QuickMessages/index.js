@@ -138,14 +138,14 @@ function QuickMessages(props) {
         saveMessage={handleSave}
       />
       <ConfirmationModal
-        title="Excluir Registro"
+        title="Hapus Catatan"
         open={showOnDeleteDialog}
         onClose={setShowOnDeleteDialog}
         onConfirm={async () => {
           await handleDelete(messageSelected);
         }}
       >
-        Deseja realmente excluir este registro?
+        Apakah Anda benar-benar ingin menghapus catatan ini?
       </ConfirmationModal>
     </MainContainer>
   );

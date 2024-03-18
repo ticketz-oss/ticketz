@@ -170,7 +170,7 @@ const Invoices = () => {
 
       ></SubscriptionModal>
       <MainHeader>
-        <Title>Faturas</Title>
+        <Title>Faktur</Title>
       </MainHeader>
       <Paper
         className={classes.mainPaper}
@@ -181,11 +181,11 @@ const Invoices = () => {
           <TableHead>
             <TableRow>
               <TableCell align="center">Id</TableCell>
-              <TableCell align="center">Detalhes</TableCell>
-              <TableCell align="center">Valor</TableCell>
-              <TableCell align="center">Data Venc.</TableCell>
+              <TableCell align="center">Detail</TableCell>
+              <TableCell align="center">Jumlah</TableCell>
+              <TableCell align="center">Tanggal Jatuh Tempo</TableCell>
               <TableCell align="center">Status</TableCell>
-              <TableCell align="center">Ação</TableCell>
+              <TableCell align="center">Tindakan</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -205,7 +205,7 @@ const Invoices = () => {
                         color="secondary"
                         onClick={() => handleOpenContactModal(invoices)}
                       >
-                        PAGAR
+                        MEMBAYAR
                       </Button> :
                       <Button
                         size="small"
@@ -213,7 +213,7 @@ const Invoices = () => {
                         /* color="secondary"
                         disabled */
                       >
-                        PAGO 
+                        TERBAYAR 
                       </Button>}
 
                   </TableCell>

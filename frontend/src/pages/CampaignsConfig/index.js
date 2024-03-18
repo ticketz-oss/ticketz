@@ -109,7 +109,7 @@ const CampaignsConfig = () => {
 
   const saveSettings = async () => {
     await api.post("/campaign-settings", { settings });
-    toast.success("Configurações salvas");
+    toast.success("Pengaturan disimpan");
   };
 
   return (
@@ -133,7 +133,7 @@ const CampaignsConfig = () => {
         <Box className={classes.tabPanelsContainer}>
           <Grid spacing={2} container>
             <Grid xs={12} item>
-              <Typography component={"h3"}>Intervalos</Typography>
+              <Typography component={"h3"}>Interval</Typography>
             </Grid>
             <Grid xs={12} md={4} item>
               <FormControl
@@ -142,7 +142,7 @@ const CampaignsConfig = () => {
                 fullWidth
               >
                 <InputLabel id="messageInterval-label">
-                  Intervalo Randômico de Disparo
+                Interval Pemicu Acak
                 </InputLabel>
                 <Select
                   name="messageInterval"
@@ -152,11 +152,11 @@ const CampaignsConfig = () => {
                   value={settings.messageInterval}
                   onChange={(e) => handleOnChangeSettings(e)}
                 >
-                  <MenuItem value={0}>Sem Intervalo</MenuItem>
-                  <MenuItem value={5}>5 segundos</MenuItem>
-                  <MenuItem value={10}>10 segundos</MenuItem>
-                  <MenuItem value={15}>15 segundos</MenuItem>
-                  <MenuItem value={20}>20 segundos</MenuItem>
+                  <MenuItem value={0}>Tanpa Interval</MenuItem>
+                  <MenuItem value={5}>5 detik</MenuItem>
+                  <MenuItem value={10}>10 detik</MenuItem>
+                  <MenuItem value={15}>15 detik</MenuItem>
+                  <MenuItem value={20}>20 detik</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -167,7 +167,7 @@ const CampaignsConfig = () => {
                 fullWidth
               >
                 <InputLabel id="longerIntervalAfter-label">
-                  Intervalo Maior Após
+                  Jeda setiap berapa pesan
                 </InputLabel>
                 <Select
                   name="longerIntervalAfter"
@@ -177,11 +177,11 @@ const CampaignsConfig = () => {
                   value={settings.longerIntervalAfter}
                   onChange={(e) => handleOnChangeSettings(e)}
                 >
-                  <MenuItem value={0}>Não definido</MenuItem>
-                  <MenuItem value={5}>5 mensagens</MenuItem>
-                  <MenuItem value={10}>10 mensagens</MenuItem>
-                  <MenuItem value={15}>15 mensagens</MenuItem>
-                  <MenuItem value={20}>20 mensagens</MenuItem>
+                  <MenuItem value={0}>Tidak ditentukan</MenuItem>
+                   <MenuItem value={5}>5 pesan</MenuItem>
+                   <MenuItem value={10}>10 pesan</MenuItem>
+                   <MenuItem value={15}>15 pesan</MenuItem>
+                   <MenuItem value={20}>20 pesan</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -192,7 +192,7 @@ const CampaignsConfig = () => {
                 fullWidth
               >
                 <InputLabel id="greaterInterval-label">
-                  Intervalo de Disparo Maior
+                Jarak Pengiriman Antar Pesan
                 </InputLabel>
                 <Select
                   name="greaterInterval"
@@ -202,12 +202,12 @@ const CampaignsConfig = () => {
                   value={settings.greaterInterval}
                   onChange={(e) => handleOnChangeSettings(e)}
                 >
-                  <MenuItem value={0}>Sem Intervalo</MenuItem>
-                  <MenuItem value={20}>20 segundos</MenuItem>
-                  <MenuItem value={30}>30 segundos</MenuItem>
-                  <MenuItem value={40}>40 segundos</MenuItem>
-                  <MenuItem value={50}>50 segundos</MenuItem>
-                  <MenuItem value={60}>60 segundos</MenuItem>
+                  <MenuItem value={0}>Tidak ada</MenuItem>
+                  <MenuItem value={20}>20 detik</MenuItem>
+                  <MenuItem value={30}>30 detik</MenuItem>
+                  <MenuItem value={40}>40 detik</MenuItem>
+                  <MenuItem value={50}>50 detik</MenuItem>
+                  <MenuItem value={60}>60 detik</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -217,21 +217,21 @@ const CampaignsConfig = () => {
                 color="primary"
                 style={{ marginRight: 10 }}
               >
-                Adicionar Variável
+                Tambahkan Variabel
               </Button>
               <Button
                 onClick={saveSettings}
                 color="primary"
                 variant="contained"
               >
-                Salvar Configurações
+                Simpan Pengaturan
               </Button>
             </Grid>
             {showVariablesForm && (
               <>
                 <Grid xs={12} md={6} item>
                   <TextField
-                    label="Atalho"
+                    label="Jalan pintas"
                     variant="outlined"
                     value={variable.key}
                     name="key"
@@ -241,7 +241,7 @@ const CampaignsConfig = () => {
                 </Grid>
                 <Grid xs={12} md={6} item>
                   <TextField
-                    label="Conteúdo"
+                    label="Isi"
                     variant="outlined"
                     value={variable.value}
                     name="value"
@@ -255,14 +255,14 @@ const CampaignsConfig = () => {
                     color="primary"
                     style={{ marginRight: 10 }}
                   >
-                    Fechar
+                    Tutup
                   </Button>
                   <Button
                     onClick={addVariable}
                     color="primary"
                     variant="contained"
                   >
-                    Adicionar
+                    Tambah
                   </Button>
                 </Grid>
               </>
@@ -273,8 +273,8 @@ const CampaignsConfig = () => {
                   <TableHead>
                     <TableRow>
                       <TableCell style={{ width: "1%" }}></TableCell>
-                      <TableCell>Atalho</TableCell>
-                      <TableCell>Conteúdo</TableCell>
+                      <TableCell>Pintasan</TableCell>
+                      <TableCell>Konten</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>

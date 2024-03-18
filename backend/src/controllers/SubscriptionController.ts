@@ -119,7 +119,7 @@ export const createSubscription = async (
     const updateCompany = await Company.findOne();
 
     if (!updateCompany) {
-      throw new AppError("Company not found", 404);
+      throw new AppError("Perusahaan tidak ditemukan", 404);
     }
 
     return res.json({
@@ -129,7 +129,7 @@ export const createSubscription = async (
     });
   } catch (error) {
     logger.error('createSubscription error:', error);
-    throw new AppError("Problema encontrado, entre em contato com o suporte!", 400);
+    throw new AppError("Terjadi Masalah, hubungi dukungan!", 400);
   }
 };
 

@@ -77,7 +77,7 @@ const NewTicketModal = ({ modalOpen, onClose, initialContact }) => {
 	const handleSaveTicket = async contactId => {
 		if (!contactId) return;
 		if (selectedQueue === "" && user.profile !== 'admin') {
-			toast.error("Selecione uma fila");
+			toast.error("Pilih antrian");
 			return;
 		}
 		setLoading(true);
@@ -227,7 +227,7 @@ const NewTicketModal = ({ modalOpen, onClose, initialContact }) => {
 								}}
 								renderValue={() => {
 									if (selectedQueue === "") {
-										return "Selecione uma fila"
+										return "Pilih antrian"
 									}
 									const queue = user.queues.find(q => q.id === selectedQueue)
 									return queue.name

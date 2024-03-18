@@ -76,7 +76,7 @@ export function UsersFilter({ onFiltered, initialUsers }) {
           <TextField
             {...params}
             variant="outlined"
-            placeholder="Filtro por Users"
+            placeholder="Filter berdasarkan User"
           />
         )}
       />

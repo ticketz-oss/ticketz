@@ -281,7 +281,7 @@ export default function ChatPopover() {
                 </ListItem>
               ))}
             {isArray(chats) && chats.length === 0 && (
-              <ListItemText primary="Nenhum registro" />
+              <ListItemText primary="Tidak ada registrasi" />
             )}
           </List>
         </Paper>

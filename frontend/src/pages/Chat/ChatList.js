@@ -117,7 +117,7 @@ export default function ChatList({
   return (
     <>
       <ConfirmationModal
-        title={"Excluir Conversa"}
+        title={"Menghapus pembicaraan"}
         open={confirmationModal}
         onClose={setConfirmModalOpen}
         onConfirm={handleDelete}

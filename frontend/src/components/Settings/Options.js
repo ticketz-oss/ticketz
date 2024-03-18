@@ -121,7 +121,7 @@ export default function Options(props) {
       key: "userRating",
       value,
     });
-    toast.success("Operação atualizada com sucesso.");
+    toast.success("Operasi berhasil diperbarui.");
     setLoadingUserRating(false);
   }
 
@@ -133,7 +133,7 @@ export default function Options(props) {
       value,
     });
     //toast.success("Oraçãpeo atualizada com sucesso.");
-    toast.success('Operação atualizada com sucesso.', {
+    toast.success('Operasi berhasil diperbarui.', {
       position: "top-right",
       autoClose: 2000,
       hideProgressBar: false,
@@ -155,7 +155,7 @@ export default function Options(props) {
       key: "call",
       value,
     });
-    toast.success("Operação atualizada com sucesso.");
+    toast.success("Operasi berhasil diperbarui.");
     setLoadingCallType(false);
   }
 
@@ -166,7 +166,7 @@ export default function Options(props) {
       key: "chatBotType",
       value,
     });
-    toast.success("Operação atualizada com sucesso.");
+    toast.success("Operasi berhasil diperbarui.");
     setLoadingChatbotType(false);
   }
 
@@ -177,7 +177,7 @@ export default function Options(props) {
       key: "CheckMsgIsGroup",
       value,
     });
-    toast.success("Operação atualizada com sucesso.");
+    toast.success("Operasi berhasil diperbarui.");
     setCheckMsgIsGroup(false);
     /*     if (typeof scheduleTypeChanged === "function") {
           scheduleTypeChanged(value);
@@ -192,7 +192,7 @@ export default function Options(props) {
                 </Grid> */}
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
-            <InputLabel id="ratings-label">Avaliações</InputLabel>
+            <InputLabel id="ratings-label">Penilaian</InputLabel>
             <Select
               labelId="ratings-label"
               value={userRating}
@@ -200,18 +200,18 @@ export default function Options(props) {
                 handleChangeUserRating(e.target.value);
               }}
             >
-              <MenuItem value={"disabled"}>Desabilitadas</MenuItem>
-              <MenuItem value={"enabled"}>Habilitadas</MenuItem>
+              <MenuItem value={"disabled"}>Dinonaktifkan</MenuItem>
+              <MenuItem value={"enabled"}>Diaktifkan</MenuItem>
             </Select>
             <FormHelperText>
-              {loadingUserRating && "Atualizando..."}
+              {loadingUserRating && "Memperbarui..."}
             </FormHelperText>
           </FormControl>
         </Grid>
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="schedule-type-label">
-              Gerenciamento de Expediente
+            Manajemen Jam
             </InputLabel>
             <Select
               labelId="schedule-type-label"
@@ -220,19 +220,19 @@ export default function Options(props) {
                 handleScheduleType(e.target.value);
               }}
             >
-              <MenuItem value={"disabled"}>Desabilitado</MenuItem>
-              <MenuItem value={"queue"}>Gerenciamento Por Fila</MenuItem>
-              <MenuItem value={"company"}>Gerenciamento Por Empresa</MenuItem>
+              <MenuItem value={"disabled"}>Dinonaktifkan</MenuItem>
+              <MenuItem value={"queue"}>Manajemen Antrian</MenuItem>
+              <MenuItem value={"company"}>Manajemen Berdasarkan Member</MenuItem>
             </Select>
             <FormHelperText>
-              {loadingScheduleType && "Atualizando..."}
+              {loadingScheduleType && "Memperbarui..."}
             </FormHelperText>
           </FormControl>
         </Grid>
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="group-type-label">
-              Ignorar Mensagens de Grupos
+            Abaikan Postingan Grup
             </InputLabel>
             <Select
               labelId="group-type-label"
@@ -241,18 +241,18 @@ export default function Options(props) {
                 handleGroupType(e.target.value);
               }}
             >
-              <MenuItem value={"disabled"}>Desativado</MenuItem>
-              <MenuItem value={"enabled"}>Ativado</MenuItem>
+              <MenuItem value={"disabled"}>Dinonaktifkan</MenuItem>
+              <MenuItem value={"enabled"}>Diaktifkan</MenuItem>
             </Select>
             <FormHelperText>
-              {loadingScheduleType && "Atualizando..."}
+              {loadingScheduleType && "Memperbarui..."}
             </FormHelperText>
           </FormControl>
         </Grid>
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="call-type-label">
-              Aceitar Chamada
+            Menerima panggilan
             </InputLabel>
             <Select
               labelId="call-type-label"
@@ -261,18 +261,18 @@ export default function Options(props) {
                 handleCallType(e.target.value);
               }}
             >
-              <MenuItem value={"disabled"}>Não Aceitar</MenuItem>
-              <MenuItem value={"enabled"}>Aceitar</MenuItem>
+              <MenuItem value={"disabled"}>Jangan terima</MenuItem>
+              <MenuItem value={"enabled"}>Terima</MenuItem>
             </Select>
             <FormHelperText>
-              {loadingCallType && "Atualizando..."}
+              {loadingCallType && "Memperbarui..."}
             </FormHelperText>
           </FormControl>
         </Grid>
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="chatbot-type-label">
-              Tipo Chatbot
+            Jenis Chatbot
             </InputLabel>
             <Select
               labelId="chatbot-type-label"
@@ -281,10 +281,10 @@ export default function Options(props) {
                 handleChatbotType(e.target.value);
               }}
             >
-              <MenuItem value={"text"}>Texto</MenuItem>
+              <MenuItem value={"text"}>Teks</MenuItem>
             </Select>
             <FormHelperText>
-              {loadingChatbotType && "Atualizando..."}
+              {loadingChatbotType && "Memperbarui..."}
             </FormHelperText>
           </FormControl>
         </Grid>

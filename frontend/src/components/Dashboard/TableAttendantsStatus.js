@@ -49,9 +49,9 @@ export default function TableAttendantsStatus(props) {
         return attendants.map((a, k) => (
             <TableRow key={k}>
                 <TableCell>{a.name}</TableCell>
-                <TableCell align="center" title="1 - Insatisfeito, 2 - Satisfeito, 3 - Muito Satisfeito" className={classes.pointer}>
+                {/* <TableCell align="center" title="1 - Tidak Puas, 2 - Puas, 3 - Sangat Puas" className={classes.pointer}>
                     <RatingBox rating={a.rating} />
-                </TableCell>
+                </TableCell> */}
                 <TableCell align="center">{a.tickets}</TableCell>
                 <TableCell align="center">{a.openCount}</TableCell>
                 <TableCell align="center">{a.closeCount}</TableCell>
@@ -76,13 +76,13 @@ export default function TableAttendantsStatus(props) {
             <Table>
                 <TableHead>
                     <TableRow>
-                        <TableCell>Nome</TableCell>
-                        <TableCell align="center">Avaliações</TableCell>
-                        <TableCell align="center">Total de Atendimentos</TableCell>
-                        <TableCell align="center">Acontecendo</TableCell>
-                        <TableCell align="center">Finalizados</TableCell>
-                        <TableCell align="center">T.M. de Espera</TableCell>
-                        <TableCell align="center">T.M. de Atendimento</TableCell>
+                        <TableCell>Nama</TableCell>
+                        {/* <TableCell align="center">Penilaian</TableCell> */}
+                        <TableCell align="center">Jumlah Pesan</TableCell>
+                        <TableCell align="center">Dalam Proses</TableCell>
+                        <TableCell align="center">Pesan Selesai</TableCell>
+                        <TableCell align="center">Waktu Rata-rata Menunggu</TableCell>
+                        <TableCell align="center">Waktu Rata-rata Layanan</TableCell>
                         <TableCell align="center">Status (Atual)</TableCell>
                     </TableRow>
                 </TableHead>

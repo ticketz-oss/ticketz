@@ -113,14 +113,14 @@ export default function Pricing(props) {
         planId: plansCompanies.id,
         price: plansCompanies.value,
         description: [
-          `${plansCompanies.users} Usuários`,
-          `${plansCompanies.connections} Conexão`,
-          `${plansCompanies.queues} Filas`
+          `${plansCompanies.users} Pengguna`,
+          `${plansCompanies.connections} Koneksi`,
+          `${plansCompanies.queues} Baris`
         ],
         users: plansCompanies.users,
         connections: plansCompanies.connections,
         queues: plansCompanies.queues,
-        buttonText: 'SELECIONAR',
+        buttonText: 'PILIH',
         buttonVariant: 'outlined',
       })
 
@@ -157,12 +157,12 @@ export default function Pricing(props) {
                     {
 
                       <React.Fragment>
-                        R${tier.price.toLocaleString('pt-br', { minimumFractionDigits: 2 })}
+                        Rp{tier.price.toLocaleString('pt-br', { minimumFractionDigits: 2 })}
                       </React.Fragment>
                     }
                   </Typography>
                   <Typography variant="h6" color="textSecondary">
-                    /mês
+                    /bulan
                   </Typography>
                 </div>
                 <ul>

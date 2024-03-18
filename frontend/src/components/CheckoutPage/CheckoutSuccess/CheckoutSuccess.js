@@ -26,7 +26,7 @@ function CheckoutSuccess(props) {
     const onCompanyPayment = (data) => {
 
       if (data.action === "CONCLUIDA") {
-        toast.success(`Sua licença foi renovada até ${dateToClient(data.company.dueDate)}!`);
+        toast.success(`Lisensi Anda telah diperpanjang sampai ${dateToClient(data.company.dueDate)}!`);
         setTimeout(() => {
           history.push("/");
         }, 4000);
@@ -51,7 +51,7 @@ function CheckoutSuccess(props) {
     <React.Fragment>
       <Total>
         <span>TOTAL</span>
-        <strong>R${pix.valor.original.toLocaleString('pt-br', { minimumFractionDigits: 2 })}</strong>
+        <strong>Rp{pix.valor.original.toLocaleString('pt-br', { minimumFractionDigits: 2 })}</strong>
       </Total>
       <SuccessContent>
         <QRCode value={pixString} />
@@ -59,20 +59,19 @@ function CheckoutSuccess(props) {
           <button className="copy-button" type="button">
             {copied ? (
               <>
-                <span>Copiado</span>
+                <span>Disalin</span>
                 <FaCheckCircle size={18} />
               </>
             ) : (
               <>
-                <span>Copiar código QR</span>
+                <span>Salin kode QR</span>
                 <FaCopy size={18} />
               </>
             )}
           </button>
         </CopyToClipboard>
         <span>
-          Para finalizar, basta realizar o pagamento escaneando ou colando o
-          código Pix acima :)
+        Untuk menyelesaikannya, cukup lakukan pembayaran dengan memindai atau menempelkan kode Pix di atas :)
         </span>
       </SuccessContent>
     </React.Fragment>

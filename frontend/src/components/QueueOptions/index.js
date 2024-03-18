@@ -221,7 +221,7 @@ export function QueueOptionStepper({ queueId, options, updateOptions }) {
     return (
       <>
         <Typography>
-          {option.title !== "" ? option.title : "Título não definido"}
+          {option.title !== "" ? option.title : "Judul tidak ditentukan"}
           <IconButton
             variant="outlined"
             size="small"
@@ -247,7 +247,7 @@ export function QueueOptionStepper({ queueId, options, updateOptions }) {
             onChange={(event) => handleOptionChangeMessage(event, index)}
             size="small"
             className={classes.input}
-            placeholder="Digite o texto da opção"
+            placeholder="Masukkan teks opsi"
           />
         </>
       );
@@ -294,7 +294,7 @@ export function QueueOptionStepper({ queueId, options, updateOptions }) {
                 variant="outlined"
                 className={classes.addButton}
               >
-                Adicionar
+                Tambah
               </Button>
             </>
           )}
@@ -387,7 +387,7 @@ export function QueueOptions({ queueId }) {
     <div className={classes.root}>
       <br />
       <Typography>
-        Opções
+        Pilihan
         <Button
           color="primary"
           size="small"
@@ -396,7 +396,7 @@ export function QueueOptions({ queueId }) {
           style={{ marginLeft: 10 }}
           variant="outlined"
         >
-          Adicionar
+          Tambah
         </Button>
       </Typography>
       {renderStepper()}

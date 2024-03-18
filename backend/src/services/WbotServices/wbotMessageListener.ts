@@ -1583,14 +1583,14 @@ const handleMessage = async (
          // dev Ricardo: insistir a responder avaliação
          const rate_ = Number(bodyMessage);
 
-         if ((ticket?.lastMessage.includes('_Insatisfeito_') || ticket?.lastMessage.includes('Por favor avalie nosso atendimento.')) &&  (!isFinite(rate_))) {
+         if ((ticket?.lastMessage.includes('_Insatisfeito_') || ticket?.lastMessage.includes('Silakan menilai layanan kami.')) &&  (!isFinite(rate_))) {
              const debouncedSentMessage = debounce(
                async () => {
                  await wbot.sendMessage(
                    `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"
                    }`,
                    {
-                     text: 'Por favor avalie nosso atendimento.'
+                     text: 'Silakan menilai layanan kami.'
                    }
                  );
                },

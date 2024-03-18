@@ -77,9 +77,9 @@ function ContactListsTable(props) {
     <Table size="small">
       <TableHead>
         <TableRow>
-          <TableCell align="left">Nome</TableCell>
-          <TableCell align="center">Contatos</TableCell>
-          {!readOnly ? <TableCell align="center">Ações</TableCell> : null}
+          <TableCell align="left">Nama</TableCell>
+          <TableCell align="center">Kontak</TableCell>
+          {!readOnly ? <TableCell align="center">Tindakan</TableCell> : null}
         </TableRow>
       </TableHead>
       <TableBody>

@@ -266,12 +266,12 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
                 top: -6,
                 marginRight: 3
               }}
-              badgeContent={ticket.queue?.name || "Sem fila"}
+              badgeContent={ticket.queue?.name || "Tidak ada antrian"}
             //color="primary"
             />
           )}
           {ticket.status === "open" && (
-            <Tooltip title="Fechar Conversa">
+            <Tooltip title="Tutup Percakapan">
               <ClearOutlinedIcon
                 onClick={() => handleCloseTicket(ticket.id)}
                 fontSize="small"
@@ -293,7 +293,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
             </Tooltip>
           )}
           {profile === "admin" && (
-            <Tooltip title="Espiar Conversa">
+            <Tooltip title="View Percakapan">
               <VisibilityIcon
                 onClick={() => setOpenTicketMessageDialog(true)}
                 fontSize="small"
@@ -360,12 +360,12 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
                 marginRight: 2
 
               }}
-              badgeContent={ticket.queue?.name || "Sem fila"}
+              badgeContent={ticket.queue?.name || "Tidak ada antrian"}
             //color=
             />
           )}
           {ticket.status === "pending" && (
-            <Tooltip title="Fechar Conversa">
+            <Tooltip title="Tutup Percakapan">
               <ClearOutlinedIcon
                 onClick={() => handleCloseTicket(ticket.id)}
                 fontSize="small"
@@ -395,7 +395,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
             </Tooltip>
           )}
           {ticket.status === "open" && (
-            <Tooltip title="Fechar Conversa">
+            <Tooltip title="Tutup Percakapan">
               <ClearOutlinedIcon
                 onClick={() => handleCloseTicket(ticket.id)}
                 fontSize="small"
@@ -411,7 +411,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
             </Tooltip>
           )}
           {ticket.status === "pending" && (
-            <Tooltip title="Aceitar Conversa">
+            <Tooltip title="Terima Percakapan">
               <DoneIcon
                 onClick={() => handleAcceptTicket(ticket.id)}
                 fontSize="small"
@@ -434,7 +434,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
           )}
 
           {profile === "admin" && (
-            <Tooltip title="Espiar Conversa">
+            <Tooltip title="View Percakapan">
               <VisibilityIcon
                 onClick={() => setOpenTicketMessageDialog(true)}
                 fontSize="small"
@@ -483,7 +483,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
         <Tooltip
           arrow
           placement="right"
-          title={ticket.queue?.name || "Sem fila"}
+          title={ticket.queue?.name || "Tidak ada antrian"}
         >
           <span
             style={{ backgroundColor: ticket.queue?.color || "#7C7C7C" }}
@@ -536,7 +536,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
           {ticket.status === "closed" && (
             <Badge
               className={classes.Radiusdot}
-              badgeContent={"FECHADO"}
+              badgeContent={"TERTUTUP"}
               //color="primary"
               style={{
                 backgroundColor: ticket.queue?.color || "#ff0000",

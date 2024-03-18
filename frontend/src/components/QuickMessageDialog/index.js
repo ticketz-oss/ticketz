@@ -104,7 +104,7 @@ function QuickMessageDialog(props) {
 
     return (
         <Dialog
-            title="Mensagem Rápida"
+            title="Pesan Cepat"
             modalOpen={dialogOpen}
             onClose={handleClose}
         >
@@ -151,10 +151,10 @@ function QuickMessageDialog(props) {
                         </DialogContent>
                         <DialogActions>
                             <Button onClick={handleClose} color="primary">
-                                Cancelar
+                                Batal
                             </Button>
                             <ButtonWithSpinner loading={loading} color="primary" type="submit" variant="contained" autoFocus>
-                                Salvar
+                                Simpan
                             </ButtonWithSpinner>
                         </DialogActions>
                     </Form>

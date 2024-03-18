@@ -247,7 +247,7 @@ const CampaignModal = ({
         placeholder={i18n.t("campaigns.dialog.form.messagePlaceholder")}
         multiline={true}
         variant="outlined"
-        helperText="Utilize variáveis como {nome}, {numero}, {email} ou defina variáveis personalziadas."
+        helperText="Gunakan variabel seperti {nome}, {numero}, {email} atau tentukan variabel khusus."
         disabled={!campaignEditable && campaign.status !== "CANCELADA"}
       />
     );
@@ -380,8 +380,8 @@ const CampaignModal = ({
                         }
                         disabled={!campaignEditable}
                       >
-                        <MenuItem value={false}>Desabilitada</MenuItem>
-                        <MenuItem value={true}>Habilitada</MenuItem>
+                        <MenuItem value={false}>Dinonaktifkan</MenuItem>
+                        <MenuItem value={true}>Diaktifkan</MenuItem>
                       </Field>
                     </FormControl>
                   </Grid>
@@ -409,7 +409,7 @@ const CampaignModal = ({
                         }
                         disabled={!campaignEditable}
                       >
-                        <MenuItem value="">Nenhuma</MenuItem>
+                        <MenuItem value="">Tidak ada</MenuItem>
                         {contactLists &&
                           contactLists.map((contactList) => (
                             <MenuItem
@@ -442,7 +442,7 @@ const CampaignModal = ({
                         error={touched.whatsappId && Boolean(errors.whatsappId)}
                         disabled={!campaignEditable}
                       >
-                        <MenuItem value="">Nenhuma</MenuItem>
+                        <MenuItem value="">Tidak ada</MenuItem>
                         {whatsapps &&
                           whatsapps.map((whatsapp) => (
                             <MenuItem key={whatsapp.id} value={whatsapp.id}>

@@ -129,12 +129,12 @@ export function ContactNotes ({ ticket }) {
     return (
         <>
             <ConfirmationModal
-                title="Excluir Registro"
+                title="Hapus Catatan"
                 open={showOnDeleteDialog}
                 onClose={setShowOnDeleteDialog}
                 onConfirm={handleDelete}
             >
-                Deseja realmente excluir este registro?
+                Apakah Anda benar-benar ingin menghapus catatan ini?
             </ConfirmationModal>
             <Formik
                 initialValues={newNote}
@@ -185,12 +185,12 @@ export function ContactNotes ({ ticket }) {
                                             variant="outlined"
                                             fullWidth
                                         >
-                                            Cancelar
+                                            Batal
                                         </Button>
                                     </Grid>
                                     <Grid xs={6} item>
                                         <ButtonWithSpinner loading={loading} color="primary" type="submit" variant="contained" autoFocus fullWidth>
-                                            Salvar
+                                            Simpan
                                         </ButtonWithSpinner>
                                     </Grid>
                                 </Grid>

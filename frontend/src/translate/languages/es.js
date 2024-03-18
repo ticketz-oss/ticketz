@@ -260,10 +260,6 @@ const messages = {
 					settings: "Configuración",
 				},
 				appBar: {
-          i18n: {
-            language: "Español",
-            language_short: "ES"
-          },
 					user: {
 						profile: "Perfil",
 						logout: "Cerrar Sesión",

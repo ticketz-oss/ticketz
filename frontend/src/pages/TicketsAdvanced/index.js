@@ -62,7 +62,7 @@ const TicketAdvanced = (props) => {
 		return <Box className={classes.placeholderContainer}>
             <div className={classes.placeholderItem}>{i18n.t("chat.noTicketMessage")}</div><br />
             <Button onClick={() => setOption(1)} variant="contained" color="primary">
-                Selecionar Ticket
+            Pilih Tiket
             </Button>
         </Box>
 	}
@@ -89,8 +89,8 @@ const TicketAdvanced = (props) => {
                     showLabels
                     className={classes.root}
                 >
-                    <BottomNavigationAction label="Ticket" icon={<ChatIcon />} />
-                    <BottomNavigationAction label="Atendimentos" icon={<QuestionAnswerIcon />} />
+                    <BottomNavigationAction label="Percakapan" icon={<ChatIcon />} />
+                    <BottomNavigationAction label="Pelayanan" icon={<QuestionAnswerIcon />} />
                 </BottomNavigation>
             </Box>
             <Box className={classes.content}>

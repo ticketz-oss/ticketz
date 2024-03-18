@@ -15,7 +15,7 @@ import { i18n } from "../../translate/i18n";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
 import logo from "../../assets/vector/logo.svg";
-
+// import logo from "../../assets/vector/pnri_logo.svg";
 
 const Copyright = () => {
 	return (

@@ -8,7 +8,7 @@ export default function ReviewOrder() {
   return (
     <React.Fragment>
       <Typography variant="h6" gutterBottom>
-        Resumo da assinatura
+      Ringkasan Langganan
       </Typography>
       <Grid container spacing={2}>
         <ShippingDetails formValues={formValues} />

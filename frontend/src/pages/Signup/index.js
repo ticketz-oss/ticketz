@@ -25,6 +25,7 @@ import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
 import logo from "../../assets/vector/logo.svg";
+// import logo from "../../assets/vector/pnri_logo.svg";
 import { i18n } from "../../translate/i18n";
 
 import { openApi } from "../../services/api";
@@ -158,7 +159,7 @@ const SignUp = () => {
 										variant="outlined"
 										fullWidth
 										id="name"
-										label="Nome da Empresa"
+										label="Nama Lengkap"
 									/>
 								</Grid>
 
@@ -183,7 +184,7 @@ const SignUp = () => {
 										variant="outlined"
 										fullWidth
 										id="phone"
-										label="Telefone com (DDD)"
+										label="No WhatsApp (diawali 62)"
 										name="phone"
 										error={touched.email && Boolean(errors.email)}
 										helperText={touched.email && errors.email}
@@ -208,19 +209,19 @@ const SignUp = () => {
 									/>
 								</Grid>
 								<Grid item xs={12}>
-									<InputLabel htmlFor="plan-selection">Plano</InputLabel>
+									<InputLabel htmlFor="plan-selection">Plan</InputLabel>
 									<Field
 										as={Select}
 										variant="outlined"
 										fullWidth
 										id="plan-selection"
-										label="Plano"
+										label="Plan"
 										name="planId"
 										required
 									>
 										{plans.map((plan, key) => (
 											<MenuItem key={key} value={plan.id}>
-												{plan.name} - Atendentes: {plan.users} - WhatsApp: {plan.connections} - Filas: {plan.queues} - R$ {plan.value}
+												{plan.name} - Atendentes: {plan.users} - WhatsApp: {plan.connections} - Filas: {plan.queues} - Rp {plan.value}
 											</MenuItem>
 										))}
 									</Field>

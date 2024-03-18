@@ -96,13 +96,13 @@ const QueueModal = ({ open, onClose, queueId }) => {
   const [confirmationOpen, setConfirmationOpen] = useState(false);
 
   const [schedules, setSchedules] = useState([
-    { weekday: "Segunda-feira",weekdayEn: "monday",startTime: "08:00",endTime: "18:00",},
-    { weekday: "Terça-feira",weekdayEn: "tuesday",startTime: "08:00",endTime: "18:00",},
-    { weekday: "Quarta-feira",weekdayEn: "wednesday",startTime: "08:00",endTime: "18:00",},
-    { weekday: "Quinta-feira",weekdayEn: "thursday",startTime: "08:00",endTime: "18:00",},
-    { weekday: "Sexta-feira", weekdayEn: "friday",startTime: "08:00",endTime: "18:00",},
-    { weekday: "Sábado", weekdayEn: "saturday",startTime: "08:00",endTime: "12:00",},
-    { weekday: "Domingo", weekdayEn: "sunday",startTime: "00:00",endTime: "00:00",},
+    { weekday: "Senin",weekdayEn: "monday",startTime: "08:00",endTime: "18:00",},
+    { weekday: "Selasa",weekdayEn: "tuesday",startTime: "08:00",endTime: "18:00",},
+    { weekday: "Rabu",weekdayEn: "wednesday",startTime: "08:00",endTime: "18:00",},
+    { weekday: "Kamis",weekdayEn: "thursday",startTime: "08:00",endTime: "18:00",},
+    { weekday: "Jumat", weekdayEn: "friday",startTime: "08:00",endTime: "18:00",},
+    { weekday: "Sabtu", weekdayEn: "saturday",startTime: "08:00",endTime: "12:00",},
+    { weekday: "Ahad", weekdayEn: "sunday",startTime: "00:00",endTime: "00:00",},
   ]);
 
   useEffect(() => {
@@ -181,7 +181,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
           await api.post(`/queue/${queueId}/media-upload`, formData);
         }
       }
-      toast.success("Queue saved successfully");
+      toast.success("Antrean berhasil disimpan");
       handleClose();
     } catch (err) {
       toastError(err);
@@ -189,7 +189,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
   };
 
   const handleSaveSchedules = async (values) => {
-    toast.success("Clique em salvar para registar as alterações");
+    toast.success("Klik simpan untuk mencatat perubahan");
     setSchedules(values);
     setTab(0);
   };
@@ -230,8 +230,8 @@ const QueueModal = ({ open, onClose, queueId }) => {
           onChange={(_, v) => setTab(v)}
           aria-label="disabled tabs example"
         >
-          <Tab label="Dados da Fila" />
-          {schedulesEnabled && <Tab label="Horários de Atendimento" />}
+          <Tab label="Data Antrian" />
+          {schedulesEnabled && <Tab label="Jam Layanan" />}
         </Tabs>
         {tab === 0 && (
           <Paper>
@@ -412,7 +412,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
               loading={false}
               onSubmit={handleSaveSchedules}
               initialValues={schedules}
-              labelSaveButton="Adicionar"
+              labelSaveButton="Pilihan"
             />
           </Paper>
         )}

@@ -28,7 +28,7 @@ import useStyles from "./styles";
 
 
 export default function CheckoutPage(props) {
-  const steps = ["Dados", "Personalizar", "Revisar"];
+  const steps = ["Data", "Personalisasi", "Tinjauan"];
   const { formId, formField } = checkoutFormModel;
   
   
@@ -89,7 +89,7 @@ function _renderStepContent(step, setFieldValue, setActiveStep, values ) {
       setDatePayment(data)
       actions.setSubmitting(true);
       setActiveStep(activeStep + 1);
-      toast.success("Assinatura realizada com sucesso!, aguardando a realização do pagamento");
+      toast.success("Langganan berhasil diselesaikan!, menunggu pembayaran");
     } catch (err) {
       actions.setSubmitting(false);
      
@@ -114,7 +114,7 @@ function _renderStepContent(step, setFieldValue, setActiveStep, values ) {
   return (
     <React.Fragment>
       <Typography component="h1" variant="h4" align="center">
-        Falta pouco!
+        Perpanjang!
       </Typography>
       <Stepper activeStep={activeStep} className={classes.stepper}>
         {steps.map((label) => (
@@ -142,7 +142,7 @@ function _renderStepContent(step, setFieldValue, setActiveStep, values ) {
                 <div className={classes.buttons}>
                   {activeStep !== 1 && (
                     <Button onClick={_handleBack} className={classes.button}>
-                      VOLTAR
+                      Kembali
                     </Button>
                   )}
                   <div className={classes.wrapper}>
@@ -154,7 +154,8 @@ function _renderStepContent(step, setFieldValue, setActiveStep, values ) {
                         color="primary"
                         className={classes.button}
                       >
-                        {isLastStep ? "PAGAR" : "PRÓXIMO"}
+                        {/* {isLastStep ? "BAYAR": "BERIKUTNYA"} */}
+                        {isLastStep ? "BAYAR": "BERIKUTNYA"}
                       </Button>
                     )}
                     {isSubmitting && (

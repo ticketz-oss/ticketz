@@ -97,13 +97,13 @@ const ToDoList = () => {
       <div className={classes.inputContainer}>
         <TextField
           className={classes.input}
-          label="Nova tarefa"
+          label="Tugas baru"
           value={task}
           onChange={handleTaskChange}
           variant="outlined"
         />
         <Button variant="contained" color="primary" onClick={handleAddTask}>
-          {editIndex >= 0 ? 'Salvar' : 'Adicionar'}
+          {editIndex >= 0 ? 'Salvar' : 'Tambah'}
         </Button>
       </div>
       <div className={classes.listContainer}>

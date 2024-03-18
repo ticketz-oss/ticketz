@@ -248,8 +248,8 @@ const AnnouncementModal = ({ open, onClose, announcementId, reload }) => {
                         name="status"
                         error={touched.status && Boolean(errors.status)}
                       >
-                        <MenuItem value={true}>Ativo</MenuItem>
-                        <MenuItem value={false}>Inativo</MenuItem>
+                        <MenuItem value={true}>Aktif</MenuItem>
+                        <MenuItem value={false}>Tidak Aktif</MenuItem>
                       </Field>
                     </FormControl>
                   </Grid>
@@ -269,9 +269,9 @@ const AnnouncementModal = ({ open, onClose, announcementId, reload }) => {
                         name="priority"
                         error={touched.priority && Boolean(errors.priority)}
                       >
-                        <MenuItem value={1}>Alta</MenuItem>
-                        <MenuItem value={2}>Média</MenuItem>
-                        <MenuItem value={3}>Baixa</MenuItem>
+                        <MenuItem value={1}>Tinggi</MenuItem>
+                         <MenuItem value={2}>Sedang</MenuItem>
+                         <MenuItem value={3}>Rendah</MenuItem>
                       </Field>
                     </FormControl>
                   </Grid>

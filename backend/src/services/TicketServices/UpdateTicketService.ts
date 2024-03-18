@@ -114,7 +114,7 @@ const   UpdateTicketService = async ({
           const ratingTxt = ratingMessage || "";
           let bodyRatingMessage = `\u200e${ratingTxt}\n\n`;
           bodyRatingMessage +=
-            "Digite de 1 à 3 para qualificar nosso atendimento:\n*1* - _Insatisfeito_\n*2* - _Satisfeito_\n*3* - _Muito Satisfeito_\n\n";
+            "Berikan penilaian 1 hingga 3 untuk memenuhi syarat layanan kami:\n*1* - _Tidak Puas_\n*2* - _Puas_\n*3* - _Sangat Puas_\n\n";
 
           if (ticket.channel === "whatsapp") {
             await SendWhatsAppMessage({ body: bodyRatingMessage, ticket });

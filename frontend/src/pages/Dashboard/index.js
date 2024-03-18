@@ -232,7 +232,7 @@ const Dashboard = () => {
     }
 
     if (Object.keys(params).length === 0) {
-      toast.error("Parametrize o filtro");
+      toast.error("Parameterisasi filter");
       setLoading(false);
       return;
     }
@@ -285,7 +285,7 @@ const Dashboard = () => {
         <>
           <Grid item xs={12} sm={6} md={4}>
             <TextField
-              label="Data Inicial"
+              label="Tanggal Awal"
               type="date"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
@@ -297,7 +297,7 @@ const Dashboard = () => {
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <TextField
-              label="Data Final"
+              label="Tanggal Akhir"
               type="date"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
@@ -313,22 +313,22 @@ const Dashboard = () => {
       return (
         <Grid item xs={12} sm={6} md={4}>
           <FormControl className={classes.selectContainer}>
-            <InputLabel id="period-selector-label">Período</InputLabel>
+            <InputLabel id="period-selector-label">Periode</InputLabel>
             <Select
               labelId="period-selector-label"
               id="period-selector"
               value={period}
               onChange={(e) => handleChangePeriod(e.target.value)}
             >
-              <MenuItem value={0}>Nenhum selecionado</MenuItem>
-              <MenuItem value={3}>Últimos 3 dias</MenuItem>
-              <MenuItem value={7}>Últimos 7 dias</MenuItem>
-              <MenuItem value={15}>Últimos 15 dias</MenuItem>
-              <MenuItem value={30}>Últimos 30 dias</MenuItem>
-              <MenuItem value={60}>Últimos 60 dias</MenuItem>
-              <MenuItem value={90}>Últimos 90 dias</MenuItem>
-            </Select>
-            <FormHelperText>Selecione o período desejado</FormHelperText>
+              <MenuItem value={0}>Tidak ada yang dipilih</MenuItem>
+               <MenuItem value={3}>3 hari terakhir</MenuItem>
+               <MenuItem value={7}>7 hari terakhir</MenuItem>
+               <MenuItem value={15}>15 hari terakhir</MenuItem>
+               <MenuItem value={30}>30 hari terakhir</MenuItem>
+               <MenuItem value={60}>60 hari terakhir</MenuItem>
+               <MenuItem value={90}>90 hari terakhir</MenuItem>
+             </Select>
+             <FormHelperText>Pilih periode yang diinginkan</FormHelperText>
           </FormControl>
         </Grid>
       );
@@ -360,16 +360,16 @@ const Dashboard = () => {
           {/* FILTROS */}
           <Grid item xs={12} sm={6} md={4}>
             <FormControl className={classes.selectContainer}>
-              <InputLabel id="period-selector-label">Tipo de Filtro</InputLabel>
+              <InputLabel id="period-selector-label">Tipe Penyaringan</InputLabel>
               <Select
                 labelId="period-selector-label"
                 value={filterType}
                 onChange={(e) => handleChangeFilterType(e.target.value)}
               >
-                <MenuItem value={1}>Filtro por Data</MenuItem>
-                <MenuItem value={2}>Filtro por Período</MenuItem>
-              </Select>
-              <FormHelperText>Selecione o período desejado</FormHelperText>
+                <MenuItem value={1}>Filter berdasarkan Tanggal</MenuItem>
+                 <MenuItem value={2}>Filter berdasarkan Periode</MenuItem>
+               </Select>
+               <FormHelperText>Pilih periode yang diinginkan</FormHelperText>
             </FormControl>
           </Grid>
 
@@ -383,45 +383,8 @@ const Dashboard = () => {
               variant="contained"
               color="primary"
             >
-              Filtrar
+              Filter
             </ButtonWithSpinner>
-          </Grid>
-
-          {/* ATENDIMENTOS PENDENTES */}
-          <Grid item xs={12} sm={6} md={4}>
-            <Paper
-              className={classes.card1}
-              style={{ overflow: "hidden" }}
-              elevation={4}
-            >
-              <Grid container spacing={3}>
-                <Grid item xs={8}>
-                  <Typography
-                    component="h3"
-                    variant="h6"
-                    paragraph
-                  >
-                    Atd. Pendentes
-                  </Typography>
-                  <Grid item>
-                    <Typography
-                      component="h1"
-                      variant="h4"
-                    >
-                      {counters.supportPending}
-                    </Typography>
-                  </Grid>
-                </Grid>
-                <Grid item xs={2}>
-                  <CallIcon
-                    style={{
-                      fontSize: 100,
-                      color: "#0b708c",
-                    }}
-                  />
-                </Grid>
-              </Grid>
-            </Paper>
           </Grid>
 
           {/* ATENDIMENTOS ACONTECENDO */}
@@ -438,7 +401,7 @@ const Dashboard = () => {
                     variant="h6"
                     paragraph
                   >
-                    Atd. Acontecendo
+                    Jumlah Pesan
                   </Typography>
                   <Grid item>
                     <Typography
@@ -461,6 +424,43 @@ const Dashboard = () => {
             </Paper>
           </Grid>
 
+          {/* ATENDIMENTOS PENDENTES */}
+          <Grid item xs={12} sm={6} md={4}>
+            <Paper
+              className={classes.card1}
+              style={{ overflow: "hidden" }}
+              elevation={4}
+            >
+              <Grid container spacing={3}>
+                <Grid item xs={8}>
+                  <Typography
+                    component="h3"
+                    variant="h6"
+                    paragraph
+                  >
+                     Pesan Dalam Antrian
+                  </Typography>
+                  <Grid item>
+                    <Typography
+                      component="h1"
+                      variant="h4"
+                    >
+                      {counters.supportPending}
+                    </Typography>
+                  </Grid>
+                </Grid>
+                <Grid item xs={2}>
+                  <CallIcon
+                    style={{
+                      fontSize: 100,
+                      color: "#0b708c",
+                    }}
+                  />
+                </Grid>
+              </Grid>
+            </Paper>
+          </Grid>
+
           {/* ATENDIMENTOS REALIZADOS */}
           <Grid item xs={12} sm={6} md={4}>
             <Paper
@@ -475,7 +475,7 @@ const Dashboard = () => {
                     variant="h6"
                     paragraph
                   >
-                    Finalizados
+                    Pesan Selesai
                   </Typography>
                   <Grid item>
                     <Typography
@@ -498,7 +498,7 @@ const Dashboard = () => {
             </Paper>
           </Grid>
 
-          {/* NOVOS CONTATOS */}
+          {/* Kontak Baru */}
           <Grid item xs={12} sm={6} md={4}>
             <Paper
               className={classes.card4}
@@ -512,7 +512,7 @@ const Dashboard = () => {
                     variant="h6"
                     paragraph
                   >
-                    Novos Contatos
+                    Kontak Baru
                   </Typography>
                   <Grid item>
                     <Typography
@@ -535,7 +535,7 @@ const Dashboard = () => {
             </Paper>
           </Grid>
 
-          {/* T.M. DE ATENDIMENTO */}
+          {/* T.M. Layanan */}
           <Grid item xs={12} sm={6} md={4}>
             <Paper
               className={classes.card8}
@@ -549,7 +549,7 @@ const Dashboard = () => {
                     variant="h6"
                     paragraph
                   >
-                    T.M. de Atendimento
+                    Waktu Rata-rata Layanan
                   </Typography>
                   <Grid item>
                     <Typography
@@ -586,7 +586,7 @@ const Dashboard = () => {
                     variant="h6"
                     paragraph
                   >
-                    T.M. de Espera
+                    Waktu Rata-rata Menunggu
                   </Typography>
                   <Grid item>
                     <Typography

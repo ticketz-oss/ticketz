@@ -132,14 +132,16 @@ const useAuth = () => {
         setIsAuth(true);
         toast.success(i18n.t("auth.toasts.success"));
         if (Math.round(dias) < 5) {
-          toast.warn(`Sua assinatura vence em ${Math.round(dias)} ${Math.round(dias) === 1 ? 'dia' : 'dias'} `);
+          toast.warn(`Langganan Anda akan habis masa berlakunya ${Math.round(dias)} ${Math.round(dias) === 1 ? 'hari' : 'hari'} `);
         }
         history.push("/tickets");
         setLoading(false);
       } else {
         
-        toastError(`Opss! Sua assinatura venceu ${vencimento}.
-Entre em contato com o Suporte para mais informações! `);
+//         toastError(`Opss! Sua assinatura venceu ${vencimento}.
+// Entre em contato com o Suporte para mais informações! `);
+toastError(`Ups! Langganan Anda telah berakhir ${vencimento}.
+Hubungi Dukungan untuk informasi lebih lanjut!`);
         setLoading(false);
       }
 

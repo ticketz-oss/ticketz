@@ -3,71 +3,71 @@ export default {
   formField: {
     firstName: {
       name: 'firstName',
-      label: 'Nome completo*',
-      requiredErrorMsg: 'O nome completo é obrigatório'
+      label: 'Nama Depan',
+      requiredErrorMsg: 'Nama depan wajib diisi'
     },
     lastName: {
       name: 'lastName',
-      label: 'Last name*',
-      requiredErrorMsg: 'Last name is required'
+      label: 'Nama Belakang*',
+      requiredErrorMsg: 'Nama belakang wajib diisi'
     },
     address1: {
       name: 'address2',
-      label: 'Endereço*',
-      requiredErrorMsg: 'O Endereço é obrigatório'
+      label: 'Alamat*',
+      requiredErrorMsg: 'Alamat wajib diisi'
     },
 
     city: {
       name: 'city',
-      label: 'Cidade*',
-      requiredErrorMsg: 'Cidade é obrigatória'
+      label: 'Kota*',
+      requiredErrorMsg: 'Kota wajib diisi'
     },
     state: {
       name: 'state',
-      label: 'Estado*',
-      requiredErrorMsg: 'Cidade é obrigatória'
+      label: 'Provinsi*',
+      requiredErrorMsg: 'Provinsi wajib diisi'
     },
     zipcode: {
       name: 'zipcode',
-      label: 'CEP*',
-      requiredErrorMsg: 'CEP é obrigatório',
-      invalidErrorMsg: 'Formato de CEP inválido'
+      label: 'Kode Pos*',
+      requiredErrorMsg: 'Kode Pos wajib diisi',
+      invalidErrorMsg: 'Format kode pos tidak valid'
     },
     country: {
       name: 'country',
-      label: 'País*',
-      requiredErrorMsg: 'País é obrigatório'
+      label: 'Negara*',
+      requiredErrorMsg: 'Negara wajib diisi'
     },
     useAddressForPaymentDetails: {
       name: 'useAddressForPaymentDetails',
-      label: 'Use this address for payment details'
+      label: 'Gunakan alamat ini untuk detail pembayaran'
     },
     invoiceId: {
       name: 'invoiceId',
-      label: 'Use this invoiceId'
+      label: 'Gunakan ID faktur ini'
     },
     nameOnCard: {
       name: 'nameOnCard',
-      label: 'Name on card*',
-      requiredErrorMsg: 'Name on card is required'
+      label: 'Nama di kartu*',
+      requiredErrorMsg: 'Nama wajib diisi'
     },
     cardNumber: {
       name: 'cardNumber',
-      label: 'Card number*',
-      requiredErrorMsg: 'Card number is required',
-      invalidErrorMsg: 'Card number is not valid (e.g. 4111111111111)'
+      label: 'Nomor Kartu*',
+      requiredErrorMsg: 'Nomor kartu diperlukan',
+      invalidErrorMsg: 'Nomor kartu tidak valid (misal 4111111111111)'
     },
     expiryDate: {
       name: 'expiryDate',
-      label: 'Expiry date*',
-      requiredErrorMsg: 'Expiry date is required',
-      invalidErrorMsg: 'Expiry date is not valid'
+      label: 'Tanggal kadaluwarsa*',
+      requiredErrorMsg: 'Tanggal kadaluwarsa wajib diisi',
+      invalidErrorMsg: 'Tanggal kadaluarsa tidak valid'
     },
     cvv: {
       name: 'cvv',
       label: 'CVV*',
-      requiredErrorMsg: 'CVV is required',
-      invalidErrorMsg: 'CVV is invalid (e.g. 357)'
+      requiredErrorMsg: 'CVV wajib diisi',
+      invalidErrorMsg: 'CVV tidak valid (misalnya 357)'
     }
   }
 };

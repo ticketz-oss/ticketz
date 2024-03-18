@@ -141,12 +141,12 @@ export default function ContactNotesDialog ({ modalOpen, onClose, ticket }) {
     return (
         <>
             <ConfirmationModal
-                title="Excluir Registro"
+                title="Hapus Catatan"
                 open={showOnDeleteDialog}
                 onClose={setShowOnDeleteDialog}
                 onConfirm={handleDelete}
             >
-                Deseja realmente excluir este registro?
+                Apakah Anda benar-benar ingin menghapus catatan ini?
             </ConfirmationModal>
             <Dialog
                 open={open}
@@ -191,10 +191,10 @@ export default function ContactNotesDialog ({ modalOpen, onClose, ticket }) {
                             </DialogContent>
                             <DialogActions>
                                 <Button onClick={handleClose} color="primary">
-                                    Fechar
+                                    Tutup
                                 </Button>
                                 <ButtonWithSpinner loading={loading} color="primary" type="submit" variant="contained" autoFocus>
-                                    Salvar
+                                    Simpan
                                 </ButtonWithSpinner>
                             </DialogActions>
                         </Form>

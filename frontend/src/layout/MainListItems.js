@@ -319,7 +319,7 @@ const MainListItems = (props) => {
           /> */}
       <ListItemLink
         to="/todolist"
-        primary={i18n.t("Tarefas")}
+        primary={i18n.t("Tugas")}
         icon={<BorderColorIcon />}
       />
             <ListItemLink
@@ -356,11 +356,11 @@ const MainListItems = (props) => {
               primary={i18n.t("mainDrawer.listItems.helps")}
               icon={<HelpOutlineIcon />}
             />
-            <ListItemLink
+            {/* <ListItemLink
               to="/about"
               primary={i18n.t("mainDrawer.listItems.about")}
               icon={<InfoIcon />}
-            />
+            /> */}
           </>
         </>
         )}
@@ -441,7 +441,7 @@ const MainListItems = (props) => {
                       <ListItemIcon>
                         <ListIcon />
                       </ListItemIcon>
-                      <ListItemText primary="Listagem" />
+                      <ListItemText primary="Daftar" />
                     </ListItem>
                     <ListItem
                       onClick={() => history.push("/contact-lists")}
@@ -450,7 +450,7 @@ const MainListItems = (props) => {
                       <ListItemIcon>
                         <PeopleIcon />
                       </ListItemIcon>
-                      <ListItemText primary="Listas de Contatos" />
+                      <ListItemText primary="Daftar Kontak" />
                     </ListItem>
                     <ListItem
                       onClick={() => history.push("/campaigns-config")}
@@ -459,7 +459,7 @@ const MainListItems = (props) => {
                       <ListItemIcon>
                         <SettingsOutlinedIcon />
                       </ListItemIcon>
-                      <ListItemText primary="Configurações" />
+                      <ListItemText primary="Pengaturan" />
                     </ListItem>
                   </List>
                 </Collapse>
@@ -496,11 +496,11 @@ const MainListItems = (props) => {
               primary={i18n.t("mainDrawer.listItems.messagesAPI")}
               icon={<CodeRoundedIcon />}
             />
-             <ListItemLink
+             {/* <ListItemLink
                 to="/financeiro"
                 primary={i18n.t("mainDrawer.listItems.financeiro")}
                 icon={<LocalAtmIcon />}
-              />
+              /> */}
 
             <ListItemLink
               to="/settings"
@@ -513,6 +513,15 @@ const MainListItems = (props) => {
         )}
       />
       <Divider />
+      <li>
+        <ListItem 
+        button 
+        dense 
+        onClick={handleClickLogout}> 
+            <ListItemIcon><RotateRight/></ListItemIcon> 
+          <ListItemText primary={i18n.t("mainDrawer.listItems.logout")} />
+        </ListItem>
+      </li>
     </div>
   );
 };

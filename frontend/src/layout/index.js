@@ -29,11 +29,11 @@ import { AuthContext } from "../context/Auth/AuthContext";
 import BackdropLoading from "../components/BackdropLoading";
 import DarkMode from "../components/DarkMode";
 import { i18n } from "../translate/i18n";
-import { messages } from "../translate/languages";
 import toastError from "../errors/toastError";
 import AnnouncementsPopover from "../components/AnnouncementsPopover";
 
 import logo from "../assets/vector/logo.svg";
+// import logo from "../../assets/vector/pnri_logo.svg";
 import { SocketContext } from "../context/Socket/SocketContext";
 import ChatPopover from "../pages/Chat/ChatPopover";
 
@@ -42,7 +42,6 @@ import { useDate } from "../hooks/useDate";
 import ColorModeContext from "../layout/themeContext";
 import Brightness4Icon from '@material-ui/icons/Brightness4';
 import Brightness7Icon from '@material-ui/icons/Brightness7';
-import LanguageIcon from '@material-ui/icons/Language';
 
 const drawerWidth = 240;
 
@@ -163,7 +162,6 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [languageOpen, setLanguageOpen] = useState(false);
   const { handleLogout, loading } = useContext(AuthContext);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerVariant, setDrawerVariant] = useState("permanent");
@@ -173,8 +171,6 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   const theme = useTheme();
   const { colorMode } = useContext(ColorModeContext);
   const greaterThenSm = useMediaQuery(theme.breakpoints.up("sm"));
-
-  const [currentLanguage, setCurrentLanguage] = useState(i18n.language);
 
   const [volume, setVolume] = useState(localStorage.getItem("volume") || 1);
 
@@ -251,7 +247,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
 
     const onCompanyAuthLayout = (data) => {
       if (data.user.id === +userId) {
-        toastError("Sua conta foi acessada em outro computador.");
+        toastError("Akun Anda diakses di komputer lain.");
         setTimeout(() => {
           localStorage.clear();
           window.location.reload();
@@ -270,35 +266,26 @@ const LoggedInLayout = ({ children, themeToggle }) => {
       socket.off(`company-${companyId}-auth`, onCompanyAuthLayout);
       clearInterval(interval);
     };
-  }, [socketManager]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const handleProfileMenu = (event) => {
+  const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
     setMenuOpen(true);
   };
 
-  const handleLanguageMenu = (event) => {
-    setAnchorEl(event.currentTarget);
-    setLanguageOpen(true);
-  };
-
-  const handleCloseProfileMenu = () => {
+  const handleCloseMenu = () => {
     setAnchorEl(null);
     setMenuOpen(false);
   };
 
-  const handleCloseLanguageMenu = () => {
-    setAnchorEl(null);
-    setLanguageOpen(false);
-  };
-
   const handleOpenUserModal = () => {
     setUserModalOpen(true);
-    handleCloseProfileMenu();
+    handleCloseMenu();
   };
 
   const handleClickLogout = () => {
-    handleCloseProfileMenu();
+    handleCloseMenu();
     handleLogout();
   };
 
@@ -321,11 +308,6 @@ const LoggedInLayout = ({ children, themeToggle }) => {
 
   const toggleColorMode = () => {
     colorMode.toggleColorMode();
-  }
-
-  const handleChooseLanguage = (language) => {
-    localStorage.setItem("language",language);
-    window.location.reload(false);
   }
 
   if (loading) {
@@ -390,11 +372,11 @@ const LoggedInLayout = ({ children, themeToggle }) => {
           >
              {greaterThenSm && user?.profile === "admin" && user?.company?.dueDate ? (
               <>
-                Olá <b>{user.name}</b>, seja bem-vindo a <b>{user?.company?.name}</b>! (Ativo até {dateToClient(user?.company?.dueDate)})
+                Halo <b>{user.name}</b>, selamat datang di <b>{user?.company?.name}</b>! (Aktif sampai {dateToClient(user?.company?.dueDate)})
               </>
             ) : (
               <>
-                Olá <b>{user.name}</b>, seja bem-vindo a <b>{user?.company?.name}</b>!
+                Halo <b>{user.name}</b>, selamat datang di <b>{user?.company?.name}</b>!
               </>
             )}
           </Typography>
@@ -424,47 +406,10 @@ const LoggedInLayout = ({ children, themeToggle }) => {
 
           <div>
             <IconButton
-              aria-label="current language"
-              aria-controls="menu-language"
-              aria-haspopup="true"
-              onClick={handleLanguageMenu}
-              variant="contained"
-              style={{ color: "white" }}
-            >
-              <LanguageIcon />
-            </IconButton>
-            <Menu
-              id="language-appbar"
-              anchorEl={anchorEl}
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "right",
-              }}
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              open={languageOpen}
-              onClose={handleCloseLanguageMenu}
-            >
-            {
-              Object.keys(messages).map((m) => (
-                <MenuItem onClick={() => handleChooseLanguage(m)}>
-                  {messages[m].translations.mainDrawer.appBar.i18n.language}
-                </MenuItem>
-              ))
-            }
-            </Menu>
-          </div>
-
-
-          <div>
-            <IconButton
               aria-label="account of current user"
               aria-controls="menu-appbar"
               aria-haspopup="true"
-              onClick={handleProfileMenu}
+              onClick={handleMenu}
               variant="contained"
               style={{ color: "white" }}
             >
@@ -483,13 +428,10 @@ const LoggedInLayout = ({ children, themeToggle }) => {
                 horizontal: "right",
               }}
               open={menuOpen}
-              onClose={handleCloseProfileMenu}
+              onClose={handleCloseMenu}
             >
               <MenuItem onClick={handleOpenUserModal}>
                 {i18n.t("mainDrawer.appBar.user.profile")}
-              </MenuItem>
-              <MenuItem onClick={handleClickLogout}>
-                {i18n.t("mainDrawer.appBar.user.logout")}
               </MenuItem>
             </Menu>
           </div>

@@ -207,12 +207,12 @@ const NotificationsPopOver = (props) => {
 	const numbers = "⓿➊➋➌➍➎➏➐➑➒➓⓫⓬⓭⓮⓯⓰⓱⓲⓳⓴";
     if (notifications.length > 0) {
 		if (notifications.length < 21 ) {
-	      document.title = numbers.substring(notifications.length,notifications.length+1) + " - ticketz";
+	      document.title = numbers.substring(notifications.length,notifications.length+1) + " - CS PNRI";
         } else {
-	      document.title = "(" + notifications.length + ") ticketz";
+	      document.title = "(" + notifications.length + ") CS PNRI";
 		}		
     } else {
-      document.title = "ticketz";
+      document.title = "CS PNRI";
     }
     return (
       <>
