@@ -34,7 +34,7 @@ const CreateMessageService = async ({
 			{
 				model: Ticket,
 				as: "ticket",
-				include: ["contact", "queue"]
+				include: ["contact", "queue", "whatsapp"]
 			},
 			{
 				model: Message,
