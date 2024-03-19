@@ -271,7 +271,7 @@ const MainListItems = (props) => {
               primary={i18n.t("mainDrawer.listItems.tickets")}
               icon={<WhatsAppIcon />}
             />
-            <ListItem
+            {/* <ListItem
             dense
             button
             onClick={() => setOpenKanbanSubmenu((prev) => !prev)}
@@ -311,7 +311,7 @@ const MainListItems = (props) => {
                 <ListItemText primary={i18n.t("kanban.subMenus.tags")} />
               </ListItem>                
             </List>
-          </Collapse>
+          </Collapse> */}
           {/* <ListItemLink
             to="/kanban"
             primary="Kanban"

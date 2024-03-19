@@ -72,7 +72,7 @@ async function handleSendMessage(job) {
     const whatsapp = await Whatsapp.findByPk(data.whatsappId);
 
     if (whatsapp == null) {
-      throw Error("Whatsapp não identificado");
+      throw Error("Whatsapp Tidak teridentifikasi");
     }
 
     const messageData: MessageData = data.data;
@@ -89,7 +89,7 @@ async function handleVerifySchedules(job) {
   try {
     const { count, rows: schedules } = await Schedule.findAndCountAll({
       where: {
-        status: "PENDENTE",
+        status: "Tertunda",
         sentAt: null,
         sendAt: {
           [Op.gte]: moment().format("YYYY-MM-DD HH:mm:ss"),
@@ -101,7 +101,7 @@ async function handleVerifySchedules(job) {
     if (count > 0) {
       schedules.map(async schedule => {
         await schedule.update({
-          status: "AGENDADA"
+          status: "DIJADWALKAN"
         });
         sendScheduledMessages.add(
           "SendMessage",
@@ -128,7 +128,7 @@ async function handleSendScheduledMessage(job) {
     scheduleRecord = await Schedule.findByPk(schedule.id);
   } catch (e) {
     Sentry.captureException(e);
-    logger.info(`Erro ao tentar consultar agendamento: ${schedule.id}`);
+    logger.info(`Terjadi kesalahan saat mencoba menanyakan jadwal: ${schedule.id}`);
   }
 
   try {
@@ -144,7 +144,7 @@ async function handleSendScheduledMessage(job) {
       status: "ENVIADA"
     });
 
-    logger.info(`Mensagem agendada enviada para: ${schedule.contact.name}`);
+    logger.info(`Pesan terjadwal dikirim ke: ${schedule.contact.name}`);
     sendScheduledMessages.clean(15000, "completed");
   } catch (e: any) {
     Sentry.captureException(e);
@@ -392,7 +392,7 @@ async function verifyAndFinalizeCampaign(campaign) {
   });
 
   if (count1 === count2) {
-    await campaign.update({ status: "FINALIZADA", completedAt: moment() });
+    await campaign.update({ status: "FINAL", completedAt: moment() });
   }
 
   const io = getIO();

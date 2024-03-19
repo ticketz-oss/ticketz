@@ -253,7 +253,7 @@ const TicketsListCustom = (props) => {
     }
     
     const onCompanyAppMessage = (data) => {
-	  console.log("recebi mensagem", data);
+	  console.log("Saya menerima pesan", data);
 
       const queueIds = queues.map((q) => q.id);
       if (

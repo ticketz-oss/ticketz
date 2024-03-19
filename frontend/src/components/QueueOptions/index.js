@@ -157,7 +157,7 @@ export function QueueOptionStepper({ queueId, options, updateOptions }) {
             onChange={(event) => handleOptionChangeTitle(event, index)}
             size="small"
             className={classes.input}
-            placeholder="Título da opção"
+            placeholder="Judul opsi"
           />
           <div style={{ display: "none" }}>
             <input

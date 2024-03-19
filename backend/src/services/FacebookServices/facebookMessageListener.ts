@@ -294,7 +294,7 @@ const verifyQueue = async (
         const endTime = moment(schedule.endTime, "HH:mm");
 
         if (now.isBefore(startTime) || now.isAfter(endTime)) {
-          const body = formatBody(`${queue.outOfHoursMessage}\n\n*[ # ]* - Voltar ao Menu Principal`, ticket.contact);
+          const body = formatBody(`${queue.outOfHoursMessage}\n\n*[ # ]* - Kembali ke Menu Utama`, ticket.contact);
 
           const sentMessage = await sendFaceMessage({
             ticket,
@@ -364,7 +364,7 @@ const handleChartbot = async (ticket: Ticket, msg: string, wbot: any, dontReadTh
       const endTime = moment(schedule.endTime, "HH:mm");
 
       if (now.isBefore(startTime) || now.isAfter(endTime)) {
-        const body = formatBody(`${ticket.queue.outOfHoursMessage}\n\n*[ # ]* - Voltar ao Menu Principal`, ticket.contact);
+        const body = formatBody(`${ticket.queue.outOfHoursMessage}\n\n*[ # ]* - Kembali ke Menu Utama`, ticket.contact);
 
 
 
@@ -459,7 +459,7 @@ const handleChartbot = async (ticket: Ticket, msg: string, wbot: any, dontReadTh
       queueOptions.forEach((option, i) => {
         options += `*[ ${option.option} ]* - ${option.title}\n`;
       });
-      options += `\n*[ # ]* - Voltar Menu Inicial`;
+      options += `\n*[ # ]* - Kembali ke Menu Utama`;
 
       const textMessage = formatBody(`\u200e${queue.greetingMessage}\n\n${options}`, ticket.contact)
 
@@ -497,7 +497,7 @@ const handleChartbot = async (ticket: Ticket, msg: string, wbot: any, dontReadTh
         queueOptions.forEach((option, i) => {
           options += `*[ ${option.option} ]* - ${option.title}\n`;
         });
-        options += `\n*[ # ]* - Voltar Menu Inicial`;
+        options += `\n*[ # ]* - Kembali ke Menu Utama`;
 
 
         await sendFaceMessage({

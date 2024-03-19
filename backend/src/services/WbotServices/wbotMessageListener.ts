@@ -1035,7 +1035,7 @@ const verifyQueue = async (
         (!currentSchedule || currentSchedule.inActivity === false)
       ) {
 
-        const body = formatBody(`${queue.outOfHoursMessage}\n\n*[ # ]* - Voltar ao Menu Principal`, ticket.contact);
+        const body = formatBody(`${queue.outOfHoursMessage}\n\n*[ # ]* - Kembali ke Menu Utama`, ticket.contact);
         const sentMessage = await wbot.sendMessage(
           `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, {
           text: body,
@@ -1281,7 +1281,7 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
         });
       });
       sectionsRows.push({
-        title: "Voltar Menu Inicial",
+        title: "Kembali ke Menu Utama",
         rowId: `#`
       });
       const sections = [
@@ -1315,7 +1315,7 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
       });
       buttons.push({
         buttonId: `#`,
-        buttonText: { displayText: "Voltar Menu Inicial" },
+        buttonText: { displayText: "Kembali ke Menu Utama" },
         type: 4
       });
 
@@ -1339,7 +1339,7 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
       queueOptions.forEach((option, i) => {
         options += `*[ ${option.option} ]* - ${option.title}\n`;
       });
-      options += `\n*[ # ]* - Voltar Menu Inicial`;
+      options += `\n*[ # ]* - Kembali ke Menu Utama`;
 
       const textMessage = {
         text: formatBody(`\u200e${queue.greetingMessage}\n\n${options}`, ticket.contact),
@@ -1398,7 +1398,7 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
           });
         });
         sectionsRows.push({
-          title: "Voltar Menu Inicial",
+          title: "Kembali ke Menu Utama",
           rowId: `#`
         });
         const sections = [
@@ -1432,7 +1432,7 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
         });
         buttons.push({
           buttonId: `#`,
-          buttonText: { displayText: "Voltar Menu Inicial" },
+          buttonText: { displayText: "Kembali ke Menu Utama" },
           type: 4
         });
 
@@ -1457,7 +1457,7 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
         queueOptions.forEach((option, i) => {
           options += `*[ ${option.option} ]* - ${option.title}\n`;
         });
-        options += `\n*[ # ]* - Voltar Menu Inicial`;
+        options += `\n*[ # ]* - Kembali ke Menu Utama`;
 
         const textMessage = {
           text: formatBody(`\u200e${currentOption.message}\n\n${options}`, ticket.contact),
