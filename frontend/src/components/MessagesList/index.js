@@ -216,6 +216,11 @@ const useStyles = makeStyles((theme) => ({
     borderBottomLeftRadius: 8,
     borderBottomRightRadius: 8,
   },
+  
+  messageMediaSticker: {
+    backgroundColor: "unset",
+    boxShadow: "unset",
+  },
 
   timestamp: {
     fontSize: 11,
@@ -224,7 +229,27 @@ const useStyles = makeStyles((theme) => ({
     right: 5,
     color: "#999",
   },
+  
+  timestampStickerLeft: {
+    backgroundColor: "#ffffff",
+    borderRadius: 8,
+    padding: 5,
+    boxShadow: "0 1px 1px #b3b3b3",
+  },
 
+  timestampStickerRight: {
+    backgroundColor: "#dcf8c6",
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 0,
+    paddingLeft: 5,
+    paddingRight: 5,
+    paddingTop: 5,
+    paddingBottom: 0,
+    boxShadow: "0 1px 1px #b3b3b3",
+  },
+  
   dailyTimestamp: {
     alignItems: "center",
     textAlign: "center",
@@ -341,6 +366,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
   const lastMessageRef = useRef();
 
   const [selectedMessage, setSelectedMessage] = useState({});
+  const [selectedMessageData, setSelectedMessageData] = useState({});
   const [anchorEl, setAnchorEl] = useState(null);
   const messageOptionsMenuOpen = Boolean(anchorEl);
   const currentTicketId = useRef(ticketId);
@@ -448,18 +474,19 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     }
   };
 
-  const handleOpenMessageOptionsMenu = (e, message) => {
+  const handleOpenMessageOptionsMenu = (e, message, data) => {
     setAnchorEl(e.currentTarget);
     setSelectedMessage(message);
+    setSelectedMessageData(data);
   };
 
   const handleCloseMessageOptionsMenu = (e) => {
     setAnchorEl(null);
   };
 
-  const checkMessageMedia = (message) => {
+  const checkMessageMedia = (message, data) => {
     if (message.mediaType === "image") {
-      return <ModalImageCors imageUrl={message.mediaUrl} isDeleted={message.isDeleted} />;
+      return <ModalImageCors imageUrl={message.mediaUrl} isDeleted={message.isDeleted} data={data} />;
     }
     if (message.mediaType === "audio") {
     
@@ -673,13 +700,17 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
 
   const renderMessages = () => {
       const viewMessagesList = messagesList.map((message, index) => {
+        const data = JSON.parse(message.dataJson);
+        const isSticker = ("stickerMessage" in data.message); 
         if (!message.fromMe) {
           return (
             <React.Fragment key={message.id}>
               {renderDailyTimestamps(message, index)}
               {renderMessageDivider(message, index)}
               <div
-                className={classes.messageLeft}
+                className={[clsx(classes.messageLeft, {
+                  [classes.messageMediaSticker] : isSticker,
+                })]}
                 title={message.queueId && message.queue?.name}
               >
                 <IconButton
@@ -688,7 +719,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                   id="messageActionsButton"
                   disabled={message.isDeleted}
                   className={classes.messageActionsButton}
-                  onClick={(e) => handleOpenMessageOptionsMenu(e, message)}
+                  onClick={(e) => handleOpenMessageOptionsMenu(e, message, data)}
                 >
                   <ExpandMore />
                 </IconButton>
@@ -698,7 +729,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                   </span>
                 )}
 
-                {message.mediaUrl && checkMessageMedia(message)}
+                {message.mediaUrl && checkMessageMedia(message, data)}
 
                 {message.body.includes('data:image') ? messageLocation(message.body, message.createdAt)
                   :
@@ -725,8 +756,13 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                           className={classes.deletedIcon}
                         />
                       )}
-                      <MarkdownWrapper>{message.body}</MarkdownWrapper>
-                      <span className={classes.timestamp}>
+                      { !isSticker && (
+                        <MarkdownWrapper>{message.body}</MarkdownWrapper>
+                        )
+                      }
+                      <span className={[clsx(classes.timestamp, {
+                        [classes.timestampStickerLeft] : isSticker
+                      })]}>
                         {message.isEdited && <span> {i18n.t("message.edited")} </span>}
                         {format(parseISO(message.createdAt), "HH:mm")}
                       </span>
@@ -740,7 +776,9 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
               {renderDailyTimestamps(message, index)}
               {renderMessageDivider(message, index)}
               <div
-                className={classes.messageRight}
+                className={[clsx(classes.messageRight, {
+                  [classes.messageMediaSticker] : isSticker,
+                })]}
                 title={message.queueId && message.queue?.name}
               >
                 <IconButton
@@ -749,11 +787,11 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                   id="messageActionsButton"
                   disabled={message.isDeleted}
                   className={classes.messageActionsButton}
-                  onClick={(e) => handleOpenMessageOptionsMenu(e, message)}
+                  onClick={(e) => handleOpenMessageOptionsMenu(e, message, data)}
                 >
                   <ExpandMore />
                 </IconButton>
-                {message.mediaUrl && checkMessageMedia(message)}
+                {message.mediaUrl && checkMessageMedia(message, data)}
                 <div
                   className={clsx(classes.textContentItem, {
                     [classes.textContentItemDeleted]: message.isDeleted,
@@ -776,8 +814,13 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
 
                     :
                   message.quotedMsg && renderQuotedMessage(message)}
-                  <MarkdownWrapper>{message.body}</MarkdownWrapper>
-                  <span className={classes.timestamp}>
+                  { !isSticker && (
+                    <MarkdownWrapper>{message.body}</MarkdownWrapper>
+                    )
+                  }
+                    <span className={[clsx(classes.timestamp, {
+                      [classes.timestampStickerRight] : isSticker
+                    })]}>
                     {message.isEdited && <span> {i18n.t("message.edited")} </span>}
                     {format(parseISO(message.createdAt), "HH:mm")}
                     {renderMessageAck(message)}
@@ -795,6 +838,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     <div className={classes.messagesListWrapper}>
       <MessageOptionsMenu
         message={selectedMessage}
+        data={selectedMessageData}
         anchorEl={anchorEl}
         menuOpen={messageOptionsMenuOpen}
         handleClose={handleCloseMessageOptionsMenu}

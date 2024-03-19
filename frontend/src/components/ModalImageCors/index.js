@@ -15,6 +15,11 @@ const useStyles = makeStyles(theme => ({
 		borderBottomLeftRadius: 8,
 		borderBottomRightRadius: 8,
 	},
+
+  messageMediaSticker: {
+    width: 200,
+    height: 200,
+  },
 	
 	messageMediaDeleted: {
     filter: "grayscale(1)",
@@ -22,7 +27,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const ModalImageCors = ({ imageUrl , isDeleted }) => {
+const ModalImageCors = ({ imageUrl, isDeleted , data }) => {
 	const classes = useStyles();
 	const [fetching, setFetching] = useState(true);
 	const [blobUrl, setBlobUrl] = useState("");
@@ -45,11 +50,13 @@ const ModalImageCors = ({ imageUrl , isDeleted }) => {
 	return (
 		<ModalImage
 			className={[clsx(classes.messageMedia, {
-        [classes.messageMediaDeleted] : isDeleted
+        [classes.messageMediaDeleted] : isDeleted,
+        [classes.messageMediaSticker] : ("stickerMessage" in data.message)
       })]}
 			smallSrcSet={fetching ? imageUrl : blobUrl}
 			medium={fetching ? imageUrl : blobUrl}
 			large={fetching ? imageUrl : blobUrl}
+			imageBackgroundColor="unset"
 			alt="image"
 		/>
 	);
