@@ -1,173 +1,116 @@
-# Sobre o projeto
+[![en](https://img.shields.io/badge/lang-en-green.svg)](README.md)
+[![pt-br](https://img.shields.io/badge/lang-pt--br-red.svg)](README.md)
 
-Ticketz é um comunicador com recursos de CRM e helpdesk que utiliza
-Whatsapp como meio de comunicação com os clientes.
+# About the Project
 
-## Autoria original
+Ticketz is a communicator with CRM and helpdesk features that utilizes WhatsApp as a means of communication with clients.
 
-Este projeto foi iniciado em [um projeto Open
-Source](https://github.com/canove/whaticket-community), publicado pelo
-desenvolvedor [Cassio Santos](https://github.com/canove) sob a licença permissiva
-MIT. Depois recebeu diversas melhorias por autores não identificados e foi
-comercializado diretamente entre desenvolvedores e usuários com fornecimento
-de código fonte, e de acordo com informações [deste vídeo acabou em algum momento
-sendo vazado e publicado abertamente](https://www.youtube.com/watch?v=SX_cGD5RLkQ)
+## Original Authorship
 
-Após algumas pesquisas foi ainda identificado que a primeira versão SaaS do
-Whaticket foi criada pelo desenvolvedor [Wender
-Teixeira](https://github.com/w3nder), inclusive uma versão do [https://github.com/unkbot/whaticket-free](Whaticket
-Single) que faz uso da biblioteca Baileys para acesso ao Whatsapp.
+This project was initiated in [an Open Source project](https://github.com/canove/whaticket-community), published by the developer [Cassio Santos](https://github.com/canove) under the permissive MIT license. It later received various improvements by unidentified authors and was commercially distributed directly between developers and users with the provision of source code. According to information from [this video, it was leaked and publicly released at some point](https://www.youtube.com/watch?v=SX_cGD5RLkQ).
 
-É praticamente impossível identificar e creditar os autores das melhorias, [o
-código publicado pelo canal Vem Fazer](https://github.com/vemfazer/whaticket-versao-03-12-canal-vem-fazer)
-não menciona licença alguma portanto estou presumindo que todos os autores
-estão tranquilos em manter estas alterações sob a mesma licença do projeto
-original (MIT)
+After some research, it was further identified that the first SaaS version of Whaticket was created by the developer [Wender Teixeira](https://github.com/w3nder), including a version of [Whaticket Single](https://github.com/unkbot/whaticket-free) that uses the Baileys library for WhatsApp access.
 
-## Relicenciamento
+It is practically impossible to identify and credit the authors of the improvements. [The code published by the Vem Fazer channel](https://github.com/vemfazer/whaticket-versao-03-12-canal-vem-fazer) does not mention any license; therefore, I am assuming that all authors are comfortable with keeping these changes under the same license as the original project (MIT).
 
-Como estou fazendo estas alterações e disponibilizando sem custo algum, desejo que
-elas estejam disponíveis a todos, por isso estou optando por relicenciar sob a
-AGPL, que exige que todo usuário que tenha acesso ao sistema possa obter o
-código fonte.
+## Relicensing
 
-Por isso, se você utilizar diretamente esta versão, é
-**muito importante manter o link na tela "Ajuda", que dá acesso ao repositório**.
+As I am making these changes and providing them at no cost, I want them to be available to everyone. Therefore, I am choosing to relicense under the AGPL, which requires that every user who has access to the system can obtain the source code.
 
-Caso você faça alterações no código você deve alterar o link para um
-repositório ou outra forma de obter o código das suas alterações.
+Therefore, if you directly utilize this version, it is **very important to keep the link on the "About Ticketz" screen, which provides access to the repository**. If you wish, you can move the link to the source code elsewhere, but it must be easily accessible to any system user.
 
-## Objetivo
+If you make changes to the code, you must change the link to a repository or another way to obtain the code for your changes.
 
-Este projeto tem por objetivo melhorar e manter abertas as atualizações sobre o Whaticket
-SaaS publicado. Principalmente direcionadas à qualidade da aplicação e à
-facilidade de instalação e utilização.
+If you wish to use parts of the code to fix any code **for your own use**, feel free to do so and you don't need to worry about the AGPL license. However, if you want to use any part added in this project in a system that you commercialize, you must either provide the code of your entire system to its users, or you must contact the author of the code to license it under different criteria.
 
-As melhorias desenvolvidas por mim serão colocadas aqui, dependendo posso transpor,
-sempre creditando, códigos e melhorias publicados em outros projetos também derivados
-do Whaticket Community ou do Whaticket SaaS.
+## Objective
 
-## Melhorias
+The objective of this project is to improve and keep open updates about the published Whaticket SaaS. Mainly focused on application quality and ease of installation and use.
 
-Por melhor esforço, procurarei sempre listar aqui as melhorias incorporadas, creditando
-autorias quando necessário, porém o melhor local para observar o que foi feito é o histórico
-do repositório.
+The improvements developed by me will be placed here, and depending on the situation, I can transpose, always crediting, codes and improvements published in other projects also derived from Whaticket Community or Whaticket SaaS.
 
-* [83f6713](https://github.com/allgood/ticketz/commit/83f67132c234f528c13540b3de529ccb54cc3e6a) Aceita documento anexado com legenda)
-* [e8f4d32](https://github.com/allgood/ticketz/commit/e8f4d325f46133a2ea828dfe8ca7470f44243bf5) Aceita mensagens editadas -- cherry pick de @Vinicius-Marques6 canove/whaticket-community#605
-* [60455d9](https://github.com/allgood/ticketz/commit/60455d9416975a0d1806968815d28f5195d15e64) Mantém aberto e utiliza apenas um websocket com o backend
-* [30526b6](https://github.com/allgood/ticketz/commit/30526b6cd6d92e3204e97ff194ef57b7def69979) Um ticket novo ao invés de reabrir ticket fechado
-* [2b58d6c](https://github.com/allgood/ticketz/commit/2b58d6c1c424bbcb060f9cc7196bfde4b42926ff) Execução através do docker compose - **Múltiplos commits até esse ponto**
-* [851bca1](https://github.com/allgood/ticketz/commit/851bca1b4d048a6f31ad90ad1db67c37dde3bcf3) Suporte recaptcha na inscrição de empresas
+## Contributing Back
 
-## Contribuindo de Volta
+Whenever possible, I intend to backport some adjustments made here to the original projects.
 
-Sempre que possível pretendo fazer backport de alguns ajustes feitos aqui
-aos projetos originais
-
-
-Rodando o projeto:
+Running the Project:
 ------------------
 
-O projeto atualmente suporta execução utilizando containers Docker, para a
-instalação é necessário ter o Docker Community Edition e o cliente Git
-instalados. O ideal é buscar a melhor forma de instalar estes recursos no
-sistema operacional de sua preferência. [O guia oficial de instalação do
-Docker pode ser encontrado aqui](https://docs.docker.com/engine/install/).
+The project currently supports execution using Docker containers. For installation, you need to have Docker Community Edition and the Git client installed. It is ideal to find the best way to install these resources on your preferred operating system. [The official Docker installation guide can be found here](https://docs.docker.com/engine/install/).
 
-
-Em ambos os casos é necessário clonar o repositório, necessário então abrir
-um terminal de comandos:
+In both cases, it is necessary to clone the repository, then open a command terminal:
 
 ```bash
-git clone https://github.com/allgood/ticketz.git
+git -c core.autocrlf=input clone https://github.com/allgood/ticketz.git
 cd ticketz
 ```
 
-## Rodando localmente
+## Running Locally
 
-Por padrão a configuração está ajustada para executar o sistema apenas no
-próprio computador. Para executar em uma rede local é necessário editar os
-arquivos `.env-backend-local` e `.env-frontend-local` e alterar os endereços
-de backend e frontend de `localhost` para o ip desejado, por exemplo
-`192.168.0.10`
+By default, the configuration is set to run the system only on the local computer. To run it on a local network, you need to edit the `.env-backend-local` and `.env-frontend-local` files and change the backend and frontend addresses from `localhost` to the desired IP, for example, `192.168.0.10`.
 
-Para executar o sistema basta executar o comando abaixo:
+To run the system, simply execute the following command:
 
 ```bash
 docker compose -f docker-compose-local.yaml up -d
 ```
 
-Na primeira execução o sistema vai inicializar os bancos de dados e tabelas,
-e após alguns minutos o Ticketz estará acessível pela porta 3000
+On the first run, the system will initialize the databases and tables, and after a few minutes, Ticketz will be accessible through port 3000.
 
-O usuário padrão é admin@admin.com e a senha padrão é 123456
+The default username is admin@admin.com, and the default password is 123456.
 
-A aplicação irá se reiniciar automaticamente a cada reboot do servidor.
+The application will restart automatically after each server reboot.
 
-A execução pode ser interrompida com o comando:
+Execution can be stopped with the command:
 
 ```bash
 docker compose -f docker-compose-local.yaml down
 ```
 
+## Running and Serving on the Internet
 
-## Rodando e servindo na internet
+Having a server accessible via the internet, it is necessary to adjust two DNS names of your choice, one for the backend and another for the frontend, and also an email address for certificate registration, for example:
 
-Tendo um servidor acessível pela internet, é necessário ajustar dois nomes
-de DNS a sua escolha, um para o backend e outro para o frontend, e também um
-endereço de email para cadastro dos certificados, por exemplo:
+* **backend:** api.ticketz.example.com
+* **frontend:** ticketz.example.com
+* **email:** ticketz@example.com
 
-* **backend:** api.ticketz.exemplo.com.br
-* **frontend:** ticketz.exemplo.com.br
-* **email:** ticketz@exemplo.com.br
+You need to edit the `.env-backend-acme` and `.env-frontend-acme` files, defining these values in them.
 
-É necessário editar os arquivos `.env-backend-acme` e `.env-frontend-acme`
-definindo neles estes valores.
+If you want to use reCAPTCHA in the company signup, you also need to insert the secret and site keys in the backend and frontend files, respectively.
 
-Se desejar utilizar reCAPTCHA na inscrição de empresas também é necessário
-inserir as chaves secretas e de site nos arquivos de backend e frontend,
-respectivamente.
+This guide assumes that the terminal is open and logged in with a regular user who has permission to use the `sudo` command to execute commands as root.
 
-Este guia presume que o terminal está aberto e logado com um usuário comum
-que tem permissão para utilizar o comando `sudo` para executar comandos como
-root.
-
-Estando então na pasta raiz do projeto, executa-se o seguinte comando para
-iniciar o serviço:
+Being in the project's root folder, execute the following command to start the service:
 
 ```bash
 sudo docker compose -f docker-compose-acme.yaml up -d
 ```
 
-Na primeira execução o Docker irá fazer a compilação do código e criação dos
-conteiners, e após isso o ticketz vai inicializar os bancos de dados e
-tabelas. Esta operação pode levar bastante tempo, depois disso o Ticketz
-estará acessível pelo endereço fornecido para oo frontend.
+On the first run, Docker will compile the code and create the containers, and then Ticketz will initialize the databases and tables. This operation can take quite some time, after which Ticketz will be accessible at the provided frontend address.
 
-O usuário padrão é admin@admin.com e a senha padrão é 123456
+The default username is admin@admin.com, and the default password is 123456.
 
-A aplicação irá se reiniciar automaticamente a cada reboot do servidor.
+The application will restart automatically after each server reboot.
 
-Para encerrar o serviço utiliza-se o seguinte comando:
+To terminate the service, use the following command:
 
 ```bash
 sudo docker compose -f docker-compose-acme.yaml down
 ```
 
-Aviso Importante
+Important Notice
 ----------------
 
-Este projeto não está afiliado à Meta, WhatsApp ou qualquer outra empresa.
-A utilização do código fornecido é de responsabilidade exclusiva dos usuários
-e não implica em qualquer responsabilidade para o autor ou colaboradores do projeto.
+This project is not affiliated with Meta, WhatsApp, or any other company. The use of the provided code is the sole responsibility of the users and does not imply any liability for the author or project collaborators.
 
+Made Your Life Easier?
+----------------------
 
-Facilitou sua vida?
--------------------
+If this project has helped you with a complex task, consider making a donation to the author via PayPal or Brazilian PIX below.
 
-Se este projeto ajudou você em uma tarefa complexa, considere fazer uma doação ao autor pelo PIX abaixo.
+[![](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=X6XHVCPMRQEL4)
 
 ![image](https://github.com/ticketz-oss/ticketz/assets/6070736/8e85b263-73ca-4fb4-9bdc-03fff356b6ff)
 
-Chave Pix: 0699c69d-0951-4686-a5b7-c6cd21aa7e15
+PIX Key: 0699c69d-0951-4686-a5b7-c6cd21aa7e15
