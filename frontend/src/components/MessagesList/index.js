@@ -122,6 +122,11 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: "#6bcbef",
   },
 
+  quotedThumbnail: {
+    maxWidth: "74px",
+    maxHeight: "74px",
+  },
+
   messageRight: {
     marginLeft: 20,
     marginTop: 2,
@@ -597,6 +602,10 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
   };
 
   const renderQuotedMessage = (message) => {
+    const data = JSON.parse(message.quotedMsg.dataJson);
+    const thumbnail = data?.message?.imageMessage?.jpegThumbnail;
+    const stickerUrl = data?.message?.stickerMessage && message.quotedMsg?.mediaUrl ;
+    const imageUrl = thumbnail ? "data:image/png;base64, " + thumbnail : stickerUrl;
     return (
       <div
         className={clsx(classes.quotedContainerLeft, {
@@ -616,6 +625,9 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
           )}
           {message.quotedMsg?.body}
         </div>
+        { imageUrl && (
+          <img className={classes.quotedThumbnail} src={ imageUrl } />
+        )}
       </div>
     );
   };
