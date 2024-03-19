@@ -84,8 +84,8 @@ const useStyles = makeStyles((theme) => ({
     },
 
     whiteSpace: "pre-wrap",
-    backgroundColor: "#ffffff",
-    color: "#303030",
+    backgroundColor: theme.mode === 'light' ? "#ffffff" : "#024481",
+    color: theme.mode === 'light' ? "#303030" : "#ffffff",
     alignSelf: "flex-start",
     borderTopLeftRadius: 0,
     borderTopRightRadius: 8,
@@ -95,13 +95,13 @@ const useStyles = makeStyles((theme) => ({
     paddingRight: 5,
     paddingTop: 5,
     paddingBottom: 0,
-    boxShadow: "0 1px 1px #b3b3b3",
+    boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000"
   },
 
   quotedContainerLeft: {
     margin: "-3px -80px 6px -6px",
     overflow: "hidden",
-    backgroundColor: "#f0f0f0",
+    backgroundColor: theme.mode === 'light' ? "#f0f0f0" : "#1c2134",
     borderRadius: "7.5px",
     display: "flex",
     position: "relative",
@@ -136,10 +136,9 @@ const useStyles = makeStyles((theme) => ({
       top: 0,
       right: 0,
     },
-
     whiteSpace: "pre-wrap",
-    backgroundColor: "#dcf8c6",
-    color: "#303030",
+    backgroundColor: theme.mode === 'light' ? "#dcf8c6" : "#128c7e",
+    color: theme.mode === 'light' ? "#303030" : "#ffffff",
     alignSelf: "flex-end",
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
@@ -149,13 +148,13 @@ const useStyles = makeStyles((theme) => ({
     paddingRight: 5,
     paddingTop: 5,
     paddingBottom: 0,
-    boxShadow: "0 1px 1px #b3b3b3",
+    boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000"
   },
 
   quotedContainerRight: {
     margin: "-3px -80px 6px -6px",
     overflowY: "hidden",
-    backgroundColor: "#cfe9ba",
+    backgroundColor: theme.mode === 'light' ? "#cfe9ba" : "#075e54",
     borderRadius: "7.5px",
     display: "flex",
     position: "relative",
@@ -227,18 +226,18 @@ const useStyles = makeStyles((theme) => ({
     position: "absolute",
     bottom: 0,
     right: 5,
-    color: "#999",
+    color: theme.mode === 'light' ? "#999" : "#d0d0d0"
   },
   
   timestampStickerLeft: {
-    backgroundColor: "#ffffff",
+    backgroundColor: theme.mode === 'light' ? "#ffffff" : "#024481",
     borderRadius: 8,
     padding: 5,
-    boxShadow: "0 1px 1px #b3b3b3",
+    boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000"
   },
 
   timestampStickerRight: {
-    backgroundColor: "#dcf8c6",
+    backgroundColor: theme.mode === 'light' ? "#dcf8c6" : "#128c7e",
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
     borderBottomLeftRadius: 8,
@@ -247,7 +246,7 @@ const useStyles = makeStyles((theme) => ({
     paddingRight: 5,
     paddingTop: 5,
     paddingBottom: 0,
-    boxShadow: "0 1px 1px #b3b3b3",
+    boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000"
   },
   
   dailyTimestamp: {
