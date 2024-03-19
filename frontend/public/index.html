@@ -10,11 +10,16 @@
 		<link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
 		<link rel=”shortcut icon” href=”%PUBLIC_URL%/favicon.ico”>
 		<link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+		<link itemprop="thumbnailUrl" href="%PUBLIC_URL%/apple-touch-icon.png"> 
+			<span itemprop="thumbnail" itemscope itemtype="http://schema.org/ImageObject"> 
+				<link itemprop="url" href="%PUBLIC_URL%/apple-touch-icon.png"> 
+			</span>
 		<meta name="theme-color" content="#000000" />
 		<meta
 			name="viewport"
 			content="minimum-scale=1, initial-scale=1, width=device-width"
 		/>
+		<meta property="og:image" content="%PUBLIC_URL%/apple-touch-icon.png">
 		<!-- Issue workaround for React v16. -->
 		<script>
 			// See https://github.com/facebook/react/issues/20829#issuecomment-802088260
