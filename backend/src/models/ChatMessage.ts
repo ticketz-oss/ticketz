@@ -34,8 +34,7 @@ class ChatMessage extends Model<ChatMessage> {
   @Column(DataType.STRING)
   get mediaPath(): string | null {
     if (this.getDataValue("mediaPath")) {
-      return `${process.env.BACKEND_URL}:${process.env.PROXY_PORT
-        }/public/${this.getDataValue("mediaPath")}`;
+      return `${process.env.BACKEND_URL}/public/${this.getDataValue("mediaPath")}`;
     }
     return null;
   }
