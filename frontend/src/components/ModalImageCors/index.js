@@ -51,7 +51,7 @@ const ModalImageCors = ({ imageUrl, isDeleted , data }) => {
 		<ModalImage
 			className={[clsx(classes.messageMedia, {
         [classes.messageMediaDeleted] : isDeleted,
-        [classes.messageMediaSticker] : ("stickerMessage" in data.message)
+        [classes.messageMediaSticker] : data && ("stickerMessage" in data.message)
       })]}
 			smallSrcSet={fetching ? imageUrl : blobUrl}
 			medium={fetching ? imageUrl : blobUrl}
