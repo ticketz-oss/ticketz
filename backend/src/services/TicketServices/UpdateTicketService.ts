@@ -58,7 +58,7 @@ const   UpdateTicketService = async ({
     if (tokenData) {
       companyId = tokenData.companyId;
     }
-    const { status, justClose } = ticketData;
+    let { status, justClose } = ticketData;
     let { queueId, userId } = ticketData;
     let chatbot: boolean | null = ticketData.chatbot || false;
     let queueOptionId: number | null = ticketData.queueOptionId || null;
@@ -220,6 +220,8 @@ const   UpdateTicketService = async ({
     });
 
     await ticket.reload();
+    
+    status = ticket.status;
 
     if (status !== undefined && ["pending"].indexOf(status) > -1) {
       ticketTraking.update({
@@ -265,8 +267,9 @@ const   UpdateTicketService = async ({
       if (ticket.status === "closed" && ticket.status !== oldStatus) {
         io.to(`company-${companyId}-${oldStatus}`)
           .to(`queue-${ticket.queueId}-${oldStatus}`)
+          .to(`user-${oldUserId}`)
           .emit(`company-${companyId}-ticket`, {
-            action: "delete",
+            action: "removeFromList",
             ticketId: ticket.id
           });
       }
@@ -274,8 +277,10 @@ const   UpdateTicketService = async ({
     io.to(`company-${companyId}-${ticket.status}`)
       .to(`company-${companyId}-notification`)
       .to(`queue-${ticket.queueId}-${ticket.status}`)
-	  .to(`queue-${ticket.queueId}-notification`)
+      .to(`queue-${ticket.queueId}-notification`)
       .to(ticketId.toString())
+      .to(`user-${ticket?.userId}`)
+      .to(`user-${oldUserId}`)
       .emit(`company-${companyId}-ticket`, {
         action: "update",
         ticket

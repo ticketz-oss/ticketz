@@ -906,7 +906,7 @@ const verifyQueue = async (
     }
 
     await UpdateTicketService({
-      ticketData: { queueId: firstQueue?.id, chatbot },
+      ticketData: { queueId: firstQueue.id, chatbot, status: "pending" },
       ticketId: ticket.id,
       companyId: ticket.companyId,
     });
