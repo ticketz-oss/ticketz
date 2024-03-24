@@ -23,8 +23,10 @@ import {
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
+import { useTheme } from "@material-ui/core";
 import Container from "@material-ui/core/Container";
 import logo from "../../assets/vector/logo.svg";
+import logoDark from "../../assets/vector/logo-dark.svg";
 import { i18n } from "../../translate/i18n";
 
 import { openApi } from "../../services/api";
@@ -77,6 +79,7 @@ const UserSchema = Yup.object().shape({
 });
 
 const SignUp = () => {
+  const theme = useTheme();
 	const classes = useStyles();
 	const history = useHistory();
 	let companyId = null
@@ -128,7 +131,7 @@ const SignUp = () => {
 			<CssBaseline />
 			<div className={classes.paper}>
 				<div>
-					<img style={{ margin: "0 auto", height: "80px", width: "100%" }} src={logo} alt="Whats" />
+					<img style={{ margin: "0 auto", height: "80px", width: "100%" }} src={theme.mode === "light" ? logo : logoDark} alt="Whats" />
 				</div>
 				{/*<Typography component="h1" variant="h5">
 					{i18n.t("signup.title")}

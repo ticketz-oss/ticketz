@@ -34,6 +34,8 @@ import toastError from "../errors/toastError";
 import AnnouncementsPopover from "../components/AnnouncementsPopover";
 
 import logo from "../assets/vector/logo.svg";
+import logoDark from "../assets/vector/logo-dark.svg";
+
 import { SocketContext } from "../context/Socket/SocketContext";
 import ChatPopover from "../pages/Chat/ChatPopover";
 
@@ -346,7 +348,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
         open={drawerOpen}
       >
         <div className={classes.toolbarIcon}>
-          <img src={logo} className={drawerOpen ? classes.logo : classes.hideLogo } alt="logo" />
+          <img src={theme.mode === "light" ? logo : logoDark} className={drawerOpen ? classes.logo : classes.hideLogo } alt="logo" />
           <IconButton onClick={() => setDrawerOpen(!drawerOpen)}>
             <ChevronLeftIcon />
           </IconButton>
