@@ -1,5 +1,6 @@
 import express from "express";
 import isAuth from "../middleware/isAuth";
+import isSuper from "../middleware/isSuper";
 
 import * as AnnouncementController from "../controllers/AnnouncementController";
 import multer from "multer";
@@ -15,22 +16,22 @@ routes.get("/announcements", isAuth, AnnouncementController.index);
 
 routes.get("/announcements/:id", isAuth, AnnouncementController.show);
 
-routes.post("/announcements", isAuth, AnnouncementController.store);
+routes.post("/announcements", isAuth, isSuper, AnnouncementController.store);
 
-routes.put("/announcements/:id", isAuth, AnnouncementController.update);
+routes.put("/announcements/:id", isAuth, isSuper, AnnouncementController.update);
 
-routes.delete("/announcements/:id", isAuth, AnnouncementController.remove);
+routes.delete("/announcements/:id", isAuth, isSuper, AnnouncementController.remove);
 
 routes.post(
   "/announcements/:id/media-upload",
-  isAuth,
+  isAuth, isSuper,
   upload.array("file"),
   AnnouncementController.mediaUpload
 );
 
 routes.delete(
   "/announcements/:id/media-upload",
-  isAuth,
+  isAuth, isSuper,
   AnnouncementController.deleteMedia
 );
 
