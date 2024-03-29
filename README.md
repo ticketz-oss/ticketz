@@ -1,5 +1,5 @@
 [![en](https://img.shields.io/badge/lang-en-green.svg)](README.md)
-[![pt-br](https://img.shields.io/badge/lang-pt--br-red.svg)](README.md)
+[![pt-br](https://img.shields.io/badge/lang-pt--br-red.svg)](README-pt.md)
 
 # About the Project
 
