@@ -1,2 +1,7 @@
 .docker
 *~
+frontend/.DS_Store
+frontend/src/.DS_Store
+frontend/src/assets/.DS_Store
+frontend/src/assets/vector/.DS_Store
+.DS_Store
