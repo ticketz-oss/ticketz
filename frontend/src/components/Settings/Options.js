@@ -10,6 +10,8 @@ import useSettings from "../../hooks/useSettings";
 import { toast } from 'react-toastify';
 import { makeStyles } from "@material-ui/core/styles";
 import { grey, blue } from "@material-ui/core/colors";
+import OnlyForSuperUser from "../OnlyForSuperUser";
+import useAuth from "../../hooks/useAuth.js";
 
 //import 'react-toastify/dist/ReactToastify.css';
  
@@ -78,17 +80,27 @@ export default function Options(props) {
   const [scheduleType, setScheduleType] = useState("disabled");
   const [callType, setCallType] = useState("enabled");
   const [chatbotType, setChatbotType] = useState("");
+  const [allowSignup, setAllowSignup] = useState("disabled");
   const [CheckMsgIsGroup, setCheckMsgIsGroupType] = useState("enabled");
 
   const [loadingUserRating, setLoadingUserRating] = useState(false);
   const [loadingScheduleType, setLoadingScheduleType] = useState(false);
   const [loadingCallType, setLoadingCallType] = useState(false);
   const [loadingChatbotType, setLoadingChatbotType] = useState(false);
+  const [loadingAllowSignup, setLoadingAllowSignup] = useState(false);
   const [loadingCheckMsgIsGroup, setCheckMsgIsGroup] = useState(false);
+  const { getCurrentUserInfo } = useAuth();
+  const [currentUser, setCurrentUser] = useState({});
 
   const { update } = useSettings();
 
   useEffect(() => {
+    getCurrentUserInfo().then(
+      (u) => {
+        setCurrentUser(u);
+      }
+    );
+    
     if (Array.isArray(settings) && settings.length) {
       const userRating = settings.find((s) => s.key === "userRating");
       if (userRating) {
@@ -109,6 +121,10 @@ export default function Options(props) {
       const chatbotType = settings.find((s) => s.key === "chatBotType");
       if (chatbotType) {
         setChatbotType(chatbotType.value);
+      }
+      const allowSignup = settings.find((s) => s.key === "allowSignup");
+      if (allowSignup) {
+        setAllowSignup(allowSignup.value);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -168,6 +184,17 @@ export default function Options(props) {
     });
     toast.success("Operação atualizada com sucesso.");
     setLoadingChatbotType(false);
+  }
+
+  async function handleAllowSignup(value) {
+    setAllowSignup(value);
+    setLoadingAllowSignup(true);
+    await update({
+      key: "allowSignup",
+      value,
+    });
+    toast.success("Operação atualizada com sucesso.");
+    setLoadingAllowSignup(false);
   }
 
   async function handleGroupType(value) {
@@ -288,6 +315,31 @@ export default function Options(props) {
             </FormHelperText>
           </FormControl>
         </Grid>
+        <OnlyForSuperUser
+          user={currentUser}
+          yes={() => (
+            <Grid xs={12} sm={6} md={4} item>
+              <FormControl className={classes.selectContainer}>
+                <InputLabel id="group-type-label">
+                  Permitir cadastro
+                </InputLabel>
+                <Select
+                  labelId="allow-signup"
+                  value={allowSignup}
+                  onChange={async (e) => {
+                    handleAllowSignup(e.target.value);
+                  }}
+                >
+                  <MenuItem value={"disabled"}>Desativado</MenuItem>
+                  <MenuItem value={"enabled"}>Ativado</MenuItem>
+                </Select>
+                <FormHelperText>
+                  {loadingAllowSignup && "Atualizando..."}
+                </FormHelperText>
+              </FormControl>
+            </Grid>
+          )}
+         />
       </Grid>
     </>
   );

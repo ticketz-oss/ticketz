@@ -14,6 +14,7 @@ import FindAllCompaniesService from "../services/CompanyService/FindAllCompanies
 import User from "../models/User";
 
 import axios from 'axios';
+import CheckSettings from "../helpers/CheckSettings";
 
 
 type IndexQuery = {
@@ -49,7 +50,11 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   return res.json({ companies, count, hasMore });
 };
 
-export const store = async (req: Request, res: Response): Promise<Response> => {
+export const signup = async (req: Request, res: Response): Promise<Response> => {
+  if (await CheckSettings("allowSignup") !== "enabled") {
+    return res.status(401).json("🙎🏻‍♂️ Signup disabled");
+  }
+  
   if (process.env.RECAPTCHA_SECRET_KEY) {
 	  if (!req.body.captchaToken) {
 		  return res.status(401).json('empty captcha');
@@ -62,7 +67,10 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 		  return res.status(401).json('🤖 be gone');
 	  }
   }
-  
+  return await store(req, res);
+}
+
+export const store = async (req: Request, res: Response): Promise<Response> => {
   const newCompany: CompanyData = req.body;
 
   const schema = Yup.object().shape({

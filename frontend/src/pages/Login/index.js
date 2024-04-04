@@ -17,6 +17,7 @@ import { i18n } from "../../translate/i18n";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import logo from "../../assets/vector/logo.svg";
 import logoDark from "../../assets/vector/logo-dark.svg";
+import useSettings from "../../hooks/useSettings";
 
 
 const Copyright = () => {
@@ -73,9 +74,10 @@ const useStyles = makeStyles(theme => ({
 const Login = () => {
 	const classes = useStyles();
   const theme = useTheme();
-
+  const { getPublicSetting } = useSettings();
 
 	const [user, setUser] = useState({ email: "", password: "" });
+	const [allowSignup, setAllowSignup] = useState(false);
 
 	const { handleLogin } = useContext(AuthContext);
 
@@ -87,6 +89,12 @@ const Login = () => {
 		e.preventDefault();
 		handleLogin(user);
 	};
+
+  getPublicSetting("allowSignup").then(
+    (data) => {
+      setAllowSignup(data === "enabled");
+    }
+  )
 
 	return (
 		<div className={classes.root}>
@@ -135,7 +143,8 @@ const Login = () => {
 					>
 						{i18n.t("login.buttons.submit")}
 					</Button>
-					{ <Grid container>
+					{ allowSignup && 
+					  <Grid container>
 						<Grid item>
 							<Link
 								href="#"

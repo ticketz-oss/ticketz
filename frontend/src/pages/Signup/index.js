@@ -35,6 +35,8 @@ import moment from "moment";
 
 import ReCAPTCHA from "react-google-recaptcha";
 import config from "../../services/config";
+import useSettings from "../../hooks/useSettings";
+
 
 const Copyright = () => {
 	return (
@@ -82,6 +84,9 @@ const SignUp = () => {
   const theme = useTheme();
 	const classes = useStyles();
 	const history = useHistory();
+  const { getPublicSetting } = useSettings();
+  const [allowSignup, setAllowSignup] = useState(false);
+
 	let companyId = null
 
 	const params = qs.parse(window.location.search)
@@ -126,6 +131,12 @@ const SignUp = () => {
 
 	const captchaRef = useRef(null)
 
+  getPublicSetting("allowSignup").then(
+    (data) => {
+      setAllowSignup(data === "enabled");
+    }
+  )
+
 	return (
 		<Container component="main" maxWidth="xs">
 			<CssBaseline />
@@ -150,6 +161,8 @@ const SignUp = () => {
 				>
 					{({ touched, errors, isSubmitting }) => (
 						<Form className={classes.form}>
+						  { allowSignup && 
+						  <>
 							<Grid container spacing={2}>
 								<Grid item xs={12}>
 									<Field
@@ -238,6 +251,9 @@ const SignUp = () => {
 							>
 								{i18n.t("signup.buttons.submit")}
 							</Button>
+							</>
+							}
+							{ allowSignup || <h2>Cadastro desabilitado!</h2> }
 							<Grid container justify="flex-end">
 								<Grid item>
 									<Link
@@ -255,7 +271,7 @@ const SignUp = () => {
 				</Formik>
 			</div>
 			<Box mt={5}>{/* <Copyright /> */}</Box>
-			{ config.RECAPTCHA_SITE_KEY &&
+			{ config.RECAPTCHA_SITE_KEY && allowSignup &&
 				<ReCAPTCHA
 				  size="invisible"
 				  sitekey={ config.RECAPTCHA_SITE_KEY }
