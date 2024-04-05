@@ -243,7 +243,7 @@ const MainListItems = (props) => {
   };
 
   return (
-    <div onClick={drawerClose}>
+    <div>
       <Can
         role={user.profile}
         perform={"drawer-service-items:view"}
@@ -265,17 +265,18 @@ const MainListItems = (props) => {
               {i18n.t("mainDrawer.listItems.service")}
           </ListSubheader>
           <>
-            
-            <ListItemLink
-              to="/tickets"
-              primary={i18n.t("mainDrawer.listItems.tickets")}
-              icon={<WhatsAppIcon />}
-            />
+            <div onClick={drawerClose}>
+              <ListItemLink
+                to="/tickets"
+                primary={i18n.t("mainDrawer.listItems.tickets")}
+                icon={<WhatsAppIcon />}
+              />
+            </div>
             <ListItem
             dense
             button
             onClick={() => setOpenKanbanSubmenu((prev) => !prev)}
-          >
+            >
             <ListItemIcon>
               <LoyaltyRoundedIcon />
             </ListItemIcon>
@@ -294,34 +295,32 @@ const MainListItems = (props) => {
             timeout="auto"
             unmountOnExit
           >
-            <List dense component="div" disablePadding>
-              <ListItem onClick={() => history.push("/kanban")} button>
-                <ListItemIcon>
-                  <ListIcon />
-                </ListItemIcon>
-                <ListItemText primary={i18n.t("kanban.subMenus.list")}/>
-              </ListItem>
-              <ListItem
-                onClick={() => history.push("/tagsKanban")}
-                button
-              >
-                <ListItemIcon>
-                  <CalendarToday />
-                </ListItemIcon>
-                <ListItemText primary={i18n.t("kanban.subMenus.tags")} />
-              </ListItem>                
-            </List>
+            <div onClick={drawerClose}>
+              <List dense component="div" disablePadding>
+                <ListItem onClick={() => history.push("/kanban")} button>
+                  <ListItemIcon>
+                    <ListIcon />
+                  </ListItemIcon>
+                  <ListItemText primary={i18n.t("kanban.subMenus.list")}/>
+                </ListItem>
+                  <ListItem
+                    onClick={() => history.push("/tagsKanban")}
+                    button
+                  >
+                    <ListItemIcon>
+                      <CalendarToday />
+                    </ListItemIcon>
+                    <ListItemText primary={i18n.t("kanban.subMenus.tags")} />
+                  </ListItem>          
+              </List>
+            </div>
           </Collapse>
-          {/* <ListItemLink
-            to="/kanban"
-            primary="Kanban"
-            icon={<LoyaltyRoundedIcon />}
-          /> */}
-      <ListItemLink
-        to="/todolist"
-        primary={i18n.t("Tarefas")}
-        icon={<BorderColorIcon />}
-      />
+          <div onClick={drawerClose}>
+            <ListItemLink
+              to="/todolist"
+              primary={i18n.t("Tarefas")}
+              icon={<BorderColorIcon />}
+            />
             <ListItemLink
               to="/quick-messages"
               primary={i18n.t("mainDrawer.listItems.quickMessages")}
@@ -361,38 +360,40 @@ const MainListItems = (props) => {
               primary={i18n.t("mainDrawer.listItems.about")}
               icon={<InfoIcon />}
             />
+          </div>
           </>
         </>
         )}
       />
-
-      <Can
-        role={user.profile}
-        perform={"drawer-admin-items:view"}
-        yes={()=>(
-          <>
-            <Divider/>
-            <ListSubheader 
-            hidden={!drawerOpen}
-            style={{
-              position:"relative",
-              fontSize: "17px",
-              textAlign: "left",
-              paddingLeft: 20
-            }} 
-            inset
-            color="inherit">
-              {i18n.t("mainDrawer.listItems.management")}
-            </ListSubheader>
-            <ListItemLink
-            small
-            to="/"
-            primary="Dashboard"
-            icon={<DashboardOutlinedIcon />}
-            />
-        </>
-        )}
-      />
+      <div onClick={drawerClose}>
+        <Can
+          role={user.profile}
+          perform={"drawer-admin-items:view"}
+          yes={()=>(
+            <>
+              <Divider/>
+              <ListSubheader 
+              hidden={!drawerOpen}
+              style={{
+                position:"relative",
+                fontSize: "17px",
+                textAlign: "left",
+                paddingLeft: 20
+              }} 
+              inset
+              color="inherit">
+                {i18n.t("mainDrawer.listItems.management")}
+              </ListSubheader>
+              <ListItemLink
+              small
+              to="/"
+              primary="Dashboard"
+              icon={<DashboardOutlinedIcon />}
+              />
+          </>
+          )}
+        />
+      </div>
       <Can
         role={user.profile}
         perform="drawer-admin-items:view"
@@ -436,35 +437,38 @@ const MainListItems = (props) => {
                   timeout="auto"
                   unmountOnExit
                 >
-                  <List component="div" disablePadding>
-                    <ListItem onClick={() => history.push("/campaigns")} button>
-                      <ListItemIcon>
-                        <ListIcon />
-                      </ListItemIcon>
-                      <ListItemText primary="Listagem" />
-                    </ListItem>
-                    <ListItem
-                      onClick={() => history.push("/contact-lists")}
-                      button
-                    >
-                      <ListItemIcon>
-                        <PeopleIcon />
-                      </ListItemIcon>
-                      <ListItemText primary="Listas de Contatos" />
-                    </ListItem>
-                    <ListItem
-                      onClick={() => history.push("/campaigns-config")}
-                      button
-                    >
-                      <ListItemIcon>
-                        <SettingsOutlinedIcon />
-                      </ListItemIcon>
-                      <ListItemText primary="Configurações" />
-                    </ListItem>
-                  </List>
-                </Collapse>
+                  <div onClick={drawerClose}>
+                    <List component="div" disablePadding>
+                      <ListItem onClick={() => history.push("/campaigns")} button>
+                        <ListItemIcon>
+                          <ListIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Listagem" />
+                      </ListItem>
+                      <ListItem
+                        onClick={() => history.push("/contact-lists")}
+                        button
+                      >
+                        <ListItemIcon>
+                          <PeopleIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Listas de Contatos" />
+                      </ListItem>
+                      <ListItem
+                        onClick={() => history.push("/campaigns-config")}
+                        button
+                      >
+                        <ListItemIcon>
+                          <SettingsOutlinedIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Configurações" />
+                      </ListItem>
+                    </List>
+                  </div>
+                  </Collapse>
               </>
             )}
+            <div onClick={drawerClose}>
             {user.super && (
               <ListItemLink
                 to="/announcements"
@@ -508,7 +512,7 @@ const MainListItems = (props) => {
               icon={<SettingsOutlinedIcon />}
             />
           {}
-
+          </div>
           </>
         )}
       />
