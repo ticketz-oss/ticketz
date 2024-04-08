@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Link as RouterLink } from "react-router-dom";
 
 import Button from "@material-ui/core/Button";
@@ -90,11 +90,14 @@ const Login = () => {
 		handleLogin(user);
 	};
 
-  getPublicSetting("allowSignup").then(
-    (data) => {
-      setAllowSignup(data === "enabled");
-    }
-  )
+  useEffect(() => {
+    getPublicSetting("allowSignup").then(
+      (data) => {
+        setAllowSignup(data === "enabled");
+      }
+    )
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
 	return (
 		<div className={classes.root}>
