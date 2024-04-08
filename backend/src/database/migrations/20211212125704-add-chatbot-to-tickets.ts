@@ -19,6 +19,7 @@ module.exports = {
   },
 
   down: (queryInterface: QueryInterface) => {
-    return queryInterface.removeColumn("Tickets", "chatbot");
+    return queryInterface.removeColumn("Tickets", "chatbot"),
+      queryInterface.removeColumn("Tickets", "queueOptionId");
   }
 };
