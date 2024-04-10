@@ -87,11 +87,22 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
 
         const { state, saveCreds } = await useMultiFileAuthState(whatsapp);
 
-        wsocket = makeWASocket({
+       wsocket = makeWASocket({
           logger: loggerBaileys,
           printQRInTerminal: false,
           auth: state as AuthenticationState,
-          version: [2,2323,4]
+          version: [2,2323,4],
+          patchMessageBeforeSending(message) {
+            if (message.deviceSentMessage?.message?.listMessage?.listType === proto.Message.ListMessage.ListType.PRODUCT_LIST) {
+              message = JSON.parse(JSON.stringify(message));
+              message.deviceSentMessage.message.listMessage.listType = proto.Message.ListMessage.ListType.SINGLE_SELECT;
+            }
+            if (message.listMessage?.listType == proto.Message.ListMessage.ListType.PRODUCT_LIST) {
+              message = JSON.parse(JSON.stringify(message));
+              message.listMessage.listType = proto.Message.ListMessage.ListType.SINGLE_SELECT;
+            }
+            return message; 
+          }
         });
 
 
