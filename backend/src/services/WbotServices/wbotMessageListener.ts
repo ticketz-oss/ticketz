@@ -523,7 +523,7 @@ const verifyContact = async (
 
   const contactData = {
     name: msgContact?.name || msgContact.id.replace(/\D/g, ""),
-    number: msgContact.id.replace(/\D/g, ""),
+    number: msgContact.id.substr(0, msgContact.id.indexOf("@")),
     profilePicUrl,
     isGroup: msgContact.id.includes("g.us"),
     companyId,
