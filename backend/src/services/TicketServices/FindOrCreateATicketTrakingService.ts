@@ -2,10 +2,10 @@ import { Op } from "sequelize";
 import TicketTraking from "../../models/TicketTraking";
 
 interface Params {
-  ticketId: string | number;
-  companyId: string | number;
-  whatsappId?: string | number;
-  userId?: string | number;
+  ticketId: number;
+  companyId: number;
+  whatsappId?: number;
+  userId?: number;
   channel?: string;
 }
 
@@ -34,7 +34,6 @@ const FindOrCreateATicketTrakingService = async ({
     companyId,
     whatsappId,
     userId,
-    channel
   });
 
   return newRecord;

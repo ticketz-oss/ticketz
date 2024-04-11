@@ -27,7 +27,7 @@ interface TicketData {
 
 interface Request {
   ticketData: TicketData;
-  ticketId: string | number;
+  ticketId: number;
   companyId?: number | undefined;
   tokenData?: {
       id: string;

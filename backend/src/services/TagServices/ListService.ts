@@ -36,7 +36,7 @@ const ListService = async ({
     };
   }
 
-  const { count, rows: tags } = await Tag.findAndCountAll({
+  const { count: counters, rows: tags } = await Tag.findAndCountAll({
     where: { ...whereCondition, companyId, kanban },
     limit,
     offset,
@@ -56,6 +56,12 @@ const ListService = async ({
       [fn('count', col('ticketTags.tagId')), 'ticketsCount']
     ],
     group: ['Tag.id']
+  });
+
+  let count = 0;
+  
+  Object.keys(counters).forEach((key)=> {
+    count += counters[key].count;
   });
 
   const hasMore = count > offset + tags.length;

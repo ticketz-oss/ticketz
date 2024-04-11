@@ -70,7 +70,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   const ticketNote = await CreateTicketNoteService({
     ...newTicketNote,
-    userId
+    userId: Number.parseInt(userId, 10)
   });
 
   return res.status(200).json(ticketNote);

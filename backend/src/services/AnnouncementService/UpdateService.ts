@@ -2,11 +2,11 @@ import AppError from "../../errors/AppError";
 import Announcement from "../../models/Announcement";
 
 interface Data {
-  id: number | string;
-  priority: string;
+  id: number;
+  priority: number;
   title: string;
   text: string;
-  status: string;
+  status: boolean;
   companyId: number;
 }
 

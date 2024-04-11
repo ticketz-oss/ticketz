@@ -2,9 +2,9 @@ import { WhereOptions } from "sequelize/types";
 import QueueOption from "../../models/QueueOption";
 
 type QueueOptionFilter = {
-  queueId: string | number;
-  queueOptionId: string | number;
-  parentId: string | number | boolean;
+  queueId: number;
+  queueOptionId: number;
+  parentId: number;
 };
 
 const ListService = async ({ queueId, queueOptionId, parentId }: QueueOptionFilter): Promise<QueueOption[]> => {
@@ -19,7 +19,7 @@ const ListService = async ({ queueId, queueOptionId, parentId }: QueueOptionFilt
     whereOptions.id = queueOptionId;
   }
 
-  if (parentId == -1) {
+  if (parentId === -1) {
     whereOptions.parentId = null;
   }
 
