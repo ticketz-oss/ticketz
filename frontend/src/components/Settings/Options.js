@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 
 import Grid from "@material-ui/core/Grid";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
+import TextField from "@material-ui/core/TextField";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import useSettings from "../../hooks/useSettings";
 import { toast } from 'react-toastify';
@@ -12,9 +13,19 @@ import { makeStyles } from "@material-ui/core/styles";
 import { grey, blue } from "@material-ui/core/colors";
 import OnlyForSuperUser from "../OnlyForSuperUser";
 import useAuth from "../../hooks/useAuth.js";
+import { Field } from "formik";
+
+import {
+  IconButton,
+  InputAdornment,
+} from "@material-ui/core";
+
+import { Colorize } from "@material-ui/icons";
+import ColorPicker from "../ColorPicker";
+import ColorModeContext from "../../layout/themeContext";
 
 //import 'react-toastify/dist/ReactToastify.css';
- 
+
 const useStyles = makeStyles((theme) => ({
   container: {
     paddingTop: theme.spacing(4),
@@ -71,6 +82,10 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
     textAlign: "left",
   },
+  colorAdorment: {
+    width: 20,
+    height: 20,
+  },
 }));
 
 export default function Options(props) {
@@ -81,6 +96,7 @@ export default function Options(props) {
   const [callType, setCallType] = useState("enabled");
   const [chatbotType, setChatbotType] = useState("");
   const [allowSignup, setAllowSignup] = useState("disabled");
+  const [settingsLoaded, setSettingsLoaded] = useState({ teste: 1 });
   const [CheckMsgIsGroup, setCheckMsgIsGroupType] = useState("enabled");
 
   const [loadingUserRating, setLoadingUserRating] = useState(false);
@@ -92,7 +108,20 @@ export default function Options(props) {
   const { getCurrentUserInfo } = useAuth();
   const [currentUser, setCurrentUser] = useState({});
 
+  const { colorMode } = useContext(ColorModeContext);
+  const [primaryColorLightModalOpen, setPrimaryColorLightModalOpen] = useState(false);
+  const [primaryColorLight, setPrimaryColorLight] = useState(""); 
+  const [primaryColorDarkModalOpen, setPrimaryColorDarkModalOpen] = useState(false);
+  const [primaryColorDark, setPrimaryColorDark] = useState(""); 
+
   const { update } = useSettings();
+
+  function updateSettingsLoaded(key, value) {
+    const newSettings = { ...settingsLoaded };
+    newSettings[key] = value;
+    setSettingsLoaded(newSettings);
+    console.log(key, value, newSettings, settingsLoaded);
+  }
 
   useEffect(() => {
     getCurrentUserInfo().then(
@@ -100,7 +129,7 @@ export default function Options(props) {
         setCurrentUser(u);
       }
     );
-    
+
     if (Array.isArray(settings) && settings.length) {
       const userRating = settings.find((s) => s.key === "userRating");
       if (userRating) {
@@ -126,6 +155,10 @@ export default function Options(props) {
       if (allowSignup) {
         setAllowSignup(allowSignup.value);
       }
+
+      const primaryColorLight = settings.find((s) => s.key === "primaryColorLight")?.value;
+      const primaryColorDark = settings.find((s) => s.key === "primaryColorDark")?.value;
+      setSettingsLoaded( { ...settingsLoaded , primaryColorLight, primaryColorDark });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
@@ -157,7 +190,7 @@ export default function Options(props) {
       pauseOnHover: false,
       draggable: true,
       theme: "light",
-      });
+    });
     setLoadingScheduleType(false);
     if (typeof scheduleTypeChanged === "function") {
       scheduleTypeChanged(value);
@@ -209,6 +242,15 @@ export default function Options(props) {
     /*     if (typeof scheduleTypeChanged === "function") {
           scheduleTypeChanged(value);
         } */
+  }
+
+  async function handleSaveSetting(key, value) {
+    await update({
+      key,
+      value,
+    });
+    updateSettingsLoaded(key, value);
+    toast.success("Operação atualizada com sucesso.");
   }
 
   return (
@@ -318,28 +360,108 @@ export default function Options(props) {
         <OnlyForSuperUser
           user={currentUser}
           yes={() => (
-            <Grid xs={12} sm={6} md={4} item>
-              <FormControl className={classes.selectContainer}>
-                <InputLabel id="group-type-label">
-                  Permitir cadastro
-                </InputLabel>
-                <Select
-                  labelId="allow-signup"
-                  value={allowSignup}
-                  onChange={async (e) => {
-                    handleAllowSignup(e.target.value);
+            <>
+              <Grid xs={12} sm={6} md={4} item>
+                <FormControl className={classes.selectContainer}>
+                  <InputLabel id="group-type-label">
+                    Permitir cadastro
+                  </InputLabel>
+                  <Select
+                    labelId="allow-signup"
+                    value={allowSignup}
+                    onChange={async (e) => {
+                      handleAllowSignup(e.target.value);
+                    }}
+                  >
+                    <MenuItem value={"disabled"}>Desativado</MenuItem>
+                    <MenuItem value={"enabled"}>Ativado</MenuItem>
+                  </Select>
+                  <FormHelperText>
+                    {loadingAllowSignup && "Atualizando..."}
+                  </FormHelperText>
+                </FormControl>
+              </Grid>
+              <Grid xs={12} sm={6} md={4} item>
+                <FormControl className={classes.selectContainer}>
+                  <TextField
+                    id="primary-color-light-field"
+                    label="Cor Primária Modo Claro"
+                    variant="standard"
+                    value={settingsLoaded.primaryColorLight || ""}
+                    onClick={() => setPrimaryColorLightModalOpen(true)}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <div
+                            style={{ backgroundColor: settingsLoaded.primaryColorLight }}
+                            className={classes.colorAdorment}
+                          ></div>
+                        </InputAdornment>
+                      ),
+                      endAdornment: (
+                        <IconButton
+                          size="small"
+                          color="default"
+                          onClick={() => setPrimaryColorLightModalOpen(true)}
+                        >
+                          <Colorize />
+                        </IconButton>
+                      ),
+                    }}
+                  />
+                </FormControl>
+                <ColorPicker
+                  open={primaryColorLightModalOpen}
+                  handleClose={() => setPrimaryColorDarkModalOpen(false)}
+                  onChange={(color) => {
+                    setPrimaryColorLightModalOpen(false);
+                    handleSaveSetting("primaryColorLight", color);
+                    colorMode.setPrimaryColorLight(color);
                   }}
-                >
-                  <MenuItem value={"disabled"}>Desativado</MenuItem>
-                  <MenuItem value={"enabled"}>Ativado</MenuItem>
-                </Select>
-                <FormHelperText>
-                  {loadingAllowSignup && "Atualizando..."}
-                </FormHelperText>
-              </FormControl>
-            </Grid>
+                />
+              </Grid>
+              <Grid xs={12} sm={6} md={4} item>
+                <FormControl className={classes.selectContainer}>
+                  <TextField
+                    id="primary-color-dark-field"
+                    label="Cor Primária Modo Escuro"
+                    variant="standard"
+                    value={settingsLoaded.primaryColorDark || ""}
+                    onClick={() => setPrimaryColorDarkModalOpen(true)}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <div
+                            style={{ backgroundColor: settingsLoaded.primaryColorDark }}
+                            className={classes.colorAdorment}
+                          ></div>
+                        </InputAdornment>
+                      ),
+                      endAdornment: (
+                        <IconButton
+                          size="small"
+                          color="default"
+                          onClick={() => setPrimaryColorDarkModalOpen(true)}
+                        >
+                          <Colorize />
+                        </IconButton>
+                      ),
+                    }}
+                  />
+                </FormControl>
+                <ColorPicker
+                  open={primaryColorDarkModalOpen}
+                  handleClose={() => setPrimaryColorDarkModalOpen(false)}
+                  onChange={(color) => {
+                    setPrimaryColorDarkModalOpen(false);
+                    handleSaveSetting("primaryColorDark", color);
+                    colorMode.setPrimaryColorDark(color);
+                  }}
+                />
+              </Grid>
+            </>
           )}
-         />
+        />
       </Grid>
     </>
   );

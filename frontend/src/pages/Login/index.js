@@ -37,7 +37,7 @@ const useStyles = makeStyles(theme => ({
 	root: {
 		width: "100vw",
 		height: "100vh",
-		background: `linear-gradient(to right, ${ theme.mode === 'light' ? '#fff , #fff ,  #00f , #fff, #fff' : '#000, #000, #39ACE7, #000, #000' })`,
+		background: `linear-gradient(to right, ${ theme.mode === "light" ? "#fff , #fff , " + theme.palette.primary.main + " , #fff, #fff" : "#000, #000, " + theme.palette.primary.main + ", #000, #000" })`,
 		backgroundRepeat: "no-repeat",
 		backgroundSize: "100% 100%",
 		backgroundPosition: "center",

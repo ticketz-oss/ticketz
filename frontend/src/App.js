@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 
 import "react-toastify/dist/ReactToastify.css";
 import { QueryClient, QueryClientProvider } from "react-query";
@@ -8,28 +8,38 @@ import { createTheme, ThemeProvider } from "@material-ui/core/styles";
 import { useMediaQuery } from "@material-ui/core";
 import ColorModeContext from "./layout/themeContext";
 import { SocketContext, socketManager } from './context/Socket/SocketContext';
+import useSettings from "./hooks/useSettings";
 
 import Routes from "./routes";
 
 const queryClient = new QueryClient();
 
 const App = () => {
-    const [locale, setLocale] = useState();
+  const [locale, setLocale] = useState();
 
-    const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
-    const preferredTheme = window.localStorage.getItem("preferredTheme");
-    const [mode, setMode] = useState(preferredTheme ? preferredTheme : prefersDarkMode ? "dark" : "light");
+  const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
+  const preferredTheme = window.localStorage.getItem("preferredTheme");
+  const [mode, setMode] = useState(preferredTheme ? preferredTheme : prefersDarkMode ? "dark" : "light");
+  const [primaryColorLight, setPrimaryColorLight] = useState("#0000FF");
+  const [primaryColorDark, setPrimaryColorDark] = useState("#39ACE7");
+  const { getPublicSetting } = useSettings();
 
-    const colorMode = React.useMemo(
-        () => ({
-            toggleColorMode: () => {
-                setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
-            },
-        }),
-        []
-    );
+  const colorMode = useMemo(
+    () => ({
+      toggleColorMode: () => {
+        setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
+      },
+      setPrimaryColorLight: (color) => {
+        setPrimaryColorLight(color);
+      },
+      setPrimaryColorDark: (color) => {
+        setPrimaryColorDark(color);
+      }
+    }),
+    []
+  );
 
-  const theme = createTheme(
+  const theme = useMemo(() => createTheme(
     {
       scrollbarStyles: {
         "&::-webkit-scrollbar": {
@@ -38,7 +48,7 @@ const App = () => {
         },
         "&::-webkit-scrollbar-thumb": {
           boxShadow: 'inset 0 0 6px rgba(0, 0, 0, 0.3)',
-          backgroundColor: mode === "light" ? "#0000FF" : "#39ACE7",
+          backgroundColor: mode === "light" ? primaryColorLight : primaryColorDark,
         },
       },
       scrollbarStylesSoft: {
@@ -51,15 +61,15 @@ const App = () => {
       },
       palette: {
         type: mode,
-        primary: { main: mode === "light" ? "#0000FF" : "#39ACE7" },
-        textPrimary: mode === "light" ? "#0000FF" : "#39ACE7",
-        borderPrimary: mode === "light" ? "#0000FF" : "#39ACE7",
+        primary: { main: mode === "light" ? primaryColorLight : primaryColorDark },
+        textPrimary: mode === "light" ? primaryColorLight : primaryColorDark,
+        borderPrimary: mode === "light" ? primaryColorLight : primaryColorDark,
         dark: { main: mode === "light" ? "#333333" : "#666" },
         light: { main: mode === "light" ? "#F3F3F3" : "#333333" },
         tabHeaderBackground: mode === "light" ? "#EEE" : "#666",
         optionsBackground: mode === "light" ? "#fafafa" : "#333",
         options: mode === "light" ? "#fafafa" : "#666",
-        fontecor: mode === "light" ? "#0000FF" : "#39ACE7",
+        fontecor: mode === "light" ? primaryColorLight : primaryColorDark,
         fancyBackground: mode === "light" ? "#fafafa" : "#333",
         bordabox: mode === "light" ? "#eee" : "#333",
         newmessagebox: mode === "light" ? "#eee" : "#333",
@@ -74,42 +84,45 @@ const App = () => {
         total: mode === "light" ? "#fff" : "#222",
         messageIcons: mode === "light" ? "grey" : "#F3F3F3",
         inputBackground: mode === "light" ? "#FFFFFF" : "#333",
-        barraSuperior: mode === "light" ? "linear-gradient(to right, #0000FF, #0000CD, #0000BB)" : "#666",
+        barraSuperior: mode === "light" ? primaryColorLight : "#666",
         boxticket: mode === "light" ? "#EEE" : "#666",
         campaigntab: mode === "light" ? "#ededed" : "#666",
       },
       mode,
     },
     locale
+  ), [locale, mode, primaryColorDark, primaryColorLight]);
+
+  useEffect(() => {
+    const i18nlocale = localStorage.getItem("i18nextLng");
+    const browserLocale =
+      i18nlocale.substring(0, 2) + i18nlocale.substring(3, 5);
+
+    if (browserLocale === "ptBR") {
+      setLocale(ptBR);
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem("preferredTheme", mode);
+  }, [mode]);
+
+  useEffect(() => {
+    getPublicSetting("primaryColorLight").then((color) => { setPrimaryColorLight(color) });
+    getPublicSetting("primaryColorDark").then((color) => { setPrimaryColorDark(color) });
+  }, [getPublicSetting]);
+
+  return (
+    <ColorModeContext.Provider value={{ colorMode }}>
+      <ThemeProvider theme={theme}>
+        <QueryClientProvider client={queryClient}>
+          <SocketContext.Provider value={socketManager}>
+            <Routes />
+          </SocketContext.Provider>
+        </QueryClientProvider>
+      </ThemeProvider>
+    </ColorModeContext.Provider>
   );
-
-    useEffect(() => {
-        const i18nlocale = localStorage.getItem("i18nextLng");
-        const browserLocale =
-            i18nlocale.substring(0, 2) + i18nlocale.substring(3, 5);
-
-        if (browserLocale === "ptBR") {
-            setLocale(ptBR);
-        }
-    }, []);
-
-    useEffect(() => {
-        window.localStorage.setItem("preferredTheme", mode);
-    }, [mode]);
-
-
-
-    return (
-        <ColorModeContext.Provider value={{ colorMode }}>
-            <ThemeProvider theme={theme}>
-                <QueryClientProvider client={queryClient}>
-                	<SocketContext.Provider value={socketManager}>
-	                    <Routes />
-	                </SocketContext.Provider>
-                </QueryClientProvider>
-            </ThemeProvider>
-        </ColorModeContext.Provider>
-    );
 };
 
 export default App;
