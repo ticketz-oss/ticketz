@@ -18,7 +18,7 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 import logo from "../../assets/vector/logo.svg";
 import logoDark from "../../assets/vector/logo-dark.svg";
 import useSettings from "../../hooks/useSettings";
-
+import { getBackendURL } from "../../services/config";
 
 const Copyright = () => {
 	return (
@@ -68,7 +68,14 @@ const useStyles = makeStyles(theme => ({
 	},
 	powered: {
 		color: "white"
-	}
+	},
+	
+	logoImg: {
+    width: "100%",
+    margin: "0 auto",
+    content: "url(" + ((theme.appLogoLight || theme.appLogoDark) ? getBackendURL()+"/public/"+  (theme.mode === "light" ? theme.appLogoLight || theme.appLogoDark : theme.appLogoDark || theme.appLogoLight  )   : (theme.mode === "light" ? logo : logoDark)) + ")"
+  }
+	
 }));
 
 const Login = () => {
@@ -105,7 +112,7 @@ const Login = () => {
 			<CssBaseline/>
 			<div className={classes.paper}>
 				<div>
-					<img style={{ margin: "0 auto", width: "100%" }} src={theme.mode === "light" ? logo : logoDark} alt="Whats" />
+					<img className={classes.logoImg} />
 				</div>
 				{/*<Typography component="h1" variant="h5">
 					{i18n.t("login.title")}

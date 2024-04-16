@@ -11,6 +11,7 @@ import CompaniesManager from "../../components/CompaniesManager";
 import PlansManager from "../../components/PlansManager";
 import HelpsManager from "../../components/HelpsManager";
 import Options from "../../components/Settings/Options";
+import Whitelabel from "../../components/Settings/Whitelabel";
 
 import { i18n } from "../../translate/i18n.js";
 import { toast } from "react-toastify";
@@ -168,6 +169,7 @@ const SettingsCustom = () => {
           {isSuper() ? <Tab label="Empresas" value={"companies"} /> : null}
           {isSuper() ? <Tab label="Planos" value={"plans"} /> : null}
           {isSuper() ? <Tab label="Ajuda" value={"helps"} /> : null}
+          {isSuper() ? <Tab label="Whitelabel" value={"whitelabel"} /> : null}
         </Tabs>
         <Paper className={classes.paper} elevation={0}>
           <TabPanel
@@ -184,6 +186,16 @@ const SettingsCustom = () => {
           <OnlyForSuperUser
             user={currentUser}
             yes={() => (
+              <>
+              <TabPanel
+                className={classes.container}
+                value={tab}
+                name={"whitelabel"}
+              >
+                  <Whitelabel
+                    settings={settings}
+                  />
+              </TabPanel>
               <TabPanel
                 className={classes.container}
                 value={tab}
@@ -191,11 +203,6 @@ const SettingsCustom = () => {
               >
                 <CompaniesManager />
               </TabPanel>
-            )}
-          />
-          <OnlyForSuperUser
-            user={currentUser}
-            yes={() => (
               <TabPanel
                 className={classes.container}
                 value={tab}
@@ -203,11 +210,6 @@ const SettingsCustom = () => {
               >
                 <PlansManager />
               </TabPanel>
-            )}
-          />
-          <OnlyForSuperUser
-            user={currentUser}
-            yes={() => (
               <TabPanel
                 className={classes.container}
                 value={tab}
@@ -215,6 +217,7 @@ const SettingsCustom = () => {
               >
                 <HelpsManager />
               </TabPanel>
+              </>
             )}
           />
           <TabPanel className={classes.container} value={tab} name={"options"}>

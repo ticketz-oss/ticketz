@@ -45,6 +45,7 @@ import ColorModeContext from "../layout/themeContext";
 import Brightness4Icon from '@material-ui/icons/Brightness4';
 import Brightness7Icon from '@material-ui/icons/Brightness7';
 import LanguageIcon from '@material-ui/icons/Language';
+import { getBackendURL } from "../services/config";
 
 const drawerWidth = 240;
 
@@ -152,8 +153,10 @@ const useStyles = makeStyles((theme) => ({
     // color: theme.barraSuperior.secondary.main,
   },
   logo: {
-    maxWidth: 192,
+    width: "192px",
+    maxHeight: "72px",
     logo: theme.logo,
+    content: "url(" + ((theme.appLogoLight || theme.appLogoDark) ? getBackendURL()+"/public/"+  (theme.mode === "light" ? theme.appLogoLight || theme.appLogoDark : theme.appLogoDark || theme.appLogoLight  )   : (theme.mode === "light" ? logo : logoDark)) + ")"
   },
   hideLogo: {
 	display: "none",
@@ -348,7 +351,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
         open={drawerOpen}
       >
         <div className={classes.toolbarIcon}>
-          <img src={theme.mode === "light" ? logo : logoDark} className={drawerOpen ? classes.logo : classes.hideLogo } alt="logo" />
+          <img  className={drawerOpen ? classes.logo : classes.hideLogo } alt="logo" />
           <IconButton onClick={() => setDrawerOpen(!drawerOpen)}>
             <ChevronLeftIcon />
           </IconButton>

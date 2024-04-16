@@ -22,6 +22,8 @@ const App = () => {
   const [mode, setMode] = useState(preferredTheme ? preferredTheme : prefersDarkMode ? "dark" : "light");
   const [primaryColorLight, setPrimaryColorLight] = useState("#0000FF");
   const [primaryColorDark, setPrimaryColorDark] = useState("#39ACE7");
+  const [appLogoLight, setAppLogoLight] = useState("");
+  const [appLogoDark, setAppLogoDark] = useState("");
   const { getPublicSetting } = useSettings();
 
   const colorMode = useMemo(
@@ -34,7 +36,13 @@ const App = () => {
       },
       setPrimaryColorDark: (color) => {
         setPrimaryColorDark(color);
-      }
+      },
+      setAppLogoLight: (file) => {
+        setAppLogoLight(file); 
+      },
+      setAppLogoDark: (file) => {
+        setAppLogoDark(file); 
+      },
     }),
     []
   );
@@ -89,9 +97,11 @@ const App = () => {
         campaigntab: mode === "light" ? "#ededed" : "#666",
       },
       mode,
+      appLogoLight,
+      appLogoDark,
     },
     locale
-  ), [locale, mode, primaryColorDark, primaryColorLight]);
+  ), [appLogoLight, appLogoDark, locale, mode, primaryColorDark, primaryColorLight]);
 
   useEffect(() => {
     const i18nlocale = localStorage.getItem("i18nextLng");
@@ -110,6 +120,8 @@ const App = () => {
   useEffect(() => {
     getPublicSetting("primaryColorLight").then((color) => { setPrimaryColorLight(color) });
     getPublicSetting("primaryColorDark").then((color) => { setPrimaryColorDark(color) });
+    getPublicSetting("appLogoLight").then((file) => { setAppLogoLight(file)});
+    getPublicSetting("appLogoDark").then((file) => { setAppLogoDark(file)});
   }, [getPublicSetting]);
 
   return (
