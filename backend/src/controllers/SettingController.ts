@@ -6,6 +6,11 @@ import AppError from "../errors/AppError";
 import UpdateSettingService from "../services/SettingServices/UpdateSettingService";
 import ListSettingsService from "../services/SettingServices/ListSettingsService";
 import GetPublicSettingService from "../services/SettingServices/GetPublicSettingService";
+import { logger } from "../utils/logger";
+
+type LogoRequest = {
+  mode: string;
+};
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.user;
@@ -52,3 +57,28 @@ export const publicShow = async (req: Request, res: Response): Promise<Response>
 
   return res.status(200).json(settingValue);
 };
+
+export const storeLogo = async (req: Request, res: Response): Promise<Response> => {
+  const file = req.file as Express.Multer.File;
+  const { mode }: LogoRequest = req.body;
+  const { companyId } = req.user;
+  const validModes = [ "Light", "Dark" ];
+
+
+  if ( validModes.indexOf(mode) === -1 ) {
+    return res.status(406);
+  }
+
+  if (file && file.mimetype.startsWith("image/")) {
+    
+    const setting = await UpdateSettingService({
+      key: `appLogo${mode}`,
+      value: file.filename,
+      companyId
+    });
+    
+    return res.status(200).json(setting.value);
+  }
+  
+  return res.status(406);
+}

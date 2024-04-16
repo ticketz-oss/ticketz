@@ -7,7 +7,9 @@ interface Request {
 const publicSettingsKeys = [
   "allowSignup",
   "primaryColorLight",
-  "primaryColorDark"
+  "primaryColorDark",
+  "appLogoLight",
+  "appLogoDark"
 ]
 
 const GetPublicSettingService = async ({
