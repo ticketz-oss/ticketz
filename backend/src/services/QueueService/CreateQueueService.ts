@@ -10,7 +10,7 @@ interface QueueData {
   companyId: number;
   greetingMessage?: string;
   outOfHoursMessage?: string;
-  schedules?: any[];
+  schedules?: unknown[];
 }
 
 const CreateQueueService = async (queueData: QueueData): Promise<Queue> => {

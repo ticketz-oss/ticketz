@@ -51,7 +51,7 @@ class Queue extends Model<Queue> {
   @Column({
     type: DataType.JSONB
   })
-  schedules: [];
+  schedules: unknown[];
 
   @CreatedAt
   createdAt: Date;

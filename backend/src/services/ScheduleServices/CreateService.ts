@@ -5,10 +5,10 @@ import Schedule from "../../models/Schedule";
 
 interface Request {
   body: string;
-  sendAt: string;
-  contactId: number | string;
-  companyId: number | string;
-  userId?: number | string;
+  sendAt: Date;
+  contactId: number;
+  companyId: number;
+  userId?: number;
 }
 
 const CreateService = async ({

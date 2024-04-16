@@ -91,7 +91,7 @@ export const update = async (
 
   const record = await UpdateService({
     ...data,
-    id
+    id: parseInt(id, 10)
   });
 
   const io = getIO();

@@ -5,8 +5,8 @@ import QuickMessage from "../../models/QuickMessage";
 interface Data {
   shortcode: string;
   message: string;
-  companyId: number | string;
-  userId: number | string;
+  companyId: number;
+  userId: number;
 }
 
 const CreateService = async (data: Data): Promise<QuickMessage> => {

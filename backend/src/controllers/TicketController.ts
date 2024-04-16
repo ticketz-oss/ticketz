@@ -193,7 +193,7 @@ export const update = async (
   const { ticket } = await mutex.runExclusive(async () => {
     return await UpdateTicketService({
       ticketData: req.body,
-      ticketId,
+      ticketId: Number.parseInt(ticketId, 10),
       tokenData: req.tokenData
     });
   });

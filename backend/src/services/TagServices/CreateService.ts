@@ -6,7 +6,7 @@ import Tag from "../../models/Tag";
 interface Request {
   name: string;
   color: string;
-  kanban: string;
+  kanban: number;
   companyId: number;
 }
 
