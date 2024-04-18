@@ -1508,6 +1508,11 @@ const handleMessage = async (
   companyId: number
 ): Promise<void> => {
   if (!isValidMsg(msg)) return;
+  
+  if (msg.message?.ephemeralMessage) {
+    msg.message = msg.message.ephemeralMessage.message;
+  }
+
   try {
     let msgContact: IMe;
     let groupContact: Contact | undefined;
