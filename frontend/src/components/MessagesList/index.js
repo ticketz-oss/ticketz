@@ -712,7 +712,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
   const renderMessages = () => {
       const viewMessagesList = messagesList.map((message, index) => {
         const data = JSON.parse(message.dataJson);
-        const isSticker = ("stickerMessage" in data.message); 
+        const isSticker = data?.message && ("stickerMessage" in data.message); 
         if (!message.fromMe) {
           return (
             <React.Fragment key={message.id}>
