@@ -26,11 +26,6 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   const convertedQueueOptionId = parseInt(queueOptionId, 10);
   const convertedParentId = parseInt(parentId, 10);
   
-  // Check if conversion fails
-  if (Number.isNaN(convertedQueueId) || Number.isNaN(convertedQueueOptionId) || Number.isNaN(convertedParentId)) {
-    throw new AppError("Invalid query parameters. queueId, queueOptionId, and parentId must be numbers.", 400);
-  }
-
   const queueOptions = await ListService({ 
     queueId: convertedQueueId,
     queueOptionId: convertedQueueOptionId,
