@@ -750,7 +750,8 @@ export const verifyEditedMessage = async (
 
   const oldMessage = {
     messageId: messageData.id,
-    body: editedMsg.body
+    body: editedMsg.body,
+    ticketId: editedMsg.ticketId
   }
 
   await OldMessage.upsert(oldMessage);

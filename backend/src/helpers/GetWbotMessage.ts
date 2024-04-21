@@ -18,7 +18,8 @@ export const GetWbotMessage = async (
   > => {
 
       const msgFound = await GetMessageService({
-        id: messageId
+        id: messageId,
+        ticketId: ticket.id
       });
 
       return msgFound;

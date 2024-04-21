@@ -18,7 +18,7 @@ import Queue from "./Queue";
 import OldMessage from "./OldMessage";
 
 @Table
-class Message extends Model<Message> {
+class Message extends Model {
   @PrimaryKey
   @Column
   id: string;
@@ -87,6 +87,7 @@ class Message extends Model<Message> {
   quotedMsg: Message;
 
   @ForeignKey(() => Ticket)
+  @PrimaryKey
   @Column
   ticketId: number;
 

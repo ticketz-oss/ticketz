@@ -114,7 +114,7 @@ export const edit = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.user;
   const { body }: MessageData = req.body;
 
-  const { ticketId , message } = await EditWhatsAppMessage({messageId, body});
+  const { ticketId , message } = await EditWhatsAppMessage({messageId, companyId, body});
 
   const io = getIO();
   io.to(ticketId.toString()).emit(`company-${companyId}-appMessage`, {

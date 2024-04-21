@@ -58,13 +58,19 @@ const ListMessagesService = async ({
     include: [
       "contact",
       {
-        model: Message,
-        as: "quotedMsg",
-        include: ["contact"]
+        model: Message, as: "quotedMsg",
+        include: ["contact"],
+        where: {
+          companyId: ticket.companyId
+        },
+        required: false,
       },
       {
-        model: OldMessage,
-        as: "oldMessages"
+        model: OldMessage, as: "oldMessages",
+        where: {
+          ticketId: ticket.id,
+        },
+        required: false,
       },
       {
         model: Queue,
