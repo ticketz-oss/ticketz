@@ -27,7 +27,7 @@ const GetPublicSettingService = async ({
     }
   });
 
-  return setting.value;
+  return setting?.value;
 };
 
 export default GetPublicSettingService;
