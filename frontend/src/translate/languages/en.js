@@ -709,6 +709,8 @@ const messages = {
 				placeholderClosed:
 					"Reopen or accept this ticket to send a message.",
 				signMessage: "Sign",
+				replying: "Replying",
+				editing: "Editing",
 			},
 			message: {
 				edited: "Edited"

@@ -715,6 +715,8 @@ const messages = {
         placeholderClosed:
           "Reabra o acepte este ticket para enviar un mensaje.",
         signMessage: "Firmar",
+        replying: "Respondiendo",
+        editing: "Editando",
       },
       message: {
         edited: "Editada"
