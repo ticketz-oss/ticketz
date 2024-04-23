@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useContext } from "react";
+import { useTheme } from "@material-ui/core/styles";
 
 import { useHistory } from "react-router-dom";
 import { format } from "date-fns";
@@ -21,6 +22,7 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 import { SocketContext } from "../../context/Socket/SocketContext";
 import Favicon from "react-favicon";
 import zapIcon from "../../assets/vector/favicon.svg";
+import { getBackendURL } from "../../services/config";
 
 const useStyles = makeStyles((theme) => ({
   tabContainer: {
@@ -44,6 +46,7 @@ const useStyles = makeStyles((theme) => ({
 
 const NotificationsPopOver = (props) => {
   const classes = useStyles();
+  const theme = useTheme();
 
   const history = useHistory();
   const { user } = useContext(AuthContext);
@@ -208,18 +211,18 @@ const NotificationsPopOver = (props) => {
 	const numbers = "⓿➊➋➌➍➎➏➐➑➒➓⓫⓬⓭⓮⓯⓰⓱⓲⓳⓴";
     if (notifications.length > 0) {
 		if (notifications.length < 21 ) {
-	      document.title = numbers.substring(notifications.length,notifications.length+1) + " - ticketz";
+	      document.title = numbers.substring(notifications.length,notifications.length+1) + " - " + ( theme.appName || "...");
         } else {
-	      document.title = "(" + notifications.length + ") ticketz";
+	      document.title = "(" + notifications.length + ")" ( theme.appName || "...");
 		}		
     } else {
-      document.title = "ticketz";
+      document.title = theme.appName || "...";
     }
     return (
       <>
         <Favicon
           animated={true}
-          url={zapIcon}
+          url={ (theme?.appLogoFavicon) ? getBackendURL()+"/public/" + theme.appLogoFavicon : zapIcon }
           alertCount={notifications.length}
           iconSize={195}
         />

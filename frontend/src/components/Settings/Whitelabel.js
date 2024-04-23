@@ -22,6 +22,7 @@ import api from "../../services/api";
 import { getBackendURL } from "../../services/config";
 import logo from "../../assets/vector/logo.svg";
 import logoDark from "../../assets/vector/logo-dark.svg";
+import logoFavicon from "../../assets/vector/favicon.svg";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -104,6 +105,13 @@ const useStyles = makeStyles((theme) => ({
     borderColor: "white",
   },
   
+  appLogoFaviconPreviewDiv: {
+    padding: "10px",
+    borderStyle: "solid",
+    borderWidth: "1px",
+    borderColor: "black",
+  },
+  
   appLogoLightPreviewImg: {
     width: "100%",
     maxHeight: 72,
@@ -114,6 +122,12 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
     maxHeight: 72,
     content: "url(" + ((theme.appLogoLight || theme.appLogoDark) ? getBackendURL()+"/public/"+ (theme.appLogoDark || theme.appLogoLight) : logoDark ) + ")"
+  },
+
+  appLogoFaviconPreviewImg: {
+    width: "100%",
+    maxHeight: 72,
+    content: "url(" + ((theme.appLogoFavicon) ? getBackendURL()+"/public/" + theme.appLogoFavicon : logoFavicon ) + ")"
   }
 }));
 
@@ -131,6 +145,9 @@ export default function Whitelabel(props) {
 
   const logoLightInput = useRef(null);
   const logoDarkInput = useRef(null);
+  const logoFaviconInput = useRef(null);
+  const appNameInput = useRef(null);
+  const [appName, setAppName] = useState(settingsLoaded.appName || "");
 
   const { update } = useSettings();
 
@@ -155,7 +172,10 @@ export default function Whitelabel(props) {
       const primaryColorDark = settings.find((s) => s.key === "primaryColorDark")?.value;
       const appLogoLight = settings.find((s) => s.key === "appLogoLight")?.value;
       const appLogoDark = settings.find((s) => s.key === "appLogoDark")?.value;
-      setSettingsLoaded( { ...settingsLoaded , primaryColorLight, primaryColorDark, appLogoLight, appLogoDark });
+      const appLogoFavicon = settings.find((s) => s.key === "appLogoFavicon")?.value;
+      const appName = settings.find((s) => s.key === "appName")?.value;
+      setAppName(appName || "");
+      setSettingsLoaded( { ...settingsLoaded , primaryColorLight, primaryColorDark, appLogoLight, appLogoDark, appLogoFavicon, appName });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
@@ -288,7 +308,24 @@ export default function Whitelabel(props) {
                   }}
                 />
               </Grid>
-              <Grid xs={12} sm={12} md={4} item>
+              <Grid xs={12} sm={6} md={4} item>
+                <FormControl className={classes.selectContainer}>
+                  <TextField
+                    id="appname-field"
+                    label="Nome do sistema"
+                    variant="standard"
+                    name="appName"
+                    value={appName}
+                    inputRef={appNameInput}
+                    onChange={(e) => {
+                      setAppName(e.target.value);
+                    }}
+                    onBlur={async (_) => {
+                      await handleSaveSetting("appName",appName);
+                      colorMode.setAppName(appName || "ticketz");
+                    }}
+                  />
+                </FormControl>
               </Grid>
               <Grid xs={12} sm={6} md={4} item>
                 <FormControl className={classes.selectContainer}>
@@ -388,7 +425,54 @@ export default function Whitelabel(props) {
                   />
                 </FormControl>
               </Grid>
-              <Grid xs={12} sm={12} md={4} item>
+              <Grid xs={12} sm={6} md={4} item>
+                <FormControl className={classes.selectContainer}>
+                  <TextField
+                    id="logo-favicon-upload-field"
+                    label="Favicon"
+                    variant="standard"
+                    value={settingsLoaded.appLogoFavicon || ""}
+                    InputProps={{
+                      endAdornment: (
+                        <>
+                          { settingsLoaded.appLogoFavicon &&
+                            <IconButton
+                              size="small"
+                              color="default"
+                              onClick={() => { 
+                                  handleSaveSetting("appLogoFavicon","");
+                                  colorMode.setAppLogoFavicon("");
+                                }
+                              }  
+                            >
+                              <Delete />
+                            </IconButton>
+                          }
+                          <input
+                            type="file"
+                            id="upload-logo-favicon-button"
+                            ref={logoFaviconInput}
+                            className={classes.uploadInput}
+                            onChange={(e) => uploadLogo(e,"Favicon")}
+                          />
+                          <label htmlFor="upload-logo-favicon-button">
+                            <IconButton
+                              size="small"
+                              color="default"
+                              onClick={
+                                () => {
+                                  logoFaviconInput.current.click();
+                                }
+                              }
+                            >
+                              <AttachFile />
+                            </IconButton>
+                          </label>
+                        </>
+                      ),
+                    }}
+                  />
+                </FormControl>
               </Grid>
               <Grid xs={12} sm={6} md={4} item>
                 <div className={classes.appLogoLightPreviewDiv}>
@@ -398,6 +482,11 @@ export default function Whitelabel(props) {
               <Grid xs={12} sm={6} md={4} item>
                 <div className={classes.appLogoDarkPreviewDiv}>
                   <img className={classes.appLogoDarkPreviewImg} />
+                </div>
+              </Grid>
+              <Grid xs={12} sm={6} md={4} item>
+                <div className={classes.appLogoFaviconPreviewDiv}>
+                  <img className={classes.appLogoFaviconPreviewImg} />
                 </div>
               </Grid>
             </>

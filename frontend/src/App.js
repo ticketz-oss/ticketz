@@ -9,6 +9,9 @@ import { useMediaQuery } from "@material-ui/core";
 import ColorModeContext from "./layout/themeContext";
 import { SocketContext, socketManager } from './context/Socket/SocketContext';
 import useSettings from "./hooks/useSettings";
+import Favicon from "react-favicon";
+import { getBackendURL } from "./services/config";
+import logoFavicon from "./assets/vector/favicon.svg";
 
 import Routes from "./routes";
 
@@ -24,6 +27,8 @@ const App = () => {
   const [primaryColorDark, setPrimaryColorDark] = useState("#39ACE7");
   const [appLogoLight, setAppLogoLight] = useState("");
   const [appLogoDark, setAppLogoDark] = useState("");
+  const [appLogoFavicon, setAppLogoFavicon] = useState("");
+  const [appName, setAppName] = useState("");
   const { getPublicSetting } = useSettings();
 
   const colorMode = useMemo(
@@ -43,6 +48,12 @@ const App = () => {
       setAppLogoDark: (file) => {
         setAppLogoDark(file); 
       },
+      setAppLogoFavicon: (file) => {
+        setAppLogoFavicon(file);
+      },
+      setAppName: (name) => {
+        setAppName(name);
+      }
     }),
     []
   );
@@ -99,9 +110,11 @@ const App = () => {
       mode,
       appLogoLight,
       appLogoDark,
+      appLogoFavicon,
+      appName,
     },
     locale
-  ), [appLogoLight, appLogoDark, locale, mode, primaryColorDark, primaryColorLight]);
+  ), [appLogoLight, appLogoDark, appLogoFavicon, appName, locale, mode, primaryColorDark, primaryColorLight]);
 
   useEffect(() => {
     const i18nlocale = localStorage.getItem("i18nextLng");
@@ -122,9 +135,13 @@ const App = () => {
     getPublicSetting("primaryColorDark").then((color) => { setPrimaryColorDark(color) });
     getPublicSetting("appLogoLight").then((file) => { setAppLogoLight(file)});
     getPublicSetting("appLogoDark").then((file) => { setAppLogoDark(file)});
+    getPublicSetting("appLogoFavicon").then((file) => { setAppLogoFavicon(file)});
+    getPublicSetting("appName").then((name) => { setAppName(name || "ticketz")});
   }, [getPublicSetting]);
 
   return (
+    <>
+    <Favicon url={ ((appLogoFavicon) ? getBackendURL()+"/public/" + theme.appLogoFavicon : logoFavicon ) } />
     <ColorModeContext.Provider value={{ colorMode }}>
       <ThemeProvider theme={theme}>
         <QueryClientProvider client={queryClient}>
@@ -134,6 +151,7 @@ const App = () => {
         </QueryClientProvider>
       </ThemeProvider>
     </ColorModeContext.Provider>
+    </>
   );
 };
 
