@@ -6,7 +6,6 @@ import AppError from "../errors/AppError";
 import UpdateSettingService from "../services/SettingServices/UpdateSettingService";
 import ListSettingsService from "../services/SettingServices/ListSettingsService";
 import GetPublicSettingService from "../services/SettingServices/GetPublicSettingService";
-import { logger } from "../utils/logger";
 
 type LogoRequest = {
   mode: string;
@@ -62,7 +61,7 @@ export const storeLogo = async (req: Request, res: Response): Promise<Response> 
   const file = req.file as Express.Multer.File;
   const { mode }: LogoRequest = req.body;
   const { companyId } = req.user;
-  const validModes = [ "Light", "Dark" ];
+  const validModes = [ "Light", "Dark", "Favicon" ];
 
 
   if ( validModes.indexOf(mode) === -1 ) {
