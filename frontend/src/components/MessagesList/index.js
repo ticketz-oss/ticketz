@@ -142,7 +142,7 @@ const useStyles = makeStyles((theme) => ({
       right: 0,
     },
     whiteSpace: "pre-wrap",
-    backgroundColor: theme.mode === 'light' ? "#dcf8c6" : "#128c7e",
+    backgroundColor: theme.mode === 'light' ? "#dcf8c6" : "#005c4b",
     color: theme.mode === 'light' ? "#303030" : "#ffffff",
     alignSelf: "flex-end",
     borderTopLeftRadius: 8,
