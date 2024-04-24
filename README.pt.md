@@ -17,9 +17,7 @@ de código fonte, e de acordo com informações [deste vídeo acabou em algum mo
 sendo vazado e publicado abertamente](https://www.youtube.com/watch?v=SX_cGD5RLkQ)
 
 Após algumas pesquisas foi ainda identificado que a primeira versão SaaS do
-Whaticket foi criada pelo desenvolvedor [Wender
-Teixeira](https://github.com/w3nder), inclusive uma versão do [https://github.com/unkbot/whaticket-free](Whaticket
-Single) que faz uso da biblioteca Baileys para acesso ao Whatsapp.
+Whaticket foi criada pelo desenvolvedor [Wender Teixeira](https://github.com/w3nder), inclusive uma versão do [Whaticket Single](https://github.com/unkbot/whaticket-free) que faz uso da biblioteca Baileys para acesso ao Whatsapp.
 
 É praticamente impossível identificar e creditar os autores das melhorias, [o
 código publicado pelo canal Vem Fazer](https://github.com/vemfazer/whaticket-versao-03-12-canal-vem-fazer)
