@@ -17,7 +17,6 @@ interface UserData {
 interface Request {
   userData: UserData;
   userId: string | number;
-  companyId: number;
   requestUserId: number;
 }
 
@@ -31,15 +30,14 @@ interface Response {
 const UpdateUserService = async ({
   userData,
   userId,
-  companyId,
   requestUserId
 }: Request): Promise<Response | undefined> => {
-  const user = await ShowUserService(userId);
+  const user = await ShowUserService(userId, requestUserId);
 
   const requestUser = await User.findByPk(requestUserId);
 
-  if (requestUser.super === false && userData.companyId !== companyId) {
-    throw new AppError("O usuário não pertence à esta empresa");
+  if (requestUser.super === false && userData.companyId !== requestUser.companyId) {
+    throw new AppError("ERR_FORBIDDEN", 403);
   }
 
   const schema = Yup.object().shape({
@@ -57,14 +55,21 @@ const UpdateUserService = async ({
     throw new AppError(err.message);
   }
 
-  await user.update({
-    email,
-    password,
-    profile,
-    name
-  });
-
-  await user.$set("queues", queueIds);
+  if (requestUser.profile === "admin") {
+    await user.update({
+      email,
+      password,
+      profile,
+      name
+    });
+    await user.$set("queues", queueIds);
+  } else {
+    await user.update({
+      email,
+      password,
+      name
+    });
+  }
 
   await user.reload();
 

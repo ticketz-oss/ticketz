@@ -82,7 +82,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 export const show = async (req: Request, res: Response): Promise<Response> => {
   const { userId } = req.params;
 
-  const user = await ShowUserService(userId);
+  const user = await ShowUserService(userId, req.user.id);
 
   return res.status(200).json(user);
 };
@@ -91,10 +91,6 @@ export const update = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  if (req.user.profile !== "admin") {
-    throw new AppError("ERR_NO_PERMISSION", 403);
-  }
-
   const { id: requestUserId, companyId } = req.user;
   const { userId } = req.params;
   const userData = req.body;
@@ -102,7 +98,6 @@ export const update = async (
   const user = await UpdateUserService({
     userData,
     userId,
-    companyId,
     requestUserId: +requestUserId
   });
 
@@ -126,7 +121,7 @@ export const remove = async (
     throw new AppError("ERR_NO_PERMISSION", 403);
   }
 
-  await DeleteUserService(userId, companyId);
+  await DeleteUserService(userId, req.user.id);
 
   const io = getIO();
   io.emit(`company-${companyId}-user`, {
