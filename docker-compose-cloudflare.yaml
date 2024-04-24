@@ -45,7 +45,7 @@ services:
       - POSTGRES_USER=${POSTGRES_USER:-ticketz}
       - POSTGRES_DB=${POSTGRES_DB:-ticketz}
       - POSTGRES_HOST_AUTH_METHOD=trust
-      - TZ=${TZ:-America/Fortaleza}
+      - TZ=${TZ:-America/Sao_Paulo}
     expose:
       - 5432
     restart: always
