@@ -1,5 +1,4 @@
-import { Request, Response } from "express";
-import express from "express";
+import express, { Request, Response } from "express";
 import * as Yup from "yup";
 import EfiPay from "sdk-typescript-apis-efi";
 import AppError from "../errors/AppError";
@@ -12,22 +11,21 @@ import { logger } from "../utils/logger";
 
 const app = express();
 
-
 const createWebHook = (efiPay: EfiPay) => {
 	const params = {
 	    chave: process.env.EFI_PIX_KEY,
 	};
 	
 	const body = {
-		webhookUrl: process.env.BACKEND_URL + '/subscription/webhook'
+		webhookUrl: `${process.env.BACKEND_URL}/subscription/webhook`
 	}
 	
 	return efiPay.pixConfigWebhook(params, body).then(
 		(ok) => {
-			logger.info({ result: ok }, 'pixConfigWebhook ok');
+			logger.info({ result: ok }, "pixConfigWebhook ok");
 		},
 		(error: any) => {
-			logger.error({ result: error }, 'pixConfigWebhook error:');
+			logger.error({ result: error }, "pixConfigWebhook error:");
 		}
 	);
 }
@@ -42,14 +40,14 @@ export const checkAndSetupWebhooks = () => {
 	  if (JSON.parse(process.env.EFI_ENABLE_PIX)) {
 		efiPay.pixDetailWebhook(params).then(
 			(hooks: any) => {
-			    if (hooks?.webhookUrl !== process.env.BACKEND_URL + '/subscription/webhook') {
+			    if (hooks?.webhookUrl !== `${process.env.BACKEND_URL}/subscription/webhook`) {
 					createWebHook(efiPay);
 				} else {
-					logger.info({ result: hooks }, 'checkAndSetupWebhooks: webhook correto já instalado');
+					logger.info({ result: hooks }, "checkAndSetupWebhooks: webhook correto já instalado");
 				}
 			},
 			(error: any) => {
-				if (error?.nome === 'webhook_nao_encontrado') {
+				if (error?.nome === "webhook_nao_encontrado") {
 					createWebHook(efiPay);
 				} else {
 					throw error;
@@ -58,7 +56,7 @@ export const checkAndSetupWebhooks = () => {
 		);
 	  }
     } catch (error) {
-		logger.error({ result: error }, 'checkAndSetupWebhooks:');
+		logger.error({ result: error }, "checkAndSetupWebhooks:");
 	}
 }
 
@@ -128,7 +126,7 @@ export const createSubscription = async (
 
     });
   } catch (error) {
-    logger.error('createSubscription error:', error);
+    logger.error("createSubscription error:", error);
     throw new AppError("Problema encontrado, entre em contato com o suporte!", 400);
   }
 };
@@ -154,7 +152,7 @@ export const webhook = async (
         const { solicitacaoPagador } = detalhe;
         const invoiceID = solicitacaoPagador.replace("#Fatura:", "");
         const invoices = await Invoices.findByPk(invoiceID);
-        const companyId =invoices.companyId;
+        const {companyId} = invoices;
         const company = await Company.findByPk(companyId);
 
         const expiresAt = new Date(company.dueDate);
@@ -165,9 +163,9 @@ export const webhook = async (
           await company.update({
             dueDate: date
           });
-         const invoi = await invoices.update({
+          await invoices.update({
             id: invoiceID,
-            status: 'paid'
+            status: "paid"
           });
           await company.reload();
           const io = getIO();
