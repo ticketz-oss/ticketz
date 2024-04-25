@@ -25,8 +25,6 @@ import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import { useTheme } from "@material-ui/core";
 import Container from "@material-ui/core/Container";
-import logo from "../../assets/vector/logo.svg";
-import logoDark from "../../assets/vector/logo-dark.svg";
 import { i18n } from "../../translate/i18n";
 
 import { openApi } from "../../services/api";
@@ -37,6 +35,8 @@ import ReCAPTCHA from "react-google-recaptcha";
 import config from "../../services/config";
 import useSettings from "../../hooks/useSettings";
 
+const logo = "/vector/logo.svg";
+const logoDark = "/vector/logo-dark.svg";
 
 const Copyright = () => {
 	return (

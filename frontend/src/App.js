@@ -11,11 +11,11 @@ import { SocketContext, socketManager } from './context/Socket/SocketContext';
 import useSettings from "./hooks/useSettings";
 import Favicon from "react-favicon";
 import { getBackendURL } from "./services/config";
-import logoFavicon from "./assets/vector/favicon.svg";
 
 import Routes from "./routes";
 
 const queryClient = new QueryClient();
+const logoFavicon = "/vector/favicon.svg";
 
 const App = () => {
   const [locale, setLocale] = useState();

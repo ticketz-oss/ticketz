@@ -21,8 +21,9 @@ import alertSound from "../../assets/sound.mp3";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { SocketContext } from "../../context/Socket/SocketContext";
 import Favicon from "react-favicon";
-import zapIcon from "../../assets/vector/favicon.svg";
 import { getBackendURL } from "../../services/config";
+
+const zapIcon = "/vector/favicon.svg";
 
 const useStyles = makeStyles((theme) => ({
   tabContainer: {

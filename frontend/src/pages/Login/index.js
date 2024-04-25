@@ -15,10 +15,11 @@ import Container from "@material-ui/core/Container";
 import { i18n } from "../../translate/i18n";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
-import logo from "../../assets/vector/logo.svg";
-import logoDark from "../../assets/vector/logo-dark.svg";
 import useSettings from "../../hooks/useSettings";
 import { getBackendURL } from "../../services/config";
+
+const logo = "/vector/logo.svg";
+const logoDark = "/vector/logo-dark.svg";
 
 const Copyright = () => {
 	return (

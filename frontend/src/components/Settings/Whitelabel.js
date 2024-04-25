@@ -20,9 +20,10 @@ import ColorPicker from "../ColorPicker";
 import ColorModeContext from "../../layout/themeContext";
 import api from "../../services/api";
 import { getBackendURL } from "../../services/config";
-import logo from "../../assets/vector/logo.svg";
-import logoDark from "../../assets/vector/logo-dark.svg";
-import logoFavicon from "../../assets/vector/favicon.svg";
+
+const logo = "/vector/logo.svg";
+const logoDark = "/vector/logo-dark.svg";
+const logoFavicon = "/vector/favicon.svg";
 
 const useStyles = makeStyles((theme) => ({
   container: {

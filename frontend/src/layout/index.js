@@ -33,9 +33,6 @@ import { messages } from "../translate/languages";
 import toastError from "../errors/toastError";
 import AnnouncementsPopover from "../components/AnnouncementsPopover";
 
-import logo from "../assets/vector/logo.svg";
-import logoDark from "../assets/vector/logo-dark.svg";
-
 import { SocketContext } from "../context/Socket/SocketContext";
 import ChatPopover from "../pages/Chat/ChatPopover";
 
@@ -48,6 +45,9 @@ import LanguageIcon from '@material-ui/icons/Language';
 import { getBackendURL } from "../services/config";
 
 const drawerWidth = 240;
+
+const logo = "/vector/logo.svg";
+const logoDark = "/vector/logo-dark.svg";
 
 const useStyles = makeStyles((theme) => ({
   root: {
