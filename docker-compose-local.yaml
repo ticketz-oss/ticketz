@@ -7,6 +7,7 @@ volumes:
   postgres_data:
   redis_data:
   backend_public:
+  backend_private:
 
 services:
 
@@ -16,6 +17,7 @@ services:
       dockerfile: ./Dockerfile
     volumes:
       - backend_public:/usr/src/app/public
+      - backend_private:/usr/src/app/private
     env_file:
       - .env-backend-local
     restart: always
