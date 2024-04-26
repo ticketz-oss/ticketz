@@ -8,10 +8,6 @@
     "@material-ui/icons": "^4.11.3",
     "@material-ui/lab": "^4.0.0-alpha.61",
     "@material-ui/pickers": "^3.3.11",
-    "@socket.io/admin-ui": "^0.5.1",
-    "@testing-library/jest-dom": "^5.11.4",
-    "@testing-library/react": "^11.0.4",
-    "@testing-library/user-event": "^12.1.7",
     "axios": "^1.6.8",
     "bootstrap": "^5.2.3",
     "compressorjs": "^1.2.1",
@@ -45,7 +41,6 @@
     "react-qr-code": "^2.0.7",
     "react-query": "^3.39.3",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "^5.0.1",
     "react-text-mask": "^5.5.0",
     "react-toastify": "9.0.0",
     "recharts": "^2.0.2",
@@ -80,5 +75,12 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "react-scripts": "^5.0.1",
+    "@socket.io/admin-ui": "^0.5.1",
+    "@testing-library/jest-dom": "^5.11.4",
+    "@testing-library/react": "^11.0.4",
+    "@testing-library/user-event": "^12.1.7"
   }
 }
