@@ -4,10 +4,10 @@
   "private": true,
   "dependencies": {
     "@date-io/date-fns": "^2.14.0",
-    "@material-ui/core": "4.12.3",
-    "@material-ui/icons": "^4.9.1",
-    "@material-ui/lab": "^4.0.0-alpha.56",
-    "@material-ui/pickers": "^3.3.10",
+    "@material-ui/core": "^4.12.4",
+    "@material-ui/icons": "^4.11.3",
+    "@material-ui/lab": "^4.0.0-alpha.61",
+    "@material-ui/pickers": "^3.3.11",
     "@socket.io/admin-ui": "^0.5.1",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.0.4",
@@ -55,7 +55,7 @@
     "use-debounce": "^7.0.0",
     "use-sound": "^2.0.1",
     "uuid": "^9.0.1",
-    "yup": "^0.32.8"
+    "yup": "^1.4.0"
   },
   "scripts": {
     "start": "react-scripts start",
