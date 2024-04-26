@@ -1589,7 +1589,7 @@ const handleMessage = async (
       order: [["createdAt", "DESC"]],
     });
 
-    if (unreadMessages === 0 && whatsapp.complationMessage && formatBody(whatsapp.complationMessage, contact).trim().toLowerCase() === lastMessage.body.trim().toLowerCase()) {
+    if (unreadMessages === 0 && whatsapp.complationMessage && formatBody(whatsapp.complationMessage, contact).trim().toLowerCase() === lastMessage?.body.trim().toLowerCase()) {
       return;
     }
 
