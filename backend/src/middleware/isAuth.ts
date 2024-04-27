@@ -7,6 +7,7 @@ interface TokenPayload {
   id: string;
   username: string;
   profile: string;
+  super: boolean;
   companyId: number;
   iat: number;
   exp: number;
@@ -26,6 +27,7 @@ const isAuth = (req: Request, res: Response, next: NextFunction): void => {
     req.user = {
       id: req.tokenData.id,
       profile: req.tokenData.profile,
+      isSuper: req.tokenData.super,
       companyId: req.tokenData.companyId
     };
   } catch (err) {
