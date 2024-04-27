@@ -42,7 +42,7 @@ export const initIO = (httpServer: Server): SocketIO => {
       tokenData = verify(token as string, authConfig.secret);
       logger.debug(tokenData, "io-onConnection: tokenData");
     } catch (error) {
-      logger.error(error, "Error decoding token");
+      logger.debug(`Error decoding token: ${error?.message}`);
       socket.disconnect();
       return io;
     }
