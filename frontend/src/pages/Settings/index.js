@@ -70,7 +70,7 @@ const Settings = () => {
     socket.on(`company-${companyId}-settings`, onSettings);
 
     return () => {
-      socket.off(`company-${companyId}-settings`, onSettings);
+      socket.disconnect();
     };
   }, [socketManager]);
 

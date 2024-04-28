@@ -36,7 +36,7 @@ function CheckoutSuccess(props) {
     socket.on(`company-${companyId}-payment`, onCompanyPayment);
     
     return () => {
-      socket.off("connect", onCompanyPayment);
+      socket.disconnect();
     }
   }, [history, dateToClient, socketManager]);
 

@@ -147,7 +147,7 @@ const ContactLists = () => {
     socket.on(`company-${companyId}-ContactList`, onContactList);
 
     return () => {
-      socket.off(`company-${companyId}-ContactList`, onContactList);
+      socket.disconnect();
     };
   }, [socketManager]);
 

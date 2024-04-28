@@ -90,7 +90,7 @@ const useAuth = () => {
     socket.on(`company-${companyId}-user`, onCompanyUserUseAuth);
 
     return () => {
-      socket.off(`company-${companyId}-user`, onCompanyUserUseAuth);
+      socket.disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);

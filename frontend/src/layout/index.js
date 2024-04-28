@@ -272,7 +272,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
     }, 1000 * 60 * 5);
 
     return () => {
-      socket.off(`company-${companyId}-auth`, onCompanyAuthLayout);
+      socket.disconnect();
       clearInterval(interval);
     };
   }, [socketManager]);

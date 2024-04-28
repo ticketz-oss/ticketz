@@ -97,8 +97,7 @@ const useWhatsApps = () => {
     socket.on(`company-${companyId}-whatsappSession`, onCompanyWhatsappSession);
 
     return () => {
-	    socket.off(`company-${companyId}-whatsapp`, onCompanyWhatsapp);
-	    socket.off(`company-${companyId}-whatsappSession`, onCompanyWhatsappSession);
+	    socket.disconnect();
     };
   }, [socketManager]);
 

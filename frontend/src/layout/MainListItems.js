@@ -176,7 +176,7 @@ const MainListItems = (props) => {
 
     socket.on(`company-${companyId}-chat`, onCompanyChatMainListItems);
     return () => {
-	    socket.off(`company-${companyId}-chat`, onCompanyChatMainListItems);
+	    socket.disconnect();
     };
   }, [socketManager]);
 

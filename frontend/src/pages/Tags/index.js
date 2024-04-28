@@ -153,7 +153,7 @@ const Tags = () => {
     socket.on("user", onUser);
 
     return () => {
-      socket.off("user", onUser);
+      socket.disconnect();
     };
   }, [user, socketManager]);
 

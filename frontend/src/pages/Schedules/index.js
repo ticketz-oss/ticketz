@@ -172,7 +172,7 @@ const Schedules = () => {
     socket.on(`company-${user.companyId}-schedule`, onSchedule);
 
     return () => {
-      socket.off(`company-${user.companyId}-schedule`, onSchedule);
+      socket.disconnect();
     };
   }, [handleOpenScheduleModalFromContactId, user, socketManager]);
 

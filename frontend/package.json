@@ -36,6 +36,7 @@
     "react-google-recaptcha": "^3.1.0",
     "react-icons": "^4.4.0",
     "react-input-mask": "^2.0.4",
+    "react-jwt": "^1.2.1",
     "react-modal-image": "^2.5.0",
     "react-number-format": "^4.6.4",
     "react-qr-code": "^2.0.7",
@@ -77,10 +78,10 @@
     ]
   },
   "devDependencies": {
-    "react-scripts": "^5.0.1",
     "@socket.io/admin-ui": "^0.5.1",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.0.4",
-    "@testing-library/user-event": "^12.1.7"
+    "@testing-library/user-event": "^12.1.7",
+    "react-scripts": "^5.0.1"
   }
 }

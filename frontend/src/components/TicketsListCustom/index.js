@@ -293,10 +293,7 @@ const TicketsListCustom = (props) => {
       } else {
         socket.emit("leaveNotification");
       }
-      socket.off("connect", onConnectTicketList);
-      socket.off(`company-${companyId}-ticket`, onCompanyTicket);
-      socket.off(`company-${companyId}-appMessage`, onCompanyAppMessage);
-      socket.off(`company-${companyId}-contact`, onCompanyContact );
+      socket.disconnect();
     };
     
   }, [status, showAll, user, selectedQueueIds, tags, users, profile, queues, socketManager]);

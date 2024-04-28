@@ -445,9 +445,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     socket.on(`company-${companyId}-appMessage`, onAppMessage);
 
     return () => {
-      socket.emit("leaveChatBox", `${ticket.id}`);
-      socket.off("connect", onConnect);
-      socket.off(`company-${companyId}-appMessage`, onAppMessage);
+      socket.disconnect();
     };
   }, [ticketId, ticket, socketManager]);
 

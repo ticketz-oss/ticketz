@@ -128,7 +128,7 @@ const Queues = () => {
     socket.on(`company-${companyId}-queue`, onQueue);
 
     return () => {
-      socket.off(`company-${companyId}-queue`, onQueue);
+      socket.disconnect();
     };
   }, [socketManager]);
 

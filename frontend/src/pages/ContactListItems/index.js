@@ -182,8 +182,7 @@ const ContactListItems = () => {
     socket.on(`company-${companyId}-ContactListItem-${contactListId}`, onContactListItemId);
   
     return () => {
-      socket.off(`company-${companyId}-ContactListItem`, onContactListItem);
-      socket.off(`company-${companyId}-ContactListItem-${contactListId}`, onContactListItemId);
+      socket.disconnect();
     };
   }, [contactListId, socketManager]);
 

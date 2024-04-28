@@ -137,10 +137,7 @@ const Ticket = () => {
     socket.on(`company-${companyId}-contact`, onCompanyContact);
 
     return () => {
-      socket.emit("leaveChatBox", `${ticket.id}`);
-      socket.off("connect", onConnectTicket);
-      socket.off(`company-${companyId}-ticket`, onCompanyTicket);
-      socket.off(`company-${companyId}-contact`, onCompanyContact);
+      socket.disconnect();
     };
   }, [ticketId, ticket, history, socketManager]);
 

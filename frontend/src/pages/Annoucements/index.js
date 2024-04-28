@@ -133,7 +133,7 @@ const Announcements = () => {
     socket.on(`company-announcement`, onAnnouncement);
     
     return () => {
-      socket.off(`company-announcement`, onAnnouncement);
+      socket.disconnect();
     };
   }, [socketManager]);
 
