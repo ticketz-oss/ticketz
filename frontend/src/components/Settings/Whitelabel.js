@@ -96,6 +96,7 @@ const useStyles = makeStyles((theme) => ({
     borderStyle: "solid",
     borderWidth: "1px",
     borderColor: "#424242",
+    textAlign: "center",
   },
   
   appLogoDarkPreviewDiv: {
@@ -104,6 +105,7 @@ const useStyles = makeStyles((theme) => ({
     borderStyle: "solid",
     borderWidth: "1px",
     borderColor: "white",
+    textAlign: "center",
   },
   
   appLogoFaviconPreviewDiv: {
@@ -111,6 +113,7 @@ const useStyles = makeStyles((theme) => ({
     borderStyle: "solid",
     borderWidth: "1px",
     borderColor: "black",
+    textAlign: "center",
   },
   
   appLogoLightPreviewImg: {
@@ -477,17 +480,17 @@ export default function Whitelabel(props) {
               </Grid>
               <Grid xs={12} sm={6} md={4} item>
                 <div className={classes.appLogoLightPreviewDiv}>
-                  <img className={classes.appLogoLightPreviewImg} />
+                  <img className={classes.appLogoLightPreviewImg} alt="dark-logo-preview" />
                 </div>
               </Grid>
               <Grid xs={12} sm={6} md={4} item>
                 <div className={classes.appLogoDarkPreviewDiv}>
-                  <img className={classes.appLogoDarkPreviewImg} />
+                  <img className={classes.appLogoDarkPreviewImg} alt="dark-logo-preview" />
                 </div>
               </Grid>
               <Grid xs={12} sm={6} md={4} item>
                 <div className={classes.appLogoFaviconPreviewDiv}>
-                  <img className={classes.appLogoFaviconPreviewImg} />
+                  <img className={classes.appLogoFaviconPreviewImg} alt="favicon-preview" />
                 </div>
               </Grid>
             </>
