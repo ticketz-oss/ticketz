@@ -99,7 +99,10 @@ const socketManager = {
       }
 
       let token = JSON.parse(localStorage.getItem("token"));
-
+      if (!token) {
+        return new DummySocket();
+      }
+      
       if ( isExpired(token) ) {
         console.warn("Expired token, reload after refresh");
         setTimeout(() => {
@@ -110,10 +113,6 @@ const socketManager = {
 
       this.currentCompanyId = companyId;
       this.currentUserId = userId;
-      
-      if (!token) {
-        return new DummySocket();
-      }
       
       this.currentSocket = openSocket(getBackendURL(), {
         transports: ["websocket"],
