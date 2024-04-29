@@ -18,6 +18,7 @@ import {
   WAMessageStubType,
   WAMessageUpdate,
 } from "@whiskeysockets/baileys";
+import { Mutex } from "async-mutex";
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
 import Message from "../../models/Message";
@@ -1593,8 +1594,12 @@ const handleMessage = async (
       return;
     }
 
-    const ticket = await FindOrCreateTicketService(contact, wbot.id!, unreadMessages, companyId, groupContact);
-
+    const mutex = new Mutex();
+    const ticket = await mutex.runExclusive(async () => {
+      const result = await FindOrCreateTicketService(contact, wbot.id!, unreadMessages, companyId, groupContact);
+      return result;
+    });
+  
     // voltar para o menu inicial
 
     if (bodyMessage == "#") {
