@@ -166,6 +166,8 @@ export const initIO = (httpServer: Server): SocketIO => {
         }
       }
     });
+    
+    socket.emit("ready");
     return io;
   });
   return io;
