@@ -113,10 +113,12 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
+    overflowY: "clip",
     ...theme.scrollbarStylesSoft
   },
   drawerPaperClose: {
     overflowX: "hidden",
+    overflowY: "clip",
     transition: theme.transitions.create("width", {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
@@ -146,7 +148,8 @@ const useStyles = makeStyles((theme) => ({
   containerWithScroll: {
     flex: 1,
     padding: theme.spacing(1),
-    overflowY: "scroll",
+    overflowY: "auto",
+    overflowX: "clip",
     ...theme.scrollbarStyles,
   },
   NotificationsPopOver: {
