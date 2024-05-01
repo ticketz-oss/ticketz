@@ -25,13 +25,13 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      
     volumes:
       - ngx_conf:/etc/nginx/conf.d
       - ngx_vhost:/etc/nginx/vhost.d
       - ngx_html:/usr/share/nginx/html
       - ngx_dhparam:/etc/nginx/dhparam
       - ngx_certs:/etc/nginx/certs:ro
+      - ./confs/nginx-ticketz.conf:/etc/nginx/conf.d/ticketz.conf
       - /var/run/docker.sock:/tmp/docker.sock:ro
     networks:
       - nginx-proxy
