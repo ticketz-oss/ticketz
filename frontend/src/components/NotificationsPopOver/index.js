@@ -208,11 +208,11 @@ const NotificationsPopOver = (props) => {
   const browserNotification = () => {
 	const numbers = "⓿➊➋➌➍➎➏➐➑➒➓⓫⓬⓭⓮⓯⓰⓱⓲⓳⓴";
     if (notifications.length > 0) {
-		if (notifications.length < 21 ) {
-	      document.title = numbers.substring(notifications.length,notifications.length+1) + " - " + ( theme.appName || "...");
-        } else {
-	      document.title = "(" + notifications.length + ")" + ( theme.appName || "...");
-		}		
+      if (notifications.length < 21) {
+        document.title = numbers.substring(notifications.length, notifications.length + 1) + " - " + (theme.appName || "...");
+      } else {
+        document.title = "(" + notifications.length + ")" + (theme.appName || "...");
+      }
     } else {
       document.title = theme.appName || "...";
     }
