@@ -211,7 +211,7 @@ const NotificationsPopOver = (props) => {
 		if (notifications.length < 21 ) {
 	      document.title = numbers.substring(notifications.length,notifications.length+1) + " - " + ( theme.appName || "...");
         } else {
-	      document.title = "(" + notifications.length + ")" ( theme.appName || "...");
+	      document.title = "(" + notifications.length + ")" + ( theme.appName || "...");
 		}		
     } else {
       document.title = theme.appName || "...";
