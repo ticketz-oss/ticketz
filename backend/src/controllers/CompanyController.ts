@@ -51,29 +51,6 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   return res.json({ companies, count, hasMore });
 };
 
-export const signup = async (req: Request, res: Response): Promise<Response> => {
-  if (await CheckSettings("allowSignup") !== "enabled") {
-    return res.status(401).json("🙎🏻‍♂️ Signup disabled");
-  }
-  
-  if (process.env.RECAPTCHA_SECRET_KEY) {
-	  if (!req.body.captchaToken) {
-		  return res.status(401).json('empty captcha');
-	  }
-	  const response = await axios.post(
-         `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${req.body.captchaToken}`
-      );
-      
-      if (!response.data.success) {
-		  return res.status(401).json('🤖 be gone');
-	  }
-  }
-
-  req.body.dueDate = moment().add(3, "day").format();
-
-  return await store(req, res);
-}
-
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const newCompany: CompanyData = req.body;
 
@@ -83,7 +60,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   try {
     await schema.validate(newCompany);
-  } catch (err: any) {
+  } catch (err) {
     throw new AppError(err.message);
   }
 
@@ -91,6 +68,30 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   return res.status(200).json(company);
 };
+
+
+export const signup = async (req: Request, res: Response): Promise<Response> => {
+  if (await CheckSettings("allowSignup") !== "enabled") {
+    return res.status(401).json("🙎🏻‍♂️ Signup disabled");
+  }
+  
+  if (process.env.RECAPTCHA_SECRET_KEY) {
+    if (!req.body.captchaToken) {
+      return res.status(401).json("empty captcha");
+    }
+    const response = await axios.post(
+         `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${req.body.captchaToken}`
+      );
+      
+      if (!response.data.success) {
+      return res.status(401).json("🤖 be gone");
+    }
+  }
+
+  req.body.dueDate = moment().add(3, "day").format();
+
+  return store(req, res);
+}
 
 export const show = async (req: Request, res: Response): Promise<Response> => {
   const { id } = req.params;
@@ -124,7 +125,7 @@ export const update = async (
 
   try {
     await schema.validate(companyData);
-  } catch (err: any) {
+  } catch (err) {
     throw new AppError(err.message);
   }
 

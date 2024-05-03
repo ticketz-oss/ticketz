@@ -26,7 +26,7 @@ const CreateService = async ({
 
   try {
     await schema.validate({ body, sendAt });
-  } catch (err: any) {
+  } catch (err) {
     throw new AppError(err.message);
   }
 
@@ -37,7 +37,7 @@ const CreateService = async ({
       contactId,
       companyId,
       userId,
-      status: 'PENDENTE'
+      status: "PENDENTE"
     }
   );
 
