@@ -2,6 +2,7 @@ import * as Yup from "yup";
 
 import AppError from "../../errors/AppError";
 import Schedule from "../../models/Schedule";
+import Contact from "../../models/Contact";
 
 interface Request {
   body: string;
@@ -40,7 +41,9 @@ const CreateService = async ({
     }
   );
 
-  await schedule.reload();
+  await schedule.reload({
+    include: [{ model: Contact, as: "contact" }]
+  });
 
   return schedule;
 };

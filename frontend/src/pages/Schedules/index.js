@@ -161,7 +161,7 @@ const Schedules = () => {
 
     const onSchedule = (data) => {
       if (data.action === "update" || data.action === "create") {
-        dispatch({ type: "UPDATE_SCHEDULES", payload: data.schedules });
+        dispatch({ type: "UPDATE_SCHEDULES", payload: data?.schedules || data?.schedule });
       }
 
       if (data.action === "delete") {
