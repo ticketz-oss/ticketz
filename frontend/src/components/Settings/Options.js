@@ -13,8 +13,6 @@ import { grey, blue } from "@material-ui/core/colors";
 import OnlyForSuperUser from "../OnlyForSuperUser";
 import useAuth from "../../hooks/useAuth.js";
 
-//import 'react-toastify/dist/ReactToastify.css';
-
 const useStyles = makeStyles((theme) => ({
   container: {
     paddingTop: theme.spacing(4),

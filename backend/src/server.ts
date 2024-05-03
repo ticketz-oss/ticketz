@@ -12,7 +12,7 @@ import fs from "fs";
 // const credentials = { key: privatkey, cert: certificate };
 // const server = https.createServer(credentials, app);
 
-import { checkAndSetupWebhooks } from "./controllers/SubscriptionController";
+import { initializePaymentGateway } from "./services/PaymentGatewayServices/PaymentGatewayServices";
 
 const server = app.listen(process.env.PORT, async () => {
   const companies = await Company.findAll();
@@ -27,7 +27,11 @@ const server = app.listen(process.env.PORT, async () => {
   });
   logger.info(`Server started on port: ${process.env.PORT}`);
   
-  checkAndSetupWebhooks();
+  initializePaymentGateway().catch(
+    (e) => {
+      logger.error(`Error initializing payment gateway: ${e.message}`);
+    }
+  );
 });
 
 // server.listen(process.env.PORT, async () => {

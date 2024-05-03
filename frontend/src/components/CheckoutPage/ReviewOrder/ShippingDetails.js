@@ -2,7 +2,7 @@ import React from 'react';
 import { Typography, Grid } from '@material-ui/core';
 import useStyles from './styles';
 
-function PaymentDetails(props) {
+function ShippingDetails(props) {
   const { formValues } = props;
   const classes = useStyles();
   const { plan } = formValues;
@@ -22,4 +22,4 @@ function PaymentDetails(props) {
   );
 }
 
-export default PaymentDetails;
+export default ShippingDetails;

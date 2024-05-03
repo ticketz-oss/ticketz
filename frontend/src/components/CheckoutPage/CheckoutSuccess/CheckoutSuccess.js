@@ -54,7 +54,15 @@ function CheckoutSuccess(props) {
         <strong>R${pix.valor.original.toLocaleString('pt-br', { minimumFractionDigits: 2 })}</strong>
       </Total>
       <SuccessContent>
-        <QRCode value={pixString} />
+        <QRCode value={pixString}
+          style={
+            { borderStyle: "solid",
+              borderWidth: "1px",
+              padding: "5px", 
+              borderColor: "black",
+              backgroundColor: "white",
+              height: "auto",
+              maxWidth: "100%" }} />
         <CopyToClipboard text={pixString} onCopy={handleCopyQR}>
           <button className="copy-button" type="button">
             {copied ? (
