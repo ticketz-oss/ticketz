@@ -29,7 +29,6 @@ import { i18n } from "../../translate/i18n";
 
 import { openApi } from "../../services/api";
 import toastError from "../../errors/toastError";
-import moment from "moment";
 
 import ReCAPTCHA from "react-google-recaptcha";
 import config from "../../services/config";
@@ -97,7 +96,6 @@ const SignUp = () => {
 	const initialState = { name: "", email: "", phone: "", password: "", planId: "", };
 
 	const [user] = useState(initialState);
-	const dueDate = moment().add(3, "day").format();
 
 	const handleSignUp = async (values) => {
 		if (config.RECAPTCHA_SITE_KEY) {
@@ -105,7 +103,6 @@ const SignUp = () => {
 		}
 		
 		Object.assign(values, { recurrence: "MENSAL" });
-		Object.assign(values, { dueDate: dueDate });
 		Object.assign(values, { status: "t" });
 		Object.assign(values, { campaignsEnabled: true });
 		try {

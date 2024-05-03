@@ -15,6 +15,7 @@ import User from "../models/User";
 
 import axios from 'axios';
 import CheckSettings from "../helpers/CheckSettings";
+import moment from "moment";
 
 
 type IndexQuery = {
@@ -67,6 +68,9 @@ export const signup = async (req: Request, res: Response): Promise<Response> => 
 		  return res.status(401).json('🤖 be gone');
 	  }
   }
+
+  req.body.dueDate = moment().add(3, "day").format();
+
   return await store(req, res);
 }
 
