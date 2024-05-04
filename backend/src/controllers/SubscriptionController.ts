@@ -3,6 +3,7 @@ import * as Yup from "yup";
 import AppError from "../errors/AppError";
 import GetSuperSettingService from "../services/SettingServices/GetSuperSettingService";
 import { efiCreateSubscription, efiWebhook } from "../services/PaymentGatewayServices/EfiServices";
+import { owenCreateSubscription, owenWebhook } from "../services/PaymentGatewayServices/OwenServices";
 
 export const createSubscription = async (
   req: Request,
@@ -25,6 +26,9 @@ export const createSubscription = async (
     case "efi": {
       return efiCreateSubscription(req, res);
     }    
+    case "owen": {
+      return owenCreateSubscription(req, res);
+    }    
     default: {
       throw new AppError("Unsupported payment gateway", 400);
     }
@@ -42,6 +46,9 @@ export const webhook = async (
   switch (paymentGateway) {
     case "efi": {
       return efiWebhook(req, res);
+    }    
+    case "owen": {
+      return owenWebhook(req, res);
     }    
     default: {
       throw new AppError("Unsupported payment gateway", 400);
