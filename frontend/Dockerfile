@@ -5,18 +5,19 @@ COPY . .
 
 ENV NODE_OPTIONS --openssl-legacy-provider
 
-RUN    npm config set maxsockets=5 \
-    && npm install \
+RUN    npm install \
+    && echo -e "\n\nBulding...\n" \
     && npm run build
 
 FROM nginx:alpine
 
 ENV DOCKERIZE_VERSION v0.7.0
-RUN    wget -O /usr/local/bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.2.5/dumb-init_1.2.5_x86_64 \
+RUN    wget -O /usr/local/bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.2.5/dumb-init_1.2.5_$(uname -m) \
     && chmod +x /usr/local/bin/dumb-init \
-    && wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
-    && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
-    && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+    && LARCH=$(if [ "$(uname -m)" == "aarch64" ] ; then echo "arm64" ; elif [ "$(uname -m)" == "x86_64" ] ; then echo "amd64" ; else uname -m ; fi) \
+    && wget -O /usr/local/bin/dockerize.tar.gz https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-${LARCH}-${DOCKERIZE_VERSION}.tar.gz \
+    && tar -C /usr/local/bin -xzvf /usr/local/bin/dockerize.tar.gz \
+    && rm /usr/local/bin/dockerize.tar.gz
 
 WORKDIR /usr/share/nginx/html
 
