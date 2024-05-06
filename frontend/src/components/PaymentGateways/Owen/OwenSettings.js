@@ -179,7 +179,7 @@ export default function OwenSettings(props) {
             webhook para o seguinte conteúdo:
           </Typography>
           <Typography variant="pre">
-            {getBackendURL()}/subscriptions/ticketz/webhook
+            {getBackendURL()}/subscription/ticketz/webhook
           </Typography>
         </Grid>
       </Grid>
