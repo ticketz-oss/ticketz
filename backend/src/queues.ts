@@ -22,7 +22,6 @@ import path from "path";
 import User from "./models/User";
 import Company from "./models/Company";
 import Plan from "./models/Plan";
-const nodemailer = require('nodemailer');
 const CronJob = require('cron').CronJob;
 
 const connection = process.env.REDIS_URI || "";
@@ -48,7 +47,6 @@ interface DispatchCampaignData {
 }
 
 export const userMonitor = new Queue("UserMonitor", connection);
-
 
 export const messageQueue = new Queue("MessageQueue", connection, {
   limiter: {
@@ -99,7 +97,7 @@ async function handleVerifySchedules(job) {
       include: [{ model: Contact, as: "contact" }]
     });
     if (count > 0) {
-      schedules.map(async schedule => {
+      for (const schedule of schedules) {
         await schedule.update({
           status: "AGENDADA"
         });
@@ -109,7 +107,7 @@ async function handleVerifySchedules(job) {
           { delay: 40000 }
         );
         logger.info(`Disparo agendado para: ${schedule.contact.name}`);
-      });
+      };
     }
   } catch (e: any) {
     Sentry.captureException(e);
@@ -583,19 +581,15 @@ async function handleDispatchCampaign(job) {
 }
 
 async function handleLoginStatus(job) {
-  const users: { id: number }[] = await sequelize.query(
-    `select id from "Users" where "updatedAt" < now() - '5 minutes'::interval and online = true`,
-    { type: QueryTypes.SELECT }
-  );
-  for (let item of users) {
-    try {
-      const user = await User.findByPk(item.id);
-      await user.update({ online: false });
-      logger.info(`Usuário passado para offline: ${item.id}`);
-    } catch (e: any) {
-      Sentry.captureException(e);
-    }
-  }
+  const thresholdTime = new Date();
+  thresholdTime.setMinutes(thresholdTime.getMinutes() - 5);
+
+  await User.update({online: false}, {
+    where: {
+      updatedAt: {[Op.lt]: thresholdTime},
+      online: true,
+    },
+  });
 }
 
 
@@ -603,8 +597,12 @@ async function handleInvoiceCreate() {
   const job = new CronJob('0 * * * * *', async () => {
 
 
-    const companies = await Company.findAll();
-    companies.map(async c => {
+    const companies = await Company.findAll({
+      where: {
+        status: true
+      }
+    });
+    for (const c of companies) {
       var dueDate = c.dueDate;
       const date = moment(dueDate).format();
       const timestamp = moment().format();
@@ -631,44 +629,9 @@ async function handleInvoiceCreate() {
             { type: QueryTypes.INSERT }
           );
 
-/*           let transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-              user: 'email@gmail.com',
-              pass: 'senha'
-            }
-          });
-
-          const mailOptions = {
-            from: 'heenriquega@gmail.com', // sender address
-            to: `${c.email}`, // receiver (use array of string for a list)
-            subject: 'Fatura gerada - Sistema', // Subject line
-            html: `Olá ${c.name} esté é um email sobre sua fatura!<br>
-<br>
-Vencimento: ${vencimento}<br>
-Valor: ${plan.value}<br>
-Link: ${process.env.FRONTEND_URL}/financeiro<br>
-<br>
-Qualquer duvida estamos a disposição!
-            `// plain text body
-          };
-
-          transporter.sendMail(mailOptions, (err, info) => {
-            if (err)
-              console.log(err)
-            else
-              console.log(info);
-          }); */
-
         }
-
-
-
-
-
       }
-
-    });
+    };
   });
   job.start()
 }
@@ -720,7 +683,7 @@ export async function startQueueProcess() {
     "VerifyLoginStatus",
     {},
     {
-      repeat: { cron: "* * * * *" },
+      repeat: {cron: "*/5 * * * *"},
       removeOnComplete: true
     }
   );
