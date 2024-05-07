@@ -5,7 +5,6 @@ import makeWASocket, {
   fetchLatestBaileysVersion,
   makeInMemoryStore,
   isJidBroadcast,
-  isJidNewsletter,
   WASocket
 } from "@whiskeysockets/baileys";
 import P from "pino";
@@ -94,16 +93,9 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
           printQRInTerminal: false,
           auth: state as AuthenticationState,
           version: [2, 2323, 4],
-          shouldIgnoreJid: (jid) => { return isJidBroadcast(jid) || isJidNewsletter('@newsletter') }
+          shouldIgnoreJid: (jid) => { return isJidBroadcast(jid) }
         });
 
-        wsocket.ev.process(async (update) => {
-          const obj = {};
-          for(const contact of update) {
-              obj[contact.id] = obj[contact.id] || {}; // Ensures that the property exists
-              Object.assign(obj[contact.id], contact); // Merges contact data into the property
-          }
-        });
 
         wsocket.ev.on(
           "connection.update",
