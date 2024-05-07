@@ -10,7 +10,7 @@ import AppError from "../../errors/AppError";
 
 const webhookUrl = `${process.env.BACKEND_URL}/subscription/ticketz/webhook`;
 
-async function getEfiOptions() {
+async function getEfiOptions(): Promise<EfiCredentials> {
   const cert = path.join(
     __dirname,
     `../../../private/${await GetSuperSettingService({ key: "_efiCertFile"})}`
@@ -86,47 +86,43 @@ export const efiWebhook = async (
     return res.json({ ok: true });
   }
   if (req.body.pix) {
-    logger.info({ request: req }, "informação sobre PIX recebida por webhoook");
-    const efiPay = new EfiPay(await getEfiOptions());
-    req.body.pix.forEach(async (pix: { txid: string; }) => {
-      const detalhe = await efiPay.pixDetailCharge({
-        txid: pix.txid
+    req.body.pix.forEach( async (pix: { status: string; txid: string; valor: number; }) => {
+      logger.debug( pix, "Processando pagamento");
+
+      const invoice = await Invoices.findOne({
+        where: {
+          txId: pix.txid,
+          status: "open",
+        },
+        include: { model: Company, as: "company" }
       });
-
-      if (detalhe.status === "CONCLUIDA") {
-        const { solicitacaoPagador } = detalhe;
-        const invoiceID = solicitacaoPagador.replace("#Fatura:", "");
-        const invoices = await Invoices.findByPk(invoiceID);
-        const { companyId } = invoices;
-        const company = await Company.findByPk(companyId);
-
-        const expiresAt = new Date(company.dueDate);
-        expiresAt.setDate(expiresAt.getDate() + 30);
-        const date = expiresAt.toISOString().split("T")[0];
-
-        if (company) {
-          await company.update({
-            dueDate: date
-          });
-          await invoices.update({
-            id: invoiceID,
-            status: "paid"
-          });
-          await company.reload();
-          const io = getIO();
-          const companyUpdate = await Company.findOne({
-            where: {
-              id: companyId
-            }
-          });
-
-          io.emit(`company-${companyId}-payment`, {
-            action: detalhe.status,
-            company: companyUpdate
-          });
-        }
-
+      
+      if (!invoice || pix.valor < invoice.value) {
+        logger.debug( "Recebido valor menor" );
+        return true;
       }
+  
+      const expiresAt = new Date(invoice.company.dueDate);
+      expiresAt.setDate(expiresAt.getDate() + 30);
+      const date = expiresAt.toISOString().split("T")[0];
+
+      if (invoice.company) {
+        await invoice.company.update({
+          dueDate: date
+        });
+        await invoice.update({
+          status: "paid"
+        });
+        await invoice.company.reload();
+        const io = getIO();
+
+        io.emit(`company-${invoice.companyId}-payment`, {
+          action: "CONCLUIDA",
+          company: invoice.company
+        });
+      }
+      
+      return true;
     });
   }
 
@@ -155,16 +151,21 @@ export const efiCreateSubscription = async (
   };
   const efiOptions = await getEfiOptions();
   try {
+    const invoice = await Invoices.findByPk(invoiceId);
+    if (!invoice) {
+      throw new Error("Invoice not found");
+    }
     const efiPay = new EfiPay(efiOptions);
     const pix = await efiPay.pixCreateImmediateCharge([], body);
-
-    const qrcode = await efiPay.pixGenerateQRCode({
-      id: pix.loc.id
+    invoice.update({
+      txId: pix.txid,
+      payGw: "efi",
+      payGwData: JSON.stringify(pix)
     });
 
     return res.json({
-      ...pix,
-      qrcode,
+      qrcode: { qrcode: pix.pixCopiaECola },
+      valor: { original: price }
     });
   } catch (error) {
     logger.error({ efiOptions, error }, "efiCreateSubscription error");

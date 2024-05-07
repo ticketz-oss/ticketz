@@ -20,12 +20,13 @@ export const owenWebhook = async (
     const invoice = await Invoices.findOne({
       where: {
         txId: qrcodeId,
+        status: "open",
       },
       include: { model: Company, as: "company" }
     });
     
-    if (!invoice) {
-      return res.json({ ok: false });
+    if (!invoice || data.valor < invoice.value) {
+      return res.json({ ok: true });
     }
 
     const expiresAt = new Date(invoice.company.dueDate);
