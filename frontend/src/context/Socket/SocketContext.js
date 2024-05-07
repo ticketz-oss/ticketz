@@ -174,6 +174,10 @@ const socketManager = {
       return
     }
     
+    if (!this.currentSocket) {
+      return;
+    }
+    
     this.currentSocket.once("ready", () => {
       callbackReady();
     });
