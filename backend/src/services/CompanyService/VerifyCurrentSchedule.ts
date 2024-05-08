@@ -1,7 +1,7 @@
 import { QueryTypes } from "sequelize";
 import sequelize from "../../database";
 
-type Result = {
+export type ScheduleResult = {
   id: number;
   currentSchedule: [];
   startTime: string;
@@ -9,7 +9,7 @@ type Result = {
   inActivity: boolean;
 };
 
-const VerifyCurrentSchedule = async (companyId?: string | number, queueId?: string | number): Promise<Result> => {
+const VerifyCurrentSchedule = async (companyId?: string | number, queueId?: string | number): Promise<ScheduleResult> => {
   if (queueId === null || queueId === undefined) {
     const sql = `
         select
@@ -51,14 +51,14 @@ const VerifyCurrentSchedule = async (companyId?: string | number, queueId?: stri
       ) s      
     `;
 
-    const result: Result = await sequelize.query(sql, {
+    const result: ScheduleResult = await sequelize.query(sql, {
       replacements: { companyId },
       type: QueryTypes.SELECT,
       plain: true
     });
 
     return result;
-  } else {
+  } 
     const sql = `
       select
         s.id,
@@ -100,14 +100,14 @@ const VerifyCurrentSchedule = async (companyId?: string | number, queueId?: stri
       ) s     
     `;
 
-    const result: Result = await sequelize.query(sql, {
+    const result: ScheduleResult = await sequelize.query(sql, {
       replacements: { companyId, queueId },
       type: QueryTypes.SELECT,
       plain: true
     });
 
     return result;
-  }
+  
 };
 
 export default VerifyCurrentSchedule;
