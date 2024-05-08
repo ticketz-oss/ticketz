@@ -67,11 +67,6 @@ interface IMe {
   id: string;
 }
 
-interface IMessage {
-  messages: WAMessage[];
-  isLatest: boolean;
-}
-
 const writeFileAsync = promisify(writeFile);
 
 const getTypeMessage = (msg: proto.IWebMessageInfo): string => {
@@ -991,8 +986,6 @@ export const handleRating = async (
 
 const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, dontReadTheFirstQuestion = false) => {
 
-
-
   const queue = await Queue.findByPk(ticket.queueId, {
     include: [
       {
@@ -1529,6 +1522,7 @@ const handleMessage = async (
            */
           const queue = await Queue.findByPk(ticket.queueId);
 
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const { schedules }: any = queue;
           const now = moment();
           const weekday = now.format("dddd").toLowerCase();
@@ -1616,6 +1610,7 @@ const handleMessage = async (
          */
         const queue = await Queue.findByPk(ticket.queueId);
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { schedules }: any = queue;
         const now = moment();
         const weekday = now.format("dddd").toLowerCase();
@@ -1938,9 +1933,6 @@ const wbotMessageListener = async (wbot: Session, companyId: number): Promise<vo
       });
     });
 
-    // wbot.ev.on("messages.set", async (messageSet: IMessage) => {
-    //  messageSet.messages.filter(filterMessages).map(msg => msg);
-    // });
   } catch (error) {
     Sentry.captureException(error);
     logger.error(`Error handling wbot message listener. Err: ${error}`);
