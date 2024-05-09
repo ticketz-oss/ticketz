@@ -673,9 +673,206 @@ ${JSON.stringify(msg?.message)}`);
   }
 };
 
+const sendMenu = async (
+  wbot: Session,
+  ticket: Ticket,
+  currentOption: Queue | QueueOption
+) => {
+
+  const { companyId } = ticket;
+  const buttonActive = await Setting.findOne({
+    where: {
+      key: "chatBotType",
+      companyId
+    }
+  });
+
+  const message =
+    currentOption instanceof Queue
+      ? (currentOption as Queue).greetingMessage
+      : (currentOption as QueueOption).message;
+
+  const botList = async () => {
+    const sectionsRows = [];
+
+    currentOption.options.forEach((option) => {
+      sectionsRows.push({
+        title: option.title,
+        rowId: `${option.option}`
+      });
+    });
+    sectionsRows.push({
+      title: "Voltar Menu Inicial",
+      rowId: "#"
+    });
+    const sections = [
+      {
+        rows: sectionsRows
+      }
+    ];
+
+    const listMessage = {
+      text: formatBody(`\u200e${message}`, ticket.contact),
+      buttonText: "Escolha uma opção",
+      sections
+    };
+
+    const sendMsg = await wbot.sendMessage(
+      `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
+      listMessage
+    );
+
+    await verifyMessage(sendMsg, ticket, ticket.contact);
+  }
+
+  const botButton = async () => {
+    const buttons = [];
+    currentOption.options.forEach((option) => {
+      buttons.push({
+        buttonId: `${option.option}`,
+        buttonText: { displayText: option.title },
+        type: 4
+      });
+    });
+    buttons.push({
+      buttonId: "#",
+      buttonText: { displayText: "Voltar Menu Inicial" },
+      type: 4
+    });
+
+    const buttonMessage = {
+      text: formatBody(`\u200e${message}`, ticket.contact),
+      buttons,
+      headerType: 4
+    };
+
+    const sendMsg = await wbot.sendMessage(
+      `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
+      buttonMessage
+    );
+
+    await verifyMessage(sendMsg, ticket, ticket.contact);
+  }
+
+  const botText = async () => {
+    let options = "";
+
+    currentOption.options.forEach((option) => {
+      options += `*[ ${option.option} ]* - ${option.title}\n`;
+    });
+    options += "\n*[ # ]* - Voltar Menu Inicial";
+
+    const textMessage = {
+      text: formatBody(`\u200e${message}\n\n${options}`, ticket.contact),
+    };
+
+    const sendMsg = await wbot.sendMessage(
+      `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
+      textMessage
+    );
+
+    await verifyMessage(sendMsg, ticket, ticket.contact);
+
+    if (currentOption.mediaPath !== null && currentOption.mediaPath !== "") {
+      const filePath = path.resolve("public", currentOption.mediaPath);
+      const optionsMsg = await getMessageOptions(currentOption.mediaName, filePath);
+      const sentMessage = await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, { ...optionsMsg });
+      await verifyMediaMessage(sentMessage, ticket, ticket.contact);
+    }
+  };
+
+  switch (buttonActive.value) {
+    case "list":
+      botList();
+      break;
+    case "button":
+      if (QueueOption.length > 4) {
+        botText();
+      } else {
+        botButton();
+      }
+      break;
+    case "text":
+      botText();
+      break;
+    default:
+  }
+}
+
+const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue) => {
+    const {companyId, contact} = ticket;
+    let chatbot = false;
+    
+    if (queue?.options) {
+      chatbot = queue.options.length > 0;
+    }
+    await UpdateTicketService({
+      ticketData: { queueId: queue.id, chatbot, status: "pending" },
+      ticketId: ticket.id,
+      companyId: ticket.companyId,
+    });
+
+
+    /* Tratamento para envio de mensagem quando a fila está fora do expediente */
+    if (queue.options.length === 0) {
+      let currentSchedule: ScheduleResult;
+
+      const settings = await Setting.findOne({
+        where: {
+          key: "scheduleType",
+          companyId
+        }
+      });
+      if (settings?.value === "queue") {
+        currentSchedule = await VerifyCurrentSchedule(ticket.companyId, queue.id);
+      }
+
+      if (
+        settings?.value === "queue" &&
+        !isNil(currentSchedule) &&
+        (!currentSchedule || currentSchedule.inActivity === false)
+      ) {
+
+        const body = formatBody(`${queue.outOfHoursMessage}\n\n*[ # ]* - Voltar ao Menu Principal`, ticket.contact);
+        const sentMessage = await wbot.sendMessage(
+          `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, {
+          text: body,
+        }
+        );
+        await verifyMessage(sentMessage, ticket, contact);
+        await UpdateTicketService({
+          ticketData: { queueId: null, chatbot },
+          ticketId: ticket.id,
+          companyId: ticket.companyId,
+        });
+        return;
+      }
+
+      const body = formatBody(`\u200e${queue.greetingMessage}`, ticket.contact);
+      const sentMessage = await wbot.sendMessage(
+        `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, {
+        text: body,
+      }
+      );
+      await verifyMessage(sentMessage, ticket, contact);
+
+      if (queue.mediaPath !== null && queue.mediaPath !== "") {
+        const filePath = path.resolve("public", queue.mediaPath);
+
+        const optionsMsg = await getMessageOptions(queue.mediaName, filePath);
+
+        const sentMediaMessage = await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, { ...optionsMsg });
+
+        await verifyMediaMessage(sentMediaMessage, ticket, contact);
+      }
+    } else {
+      sendMenu(wbot, ticket, queue);
+    }
+};
+
 const verifyQueue = async (
   wbot: Session,
-  msg: proto.IWebMessageInfo,
+  msg: proto.IWebMessageInfo | null,
   ticket: Ticket,
   contact: Contact
 ) => {
@@ -685,48 +882,12 @@ const verifyQueue = async (
   )
 
   if (queues.length === 1) {
-    const firstQueue = head(queues);
-    let chatbot = false;
-    if (firstQueue?.options) {
-      chatbot = firstQueue.options.length > 0;
-    }
-
-    if (greetingMessage) {
-      const body = formatBody(greetingMessage, ticket.contact);
-      const sentMessage = await wbot.sendMessage(
-        `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, {
-        text: body,
-      });
-      await verifyMessage(sentMessage, ticket, ticket.contact);
-    }
-
-    if (firstQueue.greetingMessage) {
-      const body = formatBody(firstQueue.greetingMessage, ticket.contact);
-      const sentMessage = await wbot.sendMessage(
-        `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, {
-        text: body,
-      });
-      await verifyMessage(sentMessage, ticket, ticket.contact);
-    }
-
-    if (firstQueue.mediaName && firstQueue.mediaPath !== null) {
-      const filePath = path.resolve("public", firstQueue.mediaPath);
-      const optionsMsg = await getMessageOptions(firstQueue.mediaName, filePath);
-      const sentMessage = await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, { ...optionsMsg });
-      await verifyMediaMessage(sentMessage, ticket, contact);
-    }
-
-    await UpdateTicketService({
-      ticketData: { queueId: firstQueue.id, chatbot, status: "pending" },
-      ticketId: ticket.id,
-      companyId: ticket.companyId,
-    });
-
+    await startQueue(wbot, ticket, head(queues));
     return;
   }
 
-  const selectedOption = getBodyMessage(msg);
-  const choosenQueue = queues[+selectedOption - 1];
+  const selectedOption = msg ? getBodyMessage(msg) : null;
+  const choosenQueue = selectedOption ? queues[+selectedOption - 1] : null;
 
   const {companyId} = ticket;
 
@@ -813,73 +974,7 @@ const verifyQueue = async (
   };
 
   if (choosenQueue) {
-    let chatbot = false;
-    if (choosenQueue?.options) {
-      chatbot = choosenQueue.options.length > 0;
-    }
-    await UpdateTicketService({
-      ticketData: { queueId: choosenQueue.id, chatbot, status: "pending" },
-      ticketId: ticket.id,
-      companyId: ticket.companyId,
-    });
-
-
-    /* Tratamento para envio de mensagem quando a fila está fora do expediente */
-    if (choosenQueue.options.length === 0) {
-      const queue = await Queue.findByPk(choosenQueue.id);
-
-      let currentSchedule: ScheduleResult;
-
-      const settings = await Setting.findOne({
-        where: {
-          key: "scheduleType",
-          companyId
-        }
-      });
-      if (settings?.value === "queue") {
-        currentSchedule = await VerifyCurrentSchedule(ticket.companyId, queue.id);
-      }
-
-      if (
-        settings?.value === "queue" &&
-        !isNil(currentSchedule) &&
-        (!currentSchedule || currentSchedule.inActivity === false)
-      ) {
-
-        const body = formatBody(`${queue.outOfHoursMessage}\n\n*[ # ]* - Voltar ao Menu Principal`, ticket.contact);
-        const sentMessage = await wbot.sendMessage(
-          `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, {
-          text: body,
-        }
-        );
-        await verifyMessage(sentMessage, ticket, contact);
-        await UpdateTicketService({
-          ticketData: { queueId: null, chatbot },
-          ticketId: ticket.id,
-          companyId: ticket.companyId,
-        });
-        return;
-      }
-
-      const body = formatBody(`\u200e${choosenQueue.greetingMessage}`, ticket.contact);
-      const sentMessage = await wbot.sendMessage(
-        `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, {
-        text: body,
-      }
-      );
-      await verifyMessage(sentMessage, ticket, contact);
-
-      if (choosenQueue.mediaPath !== null && choosenQueue.mediaPath !== "") {
-        const filePath = path.resolve("public", choosenQueue.mediaPath);
-
-        const optionsMsg = await getMessageOptions(choosenQueue.mediaName, filePath);
-
-        const sentMediaMessage = await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, { ...optionsMsg });
-
-        await verifyMediaMessage(sentMediaMessage, ticket, contact);
-      }
-    }
-
+    await startQueue(wbot, ticket, choosenQueue);
   } else {
     switch (buttonActive.value) {
       case "list":
@@ -1000,9 +1095,6 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
     ],
   });
 
-
-
-
   const messageBody = getBodyMessage(msg);
 
   if (messageBody === "#") {
@@ -1060,97 +1152,41 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
 
   await ticket.reload();
 
+  /* * /
   if (!isNil(queue) && isNil(ticket.queueOptionId)) {
-
-    const queueOptions = await QueueOption.findAll({
-      where: { queueId: ticket.queueId, parentId: null },
-      order: [
-        ["option", "ASC"],
-        ["createdAt", "ASC"],
-      ],
-    });
-
-    const {companyId} = ticket;
-
-    const buttonActive = await Setting.findOne({
-      where: {
-        key: "chatBotType",
-        companyId
-      }
-    });
-
-    const botList = async () => {
-      const sectionsRows = [];
-
-      queueOptions.forEach((option) => {
-        sectionsRows.push({
-          title: option.title,
-          rowId: `${option.option}`
-        });
-      });
-      sectionsRows.push({
-        title: "Voltar Menu Inicial",
-        rowId: "#"
-      });
-      const sections = [
+    sendMenu(wbot, ticket, queue);
+  } else /* */ if (!isNil(queue) && !isNil(ticket.queueOptionId)) {
+    const currentOption = await QueueOption.findByPk(ticket.queueOptionId, {
+      include: [
         {
-          rows: sectionsRows
+          model: Queue,
+          as: "forwardQueue",
+          include: [{
+            model: QueueOption,
+            as: "options",
+            required: false,
+            order: [
+              ["option", "ASC"],
+              ["createdAt", "ASC"],
+            ],
+          }]
+        },
+        {
+          model: QueueOption,
+          as: "options",
+          required: false,
+          order: [
+            ["option", "ASC"],
+            ["createdAt", "ASC"],
+          ],
         }
-      ];
+      ]
+    });
 
-      const listMessage = {
-        text: formatBody(`\u200e${queue.greetingMessage}`, ticket.contact),
-        buttonText: "Escolha uma opção",
-        sections
-      };
-
-      const sendMsg = await wbot.sendMessage(
-        `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-        listMessage
-      );
-
-      await verifyMessage(sendMsg, ticket, ticket.contact);
-    }
-
-    const botButton = async () => {
-      const buttons = [];
-      queueOptions.forEach((option) => {
-        buttons.push({
-          buttonId: `${option.option}`,
-          buttonText: { displayText: option.title },
-          type: 4
-        });
-      });
-      buttons.push({
-        buttonId: "#",
-        buttonText: { displayText: "Voltar Menu Inicial" },
-        type: 4
-      });
-
-      const buttonMessage = {
-        text: formatBody(`\u200e${queue.greetingMessage}`, ticket.contact),
-        buttons,
-        headerType: 4
-      };
-
-      const sendMsg = await wbot.sendMessage(
-        `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-        buttonMessage
-      );
-
-      await verifyMessage(sendMsg, ticket, ticket.contact);
-    }
-
-    const botText = async () => {
-      let options = "";
-
-      queueOptions.forEach((option) => {
-        options += `*[ ${option.option} ]* - ${option.title}\n`;
-      });
-      options += "\n*[ # ]* - Voltar Menu Inicial";
+    if (currentOption.exitChatbot || currentOption.forwardQueueId) {
 
       const textMessage = {
-        text: formatBody(`\u200e${queue.greetingMessage}\n\n${options}`, ticket.contact),
+        text: formatBody(`\u200e${currentOption.message}`, ticket.contact),
       };
 
       const sendMsg = await wbot.sendMessage(
@@ -1159,156 +1195,26 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
       );
 
       await verifyMessage(sendMsg, ticket, ticket.contact);
-    };
-
-    switch (buttonActive.value) {
-      case "list":
-        botList();
-        break;
-      case "button":
-        if (QueueOption.length > 4) {
-          botText();
-        } else {
-          botButton();
-        }
-        break;
-      case "text":
-        botText();
-        break;
-      default:
+      
+      if (currentOption.exitChatbot) {
+        await ticket.update({
+          chatbot: false,
+          queueOptionId: null,
+        });
+      } else if (currentOption.forwardQueueId) {
+        await ticket.update({
+          queueOptionId: null,
+          chatbot: false,
+          queueId: currentOption.forwardQueueId,
+        });
+        await ticket.reload();
+        startQueue(wbot, ticket, currentOption.forwardQueue);
+      }
+      return;
     }
-  } else if (!isNil(queue) && !isNil(ticket.queueOptionId)) {
-    const currentOption = await QueueOption.findByPk(ticket.queueOptionId);
-    const queueOptions = await QueueOption.findAll({
-      where: { parentId: ticket.queueOptionId },
-      order: [
-        ["option", "ASC"],
-        ["createdAt", "ASC"],
-      ],
-    });
-
-    if (queueOptions.length > -1) {
-
-      const {companyId} = ticket;
-      const buttonActive = await Setting.findOne({
-        where: {
-          key: "chatBotType",
-          companyId
-        }
-      });
-
-      const botList = async () => {
-        const sectionsRows = [];
-
-        queueOptions.forEach((option) => {
-          sectionsRows.push({
-            title: option.title,
-            rowId: `${option.option}`
-          });
-        });
-        sectionsRows.push({
-          title: "Voltar Menu Inicial",
-          rowId: "#"
-        });
-        const sections = [
-          {
-            rows: sectionsRows
-          }
-        ];
-
-        const listMessage = {
-          text: formatBody(`\u200e${currentOption.message}`, ticket.contact),
-          buttonText: "Escolha uma opção",
-          sections
-        };
-
-        const sendMsg = await wbot.sendMessage(
-          `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-          listMessage
-        );
-
-        await verifyMessage(sendMsg, ticket, ticket.contact);
-      }
-
-      const botButton = async () => {
-        const buttons = [];
-        queueOptions.forEach((option) => {
-          buttons.push({
-            buttonId: `${option.option}`,
-            buttonText: { displayText: option.title },
-            type: 4
-          });
-        });
-        buttons.push({
-          buttonId: "#",
-          buttonText: { displayText: "Voltar Menu Inicial" },
-          type: 4
-        });
-
-        const buttonMessage = {
-          text: formatBody(`\u200e${currentOption.message}`, ticket.contact),
-          buttons,
-          headerType: 4
-        };
-
-        const sendMsg = await wbot.sendMessage(
-          `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-          buttonMessage
-        );
-
-        await verifyMessage(sendMsg, ticket, ticket.contact);
-      }
-
-      const botText = async () => {
-
-        let options = "";
-
-        queueOptions.forEach((option) => {
-          options += `*[ ${option.option} ]* - ${option.title}\n`;
-        });
-        options += "\n*[ # ]* - Voltar Menu Inicial";
-
-        const textMessage = {
-          text: formatBody(`\u200e${currentOption.message}\n\n${options}`, ticket.contact),
-        };
-
-        const sendMsg = await wbot.sendMessage(
-          `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-          textMessage
-        );
-
-        await verifyMessage(sendMsg, ticket, ticket.contact);
-
-        if (currentOption.mediaPath !== null && currentOption.mediaPath !== "") {
-
-          const filePath = path.resolve("public", currentOption.mediaPath);
-
-
-          const optionsMsg = await getMessageOptions(currentOption.mediaName, filePath);
-
-          const sentMessage = await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, { ...optionsMsg });
-
-          await verifyMediaMessage(sentMessage, ticket, ticket.contact);
-        }
-      };
-
-      switch (buttonActive.value) {
-        case "list":
-          botList();
-          break;
-        case "button":
-          if (QueueOption.length > 4) {
-            botText();
-          } else {
-            botButton();
-          }
-          break;
-        case "text":
-          botText();
-          break;
-        default:
-      }
-
+    
+    if (currentOption.options.length > -1) {
+      sendMenu(wbot, ticket, currentOption);
     }
   }
 }
