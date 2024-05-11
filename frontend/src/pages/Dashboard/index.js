@@ -239,6 +239,10 @@ const Dashboard = () => {
 
     const data = await find(params);
 
+    if (!data) {
+      setLoading(false);
+      return;
+    }
 
 
     setCounters(data.counters);
