@@ -26,8 +26,9 @@ RUN rm -rf /usr/share/nginx/html/*
 COPY --from=build-deps /usr/src/app/build /var/www/public
 COPY --from=build-deps /usr/src/app/node_modules/@socket.io/admin-ui/ui/dist /var/www/public/socket-admin
 COPY nginx /etc/nginx
-COPY scripts /ticketz-scripts
 
 ENTRYPOINT ["dumb-init", "--"]
-CMD    sh /ticketz-scripts/envtojson.sh > /var/www/public/config.json \
+CMD (echo "{" && while IFS='=' read -r name value; do \
+        printf '\t"%s": "%s"\n' "$name" "$value"; \
+    done < <(env) | sed '$!s/$/,/' && echo "}")  > /var/www/public/config.json \
     && nginx -g "daemon off;"
