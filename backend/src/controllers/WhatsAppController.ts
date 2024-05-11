@@ -24,6 +24,7 @@ interface WhatsappData {
   complationMessage?: string;
   outOfHoursMessage?: string;
   ratingMessage?: string;
+  transferMessage?: string;
   status?: string;
   isDefault?: boolean;
   token?: string;
@@ -64,6 +65,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     greetingMessage,
     complationMessage,
     outOfHoursMessage,
+    ratingMessage,
+    transferMessage,
     queueIds,
     token
   }: WhatsappData = req.body;
@@ -76,6 +79,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     greetingMessage,
     complationMessage,
     outOfHoursMessage,
+    ratingMessage,
+    transferMessage,
     queueIds,
     companyId,
     token
@@ -312,12 +317,12 @@ export const remove = async (
       }
     });
 
-    for await (const whatsapp of getAllSameToken) {
+    getAllSameToken.forEach( (w) => {
       io.emit(`company-${companyId}-whatsapp`, {
         action: "delete",
-        whatsappId: whatsapp.id
+        whatsappId: w.id
       });
-    }
+    });
 
   }
 

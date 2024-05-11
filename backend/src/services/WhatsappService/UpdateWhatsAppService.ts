@@ -6,7 +6,7 @@ import Whatsapp from "../../models/Whatsapp";
 import ShowWhatsAppService from "./ShowWhatsAppService";
 import AssociateWhatsappQueue from "./AssociateWhatsappQueue";
 
-interface WhatsappData {
+export interface WhatsappData {
   name?: string;
   status?: string;
   session?: string;
@@ -17,6 +17,7 @@ interface WhatsappData {
   ratingMessage?: string;
   transferMessage?: string;
   queueIds?: number[];
+  companyId?: number;
   token?: string;
 }
 
@@ -58,8 +59,8 @@ const UpdateWhatsAppService = async ({
 
   try {
     await schema.validate({ name, status, isDefault });
-  } catch (err: any) {
-    throw new AppError(err.message);
+  } catch (err: unknown) {
+    throw new AppError((err as Error).message);
   }
 
   if (queueIds.length > 1 && !greetingMessage) {
