@@ -69,6 +69,10 @@ export const initIO = (httpServer: Server): SocketIO => {
 
     socket.join(`company-${user.companyId}-mainchannel`);
     socket.join(`user-${user.id}`);
+    
+    if (user.super) {
+      socket.join("super");
+    }
 
     socket.on("joinChatBox", async (ticketId: string) => {
       if (!ticketId || ticketId === "undefined") {
