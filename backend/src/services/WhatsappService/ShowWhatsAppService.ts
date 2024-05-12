@@ -21,15 +21,14 @@ const ShowWhatsAppService = async (
             as: "options",
             required: false,
             where: { parentId: null },
-            order: [
-              ["option", "ASC"],
-              ["createdAt", "ASC"],
-            ],
           }
         ]
       }
     ],
-    order: [["queues", "name", "ASC"]]
+    order: [
+      ["queues", "name", "ASC"],
+      ["queues", "options", "option", "ASC"],
+    ]
   };
 
   if (session !== undefined && session === 0) {

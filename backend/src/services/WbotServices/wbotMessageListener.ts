@@ -1087,12 +1087,11 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
         model: QueueOption,
         as: "options",
         where: { parentId: null },
-        order: [
-          ["option", "ASC"],
-          ["createdAt", "ASC"],
-        ],
       },
     ],
+    order: [
+      ["options", "option", "ASC"],
+    ]
   });
 
   const messageBody = getBodyMessage(msg);
@@ -1165,21 +1164,17 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
             model: QueueOption,
             as: "options",
             required: false,
-            order: [
-              ["option", "ASC"],
-              ["createdAt", "ASC"],
-            ],
           }]
         },
         {
           model: QueueOption,
           as: "options",
           required: false,
-          order: [
-            ["option", "ASC"],
-            ["createdAt", "ASC"],
-          ],
         }
+      ],
+      order: [
+        ["forwardQueue", "options", "option", "ASC"],
+        ["options", "option", "ASC"],
       ]
     });
 
