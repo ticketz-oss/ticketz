@@ -805,6 +805,15 @@ const messages = {
         ERR_WAPP_GREETING_REQUIRED:
           "El mensaje de saludo es obligatorio cuando hay más de una cola.",
       },
+      ticketz: {
+        support: {
+          title: "Apoyar el proyecto Ticketz",
+          mercadopagotitle: "Tarjeta de crédito",
+          recurringbrl: "Donaciones recurrentes en BRL",
+          paypaltitle: "Tarjeta de crédito",
+          international: "Donaciones en USD",
+        }
+      },
     },
   },
 };
