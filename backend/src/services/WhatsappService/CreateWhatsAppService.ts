@@ -14,6 +14,7 @@ interface Request {
   complationMessage?: string;
   outOfHoursMessage?: string;
   ratingMessage?: string;
+  transferMessage?: string;
   status?: string;
   isDefault?: boolean;
   token?: string;
@@ -38,6 +39,7 @@ const CreateWhatsAppService = async ({
   complationMessage,
   outOfHoursMessage,
   ratingMessage,
+  transferMessage,
   isDefault = false,
   companyId,
   token = "",
@@ -59,7 +61,7 @@ const CreateWhatsAppService = async ({
     const whatsappCount = await Whatsapp.count({
       where: {
         companyId,
-        channel: channel
+        channel
       }
     });
 
@@ -80,7 +82,7 @@ const CreateWhatsAppService = async ({
         async value => {
           if (!value) return false;
           const nameExists = await Whatsapp.findOne({
-            where: { name: value, channel: channel }
+            where: { name: value, channel }
           });
           return !nameExists;
         }
@@ -90,8 +92,8 @@ const CreateWhatsAppService = async ({
 
   try {
     await schema.validate({ name, status, isDefault });
-  } catch (err: any) {
-    throw new AppError(err.message);
+  } catch (err: unknown) {
+    throw new AppError((err as Error).message);
   }
 
   const whatsappFound = await Whatsapp.findOne({ where: { companyId} });
@@ -102,9 +104,9 @@ const CreateWhatsAppService = async ({
 
   let oldDefaultWhatsapp: Whatsapp | null = null;
 
-  if(channel === 'whatsapp' && isDefault) {
+  if(channel === "whatsapp" && isDefault) {
     oldDefaultWhatsapp = await Whatsapp.findOne({
-      where: { isDefault: true, companyId, channel: channel }
+      where: { isDefault: true, companyId, channel }
     });
     if (oldDefaultWhatsapp) {
       await oldDefaultWhatsapp.update({ isDefault: false, companyId });
@@ -126,7 +128,7 @@ const CreateWhatsAppService = async ({
           async value => {
             if (!value) return false;
             const tokenExists = await Whatsapp.findOne({
-              where: { token: value, channel: channel }
+              where: { token: value, channel }
             });
             return !tokenExists;
           }
@@ -135,8 +137,8 @@ const CreateWhatsAppService = async ({
 
     try {
       await tokenSchema.validate({ token });
-    } catch (err: any) {
-      throw new AppError(err.message);
+    } catch (err: unknown) {
+      throw new AppError((err as Error).message);
     }
   }
 
@@ -148,6 +150,7 @@ const CreateWhatsAppService = async ({
       complationMessage,
       outOfHoursMessage,
       ratingMessage,
+      transferMessage,
       isDefault,
       companyId,
       token,

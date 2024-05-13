@@ -137,7 +137,11 @@ const useAuth = () => {
         if (Math.round(dias) < 5) {
           toast.warn(`Sua assinatura vence em ${Math.round(dias)} ${Math.round(dias) === 1 ? 'dia' : 'dias'} `);
         }
-        history.push("/tickets");
+        if (data.user.profile === "admin") {
+          history.push("/");
+        } else {
+          history.push("/tickets");
+        }
         setLoading(false);
       } else {
         

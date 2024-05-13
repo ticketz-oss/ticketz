@@ -790,6 +790,15 @@ const messages = {
 				ERR_QUEUE_COLOR_ALREADY_EXISTS: "This color is already in use, choose another.",
 				ERR_WAPP_GREETING_REQUIRED: "Greeting message is mandatory when there is more than one queue.",
 			},
+      ticketz: {
+        support: {
+          title: "Support Ticketz project",
+          mercadopagotitle: "Credit Card",
+          recurringbrl: "Recurring donations in BRL",
+          paypaltitle: "Credit Card",
+          international: "Donations in USD",
+        }
+      },
 		},
 	},
 };

@@ -808,6 +808,15 @@ const messages = {
         ERR_WAPP_GREETING_REQUIRED:
           "A mensagem de saudação é obrigatório quando há mais de uma fila.",
       },
+      ticketz: {
+        support: {
+          title: "Apoie o projeto Ticketz",
+          mercadopagotitle: "Cartão de Crédito",
+          recurringbrl: "Doação recorrente em R$",
+          paypaltitle: "Cartão de Crédito",
+          international: "Internacional em US$",
+        }
+      },
     },
   },
 };

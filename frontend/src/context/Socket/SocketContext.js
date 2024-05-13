@@ -96,6 +96,8 @@ const socketManager = {
         this.currentSocket.removeAllListeners();
         this.currentSocket.disconnect();
         this.currentSocket = null;
+        this.currentCompanyId = null;
+        this.currentUserId = null;
       }
 
       let token = JSON.parse(localStorage.getItem("token"));

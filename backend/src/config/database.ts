@@ -12,7 +12,7 @@ module.exports = {
   database: process.env.DB_NAME,
   username: process.env.DB_USER,
   password: process.env.DB_PASS,
-  logging: process.env.DB_DEBUG === "true",
+  logging: process.env.DB_DEBUG && console.log,
   seederStorage: "sequelize",
   dialectOptions: { //This options for SSL connection in my version
     ssl: {

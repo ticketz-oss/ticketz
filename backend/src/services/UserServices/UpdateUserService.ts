@@ -36,7 +36,10 @@ const UpdateUserService = async ({
 
   const requestUser = await User.findByPk(requestUserId);
 
-  if (requestUser.super === false && userData.companyId !== requestUser.companyId) {
+  if ( 
+    (requestUser.super === false && userData.companyId !== requestUser.companyId) ||
+    (requestUser.profile !== "admin" && +userId !== requestUser.id )
+  ) {
     throw new AppError("ERR_FORBIDDEN", 403);
   }
 
@@ -51,8 +54,8 @@ const UpdateUserService = async ({
 
   try {
     await schema.validate({ email, password, profile, name });
-  } catch (err: any) {
-    throw new AppError(err.message);
+  } catch (err: unknown) {
+    throw new AppError((err as Error).message);
   }
 
   if (requestUser.profile === "admin") {
