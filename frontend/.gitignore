@@ -5,5 +5,4 @@
 /package-lock.json
 /build
 /.project
-/public/config.json
 /public/socket-admin

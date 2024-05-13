@@ -1,0 +1,5 @@
+{
+    "BACKEND_PROTOCOL": "https",
+    "BACKEND_HOST": "api.sacdc.dentalcred.com.br",
+    "BACKEND_PORT": "443"
+    }
