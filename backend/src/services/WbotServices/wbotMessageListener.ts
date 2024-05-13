@@ -265,8 +265,7 @@ const downloadMedia = async (msg: proto.IWebMessageInfo) => {
 
   while (contDownload < 10 && !stream) {
     try {
-      // eslint-disable-next-line no-await-in-loop
-      stream = await downloadContentFromMessage(
+      const message =
         msg.message.audioMessage ||
         msg.message.videoMessage ||
         msg.message.documentMessage ||
@@ -278,7 +277,15 @@ const downloadMedia = async (msg: proto.IWebMessageInfo) => {
         msg.message?.templateMessage?.fourRowTemplate?.imageMessage ||
         msg.message?.templateMessage?.hydratedTemplate?.imageMessage ||
         msg.message?.templateMessage?.hydratedFourRowTemplate?.imageMessage ||
-        msg.message?.interactiveMessage?.header?.imageMessage,
+        msg.message?.interactiveMessage?.header?.imageMessage;
+        
+      if (message.directPath) {
+        message.url = "";
+      }
+
+      // eslint-disable-next-line no-await-in-loop
+      stream = await downloadContentFromMessage(
+        message,
         messageType
       );
     } catch (error) {
@@ -292,7 +299,6 @@ const downloadMedia = async (msg: proto.IWebMessageInfo) => {
       );
     }
   }
-
 
   let buffer = Buffer.from([]);
   try {
