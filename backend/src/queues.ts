@@ -1,29 +1,28 @@
 import * as Sentry from "@sentry/node";
 import Queue from "bull";
+import moment from "moment";
+import { Op, QueryTypes } from "sequelize";
+import { isEmpty, isNil, isArray } from "lodash";
+import path from "path";
+import { CronJob } from "cron";
 import { MessageData, SendMessage } from "./helpers/SendMessage";
 import Whatsapp from "./models/Whatsapp";
 import { logger } from "./utils/logger";
-import moment from "moment";
 import Schedule from "./models/Schedule";
 import Contact from "./models/Contact";
-import { Op, QueryTypes } from "sequelize";
 import GetDefaultWhatsApp from "./helpers/GetDefaultWhatsApp";
 import Campaign from "./models/Campaign";
 import ContactList from "./models/ContactList";
 import ContactListItem from "./models/ContactListItem";
-import { isEmpty, isNil, isArray } from "lodash";
 import CampaignSetting from "./models/CampaignSetting";
 import CampaignShipping from "./models/CampaignShipping";
 import GetWhatsappWbot from "./helpers/GetWhatsappWbot";
 import sequelize from "./database";
 import { getMessageOptions } from "./services/WbotServices/SendWhatsAppMedia";
 import { getIO } from "./libs/socket";
-import path from "path";
 import User from "./models/User";
 import Company from "./models/Company";
 import Plan from "./models/Plan";
-const nodemailer = require('nodemailer');
-const CronJob = require('cron').CronJob;
 
 const connection = process.env.REDIS_URI || "";
 const limiterMax = process.env.REDIS_OPT_LIMITER_MAX || 1;
@@ -78,14 +77,14 @@ async function handleSendMessage(job) {
     const messageData: MessageData = data.data;
 
     await SendMessage(whatsapp, messageData);
-  } catch (e: any) {
+  } catch (e: unknown) {
     Sentry.captureException(e);
-    logger.error("MessageQueue -> SendMessage: error", e.message);
+    logger.error("MessageQueue -> SendMessage: error", (e as Error).message);
     throw e;
   }
 }
 
-async function handleVerifySchedules(job) {
+async function handleVerifySchedules() {
   try {
     const { count, rows: schedules } = await Schedule.findAndCountAll({
       where: {
@@ -111,9 +110,9 @@ async function handleVerifySchedules(job) {
         logger.info(`Disparo agendado para: ${schedule.contact.name}`);
       });
     }
-  } catch (e: any) {
+  } catch (e: unknown) {
     Sentry.captureException(e);
-    logger.error("SendScheduledMessage -> Verify: error", e.message);
+    logger.error("SendScheduledMessage -> Verify: error", (e as Error).message);
     throw e;
   }
 }
@@ -146,17 +145,17 @@ async function handleSendScheduledMessage(job) {
 
     logger.info(`Mensagem agendada enviada para: ${schedule.contact.name}`);
     sendScheduledMessages.clean(15000, "completed");
-  } catch (e: any) {
+  } catch (e: unknown) {
     Sentry.captureException(e);
     await scheduleRecord?.update({
       status: "ERRO"
     });
-    logger.error("SendScheduledMessage -> SendMessage: error", e.message);
+    logger.error("SendScheduledMessage -> SendMessage: error", (e as Error).message);
     throw e;
   }
 }
 
-async function handleVerifyCampaigns(job) {
+async function handleVerifyCampaigns() {
   /**
    * @todo
    * Implementar filtro de campanhas
@@ -167,8 +166,11 @@ async function handleVerifyCampaigns(job) {
     where "scheduledAt" between now() and now() + '1 hour'::interval and status = 'PROGRAMADA'`,
       { type: QueryTypes.SELECT }
     );
-  logger.info(`Campanhas encontradas: ${campaigns.length}`);
-  for (let campaign of campaigns) {
+
+  if (campaigns.length) {
+    logger.info(`Campanhas encontradas: ${campaigns.length}`);
+  }
+  campaigns.forEach( (campaign) => {
     try {
       const now = moment();
       const scheduledAt = moment(campaign.scheduledAt);
@@ -186,14 +188,14 @@ async function handleVerifyCampaigns(job) {
           removeOnComplete: true
         }
       );
-    } catch (err: any) {
+    } catch (err: unknown) {
       Sentry.captureException(err);
     }
-  }
+  });
 }
 
-async function getCampaign(id) {
-  return await Campaign.findByPk(id, {
+async function getCampaign(id: number) {
+  return Campaign.findByPk(id, {
     include: [
       {
         model: ContactList,
@@ -223,7 +225,7 @@ async function getCampaign(id) {
 }
 
 async function getContact(id) {
-  return await ContactListItem.findByPk(id, {
+  return ContactListItem.findByPk(id, {
     attributes: ["id", "name", "number", "email"]
   });
 }
@@ -234,9 +236,9 @@ async function getSettings(campaign) {
     attributes: ["key", "value"]
   });
 
-  let messageInterval: number = 20;
-  let longerIntervalAfter: number = 20;
-  let greaterInterval: number = 60;
+  let messageInterval = 20;
+  let longerIntervalAfter = 20;
+  let greaterInterval = 60;
   let variables: any[] = [];
 
   settings.forEach(setting => {
@@ -262,11 +264,11 @@ async function getSettings(campaign) {
   };
 }
 
-export function parseToMilliseconds(seconds) {
+export function parseToMilliseconds(seconds: number) {
   return seconds * 1000;
 }
 
-async function sleep(seconds) {
+export async function sleep(seconds: number) {
   logger.info(
     `Sleep de ${seconds} segundos iniciado: ${moment().format("HH:mm:ss")}`
   );
@@ -411,7 +413,7 @@ async function handleProcessCampaign(job) {
       const { contacts } = campaign.contactList;
       if (isArray(contacts)) {
         let index = 0;
-        for (let contact of contacts) {
+        contacts.forEach( (contact) => {
           campaignQueue.add(
             "PrepareContact",
             {
@@ -428,28 +430,27 @@ async function handleProcessCampaign(job) {
           logger.info(
             `Registro enviado pra fila de disparo: Campanha=${campaign.id};Contato=${contact.name};delay=${delay}`
           );
-          index++;
+          index+=1;
           if (index % settings.longerIntervalAfter === 0) {
-            //intervalo maior após intervalo configurado de mensagens
+            // intervalo maior após intervalo configurado de mensagens
             delay += parseToMilliseconds(settings.greaterInterval);
           } else {
             delay += parseToMilliseconds(
               randomValue(0, settings.messageInterval)
             );
           }
-        }
+        });
         await campaign.update({ status: "EM_ANDAMENTO" });
       }
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     Sentry.captureException(err);
   }
 }
 
-async function handlePrepareContact(job) {
+async function handlePrepareContact(job: { data: PrepareContactData; }) {
   try {
-    const { contactId, campaignId, delay, variables }: PrepareContactData =
-      job.data;
+    const { contactId, campaignId, delay, variables } = job.data;
     const campaign = await getCampaign(campaignId);
     const contact = await getContact(contactId);
 
@@ -520,9 +521,9 @@ async function handlePrepareContact(job) {
     }
 
     await verifyAndFinalizeCampaign(campaign);
-  } catch (err: any) {
+  } catch (err: unknown) {
     Sentry.captureException(err);
-    logger.error(`campaignQueue -> PrepareContact -> error: ${err.message}`);
+    logger.error(`campaignQueue -> PrepareContact -> error: ${(err as Error).message}`);
   }
 }
 
@@ -576,96 +577,61 @@ async function handleDispatchCampaign(job) {
     logger.info(
       `Campanha enviada para: Campanha=${campaignId};Contato=${campaignShipping.contact.name}`
     );
-  } catch (err: any) {
+  } catch (err: unknown) {
     Sentry.captureException(err);
-    logger.error(err.message);
+    logger.error((err as Error).message);
   }
 }
 
-async function handleLoginStatus(job) {
+async function handleLoginStatus() {
   const users: { id: number }[] = await sequelize.query(
-    `select id from "Users" where "updatedAt" < now() - '5 minutes'::interval and online = true`,
+    "select id from \"Users\" where \"updatedAt\" < now() - '5 minutes'::interval and online = true",
     { type: QueryTypes.SELECT }
   );
-  for (let item of users) {
+  users.forEach( async (item) => {
     try {
       const user = await User.findByPk(item.id);
       await user.update({ online: false });
       logger.info(`Usuário passado para offline: ${item.id}`);
-    } catch (e: any) {
+    } catch (e: unknown) {
       Sentry.captureException(e);
     }
-  }
+  });
 }
 
 
 async function handleInvoiceCreate() {
-  const job = new CronJob('0 * * * * *', async () => {
+  const job = new CronJob("0 * * * * *", async () => {
 
 
     const companies = await Company.findAll();
     companies.map(async c => {
-      var dueDate = c.dueDate;
+      const {dueDate} = c;
       const date = moment(dueDate).format();
       const timestamp = moment().format();
       const hoje = moment(moment()).format("DD/MM/yyyy");
-      var vencimento = moment(dueDate).format("DD/MM/yyyy");
+      const vencimento = moment(dueDate).format("DD/MM/yyyy");
 
-      var diff = moment(vencimento, "DD/MM/yyyy").diff(moment(hoje, "DD/MM/yyyy"));
-      var dias = moment.duration(diff).asDays();
+      const diff = moment(vencimento, "DD/MM/yyyy").diff(moment(hoje, "DD/MM/yyyy"));
+      const dias = moment.duration(diff).asDays();
 
       if (dias < 20) {
         const plan = await Plan.findByPk(c.planId);
 
         const sql = `SELECT COUNT(*) mycount FROM "Invoices" WHERE "companyId" = ${c.id} AND "dueDate"::text LIKE '${moment(dueDate).format("yyyy-MM-DD")}%';`
-        const invoice = await sequelize.query(sql,
+        const invoice: { mycount: number }[] = await sequelize.query(sql,
           { type: QueryTypes.SELECT }
         );
-        if (invoice[0]['mycount'] > 0) {
-
-        } else {
+        if (+invoice[0].mycount === 0) {
+          // eslint-disable-next-line no-shadow
           const sql = `INSERT INTO "Invoices" (detail, status, value, "updatedAt", "createdAt", "dueDate", "companyId")
           VALUES ('${plan.name}', 'open', '${plan.value}', '${timestamp}', '${timestamp}', '${date}', ${c.id});`
 
-          const invoiceInsert = await sequelize.query(sql,
+          await sequelize.query(sql,
             { type: QueryTypes.INSERT }
           );
 
-/*           let transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-              user: 'email@gmail.com',
-              pass: 'senha'
-            }
-          });
-
-          const mailOptions = {
-            from: 'heenriquega@gmail.com', // sender address
-            to: `${c.email}`, // receiver (use array of string for a list)
-            subject: 'Fatura gerada - Sistema', // Subject line
-            html: `Olá ${c.name} esté é um email sobre sua fatura!<br>
-<br>
-Vencimento: ${vencimento}<br>
-Valor: ${plan.value}<br>
-Link: ${process.env.FRONTEND_URL}/financeiro<br>
-<br>
-Qualquer duvida estamos a disposição!
-            `// plain text body
-          };
-
-          transporter.sendMail(mailOptions, (err, info) => {
-            if (err)
-              console.log(err)
-            else
-              console.log(info);
-          }); */
-
         }
-
-
-
-
-
       }
 
     });
