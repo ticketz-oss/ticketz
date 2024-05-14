@@ -3,6 +3,7 @@ import AppError from "../../errors/AppError";
 import Queue from "../../models/Queue";
 import QueueOption from "../../models/QueueOption";
 import { FindOptions, Op } from "sequelize/types";
+import Prompt from "../../models/Prompt";
 
 const ShowWhatsAppService = async (
   id: string | number,
@@ -23,6 +24,10 @@ const ShowWhatsAppService = async (
             where: { parentId: null },
           }
         ]
+      },
+      {
+        model: Prompt,
+        as: "prompt",
       }
     ],
     order: [

@@ -33,6 +33,9 @@ import Annoucements from "../pages/Annoucements";
 import Chat from "../pages/Chat";
 import ToDoList from "../pages/ToDoList/";
 import Subscription from "../pages/Subscription/";
+import Kanban from "../pages/Kanban";
+import TagsKanban from "../pages/TagsKanban";
+import Prompts from "../pages/Prompts";
 
 const Routes = () => {
   const [showCampaigns, setShowCampaigns] = useState(false);
@@ -90,6 +93,7 @@ const Routes = () => {
                 <Route exact path="/helps" component={Helps} isPrivate />
                 <Route exact path="/about" component={About} isPrivate />
                 <Route exact path="/users" component={Users} isPrivate />
+                <Route exact path="/prompts" component={Prompts} isPrivate />
                 <Route
                   exact
                   path="/messages-api"
@@ -100,6 +104,18 @@ const Routes = () => {
                   exact
                   path="/settings"
                   component={SettingsCustom}
+                  isPrivate
+                />				        
+                <Route 
+                exact
+                path="/kanban"
+                component={Kanban}
+                isPrivate
+              />
+                <Route
+                  exact
+                  path="/tagsKanban"
+                  component={TagsKanban}
                   isPrivate
                 />
                 <Route

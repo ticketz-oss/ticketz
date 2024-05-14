@@ -19,6 +19,9 @@ interface Request {
   isDefault?: boolean;
   token?: string;
   provider?: string;
+  sendIdQueue?: number;
+  timeSendQueue?: number;
+  promptId?: number;
   facebookUserId?: string;
   facebookUserToken?: string;
   tokenMeta?: string;
@@ -44,6 +47,9 @@ const CreateWhatsAppService = async ({
   companyId,
   token = "",
   provider = "beta",
+  timeSendQueue,
+  sendIdQueue,
+  promptId,
   facebookUserId,
   facebookUserToken,
   facebookPageUserId,
@@ -154,7 +160,9 @@ const CreateWhatsAppService = async ({
       isDefault,
       companyId,
       token,
-      provider,
+      provider, timeSendQueue,
+      sendIdQueue,
+      promptId,
       channel,
       facebookUserId,
       facebookUserToken,
