@@ -22,6 +22,7 @@ import Company from "./Company";
 import Whatsapp from "./Whatsapp";
 import WhatsappQueue from "./WhatsappQueue";
 import QueueOption from "./QueueOption";
+import Prompt from "./Prompt";
 
 @Table
 class Queue extends Model<Queue> {
@@ -81,6 +82,16 @@ class Queue extends Model<Queue> {
 
   @Column
   mediaPath: string;
+
+  @Column
+  orderQueue: string;
+
+  @HasMany(() => Prompt, {
+    onDelete: "SET NULL",
+    onUpdate: "SET NULL",
+    hooks: true
+  })
+  prompts: Prompt[];
 
   @Column
   mediaName: string;

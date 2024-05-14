@@ -28,6 +28,9 @@ interface WhatsappData {
   status?: string;
   isDefault?: boolean;
   token?: string;
+  sendIdQueue?: number;
+  timeSendQueue?: number;
+  promptId?: number;
 }
 
 interface QueryParams {
@@ -68,7 +71,10 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     ratingMessage,
     transferMessage,
     queueIds,
-    token
+    token,
+    timeSendQueue,
+    sendIdQueue,
+    promptId
   }: WhatsappData = req.body;
   const { companyId } = req.user;
 
@@ -83,7 +89,10 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     transferMessage,
     queueIds,
     companyId,
-    token
+    token,
+    timeSendQueue,
+    sendIdQueue,
+    promptId
   });
 
   StartWhatsAppSession(whatsapp, companyId);
@@ -284,11 +293,11 @@ export const remove = async (
         status: { [Op.or]: [ "open" , "pending" ] }
       }
     });
-   
+
     if (openTickets.length>0) {
       throw new AppError("Não é possível remover conexão que contém tickets não resolvidos");
     }
-   
+
     await DeleteBaileysService(whatsappId);
     await DeleteWhatsAppService(whatsappId);
     await cacheLayer.delFromPattern(`sessions:${whatsappId}:*`);

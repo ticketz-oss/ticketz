@@ -19,6 +19,9 @@ export interface WhatsappData {
   queueIds?: number[];
   companyId?: number;
   token?: string;
+  sendIdQueue?: number;
+  timeSendQueue?: number;
+  promptId?: number;
 }
 
 interface Request {
@@ -54,7 +57,10 @@ const UpdateWhatsAppService = async ({
     ratingMessage,
     transferMessage,
     queueIds = [],
-    token
+    token,
+    timeSendQueue,
+    sendIdQueue = null,
+    promptId
   } = whatsappData;
 
   try {
@@ -96,6 +102,9 @@ const UpdateWhatsAppService = async ({
     isDefault,
     companyId,
     token,
+    timeSendQueue,
+    sendIdQueue,
+    promptId,
     transferMessage,
   });
 

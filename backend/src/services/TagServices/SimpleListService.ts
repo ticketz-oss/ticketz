@@ -6,11 +6,13 @@ import TicketTag from "../../models/TicketTag";
 interface Request {
   companyId: number;
   searchParam?: string;
+  kanban?: number;
 }
 
 const ListService = async ({
   companyId,
-  searchParam
+  searchParam,
+  kanban = 0
 }: Request): Promise<Tag[]> => {
   let whereCondition = {};
 
@@ -18,14 +20,13 @@ const ListService = async ({
     whereCondition = {
       [Op.or]: [
         { name: { [Op.like]: `%${searchParam}%` } },
-        { color: { [Op.like]: `%${searchParam}%` } },
-        // { kanban: { [Op.like]: `%${searchParam}%` } }
+        { color: { [Op.like]: `%${searchParam}%` } }
       ]
     };
   }
 
   const tags = await Tag.findAll({
-    where: { ...whereCondition, companyId },
+    where: { ...whereCondition, companyId, kanban  },
     order: [["name", "ASC"]]
   });
 

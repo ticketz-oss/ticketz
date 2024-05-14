@@ -19,6 +19,7 @@ import Queue from "./Queue";
 import Ticket from "./Ticket";
 import WhatsappQueue from "./WhatsappQueue";
 import Company from "./Company";
+import Prompt from "./Prompt";
 
 @Table
 class Whatsapp extends Model<Whatsapp> {
@@ -106,6 +107,20 @@ class Whatsapp extends Model<Whatsapp> {
 
   @Column
   token: string;
+
+  @Default(0)
+  @Column
+  timeSendQueue: number;
+
+  @Column
+  sendIdQueue: number;
+
+  @ForeignKey(() => Prompt)
+  @Column
+  promptId: number;
+
+  @BelongsTo(() => Prompt)
+  prompt: Prompt;
 
   @Column(DataType.TEXT)
   facebookUserId: string;

@@ -14,10 +14,10 @@ module.exports = {
   password: process.env.DB_PASS,
   logging: process.env.DB_DEBUG && console.log,
   seederStorage: "sequelize",
-  dialectOptions: { //This options for SSL connection in my version
-    ssl: {
-      require: true, // This will enforce SSL connection
-      rejectUnauthorized: true // This should be set to true in production for security reasons
-    }
-  }
+//  dialectOptions: { //This options for SSL connection in my version
+//    ssl: {
+//      require: true, // This will enforce SSL connection
+//      rejectUnauthorized: true // This should be set to true in production for security reasons
+//    }
+ // }
 };

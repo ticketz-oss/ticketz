@@ -146,6 +146,45 @@ const messages = {
           email: "Email",
           actions: "Ações",
         },
+      },      
+      promptModal: {
+        form: {
+          name: "Nome",
+          prompt: "Prompt",
+          voice: "Voz",
+          max_tokens: "Máximo de Tokens na resposta",
+          temperature: "Temperatura",
+          apikey: "API Key",
+          max_messages: "Máximo de mensagens no Histórico",
+          voiceKey: "Chave da API de Voz",
+          voiceRegion: "Região de Voz",
+        },
+        success: "Prompt salvo com sucesso!",
+        title: {
+          add: "Adicionar Prompt",
+          edit: "Editar Prompt",
+        },
+        buttons: {
+          okAdd: "Adicionar",
+          okEdit: "Salvar",
+          cancel: "Cancelar",
+        },
+      },      
+      prompts: {
+        title: "Prompts",
+        table: {
+          name: "Nome",
+          queue: "Setor/Fila",
+          max_tokens: "Máximo Tokens Resposta",
+          actions: "Ações",
+        },
+        confirmationModal: {
+          deleteTitle: "Excluir",
+          deleteMessage: "Você tem certeza? Essa ação não pode ser revertida!",
+        },
+        buttons: {
+          add: "Adicionar Prompt",
+        },
       },
       contactModal: {
         title: {
@@ -351,7 +390,8 @@ const messages = {
           financeiro: "Financeiro",
           logout: "Sair",
           management: "Gerência",
-          kanban: "Kanban"
+          kanban: "Kanban",
+          prompts: "Open.Ai"
         },
         appBar: {
           i18n: {
