@@ -49,16 +49,3 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_FRONTEND }}:latest
             ${{ env.REGISTRY }}/${{ env.IMAGE_FRONTEND }}:${{ github.sha }}
 
-      - name: Generate backend artifact attestation
-        uses: actions/attest-build-provenance@v1
-        with:
-          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_BACKEND }}
-          subject-digest: ${{ steps.backend.outputs.digest }}
-          push-to-registry: true
-
-      - name: Generate frontend artifact attestation
-        uses: actions/attest-build-provenance@v1
-        with:
-          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_FRONTEND }}
-          subject-digest: ${{ steps.frontend.outputs.digest }}
-          push-to-registry: true
