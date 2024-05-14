@@ -7,6 +7,7 @@ import { getIO } from "../../libs/socket";
 import Invoices from "../../models/Invoices";
 import Company from "../../models/Company";
 import AppError from "../../errors/AppError";
+import { processInvoiceExpired, processInvoicePaid } from "./PaymentGatewayServices";
 
 const webhookUrl = `${process.env.BACKEND_URL}/subscription/ticketz/webhook`;
 
@@ -23,6 +24,12 @@ async function getEfiOptions(): Promise<EfiCredentials> {
     pix_cert: cert,
     validateMtls: false,
   }
+}
+
+
+const newEfiPayInstance = async () => {
+  const efiOptions = await getEfiOptions();
+  return new EfiPay(efiOptions);
 }
 
 const createWebHook = async (efiPay: EfiPay) => {
@@ -47,6 +54,11 @@ const createWebHook = async (efiPay: EfiPay) => {
 export const efiInitialize = async () => {
   const paymentGateway = await GetSuperSettingService({ key: "_paymentGateway" });
 
+  if (!webhookUrl.startsWith("https://")) {
+    logger.debug("efiInitialize: only SSL webhooks are supported");
+    return;
+  };
+
   try {
     if (paymentGateway === "efi") {
       const efiOptions = await getEfiOptions();
@@ -60,20 +72,20 @@ export const efiInitialize = async () => {
           if (hooks?.webhookUrl !== webhookUrl) {
             createWebHook(efiPay);
           } else {
-            logger.info({ result: hooks }, "checkAndSetupWebhooks: webhook correto já instalado");
+            logger.debug({ result: hooks }, "efiInitialize: webhook correto já instalado");
           }
         },
         (error: { nome: string; }) => {
           if (error?.nome === "webhook_nao_encontrado") {
             createWebHook(efiPay);
           } else {
-            logger.error(error, "Fail to verify current Efí webhook");
+            logger.error(error, "efiInitialize: fail to verify current webhook");
           }
         }
       );
     }
   } catch (error) {
-    logger.error(error, "checkAndSetupWebhooks: ");
+    logger.error(error, "efiInitialize: ");
   }
 }
 
@@ -97,31 +109,17 @@ export const efiWebhook = async (
         include: { model: Company, as: "company" }
       });
       
-      if (!invoice || pix.valor < invoice.value) {
+      if (!invoice) {
+        logger.debug( "efiWebhook: Invoice not found or already paid" );
+        return true;
+      }
+      
+      if (pix.valor < invoice.value) {
         logger.debug( "Recebido valor menor" );
         return true;
       }
   
-      const expiresAt = new Date(invoice.company.dueDate);
-      expiresAt.setDate(expiresAt.getDate() + 30);
-      const date = expiresAt.toISOString().split("T")[0];
-
-      if (invoice.company) {
-        await invoice.company.update({
-          dueDate: date
-        });
-        await invoice.update({
-          status: "paid"
-        });
-        await invoice.company.reload();
-        const io = getIO();
-
-        io.emit(`company-${invoice.companyId}-payment`, {
-          action: "CONCLUIDA",
-          company: invoice.company
-        });
-      }
-      
+      await processInvoicePaid(invoice);      
       return true;
     });
   }
@@ -129,6 +127,62 @@ export const efiWebhook = async (
   return res.json({ ok: true });
 };
 
+
+export const efiCheckStatus = async ( invoice: Invoices, efiPay: EfiPay = null ): Promise<boolean> => {
+  try {
+    if (!efiPay) {
+      efiPay = await newEfiPayInstance();
+    }
+    
+    const txDetail = await efiPay.pixDetailCharge( { txid: invoice.txId });
+    
+    if (txDetail.status === "ATIVA" || txDetail.status !== "CONCLUIDA") {
+      return false;
+    }
+
+    const { pix } = txDetail;
+    if (pix[0].valor >= invoice.value) {
+      await processInvoicePaid(invoice);
+      return true;
+    }
+    
+    return false;
+  } catch (error) {
+    logger.error(error, "Error getting detail of txid");
+  }
+
+  return false;
+}
+
+const efiPollCheckStatus = async ( efiPay: EfiPay, invoice: Invoices, retries = 10, interval = 30000 ) => {
+    let attempts = 0;
+
+    async function pollStatus(): Promise<void> {
+      await invoice.reload();
+      
+      if (invoice.status === "paid") {
+        logger.debug(`efiPollCheckStatus: Invoice ${invoice.id} already paid, finishing polling`);
+        return;
+      }
+      
+      const successful = await efiCheckStatus(invoice, efiPay);
+      if (successful) {
+          return;
+      }
+
+      attempts += 1;
+
+      if (attempts >= retries) {
+        processInvoiceExpired(invoice);
+        return;
+      }
+
+      await new Promise(resolve => {setTimeout(resolve, interval)});
+      await pollStatus();
+    }
+
+    return pollStatus();
+}
 
 export const efiCreateSubscription = async (
   req: Request,
@@ -141,7 +195,7 @@ export const efiCreateSubscription = async (
 
   const body = {
     calendario: {
-      expiracao: 3600
+      expiracao: 300
     },
     valor: {
       original: price.toLocaleString("pt-br", { minimumFractionDigits: 2 }).replace(",", ".")
@@ -155,13 +209,20 @@ export const efiCreateSubscription = async (
     if (!invoice) {
       throw new Error("Invoice not found");
     }
+    
+    await efiInitialize();
+    
     const efiPay = new EfiPay(efiOptions);
     const pix = await efiPay.pixCreateImmediateCharge([], body);
-    invoice.update({
+    await invoice.update({
       txId: pix.txid,
       payGw: "efi",
       payGwData: JSON.stringify(pix)
     });
+
+    await invoice.reload();
+
+    efiPollCheckStatus(efiPay, invoice);
 
     return res.json({
       qrcode: { qrcode: pix.pixCopiaECola },

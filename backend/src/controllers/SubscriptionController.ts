@@ -1,9 +1,7 @@
 import { Request, Response } from "express";
 import * as Yup from "yup";
 import AppError from "../errors/AppError";
-import GetSuperSettingService from "../services/SettingServices/GetSuperSettingService";
-import { efiCreateSubscription, efiWebhook } from "../services/PaymentGatewayServices/EfiServices";
-import { owenCreateSubscription, owenWebhook } from "../services/PaymentGatewayServices/OwenServices";
+import { payGatewayCreateSubscription, payGatewayReceiveWebhook } from "../services/PaymentGatewayServices/PaymentGatewayServices";
 
 export const createSubscription = async (
   req: Request,
@@ -20,38 +18,12 @@ export const createSubscription = async (
     throw new AppError("Validation fails", 400);
   }
 
-  const paymentGateway = await GetSuperSettingService({ key: "_paymentGateway" });
-
-  switch (paymentGateway) {
-    case "efi": {
-      return efiCreateSubscription(req, res);
-    }    
-    case "owen": {
-      return owenCreateSubscription(req, res);
-    }    
-    default: {
-      throw new AppError("Unsupported payment gateway", 400);
-    }
-  }
-
+  return payGatewayCreateSubscription(req, res);
 }
 
 export const webhook = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-
-  const paymentGateway = await GetSuperSettingService({ key: "_paymentGateway" });
-
-  switch (paymentGateway) {
-    case "efi": {
-      return efiWebhook(req, res);
-    }    
-    case "owen": {
-      return owenWebhook(req, res);
-    }    
-    default: {
-      throw new AppError("Unsupported payment gateway", 400);
-    }
-  }
+  return payGatewayReceiveWebhook(req, res);
 }

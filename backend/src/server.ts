@@ -5,8 +5,7 @@ import { logger } from "./utils/logger";
 import { StartAllWhatsAppsSessions } from "./services/WbotServices/StartAllWhatsAppsSessions";
 import Company from "./models/Company";
 import { startQueueProcess } from "./queues";
-
-import { initializePaymentGateway } from "./services/PaymentGatewayServices/PaymentGatewayServices";
+import { checkOpenInvoices, payGatewayInitialize } from "./services/PaymentGatewayServices/PaymentGatewayServices";
 
 const server = app.listen(process.env.PORT, async () => {
   const companies = await Company.findAll();
@@ -21,11 +20,13 @@ const server = app.listen(process.env.PORT, async () => {
   });
   logger.info(`Server started on port: ${process.env.PORT}`);
   
-  initializePaymentGateway().catch(
+  payGatewayInitialize().catch(
     (e) => {
       logger.error(`Error initializing payment gateway: ${e.message}`);
     }
   );
+  
+  checkOpenInvoices();
 });
 
 initIO(server);

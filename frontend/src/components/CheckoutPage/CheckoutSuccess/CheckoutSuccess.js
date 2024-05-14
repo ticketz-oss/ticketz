@@ -14,6 +14,7 @@ function CheckoutSuccess(props) {
   const [pixString,] = useState(pix.qrcode.qrcode);
   const [copied, setCopied] = useState(false);
   const history = useHistory();
+  const onClose = props.onClose;
 
   const { dateToClient } = useDate();
 
@@ -30,6 +31,11 @@ function CheckoutSuccess(props) {
         setTimeout(() => {
           history.push("/");
         }, 4000);
+      }
+      
+      if (data.action === "EXPIRADA") {
+        toast.error("Transação de cobrança expirou");
+        onClose();
       }
     }
 

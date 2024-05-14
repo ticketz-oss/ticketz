@@ -42,9 +42,12 @@ export const owenWebhook = async (
     await invoice.company.reload();
     const io = getIO();
 
-    io.emit(`company-${invoice.companyId}-payment`, {
+    io.to(`company-${invoice.companyId}-mainchannel`)
+      .to("super")
+      .emit(`company-${invoice.companyId}-payment`, {
       action: "CONCLUIDA",
-      company: invoice.company
+      company: invoice.company,
+      invoiceId: invoice.id,
     });
 
   }
