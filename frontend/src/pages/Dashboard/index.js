@@ -403,9 +403,9 @@ const Dashboard = () => {
                     <Typography component="h3" variant="h6" gutterBottom>
                       PIX
                     </Typography>
-                    <div><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=X6XHVCPMRQEL4" target="_blank">
+                    <div>
                       <img className={classes.paymentpix} src="/ticketzpix.png" />
-                    </a></div>
+                    </div>
                     <Typography className={classes.pixkey} component="body2" paragraph>
                       1ab11506-9480-4303-8e1e-988e7c49ed4d
                     </Typography>
