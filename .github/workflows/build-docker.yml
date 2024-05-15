@@ -31,8 +31,8 @@ jobs:
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Docker meta Backend
@@ -41,7 +41,7 @@ jobs:
         with:
           # list of Docker images to use as base name for tags
           images: |
-            ghcr.io/ticktez-oss/backend
+            ghcr.io/ticktez-oss/ticketz-backend
           # Docker tags based on the following events/attributes
           tags: |
             type=ref,event=branch
@@ -56,7 +56,7 @@ jobs:
         with:
           # list of Docker images to use as base name for tags
           images: |
-            ghcr.io/ticktez-oss/frontend
+            ghcr.io/ticktez-oss/ticketz-frontend
           # Docker tags based on the following events/attributes
           tags: |
             type=ref,event=branch
