@@ -36,7 +36,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Docker meta Backend
-        id: meta_backend
+        id: metabackend
         uses: docker/metadata-action@v3
         with:
           # list of Docker images to use as base name for tags
@@ -51,7 +51,7 @@ jobs:
             type=sha
 
       - name: Docker meta Frontend
-        id: meta_frontend
+        id: metafrontend
         uses: docker/metadata-action@v3
         with:
           # list of Docker images to use as base name for tags
@@ -72,9 +72,7 @@ jobs:
           context: ./backend
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_BACKEND }}:latest
-            ${{ env.REGISTRY }}/${{ env.IMAGE_BACKEND }}:${{ github.sha }}
+          tags: ${{ steps.metabackend.outputs.tags }}
 
       - name: Build and push frontend Docker image
         id: frontend
@@ -83,6 +81,4 @@ jobs:
           context: ./frontend
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_FRONTEND }}:latest
-            ${{ env.REGISTRY }}/${{ env.IMAGE_FRONTEND }}:${{ github.sha }}
+          tags: ${{ steps.metafrontend.outputs.tags }}
