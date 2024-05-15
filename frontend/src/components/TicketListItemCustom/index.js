@@ -270,28 +270,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
             //color="primary"
             />
           )}
-          {ticket.status === "open" && (
-            <Tooltip title="Fechar Conversa">
-              <ClearOutlinedIcon
-                onClick={() => handleCloseTicket(ticket.id)}
-                fontSize="small"
-                style={{
-                  color: '#fff',
-                  backgroundColor: red[700],
-                  cursor: "pointer",
-                  //margin: '0 5 0 5',
-                  padding: 2,
-                  height: 23,
-                  width: 23,
-                  fontSize: 12,
-                  borderRadius: 50,
-                  position: 'absolute',
-                  right: 0,
-                  top: -8
-                }}
-              />
-            </Tooltip>
-          )}
+
           {profile === "admin" && (
             <Tooltip title="Espiar Conversa">
               <VisibilityIcon
@@ -364,28 +343,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
             //color=
             />
           )}
-          {ticket.status === "pending" && (
-            <Tooltip title="Fechar Conversa">
-              <ClearOutlinedIcon
-                onClick={() => handleCloseTicket(ticket.id)}
-                fontSize="small"
-                style={{
-                  color: '#fff',
-                  backgroundColor: red[700],
-                  cursor: "pointer",
-                  margin: '0 5 0 5',
-                  padding: 2,
-                  right: 48,
-                  height: 23,
-                  width: 23,
-                  fontSize: 12,
-                  borderRadius: 50,
-                  top: -8,
-                  position: 'absolute',
-                }}
-              />
-            </Tooltip>
-          )}
+         
           {ticket.chatbot && (
             <Tooltip title="Chatbot">
               <AndroidIcon
@@ -393,23 +351,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
                 style={{ color: grey[700], marginRight: 5 }}
               />
             </Tooltip>
-          )}
-          {ticket.status === "open" && (
-            <Tooltip title="Fechar Conversa">
-              <ClearOutlinedIcon
-                onClick={() => handleCloseTicket(ticket.id)}
-                fontSize="small"
-                style={{
-                  color: red[700],
-                  cursor: "pointer",
-                  marginRight: 5,
-                  right: 49,
-                  top: -8,
-                  position: 'absolute',
-                }}
-              />
-            </Tooltip>
-          )}
+          )}         
           {ticket.status === "pending" && (
             <Tooltip title="Aceitar Conversa">
               <DoneIcon
