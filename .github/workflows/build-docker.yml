@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - 'main'
+      - 'fix/**'
+      - 'dev'
+      - 'dev/**'
     tags:
       - 'v*.*.*'
 env:
@@ -39,10 +42,10 @@ jobs:
         id: metabackend
         uses: docker/metadata-action@v3
         with:
-          # list of Docker images to use as base name for tags
           images: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_BACKEND }}
-          # Docker tags based on the following events/attributes
+          labels: |
+            org.opencontainers.image.title=ticketz-backend
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}
@@ -54,10 +57,10 @@ jobs:
         id: metafrontend
         uses: docker/metadata-action@v3
         with:
-          # list of Docker images to use as base name for tags
           images: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_BACKEND }}
-          # Docker tags based on the following events/attributes
+            ${{ env.REGISTRY }}/${{ env.IMAGE_FRONTEND }}
+          labels: |
+            org.opencontainers.image.title=ticketz-frontend
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}
@@ -73,6 +76,7 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.metabackend.outputs.tags }}
+          labels: ${{ steps.metabackend.outputs.labels }}
 
       - name: Build and push frontend Docker image
         id: frontend
@@ -82,3 +86,4 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.metafrontend.outputs.tags }}
+          labels: ${{ steps.metafrontend.outputs.labels }}
