@@ -13,7 +13,7 @@ const ListSettingsService = async ({
   const where: WhereOptions = { companyId };
   if (!isSuper) {
     where.key = {
-      [Op.notLike]: "_%"
+      [Op.notLike]: "\\_%"
     }
   }
   
