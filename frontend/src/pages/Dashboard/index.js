@@ -226,7 +226,8 @@ const Dashboard = () => {
         setCurrentUser(user);
       }
     );
-  }, [getCurrentUserInfo]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   useEffect(() => {
     async function firstLoad() {
