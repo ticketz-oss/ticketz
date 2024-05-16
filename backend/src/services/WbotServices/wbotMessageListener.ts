@@ -1023,8 +1023,8 @@ export const handleRating = async (
   const io = getIO();
   let rate: number | null = null;
 
-  if (msg?.message?.conversation) {
-    rate = parseInt(msg.message?.conversation, 10) || null;
+  if (msg?.message?.conversation || msg?.message?.extendedTextMessage) {
+    rate = parseInt(msg.message.conversation || msg.message.extendedTextMessage.text , 10) || null;
   }
 
   if (!Number.isNaN(rate) && Number.isInteger(rate) && !isNull(rate)) {
