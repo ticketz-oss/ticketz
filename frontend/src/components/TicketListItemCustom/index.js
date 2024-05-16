@@ -292,7 +292,6 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
               />
             </Tooltip>
           )}
-          {profile === "admin" && (
             <Tooltip title="Espiar Conversa">
               <VisibilityIcon
                 onClick={() => setOpenTicketMessageDialog(true)}
@@ -312,7 +311,6 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
                 }}
               />
             </Tooltip>
-          )}
           {ticket.chatbot && (
             <Tooltip title="Chatbot">
               <AndroidIcon
@@ -433,7 +431,6 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
             </Tooltip>
           )}
 
-          {profile === "admin" && (
             <Tooltip title="Espiar Conversa">
               <VisibilityIcon
                 onClick={() => setOpenTicketMessageDialog(true)}
@@ -453,7 +450,6 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
                 }}
               />
             </Tooltip>
-          )}
 
         </>
       );
