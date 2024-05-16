@@ -838,8 +838,8 @@ const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue) => {
         !isNil(currentSchedule) &&
         (!currentSchedule || currentSchedule.inActivity === false)
       ) {
-
-        const body = formatBody(`${queue.outOfHoursMessage}\n\n*[ # ]* - Voltar ao Menu Principal`, ticket.contact);
+        const outOfHoursMessage = queue.outOfHoursMessage.trim() || "Estamos fora do horário de expediente";
+        const body = formatBody(`${outOfHoursMessage}\n\n*[ # ]* - Voltar ao Menu Principal`, ticket.contact);
         const sentMessage = await wbot.sendMessage(
           `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, {
           text: body,
@@ -1028,7 +1028,7 @@ export const handleRating = async (
   }
 
   if (!Number.isNaN(rate) && Number.isInteger(rate) && !isNull(rate)) {
-    const { complationMessage } = await ShowWhatsAppService(
+    const whatsapp = await ShowWhatsAppService(
       ticket.whatsappId,
       ticket.companyId
     );
@@ -1048,6 +1048,8 @@ export const handleRating = async (
       userId: ticketTraking.userId,
       rate: finalRate,
     });
+    
+    const complationMessage = whatsapp.complationMessage.trim() || "Atendimento finalizado";
     const body = formatBody(`\u200e${complationMessage}`, ticket.contact);
     await SendWhatsAppMessage({ body, ticket });
 
@@ -1306,7 +1308,9 @@ const handleMessage = async (
       order: [["createdAt", "DESC"]],
     });
 
-    if (unreadMessages === 0 && whatsapp.complationMessage && formatBody(whatsapp.complationMessage, contact).trim().toLowerCase() === lastMessage?.body.trim().toLowerCase()) {
+    const complationMessage = whatsapp.complationMessage.trim() || "Atendimento finalizado";
+
+    if (unreadMessages === 0 && complationMessage && formatBody(complationMessage, contact).trim().toLowerCase() === lastMessage?.body.trim().toLowerCase()) {
       return;
     }
 
@@ -1402,7 +1406,7 @@ const handleMessage = async (
           !isNil(currentSchedule) &&
           (!currentSchedule || currentSchedule.inActivity === false)
         ) {
-          const body = `${whatsapp.outOfHoursMessage}`;
+          const body = `${whatsapp.outOfHoursMessage.trim() || "Estamos fora do horário de expediente"}`;
 
           const debouncedSentMessage = debounce(
             async () => {
@@ -1448,15 +1452,14 @@ const handleMessage = async (
 
           if (
             scheduleType.value === "queue" &&
-            queue.outOfHoursMessage !== null &&
-            queue.outOfHoursMessage !== "" &&
             !isNil(schedule)
           ) {
             const startTime = moment(schedule.startTime, "HH:mm");
             const endTime = moment(schedule.endTime, "HH:mm");
 
             if (now.isBefore(startTime) || now.isAfter(endTime)) {
-              const body = `${queue.outOfHoursMessage}`;
+              const outOfHoursMessage = queue.outOfHoursMessage?.trim() || "Estamos fora do horário de expediente";
+              const body = `${outOfHoursMessage}`;
               const debouncedSentMessage = debounce(
                 async () => {
                   await wbot.sendMessage(
@@ -1536,15 +1539,14 @@ const handleMessage = async (
 
         if (
           scheduleType.value === "queue" &&
-          queue.outOfHoursMessage !== null &&
-          queue.outOfHoursMessage !== "" &&
           !isNil(schedule)
         ) {
           const startTime = moment(schedule.startTime, "HH:mm");
           const endTime = moment(schedule.endTime, "HH:mm");
 
           if (now.isBefore(startTime) || now.isAfter(endTime)) {
-            const body = queue.outOfHoursMessage;
+            const outOfHoursMessage = queue.outOfHoursMessage?.trim() || "Estamos fora do horário de expediente";
+            const body = outOfHoursMessage;
             const debouncedSentMessage = debounce(
               async () => {
                 await wbot.sendMessage(

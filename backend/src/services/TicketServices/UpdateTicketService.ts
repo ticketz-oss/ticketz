@@ -110,8 +110,7 @@ const   UpdateTicketService = async ({
       if (setting?.value === "enabled") {
         if (ticketTraking.ratingAt == null && !justClose) {
 
-
-          const ratingTxt = ratingMessage || "";
+          const ratingTxt = ratingMessage?.trim() || "";
           let bodyRatingMessage = `\u200e${ratingTxt}\n\n`;
           bodyRatingMessage +=
             "Digite de 1 à 3 para qualificar nosso atendimento:\n*1* - _Insatisfeito_\n*2* - _Satisfeito_\n*3* - _Muito Satisfeito_\n\n";
