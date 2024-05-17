@@ -336,10 +336,6 @@ const LoggedInLayout = ({ children, themeToggle }) => {
     }
   };
 
-  const handleRefreshPage = () => {
-    window.location.reload(false);
-  }
-
   const handleMenuItemClick = () => {
     const { innerWidth: width } = window;
     if (width <= 600) {
@@ -439,14 +435,6 @@ const LoggedInLayout = ({ children, themeToggle }) => {
             setVolume={setVolume}
             volume={volume}
           />
-
-          <IconButton
-            onClick={handleRefreshPage}
-            aria-label={i18n.t("mainDrawer.appBar.refresh")}
-            color="inherit"
-          >
-            <CachedIcon style={{ color: "white" }} />
-          </IconButton>
 
           {user.id && <NotificationsPopOver volume={volume} />}
 
