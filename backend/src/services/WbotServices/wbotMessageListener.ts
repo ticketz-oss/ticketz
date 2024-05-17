@@ -854,13 +854,15 @@ const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue) => {
         return;
       }
 
-      const body = formatBody(`\u200e${queue.greetingMessage}`, ticket.contact);
-      const sentMessage = await wbot.sendMessage(
-        `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, {
-        text: body,
+      if (queue.greetingMessage?.trim()) {
+        const body = formatBody(`\u200e${queue.greetingMessage.trim()}`, ticket.contact);
+        const sentMessage = await wbot.sendMessage(
+          `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, {
+          text: body,
+        }
+        );
+        await verifyMessage(sentMessage, ticket, contact);
       }
-      );
-      await verifyMessage(sentMessage, ticket, contact);
 
       if (queue.mediaPath !== null && queue.mediaPath !== "") {
         const filePath = path.resolve("public", queue.mediaPath);
