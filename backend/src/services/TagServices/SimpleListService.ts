@@ -11,8 +11,7 @@ interface Request {
 
 const ListService = async ({
   companyId,
-  searchParam,
-  kanban = 0
+  searchParam
 }: Request): Promise<Tag[]> => {
   let whereCondition = {};
 
@@ -26,7 +25,7 @@ const ListService = async ({
   }
 
   const tags = await Tag.findAll({
-    where: { ...whereCondition, companyId, kanban  },
+    where: { ...whereCondition, companyId  },
     order: [["name", "ASC"]]
   });
 
