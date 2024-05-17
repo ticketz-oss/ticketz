@@ -334,7 +334,6 @@ const messages = {
 					users: "Users",
 					settings: "Settings",
 					helps: "Help",
-					about: "About Ticketz",
 					messagesAPI: "API",
 					schedules: "Schedules",
 					campaigns: "Campaigns",
@@ -627,6 +626,9 @@ const messages = {
 				title: "Help Center",
 			},
 			about: {
+        aboutthe: "About the",
+        copyright: "© 2024 - Powered by ticketz",
+        buttonclose: "Close",
 				title: "About ticketz",
 				abouttitle: "Origin and improvements",
 				aboutdetail: "ticketz is indirectly derived from the Whaticket project with improvements shared by the developers of the EquipeChat system through the VemFazer channel on YouTube, later improved by Claudemir Todo Bom",
@@ -634,7 +636,7 @@ const messages = {
 				aboutwhaticketsite: "Whaticket Community site on Github",
 				aboutvemfazersite: "Vem Fazer channel site on Github",
 				licenseheading: "Open Source License",
-				licensedetail: "Ticketz is licensed under the GNU Affero General Public License version 3, which means that any user who has access to this application has the right to obtain access to the source code. More information at the links below:",
+				licensedetail: "ticketz is licensed under the GNU Affero General Public License version 3, which means that any user who has access to this application has the right to obtain access to the source code. More information at the links below:",
 				licensefulltext: "Full text of the license",
 				licensesourcecode: "Ticketz source code"
 			},

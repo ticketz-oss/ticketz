@@ -310,11 +310,6 @@ const MainListItems = (props) => {
               primary={i18n.t("mainDrawer.listItems.helps")}
               icon={<HelpOutlineIcon />}
             />
-            <ListItemLink
-              to="/about"
-              primary={i18n.t("mainDrawer.listItems.about")}
-              icon={<InfoIcon />}
-            />
           </>
         </>
         )}

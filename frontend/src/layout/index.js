@@ -25,6 +25,7 @@ import MainListItems from "./MainListItems";
 import NotificationsPopOver from "../components/NotificationsPopOver";
 import NotificationsVolume from "../components/NotificationsVolume";
 import UserModal from "../components/UserModal";
+import AboutModal from "../components/AboutModal";
 import { AuthContext } from "../context/Auth/AuthContext";
 import BackdropLoading from "../components/BackdropLoading";
 import DarkMode from "../components/DarkMode";
@@ -37,6 +38,7 @@ import { SocketContext } from "../context/Socket/SocketContext";
 import ChatPopover from "../pages/Chat/ChatPopover";
 
 import { useDate } from "../hooks/useDate";
+import useAuth from "../hooks/useAuth.js";
 
 import ColorModeContext from "../layout/themeContext";
 import Brightness4Icon from '@material-ui/icons/Brightness4';
@@ -169,6 +171,7 @@ const useStyles = makeStyles((theme) => ({
 const LoggedInLayout = ({ children, themeToggle }) => {
   const classes = useStyles();
   const [userModalOpen, setUserModalOpen] = useState(false);
+  const [aboutModalOpen, setAboutModalOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
@@ -183,6 +186,9 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   const greaterThenSm = useMediaQuery(theme.breakpoints.up("sm"));
 
   const [currentLanguage, setCurrentLanguage] = useState(i18n.language);
+
+  const { getCurrentUserInfo } = useAuth();
+  const [currentUser, setCurrentUser] = useState({});
 
   const [volume, setVolume] = useState(localStorage.getItem("volume") || 1);
 
@@ -241,6 +247,15 @@ const LoggedInLayout = ({ children, themeToggle }) => {
     if (document.body.offsetWidth > 600) {
       setDrawerOpen(true);
     }
+  }, []);
+  
+  useEffect(() => {
+    getCurrentUserInfo().then(
+      (user) => {
+        setCurrentUser(user);
+      }
+    );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -302,6 +317,11 @@ const LoggedInLayout = ({ children, themeToggle }) => {
 
   const handleOpenUserModal = () => {
     setUserModalOpen(true);
+    handleCloseProfileMenu();
+  };
+
+  const handleOpenAboutModal = () => {
+    setAboutModalOpen(true);
     handleCloseProfileMenu();
   };
 
@@ -369,6 +389,10 @@ const LoggedInLayout = ({ children, themeToggle }) => {
         open={userModalOpen}
         onClose={() => setUserModalOpen(false)}
         userId={user?.id}
+      />
+      <AboutModal
+        open={aboutModalOpen}
+        onClose={() => setAboutModalOpen(false)}
       />
       <AppBar
         position="absolute"
@@ -495,6 +519,9 @@ const LoggedInLayout = ({ children, themeToggle }) => {
             >
               <MenuItem onClick={handleOpenUserModal}>
                 {i18n.t("mainDrawer.appBar.user.profile")}
+              </MenuItem>
+              <MenuItem onClick={handleOpenAboutModal}>
+                {i18n.t("about.aboutthe")} {currentUser?.super ? "ticketz" : theme.appName}
               </MenuItem>
               <MenuItem onClick={handleClickLogout}>
                 {i18n.t("mainDrawer.appBar.user.logout")}
