@@ -67,7 +67,7 @@ const useAuth = () => {
           setIsAuth(true);
           setUser(data.user);
         } catch (err) {
-          toastError(err?.message);
+          toastError(err);
         }
       }
       setLoading(false);
@@ -152,7 +152,7 @@ Entre em contato com o Suporte para mais informações! `);
 
       //quebra linha 
     } catch (err) {
-      toastError(err?.message);
+      toastError(err);
       setLoading(false);
     }
   };
@@ -172,7 +172,7 @@ Entre em contato com o Suporte para mais informações! `);
       setLoading(false);
       history.push("/login");
     } catch (err) {
-      toastError(err?.message);
+      toastError(err);
       setLoading(false);
     }
   };
@@ -182,7 +182,7 @@ Entre em contato com o Suporte para mais informações! `);
       const { data } = await api.get("/auth/me");
       return data;
     } catch (err) {
-      toastError(err?.message);
+      toastError(err);
     }
   };
 

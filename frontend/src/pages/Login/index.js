@@ -103,9 +103,7 @@ const Login = () => {
       (data) => {
         setAllowSignup(data === "enabled");
       }
-    ).catch((error) => {
-      console.log("Error reading setting",error);
-    });
+    )
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

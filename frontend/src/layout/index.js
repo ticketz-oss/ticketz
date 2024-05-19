@@ -45,7 +45,6 @@ import Brightness4Icon from '@material-ui/icons/Brightness4';
 import Brightness7Icon from '@material-ui/icons/Brightness7';
 import LanguageIcon from '@material-ui/icons/Language';
 import { getBackendURL } from "../services/config";
-import NestedMenuItem from "material-ui-nested-menu-item";
 
 const drawerWidth = 240;
 
@@ -301,6 +300,11 @@ const LoggedInLayout = ({ children, themeToggle }) => {
     setMenuOpen(true);
   };
 
+  const handleLanguageMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+    setLanguageOpen(true);
+  };
+
   const handleCloseProfileMenu = () => {
     setAnchorEl(null);
     setMenuOpen(false);
@@ -423,6 +427,10 @@ const LoggedInLayout = ({ children, themeToggle }) => {
             )}
           </Typography>
 
+          <IconButton edge="start" onClick={toggleColorMode}>
+            {theme.mode === 'dark' ? <Brightness7Icon style={{ color: "white" }} /> : <Brightness4Icon style={{ color: "white" }} />}
+          </IconButton>
+
           <NotificationsVolume
             setVolume={setVolume}
             volume={volume}
@@ -435,6 +443,16 @@ const LoggedInLayout = ({ children, themeToggle }) => {
           <ChatPopover />
 
           <div>
+            <IconButton
+              aria-label="current language"
+              aria-controls="menu-language"
+              aria-haspopup="true"
+              onClick={handleLanguageMenu}
+              variant="contained"
+              style={{ color: "white" }}
+            >
+              <LanguageIcon />
+            </IconButton>
             <Menu
               id="language-appbar"
               anchorEl={anchorEl}
@@ -490,21 +508,6 @@ const LoggedInLayout = ({ children, themeToggle }) => {
               <MenuItem onClick={handleOpenUserModal}>
                 {i18n.t("mainDrawer.appBar.user.profile")}
               </MenuItem>
-              <MenuItem onClick={toggleColorMode}>
-                {theme.mode === 'dark' ? i18n.t("mainDrawer.appBar.user.lightmode") : i18n.t("mainDrawer.appBar.user.darkmode")}
-              </MenuItem>
-              <NestedMenuItem
-                label={i18n.t("mainDrawer.appBar.user.language")}
-                parentMenuOpen={menuOpen}
-              >
-                {
-                  Object.keys(messages).map((m) => (
-                    <MenuItem onClick={() => handleChooseLanguage(m)}>
-                      {messages[m].translations.mainDrawer.appBar.i18n.language}
-                    </MenuItem>
-                  ))
-                }
-              </NestedMenuItem>
               <MenuItem onClick={handleOpenAboutModal}>
                 {i18n.t("about.aboutthe")} {currentUser?.super ? "ticketz" : theme.appName}
               </MenuItem>

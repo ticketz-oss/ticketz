@@ -131,25 +131,13 @@ const App = () => {
   }, [mode]);
 
   useEffect(() => {
-    getPublicSetting("primaryColorLight")
-      .then((color) => { color && setPrimaryColorLight(color) })
-      .catch((error) => { console.log("Error reading setting", error); });
-    getPublicSetting("primaryColorDark")
-      .then((color) => { color && setPrimaryColorDark(color) })
-      .catch((error) => { console.log("Error reading setting", error); });
-    getPublicSetting("appLogoLight")
-      .then((file) => { file && setAppLogoLight(file) }, (_) => { })
-      .catch((error) => { console.log("Error reading setting", error); });
-    getPublicSetting("appLogoDark")
-      .then((file) => { file && setAppLogoDark(file) })
-      .catch((error) => { console.log("Error reading setting", error); });
-    getPublicSetting("appLogoFavicon")
-      .then((file) => { file && setAppLogoFavicon(file) })
-      .catch((error) => { console.log("Error reading setting", error); });
-    getPublicSetting("appName").then((name) => { setAppName(name || "ticketz") })
-      .catch((error) => { console.log("Error reading setting", error); setAppName("whitelabel chat") });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    getPublicSetting("primaryColorLight").then((color) => { color && setPrimaryColorLight(color) });
+    getPublicSetting("primaryColorDark").then((color) => { color && setPrimaryColorDark(color) });
+    getPublicSetting("appLogoLight").then((file) => { file && setAppLogoLight(file)});
+    getPublicSetting("appLogoDark").then((file) => { file && setAppLogoDark(file)});
+    getPublicSetting("appLogoFavicon").then((file) => { file && setAppLogoFavicon(file)});
+    getPublicSetting("appName").then((name) => { setAppName(name || "ticketz")});
+  }, [getPublicSetting]);
 
   return (
     <>
