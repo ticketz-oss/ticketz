@@ -33,15 +33,73 @@ The improvements developed by me will be placed here, and depending on the situa
 
 Whenever possible, I intend to backport some adjustments made here to the original projects.
 
-Running the Project:
-------------------
+Very Quick Start on a public Server
+-----------------------------------
 
-The project currently supports execution using Docker containers. For installation, you need to have Docker Community Edition and the Git client installed. It is ideal to find the best way to install these resources on your preferred operating system. [The official Docker installation guide can be found here](https://docs.docker.com/engine/install/).
+There are Docker images provided from the project, so you can get **ticketz** to work very easily on a public server (baremetal or VPS).
+
+### First setup
+
+Before starting you must complete this checklist:
+
+- [ ] Have a clean server running Ubuntu 20 or newer
+- [ ] Ports 80 and 443 available and not filtered by firewall
+- [ ] Two hostnames with configured DNS pointing to your server (one for the backend and another for the frontend)
+
+After this, just log in to your server and issue the following command, replacing the hostnames you already configured and your email address:
+
+```bash
+curl -sSL get.ticke.tz | sudo bash -s backend.example.com frontend.example.com name@example.com
+```
+
+After a few minutes you will have the server running at the name you gave to the frontend host.
+
+The default login is `admin@admin.com` and the default password is `123456`, you must change it right away.
+
+### Upgrade
+
+The upgrade is just easy as the instalation, you just need to login to your server using the same username you used on the installation and issue the following command:
+
+```bash
+curl -sSL update.ticke.tz | sudo bash
+```
+
+Your server will go down and after some minutes it will be running in the latest released version.
+
+### Inspect logs
+
+As all elements are running in containers the logs must be checked through the docker command.
+
+You must login to your server using the same user you used for the installation.
+
+First you need to move the current directory to the installation folder:
+
+```bash
+cd ~/ticketz-docker-acme
+```
+
+After this you can get a full log report with the following command:
+
+```bash
+docker compose logs -t
+```
+
+If you want to "tail follow" the logs just add a `-f` parameter to that command:
+
+```bash
+docker compose logs -t -f
+
+```
+
+Running from Source code Using Docker
+-------------------------------------
+
+For installation, you need to have Docker Community Edition and the Git client installed. It is ideal to find the best way to install these resources on your preferred operating system. [The official Docker installation guide can be found here](https://docs.docker.com/engine/install/).
 
 In both cases, it is necessary to clone the repository, then open a command terminal:
 
 ```bash
-git -c core.autocrlf=input clone https://github.com/allgood/ticketz.git
+git clone https://github.com/allgood/ticketz.git
 cd ticketz
 ```
 

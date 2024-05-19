@@ -102,7 +102,8 @@ const Login = () => {
     getPublicSetting("allowSignup").then(
       (data) => {
         setAllowSignup(data === "enabled");
-      }
+      },
+      (_) => {}
     )
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

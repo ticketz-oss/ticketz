@@ -1,7 +1,8 @@
 import { createContext } from "react";
 import openSocket from "socket.io-client";
 import { getBackendURL } from "../../services/config";
-import { isExpired, decodeToken } from "react-jwt";
+import { isExpired } from "react-jwt";
+import toastError from "../../errors/toastError";
 
 class ManagedSocket {
   constructor(socketManager) {
@@ -106,8 +107,13 @@ const socketManager = {
       }
       
       if ( isExpired(token) ) {
-        console.warn("Expired token, reload after refresh");
+        console.warn("Expired token, waiting for refresh");
         setTimeout(() => {
+          const currentToken = JSON.parse(localStorage.getItem("token"));
+          if (isExpired(currentToken)) {
+            localStorage.removeItem("token");
+            localStorage.removeItem("companyId");
+          }
           window.location.reload();
         },1000);
         return new DummySocket();
