@@ -42,9 +42,9 @@ There are Docker images provided from the project, so you can get **ticketz** to
 
 Before starting you must complete this checklist:
 
- [ ] Have a clean server running Ubuntu 20 or newer
- [ ] Ports 80 and 443 available and not filtered by firewall
- [ ] Two hostnames with configured DNS pointing to your server (one for the backend and another for the frontend)
+- [ ] Have a clean server running Ubuntu 20 or newer
+- [ ] Ports 80 and 443 available and not filtered by firewall
+- [ ] Two hostnames with configured DNS pointing to your server (one for the backend and another for the frontend)
 
 After this, just log in to your server and issue the following command, replacing the hostnames you already configured and your email address:
 

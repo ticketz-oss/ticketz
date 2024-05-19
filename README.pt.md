@@ -64,9 +64,9 @@ Existem imagens Docker fornecidas pelo projeto, então você pode fazer o **tick
 
 Antes de começar, você deve completar esta lista de verificação:
 
- [ ] Ter um servidor limpo rodando Ubuntu 20 ou mais recente
- [ ] Portas 80 e 443 disponíveis e não filtradas pelo firewall
- [ ] Dois nomes de host com DNS configurado apontando para o seu servidor (um para o backend e outro para o frontend)
+- [ ] Ter um servidor limpo rodando Ubuntu 20 ou mais recente
+- [ ] Portas 80 e 443 disponíveis e não filtradas pelo firewall
+- [ ] Dois nomes de host com DNS configurado apontando para o seu servidor (um para o backend e outro para o frontend)
 
 Após isso, basta fazer login no seu servidor e emitir o seguinte comando, substituindo os nomes de host que você já configurou e seu endereço de email:
 
