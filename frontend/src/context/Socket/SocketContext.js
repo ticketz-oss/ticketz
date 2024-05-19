@@ -2,7 +2,6 @@ import { createContext } from "react";
 import openSocket from "socket.io-client";
 import { getBackendURL } from "../../services/config";
 import { isExpired } from "react-jwt";
-import toastError from "../../errors/toastError";
 
 class ManagedSocket {
   constructor(socketManager) {
