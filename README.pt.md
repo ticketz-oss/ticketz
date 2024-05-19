@@ -71,7 +71,7 @@ Antes de começar, você deve completar esta lista de verificação:
 Após isso, basta fazer login no seu servidor e emitir o seguinte comando, substituindo os nomes de host que você já configurou e seu endereço de email:
 
 ```bash
-curl -sSL get.ticke.tz | sudo bash backend.exemplo.com frontend.exemplo.com nome@exemplo.com
+curl -sSL get.ticke.tz | sudo bash -s backend.exemplo.com frontend.exemplo.com nome@exemplo.com
 ```
 
 Após alguns minutos, você terá o servidor rodando no nome que você deu para o host do frontend.
