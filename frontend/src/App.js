@@ -131,12 +131,12 @@ const App = () => {
   }, [mode]);
 
   useEffect(() => {
-    getPublicSetting("primaryColorLight").then((color) => { color && setPrimaryColorLight(color) });
-    getPublicSetting("primaryColorDark").then((color) => { color && setPrimaryColorDark(color) });
-    getPublicSetting("appLogoLight").then((file) => { file && setAppLogoLight(file)});
-    getPublicSetting("appLogoDark").then((file) => { file && setAppLogoDark(file)});
-    getPublicSetting("appLogoFavicon").then((file) => { file && setAppLogoFavicon(file)});
-    getPublicSetting("appName").then((name) => { setAppName(name || "ticketz")});
+    getPublicSetting("primaryColorLight").then((color) => { color && setPrimaryColorLight(color) }, (_) => {});
+    getPublicSetting("primaryColorDark").then((color) => { color && setPrimaryColorDark(color) }, (_) => {});
+    getPublicSetting("appLogoLight").then((file) => { file && setAppLogoLight(file)}, (_) => {});
+    getPublicSetting("appLogoDark").then((file) => { file && setAppLogoDark(file)}, (_) => {});
+    getPublicSetting("appLogoFavicon").then((file) => { file && setAppLogoFavicon(file)}, (_) => {});
+    getPublicSetting("appName").then((name) => { setAppName(name || "ticketz")}, (_) => {});
   }, [getPublicSetting]);
 
   return (
