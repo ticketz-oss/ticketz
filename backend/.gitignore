@@ -7,4 +7,4 @@
 /.externalToolBuilders/
 /.project
 /.settings/
-/.prod.env
+/*.env
