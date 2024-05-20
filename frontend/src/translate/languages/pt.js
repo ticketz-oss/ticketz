@@ -359,6 +359,9 @@ const messages = {
           },
           user: {
             profile: "Perfil",
+            darkmode: "Modo escuro",
+            lightmode: "Modo claro",
+            language: "Selecionar idioma",
             about: "Sobre",
             logout: "Sair",
           },
