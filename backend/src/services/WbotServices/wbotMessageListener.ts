@@ -290,7 +290,7 @@ const downloadMedia = async (msg: proto.IWebMessageInfo) => {
         msg.message?.templateMessage?.hydratedTemplate?.imageMessage ||
         msg.message?.templateMessage?.hydratedFourRowTemplate?.imageMessage ||
         msg.message?.interactiveMessage?.header?.imageMessage;
-        
+
       if (message.directPath) {
         message.url = "";
       }
@@ -1341,7 +1341,7 @@ export const handleRating = async (
       userId: ticketTraking.userId,
       rate: finalRate,
     });
-    
+
     const complationMessage = whatsapp.complationMessage.trim() || "Atendimento finalizado";
     const body = formatBody(`\u200e${complationMessage}`, ticket.contact);
     await SendWhatsAppMessage({ body, ticket });
@@ -1520,6 +1520,9 @@ const handleMessage = async (
   wbot: Session,
   companyId: number
 ): Promise<void> => {
+
+  let mediaSent: Message | undefined;
+
   if (!isValidMsg(msg)) return;
 
   if (msg.message?.ephemeralMessage) {
@@ -1671,7 +1674,8 @@ const handleMessage = async (
 
 
     if (hasMedia) {
-      await verifyMediaMessage(msg, ticket, contact);
+      mediaSent = await verifyMediaMessage(msg, ticket, contact);
+      //await verifyMediaMessage(msg, ticket, contact);
     } else if (msg.message?.protocolMessage?.editedMessage) {
       await verifyEditedMessage(msg.message.protocolMessage.editedMessage, ticket, msg.message.protocolMessage.key.id);
     } else if (msg.message?.protocolMessage?.type === 0) {
@@ -1789,6 +1793,17 @@ const handleMessage = async (
       Sentry.captureException(e);
       console.log(e);
     }
+
+    if (
+      !ticket.queue &&
+      !isGroup &&
+      !msg.key.fromMe &&
+      !ticket.userId &&
+      !isNil(whatsapp.promptId)
+    ) {
+      await handleOpenAi(msg, wbot, ticket, contact, mediaSent);
+    }
+
 
     if (
       !ticket.queue &&

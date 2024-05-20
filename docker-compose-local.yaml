@@ -45,6 +45,8 @@ services:
 
   postgres:
     image: postgres:16-alpine
+    ports:
+      - ${DB_PORT:-5432}:5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
@@ -60,6 +62,8 @@ services:
 
   redis:
     image: redis:alpine
+    ports:
+      - ${DB_PORT:-6379}:6379
     command: redis-server --appendonly yes
     expose:
       - 6379
