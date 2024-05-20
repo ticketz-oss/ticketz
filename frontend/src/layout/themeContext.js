@@ -6,6 +6,7 @@ const ColorModeContext = React.createContext({
   setPrimaryColorDark: (_) => { },
   setAppLogoLight: (_) => { },
   setAppLogoDark: (_) => { },
+  setAppLogoFavicon: (_) => { },
 });
 
 export default ColorModeContext;

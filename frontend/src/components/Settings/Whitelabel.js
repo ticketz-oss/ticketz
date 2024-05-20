@@ -215,7 +215,7 @@ export default function Whitelabel(props) {
       },
     }).then((response) => {
       updateSettingsLoaded(`appLogo${mode}`, response.data);
-      colorMode.setAppLogoLight(response.data);
+      colorMode[`setAppLogo${mode}`](response.data);
     }).catch((err) => {
       console.error(
         `Houve um problema ao realizar o upload da imagem.`
