@@ -66,9 +66,8 @@ const useWhatsApps = () => {
         const { data } = await api.get("/whatsapp/?session=0");
         dispatch({ type: "LOAD_WHATSAPPS", payload: data });
         setLoading(false);
-      } catch (err) {
+      } catch (_) {
         setLoading(false);
-        toastError(err);
       }
     };
     fetchSession();

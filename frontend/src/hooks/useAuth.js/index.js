@@ -181,8 +181,8 @@ Entre em contato com o Suporte para mais informações! `);
     try {
       const { data } = await api.get("/auth/me");
       return data;
-    } catch (err) {
-      toastError(err?.message);
+    } catch (_) {
+      return null;
     }
   };
 
