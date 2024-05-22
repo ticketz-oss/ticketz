@@ -23,7 +23,7 @@ import { SocketContext } from "../../context/Socket/SocketContext";
 import Favicon from "react-favicon";
 import { getBackendURL } from "../../services/config";
 
-const zapIcon = "/vector/favicon.svg";
+const defaultLogoFavicon = "/vector/favicon.svg";
 
 const useStyles = makeStyles((theme) => ({
   tabContainer: {
@@ -220,7 +220,7 @@ const NotificationsPopOver = (props) => {
       <>
         <Favicon
           animated={true}
-          url={ (theme?.appLogoFavicon) ? getBackendURL()+"/public/" + theme.appLogoFavicon : zapIcon }
+          url={ (theme?.appLogoFavicon) ? theme.appLogoFavicon : defaultLogoFavicon }
           alertCount={notifications.length}
           iconSize={195}
         />

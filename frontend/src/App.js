@@ -15,7 +15,9 @@ import { getBackendURL } from "./services/config";
 import Routes from "./routes";
 
 const queryClient = new QueryClient();
-const logoFavicon = "/vector/favicon.svg";
+const defaultLogoLight = "/vector/logo.svg";
+const defaultLogoDark = "/vector/logo-dark.svg";
+const defaultLogoFavicon = "/vector/favicon.svg";
 
 const App = () => {
   const [locale, setLocale] = useState();
@@ -23,8 +25,8 @@ const App = () => {
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
   const preferredTheme = window.localStorage.getItem("preferredTheme");
   const [mode, setMode] = useState(preferredTheme ? preferredTheme : prefersDarkMode ? "dark" : "light");
-  const [primaryColorLight, setPrimaryColorLight] = useState("#0000FF");
-  const [primaryColorDark, setPrimaryColorDark] = useState("#39ACE7");
+  const [primaryColorLight, setPrimaryColorLight] = useState("#888");
+  const [primaryColorDark, setPrimaryColorDark] = useState("#888");
   const [appLogoLight, setAppLogoLight] = useState("");
   const [appLogoDark, setAppLogoDark] = useState("");
   const [appLogoFavicon, setAppLogoFavicon] = useState("");
@@ -112,6 +114,18 @@ const App = () => {
       appLogoDark,
       appLogoFavicon,
       appName,
+      calculatedLogoDark: () => {
+        if (appLogoDark === defaultLogoDark && appLogoLight !== defaultLogoLight) {
+          return appLogoLight;
+        }
+        return appLogoDark;
+      },
+      calculatedLogoLight: () => {
+        if (appLogoDark !== defaultLogoDark && appLogoLight === defaultLogoLight) {
+          return appLogoDark;
+        }
+        return appLogoLight;
+      }
     },
     locale
   ), [appLogoLight, appLogoDark, appLogoFavicon, appName, locale, mode, primaryColorDark, primaryColorLight]);
@@ -132,19 +146,19 @@ const App = () => {
 
   useEffect(() => {
     getPublicSetting("primaryColorLight")
-      .then((color) => { color && setPrimaryColorLight(color) })
+      .then((color) => { setPrimaryColorLight(color || "#0000FF") })
       .catch((error) => { console.log("Error reading setting", error); });
     getPublicSetting("primaryColorDark")
-      .then((color) => { color && setPrimaryColorDark(color) })
+      .then((color) => { setPrimaryColorDark(color || "#39ACE7") })
       .catch((error) => { console.log("Error reading setting", error); });
     getPublicSetting("appLogoLight")
-      .then((file) => { file && setAppLogoLight(file) }, (_) => { })
+      .then((file) => { setAppLogoLight(file ? (getBackendURL()+"/public/"+file) : defaultLogoLight) }, (_) => { })
       .catch((error) => { console.log("Error reading setting", error); });
     getPublicSetting("appLogoDark")
-      .then((file) => { file && setAppLogoDark(file) })
+      .then((file) => { setAppLogoDark(file ? (getBackendURL()+"/public/"+file) : defaultLogoDark) })
       .catch((error) => { console.log("Error reading setting", error); });
     getPublicSetting("appLogoFavicon")
-      .then((file) => { file && setAppLogoFavicon(file) })
+      .then((file) => { setAppLogoFavicon(file ? (getBackendURL()+"/public/"+file) : defaultLogoFavicon) })
       .catch((error) => { console.log("Error reading setting", error); });
     getPublicSetting("appName").then((name) => { setAppName(name || "ticketz") })
       .catch((error) => { console.log("Error reading setting", error); setAppName("whitelabel chat") });
@@ -153,7 +167,7 @@ const App = () => {
 
   return (
     <>
-    <Favicon url={ ((appLogoFavicon) ? getBackendURL()+"/public/" + theme.appLogoFavicon : logoFavicon ) } />
+    <Favicon url={ ((appLogoFavicon) ? getBackendURL()+"/public/" + theme.appLogoFavicon : defaultLogoFavicon ) } />
     <ColorModeContext.Provider value={{ colorMode }}>
       <ThemeProvider theme={theme}>
         <QueryClientProvider client={queryClient}>
