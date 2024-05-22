@@ -16,6 +16,8 @@ import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import Switch from "@material-ui/core/Switch";
 
 import { i18n } from "../../translate/i18n";
 
@@ -64,11 +66,13 @@ const ContactSchema = Yup.object().shape({
 const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 	const classes = useStyles();
 	const isMounted = useRef(true);
+	const [disableBot, setDisableBot] = useState(false);
 
 	const initialState = {
 		name: "",
 		number: "",
 		email: "",
+		disableBot: false
 	};
 
 	const [contact, setContact] = useState(initialState);
@@ -110,10 +114,10 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 	const handleSaveContact = async values => {
 		try {
 			if (contactId) {
-				await api.put(`/contacts/${contactId}`, values);
+				await api.put(`/contacts/${contactId}`, {...values, disableBot});
 				handleClose();
 			} else {
-				const { data } = await api.post("/contacts", values);
+				const { data } = await api.post("/contacts", {...values, disableBot});
 				if (onSave) {
 					onSave(data);
 				}
@@ -184,6 +188,23 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 										variant="outlined"
 									/>
 								</div>
+								<>
+								<FormControlLabel
+									label={i18n.t("contactModal.form.disableBot")}
+									labelPlacement="start"
+									control={
+										<Switch
+											size="small"
+											checked={disableBot}
+											onChange={() =>
+												setDisableBot((prevState) => !prevState)
+											}
+											name="disableBot"
+											color="primary"
+										/>
+									}
+								/>
+								</>
 								<Typography
 									style={{ marginBottom: 8, marginTop: 12 }}
 									variant="subtitle1"
