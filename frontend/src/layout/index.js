@@ -49,9 +49,6 @@ import NestedMenuItem from "material-ui-nested-menu-item";
 
 const drawerWidth = 240;
 
-const logo = "/vector/logo.svg";
-const logoDark = "/vector/logo-dark.svg";
-
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
@@ -162,7 +159,7 @@ const useStyles = makeStyles((theme) => ({
     width: "192px",
     maxHeight: "72px",
     logo: theme.logo,
-    content: "url(" + ((theme.appLogoLight || theme.appLogoDark) ? getBackendURL()+"/public/"+  (theme.mode === "light" ? theme.appLogoLight || theme.appLogoDark : theme.appLogoDark || theme.appLogoLight  )   : (theme.mode === "light" ? logo : logoDark)) + ")"
+    content: "url(" + (theme.mode === "light" ? theme.calculatedLogoLight() : theme.calculatedLogoDark()) + ")"
   },
   hideLogo: {
 	display: "none",

@@ -60,7 +60,7 @@ const wbotMonitor = async (
             where: {
               contactId: contact.id,
               whatsappId: wbot.id,
-              //status: { [Op.or]: ["close"] },
+              status: "open",
               companyId
             },
           });

@@ -21,9 +21,9 @@ import ColorModeContext from "../../layout/themeContext";
 import api from "../../services/api";
 import { getBackendURL } from "../../services/config";
 
-const logo = "/vector/logo.svg";
-const logoDark = "/vector/logo-dark.svg";
-const logoFavicon = "/vector/favicon.svg";
+const defaultLogoLight = "/vector/logo.svg";
+const defaultLogoDark = "/vector/logo-dark.svg";
+const defaultLogoFavicon = "/vector/favicon.svg";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -119,19 +119,19 @@ const useStyles = makeStyles((theme) => ({
   appLogoLightPreviewImg: {
     width: "100%",
     maxHeight: 72,
-    content: "url(" + ((theme.appLogoLight || theme.appLogoDark) ? getBackendURL()+"/public/"+ (theme.appLogoLight || theme.appLogoDark) : logo ) + ")"
+    content: "url(" + theme.calculatedLogoLight() + ")"
   },
   
   appLogoDarkPreviewImg: {
     width: "100%",
     maxHeight: 72,
-    content: "url(" + ((theme.appLogoLight || theme.appLogoDark) ? getBackendURL()+"/public/"+ (theme.appLogoDark || theme.appLogoLight) : logoDark ) + ")"
+    content: "url(" + theme.calculatedLogoDark() + ")"
   },
 
   appLogoFaviconPreviewImg: {
     width: "100%",
     maxHeight: 72,
-    content: "url(" + ((theme.appLogoFavicon) ? getBackendURL()+"/public/" + theme.appLogoFavicon : logoFavicon ) + ")"
+    content: "url(" + ((theme.appLogoFavicon) ? theme.appLogoFavicon : "" ) + ")"
   }
 }));
 
@@ -215,7 +215,7 @@ export default function Whitelabel(props) {
       },
     }).then((response) => {
       updateSettingsLoaded(`appLogo${mode}`, response.data);
-      colorMode[`setAppLogo${mode}`](response.data);
+      colorMode[`setAppLogo${mode}`]( getBackendURL()+"/public/"+response.data );
     }).catch((err) => {
       console.error(
         `Houve um problema ao realizar o upload da imagem.`
@@ -347,7 +347,7 @@ export default function Whitelabel(props) {
                               color="default"
                               onClick={() => { 
                                   handleSaveSetting("appLogoLight","");
-                                  colorMode.setAppLogoLight("");
+                                  colorMode.setAppLogoLight(defaultLogoLight);
                                 }
                               }  
                             >
@@ -396,7 +396,7 @@ export default function Whitelabel(props) {
                               color="default"
                               onClick={() => { 
                                   handleSaveSetting("appLogoDark","");
-                                  colorMode.setAppLogoDark("");
+                                  colorMode.setAppLogoDark(defaultLogoDark);
                                 }
                               }  
                             >
@@ -445,7 +445,7 @@ export default function Whitelabel(props) {
                               color="default"
                               onClick={() => { 
                                   handleSaveSetting("appLogoFavicon","");
-                                  colorMode.setAppLogoFavicon("");
+                                  colorMode.setAppLogoFavicon(defaultLogoFavicon);
                                 }
                               }  
                             >
@@ -480,7 +480,7 @@ export default function Whitelabel(props) {
               </Grid>
               <Grid xs={12} sm={6} md={4} item>
                 <div className={classes.appLogoLightPreviewDiv}>
-                  <img className={classes.appLogoLightPreviewImg} alt="dark-logo-preview" />
+                  <img className={classes.appLogoLightPreviewImg} alt="light-logo-preview" />
                 </div>
               </Grid>
               <Grid xs={12} sm={6} md={4} item>

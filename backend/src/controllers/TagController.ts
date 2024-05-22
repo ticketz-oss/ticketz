@@ -41,7 +41,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   const tag = await CreateService({
     name,
     color,
-    kanban,
+    kanban: kanban || null,
     companyId
   });
 

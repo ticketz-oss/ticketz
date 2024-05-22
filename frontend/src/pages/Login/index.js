@@ -18,9 +18,6 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 import useSettings from "../../hooks/useSettings";
 import { getBackendURL } from "../../services/config";
 
-const logo = "/vector/logo.svg";
-const logoDark = "/vector/logo-dark.svg";
-
 const Copyright = () => {
 	return (
 		<Typography variant="body2" color="primary" align="center">
@@ -74,7 +71,7 @@ const useStyles = makeStyles(theme => ({
 	logoImg: {
     width: "100%",
     margin: "0 auto",
-    content: "url(" + ((theme.appLogoLight || theme.appLogoDark) ? getBackendURL()+"/public/"+  (theme.mode === "light" ? theme.appLogoLight || theme.appLogoDark : theme.appLogoDark || theme.appLogoLight  )   : (theme.mode === "light" ? logo : logoDark)) + ")"
+    content: "url(" + (theme.mode === "light" ? theme.calculatedLogoLight() : theme.calculatedLogoDark()) + ")"
   }
 	
 }));
