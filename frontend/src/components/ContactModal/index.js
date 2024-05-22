@@ -65,6 +65,11 @@ const ContactSchema = Yup.object().shape({
 
 const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 	const classes = useStyles();
+<<<<<<< HEAD
+=======
+	const isMounted = useRef(true);
+	const [disableBot, setDisableBot] = useState(false);
+>>>>>>> 92f284d (DESATIVAR O BOT DO CONTATO)
 
 	const initialState = {
 		name: "",
@@ -104,10 +109,10 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 	const handleSaveContact = async values => {
 		try {
 			if (contactId) {
-				await api.put(`/contacts/${contactId}`, values);
+				await api.put(`/contacts/${contactId}`, {...values, disableBot});
 				handleClose();
 			} else {
-				const { data } = await api.post("/contacts", values);
+				const { data } = await api.post("/contacts", {...values, disableBot});
 				if (onSave) {
 					onSave(data);
 				}
@@ -185,9 +190,15 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 									control={
 										<Switch
 											size="small"
+<<<<<<< HEAD
 											checked={values.disableBot}
 											onChange={() =>
                         setContact({ ...values, disableBot: !values.disableBot })
+=======
+											checked={disableBot}
+											onChange={() =>
+												setDisableBot((prevState) => !prevState)
+>>>>>>> 92f284d (DESATIVAR O BOT DO CONTATO)
 											}
 											name="disableBot"
 											color="primary"

@@ -1095,6 +1095,10 @@ export const handleRating = async (
 };
 
 const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, dontReadTheFirstQuestion = false) => {
+<<<<<<< HEAD
+=======
+  if(ticket.contact.disableBot){
+>>>>>>> 92f284d (DESATIVAR O BOT DO CONTATO)
   const queue = await Queue.findByPk(ticket.queueId, {
     include: [
       {
@@ -1225,6 +1229,7 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
     if (currentOption.options.length > -1) {
       sendMenu(wbot, ticket, currentOption);
     }
+  }
   }
 }
 
