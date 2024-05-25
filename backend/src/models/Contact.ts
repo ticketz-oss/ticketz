@@ -55,12 +55,18 @@ class Contact extends Model<Contact> {
   disableBot: boolean
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> ee19133 (CORREÇÃO DO MIGRATE E COLOCAR O CAMPO NO MODEL)
   @Default("available")
   @Column
   presence: string;
 
+<<<<<<< HEAD
 =======
 >>>>>>> 92f284d (DESATIVAR O BOT DO CONTATO)
+=======
+>>>>>>> ee19133 (CORREÇÃO DO MIGRATE E COLOCAR O CAMPO NO MODEL)
   @CreatedAt
   createdAt: Date;
 
