@@ -1096,9 +1096,13 @@ export const handleRating = async (
 
 const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, dontReadTheFirstQuestion = false) => {
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
   if(ticket.contact.disableBot){
 >>>>>>> 92f284d (DESATIVAR O BOT DO CONTATO)
+=======
+  if(!ticket.contact.disableBot){
+>>>>>>> 72cc691 (CORREÇÃO DO DESATIVAR CHATBOT PARA O CONTATO)
   const queue = await Queue.findByPk(ticket.queueId, {
     include: [
       {
