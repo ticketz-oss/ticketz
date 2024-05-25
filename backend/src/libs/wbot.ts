@@ -21,8 +21,13 @@ import { getIO } from "./socket";
 import { Store } from "./store";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
 import DeleteBaileysService from "../services/BaileysServices/DeleteBaileysService";
+<<<<<<< HEAD
 import Contact from "../models/Contact";
 import Ticket from "../models/Ticket";
+=======
+import { cacheLayer } from "./cache";
+import Contact from "../models/Contact";
+>>>>>>> 0ee9f17 (COLOCAR PRESENÇA DO CONTATO NA LISTA DE CONVERSAS)
 
 const loggerBaileys = MAIN_LOGGER.child({});
 loggerBaileys.level = "error";
@@ -256,6 +261,7 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
             }
           }
         );
+<<<<<<< HEAD
         wsocket.ev.on("creds.update", saveState);
 
         wsocket.ev.on(
@@ -309,6 +315,33 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
         );
 
         store.bind(wsocket.ev);
+=======
+        wsocket.ev.on("creds.update", saveCreds);
+
+        wsocket.ev.on("presence.update",async ({ id: remoteJid, presences }) => {
+          try {
+            const contact = await Contact.findOne({
+              where: {
+                number: remoteJid.replace(/\D/g, ""),
+                companyId: whatsapp.companyId
+              }
+            });
+
+            await contact.update({
+              presence: presences[remoteJid].lastKnownPresence
+            });
+
+            await contact.reload();
+
+            io.to(`company-${whatsapp.companyId}-mainchannel`).emit(`company-${whatsapp.companyId}-contact`,
+              {
+                action: "update",
+                contact
+              }
+            );
+          } catch (e) {}
+        });
+>>>>>>> 0ee9f17 (COLOCAR PRESENÇA DO CONTATO NA LISTA DE CONVERSAS)
       })();
     } catch (error) {
       Sentry.captureException(error);

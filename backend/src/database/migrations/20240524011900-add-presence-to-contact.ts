@@ -5,7 +5,11 @@ module.exports = {
     return Promise.all([
       queryInterface.addColumn("Contacts", "presence", {
         type: DataTypes.STRING,
+<<<<<<< HEAD
         defaultValue: "available"
+=======
+        defaultValue: false
+>>>>>>> 0ee9f17 (COLOCAR PRESENÇA DO CONTATO NA LISTA DE CONVERSAS)
       })
     ]);
   },

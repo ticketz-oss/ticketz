@@ -522,11 +522,19 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
                 variant="body2"
                 color="textSecondary"
               >
+<<<<<<< HEAD
                 {["composing", "recording"].includes(ticket?.presence) ? (
                   <span className={classes.presence}>
                     {i18n.t(`presence.${ticket.presence}`)}
                   </span>
                 ) : (
+=======
+              {ticket.contact?.presence !== "available" ? (
+                <>
+                  {i18n.t(`presence.${ticket.contact.presence}`)}
+                </>
+              ) : (
+>>>>>>> 0ee9f17 (COLOCAR PRESENÇA DO CONTATO NA LISTA DE CONVERSAS)
                 <>
                   {ticket.lastMessage.includes('data:image/png;base64') ? <MarkdownWrapper> Localização</MarkdownWrapper> : <MarkdownWrapper>{ticket.lastMessage}</MarkdownWrapper>}
                 </>
