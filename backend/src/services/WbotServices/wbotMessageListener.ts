@@ -107,7 +107,7 @@ const getBodyButton = (msg: proto.IWebMessageInfo): string => {
 
     return bodyMessage;
   }
-  
+
   return "";
 };
 
@@ -278,7 +278,7 @@ const downloadMedia = async (msg: proto.IWebMessageInfo) => {
         msg.message?.templateMessage?.hydratedTemplate?.imageMessage ||
         msg.message?.templateMessage?.hydratedFourRowTemplate?.imageMessage ||
         msg.message?.interactiveMessage?.header?.imageMessage;
-        
+
       if (message.directPath) {
         message.url = "";
       }
@@ -808,7 +808,7 @@ const sendMenu = async (
 const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue) => {
     const {companyId, contact} = ticket;
     let chatbot = false;
-    
+
     if (queue?.options) {
       chatbot = queue.options.length > 0;
     }
@@ -997,7 +997,7 @@ const verifyQueue = async (
         break;
       case "text":
         botText();
-        break;      
+        break;
       default:
     }
   }
@@ -1050,7 +1050,7 @@ export const handleRating = async (
       userId: ticketTraking.userId,
       rate: finalRate,
     });
-    
+
     const complationMessage = whatsapp.complationMessage.trim() || "Atendimento finalizado";
     const body = formatBody(`\u200e${complationMessage}`, ticket.contact);
     await SendWhatsAppMessage({ body, ticket });
@@ -1090,7 +1090,7 @@ export const handleRating = async (
 };
 
 const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, dontReadTheFirstQuestion = false) => {
-  if(ticket.contact.disableBot){
+  if(!ticket.contact.disableBot){
   const queue = await Queue.findByPk(ticket.queueId, {
     include: [
       {
@@ -1200,7 +1200,7 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
       );
 
       await verifyMessage(sendMsg, ticket, ticket.contact);
-      
+
       if (currentOption.exitChatbot) {
         await ticket.update({
           chatbot: false,
@@ -1217,7 +1217,7 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
       }
       return;
     }
-    
+
     if (currentOption.options.length > -1) {
       sendMenu(wbot, ticket, currentOption);
     }
@@ -1231,7 +1231,7 @@ const handleMessage = async (
   companyId: number
 ): Promise<void> => {
   if (!isValidMsg(msg)) return;
-  
+
   if (msg.message?.ephemeralMessage) {
     msg.message = msg.message.ephemeralMessage.message;
   }
@@ -1322,7 +1322,7 @@ const handleMessage = async (
       const result = await FindOrCreateTicketService(contact, wbot.id!, unreadMessages, companyId, groupContact);
       return result;
     });
-  
+
     // voltar para o menu inicial
 
     if (bodyMessage === "#") {
