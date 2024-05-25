@@ -54,6 +54,10 @@ class Contact extends Model<Contact> {
   @Column
   disableBot: boolean
 
+  @Default("available")
+  @Column
+  presence: string;
+
   @CreatedAt
   createdAt: Date;
 

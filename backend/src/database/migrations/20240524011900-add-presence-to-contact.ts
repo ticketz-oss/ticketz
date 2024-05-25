@@ -5,7 +5,7 @@ module.exports = {
     return Promise.all([
       queryInterface.addColumn("Contacts", "presence", {
         type: DataTypes.STRING,
-        defaultValue: false
+        defaultValue: "available"
       })
     ]);
   },
