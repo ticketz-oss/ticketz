@@ -164,10 +164,6 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
   const { profile } = user;
 
   useEffect(() => {
-    
-  }, []);
-
-  useEffect(() => {
     if (ticket.userId && ticket.user) {
       setTicketUser(ticket.user.name);
     }
@@ -522,8 +518,16 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
                 component="span"
                 variant="body2"
                 color="textSecondary"
-              > {ticket.lastMessage.includes('data:image/png;base64') ? <MarkdownWrapper> Localização</MarkdownWrapper> : <MarkdownWrapper>{ticket.lastMessage}</MarkdownWrapper>}
-                {/* {ticket.lastMessage === "" ? <br /> : <MarkdownWrapper>{ticket.lastMessage}</MarkdownWrapper>} */}
+              >
+              {ticket.contact?.presence !== "available" ? (
+                <>
+                  {i18n.t(`presence.${ticket.contact.presence}`)}
+                </>
+              ) : (
+                <>
+                  {ticket.lastMessage.includes('data:image/png;base64') ? <MarkdownWrapper> Localização</MarkdownWrapper> : <MarkdownWrapper>{ticket.lastMessage}</MarkdownWrapper>}
+                </>
+              )}
               </Typography>
               <ListItemSecondaryAction style={{ left: 73 }}>
                 <Box className={classes.ticketInfo1}>{renderTicketInfo()}</Box>

@@ -20,6 +20,7 @@ import { Store } from "./store";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
 import DeleteBaileysService from "../services/BaileysServices/DeleteBaileysService";
 import { cacheLayer } from "./cache";
+import Contact from "../models/Contact";
 
 const loggerBaileys = MAIN_LOGGER.child({});
 loggerBaileys.level = "error";
@@ -206,6 +207,30 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
           }
         );
         wsocket.ev.on("creds.update", saveCreds);
+
+        wsocket.ev.on("presence.update",async ({ id: remoteJid, presences }) => {
+          try {
+            const contact = await Contact.findOne({
+              where: {
+                number: remoteJid.replace(/\D/g, ""),
+                companyId: whatsapp.companyId
+              }
+            });
+
+            await contact.update({
+              presence: presences[remoteJid].lastKnownPresence
+            });
+
+            await contact.reload();
+
+            io.to(`company-${whatsapp.companyId}-mainchannel`).emit(`company-${whatsapp.companyId}-contact`,
+              {
+                action: "update",
+                contact
+              }
+            );
+          } catch (e) {}
+        });
       })();
     } catch (error) {
       Sentry.captureException(error);

@@ -777,6 +777,13 @@ const messages = {
 		  close: "Fechar",
 		  title: "Histórico de edição da mensagem"
 	  },
+    presence: {
+      unavailable: "Indisponível",
+      available: "Disponível",
+      composing: "Digitando...",
+      recording: "Gravando...",
+      paused: "Pausado",
+    },
       backendErrors: {
         ERR_NO_OTHER_WHATSAPP: "Deve haver pelo menos um WhatsApp padrão.",
         ERR_NO_DEF_WAPP_FOUND:
