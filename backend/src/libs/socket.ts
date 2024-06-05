@@ -42,14 +42,14 @@ export const initIO = (httpServer: Server): SocketIO => {
       tokenData = verify(token as string, authConfig.secret);
       logger.debug(tokenData, "io-onConnection: tokenData");
     } catch (error) {
-      logger.error(error, "Error decoding token");
+      logger.debug(`Error decoding token: ${error?.message}`);
       socket.disconnect();
       return io;
     }
     const counters = new CounterManager();
 
     let user: User = null;
-    let userId = tokenData.id;
+    const userId = tokenData.id;
 
     if (userId && userId !== "undefined" && userId !== "null") {
       user = await User.findByPk(userId, { include: [Queue] });
@@ -69,6 +69,10 @@ export const initIO = (httpServer: Server): SocketIO => {
 
     socket.join(`company-${user.companyId}-mainchannel`);
     socket.join(`user-${user.id}`);
+    
+    if (user.super) {
+      socket.join("super");
+    }
 
     socket.on("joinChatBox", async (ticketId: string) => {
       if (!ticketId || ticketId === "undefined") {
@@ -78,8 +82,8 @@ export const initIO = (httpServer: Server): SocketIO => {
         (ticket) => {
           if (ticket && ticket.companyId === user.companyId
             && (ticket.userId === user.id || user.profile === "admin")) {
-            let c: number;
-            if ((c = counters.incrementCounter(`ticket-${ticketId}`)) === 1) {
+            const c = counters.incrementCounter(`ticket-${ticketId}`);
+            if (c === 1) {
               socket.join(ticketId);
             }
             logger.debug(`joinChatbox[${c}]: Channel: ${ticketId} by user ${user.id}`)
@@ -98,18 +102,18 @@ export const initIO = (httpServer: Server): SocketIO => {
         return;
       }
 
-      let c: number;
       // o último que sair apaga a luz
-
-      if ((c = counters.decrementCounter(`ticket-${ticketId}`)) === 0) {
+      const c = counters.decrementCounter(`ticket-${ticketId}`);
+      if (c === 0) {
         socket.leave(ticketId);
       }
+
       logger.debug(`leaveChatbox[${c}]: Channel: ${ticketId} by user ${user.id}`)
     });
 
 	  socket.on("joinNotification", async () => {
-      let c: number;
-      if ((c = counters.incrementCounter("notification")) === 1) {
+      const c = counters.incrementCounter("notification");
+      if (c === 1) {
   		  if (user.profile === "admin") {
   			  socket.join(`company-${user.companyId}-notification`);
   		  } else {
@@ -123,8 +127,8 @@ export const initIO = (httpServer: Server): SocketIO => {
 	  });
 	  
 	  socket.on("leaveNotification", async () => {
-      let c: number;
-      if ((c = counters.decrementCounter("notification")) === 0) {
+      const c = counters.decrementCounter("notification");
+      if (c === 0) {
         if (user.profile === "admin") {
           socket.leave(`company-${user.companyId}-notification`);
         } else {
@@ -166,7 +170,9 @@ export const initIO = (httpServer: Server): SocketIO => {
         }
       }
     });
-	  
+    
+    socket.emit("ready");
+    return io;
   });
   return io;
 };

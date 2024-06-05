@@ -3,11 +3,11 @@ import { QueryInterface } from "sequelize";
 module.exports = {
   up: (queryInterface: QueryInterface) => {
     return Promise.all([
-      queryInterface.addConstraint("Queues", ["color", "companyId"], {
+      queryInterface.addConstraint("Queues", { fields: ["color", "companyId"],
         name: "Queues_color_key",
         type: 'unique'
       }),
-      queryInterface.addConstraint("Queues", ["name", "companyId"], {
+      queryInterface.addConstraint("Queues", { fields: ["name", "companyId"],
         name: "Queues_name_key",
         type: 'unique'
       }),

@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>ticketz</title>
 		<link
 			rel="stylesheet"
 			href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
@@ -15,6 +14,45 @@
 			name="viewport"
 			content="minimum-scale=1, initial-scale=1, width=device-width"
 		/>
+		
+	  <style>
+	    /* Basic styles for the splash screen */
+	    #splash-screen {
+	      position: fixed;
+	      top: 0;
+	      left: 0;
+	      width: 100%;
+	      height: 100%;
+	      display: flex;
+	      flex-direction: column;
+	      justify-content: center;
+	      align-items: center;
+	      background-color: #808080; /* 50% grey */
+	      z-index: 9999;
+	    }
+	
+	    .progress-bar {
+	      width: 80%;
+	      height: 20px;
+	      background-color: #d3d3d3; /* light grey */
+	      border-radius: 10px;
+	      overflow: hidden;
+	    }
+	
+	    .progress {
+	      height: 100%;
+	      background-color: #000000; /* black */
+	      width: 0;
+	      transition: width 0.2s;
+	    }
+	
+	    #loading-text {
+	      margin-top: 10px;
+	      font-size: 18px;
+	      color: #ffffff; /* white */
+	    }
+	  </style>
+
 		<!-- Issue workaround for React v16. -->
 		<script>
 			// See https://github.com/facebook/react/issues/20829#issuecomment-802088260
@@ -22,7 +60,37 @@
 		</script>
 	</head>
 	<body>
-		<noscript>You need to enable JavaScript to run this app.</noscript>
-		<div id="root"></div>
+	  <div id="splash-screen">
+	    <div class="progress-bar">
+	      <div class="progress" id="progress-bar"></div>
+	    </div>
+	  </div>
+	  <div id="root"></div>
+	<script>
+		// Simulate progress update
+		progress = 0;
+		const progressBar = document.getElementById('progress-bar');
+		const interval = setInterval(() => {
+		  if (progress < 50) {
+		    progress += 10;
+		  } else if (progress < 80) {
+		    progress += 3;
+		  } else if (progress < 99) {
+		    progress += ( (99-progress) / 20 );
+		  }
+		  progressBar.style.width = progress + '%';
+		  
+		  if (progress >= 100) {
+        clearInterval(interval);
+		    setTimeout(() => {
+          const splashScreen = document.getElementById('splash-screen');
+          splashScreen.remove();
+		    }, 500);
+		  }
+		}, 1000);
+    window.finishProgress=() => {
+      progress = 100;
+    }
+	</script>	  
 	</body>
 </html>

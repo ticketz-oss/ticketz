@@ -2,7 +2,7 @@ import AppError from "../../errors/AppError";
 import Help from "../../models/Help";
 
 interface Data {
-  id: number | string;
+  id: number;
   title: string;
   description?: string;
   video?: string;

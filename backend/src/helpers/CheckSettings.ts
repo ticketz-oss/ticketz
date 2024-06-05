@@ -3,7 +3,11 @@ import AppError from "../errors/AppError";
 
 const CheckSettings = async (key: string): Promise<string> => {
   const setting = await Setting.findOne({
-    where: { key }
+    where:
+     {
+       companyId: 1,
+       key
+     }
   });
 
   if (!setting) {

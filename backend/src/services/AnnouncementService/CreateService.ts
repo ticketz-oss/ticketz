@@ -3,10 +3,10 @@ import AppError from "../../errors/AppError";
 import Announcement from "../../models/Announcement";
 
 interface Data {
-  priority: string;
+  priority: number;
   title: string;
   text: string;
-  status: string;
+  status: boolean;
   companyId: number;
 }
 

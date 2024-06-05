@@ -15,14 +15,13 @@ import formatBody from "../../helpers/Mustache";
 import Queue from "../../models/Queue";
 import Message from "../../models/Message";
 import FindOrCreateTicketServiceMeta from "../TicketServices/FindOrCreateTicketServiceMeta";
-import { isNumeric, sleep, validaCpfCnpj, verifyRating } from "../WbotServices/wbotMessageListener";
+import { verifyRating } from "../WbotServices/wbotMessageListener";
 import moment from "moment";
 import UserRating from "../../models/UserRating";
 import { isNil, isNull, head } from "lodash";
 import TicketTraking from "../../models/TicketTraking";
 import { getIO } from "../../libs/socket";
 import FindOrCreateATicketTrakingService from "../TicketServices/FindOrCreateATicketTrakingService";
-import puppeteer from "puppeteer";
 import Setting from "../../models/Setting";
 
 import { sendFacebookMessageFileExternal, sendFacebookMessageMediaExternal } from "../FacebookServices/sendFacebookMessageMedia";

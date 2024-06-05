@@ -2,13 +2,14 @@ import * as Yup from "yup";
 
 import AppError from "../../errors/AppError";
 import Schedule from "../../models/Schedule";
+import Contact from "../../models/Contact";
 
 interface Request {
   body: string;
-  sendAt: string;
-  contactId: number | string;
-  companyId: number | string;
-  userId?: number | string;
+  sendAt: Date;
+  contactId: number;
+  companyId: number;
+  userId?: number;
 }
 
 const CreateService = async ({
@@ -25,7 +26,7 @@ const CreateService = async ({
 
   try {
     await schema.validate({ body, sendAt });
-  } catch (err: any) {
+  } catch (err) {
     throw new AppError(err.message);
   }
 
@@ -36,11 +37,13 @@ const CreateService = async ({
       contactId,
       companyId,
       userId,
-      status: 'PENDENTE'
+      status: "PENDENTE"
     }
   );
 
-  await schedule.reload();
+  await schedule.reload({
+    include: [{ model: Contact, as: "contact" }]
+  });
 
   return schedule;
 };

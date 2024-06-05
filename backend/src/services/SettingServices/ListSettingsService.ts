@@ -1,16 +1,24 @@
+import { Op, WhereOptions } from "sequelize";
 import Setting from "../../models/Setting";
+import User from "../../models/User";
 
 interface Request {
+  isSuper: boolean,
   companyId: number;
 }
 
 const ListSettingsService = async ({
-  companyId
+  isSuper, companyId
 }: Request): Promise<Setting[] | undefined> => {
-  const settings = await Setting.findAll({
-    where: {
-      companyId
+  const where: WhereOptions = { companyId };
+  if (!isSuper) {
+    where.key = {
+      [Op.notLike]: "\\_%"
     }
+  }
+  
+  const settings = await Setting.findAll({
+    where
   });
 
   return settings;

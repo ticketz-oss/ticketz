@@ -44,6 +44,6 @@ module.exports = {
   },
 
   down: (queryInterface: QueryInterface) => {
-    return queryInterface.dropTable("Plans");
+    return queryInterface.dropTable("TicketNotes");
   }
 };

@@ -6,6 +6,7 @@ interface Request {
 
 const FindAllPlanService = async (companyId: number): Promise<Invoices[]> => {
   const invoice = await Invoices.findAll({
+    attributes: [ "id", "detail", "value", "dueDate", "status", "createdAt", "updatedAt" ],
     where: {
       companyId
     }, 

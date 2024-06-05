@@ -1,0 +1,78 @@
+version: '3'
+
+networks:
+  ticketz:
+
+volumes:
+  postgres_data:
+  redis_data:
+  backend_public:
+  backend_private:
+
+services:
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
+    volumes:
+      - backend_public:/usr/src/app/public
+      - backend_private:/usr/src/app/private
+    env_file:
+      - .env-backend-cloudflare
+    restart: always
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - ticketz
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+    env_file:
+      - .env-frontend-cloudflare
+    restart: always
+    depends_on:
+      - backend
+    networks:
+      - ticketz
+
+  postgres:
+    image: postgres:16-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-ticketz}
+      - POSTGRES_DB=${POSTGRES_DB:-ticketz}
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - TZ=${TZ:-America/Sao_Paulo}
+    expose:
+      - 5432
+    restart: always
+    networks:
+      - ticketz
+
+  redis:
+    image: redis:alpine
+    command: redis-server --appendonly yes
+    expose:
+      - 6379
+    restart: always
+    volumes:
+      - redis_data:/data
+    networks:
+      - ticketz
+
+  cloudflared:
+    image: cloudflare/cloudflared
+    restart: always
+    command: tunnel run
+    env_file:
+      - .env-cloudflared
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - ticketz

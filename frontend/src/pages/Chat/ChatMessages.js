@@ -251,8 +251,6 @@ export default function ChatMessages({
     setLoading(true);
     e.preventDefault();
 
-    const currentChat = JSON.parse(localStorage.getItem("currentChat"));
-
     const formData = new FormData();
     formData.append("fromMe", true);
     medias.forEach((media) => {
@@ -261,7 +259,7 @@ export default function ChatMessages({
     });
 
     try {
-      await api.post(`/chats/${currentChat.id}/messages`, formData);
+      await api.post(`/chats/${chat.id}/messages`, formData);
     } catch (err) {
       console.log(err);
       toastError(err);
@@ -295,8 +293,6 @@ export default function ChatMessages({
         return;
       }
 
-      const currentChat = JSON.parse(localStorage.getItem("currentChat"));
-
       const formData = new FormData();
       const filename = `audio-${new Date().getTime()}.mp3`;
 
@@ -304,9 +300,7 @@ export default function ChatMessages({
       formData.append("body", filename);
       formData.append("fromMe", true);
 
-      await api.post(`/chats/${currentChat.id}/messages`, formData);
-
-      // await api.post(`/messages/${ticketId}`, formData);
+      await api.post(`/chats/${chat.id}/messages`, formData);
     } catch (err) {
       toastError(err);
     }

@@ -342,7 +342,6 @@ const messages = {
           users: "Usuários",
           settings: "Configurações",
           helps: "Ajuda",
-          about: "Sobre o ticketz",
           messagesAPI: "API",
           schedules: "Agendamentos",
           campaigns: "Campanhas",
@@ -360,6 +359,10 @@ const messages = {
           },
           user: {
             profile: "Perfil",
+            darkmode: "Modo escuro",
+            lightmode: "Modo claro",
+            language: "Selecionar idioma",
+            about: "Sobre",
             logout: "Sair",
           },
         },
@@ -635,14 +638,17 @@ const messages = {
         title: "Central de Ajuda",
       },
       about: {
+        aboutthe: "Sobre o",
+        copyright: "© 2024 - Funcionando com ticketz",
+        buttonclose: "Fechar",
         title: "Sobre o ticketz",
         abouttitle: "Origem e melhorias",
-        aboutdetail: "ticketz é derivado indireto do projeto Whaticket com melhorias compartilhadas pelos desenvolvedores do sistema EquipeChat através do canal VemFazer no youtube, posteriormente melhoradas por Claudemir Todo Bom",
+        aboutdetail: "O ticketz é derivado indireto do projeto Whaticket com melhorias compartilhadas pelos desenvolvedores do sistema EquipeChat através do canal VemFazer no youtube, posteriormente melhoradas por Claudemir Todo Bom",
         aboutauthorsite: "Site do autor",
         aboutwhaticketsite: "Site do Whaticket Community no Github",
         aboutvemfazersite: "Site do canal Vem Fazer no Github",
         licenseheading: "Licença em Código Aberto",
-        licensedetail: "Ticketz está licenciado sob a GNU Affero General Public License versão 3, isso significa que qualquer usuário que tiver acesso a esta aplicação tem o direito de obter acesso ao código fonte. Mais informações nos links abaixo:",
+        licensedetail: "O ticketz está licenciado sob a GNU Affero General Public License versão 3, isso significa que qualquer usuário que tiver acesso a esta aplicação tem o direito de obter acesso ao código fonte. Mais informações nos links abaixo:",
         licensefulltext: "Texto completo da licença",
         licensesourcecode: "Código fonte do ticketz"
       },
@@ -717,6 +723,8 @@ const messages = {
         placeholderClosed:
           "Reabra ou aceite esse ticket para enviar uma mensagem.",
         signMessage: "Assinar",
+        replying: "Respondendo",
+        editing: "Editando",
       },
       message: {
         edited: "Editada"
@@ -805,6 +813,15 @@ const messages = {
           "Esta cor já está em uso, escolha outra.",
         ERR_WAPP_GREETING_REQUIRED:
           "A mensagem de saudação é obrigatório quando há mais de uma fila.",
+      },
+      ticketz: {
+        support: {
+          title: "Apoie o projeto Ticketz",
+          mercadopagotitle: "Cartão de Crédito",
+          recurringbrl: "Doação recorrente em R$",
+          paypaltitle: "Cartão de Crédito",
+          international: "Internacional em US$",
+        }
       },
     },
   },

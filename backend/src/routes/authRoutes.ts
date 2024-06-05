@@ -6,7 +6,6 @@ import envTokenAuth from "../middleware/envTokenAuth";
 
 const authRoutes = Router();
 
-authRoutes.post("/signup", envTokenAuth, UserController.store);
 authRoutes.post("/login", SessionController.store);
 authRoutes.post("/refresh_token", SessionController.update);
 authRoutes.delete("/logout", isAuth, SessionController.remove);

@@ -30,20 +30,20 @@ const SendWhatsAppMessage = async ({
   if (quotedMsg) {
 
 
-      const chatMessages = await Message.findOne({
+      const chatMessage = await Message.findOne({
         where: {
           id: quotedMsg.id
         }
       });
 
-      if (chatMessages) {
-        const msgFound = JSON.parse(chatMessages.dataJson);
+      if (chatMessage) {
+        const msgFound = JSON.parse(chatMessage.dataJson);
 
         options = {
           quoted: {
-            key: msgFound.key,
+            key: msgFound?.key || chatMessage.id,
             message: {
-              extendedTextMessage: msgFound.message.extendedTextMessage
+              extendedTextMessage: msgFound?.message.extendedTextMessage
             }
           }
         };

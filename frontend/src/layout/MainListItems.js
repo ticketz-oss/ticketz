@@ -176,7 +176,7 @@ const MainListItems = (props) => {
 
     socket.on(`company-${companyId}-chat`, onCompanyChatMainListItems);
     return () => {
-	    socket.off(`company-${companyId}-chat`, onCompanyChatMainListItems);
+	    socket.disconnect();
     };
   }, [socketManager]);
 
@@ -271,52 +271,6 @@ const MainListItems = (props) => {
               primary={i18n.t("mainDrawer.listItems.tickets")}
               icon={<WhatsAppIcon />}
             />
-            <ListItem
-            dense
-            button
-            onClick={() => setOpenKanbanSubmenu((prev) => !prev)}
-          >
-            <ListItemIcon>
-              <LoyaltyRoundedIcon />
-            </ListItemIcon>
-            <ListItemText
-              primary={i18n.t("mainDrawer.listItems.kanban")}
-            />
-            {openKanbanSubmenu ? (
-              <ExpandLessIcon />
-            ) : (
-              <ExpandMoreIcon />
-            )}
-          </ListItem>
-          <Collapse
-            style={{ paddingLeft: 15 }}
-            in={openKanbanSubmenu}
-            timeout="auto"
-            unmountOnExit
-          >
-            <List dense component="div" disablePadding>
-              <ListItem onClick={() => history.push("/kanban")} button>
-                <ListItemIcon>
-                  <ListIcon />
-                </ListItemIcon>
-                <ListItemText primary={i18n.t("kanban.subMenus.list")}/>
-              </ListItem>
-              <ListItem
-                onClick={() => history.push("/tagsKanban")}
-                button
-              >
-                <ListItemIcon>
-                  <CalendarToday />
-                </ListItemIcon>
-                <ListItemText primary={i18n.t("kanban.subMenus.tags")} />
-              </ListItem>                
-            </List>
-          </Collapse>
-          {/* <ListItemLink
-            to="/kanban"
-            primary="Kanban"
-            icon={<LoyaltyRoundedIcon />}
-          /> */}
       <ListItemLink
         to="/todolist"
         primary={i18n.t("Tarefas")}
@@ -355,11 +309,6 @@ const MainListItems = (props) => {
               to="/helps"
               primary={i18n.t("mainDrawer.listItems.helps")}
               icon={<HelpOutlineIcon />}
-            />
-            <ListItemLink
-              to="/about"
-              primary={i18n.t("mainDrawer.listItems.about")}
-              icon={<InfoIcon />}
             />
           </>
         </>

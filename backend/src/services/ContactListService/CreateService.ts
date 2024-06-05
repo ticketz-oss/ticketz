@@ -4,11 +4,11 @@ import ContactList from "../../models/ContactList";
 
 interface Data {
   name: string;
-  companyId: number | string;
+  companyId: number;
 }
 
 const CreateService = async (data: Data): Promise<ContactList> => {
-  const { name, companyId } = data;
+  const { name } = data;
 
   const ticketnoteSchema = Yup.object().shape({
     name: Yup.string()

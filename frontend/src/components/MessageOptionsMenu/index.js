@@ -12,7 +12,7 @@ import { EditMessageContext } from "../../context/EditingMessage/EditingMessageC
 import toastError from "../../errors/toastError";
 import MessageHistoryModal from "../MessageHistoryModal";
 
-const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
+const MessageOptionsMenu = ({ message, data, menuOpen, handleClose, anchorEl }) => {
 	const { setReplyingMessage } = useContext(ReplyMessageContext);
  	const editingContext = useContext(EditMessageContext);
  	const setEditingMessage = editingContext ? editingContext.setEditingMessage : null;
@@ -48,6 +48,8 @@ const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
 		handleClose();
 	}
 
+  const isSticker = data?.message && ("stickerMessage" in data.message);
+
 	return (
 		<>
 			<ConfirmationModal
@@ -82,11 +84,12 @@ const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
 					<MenuItem key="delete" onClick={handleOpenConfirmationModal}>
 						{i18n.t("messageOptionsMenu.delete")}
 					</MenuItem>,
-					<MenuItem key="edit" onClick={handleEditMessage}>
+          !isSticker && (
+					  <MenuItem key="edit" onClick={handleEditMessage}>
 			            {i18n.t("messageOptionsMenu.edit")}
-         			</MenuItem>
-				]}
-				{message.oldMessages?.length > 0 && (
+         		</MenuItem>
+			    )]}
+				{!isSticker && message.oldMessages?.length > 0 && (
 					<MenuItem key="history" onClick={handleOpenMessageHistoryModal}>
 	                    {i18n.t("messageOptionsMenu.history")}
 				    </MenuItem>

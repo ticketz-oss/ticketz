@@ -28,23 +28,33 @@ const CreateMessageService = async ({
 }: Request): Promise<Message> => {
 	await Message.upsert({ ...messageData, companyId });
 
-	const message = await Message.findByPk(messageData.id, {
+	const message = await Message.findOne({
+    where: {
+      id: messageData.id,
+      companyId
+    },
 		include: [
 			"contact",
 			{
 				model: Ticket,
 				as: "ticket",
-				include: ["contact", "queue"]
+				include: ["contact", "queue", "whatsapp"]
 			},
-			{
-				model: Message,
-				as: "quotedMsg",
-				include: ["contact"]
-			},
-			{
-				model: OldMessage,
-				as: "oldMessages"
-			}
+      {
+        model: Message, as: "quotedMsg",
+        include: ["contact"],
+        where: {
+          companyId
+        },
+        required: false,
+      },
+      {
+        model: OldMessage, as: "oldMessages",
+        where: {
+          ticketId: messageData.ticketId,
+        },
+        required: false,
+      },
 		]
 	});
 

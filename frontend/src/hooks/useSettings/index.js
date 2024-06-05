@@ -1,4 +1,4 @@
-import api from "../../services/api";
+import api, { openApi } from "../../services/api";
 
 const useSettings = () => {
 
@@ -19,10 +19,19 @@ const useSettings = () => {
         });
         return responseData;
     }
+    
+    const getPublicSetting = async (key) => {
+        const { data } = await openApi.request({
+            url: `/public-settings/${key}`,
+            method: 'GET'
+        });
+        return data;
+    }
 
     return {
-		getAll,
-        update
+		  getAll,
+		  getPublicSetting,
+      update
     }
 }
 

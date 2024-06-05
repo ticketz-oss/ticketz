@@ -1,0 +1,89 @@
+name: Create and publish multi-arch Docker images
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'fix/**'
+      - 'dev'
+      - 'dev/**'
+    tags:
+      - 'v*.*.*'
+env:
+  REGISTRY: ghcr.io
+  IMAGE_BACKEND: ticketz-oss/ticketz-backend
+  IMAGE_FRONTEND: ticketz-oss/ticketz-frontend
+
+jobs:
+  build-and-push-images:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker meta Backend
+        id: metabackend
+        uses: docker/metadata-action@v3
+        with:
+          images: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_BACKEND }}
+          labels: |
+            org.opencontainers.image.title=ticketz-backend
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
+
+      - name: Docker meta Frontend
+        id: metafrontend
+        uses: docker/metadata-action@v3
+        with:
+          images: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_FRONTEND }}
+          labels: |
+            org.opencontainers.image.title=ticketz-frontend
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
+
+      - name: Build and push backend Docker image
+        id: backend
+        uses: docker/build-push-action@v2
+        with:
+          context: ./backend
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.metabackend.outputs.tags }}
+          labels: ${{ steps.metabackend.outputs.labels }}
+
+      - name: Build and push frontend Docker image
+        id: frontend
+        uses: docker/build-push-action@v2
+        with:
+          context: ./frontend
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.metafrontend.outputs.tags }}
+          labels: ${{ steps.metafrontend.outputs.labels }}

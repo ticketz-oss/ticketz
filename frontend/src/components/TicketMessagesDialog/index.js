@@ -141,10 +141,7 @@ export default function TicketMessagesDialog({ open, handleClose, ticketId }) {
 
       onReturn = () => {
         if (socket !== null) {
-          socket.emit("leaveChatBox", `${ticket.id}`);
-          socket.off("connect", onConnectTicketMessagesDialog);
-          socket.off(`company-${companyId}-ticket`, onCompanyTicketMessagesDialog);
-          socket.off(`company-${companyId}-contact`, onCompanyContactMessagesDialog);
+          socket.disconnect();
         }
       }
 

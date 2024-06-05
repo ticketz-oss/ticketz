@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { Mutex } from "async-mutex";
 import { getIO } from "../libs/socket";
 import Ticket from "../models/Ticket";
 
@@ -9,7 +10,6 @@ import ShowTicketUUIDService from "../services/TicketServices/ShowTicketFromUUID
 import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import UpdateTicketService from "../services/TicketServices/UpdateTicketService";
 import ListTicketsServiceKanban from "../services/TicketServices/ListTicketsServiceKanban";
-import { Mutex } from "async-mutex";
 
 
 type IndexQuery = {
@@ -135,8 +135,6 @@ export const kanban = async (req: Request, res: Response): Promise<Response> => 
 
   });
 
-  //console.log("ticket controller 82");
-  
   return res.status(200).json({ tickets, count, hasMore });
 };
 
@@ -191,11 +189,12 @@ export const update = async (
 
   const mutex = new Mutex();
   const { ticket } = await mutex.runExclusive(async () => {
-    return await UpdateTicketService({
+    const result = await UpdateTicketService({
       ticketData: req.body,
-      ticketId,
+      ticketId: Number.parseInt(ticketId, 10),
       tokenData: req.tokenData
     });
+    return result;
   });
 
   return res.status(200).json(ticket);

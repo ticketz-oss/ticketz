@@ -23,16 +23,17 @@ import {
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
+import { useTheme } from "@material-ui/core";
 import Container from "@material-ui/core/Container";
-import logo from "../../assets/vector/logo.svg";
 import { i18n } from "../../translate/i18n";
 
 import { openApi } from "../../services/api";
 import toastError from "../../errors/toastError";
-import moment from "moment";
 
 import ReCAPTCHA from "react-google-recaptcha";
 import config from "../../services/config";
+import useSettings from "../../hooks/useSettings";
+import { getBackendURL } from "../../services/config";
 
 const Copyright = () => {
 	return (
@@ -65,6 +66,13 @@ const useStyles = makeStyles(theme => ({
 	submit: {
 		margin: theme.spacing(3, 0, 2),
 	},
+	
+  logoImg: {
+    width: "100%",
+    margin: "0 auto",
+    content: "url(" + (theme.mode === "light" ? theme.calculatedLogoLight() : theme.calculatedLogoDark()) + ")"
+  }
+	
 }));
 
 const UserSchema = Yup.object().shape({
@@ -77,8 +85,12 @@ const UserSchema = Yup.object().shape({
 });
 
 const SignUp = () => {
+  const theme = useTheme();
 	const classes = useStyles();
 	const history = useHistory();
+  const { getPublicSetting } = useSettings();
+  const [allowSignup, setAllowSignup] = useState(false);
+
 	let companyId = null
 
 	const params = qs.parse(window.location.search)
@@ -89,7 +101,6 @@ const SignUp = () => {
 	const initialState = { name: "", email: "", phone: "", password: "", planId: "", };
 
 	const [user] = useState(initialState);
-	const dueDate = moment().add(3, "day").format();
 
 	const handleSignUp = async (values) => {
 		if (config.RECAPTCHA_SITE_KEY) {
@@ -97,7 +108,6 @@ const SignUp = () => {
 		}
 		
 		Object.assign(values, { recurrence: "MENSAL" });
-		Object.assign(values, { dueDate: dueDate });
 		Object.assign(values, { status: "t" });
 		Object.assign(values, { campaignsEnabled: true });
 		try {
@@ -111,11 +121,11 @@ const SignUp = () => {
 	};
 
 	const [plans, setPlans] = useState([]);
-	const { list: listPlans } = usePlans();
+	const { listPublic: listPublicPlans } = usePlans();
 
 	useEffect(() => {
 		async function fetchData() {
-			const list = await listPlans();
+			const list = await listPublicPlans();
 			setPlans(list);
 		}
 		fetchData();
@@ -123,13 +133,19 @@ const SignUp = () => {
 
 	const captchaRef = useRef(null)
 
+  getPublicSetting("allowSignup").then(
+    (data) => {
+      setAllowSignup(data === "enabled");
+    }
+  )
+
 	return (
 		<Container component="main" maxWidth="xs">
 			<CssBaseline />
 			<div className={classes.paper}>
-				<div>
-					<img style={{ margin: "0 auto", height: "80px", width: "100%" }} src={logo} alt="Whats" />
-				</div>
+        <div>
+          <img className={classes.logoImg} />
+        </div>
 				{/*<Typography component="h1" variant="h5">
 					{i18n.t("signup.title")}
 				</Typography>*/}
@@ -147,6 +163,8 @@ const SignUp = () => {
 				>
 					{({ touched, errors, isSubmitting }) => (
 						<Form className={classes.form}>
+						  { allowSignup && 
+						  <>
 							<Grid container spacing={2}>
 								<Grid item xs={12}>
 									<Field
@@ -235,6 +253,9 @@ const SignUp = () => {
 							>
 								{i18n.t("signup.buttons.submit")}
 							</Button>
+							</>
+							}
+							{ allowSignup || <h2>Cadastro desabilitado!</h2> }
 							<Grid container justify="flex-end">
 								<Grid item>
 									<Link
@@ -252,7 +273,7 @@ const SignUp = () => {
 				</Formik>
 			</div>
 			<Box mt={5}>{/* <Copyright /> */}</Box>
-			{ config.RECAPTCHA_SITE_KEY &&
+			{ config.RECAPTCHA_SITE_KEY && allowSignup &&
 				<ReCAPTCHA
 				  size="invisible"
 				  sitekey={ config.RECAPTCHA_SITE_KEY }

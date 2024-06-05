@@ -140,7 +140,7 @@ const Users = () => {
     socket.on(`company-${companyId}-user`, onCompanyUser);
 
     return () => {
-      socket.off(`company-${companyId}-user`, onCompanyUser);
+      socket.disconnect();
     };
   }, [socketManager]);
 

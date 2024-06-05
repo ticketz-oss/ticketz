@@ -9,6 +9,7 @@ export const createAccessToken = (user: User): string => {
     {
       username: user.name,
       profile: user.profile,
+      super: user.super,
       id: user.id,
       companyId: user.companyId
     },

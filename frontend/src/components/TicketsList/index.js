@@ -256,10 +256,7 @@ const TicketsList = ({
     socket.on(`company-${companyId}-contact`, onContact);
 
     return () => {
-      socket.off("connect", onConnect);
-      socket.off(`company-${companyId}-ticket`, onTicket);
-      socket.off(`company-${companyId}-appMessage`, onAppMessage);  
-      socket.off(`company-${companyId}-contact`, onContact);
+      socket.disconnect();
     };
   }, [status, showAll, user, selectedQueueIds, socketManager]);
 

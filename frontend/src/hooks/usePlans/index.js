@@ -20,6 +20,15 @@ const usePlans = () => {
         return data;
     }
 
+    const listPublic = async (params) => {
+        const { data } = await api.request({
+            url: '/plans/listpublic',
+            method: 'GET',
+            params
+        });
+        return data;
+    }
+
     const finder = async (id) => {
         const { data } = await api.request({
             url: `/plans/${id}`,
@@ -57,6 +66,7 @@ const usePlans = () => {
     return {
         getPlanList,
         list,
+        listPublic,
         save,
         update,
         finder,

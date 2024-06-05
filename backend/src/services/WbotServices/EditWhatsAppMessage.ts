@@ -11,15 +11,21 @@ import formatBody from "../../helpers/Mustache";
 
 interface Request {
   messageId: string;
+  companyId: number;
   body: string;
 }
 
 const EditWhatsAppMessage = async ({
   messageId,
+  companyId,
   body,
 }: Request): Promise<{ ticketId: number , message: Message}> => {
   
-  const message = await Message.findByPk(messageId, {
+  const message = await Message.findOne({
+    where: {
+      id: messageId,
+      companyId
+    },
     include: [
       {
         model: Ticket,
@@ -40,21 +46,51 @@ const EditWhatsAppMessage = async ({
   const msg = JSON.parse(message.dataJson);
   
   try {
-	await wbot.sendMessage(message.remoteJid, {
-	  text: body,
-	  edit: msg.key,
-	},{});
-	
+    await wbot.sendMessage(message.remoteJid, {
+      text: body,
+      edit: msg.key,
+    }, {});
+
     const oldMessage = {
-      messageId: messageId,
-      body: message.body
-	}
+      messageId,
+      body: message.body,
+      ticketId: message.ticketId,
+    }
 
     await OldMessage.upsert(oldMessage);
 
-	message.update({ body: body, isEdited: true});
+    await message.update({ body, isEdited: true });
+
+    const savedMessage = await Message.findOne({
+      where: {
+        id: messageId,
+        companyId
+      },
+      include: [
+        {
+          model: Ticket,
+          as: "ticket",
+          include: ["contact"]
+        },
+        {
+          model: Message, as: "quotedMsg",
+          include: ["contact"],
+          where: {
+            companyId
+          },
+          required: false,
+        },
+        {
+          model: OldMessage, as: "oldMessages",
+          where: {
+            ticketId: message.ticketId,
+          },
+          required: false,
+        },
+      ]
+    });
 	
-    return { ticketId: message.ticketId , message: message };
+    return { ticketId: savedMessage.ticketId , message: savedMessage };
   } catch (err) {
 	console.log(err);
     throw new AppError("ERR_EDITING_WAPP_MSG");
