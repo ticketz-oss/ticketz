@@ -9,8 +9,6 @@ import makeWASocket, {
   isJidBroadcast,
   CacheStore
 } from "@whiskeysockets/baileys";
-import makeWALegacySocket from "@whiskeysockets/baileys";
-import P from "pino";
 
 import { Boom } from "@hapi/boom";
 import MAIN_LOGGER from "@whiskeysockets/baileys/lib/Utils/logger";
