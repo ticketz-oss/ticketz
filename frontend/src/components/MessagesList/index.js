@@ -221,6 +221,15 @@ const useStyles = makeStyles((theme) => ({
     borderBottomRightRadius: 8,
   },
   
+  messageVideo: {
+    width: 250,
+    maxHeight: 445,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+  },
+  
   messageMediaSticker: {
     backgroundColor: "unset",
     boxShadow: "unset",
@@ -502,7 +511,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     if (message.mediaType === "video") {
       return (
         <video
-          className={classes.messageMedia}
+          className={classes.messageVideo}
           src={message.mediaUrl}
           controls
         />
