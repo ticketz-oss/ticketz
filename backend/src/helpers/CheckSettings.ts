@@ -17,4 +17,21 @@ const CheckSettings = async (key: string, defaultValue: string = null ): Promise
   return setting?.value || defaultValue;
 };
 
+export const GetCompanySetting = async (companyId: number, key: string, defaultValue: string = null ): Promise<string> => {
+  const setting = await Setting.findOne({
+    where:
+     {
+       companyId,
+       key
+     }
+  });
+
+  if (!setting && !defaultValue) {
+    throw new AppError("ERR_NO_SETTING_FOUND", 404);
+  }
+
+  return setting?.value || defaultValue;
+};
+
+
 export default CheckSettings;
