@@ -107,7 +107,7 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
           // retryRequestDelayMs: 250,
           // keepAliveIntervalMs: 1000 * 60 * 10 * 3,
           msgRetryCounterCache,
-          syncFullHistory: true,
+          // syncFullHistory: true,
           generateHighQualityLinkPreview: true,
           userDevicesCache,
           shouldIgnoreJid: jid => isJidBroadcast(jid) || jid?.endsWith("@newsletter"),
