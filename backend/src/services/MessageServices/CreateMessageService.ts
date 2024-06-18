@@ -2,6 +2,7 @@ import { getIO } from "../../libs/socket";
 import Message from "../../models/Message";
 import OldMessage from "../../models/OldMessage";
 import Ticket from "../../models/Ticket";
+import Whatsapp from "../../models/Whatsapp";
 import { logger } from "../../utils/logger";
 
 interface MessageData {
@@ -38,7 +39,14 @@ const CreateMessageService = async ({
 			{
 				model: Ticket,
 				as: "ticket",
-				include: ["contact", "queue", "whatsapp"]
+        include: [
+          "contact",
+          "queue",
+          {
+            model: Whatsapp,
+            as: "whatsapp",
+            attributes: ["name", "id"]
+          }]
 			},
       {
         model: Message, as: "quotedMsg",
