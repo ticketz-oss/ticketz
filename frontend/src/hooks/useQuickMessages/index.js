@@ -28,11 +28,10 @@ const useQuickMessages = () => {
         return data;
     }
 
-    const list = async (params) => {
+    const list = async () => {
         const { data } = await api.request({
             url: '/quick-messages/list',
             method: 'GET',
-            params
         });
         return data;
     }
