@@ -1,16 +1,16 @@
 import { Op } from "sequelize";
 import QuickMessage from "../../models/QuickMessage";
 import Company from "../../models/Company";
-import CheckSettings, { GetCompanySetting } from "../../helpers/CheckSettings";
+import { GetCompanySetting } from "../../helpers/CheckSettings";
 
 type Params = {
-  companyId: string;
-  userId: string;
+  companyId: number;
+  userId: number;
 };
 
 type QuickMessageWhere = {
-  companyId: string;
-  userId?: string;
+  companyId: number;
+  userId?: number;
 }
 
 const FindService = async ({ companyId, userId }: Params): Promise<QuickMessage[]> => {
@@ -18,7 +18,7 @@ const FindService = async ({ companyId, userId }: Params): Promise<QuickMessage[
     companyId,
   } 
 
-  const quickMessagesSetting = await GetCompanySetting(parseInt(companyId,10), "quickMessages","individual"); 
+  const quickMessagesSetting = await GetCompanySetting(companyId, "quickMessages","individual"); 
 
   if (quickMessagesSetting === "individual") {
     where.userId = userId
