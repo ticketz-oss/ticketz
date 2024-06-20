@@ -1604,7 +1604,7 @@ const handleMessage = async (
               `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"
               }`,
               {
-                text: whatsapp.greetingMessage
+                text: formatBody(whatsapp.greetingMessage, contact, ticket)
               }
             );
           },
