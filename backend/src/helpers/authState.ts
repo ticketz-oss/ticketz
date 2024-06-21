@@ -15,7 +15,7 @@ const authState = async (
   const whatsappId = whatsapp.id;
 
   const saveKey = async (type: string, key: string, value: any) => {
-    logger.debug({type, key, value}, "Storing key");
+    logger.debug(`Storing key whatsappId: ${whatsappId} type: ${type} key: ${key}`);
     return BaileysKeys.upsert({ whatsappId, type, key, value: JSON.stringify(value)});
   }
   
@@ -28,7 +28,7 @@ const authState = async (
       }
     });
 
-    logger.debug({type, key, baileysKey}, "Recovering key");
+    logger.debug(`${baileysKey ? "Successfull" : "Failed"} recover of key whatsappId: ${whatsappId} type: ${type} key: ${key}`);
 
     return baileysKey?.value ? JSON.parse(baileysKey.value) : null;
   }
@@ -61,13 +61,23 @@ const authState = async (
     
     // conversion from old format (remove in the future)
     if (Object.keys(keys).length) {
-      logger.debug({keys}, "Converting keys to new format");
+      logger.debug("Starting conversion of keys to new format");
+      const TYPE_MAP = {
+        "preKeys": "pre-key",
+        "sessions": "session",
+        "senderKeys": "sender-key",
+        "appStateSyncKeys": "app-state-sync-key",
+        "appStateVersions": "app-state-sync-version",
+        "senderKeyMemory": "sender-key-memory"
+      };
+      
       // eslint-disable-next-line no-restricted-syntax
-      for await (const type of Object.keys(keys)) {
-        logger.debug(`Converting keys of type ${type}`);
+      for await (const oldType of Object.keys(keys)) {
+        const newType=TYPE_MAP[oldType];
+        logger.debug(`Converting keys of type ${oldType} to ${newType}`);
         // eslint-disable-next-line no-restricted-syntax
-        for await (const key of Object.keys(keys[type])) {
-          await saveKey(type, key, keys[type][key]);
+        for await (const key of Object.keys(keys[oldType])) {
+          await saveKey(newType, key, keys[oldType][key]);
         }
       }
       saveState();
@@ -85,11 +95,10 @@ const authState = async (
           const data: { [_: string]: SignalDataTypeMap[typeof type] } = {};
 
           // eslint-disable-next-line no-restricted-syntax
-          for (const id of ids) {
+          for await (const id of ids) {
             try {
-              // eslint-disable-next-line no-await-in-loop
               let value = await getKey(type, id);
-              if (type === "app-state-sync-key") {
+              if (value && type === "app-state-sync-key") {
                 value = proto.Message.AppStateSyncKeyData.fromObject(value);
               }
               data[id] = value;
