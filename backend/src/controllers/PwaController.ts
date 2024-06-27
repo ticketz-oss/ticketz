@@ -23,8 +23,8 @@ export const manifest = async (req: Request, res: Response): Promise<Response> =
     "short_name": appName || "TIcketz",
     "name": appName || "Ticketz - Chat Based Ticket System",
     "icons": [{
-      "src": logoFavicon || "/favicon.ico",
-      "sizes": "192x192 64x64 32x32 24x24 16x16",
+      "src": logoFavicon ? `/backend/${logoFavicon}` : "/favicon.ico",
+      "sizes": "512x512 192x192 64x64 32x32 24x24 16x16",
       "type": mimeFavicon
     }],
     "start_url": ".",
