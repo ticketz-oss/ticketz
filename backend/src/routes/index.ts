@@ -28,6 +28,7 @@ import invoiceRoutes from "./invoicesRoutes";
 import subscriptionRoutes from "./subScriptionRoutes";
 import webHookMetaRoutes from "./WebHookMetaRoutes";
 import ticketTagRoutes from "./ticketTagRoutes";
+import pwaRoutes from "./pwaRoutes";
 
 const routes = Router();
 
@@ -59,6 +60,7 @@ routes.use(chatRoutes);
 routes.use(subscriptionRoutes);
 routes.use(invoiceRoutes);
 routes.use(ticketTagRoutes);
+routes.use(pwaRoutes);
 routes.use("/webhook/fb", webHookMetaRoutes);
 
 
