@@ -221,6 +221,15 @@ const useStyles = makeStyles((theme) => ({
     borderBottomRightRadius: 8,
   },
   
+  messageVideo: {
+    width: 250,
+    maxHeight: 445,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+  },
+  
   messageMediaSticker: {
     backgroundColor: "unset",
     boxShadow: "unset",
@@ -502,7 +511,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     if (message.mediaType === "video") {
       return (
         <video
-          className={classes.messageMedia}
+          className={classes.messageVideo}
           src={message.mediaUrl}
           controls
         />
@@ -635,8 +644,9 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
   };
 
   const vCard = (message) => {
-    const name = message?.substring(message.indexOf("N:;") + 3, message.indexOf(";;;"))
-    const description = message?.substring(message.indexOf("TION:") + 5, message.indexOf("TEL"))
+    const name = message?.substring(message.indexOf("\nN:;") + 4, message.indexOf(";;;"));
+    const telLine = message?.substring(message.indexOf("\nTEL;") + 5);
+    const description = telLine.substring(telLine.indexOf(":") + 1, telLine.indexOf("\n"));
     return (
       <div>
         <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: 20, marginBottom: 20 }}>
@@ -668,7 +678,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
 
         </div>
         <div style={{
-          width: '100%', display: 'flex',
+          width: '100%', display: 'none',
           justifyContent: 'center',
           alignItems: 'center',
           marginTop: 20,

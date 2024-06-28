@@ -536,6 +536,10 @@ export const verifyEditedMessage = async (
       editedText = msg.conversation
       break;
     }
+    case "extendedTextMessage": {
+      editedText = msg.extendedTextMessage.text;
+      break;
+    }
     case "imageMessage": {
       editedText = msg.imageMessage.caption;
       break;
@@ -1382,7 +1386,11 @@ const handleMessage = async (
 
     if (hasMedia) {
       await verifyMediaMessage(msg, ticket, contact);
+    } else if (msg.message?.editedMessage?.message?.protocolMessage?.editedMessage) {
+      // message edited by Whatsapp App
+      await verifyEditedMessage(msg.message.editedMessage.message.protocolMessage.editedMessage, ticket, msg.message.editedMessage.message.protocolMessage.key.id);
     } else if (msg.message?.protocolMessage?.editedMessage) {
+      // message edited by Whatsapp Web
       await verifyEditedMessage(msg.message.protocolMessage.editedMessage, ticket, msg.message.protocolMessage.key.id);
     } else if (msg.message?.protocolMessage?.type === 0) {
       await verifyDeleteMessage(msg.message.protocolMessage, ticket);
@@ -1597,7 +1605,7 @@ const handleMessage = async (
               `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"
               }`,
               {
-                text: whatsapp.greetingMessage
+                text: formatBody(whatsapp.greetingMessage, contact, ticket)
               }
             );
           },

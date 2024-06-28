@@ -86,6 +86,7 @@ export default function Options(props) {
   const [scheduleType, setScheduleType] = useState("disabled");
   const [callType, setCallType] = useState("enabled");
   const [chatbotType, setChatbotType] = useState("");
+  const [quickMessages, setQuickMessages] = useState("");
   const [allowSignup, setAllowSignup] = useState("disabled");
   const [CheckMsgIsGroup, setCheckMsgIsGroupType] = useState("enabled");
 
@@ -93,6 +94,7 @@ export default function Options(props) {
   const [loadingScheduleType, setLoadingScheduleType] = useState(false);
   const [loadingCallType, setLoadingCallType] = useState(false);
   const [loadingChatbotType, setLoadingChatbotType] = useState(false);
+  const [loadingQuickMessages, setLoadingQuickMessages] = useState(false);
   const [loadingAllowSignup, setLoadingAllowSignup] = useState(false);
   const [loadingCheckMsgIsGroup, setCheckMsgIsGroup] = useState(false);
   const { getCurrentUserInfo } = useAuth();
@@ -132,6 +134,8 @@ export default function Options(props) {
       if (allowSignup) {
         setAllowSignup(allowSignup.value);
       }
+      const quickMessages = settings.find((s) => s.key === "quickMessages");
+      setQuickMessages(quickMessages?.value || "individual");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
@@ -190,6 +194,17 @@ export default function Options(props) {
     });
     toast.success("Operação atualizada com sucesso.");
     setLoadingChatbotType(false);
+  }
+
+  async function handleQuickMessages(value) {
+    setQuickMessages(value);
+    setLoadingQuickMessages(true);
+    await update({
+      key: "quickMessages",
+      value,
+    });
+    toast.success("Operação atualizada com sucesso.");
+    setLoadingQuickMessages(false);
   }
 
   async function handleAllowSignup(value) {
@@ -318,6 +333,26 @@ export default function Options(props) {
             </Select>
             <FormHelperText>
               {loadingChatbotType && "Atualizando..."}
+            </FormHelperText>
+          </FormControl>
+        </Grid>
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="quickmessages-label">
+              Mensagens Rápidas
+            </InputLabel>
+            <Select
+              labelId="quickmessages-label"
+              value={quickMessages}
+              onChange={async (e) => {
+                handleQuickMessages(e.target.value);
+              }}
+            >
+              <MenuItem value={"company"}>Por empresa</MenuItem>
+              <MenuItem value={"individual"}>Por usuário</MenuItem>
+            </Select>
+            <FormHelperText>
+              {loadingQuickMessages && "Atualizando..."}
             </FormHelperText>
           </FormControl>
         </Grid>
