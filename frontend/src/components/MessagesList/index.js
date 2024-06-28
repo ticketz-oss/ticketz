@@ -319,7 +319,51 @@ const useStyles = makeStyles((theme) => ({
     width: '100%',
     height: 80,
     borderRadius: 5
-  }
+  },
+  
+  '@global': {
+    '@keyframes wave': {
+      '0%, 60%, 100%': {
+        transform: 'initial',
+      },
+      '30%': {
+        transform: 'translateY(-15px)',
+      },
+    },
+  },
+  wave: {
+    position: 'relative',
+    textAlign: 'center',
+    height: "30px",
+    marginTop: "10px",
+    marginLeft: 'auto',
+    marginRight: 'auto',
+  },
+  dot: {
+    display: "inline-block",
+    width: "7px",
+    height: "7px",
+    borderRadius: "50%",
+    marginRight: "3px",
+    background: "#303131",
+    animation: "wave 1.3s linear infinite",
+    "&:nth-child(2)": {
+      animationDelay: "-1.1s",
+    },
+    "&:nth-child(3)": {
+      animationDelay: "-0.9s",
+    }
+  },
+  '@keyframes wave': {
+    '0%, 60%, 100%': {
+      transform: 'initial',
+    },
+    '30%': {
+      transform: 'translateY(-15px)',
+    },
+  },  
+  
+  
 }));
 
 const reducer = (state, action) => {
@@ -383,6 +427,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const messageOptionsMenuOpen = Boolean(anchorEl);
   const currentTicketId = useRef(ticketId);
+  const [contactPresence, setContactPresence] = useState("available");
 
   const socketManager = useContext(SocketContext);
 
@@ -452,6 +497,12 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     }
 
     socket.on(`company-${companyId}-appMessage`, onAppMessage);
+
+    socket.on(`company-${companyId}-contact`, (data) => {
+      if (data?.contact?.id === ticket.contact.id && data.action === "update") {
+        setContactPresence(data?.contact?.presence || "available");
+      }
+    });
 
     return () => {
       socket.disconnect();
@@ -868,6 +919,15 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
         onScroll={handleScroll}
       >
         {messagesList.length > 0 ? renderMessages() : []}
+        {contactPresence === "composing" && (
+          <div className={classes.messageLeft}>
+            <div className={classes.wave}>
+                <span className={classes.dot}></span>
+                <span className={classes.dot}></span>
+                <span className={classes.dot}></span>
+            </div>
+          </div>
+        )}
       </div>
       {ticket?.channel !== "whatsapp" || ticket.channel === undefined && (
         <div
