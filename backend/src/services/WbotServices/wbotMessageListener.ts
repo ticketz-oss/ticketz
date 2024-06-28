@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import path, { join } from "path";
 import { promisify } from "util";
 import fs, { writeFile } from "fs";
