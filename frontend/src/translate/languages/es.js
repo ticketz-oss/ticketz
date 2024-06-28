@@ -159,6 +159,7 @@ const messages = {
           email: "Correo electrónico",
           extraName: "Nombre del campo",
           extraValue: "Valor",
+          disableBot: "Desativar bot de conversa",
         },
         buttons: {
           addExtraInfo: "Agregar información",

@@ -160,6 +160,7 @@ const messages = {
           email: "Email",
           extraName: "Nome do campo",
           extraValue: "Valor",
+          disableBot: "Desabilitar chatbot",
         },
         buttons: {
           addExtraInfo: "Adicionar informação",
