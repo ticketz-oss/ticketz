@@ -768,6 +768,13 @@ const messages = {
 				close: "Close",
 				title: "Message edit history"
 			},
+			presence: {
+			  unavailable: "Unavailable",
+			  available: "Available",
+			  composing: "Composing...",
+			  recording: "Recording...",
+			  paused: "Paused",
+			},
 			backendErrors: {
 				ERR_NO_OTHER_WHATSAPP: "There must be at least one default WhatsApp.",
 				ERR_NO_DEF_WAPP_FOUND: "No default WhatsApp found. Check the connections page.",

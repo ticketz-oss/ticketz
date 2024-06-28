@@ -66,6 +66,9 @@ const CreateMessageService = async ({
 		]
 	});
 
+  await message.ticket.contact.update({ presence: "available" });
+  await message.ticket.contact.reload();
+
 	if (message.ticket.queueId !== null && message.queueId === null) {
 		await message.update({ queueId: message.ticket.queueId });
 	}
@@ -86,6 +89,12 @@ const CreateMessageService = async ({
 			ticket: message.ticket,
 			contact: message.ticket.contact
 		});
+
+  io.to(`company-${companyId}-mainchannel`)
+    .emit(`company-${companyId}-contact`, {
+        action: "update",
+        contact: message.ticket.contact
+    });
 	logger.debug(
 		{
 			company: companyId,
