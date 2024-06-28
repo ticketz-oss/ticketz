@@ -21,7 +21,6 @@ import { getIO } from "./socket";
 import { Store } from "./store";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
 import DeleteBaileysService from "../services/BaileysServices/DeleteBaileysService";
-import Contact from "../models/Contact";
 
 const loggerBaileys = MAIN_LOGGER.child({});
 loggerBaileys.level = "error";
@@ -253,7 +252,9 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
             }
           }
         );
-        wsocket.ev.on("creds.update", saveCreds);
+        wsocket.ev.on("creds.update", saveState);
+
+        store.bind(wsocket.ev);
       })();
     } catch (error) {
       Sentry.captureException(error);
