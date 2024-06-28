@@ -65,8 +65,6 @@ const ContactSchema = Yup.object().shape({
 
 const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 	const classes = useStyles();
-	const isMounted = useRef(true);
-	const [disableBot, setDisableBot] = useState(false);
 
 	const initialState = {
 		name: "",
@@ -76,12 +74,6 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 	};
 
 	const [contact, setContact] = useState(initialState);
-
-	useEffect(() => {
-		return () => {
-			isMounted.current = false;
-		};
-	}, []);
 
 	useEffect(() => {
 		const fetchContact = async () => {
@@ -95,9 +87,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 
 			try {
 				const { data } = await api.get(`/contacts/${contactId}`);
-				if (isMounted.current) {
-					setContact(data);
-				}
+  			setContact(data);
 			} catch (err) {
 				toastError(err);
 			}
@@ -114,10 +104,10 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 	const handleSaveContact = async values => {
 		try {
 			if (contactId) {
-				await api.put(`/contacts/${contactId}`, {...values, disableBot});
+				await api.put(`/contacts/${contactId}`, values);
 				handleClose();
 			} else {
-				const { data } = await api.post("/contacts", {...values, disableBot});
+				const { data } = await api.post("/contacts", values);
 				if (onSave) {
 					onSave(data);
 				}
@@ -195,9 +185,9 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 									control={
 										<Switch
 											size="small"
-											checked={disableBot}
+											checked={values.disableBot}
 											onChange={() =>
-												setDisableBot((prevState) => !prevState)
+                        setContact({ ...values, disableBot: !values.disableBot })
 											}
 											name="disableBot"
 											color="primary"
