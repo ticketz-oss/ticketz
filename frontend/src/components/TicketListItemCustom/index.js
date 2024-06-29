@@ -522,11 +522,11 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
                 variant="body2"
                 color="textSecondary"
               >
-              {ticket.contact?.presence !== "available" ? (
-                <span className={classes.presence}>
-                  {i18n.t(`presence.${ticket.contact.presence}`)}
-                </span>
-              ) : (
+                {["composing", "recording"].includes(ticket.contact?.presence) ? (
+                  <span className={classes.presence}>
+                    {i18n.t(`presence.${ticket.contact.presence}`)}
+                  </span>
+                ) : (
                 <>
                   {ticket.lastMessage.includes('data:image/png;base64') ? <MarkdownWrapper> Localização</MarkdownWrapper> : <MarkdownWrapper>{ticket.lastMessage}</MarkdownWrapper>}
                 </>
