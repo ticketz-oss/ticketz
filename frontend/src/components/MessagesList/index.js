@@ -330,6 +330,39 @@ const useStyles = makeStyles((theme) => ({
         transform: 'translateY(-15px)',
       },
     },
+    '@keyframes quiet': {
+      '25%': {
+        transform: 'scaleY(.6)'
+      },
+      '50%': {
+        transform: 'scaleY(.4)',
+      },
+      '75%': {
+        transform: 'scaleY(.8)',
+      }
+    },
+    '@keyframes normal': {
+      '25%': {
+        transform: 'scaleY(.1)'
+      },
+      '50%': {
+        transform: 'scaleY(.4)',
+      },
+      '75%': {
+        transform: 'scaleY(.6)',
+      }
+    },
+    '@keyframes loud': {
+      '25%': {
+        transform: 'scaleY(1)'
+      },
+      '50%': {
+        transform: 'scaleY(.4)',
+      },
+      '75%': {
+        transform: 'scaleY(1.2)',
+      }
+    },
   },
   wave: {
     position: 'relative',
@@ -345,7 +378,7 @@ const useStyles = makeStyles((theme) => ({
     height: "7px",
     borderRadius: "50%",
     marginRight: "3px",
-    background: "#303131",
+    background: theme.mode === 'light' ? "#303030" : "#ffffff",
     animation: "wave 1.3s linear infinite",
     "&:nth-child(2)": {
       animationDelay: "-1.1s",
@@ -354,16 +387,46 @@ const useStyles = makeStyles((theme) => ({
       animationDelay: "-0.9s",
     }
   },
-  '@keyframes wave': {
-    '0%, 60%, 100%': {
-      transform: 'initial',
-    },
-    '30%': {
-      transform: 'translateY(-15px)',
-    },
-  },  
-  
-  
+
+  wavebarsContainer: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    height: "30px",
+    marginTop: "5px",
+    marginBottom: "5px",
+    marginLeft: "auto",
+    marginRight: "auto",
+    "--boxSize": "5px",
+    "--gutter": "4px",
+    width: "calc((var(--boxSize) + var(--gutter)) * 5)",
+  },
+
+  wavebars: {
+    transform: "scaleY(.4)",
+    height: "100%",
+    width: "var(--boxSize)",
+    animationDuration: "1.2s",
+    backgroundColor: theme.mode === 'light' ? "#303030" : "#ffffff",
+    animationTimingFunction: 'ease-in-out',
+    animationIterationCount: 'infinite',
+    borderRadius: '8px',
+  },
+
+  wavebar1: {
+    animationName: 'quiet'
+  },
+  wavebar2: {
+    animationName: 'normal'
+  },
+  wavebar3: {
+    animationName: 'quiet'
+  },
+  wavebar4: {
+    animationName: 'loud'
+  },
+  wavebar5: {
+    animationName: 'quiet'
+  }  
 }));
 
 const reducer = (state, action) => {
@@ -925,6 +988,17 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                 <span className={classes.dot}></span>
                 <span className={classes.dot}></span>
                 <span className={classes.dot}></span>
+            </div>
+          </div>
+        )}
+        {contactPresence === "recording" && (
+          <div className={classes.messageLeft}>
+            <div className={classes.wavebarsContainer}>
+                <div className={clsx(classes.wavebars, classes.wavebar1)}></div>
+                <div className={clsx(classes.wavebars, classes.wavebar2)}></div>
+                <div className={clsx(classes.wavebars, classes.wavebar3)}></div>
+                <div className={clsx(classes.wavebars, classes.wavebar4)}></div>
+                <div className={clsx(classes.wavebars, classes.wavebar5)}></div>
             </div>
           </div>
         )}
