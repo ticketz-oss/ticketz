@@ -483,7 +483,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
   const [pageNumber, setPageNumber] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
-  const lastMessageRef = useRef();
+  const scrollRef = useRef();
 
   const [selectedMessage, setSelectedMessage] = useState({});
   const [selectedMessageData, setSelectedMessageData] = useState({});
@@ -564,8 +564,16 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     socket.on(`company-${companyId}-appMessage`, onAppMessage);
 
     socket.on(`company-${companyId}-presence`, (data) => {
+      const { scrollTop, clientHeight, scrollHeight } = scrollRef.current;
+      console.log({ presence: data.presence, scrollTop, clientHeight, scrollHeight});
+      const isAtBottom = scrollTop + clientHeight >= (scrollHeight - clientHeight/4);
+      setContactPresence(data.presence);
       if (data?.ticketId === ticket.id) {
-        setContactPresence(data.presence);
+        if ([ "composing", "recording"].includes(data.presence)) {
+          if (isAtBottom) {
+            scrollToBottom();
+          }
+        }
       }
     });
 
@@ -579,8 +587,8 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
   };
 
   const scrollToBottom = () => {
-    if (lastMessageRef.current) {
-      lastMessageRef.current.scrollIntoView({});
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   };
 
@@ -704,7 +712,6 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
       return (
         <div
           key={`ref-${message.createdAt}`}
-          ref={lastMessageRef}
           style={{ float: "left", clear: "both" }}
         />
       );
@@ -982,6 +989,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
         id="messagesList"
         className={classes.messagesList}
         onScroll={handleScroll}
+        ref={scrollRef}
       >
         {messagesList.length > 0 ? renderMessages() : []}
         {contactPresence === "composing" && (
