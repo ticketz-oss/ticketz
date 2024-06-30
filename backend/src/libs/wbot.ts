@@ -262,7 +262,14 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
           "presence.update",
           async ({ id: remoteJid, presences }) => {
             try {
-              logger.debug({ id, presences }, "Received contact presence");
+              logger.debug(
+                { remoteJid, presences },
+                "Received contact presence"
+              );
+              if (!presences[remoteJid]?.lastKnownPresence) {
+                console.debug("Received invalid presence");
+                return;
+              }
               const contact = await Contact.findOne({
                 where: {
                   number: remoteJid.replace(/\D/g, ""),
@@ -289,9 +296,14 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
               }
             } catch (error) {
               logger.error(
-                { error, id, presences },
+                { remoteJid, presences },
                 "presence.update: error processing"
               );
+              if (error instanceof Error) {
+                logger.error(`Error: ${error.name} ${error.message}`);
+              } else {
+                logger.error(`Error was object of type: ${typeof error}`);
+              }
             }
           }
         );
