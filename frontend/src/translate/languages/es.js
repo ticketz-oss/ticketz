@@ -159,6 +159,7 @@ const messages = {
           email: "Correo electrónico",
           extraName: "Nombre del campo",
           extraValue: "Valor",
+          disableBot: "Desativar bot de conversa",
         },
         buttons: {
           addExtraInfo: "Agregar información",
@@ -773,6 +774,13 @@ const messages = {
 		  close: "Cerrar",
 		  title: "Historial de edición del mensaje"
 	  },
+    presence: {
+      unavailable: "Indisponible",
+      available: "Disponible",
+      composing: "Componiendo",
+      recording: "Grabando",
+      paused: "Pausado",
+    },
       backendErrors: {
         ERR_NO_OTHER_WHATSAPP: "Debe haber al menos un WhatsApp predeterminado.",
         ERR_NO_DEF_WAPP_FOUND:

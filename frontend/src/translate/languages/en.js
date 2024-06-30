@@ -154,6 +154,7 @@ const messages = {
 					email: "Email",
 					extraName: "Field Name",
 					extraValue: "Value",
+					disableBot: "Disable chatbot",
 				},
 				buttons: {
 					addExtraInfo: "Add Information",
@@ -767,6 +768,13 @@ const messages = {
 			messageHistoryModal: {
 				close: "Close",
 				title: "Message edit history"
+			},
+			presence: {
+			  unavailable: "Unavailable",
+			  available: "Available",
+			  composing: "Composing...",
+			  recording: "Recording...",
+			  paused: "Paused",
 			},
 			backendErrors: {
 				ERR_NO_OTHER_WHATSAPP: "There must be at least one default WhatsApp.",

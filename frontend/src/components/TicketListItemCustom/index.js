@@ -146,7 +146,10 @@ const useStyles = makeStyles((theme) => ({
     "& .MuiBadge-anchorOriginTopRightRectangle": {
       transform: "scale(1) translate(0%, -40%)",
     },
-
+  },
+  presence: {
+    color: theme.mode === 'light' ? "green" : "lightgreen",
+    fontWeight: "bold",
   }
 }));
 
@@ -162,10 +165,6 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
   const { setCurrentTicket } = useContext(TicketsContext);
   const { user } = useContext(AuthContext);
   const { profile } = user;
-
-  useEffect(() => {
-    
-  }, []);
 
   useEffect(() => {
     if (ticket.userId && ticket.user) {
@@ -522,8 +521,16 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
                 component="span"
                 variant="body2"
                 color="textSecondary"
-              > {ticket.lastMessage.includes('data:image/png;base64') ? <MarkdownWrapper> Localização</MarkdownWrapper> : <MarkdownWrapper>{ticket.lastMessage}</MarkdownWrapper>}
-                {/* {ticket.lastMessage === "" ? <br /> : <MarkdownWrapper>{ticket.lastMessage}</MarkdownWrapper>} */}
+              >
+                {["composing", "recording"].includes(ticket.contact?.presence) ? (
+                  <span className={classes.presence}>
+                    {i18n.t(`presence.${ticket.contact.presence}`)}
+                  </span>
+                ) : (
+                <>
+                  {ticket.lastMessage.includes('data:image/png;base64') ? <MarkdownWrapper> Localização</MarkdownWrapper> : <MarkdownWrapper>{ticket.lastMessage}</MarkdownWrapper>}
+                </>
+              )}
               </Typography>
               <ListItemSecondaryAction style={{ left: 73 }}>
                 <Box className={classes.ticketInfo1}>{renderTicketInfo()}</Box>
