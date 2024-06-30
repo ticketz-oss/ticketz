@@ -156,6 +156,7 @@ const messages = {
                     email: "Email",
                     extraName: "Nama Bidang",
                     extraValue: "Nilai",
+                    disableBot: "Nonaktifkan chatbot",
                 },
                 buttons: {
                     addExtraInfo: "Tambah Informasi",
@@ -772,6 +773,13 @@ const messages = {
             messageHistoryModal: {
                 close: "Tutup",
                 title: "Riwayat edit pesan"
+            },
+            presence: {
+                unavailable: "Tidak tersedia",
+                available: "Tersedia",
+                composing: "Menulis...",
+                recording: "Merekam...",
+                paused: "Jeda",
             },
             backendErrors: {
                 ERR_NO_OTHER_WHATSAPP: "Harus ada setidaknya satu WhatsApp default.",
