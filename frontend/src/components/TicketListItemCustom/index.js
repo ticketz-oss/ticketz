@@ -522,9 +522,9 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
                 variant="body2"
                 color="textSecondary"
               >
-                {["composing", "recording"].includes(ticket.contact?.presence) ? (
+                {["composing", "recording"].includes(ticket?.presence) ? (
                   <span className={classes.presence}>
-                    {i18n.t(`presence.${ticket.contact.presence}`)}
+                    {i18n.t(`presence.${ticket.presence}`)}
                   </span>
                 ) : (
                 <>

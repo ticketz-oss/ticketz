@@ -205,7 +205,7 @@ const useStyles = makeStyles((theme) => ({
     overflowWrap: "break-word",
     padding: "3px 80px 6px 6px",
   },
-  
+
   textContentItemEdited: {
     overflowWrap: "break-word",
     padding: "3px 120px 6px 6px",
@@ -220,7 +220,7 @@ const useStyles = makeStyles((theme) => ({
     borderBottomLeftRadius: 8,
     borderBottomRightRadius: 8,
   },
-  
+
   messageVideo: {
     width: 250,
     maxHeight: 445,
@@ -229,7 +229,7 @@ const useStyles = makeStyles((theme) => ({
     borderBottomLeftRadius: 8,
     borderBottomRightRadius: 8,
   },
-  
+
   messageMediaSticker: {
     backgroundColor: "unset",
     boxShadow: "unset",
@@ -242,7 +242,7 @@ const useStyles = makeStyles((theme) => ({
     right: 5,
     color: theme.mode === 'light' ? "#999" : "#d0d0d0"
   },
-  
+
   timestampStickerLeft: {
     backgroundColor: theme.mode === 'light' ? "#ffffff" : "#024481",
     borderRadius: 8,
@@ -262,7 +262,7 @@ const useStyles = makeStyles((theme) => ({
     paddingBottom: 0,
     boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000"
   },
-  
+
   dailyTimestamp: {
     alignItems: "center",
     textAlign: "center",
@@ -320,7 +320,7 @@ const useStyles = makeStyles((theme) => ({
     height: 80,
     borderRadius: 5
   },
-  
+
   '@global': {
     '@keyframes wave': {
       '0%, 60%, 100%': {
@@ -426,16 +426,16 @@ const useStyles = makeStyles((theme) => ({
   },
   wavebar5: {
     animationName: 'quiet'
-  }  
+  }
 }));
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_MESSAGES") {
     const messages = action.payload;
     const newMessages = [];
-    
+
     messages.forEach((message) => {
-      
+
       const messageIndex = state.findIndex((m) => m.id === message.id);
       if (messageIndex !== -1) {
         state[messageIndex] = message;
@@ -544,26 +544,28 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     const onConnect = () => {
       socket.emit("joinChatBox", `${ticket.id}`);
     }
-	
-  	socketManager.onConnect(onConnect);
+
+    socketManager.onConnect(onConnect);
 
     const onAppMessage = (data) => {
-	  console.log("AppMessage", data);
-      if (data.action === "create" && data.message.ticketId === currentTicketId.current) {
-        dispatch({ type: "ADD_MESSAGE", payload: data.message });
-        scrollToBottom();
-      }
+      if (data.message.ticketId === currentTicketId.current) {
+        setContactPresence("available");
+        if (data.action === "create") {
+          dispatch({ type: "ADD_MESSAGE", payload: data.message });
+          scrollToBottom();
+        }
 
-      if (data.action === "update" && data.message.ticketId === currentTicketId.current) {
-        dispatch({ type: "UPDATE_MESSAGE", payload: data.message });
+        if (data.action === "update") {
+          dispatch({ type: "UPDATE_MESSAGE", payload: data.message });
+        }
       }
     }
 
     socket.on(`company-${companyId}-appMessage`, onAppMessage);
 
-    socket.on(`company-${companyId}-contact`, (data) => {
-      if (data?.contact?.id === ticket.contact.id && data.action === "update") {
-        setContactPresence(data?.contact?.presence || "available");
+    socket.on(`company-${companyId}-presence`, (data) => {
+      if (data?.ticketId === ticket.id) {
+        setContactPresence(data.presence);
       }
     });
 
@@ -614,7 +616,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
       return <ModalImageCors imageUrl={message.mediaUrl} isDeleted={message.isDeleted} data={data} />;
     }
     if (message.mediaType === "audio") {
-    
+
       return (
         <audio controls>
           <source src={message.mediaUrl} type="audio/ogg"></source>
@@ -665,7 +667,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     }
     if (message.ack === 4) {
       return <DoneAll fontSize="small" className={classes.ackDoneReadIcon} />;
-	}
+    }
   };
 
   const renderDailyTimestamps = (message, index) => {
@@ -725,7 +727,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
   const renderQuotedMessage = (message) => {
     const data = JSON.parse(message.quotedMsg.dataJson);
     const thumbnail = data?.message?.imageMessage?.jpegThumbnail;
-    const stickerUrl = data?.message?.stickerMessage && message.quotedMsg?.mediaUrl ;
+    const stickerUrl = data?.message?.stickerMessage && message.quotedMsg?.mediaUrl;
     const imageUrl = thumbnail ? "data:image/png;base64, " + thumbnail : stickerUrl;
     return (
       <div
@@ -746,8 +748,8 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
           )}
           {message.quotedMsg?.body}
         </div>
-        { imageUrl && (
-          <img className={classes.quotedThumbnail} src={ imageUrl } />
+        {imageUrl && (
+          <img className={classes.quotedThumbnail} src={imageUrl} />
         )}
       </div>
     );
@@ -832,113 +834,113 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
 
 
   const renderMessages = () => {
-      const viewMessagesList = messagesList.map((message, index) => {
-        const data = JSON.parse(message.dataJson);
-        const isSticker = data?.message && ("stickerMessage" in data.message); 
-        if (!message.fromMe) {
-          return (
-            <React.Fragment key={message.id}>
-              {renderDailyTimestamps(message, index)}
-              {renderMessageDivider(message, index)}
-              <div
-                className={[clsx(classes.messageLeft, {
-                  [classes.messageMediaSticker] : isSticker,
-                })]}
-                title={message.queueId && message.queue?.name}
+    const viewMessagesList = messagesList.map((message, index) => {
+      const data = JSON.parse(message.dataJson);
+      const isSticker = data?.message && ("stickerMessage" in data.message);
+      if (!message.fromMe) {
+        return (
+          <React.Fragment key={message.id}>
+            {renderDailyTimestamps(message, index)}
+            {renderMessageDivider(message, index)}
+            <div
+              className={[clsx(classes.messageLeft, {
+                [classes.messageMediaSticker]: isSticker,
+              })]}
+              title={message.queueId && message.queue?.name}
+            >
+              <IconButton
+                variant="contained"
+                size="small"
+                id="messageActionsButton"
+                disabled={message.isDeleted}
+                className={classes.messageActionsButton}
+                onClick={(e) => handleOpenMessageOptionsMenu(e, message, data)}
               >
-                <IconButton
-                  variant="contained"
-                  size="small"
-                  id="messageActionsButton"
-                  disabled={message.isDeleted}
-                  className={classes.messageActionsButton}
-                  onClick={(e) => handleOpenMessageOptionsMenu(e, message, data)}
-                >
-                  <ExpandMore />
-                </IconButton>
-                {isGroup && (
-                  <span className={classes.messageContactName}>
-                    {message.contact?.name}
-                  </span>
-                )}
+                <ExpandMore />
+              </IconButton>
+              {isGroup && (
+                <span className={classes.messageContactName}>
+                  {message.contact?.name}
+                </span>
+              )}
 
-                {message.mediaUrl && checkMessageMedia(message, data)}
+              {message.mediaUrl && checkMessageMedia(message, data)}
 
-                {message.body.includes('data:image') ? messageLocation(message.body, message.createdAt)
+              {message.body.includes('data:image') ? messageLocation(message.body, message.createdAt)
+                :
+                isVCard(message.body) ?
+                  <div
+                    className={[clsx(classes.textContentItem, {
+                      [classes.textContentItemEdited]: message.isEdited
+                    }), { marginRight: 0 }]}>
+                    {vCard(message.body)}
+                  </div>
+
                   :
-                  isVCard(message.body) ?
-                    <div
-                      className={[clsx(classes.textContentItem, {
-                        [classes.textContentItemEdited] : message.isEdited
-                      }), { marginRight: 0 }]}>
-                      {vCard(message.body)}
-                    </div>
-
-                    :
 
 
-                    (<div className={[clsx(classes.textContentItem, {
-                        [classes.textContentItemDeleted] : message.isDeleted,
-                        [classes.textContentItemEdited] : message.isEdited
-                    }), ]}>
-                      {message.quotedMsg && renderQuotedMessage(message)}
-                      {message.isDeleted && (
-                        <Block
-                          color="disabled"
-                          fontSize="small"
-                          className={classes.deletedIcon}
-                        />
-                      )}
-                      { !isSticker && (
-                        <MarkdownWrapper>{message.body}</MarkdownWrapper>
-                        )
-                      }
-                      <span className={[clsx(classes.timestamp, {
-                        [classes.timestampStickerLeft] : isSticker
-                      })]}>
-                        {message.isEdited && <span> {i18n.t("message.edited")} </span>}
-                        {format(parseISO(message.createdAt), "HH:mm")}
-                      </span>
-                    </div>)}
-              </div>
-            </React.Fragment>
-          );
-        } else {
-          return (
-            <React.Fragment key={message.id}>
-              {renderDailyTimestamps(message, index)}
-              {renderMessageDivider(message, index)}
-              <div
-                className={[clsx(classes.messageRight, {
-                  [classes.messageMediaSticker] : isSticker,
-                })]}
-                title={message.queueId && message.queue?.name}
-              >
-                <IconButton
-                  variant="contained"
-                  size="small"
-                  id="messageActionsButton"
-                  disabled={message.isDeleted}
-                  className={classes.messageActionsButton}
-                  onClick={(e) => handleOpenMessageOptionsMenu(e, message, data)}
-                >
-                  <ExpandMore />
-                </IconButton>
-                {message.mediaUrl && checkMessageMedia(message, data)}
-                <div
-                  className={clsx(classes.textContentItem, {
+                  (<div className={[clsx(classes.textContentItem, {
                     [classes.textContentItemDeleted]: message.isDeleted,
-                    [classes.textContentItemEdited]: message.isEdited,
-                  })}
-                >
-                  {message.isDeleted && (
-                    <Block
-                      color="disabled"
-                      fontSize="small"
-                      className={classes.deletedIcon}
-                    />
-                  )}
-                  {message.body.includes('data:image') ? messageLocation(message.body, message.createdAt)
+                    [classes.textContentItemEdited]: message.isEdited
+                  }),]}>
+                    {message.quotedMsg && renderQuotedMessage(message)}
+                    {message.isDeleted && (
+                      <Block
+                        color="disabled"
+                        fontSize="small"
+                        className={classes.deletedIcon}
+                      />
+                    )}
+                    {!isSticker && (
+                      <MarkdownWrapper>{message.body}</MarkdownWrapper>
+                    )
+                    }
+                    <span className={[clsx(classes.timestamp, {
+                      [classes.timestampStickerLeft]: isSticker
+                    })]}>
+                      {message.isEdited && <span> {i18n.t("message.edited")} </span>}
+                      {format(parseISO(message.createdAt), "HH:mm")}
+                    </span>
+                  </div>)}
+            </div>
+          </React.Fragment>
+        );
+      } else {
+        return (
+          <React.Fragment key={message.id}>
+            {renderDailyTimestamps(message, index)}
+            {renderMessageDivider(message, index)}
+            <div
+              className={[clsx(classes.messageRight, {
+                [classes.messageMediaSticker]: isSticker,
+              })]}
+              title={message.queueId && message.queue?.name}
+            >
+              <IconButton
+                variant="contained"
+                size="small"
+                id="messageActionsButton"
+                disabled={message.isDeleted}
+                className={classes.messageActionsButton}
+                onClick={(e) => handleOpenMessageOptionsMenu(e, message, data)}
+              >
+                <ExpandMore />
+              </IconButton>
+              {message.mediaUrl && checkMessageMedia(message, data)}
+              <div
+                className={clsx(classes.textContentItem, {
+                  [classes.textContentItemDeleted]: message.isDeleted,
+                  [classes.textContentItemEdited]: message.isEdited,
+                })}
+              >
+                {message.isDeleted && (
+                  <Block
+                    color="disabled"
+                    fontSize="small"
+                    className={classes.deletedIcon}
+                  />
+                )}
+                {message.body.includes('data:image') ? messageLocation(message.body, message.createdAt)
                   :
                   isVCard(message.body) ?
                     <div className={[classes.textContentItem]}>
@@ -946,25 +948,25 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                     </div>
 
                     :
-                  message.quotedMsg && renderQuotedMessage(message)}
-                  { !isSticker && (
-                    <MarkdownWrapper>{message.body}</MarkdownWrapper>
-                    )
-                  }
-                    <span className={[clsx(classes.timestamp, {
-                      [classes.timestampStickerRight] : isSticker
-                    })]}>
-                    {message.isEdited && <span> {i18n.t("message.edited")} </span>}
-                    {format(parseISO(message.createdAt), "HH:mm")}
-                    {renderMessageAck(message)}
-                  </span>
-                </div>
+                    message.quotedMsg && renderQuotedMessage(message)}
+                {!isSticker && (
+                  <MarkdownWrapper>{message.body}</MarkdownWrapper>
+                )
+                }
+                <span className={[clsx(classes.timestamp, {
+                  [classes.timestampStickerRight]: isSticker
+                })]}>
+                  {message.isEdited && <span> {i18n.t("message.edited")} </span>}
+                  {format(parseISO(message.createdAt), "HH:mm")}
+                  {renderMessageAck(message)}
+                </span>
               </div>
-            </React.Fragment>
-          );
-        }
-      });
-      return viewMessagesList;
+            </div>
+          </React.Fragment>
+        );
+      }
+    });
+    return viewMessagesList;
   };
 
   return (
@@ -985,20 +987,20 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
         {contactPresence === "composing" && (
           <div className={classes.messageLeft}>
             <div className={classes.wave}>
-                <span className={classes.dot}></span>
-                <span className={classes.dot}></span>
-                <span className={classes.dot}></span>
+              <span className={classes.dot}></span>
+              <span className={classes.dot}></span>
+              <span className={classes.dot}></span>
             </div>
           </div>
         )}
         {contactPresence === "recording" && (
           <div className={classes.messageLeft}>
             <div className={classes.wavebarsContainer}>
-                <div className={clsx(classes.wavebars, classes.wavebar1)}></div>
-                <div className={clsx(classes.wavebars, classes.wavebar2)}></div>
-                <div className={clsx(classes.wavebars, classes.wavebar3)}></div>
-                <div className={clsx(classes.wavebars, classes.wavebar4)}></div>
-                <div className={clsx(classes.wavebars, classes.wavebar5)}></div>
+              <div className={clsx(classes.wavebars, classes.wavebar1)}></div>
+              <div className={clsx(classes.wavebars, classes.wavebar2)}></div>
+              <div className={clsx(classes.wavebars, classes.wavebar3)}></div>
+              <div className={clsx(classes.wavebars, classes.wavebar4)}></div>
+              <div className={clsx(classes.wavebars, classes.wavebar5)}></div>
             </div>
           </div>
         )}

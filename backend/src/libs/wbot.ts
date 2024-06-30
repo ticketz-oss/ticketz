@@ -22,6 +22,7 @@ import { Store } from "./store";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
 import DeleteBaileysService from "../services/BaileysServices/DeleteBaileysService";
 import Contact from "../models/Contact";
+import Ticket from "../models/Ticket";
 
 const loggerBaileys = MAIN_LOGGER.child({});
 loggerBaileys.level = "error";
@@ -268,21 +269,23 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
                   companyId: whatsapp.companyId
                 }
               });
+              if (!contact) {
+                return;
+              }
+              const ticket = await Ticket.findOne({
+                where: {
+                  contactId: contact.id
+                }
+              });
 
-              if (contact) {
-                await contact.update({
-                  presence: presences[remoteJid].lastKnownPresence
-                });
-
-                await contact.reload();
-
-                io.to(`company-${whatsapp.companyId}-mainchannel`).emit(
-                  `company-${whatsapp.companyId}-contact`,
-                  {
-                    action: "update",
-                    contact
-                  }
-                );
+              if (ticket) {
+                io.to(ticket.id.toString())
+                  .to(`company-${whatsapp.companyId}-${ticket.status}`)
+                  .to(`queue-${ticket.queueId}-${ticket.status}`)
+                  .emit(`company-${whatsapp.companyId}-presence`, {
+                    ticketId: ticket.id,
+                    presence: presences[remoteJid].lastKnownPresence
+                  });
               }
             } catch (error) {
               logger.error(
