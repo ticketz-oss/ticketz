@@ -31,11 +31,15 @@ const SetTicketMessagesAsRead = async (ticket: Ticket): Promise<void> => {
     });
 
     if (getJsonMessage.length > 0) {
-      const lastMessages: proto.IWebMessageInfo = JSON.parse( getJsonMessage[0].dataJson );
+      const lastMessages: proto.IWebMessageInfo = JSON.parse(
+        getJsonMessage[0].dataJson
+      );
       if (lastMessages.key && lastMessages.key.fromMe === false) {
         await (wbot as WASocket).chatModify(
           { markRead: true, lastMessages: [lastMessages] },
-          `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`
+          `${ticket.contact.number}@${
+            ticket.isGroup ? "g.us" : "s.whatsapp.net"
+          }`
         );
       }
     }
@@ -57,11 +61,14 @@ const SetTicketMessagesAsRead = async (ticket: Ticket): Promise<void> => {
   }
 
   const io = getIO();
-  if (companyid){
-    io.to(`company-${companyid}-mainchannel`).emit(`company-${companyid}-ticket`, {
-      action: "updateUnread",
-      ticketId: ticket?.id
-    });
+  if (companyid) {
+    io.to(`company-${companyid}-mainchannel`).emit(
+      `company-${companyid}-ticket`,
+      {
+        action: "updateUnread",
+        ticketId: ticket?.id
+      }
+    );
   }
 
   io.to(ticket.status).to("notification").emit("ticket", {
