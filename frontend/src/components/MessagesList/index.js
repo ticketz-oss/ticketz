@@ -567,8 +567,8 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
       const { scrollTop, clientHeight, scrollHeight } = scrollRef.current;
       console.log({ presence: data.presence, scrollTop, clientHeight, scrollHeight});
       const isAtBottom = scrollTop + clientHeight >= (scrollHeight - clientHeight/4);
-      setContactPresence(data.presence);
       if (data?.ticketId === ticket.id) {
+        setContactPresence(data.presence);
         if ([ "composing", "recording"].includes(data.presence)) {
           if (isAtBottom) {
             scrollToBottom();
