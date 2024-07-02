@@ -22,12 +22,21 @@ import { Store } from "./store";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
 import DeleteBaileysService from "../services/BaileysServices/DeleteBaileysService";
 <<<<<<< HEAD
+<<<<<<< HEAD
 import Contact from "../models/Contact";
 import Ticket from "../models/Ticket";
 =======
 import { cacheLayer } from "./cache";
 import Contact from "../models/Contact";
 >>>>>>> 0ee9f17 (COLOCAR PRESENÇA DO CONTATO NA LISTA DE CONVERSAS)
+=======
+import { cacheLayer } from "./cache";
+import Contact from "../models/Contact";
+=======
+import Contact from "../models/Contact";
+import Ticket from "../models/Ticket";
+>>>>>>> 61662d95e84f35a5f19cedd3fb5447b092cc70c7
+>>>>>>> e4ce0d5027060dcf0a027f8c145808068ca80473
 
 const loggerBaileys = MAIN_LOGGER.child({});
 loggerBaileys.level = "error";
@@ -262,6 +271,35 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
           }
         );
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+        wsocket.ev.on("creds.update", saveCreds);
+
+        wsocket.ev.on("presence.update",async ({ id: remoteJid, presences }) => {
+          try {
+            const contact = await Contact.findOne({
+              where: {
+                number: remoteJid.replace(/\D/g, ""),
+                companyId: whatsapp.companyId
+              }
+            });
+
+            await contact.update({
+              presence: presences[remoteJid].lastKnownPresence
+            });
+
+            await contact.reload();
+
+            io.to(`company-${whatsapp.companyId}-mainchannel`).emit(`company-${whatsapp.companyId}-contact`,
+              {
+                action: "update",
+                contact
+              }
+            );
+          } catch (e) {}
+        });
+=======
+>>>>>>> e4ce0d5027060dcf0a027f8c145808068ca80473
         wsocket.ev.on("creds.update", saveState);
 
         wsocket.ev.on(
@@ -315,6 +353,7 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
         );
 
         store.bind(wsocket.ev);
+<<<<<<< HEAD
 =======
         wsocket.ev.on("creds.update", saveCreds);
 
@@ -342,6 +381,9 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
           } catch (e) {}
         });
 >>>>>>> 0ee9f17 (COLOCAR PRESENÇA DO CONTATO NA LISTA DE CONVERSAS)
+=======
+>>>>>>> 61662d95e84f35a5f19cedd3fb5447b092cc70c7
+>>>>>>> e4ce0d5027060dcf0a027f8c145808068ca80473
       })();
     } catch (error) {
       Sentry.captureException(error);

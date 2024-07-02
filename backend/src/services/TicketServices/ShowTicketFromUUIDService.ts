@@ -16,10 +16,17 @@ const ShowTicketUUIDService = async (uuid: string): Promise<Ticket> => {
         model: Contact,
         as: "contact",
 <<<<<<< HEAD
+<<<<<<< HEAD
         attributes: ["id", "name", "number", "email", "profilePicUrl", "presence", "disableBot"],
 =======
         attributes: ["id", "name", "number", "email", "profilePicUrl", "presence"],
 >>>>>>> 0ee9f17 (COLOCAR PRESENÇA DO CONTATO NA LISTA DE CONVERSAS)
+=======
+        attributes: ["id", "name", "number", "email", "profilePicUrl", "presence"],
+=======
+        attributes: ["id", "name", "number", "email", "profilePicUrl", "presence", "disableBot"],
+>>>>>>> 61662d95e84f35a5f19cedd3fb5447b092cc70c7
+>>>>>>> e4ce0d5027060dcf0a027f8c145808068ca80473
         include: ["extraInfo"]
       },
       {

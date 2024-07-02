@@ -523,11 +523,21 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
                 color="textSecondary"
               >
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+              {ticket.contact?.presence !== "available" ? (
+                <>
+                  {i18n.t(`presence.${ticket.contact.presence}`)}
+                </>
+              ) : (
+=======
+>>>>>>> e4ce0d5027060dcf0a027f8c145808068ca80473
                 {["composing", "recording"].includes(ticket?.presence) ? (
                   <span className={classes.presence}>
                     {i18n.t(`presence.${ticket.presence}`)}
                   </span>
                 ) : (
+<<<<<<< HEAD
 =======
               {ticket.contact?.presence !== "available" ? (
                 <>
@@ -535,6 +545,9 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
                 </>
               ) : (
 >>>>>>> 0ee9f17 (COLOCAR PRESENÇA DO CONTATO NA LISTA DE CONVERSAS)
+=======
+>>>>>>> 61662d95e84f35a5f19cedd3fb5447b092cc70c7
+>>>>>>> e4ce0d5027060dcf0a027f8c145808068ca80473
                 <>
                   {ticket.lastMessage.includes('data:image/png;base64') ? <MarkdownWrapper> Localização</MarkdownWrapper> : <MarkdownWrapper>{ticket.lastMessage}</MarkdownWrapper>}
                 </>

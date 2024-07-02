@@ -66,10 +66,17 @@ const ContactSchema = Yup.object().shape({
 const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 	const classes = useStyles();
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 	const isMounted = useRef(true);
 	const [disableBot, setDisableBot] = useState(false);
 >>>>>>> 92f284d (DESATIVAR O BOT DO CONTATO)
+=======
+	const isMounted = useRef(true);
+	const [disableBot, setDisableBot] = useState(false);
+=======
+>>>>>>> 61662d95e84f35a5f19cedd3fb5447b092cc70c7
+>>>>>>> e4ce0d5027060dcf0a027f8c145808068ca80473
 
 	const initialState = {
 		name: "",
@@ -191,6 +198,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 										<Switch
 											size="small"
 <<<<<<< HEAD
+<<<<<<< HEAD
 											checked={values.disableBot}
 											onChange={() =>
                         setContact({ ...values, disableBot: !values.disableBot })
@@ -199,6 +207,16 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 											onChange={() =>
 												setDisableBot((prevState) => !prevState)
 >>>>>>> 92f284d (DESATIVAR O BOT DO CONTATO)
+=======
+											checked={disableBot}
+											onChange={() =>
+												setDisableBot((prevState) => !prevState)
+=======
+											checked={values.disableBot}
+											onChange={() =>
+                        setContact({ ...values, disableBot: !values.disableBot })
+>>>>>>> 61662d95e84f35a5f19cedd3fb5447b092cc70c7
+>>>>>>> e4ce0d5027060dcf0a027f8c145808068ca80473
 											}
 											name="disableBot"
 											color="primary"

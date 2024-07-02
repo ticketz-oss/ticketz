@@ -1097,12 +1097,18 @@ export const handleRating = async (
 const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, dontReadTheFirstQuestion = false) => {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
   if(ticket.contact.disableBot){
 >>>>>>> 92f284d (DESATIVAR O BOT DO CONTATO)
 =======
   if(!ticket.contact.disableBot){
 >>>>>>> 72cc691 (CORREÇÃO DO DESATIVAR CHATBOT PARA O CONTATO)
+=======
+  if(!ticket.contact.disableBot){
+=======
+>>>>>>> 61662d95e84f35a5f19cedd3fb5447b092cc70c7
+>>>>>>> e4ce0d5027060dcf0a027f8c145808068ca80473
   const queue = await Queue.findByPk(ticket.queueId, {
     include: [
       {
