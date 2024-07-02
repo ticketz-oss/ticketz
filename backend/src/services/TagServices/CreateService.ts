@@ -26,6 +26,10 @@ const CreateService = async ({
     throw new AppError(err.message);
   }
 
+  if (kanban === null) {
+    kanban = 0;
+  }
+
   const [tag] = await Tag.findOrCreate({
     where: { name, color, kanban, companyId },
     defaults: { name, color, kanban, companyId }

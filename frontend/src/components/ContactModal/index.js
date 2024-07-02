@@ -65,8 +65,11 @@ const ContactSchema = Yup.object().shape({
 
 const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 	const classes = useStyles();
+<<<<<<< HEAD
 	const isMounted = useRef(true);
 	const [disableBot, setDisableBot] = useState(false);
+=======
+>>>>>>> 61662d95e84f35a5f19cedd3fb5447b092cc70c7
 
 	const initialState = {
 		name: "",
@@ -76,12 +79,6 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 	};
 
 	const [contact, setContact] = useState(initialState);
-
-	useEffect(() => {
-		return () => {
-			isMounted.current = false;
-		};
-	}, []);
 
 	useEffect(() => {
 		const fetchContact = async () => {
@@ -95,9 +92,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 
 			try {
 				const { data } = await api.get(`/contacts/${contactId}`);
-				if (isMounted.current) {
-					setContact(data);
-				}
+  			setContact(data);
 			} catch (err) {
 				toastError(err);
 			}
@@ -195,9 +190,15 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 									control={
 										<Switch
 											size="small"
+<<<<<<< HEAD
 											checked={disableBot}
 											onChange={() =>
 												setDisableBot((prevState) => !prevState)
+=======
+											checked={values.disableBot}
+											onChange={() =>
+                        setContact({ ...values, disableBot: !values.disableBot })
+>>>>>>> 61662d95e84f35a5f19cedd3fb5447b092cc70c7
 											}
 											name="disableBot"
 											color="primary"

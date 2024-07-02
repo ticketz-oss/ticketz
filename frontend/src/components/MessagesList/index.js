@@ -205,7 +205,7 @@ const useStyles = makeStyles((theme) => ({
     overflowWrap: "break-word",
     padding: "3px 80px 6px 6px",
   },
-  
+
   textContentItemEdited: {
     overflowWrap: "break-word",
     padding: "3px 120px 6px 6px",
@@ -220,7 +220,16 @@ const useStyles = makeStyles((theme) => ({
     borderBottomLeftRadius: 8,
     borderBottomRightRadius: 8,
   },
-  
+
+  messageVideo: {
+    width: 250,
+    maxHeight: 445,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+  },
+
   messageMediaSticker: {
     backgroundColor: "unset",
     boxShadow: "unset",
@@ -233,7 +242,7 @@ const useStyles = makeStyles((theme) => ({
     right: 5,
     color: theme.mode === 'light' ? "#999" : "#d0d0d0"
   },
-  
+
   timestampStickerLeft: {
     backgroundColor: theme.mode === 'light' ? "#ffffff" : "#024481",
     borderRadius: 8,
@@ -253,7 +262,7 @@ const useStyles = makeStyles((theme) => ({
     paddingBottom: 0,
     boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000"
   },
-  
+
   dailyTimestamp: {
     alignItems: "center",
     textAlign: "center",
@@ -310,6 +319,113 @@ const useStyles = makeStyles((theme) => ({
     width: '100%',
     height: 80,
     borderRadius: 5
+  },
+
+  '@global': {
+    '@keyframes wave': {
+      '0%, 60%, 100%': {
+        transform: 'initial',
+      },
+      '30%': {
+        transform: 'translateY(-15px)',
+      },
+    },
+    '@keyframes quiet': {
+      '25%': {
+        transform: 'scaleY(.6)'
+      },
+      '50%': {
+        transform: 'scaleY(.4)',
+      },
+      '75%': {
+        transform: 'scaleY(.8)',
+      }
+    },
+    '@keyframes normal': {
+      '25%': {
+        transform: 'scaleY(.1)'
+      },
+      '50%': {
+        transform: 'scaleY(.4)',
+      },
+      '75%': {
+        transform: 'scaleY(.6)',
+      }
+    },
+    '@keyframes loud': {
+      '25%': {
+        transform: 'scaleY(1)'
+      },
+      '50%': {
+        transform: 'scaleY(.4)',
+      },
+      '75%': {
+        transform: 'scaleY(1.2)',
+      }
+    },
+  },
+  wave: {
+    position: 'relative',
+    textAlign: 'center',
+    height: "30px",
+    marginTop: "10px",
+    marginLeft: 'auto',
+    marginRight: 'auto',
+  },
+  dot: {
+    display: "inline-block",
+    width: "7px",
+    height: "7px",
+    borderRadius: "50%",
+    marginRight: "3px",
+    background: theme.mode === 'light' ? "#303030" : "#ffffff",
+    animation: "wave 1.3s linear infinite",
+    "&:nth-child(2)": {
+      animationDelay: "-1.1s",
+    },
+    "&:nth-child(3)": {
+      animationDelay: "-0.9s",
+    }
+  },
+
+  wavebarsContainer: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    height: "30px",
+    marginTop: "5px",
+    marginBottom: "5px",
+    marginLeft: "auto",
+    marginRight: "auto",
+    "--boxSize": "5px",
+    "--gutter": "4px",
+    width: "calc((var(--boxSize) + var(--gutter)) * 5)",
+  },
+
+  wavebars: {
+    transform: "scaleY(.4)",
+    height: "100%",
+    width: "var(--boxSize)",
+    animationDuration: "1.2s",
+    backgroundColor: theme.mode === 'light' ? "#303030" : "#ffffff",
+    animationTimingFunction: 'ease-in-out',
+    animationIterationCount: 'infinite',
+    borderRadius: '8px',
+  },
+
+  wavebar1: {
+    animationName: 'quiet'
+  },
+  wavebar2: {
+    animationName: 'normal'
+  },
+  wavebar3: {
+    animationName: 'quiet'
+  },
+  wavebar4: {
+    animationName: 'loud'
+  },
+  wavebar5: {
+    animationName: 'quiet'
   }
 }));
 
@@ -317,9 +433,9 @@ const reducer = (state, action) => {
   if (action.type === "LOAD_MESSAGES") {
     const messages = action.payload;
     const newMessages = [];
-    
+
     messages.forEach((message) => {
-      
+
       const messageIndex = state.findIndex((m) => m.id === message.id);
       if (messageIndex !== -1) {
         state[messageIndex] = message;
@@ -367,13 +483,14 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
   const [pageNumber, setPageNumber] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
-  const lastMessageRef = useRef();
+  const scrollRef = useRef();
 
   const [selectedMessage, setSelectedMessage] = useState({});
   const [selectedMessageData, setSelectedMessageData] = useState({});
   const [anchorEl, setAnchorEl] = useState(null);
   const messageOptionsMenuOpen = Boolean(anchorEl);
   const currentTicketId = useRef(ticketId);
+  const [contactPresence, setContactPresence] = useState("available");
 
   const socketManager = useContext(SocketContext);
 
@@ -427,22 +544,38 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     const onConnect = () => {
       socket.emit("joinChatBox", `${ticket.id}`);
     }
-	
-  	socketManager.onConnect(onConnect);
+
+    socketManager.onConnect(onConnect);
 
     const onAppMessage = (data) => {
-	  console.log("AppMessage", data);
-      if (data.action === "create" && data.message.ticketId === currentTicketId.current) {
-        dispatch({ type: "ADD_MESSAGE", payload: data.message });
-        scrollToBottom();
-      }
+      if (data.message.ticketId === currentTicketId.current) {
+        setContactPresence("available");
+        if (data.action === "create") {
+          dispatch({ type: "ADD_MESSAGE", payload: data.message });
+          scrollToBottom();
+        }
 
-      if (data.action === "update" && data.message.ticketId === currentTicketId.current) {
-        dispatch({ type: "UPDATE_MESSAGE", payload: data.message });
+        if (data.action === "update") {
+          dispatch({ type: "UPDATE_MESSAGE", payload: data.message });
+        }
       }
     }
 
     socket.on(`company-${companyId}-appMessage`, onAppMessage);
+
+    socket.on(`company-${companyId}-presence`, (data) => {
+      const { scrollTop, clientHeight, scrollHeight } = scrollRef.current;
+      console.log({ presence: data.presence, scrollTop, clientHeight, scrollHeight});
+      const isAtBottom = scrollTop + clientHeight >= (scrollHeight - clientHeight/4);
+      setContactPresence(data.presence);
+      if (data?.ticketId === ticket.id) {
+        if ([ "composing", "recording"].includes(data.presence)) {
+          if (isAtBottom) {
+            scrollToBottom();
+          }
+        }
+      }
+    });
 
     return () => {
       socket.disconnect();
@@ -454,8 +587,8 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
   };
 
   const scrollToBottom = () => {
-    if (lastMessageRef.current) {
-      lastMessageRef.current.scrollIntoView({});
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   };
 
@@ -491,7 +624,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
       return <ModalImageCors imageUrl={message.mediaUrl} isDeleted={message.isDeleted} data={data} />;
     }
     if (message.mediaType === "audio") {
-    
+
       return (
         <audio controls>
           <source src={message.mediaUrl} type="audio/ogg"></source>
@@ -502,7 +635,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     if (message.mediaType === "video") {
       return (
         <video
-          className={classes.messageMedia}
+          className={classes.messageVideo}
           src={message.mediaUrl}
           controls
         />
@@ -542,7 +675,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     }
     if (message.ack === 4) {
       return <DoneAll fontSize="small" className={classes.ackDoneReadIcon} />;
-	}
+    }
   };
 
   const renderDailyTimestamps = (message, index) => {
@@ -579,7 +712,6 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
       return (
         <div
           key={`ref-${message.createdAt}`}
-          ref={lastMessageRef}
           style={{ float: "left", clear: "both" }}
         />
       );
@@ -602,7 +734,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
   const renderQuotedMessage = (message) => {
     const data = JSON.parse(message.quotedMsg.dataJson);
     const thumbnail = data?.message?.imageMessage?.jpegThumbnail;
-    const stickerUrl = data?.message?.stickerMessage && message.quotedMsg?.mediaUrl ;
+    const stickerUrl = data?.message?.stickerMessage && message.quotedMsg?.mediaUrl;
     const imageUrl = thumbnail ? "data:image/png;base64, " + thumbnail : stickerUrl;
     return (
       <div
@@ -623,8 +755,8 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
           )}
           {message.quotedMsg?.body}
         </div>
-        { imageUrl && (
-          <img className={classes.quotedThumbnail} src={ imageUrl } />
+        {imageUrl && (
+          <img className={classes.quotedThumbnail} src={imageUrl} />
         )}
       </div>
     );
@@ -635,8 +767,9 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
   };
 
   const vCard = (message) => {
-    const name = message?.substring(message.indexOf("N:;") + 3, message.indexOf(";;;"))
-    const description = message?.substring(message.indexOf("TION:") + 5, message.indexOf("TEL"))
+    const name = message?.substring(message.indexOf("\nN:;") + 4, message.indexOf(";;;"));
+    const telLine = message?.substring(message.indexOf("\nTEL;") + 5);
+    const description = telLine.substring(telLine.indexOf(":") + 1, telLine.indexOf("\n"));
     return (
       <div>
         <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: 20, marginBottom: 20 }}>
@@ -668,7 +801,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
 
         </div>
         <div style={{
-          width: '100%', display: 'flex',
+          width: '100%', display: 'none',
           justifyContent: 'center',
           alignItems: 'center',
           marginTop: 20,
@@ -708,113 +841,113 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
 
 
   const renderMessages = () => {
-      const viewMessagesList = messagesList.map((message, index) => {
-        const data = JSON.parse(message.dataJson);
-        const isSticker = data?.message && ("stickerMessage" in data.message); 
-        if (!message.fromMe) {
-          return (
-            <React.Fragment key={message.id}>
-              {renderDailyTimestamps(message, index)}
-              {renderMessageDivider(message, index)}
-              <div
-                className={[clsx(classes.messageLeft, {
-                  [classes.messageMediaSticker] : isSticker,
-                })]}
-                title={message.queueId && message.queue?.name}
+    const viewMessagesList = messagesList.map((message, index) => {
+      const data = JSON.parse(message.dataJson);
+      const isSticker = data?.message && ("stickerMessage" in data.message);
+      if (!message.fromMe) {
+        return (
+          <React.Fragment key={message.id}>
+            {renderDailyTimestamps(message, index)}
+            {renderMessageDivider(message, index)}
+            <div
+              className={[clsx(classes.messageLeft, {
+                [classes.messageMediaSticker]: isSticker,
+              })]}
+              title={message.queueId && message.queue?.name}
+            >
+              <IconButton
+                variant="contained"
+                size="small"
+                id="messageActionsButton"
+                disabled={message.isDeleted}
+                className={classes.messageActionsButton}
+                onClick={(e) => handleOpenMessageOptionsMenu(e, message, data)}
               >
-                <IconButton
-                  variant="contained"
-                  size="small"
-                  id="messageActionsButton"
-                  disabled={message.isDeleted}
-                  className={classes.messageActionsButton}
-                  onClick={(e) => handleOpenMessageOptionsMenu(e, message, data)}
-                >
-                  <ExpandMore />
-                </IconButton>
-                {isGroup && (
-                  <span className={classes.messageContactName}>
-                    {message.contact?.name}
-                  </span>
-                )}
+                <ExpandMore />
+              </IconButton>
+              {isGroup && (
+                <span className={classes.messageContactName}>
+                  {message.contact?.name}
+                </span>
+              )}
 
-                {message.mediaUrl && checkMessageMedia(message, data)}
+              {message.mediaUrl && checkMessageMedia(message, data)}
 
-                {message.body.includes('data:image') ? messageLocation(message.body, message.createdAt)
+              {message.body.includes('data:image') ? messageLocation(message.body, message.createdAt)
+                :
+                isVCard(message.body) ?
+                  <div
+                    className={[clsx(classes.textContentItem, {
+                      [classes.textContentItemEdited]: message.isEdited
+                    }), { marginRight: 0 }]}>
+                    {vCard(message.body)}
+                  </div>
+
                   :
-                  isVCard(message.body) ?
-                    <div
-                      className={[clsx(classes.textContentItem, {
-                        [classes.textContentItemEdited] : message.isEdited
-                      }), { marginRight: 0 }]}>
-                      {vCard(message.body)}
-                    </div>
-
-                    :
 
 
-                    (<div className={[clsx(classes.textContentItem, {
-                        [classes.textContentItemDeleted] : message.isDeleted,
-                        [classes.textContentItemEdited] : message.isEdited
-                    }), ]}>
-                      {message.quotedMsg && renderQuotedMessage(message)}
-                      {message.isDeleted && (
-                        <Block
-                          color="disabled"
-                          fontSize="small"
-                          className={classes.deletedIcon}
-                        />
-                      )}
-                      { !isSticker && (
-                        <MarkdownWrapper>{message.body}</MarkdownWrapper>
-                        )
-                      }
-                      <span className={[clsx(classes.timestamp, {
-                        [classes.timestampStickerLeft] : isSticker
-                      })]}>
-                        {message.isEdited && <span> {i18n.t("message.edited")} </span>}
-                        {format(parseISO(message.createdAt), "HH:mm")}
-                      </span>
-                    </div>)}
-              </div>
-            </React.Fragment>
-          );
-        } else {
-          return (
-            <React.Fragment key={message.id}>
-              {renderDailyTimestamps(message, index)}
-              {renderMessageDivider(message, index)}
-              <div
-                className={[clsx(classes.messageRight, {
-                  [classes.messageMediaSticker] : isSticker,
-                })]}
-                title={message.queueId && message.queue?.name}
-              >
-                <IconButton
-                  variant="contained"
-                  size="small"
-                  id="messageActionsButton"
-                  disabled={message.isDeleted}
-                  className={classes.messageActionsButton}
-                  onClick={(e) => handleOpenMessageOptionsMenu(e, message, data)}
-                >
-                  <ExpandMore />
-                </IconButton>
-                {message.mediaUrl && checkMessageMedia(message, data)}
-                <div
-                  className={clsx(classes.textContentItem, {
+                  (<div className={[clsx(classes.textContentItem, {
                     [classes.textContentItemDeleted]: message.isDeleted,
-                    [classes.textContentItemEdited]: message.isEdited,
-                  })}
-                >
-                  {message.isDeleted && (
-                    <Block
-                      color="disabled"
-                      fontSize="small"
-                      className={classes.deletedIcon}
-                    />
-                  )}
-                  {message.body.includes('data:image') ? messageLocation(message.body, message.createdAt)
+                    [classes.textContentItemEdited]: message.isEdited
+                  }),]}>
+                    {message.quotedMsg && renderQuotedMessage(message)}
+                    {message.isDeleted && (
+                      <Block
+                        color="disabled"
+                        fontSize="small"
+                        className={classes.deletedIcon}
+                      />
+                    )}
+                    {!isSticker && (
+                      <MarkdownWrapper>{message.body}</MarkdownWrapper>
+                    )
+                    }
+                    <span className={[clsx(classes.timestamp, {
+                      [classes.timestampStickerLeft]: isSticker
+                    })]}>
+                      {message.isEdited && <span> {i18n.t("message.edited")} </span>}
+                      {format(parseISO(message.createdAt), "HH:mm")}
+                    </span>
+                  </div>)}
+            </div>
+          </React.Fragment>
+        );
+      } else {
+        return (
+          <React.Fragment key={message.id}>
+            {renderDailyTimestamps(message, index)}
+            {renderMessageDivider(message, index)}
+            <div
+              className={[clsx(classes.messageRight, {
+                [classes.messageMediaSticker]: isSticker,
+              })]}
+              title={message.queueId && message.queue?.name}
+            >
+              <IconButton
+                variant="contained"
+                size="small"
+                id="messageActionsButton"
+                disabled={message.isDeleted}
+                className={classes.messageActionsButton}
+                onClick={(e) => handleOpenMessageOptionsMenu(e, message, data)}
+              >
+                <ExpandMore />
+              </IconButton>
+              {message.mediaUrl && checkMessageMedia(message, data)}
+              <div
+                className={clsx(classes.textContentItem, {
+                  [classes.textContentItemDeleted]: message.isDeleted,
+                  [classes.textContentItemEdited]: message.isEdited,
+                })}
+              >
+                {message.isDeleted && (
+                  <Block
+                    color="disabled"
+                    fontSize="small"
+                    className={classes.deletedIcon}
+                  />
+                )}
+                {message.body.includes('data:image') ? messageLocation(message.body, message.createdAt)
                   :
                   isVCard(message.body) ?
                     <div className={[classes.textContentItem]}>
@@ -822,25 +955,25 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                     </div>
 
                     :
-                  message.quotedMsg && renderQuotedMessage(message)}
-                  { !isSticker && (
-                    <MarkdownWrapper>{message.body}</MarkdownWrapper>
-                    )
-                  }
-                    <span className={[clsx(classes.timestamp, {
-                      [classes.timestampStickerRight] : isSticker
-                    })]}>
-                    {message.isEdited && <span> {i18n.t("message.edited")} </span>}
-                    {format(parseISO(message.createdAt), "HH:mm")}
-                    {renderMessageAck(message)}
-                  </span>
-                </div>
+                    message.quotedMsg && renderQuotedMessage(message)}
+                {!isSticker && (
+                  <MarkdownWrapper>{message.body}</MarkdownWrapper>
+                )
+                }
+                <span className={[clsx(classes.timestamp, {
+                  [classes.timestampStickerRight]: isSticker
+                })]}>
+                  {message.isEdited && <span> {i18n.t("message.edited")} </span>}
+                  {format(parseISO(message.createdAt), "HH:mm")}
+                  {renderMessageAck(message)}
+                </span>
               </div>
-            </React.Fragment>
-          );
-        }
-      });
-      return viewMessagesList;
+            </div>
+          </React.Fragment>
+        );
+      }
+    });
+    return viewMessagesList;
   };
 
   return (
@@ -856,8 +989,29 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
         id="messagesList"
         className={classes.messagesList}
         onScroll={handleScroll}
+        ref={scrollRef}
       >
         {messagesList.length > 0 ? renderMessages() : []}
+        {contactPresence === "composing" && (
+          <div className={classes.messageLeft}>
+            <div className={classes.wave}>
+              <span className={classes.dot}></span>
+              <span className={classes.dot}></span>
+              <span className={classes.dot}></span>
+            </div>
+          </div>
+        )}
+        {contactPresence === "recording" && (
+          <div className={classes.messageLeft}>
+            <div className={classes.wavebarsContainer}>
+              <div className={clsx(classes.wavebars, classes.wavebar1)}></div>
+              <div className={clsx(classes.wavebars, classes.wavebar2)}></div>
+              <div className={clsx(classes.wavebars, classes.wavebar3)}></div>
+              <div className={clsx(classes.wavebars, classes.wavebar4)}></div>
+              <div className={clsx(classes.wavebars, classes.wavebar5)}></div>
+            </div>
+          </div>
+        )}
       </div>
       {ticket?.channel !== "whatsapp" || ticket.channel === undefined && (
         <div

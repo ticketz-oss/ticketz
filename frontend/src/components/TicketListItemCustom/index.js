@@ -146,7 +146,10 @@ const useStyles = makeStyles((theme) => ({
     "& .MuiBadge-anchorOriginTopRightRectangle": {
       transform: "scale(1) translate(0%, -40%)",
     },
-
+  },
+  presence: {
+    color: theme.mode === 'light' ? "green" : "lightgreen",
+    fontWeight: "bold",
   }
 }));
 
@@ -519,11 +522,19 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
                 variant="body2"
                 color="textSecondary"
               >
+<<<<<<< HEAD
               {ticket.contact?.presence !== "available" ? (
                 <>
                   {i18n.t(`presence.${ticket.contact.presence}`)}
                 </>
               ) : (
+=======
+                {["composing", "recording"].includes(ticket?.presence) ? (
+                  <span className={classes.presence}>
+                    {i18n.t(`presence.${ticket.presence}`)}
+                  </span>
+                ) : (
+>>>>>>> 61662d95e84f35a5f19cedd3fb5447b092cc70c7
                 <>
                   {ticket.lastMessage.includes('data:image/png;base64') ? <MarkdownWrapper> Localização</MarkdownWrapper> : <MarkdownWrapper>{ticket.lastMessage}</MarkdownWrapper>}
                 </>

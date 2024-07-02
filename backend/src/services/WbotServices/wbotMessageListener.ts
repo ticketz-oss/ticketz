@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import path, { join } from "path";
 import { promisify } from "util";
 import fs, { writeFile } from "fs";
@@ -534,6 +535,10 @@ export const verifyEditedMessage = async (
   switch (editedType) {
     case "conversation": {
       editedText = msg.conversation
+      break;
+    }
+    case "extendedTextMessage": {
+      editedText = msg.extendedTextMessage.text;
       break;
     }
     case "imageMessage": {
@@ -1090,7 +1095,10 @@ export const handleRating = async (
 };
 
 const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, dontReadTheFirstQuestion = false) => {
+<<<<<<< HEAD
   if(!ticket.contact.disableBot){
+=======
+>>>>>>> 61662d95e84f35a5f19cedd3fb5447b092cc70c7
   const queue = await Queue.findByPk(ticket.queueId, {
     include: [
       {
@@ -1382,12 +1390,20 @@ const handleMessage = async (
 
     if (hasMedia) {
       await verifyMediaMessage(msg, ticket, contact);
+    } else if (msg.message?.editedMessage?.message?.protocolMessage?.editedMessage) {
+      // message edited by Whatsapp App
+      await verifyEditedMessage(msg.message.editedMessage.message.protocolMessage.editedMessage, ticket, msg.message.editedMessage.message.protocolMessage.key.id);
     } else if (msg.message?.protocolMessage?.editedMessage) {
+      // message edited by Whatsapp Web
       await verifyEditedMessage(msg.message.protocolMessage.editedMessage, ticket, msg.message.protocolMessage.key.id);
     } else if (msg.message?.protocolMessage?.type === 0) {
       await verifyDeleteMessage(msg.message.protocolMessage, ticket);
     } else {
       await verifyMessage(msg, ticket, contact);
+    }
+    
+    if (contact.disableBot) {
+      return;
     }
 
     const currentSchedule = await VerifyCurrentSchedule(companyId);
@@ -1597,7 +1613,7 @@ const handleMessage = async (
               `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"
               }`,
               {
-                text: whatsapp.greetingMessage
+                text: formatBody(whatsapp.greetingMessage, contact, ticket)
               }
             );
           },
