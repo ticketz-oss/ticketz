@@ -1,0 +1,110 @@
+version: '3.3'
+
+services:
+
+  traefik:
+    image: "traefik:v2.10"
+    container_name: "traefik"
+    restart: always
+    command:
+      #- "--log.level=DEBUG"
+      - "--api"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=true"
+      - "--entrypoints.web.address=:80"
+
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=postmaster@exemplo.com.br"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./letsencrypt:/letsencrypt"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
+    volumes:
+      - backend_public:/usr/src/app/public
+      - backend_private:/usr/src/app/private
+    env_file:
+      - .env-backend-traefik
+    restart: always
+    
+    labels:
+
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`backend.exemplo.com.br`)"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls.certresolver=myresolver"
+
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - ${BACKEND_PORT:-8080}:3000
+ 
+
+  frontend:
+    ports:
+      - ${FRONTEND_PORT:-3000}:80
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+    env_file:
+      - .env-frontend-traefik
+    restart: always
+
+    labels:
+
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`frontend.exemplo.com.br`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls.certresolver=myresolver"
+    depends_on:
+      - backend
+
+
+  postgres:
+    image: postgres:16-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-ticketz}
+      - POSTGRES_DB=${POSTGRES_DB:-ticketz}
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - TZ=${TZ:-America/Sao_Paulo}
+    expose:
+      - 5432
+    restart: always
+
+
+  redis:
+    image: redis:alpine
+    command: redis-server --appendonly yes
+    expose:
+      - 6379
+    restart: always
+    volumes:
+      - redis_data:/data
+    
+
+
+networks:
+  default:
+   external:
+    name: ticketz
+
+    
+volumes:
+  postgres_data:
+  redis_data:
+  backend_public:
+  backend_private:
