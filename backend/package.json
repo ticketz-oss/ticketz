@@ -24,7 +24,7 @@
     "@sentry/node": "^6.19.7",
     "@socket.io/admin-ui": "^0.5.1",
     "@types/lodash": "^4.17.1",
-    "@whiskeysockets/baileys": "^6.7.5",
+    "@whiskeysockets/baileys": "github:allgood/Baileys#fixProfilePic",
     "async-mutex": "^0.4.1",
     "bcryptjs": "^2.4.3",
     "bull": "^4.12.2",
