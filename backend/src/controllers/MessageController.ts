@@ -18,6 +18,7 @@ import EditWhatsAppMessage from "../services/WbotServices/EditWhatsAppMessage";
 
 import { sendFacebookMessageMedia } from "../services/FacebookServices/sendFacebookMessageMedia";
 import sendFaceMessage from "../services/FacebookServices/sendFacebookMessage";
+import { logger } from "../utils/logger";
 
 type IndexQuery = {
   pageNumber: string;
@@ -143,21 +144,20 @@ export const remove = async (
 };
 
 export const send = async (req: Request, res: Response): Promise<Response> => {
-  const { whatsappId } = req.params as unknown as { whatsappId: number };
+  const { whatsappId } = req.params;
   const messageData: MessageData = req.body;
   const medias = req.files as Express.Multer.File[];
 
+  if (messageData.number === undefined) {
+    throw new AppError("ERR_SYNTAX", 400);
+  }
+  const whatsapp = await Whatsapp.findByPk(whatsappId);
+
+  if (!whatsapp) {
+    throw new AppError("ERR_WHATSAPP_NOT_FOUND", 404);
+  }
+
   try {
-    const whatsapp = await Whatsapp.findByPk(whatsappId);
-
-    if (!whatsapp) {
-      throw new Error("Não foi possível realizar a operação");
-    }
-
-    if (messageData.number === undefined) {
-      throw new Error("O número é obrigatório");
-    }
-
     const numberToTest = messageData.number;
     const { body } = messageData;
 
@@ -198,14 +198,17 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
       );
     }
 
-    return res.send({ mensagem: "Mensagem enviada" });
+    return res.send({ mensagem: "Message added to queue" });
   } catch (err) {
-    if (Object.keys(err).length === 0) {
-      throw new AppError(
-        "Não foi possível enviar a mensagem, tente novamente em alguns instantes"
-      );
+    const error = { errType: typeof err, serialized: JSON.stringify(err), err };
+    if (err?.message) {
+      console.error(error, `MessageController.send: ${err.message}`);
     } else {
-      throw new AppError(err.message);
+      logger.error(
+        error,
+        "MessageController.send: Failed to put message on queue"
+      );
     }
+    throw new AppError("ERR_INTERNAL_ERROR", 500);
   }
 };
