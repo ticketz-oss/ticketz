@@ -14,10 +14,9 @@ import DeleteWhatsAppMessage from "../services/WbotServices/DeleteWhatsAppMessag
 import SendWhatsAppMedia from "../services/WbotServices/SendWhatsAppMedia";
 import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import CheckContactNumber from "../services/WbotServices/CheckNumber";
-import CheckIsValidContact from "../services/WbotServices/CheckIsValidContact";
 import EditWhatsAppMessage from "../services/WbotServices/EditWhatsAppMessage";
 
-import {sendFacebookMessageMedia} from "../services/FacebookServices/sendFacebookMessageMedia";
+import { sendFacebookMessageMedia } from "../services/FacebookServices/sendFacebookMessageMedia";
 import sendFaceMessage from "../services/FacebookServices/sendFacebookMessage";
 
 type IndexQuery = {
@@ -89,21 +88,17 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
         })
       );
     }
-
-
   } else {
-
-
-
     if (["facebook", "instagram"].includes(channel)) {
-      console.log(`Checking if ${ticket.contact.number} is a valid ${channel} contact`)
+      console.log(
+        `Checking if ${ticket.contact.number} is a valid ${channel} contact`
+      );
       await sendFaceMessage({ body, ticket, quotedMsg });
     }
 
     if (channel === "whatsapp") {
       await SendWhatsAppMessage({ body, ticket, quotedMsg });
     }
-
   }
 
   return res.send();
@@ -114,7 +109,11 @@ export const edit = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.user;
   const { body }: MessageData = req.body;
 
-  const { ticketId , message } = await EditWhatsAppMessage({messageId, companyId, body});
+  const { ticketId, message } = await EditWhatsAppMessage({
+    messageId,
+    companyId,
+    body
+  });
 
   const io = getIO();
   io.to(ticketId.toString()).emit(`company-${companyId}-appMessage`, {
@@ -123,7 +122,7 @@ export const edit = async (req: Request, res: Response): Promise<Response> => {
   });
 
   return res.send();
-}
+};
 
 export const remove = async (
   req: Request,
@@ -160,9 +159,9 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
     }
 
     const numberToTest = messageData.number;
-    const body = messageData.body;
+    const { body } = messageData;
 
-    const companyId = whatsapp.companyId;
+    const { companyId } = whatsapp;
 
     const CheckValidNumber = await CheckContactNumber(numberToTest, companyId);
     const number = CheckValidNumber.jid.replace(/\D/g, "");
@@ -196,12 +195,11 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
         },
 
         { removeOnComplete: false, attempts: 3 }
-
       );
     }
 
     return res.send({ mensagem: "Mensagem enviada" });
-  } catch (err: any) {
+  } catch (err) {
     if (Object.keys(err).length === 0) {
       throw new AppError(
         "Não foi possível enviar a mensagem, tente novamente em alguns instantes"
