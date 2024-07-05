@@ -1,6 +1,6 @@
 import { Chat, Contact } from "@whiskeysockets/baileys";
-import Baileys from "../../models/Baileys";
 import { isArray } from "lodash";
+import Baileys from "../../models/Baileys";
 
 interface Request {
   whatsappId: number;
@@ -10,35 +10,32 @@ interface Request {
 
 const createOrUpdateBaileysService = async ({
   whatsappId,
-  contacts,
-  chats
+  contacts
 }: Request): Promise<Baileys> => {
   const baileysExists = await Baileys.findOne({
     where: { whatsappId }
   });
 
+  if (!contacts) {
+    return baileysExists;
+  }
+
   if (baileysExists) {
-    const getChats = baileysExists.chats
-      ? JSON.parse(JSON.stringify(baileysExists.chats))
-      : [];
-    const getContacts = baileysExists.contacts
+    const getContacts = [];
+
+    const baileysContacts = baileysExists.contacts
       ? JSON.parse(JSON.stringify(baileysExists.contacts))
       : [];
 
-    if (chats && isArray(getChats)) {
-      getChats.push(...chats);
-      getChats.sort();
-      getChats.filter((v, i, a) => a.indexOf(v) === i);
+    if (isArray(baileysContacts)) {
+      getContacts.push(...baileysContacts);
     }
 
-    if (contacts && isArray(getContacts)) {
-      getContacts.push(...contacts);
-      getContacts.sort();
-      getContacts.filter((v, i, a) => a.indexOf(v) === i);
-    }
+    getContacts.push(...contacts);
+    getContacts.sort();
+    getContacts.filter((v, i, a) => a.indexOf(v) === i);
 
     const newBaileys = await baileysExists.update({
-      chats: JSON.stringify(getChats),
       contacts: JSON.stringify(getContacts)
     });
 
@@ -47,8 +44,7 @@ const createOrUpdateBaileysService = async ({
 
   const baileys = await Baileys.create({
     whatsappId,
-    contacts: JSON.stringify(contacts),
-    chats: JSON.stringify(chats)
+    contacts: JSON.stringify(contacts)
   });
 
   return baileys;
