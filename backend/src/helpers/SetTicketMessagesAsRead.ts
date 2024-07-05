@@ -35,6 +35,11 @@ const SetTicketMessagesAsRead = async (ticket: Ticket): Promise<void> => {
       })
       .filter(key => key !== undefined);
 
+    logger.debug(
+      { messageKeys, ticketId: ticket.id },
+      `Marking ${messageKeys.length} messages of ticket ${ticket.id} as read`
+    );
+
     // Process message keys in batches of 250
     const batchSize = 250;
     for (let i = 0; i < messageKeys.length; i += batchSize) {
