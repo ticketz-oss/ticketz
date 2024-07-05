@@ -497,6 +497,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
+    setContactPresence("available");
 
     currentTicketId.current = ticketId;
   }, [ticketId]);
