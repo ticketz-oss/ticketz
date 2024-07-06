@@ -23,6 +23,7 @@ import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSess
 import DeleteBaileysService from "../services/BaileysServices/DeleteBaileysService";
 import Contact from "../models/Contact";
 import Ticket from "../models/Ticket";
+import { Op } from "sequelize";
 
 const loggerBaileys = MAIN_LOGGER.child({});
 loggerBaileys.level = "error";
@@ -281,7 +282,11 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
               }
               const ticket = await Ticket.findOne({
                 where: {
-                  contactId: contact.id
+                  contactId: contact.id,
+                  whatsappId: whatsapp.id,
+                  status: {
+                    [Op.or]: ["open", "pending"]
+                  }
                 }
               });
 
