@@ -80,7 +80,7 @@ const UpdateTicketService = async ({
     if (tokenData && ticket.status !== "pending") {
       if (
         tokenData.profile !== "admin" &&
-        ticket.userId !== parseInt(tokenData.id)
+        ticket.userId !== parseInt(tokenData.id, 10)
       ) {
         throw new AppError(
           "Apenas o usuário ativo do ticket ou o Admin podem fazer alterações no ticket"
@@ -114,7 +114,7 @@ const UpdateTicketService = async ({
         companyId
       );
 
-      if (setting?.value === "enabled") {
+      if (!ticket.contact.disableBot && setting?.value === "enabled") {
         if (ticketTraking.ratingAt == null && !justClose) {
           const ratingTxt = ratingMessage?.trim() || "";
           let bodyRatingMessage = `\u200e${ratingTxt}\n\n`;
@@ -150,7 +150,11 @@ const UpdateTicketService = async ({
         ticketTraking.rated = false;
       }
 
-      if (!isNil(complationMessage) && complationMessage !== "") {
+      if (
+        !ticket.contact.disableBot &&
+        !isNil(complationMessage) &&
+        complationMessage !== ""
+      ) {
         const body = `\u200e${complationMessage}`;
 
         if (ticket.channel === "whatsapp" && !ticket.isGroup) {
