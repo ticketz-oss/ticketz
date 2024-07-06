@@ -51,17 +51,18 @@ const SendWhatsAppMessage = async ({
   }
 
   try {
+    const formattedBody = formatBody(body, ticket.contact);
     const sentMessage = await wbot.sendMessage(
       number,
       {
-        text: formatBody(body, ticket.contact)
+        text: formattedBody
       },
       {
         ...options
       }
     );
 
-    await ticket.update({ lastMessage: formatBody(body, ticket.contact) });
+    await ticket.update({ lastMessage: formattedBody });
 
     return sentMessage;
   } catch (err) {
