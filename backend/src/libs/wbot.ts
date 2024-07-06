@@ -7,12 +7,16 @@ import makeWASocket, {
   makeCacheableSignalKeyStore,
   makeInMemoryStore,
   isJidBroadcast,
-  CacheStore
+  CacheStore,
+  WAMessageKey,
+  WAMessageContent,
+  proto
 } from "@whiskeysockets/baileys";
 
 import { Boom } from "@hapi/boom";
 import MAIN_LOGGER from "@whiskeysockets/baileys/lib/Utils/logger";
 import NodeCache from "node-cache";
+import { Op } from "sequelize";
 import Whatsapp from "../models/Whatsapp";
 import { logger } from "../utils/logger";
 import authState from "../helpers/authState";
@@ -23,7 +27,6 @@ import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSess
 import DeleteBaileysService from "../services/BaileysServices/DeleteBaileysService";
 import Contact from "../models/Contact";
 import Ticket from "../models/Ticket";
-import { Op } from "sequelize";
 
 const loggerBaileys = MAIN_LOGGER.child({});
 loggerBaileys.level = "error";
@@ -92,6 +95,22 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
           logger: loggerBaileys
         });
 
+        async function getMessage(
+          key: WAMessageKey
+        ): Promise<WAMessageContent | undefined> {
+          if (store) {
+            const msg = await store.loadMessage(key.remoteJid!, key.id!);
+            logger.debug(
+              { key, message: JSON.stringify(msg) },
+              `[wbot.ts] getMessage: result of recovering message ${key.remoteJid} ${key.id}`
+            );
+            return msg?.message || undefined;
+          }
+
+          // only if store isn't present
+          return proto.Message.fromObject({});
+        }
+
         const { state, saveState } = await authState(whatsapp);
 
         const msgRetryCounterCache = new NodeCache();
@@ -113,6 +132,7 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
           // syncFullHistory: true,
           generateHighQualityLinkPreview: true,
           userDevicesCache,
+          getMessage,
           shouldIgnoreJid: jid =>
             isJidBroadcast(jid) || jid?.endsWith("@newsletter"),
           transactionOpts: { maxCommitRetries: 1, delayBetweenTriesMs: 10 }
