@@ -566,11 +566,11 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
 
     socket.on(`company-${companyId}-presence`, (data) => {
       const { scrollTop, clientHeight, scrollHeight } = scrollRef.current;
-      console.log({ presence: data.presence, scrollTop, clientHeight, scrollHeight});
-      const isAtBottom = scrollTop + clientHeight >= (scrollHeight - clientHeight/4);
+      console.log({ presence: data.presence, scrollTop, clientHeight, scrollHeight });
+      const isAtBottom = scrollTop + clientHeight >= (scrollHeight - clientHeight / 4);
       if (data?.ticketId === ticket.id) {
         setContactPresence(data.presence);
-        if ([ "composing", "recording"].includes(data.presence)) {
+        if (["composing", "recording"].includes(data.presence)) {
           if (isAtBottom) {
             scrollToBottom();
           }
@@ -622,7 +622,24 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
 
   const checkMessageMedia = (message, data) => {
     if (message.mediaType === "image") {
-      return <ModalImageCors imageUrl={message.mediaUrl} isDeleted={message.isDeleted} data={data} />;
+      const data = JSON.parse(message.dataJson);
+      return (
+        <>
+          <ModalImageCors imageUrl={message.mediaUrl} isDeleted={message.isDeleted} />
+          {data?.message?.imageMessage?.caption &&
+            <>
+              <Divider />
+              <div className={[clsx({
+                [classes.textContentItemDeleted]: message.isDeleted,
+              }),]}>
+                <MarkdownWrapper >
+                  {data.message.imageMessage.caption}
+                </MarkdownWrapper>
+              </div>
+            </>
+          }
+        </>
+      )
     }
     if (message.mediaType === "audio") {
 
@@ -646,13 +663,13 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
         <>
           <div className={classes.downloadMedia}>
             <Button
-              startIcon={<GetApp />}
+              endIcon={<GetApp />}
               color="primary"
               variant="outlined"
               target="_blank"
               href={message.mediaUrl}
             >
-              Download
+              🗎 {message.body}
             </Button>
           </div>
           <Divider />
@@ -900,7 +917,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                       />
                     )}
                     {!isSticker && (
-                      <MarkdownWrapper>{message.body}</MarkdownWrapper>
+                      message.mediaUrl ? "" : <MarkdownWrapper>{message.body}</MarkdownWrapper>
                     )
                     }
                     <span className={[clsx(classes.timestamp, {
@@ -958,7 +975,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                     :
                     message.quotedMsg && renderQuotedMessage(message)}
                 {!isSticker && (
-                  <MarkdownWrapper>{message.body}</MarkdownWrapper>
+                  message.mediaUrl ? "" : <MarkdownWrapper>{message.body}</MarkdownWrapper>
                 )
                 }
                 <span className={[clsx(classes.timestamp, {
