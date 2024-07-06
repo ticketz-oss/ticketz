@@ -88,6 +88,7 @@ export default function Options(props) {
   const [chatbotType, setChatbotType] = useState("");
   const [quickMessages, setQuickMessages] = useState("");
   const [allowSignup, setAllowSignup] = useState("disabled");
+  const [chatbotAutoExit, setChatbotAutoExit] = useState("disabled");
   const [CheckMsgIsGroup, setCheckMsgIsGroupType] = useState("enabled");
 
   const [loadingUserRating, setLoadingUserRating] = useState(false);
@@ -96,6 +97,7 @@ export default function Options(props) {
   const [loadingChatbotType, setLoadingChatbotType] = useState(false);
   const [loadingQuickMessages, setLoadingQuickMessages] = useState(false);
   const [loadingAllowSignup, setLoadingAllowSignup] = useState(false);
+  const [loadingChatbotAutoExit, setLoadingChatbotAutoExit] = useState(false);
   const [loadingCheckMsgIsGroup, setCheckMsgIsGroup] = useState(false);
   const { getCurrentUserInfo } = useAuth();
   const [currentUser, setCurrentUser] = useState({});
@@ -129,6 +131,10 @@ export default function Options(props) {
       const chatbotType = settings.find((s) => s.key === "chatBotType");
       if (chatbotType) {
         setChatbotType(chatbotType.value);
+      }
+      const chatbotAutoExit = settings.find((s) => s.key === "chatbotAutoExit");
+      if (chatbotAutoExit) {
+        setChatbotAutoExit(chatbotAutoExit.value);
       }
       const allowSignup = settings.find((s) => s.key === "allowSignup");
       if (allowSignup) {
@@ -194,6 +200,17 @@ export default function Options(props) {
     });
     toast.success("Operação atualizada com sucesso.");
     setLoadingChatbotType(false);
+  }
+
+  async function handleChatbotAutoExit(value) {
+    setChatbotAutoExit(value);
+    setLoadingChatbotAutoExit(true);
+    await update({
+      key: "chatbotAutoExit",
+      value,
+    });
+    toast.success("Operação atualizada com sucesso.");
+    setLoadingChatbotAutoExit(false);
   }
 
   async function handleQuickMessages(value) {
@@ -333,6 +350,26 @@ export default function Options(props) {
             </Select>
             <FormHelperText>
               {loadingChatbotType && "Atualizando..."}
+            </FormHelperText>
+          </FormControl>
+        </Grid>
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="group-type-label">
+              Saída automática de chatbot
+            </InputLabel>
+            <Select
+              labelId="chatbot-autoexit"
+              value={chatbotAutoExit}
+              onChange={async (e) => {
+                handleChatbotAutoExit(e.target.value);
+              }}
+            >
+              <MenuItem value={"disabled"}>Desativado</MenuItem>
+              <MenuItem value={"enabled"}>Ativado</MenuItem>
+            </Select>
+            <FormHelperText>
+              {loadingChatbotAutoExit && "Atualizando..."}
             </FormHelperText>
           </FormControl>
         </Grid>

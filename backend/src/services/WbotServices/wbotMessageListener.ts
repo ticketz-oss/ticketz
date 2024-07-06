@@ -52,6 +52,8 @@ import { cacheLayer } from "../../libs/cache";
 import { debounce } from "../../helpers/Debounce";
 import { getMessageOptions } from "./SendWhatsAppMedia";
 import { makeRandomId } from "../../helpers/MakeRandomId";
+import { GetCompanySetting } from "../../helpers/CheckSettings";
+import Whatsapp from "../../models/Whatsapp";
 
 
 type Session = WASocket & {
@@ -1166,6 +1168,15 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
     const option = queue?.options.find((o) => o.option === messageBody);
     if (option) {
       await ticket.update({ queueOptionId: option?.id });
+    } else if (await GetCompanySetting(ticket.companyId, "chatbotAutoExit") === "enabled" ) {
+      // message didn't identified an option and company setting to exit chatbot
+      await ticket.update({ chatbot: false });
+      const whatsapp = await Whatsapp.findByPk(ticket.whatsappId);
+      const contact = await Contact.findByPk(ticket.contactId);
+      if (whatsapp.transferMessage) {
+        const body = formatBody(`\u200e${whatsapp.transferMessage}`, contact);
+        await SendWhatsAppMessage({ body, ticket });        
+      }
     }
   }
 
