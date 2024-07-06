@@ -53,13 +53,13 @@ const FindOrCreateTicketService = async (
         ticketId: ticket.id,
         companyId,
         whatsappId: ticket.whatsappId,
-        userId: ticket.userId,
+        userId: ticket.userId
       });
     }
     const msgIsGroupBlock = await Setting.findOne({
       where: { key: "timeCreateNewTicket" }
     });
-  
+
     const value = msgIsGroupBlock ? parseInt(msgIsGroupBlock.value, 10) : 7200;
   }
 
@@ -106,7 +106,6 @@ const FindOrCreateTicketService = async (
       whatsappId,
       userId: ticket.userId
     });
-
   } else {
     await ticket.update({ whatsappId });
   }
