@@ -51,6 +51,7 @@ import Setting from "../../models/Setting";
 import { cacheLayer } from "../../libs/cache";
 import { debounce } from "../../helpers/Debounce";
 import { getMessageOptions } from "./SendWhatsAppMedia";
+import { makeRandomId } from "../../helpers/MakeRandomId";
 
 
 type Session = WASocket & {
@@ -316,11 +317,16 @@ const downloadMedia = async (msg: proto.IWebMessageInfo) => {
     Sentry.captureException(new Error("ERR_WAPP_DOWNLOAD_MEDIA"));
     throw new Error("ERR_WAPP_DOWNLOAD_MEDIA");
   }
-  let filename = msg.message?.documentMessage?.fileName || "";
+  let filename =
+    msg.message?.documentMessage?.fileName
+    || msg.message?.documentWithCaptionMessage?.message?.documentMessage?.fileName
+    || "";
 
   if (!filename) {
     const ext = mineType.mimetype.split("/")[1].split(";")[0];
-    filename = `${new Date().getTime()}.${ext}`;
+    filename = `${makeRandomId(5)}-${new Date().getTime()}.${ext}`;
+  } else {
+    filename = `${filename.split(".").slice(0,-1).join(".")}.${makeRandomId(5)}.${filename.split(".").slice(-1)}`;
   }
   const media = {
     data: buffer,
