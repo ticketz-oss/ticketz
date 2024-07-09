@@ -40,12 +40,13 @@ const EditWhatsAppMessage = async ({
   const wbot = await GetTicketWbot(ticket);
 
   const msg = JSON.parse(message.dataJson);
+  const formattedBody = formatBody(body, ticket.contact);
 
   try {
     await wbot.sendMessage(
       message.remoteJid,
       {
-        text: body,
+        text: formattedBody,
         edit: msg.key
       },
       {}
@@ -59,7 +60,7 @@ const EditWhatsAppMessage = async ({
 
     await OldMessage.upsert(oldMessage);
 
-    await message.update({ body, isEdited: true });
+    await message.update({ formattedBody, isEdited: true });
 
     const savedMessage = await Message.findOne({
       where: {
