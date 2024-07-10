@@ -256,7 +256,7 @@ const downloadMedia = async (msg: proto.IWebMessageInfo) => {
     msg.message?.extendedTextMessage?.contextInfo?.quotedMessage?.imageMessage;
 
   // eslint-disable-next-line no-nested-ternary
-  const messageType = msg.message?.documentMessage
+  const messageType = msg.message?.documentMessage || msg.message?.documentWithCaptionMessage
     ? "document"
     : mineType.mimetype.split("/")[0].replace("application", "document")
       ? (mineType.mimetype
@@ -333,7 +333,9 @@ const downloadMedia = async (msg: proto.IWebMessageInfo) => {
       }
     }
   } catch (error) {
-    return { data: "error", mimetype: "", filename: "" };
+    Sentry.setExtra("ERR_WAPP_DOWNLOAD_MEDIA", { error, msg });
+    Sentry.captureException(new Error("ERR_WAPP_DOWNLOAD_MEDIA"));
+    throw new Error("ERR_WAPP_DOWNLOAD_MEDIA");
   }
 
   const endTime = Date.now();
