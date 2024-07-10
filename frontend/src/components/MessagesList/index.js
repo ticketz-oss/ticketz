@@ -622,7 +622,9 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
 
   const checkMessageMedia = (message, messageData) => {
     const data = JSON.parse(message.dataJson);
-    const document = data?.message?.documentMessage || data?.message?.documentWithCaptionMessage;
+    const document =
+      data?.message?.documentMessage
+      || data?.message?.documentWithCaptionMessage?.message?.documentMessage;
     if (!document && message.mediaType === "image") {
       return (
         <>
@@ -670,10 +672,21 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
               target="_blank"
               href={message.mediaUrl}
             >
-              🗎 {message.body}
+              🗎 { document?.fileName || message.body}
             </Button>
           </div>
-          <Divider />
+          {document?.caption && document.caption !== document?.fileName &&
+            <>
+              <Divider />
+              <div className={[clsx({
+                [classes.textContentItemDeleted]: message.isDeleted,
+              }),]}>
+                <MarkdownWrapper >
+                  document.caption
+                </MarkdownWrapper>
+              </div>
+            </>
+          }
         </>
       );
     }
