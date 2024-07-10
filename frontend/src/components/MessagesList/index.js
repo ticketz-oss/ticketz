@@ -23,6 +23,7 @@ import {
   GetApp,
   Facebook,
   Instagram,
+  Description,
 } from "@material-ui/icons";
 
 import MarkdownWrapper from "../MarkdownWrapper";
@@ -666,13 +667,14 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
         <>
           <div className={classes.downloadMedia}>
             <Button
+              startIcon={<Description />}
               endIcon={<GetApp />}
               color="primary"
               variant="outlined"
               target="_blank"
               href={message.mediaUrl}
             >
-              🗎 { document?.fileName || message.body}
+             { document?.fileName || message.body}
             </Button>
           </div>
           {document?.caption && document.caption !== document?.fileName &&
