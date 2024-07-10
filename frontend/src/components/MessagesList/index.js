@@ -620,9 +620,10 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     setAnchorEl(null);
   };
 
-  const checkMessageMedia = (message, data) => {
-    if (message.mediaType === "image") {
-      const data = JSON.parse(message.dataJson);
+  const checkMessageMedia = (message, messageData) => {
+    const data = JSON.parse(message.dataJson);
+    const document = data?.message?.documentMessage || data?.message?.documentWithCaptionMessage;
+    if (!document && message.mediaType === "image") {
       return (
         <>
           <ModalImageCors imageUrl={message.mediaUrl} isDeleted={message.isDeleted} />
@@ -641,7 +642,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
         </>
       )
     }
-    if (message.mediaType === "audio") {
+    if (!document && message.mediaType === "audio") {
 
       return (
         <audio controls>
@@ -650,7 +651,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
       );
     }
 
-    if (message.mediaType === "video") {
+    if (!document || message.mediaType === "video") {
       return (
         <video
           className={classes.messageVideo}
