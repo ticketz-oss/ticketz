@@ -60,7 +60,7 @@ const EditWhatsAppMessage = async ({
 
     await OldMessage.upsert(oldMessage);
 
-    await message.update({ formattedBody, isEdited: true });
+    await message.update({ body: formattedBody, isEdited: true });
 
     const savedMessage = await Message.findOne({
       where: {
