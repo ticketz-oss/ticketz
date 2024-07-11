@@ -131,7 +131,11 @@ const App = () => {
   ), [appLogoLight, appLogoDark, appLogoFavicon, appName, locale, mode, primaryColorDark, primaryColorLight]);
 
   useEffect(() => {
-    const i18nlocale = localStorage.getItem("i18nextLng");
+    const i18nlocale = localStorage.getItem("language");
+    if (!i18nlocale) {
+      return;
+    }
+    
     const browserLocale =
       i18nlocale.substring(0, 2) + i18nlocale.substring(3, 5);
 
