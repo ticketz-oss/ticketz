@@ -6,7 +6,6 @@ import { getIO } from "../../libs/socket";
 import Invoices from "../../models/Invoices";
 import Company from "../../models/Company";
 import AppError from "../../errors/AppError";
-import GetPublicSettingService from "../SettingServices/GetPublicSettingService";
 
 const owenBaseURL = "https://pix.owenbrasil.com.br";
 
@@ -20,11 +19,11 @@ export const owenWebhook = async (
     const invoice = await Invoices.findOne({
       where: {
         txId: qrcodeId,
-        status: "open",
+        status: "open"
       },
       include: { model: Company, as: "company" }
     });
-    
+
     if (!invoice || data.valor < invoice.value) {
       return res.json({ ok: true });
     }
@@ -45,24 +44,19 @@ export const owenWebhook = async (
     io.to(`company-${invoice.companyId}-mainchannel`)
       .to("super")
       .emit(`company-${invoice.companyId}-payment`, {
-      action: "CONCLUIDA",
-      company: invoice.company,
-      invoiceId: invoice.id,
-    });
-
+        action: "CONCLUIDA",
+        company: invoice.company,
+        invoiceId: invoice.id
+      });
   }
   return res.json({ ok: true });
-}
-
+};
 
 export const owenCreateSubscription = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const {
-    price,
-    invoiceId
-  } = req.body;
+  const { price, invoiceId } = req.body;
 
   const config = {
     params: {
@@ -80,7 +74,10 @@ export const owenCreateSubscription = async (
     if (!invoice) {
       throw new Error("Invoice not found");
     }
-    const qrResult = await axios.get( `${owenBaseURL}/api/v1/qrdinamico`, config);
+    const qrResult = await axios.get(
+      `${owenBaseURL}/api/v1/qrdinamico`,
+      config
+    );
     invoice.update({
       txId: qrResult.data.data.qrcodeId,
       payGw: "owen",
@@ -89,9 +86,12 @@ export const owenCreateSubscription = async (
     return res.json({
       qrcode: { qrcode: qrResult.data.data.qrcode },
       valor: { original: price }
-    })
+    });
   } catch (error) {
     logger.error({ error }, "owenCreateSubscription error");
-    throw new AppError("Problema encontrado, entre em contato com o suporte!", 400);
+    throw new AppError(
+      "Problema encontrado, entre em contato com o suporte!",
+      400
+    );
   }
 };
