@@ -14,6 +14,11 @@ interface TokenPayload {
 }
 
 const isAuth = (req: Request, res: Response, next: NextFunction): void => {
+  if (req?.user) {
+    // previous middleware already authorized
+    return next();
+  }
+
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
