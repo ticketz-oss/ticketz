@@ -12,6 +12,17 @@ import { makeStyles } from "@material-ui/core/styles";
 import { grey, blue } from "@material-ui/core/colors";
 import OnlyForSuperUser from "../OnlyForSuperUser";
 import useAuth from "../../hooks/useAuth.js";
+import { Loop, Delete } from "@material-ui/icons";
+import {
+  IconButton,
+  TextField
+} from "@material-ui/core";
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCopy, faGears } from '@fortawesome/free-solid-svg-icons';
+
+import { generateSecureToken } from "../../helpers/generateSecureToken";
+import { copyToClipboard } from "../../helpers/copyToClipboard";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -90,6 +101,7 @@ export default function Options(props) {
   const [allowSignup, setAllowSignup] = useState("disabled");
   const [chatbotAutoExit, setChatbotAutoExit] = useState("disabled");
   const [CheckMsgIsGroup, setCheckMsgIsGroupType] = useState("enabled");
+  const [apiToken, setApiToken] = useState("");
 
   const [loadingUserRating, setLoadingUserRating] = useState(false);
   const [loadingScheduleType, setLoadingScheduleType] = useState(false);
@@ -99,6 +111,7 @@ export default function Options(props) {
   const [loadingAllowSignup, setLoadingAllowSignup] = useState(false);
   const [loadingChatbotAutoExit, setLoadingChatbotAutoExit] = useState(false);
   const [loadingCheckMsgIsGroup, setCheckMsgIsGroup] = useState(false);
+  const [loadingApiToken, setLoadingApiToken] = useState(false);
   const { getCurrentUserInfo } = useAuth();
   const [currentUser, setCurrentUser] = useState({});
 
@@ -142,6 +155,9 @@ export default function Options(props) {
       }
       const quickMessages = settings.find((s) => s.key === "quickMessages");
       setQuickMessages(quickMessages?.value || "individual");
+
+      const apiToken = settings.find((s) => s.key === "apiToken");
+      setApiToken(apiToken?.value || "");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
@@ -233,6 +249,34 @@ export default function Options(props) {
     });
     toast.success("Operação atualizada com sucesso.");
     setLoadingAllowSignup(false);
+  }
+
+  async function generateApiToken() {
+    const newToken = generateSecureToken(32);
+    setApiToken(newToken);
+    setLoadingApiToken(true);
+    await update({
+      key: "apiToken",
+      value: newToken,
+    });
+    toast.success("Operação atualizada com sucesso.");
+    setLoadingApiToken(false);
+  }
+
+  async function deleteApiToken() {
+    setApiToken("");
+    setLoadingApiToken(true);
+    await update({
+      key: "apiToken",
+      value: "",
+    });
+    toast.success("Operação atualizada com sucesso.");
+    setLoadingApiToken(false);
+  }
+  
+  async function copyApiToken() {
+    copyToClipboard(apiToken);
+    toast.success("Token copied to clipboard");
   }
 
   async function handleGroupType(value) {
@@ -393,6 +437,61 @@ export default function Options(props) {
             </FormHelperText>
           </FormControl>
         </Grid>
+        
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <TextField
+              id="primary-color-light-field"
+              label="API Token"
+              variant="standard"
+              value={apiToken}
+              InputProps={{
+                endAdornment: (
+                  <>
+                    {apiToken &&
+                      <>
+                        <IconButton
+                          size="small"
+                          color="default"
+                          onClick={() => {
+                            copyApiToken();
+                          }
+                          }
+                        >
+                          <FontAwesomeIcon icon={faCopy} />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          color="default"
+                          onClick={() => {
+                            deleteApiToken();
+                          }
+                          }
+                        >
+                          <Delete />
+                        </IconButton>
+                      </>
+                    }
+                    {
+                      !apiToken &&
+                      <IconButton
+                        size="small"
+                        color="default"
+                        onClick={() => {
+                          generateApiToken();
+                        }
+                        }
+                      >
+                        <FontAwesomeIcon icon={faGears} />
+                      </IconButton>
+                    }
+                  </>
+                ),
+              }}
+            />
+          </FormControl>
+        </Grid>
+
         <OnlyForSuperUser
           user={currentUser}
           yes={() => (
