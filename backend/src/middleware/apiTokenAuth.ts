@@ -12,6 +12,10 @@ const apiTokenAuth = async (
   try {
     const token = req.headers.authorization.replace("Bearer ", "");
 
+    if (!token) {
+      return next();
+    }
+
     const setting = await Setting.findOne({
       where: {
         key: "apiToken",
