@@ -677,14 +677,14 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
              { document?.fileName || message.body}
             </Button>
           </div>
-          {document?.caption && document.caption !== document?.fileName &&
+          {message.body !== document?.fileName &&
             <>
               <Divider />
               <div className={[clsx({
                 [classes.textContentItemDeleted]: message.isDeleted,
               }),]}>
                 <MarkdownWrapper >
-                  document.caption
+                  { message.body }
                 </MarkdownWrapper>
               </div>
             </>
