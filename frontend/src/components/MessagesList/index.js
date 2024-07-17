@@ -672,7 +672,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
               color="primary"
               variant="outlined"
               target="_blank"
-              href={message.mediaUrl}
+              href={message.mediaUrl.replace(/%/g, '%25')}
             >
              { document?.fileName || message.body}
             </Button>
