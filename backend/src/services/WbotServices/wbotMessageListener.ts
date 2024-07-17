@@ -1300,7 +1300,7 @@ const handleMessage = async (
         },
       });
       
-      if (msgIsGroupBlock?.value === "enabled") {
+      if ( !msgIsGroupBlock || msgIsGroupBlock.value === "enabled") {
         return;
       }
     }
