@@ -1292,12 +1292,18 @@ const handleMessage = async (
 
     const isGroup = msg.key.remoteJid?.endsWith("@g.us");
 
-    const msgIsGroupBlock = await Setting.findOne({
-      where: {
-        companyId,
-        key: "CheckMsgIsGroup",
-      },
-    });
+    if (isGroup) {
+      const msgIsGroupBlock = await Setting.findOne({
+        where: {
+          companyId,
+          key: "CheckMsgIsGroup",
+        },
+      });
+      
+      if (msgIsGroupBlock?.value === "enabled") {
+        return;
+      }
+    }
 
     const bodyMessage = getBodyMessage(msg);
     const msgType = getTypeMessage(msg);
@@ -1318,8 +1324,6 @@ const handleMessage = async (
     } else {
       msgContact = await getContactMessage(msg, wbot);
     }
-
-    if (msgIsGroupBlock?.value === "enabled" && isGroup) return;
 
     if (isGroup) {
       const grupoMeta = await wbot.groupMetadata(msg.key.remoteJid);
