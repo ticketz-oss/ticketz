@@ -145,6 +145,7 @@ export const getBodyMessage = (msg: proto.IWebMessageInfo): string | null => {
       messageContextInfo: msg.message?.buttonsResponseMessage?.selectedButtonId || msg.message?.listResponseMessage?.title,
       buttonsMessage: getBodyButton(msg) || msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId,
       viewOnceMessage: getBodyButton(msg) || msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId,
+      viewOnceMessageV2: msg.message?.viewOnceMessageV2?.message?.imageMessage?.caption || "",
       stickerMessage: "sticker",
       contactMessage: msg.message?.contactMessage?.vcard,
       contactsArrayMessage: "varios contatos",
@@ -245,43 +246,56 @@ const getContactMessage = async (msg: proto.IWebMessageInfo, wbot: Session) => {
     };
 };
 
+
+const getUnpackedMessage = (msg: proto.IWebMessageInfo) => {
+  return (
+    msg.message?.documentWithCaptionMessage?.message ||
+    msg.message?.extendedTextMessage?.contextInfo?.quotedMessage ||
+    msg.message?.ephemeralMessage?.message ||
+    msg.message?.viewOnceMessage?.message ||
+    msg.message?.viewOnceMessageV2?.message ||
+    msg.message?.ephemeralMessage?.message ||
+    msg.message?.templateMessage?.hydratedTemplate ||
+    msg.message?.templateMessage?.hydratedFourRowTemplate ||
+    msg.message?.templateMessage?.fourRowTemplate ||
+    msg.message?.interactiveMessage?.header ||
+    msg.message?.highlyStructuredMessage?.hydratedHsm?.hydratedTemplate ||
+    msg.message
+  )
+}
+
+const getMessageMedia = (message: proto.IMessage) => {
+  return ( 
+      message?.imageMessage ||
+      message?.audioMessage ||
+      message?.videoMessage ||
+      message?.stickerMessage ||
+      message?.documentMessage || null
+  );
+}
+
 const downloadMedia = async (msg: proto.IWebMessageInfo) => {
-  const mineType =
-    msg.message?.imageMessage ||
-    msg.message?.audioMessage ||
-    msg.message?.videoMessage ||
-    msg.message?.stickerMessage ||
-    msg.message?.documentMessage ||
-    msg.message?.documentWithCaptionMessage?.message?.documentMessage ||
-    msg.message?.extendedTextMessage?.contextInfo?.quotedMessage?.imageMessage;
+  const unpackedMessage = getUnpackedMessage(msg);
+  const message = getMessageMedia(unpackedMessage);
+  
+  if (!message) {
+    return null;
+  }
 
   // eslint-disable-next-line no-nested-ternary
-  const messageType = msg.message?.documentMessage || msg.message?.documentWithCaptionMessage
+  const messageType = unpackedMessage?.documentMessage 
     ? "document"
-    : mineType.mimetype.split("/")[0].replace("application", "document")
-      ? (mineType.mimetype
+    : message.mimetype.split("/")[0].replace("application", "document")
+      ? (message.mimetype
         .split("/")[0]
         .replace("application", "document") as MediaType)
-      : (mineType.mimetype.split("/")[0] as MediaType);
+      : (message.mimetype.split("/")[0] as MediaType);
 
   let stream: Transform | undefined;
   let contDownload = 0;
 
   while (contDownload < 10 && !stream) {
     try {
-      const message =
-        msg.message?.audioMessage ||
-        msg.message?.videoMessage ||
-        msg.message?.documentMessage ||
-        msg.message?.documentWithCaptionMessage?.message?.documentMessage ||
-        msg.message?.imageMessage ||
-        msg.message?.stickerMessage ||
-        msg.message?.extendedTextMessage?.contextInfo?.quotedMessage?.imageMessage ||
-        msg.message?.buttonsMessage?.imageMessage ||
-        msg.message?.templateMessage?.fourRowTemplate?.imageMessage ||
-        msg.message?.templateMessage?.hydratedTemplate?.imageMessage ||
-        msg.message?.templateMessage?.hydratedFourRowTemplate?.imageMessage ||
-        msg.message?.interactiveMessage?.header?.imageMessage;
 
       if (message?.directPath) {
         message.url = "";
@@ -301,13 +315,10 @@ const downloadMedia = async (msg: proto.IWebMessageInfo) => {
     throw new Error("Failed to get stream");
   }
 
-  let filename =
-    msg.message?.documentMessage?.fileName ||
-    msg.message?.documentWithCaptionMessage?.message?.documentMessage?.fileName ||
-    "";
+  let filename = unpackedMessage?.documentMessage?.fileName || "";
 
   if (!filename) {
-    const ext = mineType.mimetype.split("/")[1].split(";")[0];
+    const ext = message.mimetype.split("/")[1].split(";")[0];
     filename = `${makeRandomId(5)}-${new Date().getTime()}.${ext}`;
   } else {
     filename = `${filename.split(".").slice(0, -1).join(".")}.${makeRandomId(5)}.${filename.split(".").slice(-1)}`;
@@ -351,7 +362,7 @@ const downloadMedia = async (msg: proto.IWebMessageInfo) => {
 
   const media = {
     data: buffer,
-    mimetype: mineType.mimetype,
+    mimetype: message.mimetype,
     filename
   };
   return media;
@@ -693,7 +704,8 @@ const isValidMsg = (msg: proto.IWebMessageInfo): boolean => {
       msgType === "protocolMessage" ||
       msgType === "listResponseMessage" ||
       msgType === "listMessage" ||
-      msgType === "viewOnceMessage";
+      msgType === "viewOnceMessage" || 
+      msgType === "viewOnceMessageV2";
 
     if (!ifType) {
       logger.warn(`#### Nao achou o type em isValidMsg: ${msgType}
@@ -1290,18 +1302,13 @@ const handleMessage = async (
     const bodyMessage = getBodyMessage(msg);
     const msgType = getTypeMessage(msg);
 
-    const hasMedia =
-      msg.message?.audioMessage ||
-      msg.message?.imageMessage ||
-      msg.message?.videoMessage ||
-      msg.message?.documentMessage ||
-      msg.message?.documentWithCaptionMessage ||
-      msg.message.stickerMessage;
+    const unpackedMessage = getUnpackedMessage(msg);
+    const messageMedia = getMessageMedia(unpackedMessage);
     if (msg.key.fromMe) {
       if (/\u200e/.test(bodyMessage)) return;
 
       if (
-        !hasMedia &&
+        !messageMedia &&
         msgType !== "conversation" &&
         msgType !== "extendedTextMessage" &&
         msgType !== "vcard"
@@ -1418,7 +1425,7 @@ const handleMessage = async (
     }
 
 
-    if (hasMedia) {
+    if (messageMedia) {
       await verifyMediaMessage(msg, ticket, contact);
     } else if (msg.message?.editedMessage?.message?.protocolMessage?.editedMessage) {
       // message edited by Whatsapp App
