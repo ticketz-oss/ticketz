@@ -361,7 +361,7 @@ export default function Options(props) {
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="call-type-label">
-              Aceitar Chamada
+              Chamadas de Voz e Vídeo
             </InputLabel>
             <Select
               labelId="call-type-label"
@@ -370,8 +370,8 @@ export default function Options(props) {
                 handleCallType(e.target.value);
               }}
             >
-              <MenuItem value={"disabled"}>Não Aceitar</MenuItem>
-              <MenuItem value={"enabled"}>Aceitar</MenuItem>
+              <MenuItem value={"disabled"}>Informar indisponibilidade</MenuItem>
+              <MenuItem value={"enabled"}>Ignorar</MenuItem>
             </Select>
             <FormHelperText>
               {loadingCallType && "Atualizando..."}
