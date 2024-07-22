@@ -1325,7 +1325,7 @@ const handleMessage = async (
     const unpackedMessage = getUnpackedMessage(msg);
     const messageMedia = getMessageMedia(unpackedMessage);
     if (msg.key.fromMe) {
-      if (/\u200e/.test(bodyMessage)) return;
+      if (bodyMessage.startsWith("\u200e")) return;
 
       if (
         !messageMedia &&
