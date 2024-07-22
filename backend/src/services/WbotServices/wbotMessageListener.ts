@@ -147,21 +147,35 @@ export const getBodyMessage = (msg: proto.IWebMessageInfo): string | null => {
       viewOnceMessage: getBodyButton(msg) || msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId,
       viewOnceMessageV2: msg.message?.viewOnceMessageV2?.message?.imageMessage?.caption || "",
       stickerMessage: "sticker",
-      contactMessage: msg.message?.contactMessage?.vcard,
-      contactsArrayMessage: "varios contatos",
+      contactMessage: 
+        msg.message?.contactMessage?.vcard &&
+        JSON.stringify(
+          {
+            ticketzvCard: [
+              {
+                displayName: msg.message.contactMessage.displayName,
+                vcard: msg.message.contactMessage.vcard
+              }
+            ]
+          }),
+      contactsArrayMessage: msg.message?.contactsArrayMessage &&
+        JSON.stringify(
+          {
+            ticketzvCard: msg.message.contactsArrayMessage.contacts
+          }),
       // locationMessage: `Latitude: ${msg.message.locationMessage?.degreesLatitude} - Longitude: ${msg.message.locationMessage?.degreesLongitude}`,
       locationMessage: msgLocation(
         msg.message?.locationMessage?.jpegThumbnail,
         msg.message?.locationMessage?.degreesLatitude,
         msg.message?.locationMessage?.degreesLongitude
       ),
-      liveLocationMessage: `Latitude: ${msg.message.liveLocationMessage?.degreesLatitude} - Longitude: ${msg.message.liveLocationMessage?.degreesLongitude}`,
+      liveLocationMessage: `Latitude: ${msg.message?.liveLocationMessage?.degreesLatitude} - Longitude: ${msg.message?.liveLocationMessage?.degreesLongitude}`,
       documentMessage: msg.message?.documentMessage?.title,
       documentWithCaptionMessage: msg.message?.documentWithCaptionMessage?.message?.documentMessage?.caption,
       audioMessage: "Áudio",
       listMessage: getBodyButton(msg) || msg.message.listResponseMessage?.title,
       listResponseMessage: msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId,
-      reactionMessage: msg.message.reactionMessage?.text || "reaction",
+      reactionMessage: msg.message?.reactionMessage?.text || "reaction",
     };
 
     const objKey = Object.keys(types).find(key => key === type);
@@ -177,7 +191,7 @@ export const getBodyMessage = (msg: proto.IWebMessageInfo): string | null => {
   } catch (error) {
     Sentry.setExtra("Error getTypeMessage", { msg, BodyMsg: msg.message });
     Sentry.captureException(error);
-    console.log(error);
+    logger.error({error, msg}, `getBodyMessage: error: ${error?.message}`);
     return null;
   }
 };

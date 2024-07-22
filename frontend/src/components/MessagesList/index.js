@@ -36,7 +36,9 @@ import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import { SocketContext } from "../../context/Socket/SocketContext";
 import { i18n } from "../../translate/i18n";
-
+import vCard from "vcard-parser";
+import { generateColor } from "../../helpers/colorGenerator";
+import { getInitials } from "../../helpers/getInitials";
 
 const useStyles = makeStyles((theme) => ({
   messagesListWrapper: {
@@ -796,66 +798,110 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     );
   };
 
+  const formatVCardN = (n) => {
+    return(
+      (n[3] ? n[3] + " " : "") +
+      (n[1] ? n[1] + " " : "") +
+      (n[2] ? n[2] + " " : "") +
+      (n[0] ? n[0] + " " : "") +
+      (n[4] ? n[4] + " " : "")
+    );
+  }
+
   const isVCard = (message) => {
-    return message.includes('BEGIN:VCARD');
+    return message.startsWith('{"ticketzvCard":');
   };
 
-  const vCard = (message) => {
-    const name = message?.substring(message.indexOf("\nN:;") + 4, message.indexOf(";;;"));
-    const telLine = message?.substring(message.indexOf("\nTEL;") + 5);
-    const description = telLine.substring(telLine.indexOf(":") + 1, telLine.indexOf("\n"));
-    return (
-      <div>
-        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: 20, marginBottom: 20 }}>
-          <Avatar style={{ marginRight: 10, marginLeft: 20, width: 60, height: 60 }} />
-          <div style={{ width: 350 }}>
-            <div>
-              <Typography
-                noWrap
-                component="h4"
-                variant="body2"
-                color="textPrimary"
-                style={{ fontWeight: '700' }}
-              >
-                {name}
-              </Typography>
-            </div>
+  const renderVCard = (vcardJson) => {
+    const cardArray = JSON.parse(vcardJson)?.ticketzvCard;
+    
+    if (!cardArray || !Array.isArray(cardArray)) {
+      return <div>Invalid VCARD data</div>;
+    }
 
+    return cardArray.map((item) => {
+      const message = item?.vcard;
+      if (!message) {
+        return <></>;
+      }
+      const parsedVCard = vCard.parse(message);
+      console.debug("vCard data:", { message , parsedVCard });
+      
+      const name = 
+        parsedVCard['X-WA-BIZ-NAME']?.[0]?.value ||
+        parsedVCard.fn?.[0]?.value ||
+        formatVCardN(parsedVCard.n?.[0]?.value);
+      const description =
+        parsedVCard['X-WA-BIZ-DESCRIPTION']?.[0]?.value || ""
+      const number = parsedVCard?.tel?.[0]?.value;
+      const metaNumber = parsedVCard?.tel?.[0]?.meta?.waid?.[0] || number || "unknown";
+      
+      return (
+        <div>
+          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: 20, marginBottom: 20 }}>
+            <Avatar style={{ backgroundColor: generateColor(metaNumber), marginRight: 10, marginLeft: 20, width: 60, height: 60, color: "white", fontWeight: "bold" }}>{ getInitials(name)}</Avatar>
             <div style={{ width: 350 }}>
-              <Typography
-                component="span"
-                variant="body2"
-                color="textPrimary"
-                style={{ display: 'flex' }}
-              >
-                {description}
-              </Typography>
-            </div>
-          </div>
+              <div>
+                <Typography
+                  noWrap
+                  component="h4"
+                  variant="body2"
+                  color="textPrimary"
+                  style={{ fontWeight: '700' }}
+                >
+                  {name}
+                </Typography>
+              </div>
 
+              <div style={{ width: 350 }}>
+                <Typography
+                  component="span"
+                  variant="body2"
+                  color="textPrimary"
+                  style={{ display: 'flex' }}
+                >
+                  {description}
+                </Typography>
+              </div>
+
+              <div style={{ width: 350 }}>
+                <Typography
+                  component="span"
+                  variant="body2"
+                  color="textPrimary"
+                  style={{ display: 'flex' }}
+                >
+                  {number}
+                </Typography>
+              </div>
+
+            </div>
+
+          </div>
+          <div style={{
+            width: '100%', display: 'none',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginTop: 20,
+            borderWidth: '1px 0 0 0',
+            borderTopColor: '#bdbdbd',
+            borderStyle: 'solid',
+            padding: 8
+          }}>
+            <Typography
+              noWrap
+              component="h4"
+              variant="body2"
+              color="textPrimary"
+              style={{ fontWeight: '700', color: '#2c9ce7' }}
+            >
+              Conversar
+            </Typography>
+          </div>
         </div>
-        <div style={{
-          width: '100%', display: 'none',
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginTop: 20,
-          borderWidth: '1px 0 0 0',
-          borderTopColor: '#bdbdbd',
-          borderStyle: 'solid',
-          padding: 8
-        }}>
-          <Typography
-            noWrap
-            component="h4"
-            variant="body2"
-            color="textPrimary"
-            style={{ fontWeight: '700', color: '#2c9ce7' }}
-          >
-            Conversar
-          </Typography>
-        </div>
-      </div>
-    )
+      )
+
+    });
   };
 
   const messageLocation = (message, createdAt) => {
@@ -914,7 +960,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                     className={[clsx(classes.textContentItem, {
                       [classes.textContentItemEdited]: message.isEdited
                     }), { marginRight: 0 }]}>
-                    {vCard(message.body)}
+                    {renderVCard(message.body)}
                   </div>
 
                   :
@@ -985,7 +1031,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                   :
                   isVCard(message.body) ?
                     <div className={[classes.textContentItem]}>
-                      {vCard(message.body)}
+                      {renderVCard(message.body)}
                     </div>
 
                     :

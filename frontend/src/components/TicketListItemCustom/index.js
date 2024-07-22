@@ -530,7 +530,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
                   </span>
                 ) : (
                 <>
-                  {ticket.lastMessage.includes('data:image/png;base64') ? <MarkdownWrapper> Localização</MarkdownWrapper> : <MarkdownWrapper>{ticket.lastMessage}</MarkdownWrapper>}
+                  {ticket.lastMessage?.includes('data:image/png;base64') ? <MarkdownWrapper> Localização</MarkdownWrapper> : <MarkdownWrapper>{ticket.lastMessage.startsWith('{"ticketzvCard"') ? "🪪" : ticket.lastMessage}</MarkdownWrapper>}
                 </>
               )}
               </Typography>
