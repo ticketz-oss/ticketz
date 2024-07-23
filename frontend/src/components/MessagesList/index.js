@@ -113,6 +113,7 @@ const useStyles = makeStyles((theme) => ({
   quotedMsg: {
     padding: 10,
     maxWidth: 300,
+    width: "100%",
     height: "auto",
     display: "block",
     whiteSpace: "pre-wrap",
@@ -212,16 +213,6 @@ const useStyles = makeStyles((theme) => ({
   textContentItemEdited: {
     overflowWrap: "break-word",
     padding: "3px 120px 6px 6px",
-  },
-
-  messageMedia: {
-    objectFit: "cover",
-    width: 250,
-    height: 200,
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
   },
 
   messageVideo: {
@@ -632,18 +623,21 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
       return (
         <>
           <ModalImageCors imageUrl={message.mediaUrl} isDeleted={message.isDeleted} />
-          {data?.message?.imageMessage?.caption &&
-            <>
-              <Divider />
-              <div className={[clsx({
-                [classes.textContentItemDeleted]: message.isDeleted,
-              }),]}>
-                <MarkdownWrapper >
-                  {data.message.imageMessage.caption}
-                </MarkdownWrapper>
-              </div>
-            </>
-          }
+          <>
+            <div className={[clsx({
+              [classes.textContentItemDeleted]: message.isDeleted,
+              [classes.textContentItem]: !message.isDeleted,
+            }),]}>
+              {data?.message?.imageMessage?.caption &&
+                <>
+                  <Divider />
+                  <MarkdownWrapper>
+                    {data.message.imageMessage.caption}
+                  </MarkdownWrapper>
+                </>
+              }
+            </div>
+          </>
         </>
       )
     }
@@ -685,7 +679,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
               <div className={[clsx({
                 [classes.textContentItemDeleted]: message.isDeleted,
               }),]}>
-                <MarkdownWrapper >
+                <MarkdownWrapper>
                   { message.body }
                 </MarkdownWrapper>
               </div>
@@ -769,6 +763,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
 
   const renderQuotedMessage = (message) => {
     const data = JSON.parse(message.quotedMsg.dataJson);
+    
     const thumbnail = data?.message?.imageMessage?.jpegThumbnail;
     const stickerUrl = data?.message?.stickerMessage && message.quotedMsg?.mediaUrl;
     const imageUrl = thumbnail ? "data:image/png;base64, " + thumbnail : stickerUrl;
@@ -789,7 +784,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
               {message.quotedMsg?.contact?.name}
             </span>
           )}
-          {message.quotedMsg?.body}
+          <MarkdownWrapper>{!message.quotedMsg?.mediaUrl?.endsWith(message.quotedMsg?.body) && message.quotedMsg?.body}</MarkdownWrapper>
         </div>
         {imageUrl && (
           <img className={classes.quotedThumbnail} src={imageUrl} />
@@ -951,8 +946,6 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                 </span>
               )}
 
-              {message.mediaUrl && checkMessageMedia(message, data)}
-
               {message.body.includes('data:image') ? messageLocation(message.body, message.createdAt)
                 :
                 isVCard(message.body) ?
@@ -965,21 +958,27 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
 
                   :
 
-
                   (<div className={[clsx(classes.textContentItem, {
                     [classes.textContentItemDeleted]: message.isDeleted,
                     [classes.textContentItemEdited]: message.isEdited
                   }),]}>
                     {message.quotedMsg && renderQuotedMessage(message)}
-                    {message.isDeleted && (
-                      <Block
-                        color="disabled"
-                        fontSize="small"
-                        className={classes.deletedIcon}
-                      />
-                    )}
                     {!isSticker && (
-                      message.mediaUrl ? "" : <MarkdownWrapper>{message.body}</MarkdownWrapper>
+                      message.mediaUrl ?
+                        ""
+                        :
+                        <>
+                          {message.isDeleted && (
+                            <Block
+                              color="disabled"
+                              fontSize="small"
+                              className={classes.deletedIcon}
+                            />
+                          )}
+                          <MarkdownWrapper>
+                            {message.body}
+                          </MarkdownWrapper>
+                        </>
                     )
                     }
                     <span className={[clsx(classes.timestamp, {
@@ -989,6 +988,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                       {format(parseISO(message.createdAt), "HH:mm")}
                     </span>
                   </div>)}
+                  {message.mediaUrl && checkMessageMedia(message, data)}
             </div>
           </React.Fragment>
         );
@@ -1013,7 +1013,6 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
               >
                 <ExpandMore />
               </IconButton>
-              {message.mediaUrl && checkMessageMedia(message, data)}
               <div
                 className={clsx(classes.textContentItem, {
                   [classes.textContentItemDeleted]: message.isDeleted,
@@ -1048,6 +1047,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                   {renderMessageAck(message)}
                 </span>
               </div>
+              {message.mediaUrl && checkMessageMedia(message, data)}
             </div>
           </React.Fragment>
         );
