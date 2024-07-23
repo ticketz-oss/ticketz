@@ -264,7 +264,6 @@ const getContactMessage = async (msg: proto.IWebMessageInfo, wbot: Session) => {
 const getUnpackedMessage = (msg: proto.IWebMessageInfo) => {
   return (
     msg.message?.documentWithCaptionMessage?.message ||
-    msg.message?.extendedTextMessage?.contextInfo?.quotedMessage ||
     msg.message?.ephemeralMessage?.message ||
     msg.message?.viewOnceMessage?.message ||
     msg.message?.viewOnceMessageV2?.message ||
