@@ -1460,7 +1460,6 @@ const handleMessage = async (
       return;
     }
 
-    const currentSchedule = await VerifyCurrentSchedule(companyId);
     const scheduleType = await Setting.findOne({
       where: {
         companyId,
@@ -1471,6 +1470,10 @@ const handleMessage = async (
 
     try {
       if (!msg.key.fromMe && scheduleType) {
+        let currentSchedule: ScheduleResult = null;
+        if (scheduleType.value === "company") {
+          currentSchedule = await VerifyCurrentSchedule(companyId);
+        }
         /**
          * Tratamento para envio de mensagem quando a empresa está fora do expediente
          */
@@ -1498,57 +1501,36 @@ const handleMessage = async (
           return;
         }
 
-
         if (scheduleType.value === "queue" && ticket.queueId !== null) {
-
           /**
            * Tratamento para envio de mensagem quando a fila está fora do expediente
            */
+          if (scheduleType.value === "queue") {
+            currentSchedule = await VerifyCurrentSchedule(companyId, ticket.queueId);
+          }
           const queue = await Queue.findByPk(ticket.queueId);
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const { schedules }: any = queue;
-          const now = moment();
-          const weekday = now.format("dddd").toLowerCase();
-          let schedule = null;
-
-          if (Array.isArray(schedules) && schedules.length > 0) {
-            schedule = schedules.find(
-              s =>
-                s.weekdayEn === weekday &&
-                s.startTime !== "" &&
-                s.startTime !== null &&
-                s.endTime !== "" &&
-                s.endTime !== null
-            );
-          }
-
           if (
-            scheduleType.value === "queue" &&
-            !isNil(schedule)
+            !isNil(currentSchedule) &&
+            (!currentSchedule || currentSchedule.inActivity === false)
           ) {
-            const startTime = moment(schedule.startTime, "HH:mm");
-            const endTime = moment(schedule.endTime, "HH:mm");
-
-            if (now.isBefore(startTime) || now.isAfter(endTime)) {
-              const outOfHoursMessage = queue.outOfHoursMessage?.trim() || "Estamos fora do horário de expediente";
-              const body = `${outOfHoursMessage}`;
-              const debouncedSentMessage = debounce(
-                async () => {
-                  await wbot.sendMessage(
-                    `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"
-                    }`,
-                    {
-                      text: body
-                    }
-                  );
-                },
-                3000,
-                ticket.id
-              );
-              debouncedSentMessage();
-              return;
-            }
+            const outOfHoursMessage = queue.outOfHoursMessage?.trim() || "Estamos fora do horário de expediente";
+            const body = `${outOfHoursMessage}`;
+            const debouncedSentMessage = debounce(
+              async () => {
+                await wbot.sendMessage(
+                  `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"
+                  }`,
+                  {
+                    text: body
+                  }
+                );
+              },
+              3000,
+              ticket.id
+            );
+            debouncedSentMessage();
+            return;
           }
         }
 
@@ -1587,39 +1569,19 @@ const handleMessage = async (
 
     try {
       // Fluxo fora do expediente
-      if (!msg.key.fromMe && scheduleType && ticket.queueId !== null) {
-        /**
-         * Tratamento para envio de mensagem quando a fila está fora do expediente
-         */
-        const queue = await Queue.findByPk(ticket.queueId);
+      if (!msg.key.fromMe && scheduleType.value === "queue" && ticket.queueId !== null) {
+          /**
+           * Tratamento para envio de mensagem quando a fila está fora do expediente
+           */
+          const currentSchedule = await VerifyCurrentSchedule(companyId, ticket.queueId);
+          const queue = await Queue.findByPk(ticket.queueId);
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { schedules }: any = queue;
-        const now = moment();
-        const weekday = now.format("dddd").toLowerCase();
-        let schedule = null;
-
-        if (Array.isArray(schedules) && schedules.length > 0) {
-          schedule = schedules.find(
-            s =>
-              s.weekdayEn === weekday &&
-              s.startTime !== "" &&
-              s.startTime !== null &&
-              s.endTime !== "" &&
-              s.endTime !== null
-          );
-        }
-
-        if (
-          scheduleType.value === "queue" &&
-          !isNil(schedule)
-        ) {
-          const startTime = moment(schedule.startTime, "HH:mm");
-          const endTime = moment(schedule.endTime, "HH:mm");
-
-          if (now.isBefore(startTime) || now.isAfter(endTime)) {
+          if (
+            !isNil(currentSchedule) &&
+            (!currentSchedule || currentSchedule.inActivity === false)
+          ) {
             const outOfHoursMessage = queue.outOfHoursMessage?.trim() || "Estamos fora do horário de expediente";
-            const body = outOfHoursMessage;
+            const body = `${outOfHoursMessage}`;
             const debouncedSentMessage = debounce(
               async () => {
                 await wbot.sendMessage(
@@ -1636,7 +1598,6 @@ const handleMessage = async (
             debouncedSentMessage();
             return;
           }
-        }
       }
     } catch (e) {
       Sentry.captureException(e);
