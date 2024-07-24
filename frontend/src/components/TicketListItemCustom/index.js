@@ -93,7 +93,6 @@ const useStyles = makeStyles((theme) => ({
   },
 
   contactLastMessage: {
-    paddingRight: "50%",
   },
 
   newMessagesCount: {
