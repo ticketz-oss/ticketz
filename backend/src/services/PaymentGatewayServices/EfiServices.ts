@@ -277,6 +277,7 @@ export const efiCreateSubscription = async (
     const efiPay = new EfiPay(efiOptions);
     const pix = await efiPay.pixCreateImmediateCharge([], body);
     await invoice.update({
+      value: price,
       txId: pix.txid,
       payGw: "efi",
       payGwData: JSON.stringify(pix)

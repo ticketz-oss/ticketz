@@ -202,6 +202,7 @@ export const owenCreateSubscription = async (
       qrData
     );
     invoice.update({
+      value: price,
       txId: qrResult.data.data.qrcodeId,
       payGw: "owen",
       payGwData: JSON.stringify(qrResult.data.data)
