@@ -173,7 +173,7 @@ export const getBodyMessage = (msg: proto.IWebMessageInfo): string | null => {
       documentMessage: msg.message?.documentMessage?.title,
       documentWithCaptionMessage: msg.message?.documentWithCaptionMessage?.message?.documentMessage?.caption,
       audioMessage: "Áudio",
-      listMessage: getBodyButton(msg) || msg.message.listResponseMessage?.title,
+      listMessage: getBodyButton(msg) || msg.message?.listResponseMessage?.title,
       listResponseMessage: msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId,
       reactionMessage: msg.message?.reactionMessage?.text || "reaction",
     };
