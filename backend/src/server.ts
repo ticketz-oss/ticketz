@@ -5,7 +5,10 @@ import { logger } from "./utils/logger";
 import { StartAllWhatsAppsSessions } from "./services/WbotServices/StartAllWhatsAppsSessions";
 import Company from "./models/Company";
 import { startQueueProcess } from "./queues";
-import { checkOpenInvoices, payGatewayInitialize } from "./services/PaymentGatewayServices/PaymentGatewayServices";
+import {
+  checkOpenInvoices,
+  payGatewayInitialize
+} from "./services/PaymentGatewayServices/PaymentGatewayServices";
 
 // Environment Variable Validation
 if (!process.env.PORT) {
@@ -17,12 +20,14 @@ if (!process.env.PORT) {
 async function startServer() {
   try {
     const companies = await Company.findAll();
-    const sessionPromises = companies.map(async (company) => {
+    const sessionPromises = companies.map(async company => {
       try {
         await StartAllWhatsAppsSessions(company.id);
         logger.info(`Started WhatsApp session for company ID: ${company.id}`);
       } catch (error) {
-        logger.error(`Error starting WhatsApp session for company ID: ${company.id} - ${error.message}`);
+        logger.error(
+          `Error starting WhatsApp session for company ID: ${company.id} - ${error.message}`
+        );
       }
     });
 
@@ -65,7 +70,7 @@ gracefulShutdown(server, {
 });
 
 // Global Exception Handlers
-process.on("uncaughtException", (err) => {
+process.on("uncaughtException", err => {
   logger.error({ err }, `Uncaught Exception: ${err.message}`);
   process.exit(1);
 });
@@ -73,5 +78,5 @@ process.on("uncaughtException", (err) => {
 // Global Exception Handlers for logging only
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 process.on("unhandledRejection", (reason: any, promise) => {
-  logger.debug({ promise , reason }, "Unhandled Rejection");
+  logger.debug({ promise, reason }, "Unhandled Rejection");
 });
