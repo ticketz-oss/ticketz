@@ -49,7 +49,11 @@ import {
   efiInitialize,
   efiWebhook
 } from "./EfiServices";
-import { owenCreateSubscription, owenWebhook } from "./OwenServices";
+import {
+  owenCheckStatus,
+  owenCreateSubscription,
+  owenWebhook
+} from "./OwenServices";
 import Invoices from "../../models/Invoices";
 import { getIO } from "../../libs/socket";
 import Company from "../../models/Company";
@@ -62,7 +66,7 @@ export const payGatewayInitialize = async () => {
   if (paymentGateway === "efi") {
     return efiInitialize();
   }
-  throw new AppError("Unsupported payment gateway", 400);
+  return null;
 };
 
 export const payGatewayCreateSubscription = async (
@@ -158,6 +162,8 @@ export const processInvoiceExpired = async (invoice: Invoices) => {
 export const checkInvoicePayment = async (invoice: Invoices) => {
   if (invoice.payGw === "efi") {
     efiCheckStatus(invoice);
+  } else if (invoice.payGw === "owen") {
+    owenCheckStatus(invoice);
   }
 };
 

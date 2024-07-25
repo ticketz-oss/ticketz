@@ -60,6 +60,14 @@ interface OwenConfig {
   secretkey: string;
 }
 
+const owenLoadConfig = async (): Promise<OwenConfig> => {
+  return {
+    user: await GetSuperSettingService({ key: "_owenCnpj" }),
+    password: await GetSuperSettingService({ key: "_owenToken" }),
+    secretkey: await GetSuperSettingService({ key: "_owenSecretKey" })
+  };
+};
+
 export const owenWebhook = async (
   req: Request,
   res: Response
@@ -104,10 +112,14 @@ export const owenWebhook = async (
 };
 
 export const owenCheckStatus = async (
-  owenConfig: OwenConfig,
-  invoice: Invoices
+  invoice: Invoices,
+  owenConfig: OwenConfig = null
 ): Promise<boolean> => {
   try {
+    if (!owenConfig) {
+      owenConfig = await owenLoadConfig();
+    }
+
     const txDetail = await axios.get(`${owenBaseURL}/api/v1/qrstatus`, {
       params: {
         qrcodeId: invoice.txId,
@@ -150,7 +162,7 @@ const owenPollCheckStatus = async (
       return;
     }
 
-    const successful = await owenCheckStatus(owenConfig, invoice);
+    const successful = await owenCheckStatus(invoice, owenConfig);
     if (successful) {
       return;
     }
@@ -177,11 +189,7 @@ export const owenCreateSubscription = async (
 ): Promise<Response> => {
   const { price, invoiceId } = req.body;
 
-  const owenConfig: OwenConfig = {
-    user: await GetSuperSettingService({ key: "_owenCnpj" }),
-    password: await GetSuperSettingService({ key: "_owenToken" }),
-    secretkey: await GetSuperSettingService({ key: "_owenSecretKey" })
-  };
+  const owenConfig: OwenConfig = await owenLoadConfig();
 
   const qrData = {
     params: {
