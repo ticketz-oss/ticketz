@@ -288,7 +288,7 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
                 "Received contact presence"
               );
               if (!presences[remoteJid]?.lastKnownPresence) {
-                console.debug("Received invalid presence");
+                // ignore presence from groups
                 return;
               }
               const contact = await Contact.findOne({
