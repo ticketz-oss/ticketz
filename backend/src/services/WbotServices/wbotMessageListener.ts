@@ -53,7 +53,7 @@ import { cacheLayer } from "../../libs/cache";
 import { debounce } from "../../helpers/Debounce";
 import { getMessageOptions } from "./SendWhatsAppMedia";
 import { makeRandomId } from "../../helpers/MakeRandomId";
-import { GetCompanySetting } from "../../helpers/CheckSettings";
+import CheckSettings, { GetCompanySetting } from "../../helpers/CheckSettings";
 import Whatsapp from "../../models/Whatsapp";
 
 type Session = WASocket & {
@@ -287,12 +287,30 @@ const getMessageMedia = (message: proto.IMessage) => {
   );
 }
 
-const downloadMedia = async (msg: proto.IWebMessageInfo) => {
+const downloadMedia = async (msg: proto.IWebMessageInfo, wbot: Session, ticket: Ticket) => {
   const unpackedMessage = getUnpackedMessage(msg);
   const message = getMessageMedia(unpackedMessage);
   
   if (!message) {
     return null;
+  }
+
+  const fileLimit = parseInt(await CheckSettings("downloadLimit", "15"), 10);
+  if (wbot && message?.fileLength && +message.fileLength > fileLimit*1024*1024) {
+    const fileLimitMessage = {
+      text: `\u200e*Mensagem Automática*:\nNosso sistema aceita apenas arquivos com no máximo ${fileLimit} MiB`
+    };
+    
+    const sendMsg = await wbot.sendMessage(
+      `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
+      fileLimitMessage
+    );
+
+    sendMsg.message.extendedTextMessage.text = "\u200e*Mensagem do sistema*:\nArquivo recebido além do limite de tamanho do sistema, se for necessário ele pode ser obtido no aplicativo do whatsapp.";
+
+    // eslint-disable-next-line no-use-before-define
+    await verifyMessage(sendMsg, ticket, ticket.contact);
+    throw new Error("ERR_FILESIZE_OVER_LIMIT");
   }
 
   // eslint-disable-next-line no-nested-ternary
@@ -429,11 +447,12 @@ const verifyQuotedMessage = async (
 const verifyMediaMessage = async (
   msg: proto.IWebMessageInfo,
   ticket: Ticket,
-  contact: Contact
+  contact: Contact,
+  wbot: Session = null
 ): Promise<Message> => {
   const io = getIO();
   const quotedMsg = await verifyQuotedMessage(msg);
-  const media = await downloadMedia(msg);
+  const media = await downloadMedia(msg, wbot, ticket);
 
   if (!media) {
     throw new Error("ERR_WAPP_DOWNLOAD_MEDIA");
@@ -1443,7 +1462,7 @@ const handleMessage = async (
 
 
     if (messageMedia) {
-      await verifyMediaMessage(msg, ticket, contact);
+      await verifyMediaMessage(msg, ticket, contact, wbot);
     } else if (msg.message?.editedMessage?.message?.protocolMessage?.editedMessage) {
       // message edited by Whatsapp App
       await verifyEditedMessage(msg.message.editedMessage.message.protocolMessage.editedMessage, ticket, msg.message.editedMessage.message.protocolMessage.key.id);
