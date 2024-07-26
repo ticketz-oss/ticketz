@@ -17,7 +17,7 @@ It is practically impossible to identify and credit the authors of the improveme
 
 As I am making these changes and providing them at no cost, I want them to be available to everyone. Therefore, I am choosing to relicense under the AGPL, which requires that every user who has access to the system can obtain the source code.
 
-Therefore, if you directly utilize this version, it is **very important to keep the link on the "About Ticketz" screen, which provides access to the repository**. If you wish, you can move the link to the source code elsewhere, but it must be easily accessible to any system user.
+Therefore, if you directly utilize this version, it is **very important to keep the link on the "About Meuzap" screen, which provides access to the repository**. If you wish, you can move the link to the source code elsewhere, but it must be easily accessible to any system user.
 
 If you make changes to the code, you must change the link to a repository or another way to obtain the code for your changes.
 

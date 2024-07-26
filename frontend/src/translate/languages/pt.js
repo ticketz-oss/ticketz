@@ -640,18 +640,18 @@ const messages = {
       },
       about: {
         aboutthe: "Sobre o",
-        copyright: "© 2024 - Funcionando com ticketz",
+        copyright: "© 2024 - Funcionando com chatzap",
         buttonclose: "Fechar",
-        title: "Sobre o ticketz",
+        title: "Sobre o chatzap",
         abouttitle: "Origem e melhorias",
-        aboutdetail: "O ticketz é derivado indireto do projeto Whaticket com melhorias compartilhadas pelos desenvolvedores do sistema EquipeChat através do canal VemFazer no youtube, posteriormente melhoradas por Claudemir Todo Bom",
-        aboutauthorsite: "Site do autor",
-        aboutwhaticketsite: "Site do Whaticket Community no Github",
-        aboutvemfazersite: "Site do canal Vem Fazer no Github",
+        aboutdetail: "O chatzap é um sistema em modo Saas, voltado para atendimento de whatsApp, nele você pode ter varios atendentes, e varias conexões de whatsApp",
+        aboutauthorsite:"",
+        aboutwhaticketsite: "",
+        aboutvemfazersite: "",
         licenseheading: "Licença em Código Aberto",
-        licensedetail: "O ticketz está licenciado sob a GNU Affero General Public License versão 3, isso significa que qualquer usuário que tiver acesso a esta aplicação tem o direito de obter acesso ao código fonte. Mais informações nos links abaixo:",
-        licensefulltext: "Texto completo da licença",
-        licensesourcecode: "Código fonte do ticketz"
+        licensedetail: "O chatzap está licenciado sob a GNU Affero General Public License versão 3.",
+        licensefulltext: "",
+        licensesourcecode: ""
       },
       schedules: {
         title: "Agendamentos",
