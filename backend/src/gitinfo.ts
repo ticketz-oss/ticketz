@@ -1,5 +1,7 @@
 export const GitInfo = {
   commitHash: "N/A",
+  commitTimestamp: "N/A",
   branchName: "N/A",
-  tagName: "N/A"
+  tagName: "N/A",
+  buildTimestamp: "N/A"
 };
