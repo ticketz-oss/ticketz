@@ -36,15 +36,19 @@ jobs:
           cat <<EOT > backend/src/gitinfo.ts
           export const GitInfo = {
               commitHash: "$(git rev-parse --short HEAD)",
+              commitTimestamp: "$(date -u -d "$(git log -1 --format=%cI)" +'%Y-%m-%dT%H:%M:%SZ')",
               branchName: "$(git rev-parse --abbrev-ref HEAD)",
-              tagName: "$(git describe --tags --abbrev=0 2>/dev/null || echo 'N/A')"
+              tagName: "$(git describe --tags --abbrev=0 2>/dev/null || echo 'N/A')",
+              buildTimestamp: "$(date -u +"%Y-%m-%dT%H:%M:%SZ)"
           };
           EOT
           cat <<EOT > frontend/public/gitinfo.json
           {
               "commitHash": "$(git rev-parse --short HEAD)",
+              "commitTimestamp": "$(date -u -d "$(git log -1 --format=%cI)" +'%Y-%m-%dT%H:%M:%SZ')",
               "branchName": "$(git rev-parse --abbrev-ref HEAD)",
-              "tagName": "$(git describe --tags --abbrev=0 2>/dev/null || echo 'N/A')"
+              "tagName": "$(git describe --tags --abbrev=0 2>/dev/null || echo 'N/A')",
+              "buildTimestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ)"
           };
           EOT
 
