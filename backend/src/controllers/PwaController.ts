@@ -26,7 +26,7 @@ export const manifest = async (
     name: appName || "Ticketz - Chat Based Ticket System",
     icons: [
       {
-        src: logoFavicon ? `/backend/${logoFavicon}` : "/vector/favicon.svg",
+        src: logoFavicon ? `/backend/public/${logoFavicon}` : "/vector/favicon.svg",
         sizes: "512x512 192x192 64x64 32x32 24x24 16x16",
         type: mimeFavicon
       }
