@@ -14,7 +14,7 @@ export const manifest = async (
     ico: "image/x-icon"
   };
 
-  let mimeFavicon = "image/x-icon";
+  let mimeFavicon = "image/svg+xml";
 
   if (logoFavicon) {
     const extension = logoFavicon.split(".").pop();
