@@ -49,7 +49,7 @@ jobs:
               "branchName": "$(git rev-parse --abbrev-ref HEAD)",
               "tagName": "$(git describe --tags --abbrev=0 2>/dev/null || echo 'N/A')",
               "buildTimestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-          };
+          }
           EOT
 
       - name: Log in to the Container registry
