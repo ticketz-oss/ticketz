@@ -66,15 +66,15 @@ Antes de começar, você deve completar esta lista de verificação:
 
 - [ ] Ter um servidor limpo rodando Ubuntu 20 ou mais recente
 - [ ] Portas 80 e 443 disponíveis e não filtradas pelo firewall
-- [ ] Dois nomes de host com DNS configurado apontando para o seu servidor (um para o backend e outro para o frontend)
+- [ ] Um nome de host com DNS configurado apontando para o seu servidor
 
 Após isso, basta fazer login no seu servidor e emitir o seguinte comando, substituindo os nomes de host que você já configurou e seu endereço de email:
 
 ```bash
-curl -sSL get.ticke.tz | sudo bash -s backend.exemplo.com frontend.exemplo.com nome@exemplo.com
+curl -sSL get.ticke.tz | sudo bash -s app.exemplo.com nome@exemplo.com
 ```
 
-Após alguns minutos, você terá o servidor rodando no nome que você deu para o host do frontend.
+Após alguns minutos, você terá o servidor rodando no nome que você deu para o host.
 
 O login padrão é `admin@admin.com` e a senha padrão é `123456`, você deve alterá-la imediatamente.
 
