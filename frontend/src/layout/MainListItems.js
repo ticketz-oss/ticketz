@@ -43,6 +43,10 @@ import { isArray } from "lodash";
 import api from "../services/api";
 import toastError from "../errors/toastError";
 import { makeStyles } from "@material-ui/core/styles";
+import Typography from "@material-ui/core/Typography";
+import { loadJSON } from "../helpers/loadJSON";
+
+const gitinfo = loadJSON('/gitinfo.json');
 
 
 const useStyles = makeStyles((theme) => ({
@@ -146,6 +150,7 @@ const MainListItems = (props) => {
   const [pageNumber, setPageNumber] = useState(1);
   const [searchParam] = useState("");
   const [chats, dispatch] = useReducer(reducer, []);
+  const [version, setVersion] = useState("v N/A");
 
   const socketManager = useContext(SocketContext);
 
@@ -472,7 +477,7 @@ const MainListItems = (props) => {
               <ListItemIcon></ListItemIcon>
               <ListItemText primary={i18n.t("mainDrawer.listItems.logout")}
             />
-            </ListItem>
+
           {}
 
           </>

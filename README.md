@@ -44,15 +44,15 @@ Before starting you must complete this checklist:
 
 - [ ] Have a clean server running Ubuntu 20 or newer
 - [ ] Ports 80 and 443 available and not filtered by firewall
-- [ ] Two hostnames with configured DNS pointing to your server (one for the backend and another for the frontend)
+- [ ] One hostname with configured DNS pointing to your server
 
 After this, just log in to your server and issue the following command, replacing the hostnames you already configured and your email address:
 
 ```bash
-curl -sSL get.ticke.tz | sudo bash -s backend.example.com frontend.example.com name@example.com
+curl -sSL get.ticke.tz | sudo bash -s app.example.com name@example.com
 ```
 
-After a few minutes you will have the server running at the name you gave to the frontend host.
+After a few minutes you will have the server running at the hostname you defined.
 
 The default login is `admin@admin.com` and the default password is `123456`, you must change it right away.
 

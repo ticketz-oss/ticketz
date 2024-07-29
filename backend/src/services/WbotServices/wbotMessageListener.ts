@@ -53,7 +53,7 @@ import { cacheLayer } from "../../libs/cache";
 import { debounce } from "../../helpers/Debounce";
 import { getMessageOptions } from "./SendWhatsAppMedia";
 import { makeRandomId } from "../../helpers/MakeRandomId";
-import { GetCompanySetting } from "../../helpers/CheckSettings";
+import CheckSettings, { GetCompanySetting } from "../../helpers/CheckSettings";
 import Whatsapp from "../../models/Whatsapp";
 
 type Session = WASocket & {
@@ -147,21 +147,35 @@ export const getBodyMessage = (msg: proto.IWebMessageInfo): string | null => {
       viewOnceMessage: getBodyButton(msg) || msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId,
       viewOnceMessageV2: msg.message?.viewOnceMessageV2?.message?.imageMessage?.caption || "",
       stickerMessage: "sticker",
-      contactMessage: msg.message?.contactMessage?.vcard,
-      contactsArrayMessage: "varios contatos",
+      contactMessage: 
+        msg.message?.contactMessage?.vcard &&
+        JSON.stringify(
+          {
+            ticketzvCard: [
+              {
+                displayName: msg.message.contactMessage.displayName,
+                vcard: msg.message.contactMessage.vcard
+              }
+            ]
+          }),
+      contactsArrayMessage: msg.message?.contactsArrayMessage &&
+        JSON.stringify(
+          {
+            ticketzvCard: msg.message.contactsArrayMessage.contacts
+          }),
       // locationMessage: `Latitude: ${msg.message.locationMessage?.degreesLatitude} - Longitude: ${msg.message.locationMessage?.degreesLongitude}`,
       locationMessage: msgLocation(
         msg.message?.locationMessage?.jpegThumbnail,
         msg.message?.locationMessage?.degreesLatitude,
         msg.message?.locationMessage?.degreesLongitude
       ),
-      liveLocationMessage: `Latitude: ${msg.message.liveLocationMessage?.degreesLatitude} - Longitude: ${msg.message.liveLocationMessage?.degreesLongitude}`,
+      liveLocationMessage: `Latitude: ${msg.message?.liveLocationMessage?.degreesLatitude} - Longitude: ${msg.message?.liveLocationMessage?.degreesLongitude}`,
       documentMessage: msg.message?.documentMessage?.title,
       documentWithCaptionMessage: msg.message?.documentWithCaptionMessage?.message?.documentMessage?.caption,
       audioMessage: "Áudio",
-      listMessage: getBodyButton(msg) || msg.message.listResponseMessage?.title,
+      listMessage: getBodyButton(msg) || msg.message?.listResponseMessage?.title,
       listResponseMessage: msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId,
-      reactionMessage: msg.message.reactionMessage?.text || "reaction",
+      reactionMessage: msg.message?.reactionMessage?.text || "reaction",
     };
 
     const objKey = Object.keys(types).find(key => key === type);
@@ -177,7 +191,7 @@ export const getBodyMessage = (msg: proto.IWebMessageInfo): string | null => {
   } catch (error) {
     Sentry.setExtra("Error getTypeMessage", { msg, BodyMsg: msg.message });
     Sentry.captureException(error);
-    console.log(error);
+    logger.error({error, msg}, `getBodyMessage: error: ${error?.message}`);
     return null;
   }
 };
@@ -250,7 +264,6 @@ const getContactMessage = async (msg: proto.IWebMessageInfo, wbot: Session) => {
 const getUnpackedMessage = (msg: proto.IWebMessageInfo) => {
   return (
     msg.message?.documentWithCaptionMessage?.message ||
-    msg.message?.extendedTextMessage?.contextInfo?.quotedMessage ||
     msg.message?.ephemeralMessage?.message ||
     msg.message?.viewOnceMessage?.message ||
     msg.message?.viewOnceMessageV2?.message ||
@@ -274,12 +287,30 @@ const getMessageMedia = (message: proto.IMessage) => {
   );
 }
 
-const downloadMedia = async (msg: proto.IWebMessageInfo) => {
+const downloadMedia = async (msg: proto.IWebMessageInfo, wbot: Session, ticket: Ticket) => {
   const unpackedMessage = getUnpackedMessage(msg);
   const message = getMessageMedia(unpackedMessage);
   
   if (!message) {
     return null;
+  }
+
+  const fileLimit = parseInt(await CheckSettings("downloadLimit", "15"), 10);
+  if (wbot && message?.fileLength && +message.fileLength > fileLimit*1024*1024) {
+    const fileLimitMessage = {
+      text: `\u200e*Mensagem Automática*:\nNosso sistema aceita apenas arquivos com no máximo ${fileLimit} MiB`
+    };
+    
+    const sendMsg = await wbot.sendMessage(
+      `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
+      fileLimitMessage
+    );
+
+    sendMsg.message.extendedTextMessage.text = "\u200e*Mensagem do sistema*:\nArquivo recebido além do limite de tamanho do sistema, se for necessário ele pode ser obtido no aplicativo do whatsapp.";
+
+    // eslint-disable-next-line no-use-before-define
+    await verifyMessage(sendMsg, ticket, ticket.contact);
+    throw new Error("ERR_FILESIZE_OVER_LIMIT");
   }
 
   // eslint-disable-next-line no-nested-ternary
@@ -416,11 +447,12 @@ const verifyQuotedMessage = async (
 const verifyMediaMessage = async (
   msg: proto.IWebMessageInfo,
   ticket: Ticket,
-  contact: Contact
+  contact: Contact,
+  wbot: Session = null
 ): Promise<Message> => {
   const io = getIO();
   const quotedMsg = await verifyQuotedMessage(msg);
-  const media = await downloadMedia(msg);
+  const media = await downloadMedia(msg, wbot, ticket);
 
   if (!media) {
     throw new Error("ERR_WAPP_DOWNLOAD_MEDIA");
@@ -1311,7 +1343,7 @@ const handleMessage = async (
     const unpackedMessage = getUnpackedMessage(msg);
     const messageMedia = getMessageMedia(unpackedMessage);
     if (msg.key.fromMe) {
-      if (/\u200e/.test(bodyMessage)) return;
+      if (bodyMessage.startsWith("\u200e")) return;
 
       if (
         !messageMedia &&
@@ -1430,7 +1462,7 @@ const handleMessage = async (
 
 
     if (messageMedia) {
-      await verifyMediaMessage(msg, ticket, contact);
+      await verifyMediaMessage(msg, ticket, contact, wbot);
     } else if (msg.message?.editedMessage?.message?.protocolMessage?.editedMessage) {
       // message edited by Whatsapp App
       await verifyEditedMessage(msg.message.editedMessage.message.protocolMessage.editedMessage, ticket, msg.message.editedMessage.message.protocolMessage.key.id);
@@ -1447,7 +1479,6 @@ const handleMessage = async (
       return;
     }
 
-    const currentSchedule = await VerifyCurrentSchedule(companyId);
     const scheduleType = await Setting.findOne({
       where: {
         companyId,
@@ -1458,6 +1489,10 @@ const handleMessage = async (
 
     try {
       if (!msg.key.fromMe && scheduleType) {
+        let currentSchedule: ScheduleResult = null;
+        if (scheduleType.value === "company") {
+          currentSchedule = await VerifyCurrentSchedule(companyId);
+        }
         /**
          * Tratamento para envio de mensagem quando a empresa está fora do expediente
          */
@@ -1485,57 +1520,36 @@ const handleMessage = async (
           return;
         }
 
-
         if (scheduleType.value === "queue" && ticket.queueId !== null) {
-
           /**
            * Tratamento para envio de mensagem quando a fila está fora do expediente
            */
+          if (scheduleType.value === "queue") {
+            currentSchedule = await VerifyCurrentSchedule(companyId, ticket.queueId);
+          }
           const queue = await Queue.findByPk(ticket.queueId);
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const { schedules }: any = queue;
-          const now = moment();
-          const weekday = now.format("dddd").toLowerCase();
-          let schedule = null;
-
-          if (Array.isArray(schedules) && schedules.length > 0) {
-            schedule = schedules.find(
-              s =>
-                s.weekdayEn === weekday &&
-                s.startTime !== "" &&
-                s.startTime !== null &&
-                s.endTime !== "" &&
-                s.endTime !== null
-            );
-          }
-
           if (
-            scheduleType.value === "queue" &&
-            !isNil(schedule)
+            !isNil(currentSchedule) &&
+            (!currentSchedule || currentSchedule.inActivity === false)
           ) {
-            const startTime = moment(schedule.startTime, "HH:mm");
-            const endTime = moment(schedule.endTime, "HH:mm");
-
-            if (now.isBefore(startTime) || now.isAfter(endTime)) {
-              const outOfHoursMessage = queue.outOfHoursMessage?.trim() || "Estamos fora do horário de expediente";
-              const body = `${outOfHoursMessage}`;
-              const debouncedSentMessage = debounce(
-                async () => {
-                  await wbot.sendMessage(
-                    `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"
-                    }`,
-                    {
-                      text: body
-                    }
-                  );
-                },
-                3000,
-                ticket.id
-              );
-              debouncedSentMessage();
-              return;
-            }
+            const outOfHoursMessage = queue.outOfHoursMessage?.trim() || "Estamos fora do horário de expediente";
+            const body = `${outOfHoursMessage}`;
+            const debouncedSentMessage = debounce(
+              async () => {
+                await wbot.sendMessage(
+                  `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"
+                  }`,
+                  {
+                    text: body
+                  }
+                );
+              },
+              3000,
+              ticket.id
+            );
+            debouncedSentMessage();
+            return;
           }
         }
 
@@ -1574,39 +1588,19 @@ const handleMessage = async (
 
     try {
       // Fluxo fora do expediente
-      if (!msg.key.fromMe && scheduleType && ticket.queueId !== null) {
-        /**
-         * Tratamento para envio de mensagem quando a fila está fora do expediente
-         */
-        const queue = await Queue.findByPk(ticket.queueId);
+      if (!msg.key.fromMe && scheduleType.value === "queue" && ticket.queueId !== null) {
+          /**
+           * Tratamento para envio de mensagem quando a fila está fora do expediente
+           */
+          const currentSchedule = await VerifyCurrentSchedule(companyId, ticket.queueId);
+          const queue = await Queue.findByPk(ticket.queueId);
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { schedules }: any = queue;
-        const now = moment();
-        const weekday = now.format("dddd").toLowerCase();
-        let schedule = null;
-
-        if (Array.isArray(schedules) && schedules.length > 0) {
-          schedule = schedules.find(
-            s =>
-              s.weekdayEn === weekday &&
-              s.startTime !== "" &&
-              s.startTime !== null &&
-              s.endTime !== "" &&
-              s.endTime !== null
-          );
-        }
-
-        if (
-          scheduleType.value === "queue" &&
-          !isNil(schedule)
-        ) {
-          const startTime = moment(schedule.startTime, "HH:mm");
-          const endTime = moment(schedule.endTime, "HH:mm");
-
-          if (now.isBefore(startTime) || now.isAfter(endTime)) {
+          if (
+            !isNil(currentSchedule) &&
+            (!currentSchedule || currentSchedule.inActivity === false)
+          ) {
             const outOfHoursMessage = queue.outOfHoursMessage?.trim() || "Estamos fora do horário de expediente";
-            const body = outOfHoursMessage;
+            const body = `${outOfHoursMessage}`;
             const debouncedSentMessage = debounce(
               async () => {
                 await wbot.sendMessage(
@@ -1623,7 +1617,6 @@ const handleMessage = async (
             debouncedSentMessage();
             return;
           }
-        }
       }
     } catch (e) {
       Sentry.captureException(e);

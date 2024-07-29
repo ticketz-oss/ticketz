@@ -36,9 +36,11 @@ const UpdateUserService = async ({
 
   const requestUser = await User.findByPk(requestUserId);
 
-  if ( 
-    (requestUser.super === false && userData.companyId !== requestUser.companyId) ||
-    (requestUser.profile !== "admin" && +userId !== requestUser.id )
+  if (
+    !requestUser.super &&
+    +userId !== requestUser.id &&
+    (user.companyId !== requestUser.companyId ||
+      requestUser.profile !== "admin")
   ) {
     throw new AppError("ERR_FORBIDDEN", 403);
   }

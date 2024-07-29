@@ -1,7 +1,7 @@
 import {
   WASocket,
   BinaryNode,
-  Contact as BContact,
+  Contact as BContact
 } from "@whiskeysockets/baileys";
 import * as Sentry from "@sentry/node";
 
@@ -36,24 +36,23 @@ const wbotMonitor = async (
 
       if (content.tag === "offer") {
         const { from, id } = node.attrs;
-        //console.log(`${from} is calling you with id ${id}`);
+        // console.log(`${from} is calling you with id ${id}`);
       }
 
       if (content.tag === "terminate") {
         const sendMsgCall = await Setting.findOne({
-          where: { key: "call", companyId },
+          where: { key: "call", companyId }
         });
 
         if (sendMsgCall.value === "disabled") {
-          // await wbot.sendMessage(node.attrs.from, {
-          //   text:
-          //     "*Mensagem Automática:*\n\nAs chamadas de voz e vídeo estão desabilitas para esse WhatsApp, favor enviar uma mensagem de texto. Obrigado",
-          // });
+          await wbot.sendMessage(node.attrs.from, {
+            text: "\u200e*Mensagem Automática:*\n\nAs chamadas de voz e vídeo estão desabilitas para esse WhatsApp, favor enviar uma mensagem de texto. Obrigado"
+          });
 
           const number = node.attrs.from.replace(/\D/g, "");
 
           const contact = await Contact.findOne({
-            where: { companyId, number },
+            where: { companyId, number }
           });
 
           const ticket = await Ticket.findOne({
@@ -62,7 +61,7 @@ const wbotMonitor = async (
               whatsappId: wbot.id,
               status: "open",
               companyId
-            },
+            }
           });
           // se não existir o ticket não faz nada.
           if (!ticket) return;
@@ -81,21 +80,20 @@ const wbotMonitor = async (
             mediaType: "call_log",
             read: true,
             quotedMsgId: null,
-            ack: 1,
+            ack: 1
           };
 
           await ticket.update({
-            lastMessage: body,
+            lastMessage: body
           });
 
-
-          if(ticket.status === "closed") {
+          if (ticket.status === "closed") {
             await ticket.update({
-              status: "pending",
+              status: "pending"
             });
           }
 
-          return CreateMessageService({ messageData, companyId: companyId });
+          return CreateMessageService({ messageData, companyId });
         }
       }
     });
@@ -104,13 +102,13 @@ const wbotMonitor = async (
       console.log("upsert", contacts);
       await createOrUpdateBaileysService({
         whatsappId: whatsapp.id,
-        contacts,
+        contacts
       });
     });
 
-    //wbot.ev.on("contacts.set", async (contacts: IContact) => {
+    // wbot.ev.on("contacts.set", async (contacts: IContact) => {
     //  console.log("set", contacts);
-    //});
+    // });
   } catch (err) {
     Sentry.captureException(err);
     logger.error(err);

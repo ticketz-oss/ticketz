@@ -36,7 +36,9 @@ import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import { SocketContext } from "../../context/Socket/SocketContext";
 import { i18n } from "../../translate/i18n";
-
+import vCard from "vcard-parser";
+import { generateColor } from "../../helpers/colorGenerator";
+import { getInitials } from "../../helpers/getInitials";
 
 const useStyles = makeStyles((theme) => ({
   messagesListWrapper: {
@@ -111,6 +113,7 @@ const useStyles = makeStyles((theme) => ({
   quotedMsg: {
     padding: 10,
     maxWidth: 300,
+    width: "100%",
     height: "auto",
     display: "block",
     whiteSpace: "pre-wrap",
@@ -210,16 +213,6 @@ const useStyles = makeStyles((theme) => ({
   textContentItemEdited: {
     overflowWrap: "break-word",
     padding: "3px 120px 6px 6px",
-  },
-
-  messageMedia: {
-    objectFit: "cover",
-    width: 250,
-    height: 200,
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
   },
 
   messageVideo: {
@@ -630,18 +623,21 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
       return (
         <>
           <ModalImageCors imageUrl={message.mediaUrl} isDeleted={message.isDeleted} />
-          {data?.message?.imageMessage?.caption &&
-            <>
-              <Divider />
-              <div className={[clsx({
-                [classes.textContentItemDeleted]: message.isDeleted,
-              }),]}>
-                <MarkdownWrapper >
-                  {data.message.imageMessage.caption}
-                </MarkdownWrapper>
-              </div>
-            </>
-          }
+          <>
+            <div className={[clsx({
+              [classes.textContentItemDeleted]: message.isDeleted,
+              [classes.textContentItem]: !message.isDeleted,
+            }),]}>
+              {data?.message?.imageMessage?.caption &&
+                <>
+                  <Divider />
+                  <MarkdownWrapper>
+                    {data.message.imageMessage.caption}
+                  </MarkdownWrapper>
+                </>
+              }
+            </div>
+          </>
         </>
       )
     }
@@ -683,7 +679,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
               <div className={[clsx({
                 [classes.textContentItemDeleted]: message.isDeleted,
               }),]}>
-                <MarkdownWrapper >
+                <MarkdownWrapper>
                   { message.body }
                 </MarkdownWrapper>
               </div>
@@ -767,6 +763,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
 
   const renderQuotedMessage = (message) => {
     const data = JSON.parse(message.quotedMsg.dataJson);
+    
     const thumbnail = data?.message?.imageMessage?.jpegThumbnail;
     const stickerUrl = data?.message?.stickerMessage && message.quotedMsg?.mediaUrl;
     const imageUrl = thumbnail ? "data:image/png;base64, " + thumbnail : stickerUrl;
@@ -787,7 +784,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
               {message.quotedMsg?.contact?.name}
             </span>
           )}
-          {message.quotedMsg?.body}
+          <MarkdownWrapper>{!message.quotedMsg?.mediaUrl?.endsWith(message.quotedMsg?.body) && message.quotedMsg?.body}</MarkdownWrapper>
         </div>
         {imageUrl && (
           <img className={classes.quotedThumbnail} src={imageUrl} />
@@ -796,66 +793,110 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     );
   };
 
+  const formatVCardN = (n) => {
+    return(
+      (n[3] ? n[3] + " " : "") +
+      (n[1] ? n[1] + " " : "") +
+      (n[2] ? n[2] + " " : "") +
+      (n[0] ? n[0] + " " : "") +
+      (n[4] ? n[4] + " " : "")
+    );
+  }
+
   const isVCard = (message) => {
-    return message.includes('BEGIN:VCARD');
+    return message.startsWith('{"ticketzvCard":');
   };
 
-  const vCard = (message) => {
-    const name = message?.substring(message.indexOf("\nN:;") + 4, message.indexOf(";;;"));
-    const telLine = message?.substring(message.indexOf("\nTEL;") + 5);
-    const description = telLine.substring(telLine.indexOf(":") + 1, telLine.indexOf("\n"));
-    return (
-      <div>
-        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: 20, marginBottom: 20 }}>
-          <Avatar style={{ marginRight: 10, marginLeft: 20, width: 60, height: 60 }} />
-          <div style={{ width: 350 }}>
-            <div>
-              <Typography
-                noWrap
-                component="h4"
-                variant="body2"
-                color="textPrimary"
-                style={{ fontWeight: '700' }}
-              >
-                {name}
-              </Typography>
-            </div>
+  const renderVCard = (vcardJson) => {
+    const cardArray = JSON.parse(vcardJson)?.ticketzvCard;
+    
+    if (!cardArray || !Array.isArray(cardArray)) {
+      return <div>Invalid VCARD data</div>;
+    }
 
+    return cardArray.map((item) => {
+      const message = item?.vcard;
+      if (!message) {
+        return <></>;
+      }
+      const parsedVCard = vCard.parse(message);
+      console.debug("vCard data:", { message , parsedVCard });
+      
+      const name = 
+        parsedVCard['X-WA-BIZ-NAME']?.[0]?.value ||
+        parsedVCard.fn?.[0]?.value ||
+        formatVCardN(parsedVCard.n?.[0]?.value);
+      const description =
+        parsedVCard['X-WA-BIZ-DESCRIPTION']?.[0]?.value || ""
+      const number = parsedVCard?.tel?.[0]?.value;
+      const metaNumber = parsedVCard?.tel?.[0]?.meta?.waid?.[0] || number || "unknown";
+      
+      return (
+        <div>
+          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: 20, marginBottom: 20 }}>
+            <Avatar style={{ backgroundColor: generateColor(metaNumber), marginRight: 10, marginLeft: 20, width: 60, height: 60, color: "white", fontWeight: "bold" }}>{ getInitials(name)}</Avatar>
             <div style={{ width: 350 }}>
-              <Typography
-                component="span"
-                variant="body2"
-                color="textPrimary"
-                style={{ display: 'flex' }}
-              >
-                {description}
-              </Typography>
-            </div>
-          </div>
+              <div>
+                <Typography
+                  noWrap
+                  component="h4"
+                  variant="body2"
+                  color="textPrimary"
+                  style={{ fontWeight: '700' }}
+                >
+                  {name}
+                </Typography>
+              </div>
 
+              <div style={{ width: 350 }}>
+                <Typography
+                  component="span"
+                  variant="body2"
+                  color="textPrimary"
+                  style={{ display: 'flex' }}
+                >
+                  {description}
+                </Typography>
+              </div>
+
+              <div style={{ width: 350 }}>
+                <Typography
+                  component="span"
+                  variant="body2"
+                  color="textPrimary"
+                  style={{ display: 'flex' }}
+                >
+                  {number}
+                </Typography>
+              </div>
+
+            </div>
+
+          </div>
+          <div style={{
+            width: '100%', display: 'none',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginTop: 20,
+            borderWidth: '1px 0 0 0',
+            borderTopColor: '#bdbdbd',
+            borderStyle: 'solid',
+            padding: 8
+          }}>
+            <Typography
+              noWrap
+              component="h4"
+              variant="body2"
+              color="textPrimary"
+              style={{ fontWeight: '700', color: '#2c9ce7' }}
+            >
+              Conversar
+            </Typography>
+          </div>
         </div>
-        <div style={{
-          width: '100%', display: 'none',
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginTop: 20,
-          borderWidth: '1px 0 0 0',
-          borderTopColor: '#bdbdbd',
-          borderStyle: 'solid',
-          padding: 8
-        }}>
-          <Typography
-            noWrap
-            component="h4"
-            variant="body2"
-            color="textPrimary"
-            style={{ fontWeight: '700', color: '#2c9ce7' }}
-          >
-            Conversar
-          </Typography>
-        </div>
-      </div>
-    )
+      )
+
+    });
   };
 
   const messageLocation = (message, createdAt) => {
@@ -905,8 +946,6 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                 </span>
               )}
 
-              {message.mediaUrl && checkMessageMedia(message, data)}
-
               {message.body.includes('data:image') ? messageLocation(message.body, message.createdAt)
                 :
                 isVCard(message.body) ?
@@ -914,26 +953,32 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                     className={[clsx(classes.textContentItem, {
                       [classes.textContentItemEdited]: message.isEdited
                     }), { marginRight: 0 }]}>
-                    {vCard(message.body)}
+                    {renderVCard(message.body)}
                   </div>
 
                   :
-
 
                   (<div className={[clsx(classes.textContentItem, {
                     [classes.textContentItemDeleted]: message.isDeleted,
                     [classes.textContentItemEdited]: message.isEdited
                   }),]}>
                     {message.quotedMsg && renderQuotedMessage(message)}
-                    {message.isDeleted && (
-                      <Block
-                        color="disabled"
-                        fontSize="small"
-                        className={classes.deletedIcon}
-                      />
-                    )}
                     {!isSticker && (
-                      message.mediaUrl ? "" : <MarkdownWrapper>{message.body}</MarkdownWrapper>
+                      message.mediaUrl ?
+                        ""
+                        :
+                        <>
+                          {message.isDeleted && (
+                            <Block
+                              color="disabled"
+                              fontSize="small"
+                              className={classes.deletedIcon}
+                            />
+                          )}
+                          <MarkdownWrapper>
+                            {message.body}
+                          </MarkdownWrapper>
+                        </>
                     )
                     }
                     <span className={[clsx(classes.timestamp, {
@@ -943,6 +988,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                       {format(parseISO(message.createdAt), "HH:mm")}
                     </span>
                   </div>)}
+                  {message.mediaUrl && checkMessageMedia(message, data)}
             </div>
           </React.Fragment>
         );
@@ -967,7 +1013,6 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
               >
                 <ExpandMore />
               </IconButton>
-              {message.mediaUrl && checkMessageMedia(message, data)}
               <div
                 className={clsx(classes.textContentItem, {
                   [classes.textContentItemDeleted]: message.isDeleted,
@@ -985,7 +1030,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                   :
                   isVCard(message.body) ?
                     <div className={[classes.textContentItem]}>
-                      {vCard(message.body)}
+                      {renderVCard(message.body)}
                     </div>
 
                     :
@@ -1002,6 +1047,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                   {renderMessageAck(message)}
                 </span>
               </div>
+              {message.mediaUrl && checkMessageMedia(message, data)}
             </div>
           </React.Fragment>
         );

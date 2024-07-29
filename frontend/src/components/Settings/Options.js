@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 import Grid from "@material-ui/core/Grid";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -102,6 +102,7 @@ export default function Options(props) {
   const [chatbotAutoExit, setChatbotAutoExit] = useState("disabled");
   const [CheckMsgIsGroup, setCheckMsgIsGroupType] = useState("enabled");
   const [apiToken, setApiToken] = useState("");
+  const [downloadLimit, setDownloadLimit] = useState("15");
 
   const [loadingUserRating, setLoadingUserRating] = useState(false);
   const [loadingScheduleType, setLoadingScheduleType] = useState(false);
@@ -112,8 +113,11 @@ export default function Options(props) {
   const [loadingChatbotAutoExit, setLoadingChatbotAutoExit] = useState(false);
   const [loadingCheckMsgIsGroup, setCheckMsgIsGroup] = useState(false);
   const [loadingApiToken, setLoadingApiToken] = useState(false);
+  const [loadingDownloadLimit, setLoadingDownloadLimit] = useState(false);
   const { getCurrentUserInfo } = useAuth();
   const [currentUser, setCurrentUser] = useState({});
+
+  const downloadLimitInput = useRef(null);
 
   const { update } = useSettings();
 
@@ -158,6 +162,9 @@ export default function Options(props) {
 
       const apiToken = settings.find((s) => s.key === "apiToken");
       setApiToken(apiToken?.value || "");
+
+      const downloadLimit = settings.find((s) => s.key === "downloadLimit");
+      setDownloadLimit(downloadLimit?.value || "");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
@@ -249,6 +256,17 @@ export default function Options(props) {
     });
     toast.success("Operação atualizada com sucesso.");
     setLoadingAllowSignup(false);
+  }
+
+  async function handleDownloadLimit(value) {
+    setDownloadLimit(value);
+    setLoadingDownloadLimit(true);
+    await update({
+      key: "downloadLimit",
+      value,
+    });
+    toast.success("Operação atualizada com sucesso.");
+    setLoadingDownloadLimit(false);
   }
 
   async function generateApiToken() {
@@ -361,7 +379,7 @@ export default function Options(props) {
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="call-type-label">
-              Aceitar Chamada
+              Chamadas de Voz e Vídeo
             </InputLabel>
             <Select
               labelId="call-type-label"
@@ -370,8 +388,8 @@ export default function Options(props) {
                 handleCallType(e.target.value);
               }}
             >
-              <MenuItem value={"disabled"}>Não Aceitar</MenuItem>
-              <MenuItem value={"enabled"}>Aceitar</MenuItem>
+              <MenuItem value={"disabled"}>Informar indisponibilidade</MenuItem>
+              <MenuItem value={"enabled"}>Ignorar</MenuItem>
             </Select>
             <FormHelperText>
               {loadingCallType && "Atualizando..."}
@@ -495,6 +513,7 @@ export default function Options(props) {
         <OnlyForSuperUser
           user={currentUser}
           yes={() => (
+            <>
               <Grid xs={12} sm={6} md={4} item>
                 <FormControl className={classes.selectContainer}>
                   <InputLabel id="group-type-label">
@@ -515,6 +534,28 @@ export default function Options(props) {
                   </FormHelperText>
                 </FormControl>
               </Grid>
+
+
+              <Grid xs={12} sm={6} md={4} item>
+                <FormControl className={classes.selectContainer}>
+                  <TextField
+                    id="appname-field"
+                    label="Limite de Download de arquivos (MB)"
+                    variant="standard"
+                    name="appName"
+                    value={downloadLimit}
+                    inputRef={downloadLimitInput}
+                    onChange={(e) => {
+                      setDownloadLimit(e.target.value);
+                    }}
+                    onBlur={async (_) => {
+                      await handleDownloadLimit(downloadLimit);
+                    }}
+                  />
+                </FormControl>
+              </Grid>
+            </>
+
           )}
         />
       </Grid>

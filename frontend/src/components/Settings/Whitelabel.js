@@ -172,7 +172,7 @@ const useStyles = makeStyles((theme) => ({
   appLogoFaviconPreviewImg: {
     width: "100%",
     maxHeight: 72,
-    content: "url(" + ((theme.appLogoFavicon) ? theme.appLogoFavicon : "" ) + ")"
+    content: "url(" + ((theme.appLogoFavicon) ? theme.appLogoFavicon : "/vector/favicon.svg" ) + ")"
   }
 }));
 

@@ -162,7 +162,7 @@ const App = () => {
       .then((file) => { setAppLogoDark(file ? (getBackendURL()+"/public/"+file) : defaultLogoDark) })
       .catch((error) => { console.log("Error reading setting", error); });
     getPublicSetting("appLogoFavicon")
-      .then((file) => { setAppLogoFavicon(file ? (getBackendURL()+"/public/"+file) : defaultLogoFavicon) })
+      .then((file) => { setAppLogoFavicon(file ? (getBackendURL()+"/public/"+file) : null) })
       .catch((error) => { console.log("Error reading setting", error); });
     getPublicSetting("appName").then((name) => { setAppName(name || "ticketz") })
       .catch((error) => { console.log("Error reading setting", error); setAppName("whitelabel chat") });

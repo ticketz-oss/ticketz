@@ -41,6 +41,7 @@
 
 import { Request, Response } from "express";
 import { Op } from "sequelize";
+import moment from "moment";
 import AppError from "../../errors/AppError";
 import GetSuperSettingService from "../SettingServices/GetSuperSettingService";
 import {
@@ -49,7 +50,11 @@ import {
   efiInitialize,
   efiWebhook
 } from "./EfiServices";
-import { owenCreateSubscription, owenWebhook } from "./OwenServices";
+import {
+  owenCheckStatus,
+  owenCreateSubscription,
+  owenWebhook
+} from "./OwenServices";
 import Invoices from "../../models/Invoices";
 import { getIO } from "../../libs/socket";
 import Company from "../../models/Company";
@@ -62,7 +67,7 @@ export const payGatewayInitialize = async () => {
   if (paymentGateway === "efi") {
     return efiInitialize();
   }
-  throw new AppError("Unsupported payment gateway", 400);
+  return null;
 };
 
 export const payGatewayCreateSubscription = async (
@@ -112,12 +117,30 @@ export const processInvoicePaid = async (invoice: Invoices) => {
     invoice.company || (await Company.findByPk(invoice.companyId));
 
   if (company) {
-    const expiresAt = new Date(company.dueDate);
-    expiresAt.setDate(expiresAt.getDate() + 30);
-    const date = expiresAt.toISOString().split("T")[0];
+    const currentDueDate = moment(company.dueDate);
+    let { dueDate } = company;
+
+    switch (company.recurrence) {
+      case "BIMESTRAL":
+        dueDate = currentDueDate.add(2, "month").format("YYYY-MM-DD");
+        break;
+      case "TRIMESTRAL":
+        dueDate = currentDueDate.add(3, "month").format("YYYY-MM-DD");
+        break;
+      case "SEMESTRAL":
+        dueDate = currentDueDate.add(6, "month").format("YYYY-MM-DD");
+        break;
+      case "ANUAL":
+        dueDate = currentDueDate.add(12, "month").format("YYYY-MM-DD");
+        break;
+      case "MENSAL":
+      default:
+        dueDate = currentDueDate.add(1, "month").format("YYYY-MM-DD");
+        break;
+    }
 
     await company.update({
-      dueDate: date
+      dueDate
     });
     await invoice.update({
       status: "paid"
@@ -158,6 +181,8 @@ export const processInvoiceExpired = async (invoice: Invoices) => {
 export const checkInvoicePayment = async (invoice: Invoices) => {
   if (invoice.payGw === "efi") {
     efiCheckStatus(invoice);
+  } else if (invoice.payGw === "owen") {
+    owenCheckStatus(invoice);
   }
 };
 

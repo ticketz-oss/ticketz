@@ -41,7 +41,7 @@
 
 import { createContext } from "react";
 import openSocket from "socket.io-client";
-import { getBackendURL } from "../../services/config";
+import { getBackendSocketURL } from "../../services/config";
 import { isExpired } from "react-jwt";
 
 class ManagedSocket {
@@ -162,7 +162,7 @@ const socketManager = {
       this.currentCompanyId = companyId;
       this.currentUserId = userId;
       
-      this.currentSocket = openSocket(getBackendURL(), {
+      this.currentSocket = openSocket(getBackendSocketURL(), {
         transports: ["websocket"],
         pingTimeout: 18000,
         pingInterval: 18000,

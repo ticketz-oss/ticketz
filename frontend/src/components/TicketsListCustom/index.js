@@ -210,7 +210,7 @@ const TicketsListCustom = (props) => {
     } else {
       dispatch({ type: "LOAD_TICKETS", payload: tickets });
     }
-  }, [tickets, status, searchParam, queues, profile]);
+  }, [tickets, queues, profile]);
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
