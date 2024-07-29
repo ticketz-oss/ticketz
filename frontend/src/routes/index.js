@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter, Switch } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
+import LGPD from "../pages/LGPD";
+import TermsOfUse from "../pages/TermsOfUse";
 
 import LoggedInLayout from "../layout";
 import Dashboard from "../pages/Dashboard/";
@@ -50,6 +52,8 @@ const Routes = () => {
           <Switch>
             <Route exact path="/login" component={Login} />
             <Route exact path="/signup" component={Signup} />
+            <Route exact path="/lgpd" component={LGPD} />
+            <Route exact path="/terms-of-use" component={TermsOfUse} />
             {/* <Route exact path="/create-company" component={Companies} /> */}
             <WhatsAppsProvider>
               <LoggedInLayout>

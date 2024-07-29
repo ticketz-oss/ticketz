@@ -48,6 +48,7 @@ import { loadJSON } from "../helpers/loadJSON";
 
 const gitinfo = loadJSON('/gitinfo.json');
 
+
 const useStyles = makeStyles((theme) => ({
   ListSubheader: {
     height: 26,
@@ -274,47 +275,56 @@ const MainListItems = (props) => {
             <ListItemLink
               to="/tickets"
               primary={i18n.t("mainDrawer.listItems.tickets")}
-              icon={<WhatsAppIcon />}
+              icon={<img src={`${process.env.PUBLIC_URL}/icones/tickets.png`} alt="Atendimentos" style={{ width: '24px', height: '24px' }} />}
             />
       <ListItemLink
         to="/todolist"
         primary={i18n.t("Tarefas")}
-        icon={<BorderColorIcon />}
+        icon={<img src={`${process.env.PUBLIC_URL}/icones/tarefas.png`} alt="Tarefas" style={{ width: '24px', height: '24px' }} />}
       />
             <ListItemLink
               to="/quick-messages"
               primary={i18n.t("mainDrawer.listItems.quickMessages")}
-              icon={<FlashOnIcon />}
+              icon={<img src={`${process.env.PUBLIC_URL}/icones/respostarapida.png`} alt="Respostas Rápidas" style={{ width: '24px', height: '24px' }} />}
             />
             <ListItemLink
               to="/contacts"
               primary={i18n.t("mainDrawer.listItems.contacts")}
-              icon={<ContactPhoneOutlinedIcon />}
+              icon={<img src={`${process.env.PUBLIC_URL}/icones/listadecontatos.png`} alt="Contatos" style={{ width: '24px', height: '24px' }} />}
             />
             <ListItemLink
               to="/schedules"
               primary={i18n.t("mainDrawer.listItems.schedules")}
-              icon={<EventIcon />}
+              icon={<img src={`${process.env.PUBLIC_URL}/icones/anotacao.png`} alt="Agendamentos" style={{ width: '24px', height: '24px' }} />}
             />
             <ListItemLink
               to="/tags"
               primary={i18n.t("mainDrawer.listItems.tags")}
-              icon={<LocalOfferIcon />}
+              icon={<img src={`${process.env.PUBLIC_URL}/icones/rotulo.png`} alt="Tags" style={{ width: '24px', height: '24px' }} />}
             />
             <ListItemLink
               to="/chats"
               primary={i18n.t("mainDrawer.listItems.chats")}
-              icon={
-                <Badge color="secondary" variant="dot" invisible={invisible}>
-                  <ForumIcon />
-                </Badge>
+              icon={<Badge color="secondary" variant="dot" invisible={invisible}><img src={`${process.env.PUBLIC_URL}/icones/chatinterno.png`} alt="Chat Interno" style={{ width: '24px', height: '24px' }} />
+              </Badge>
               }
             />
             <ListItemLink
-              to="/helps"
-              primary={i18n.t("mainDrawer.listItems.helps")}
-              icon={<HelpOutlineIcon />}
+                to="/helps"
+                primary={i18n.t("mainDrawer.listItems.helps")}
+                icon={<img src={`${process.env.PUBLIC_URL}/icones/ajuda.png`} alt="Ajuda" style={{ width: '24px', height: '24px' }} />}
+              />
+
+            <ListItem
+              button
+              dense
+              onClick={handleClickLogout}>
+              
+              {<img src={`${process.env.PUBLIC_URL}/icones/sair.png`} alt="Sair" style={{ width: '24px', height: '24px' }} />}
+              <ListItemIcon></ListItemIcon>
+              <ListItemText primary={i18n.t("mainDrawer.listItems.logout")}
             />
+            </ListItem>
           </>
         </>
         )}
@@ -342,7 +352,7 @@ const MainListItems = (props) => {
             small
             to="/"
             primary="Dashboard"
-            icon={<DashboardOutlinedIcon />}
+            icon={<img src={`${process.env.PUBLIC_URL}/icones/painel.png`} alt="Dashboard" style={{ width: '24px', height: '24px' }} />}
             />
         </>
         )}
@@ -423,52 +433,51 @@ const MainListItems = (props) => {
               <ListItemLink
                 to="/announcements"
                 primary={i18n.t("mainDrawer.listItems.annoucements")}
-                icon={<AnnouncementIcon />}
+                icon={<img src={`${process.env.PUBLIC_URL}/icones/informacao.png`} alt="Informativos" style={{ width: '24px', height: '24px' }} />}
               />
             )}
             <ListItemLink
               to="/connections"
               primary={i18n.t("mainDrawer.listItems.connections")}
-              icon={
-                <Badge badgeContent={connectionWarning ? "!" : 0} color="error">
-                  <SyncAltIcon />
-                </Badge>
-              }
+              icon={<img src={`${process.env.PUBLIC_URL}/icones/sinal.png`} alt="Conexões" style={{ width: '24px', height: '24px' }} />}
             />
             <ListItemLink
               to="/queues"
               primary={i18n.t("mainDrawer.listItems.queues")}
-              icon={<AccountTreeOutlinedIcon />}
+              icon={<img src={`${process.env.PUBLIC_URL}/icones/votacao.png`} alt="Filas & Chatbot" style={{ width: '24px', height: '24px' }} />}
             />
             <ListItemLink
               to="/users"
               primary={i18n.t("mainDrawer.listItems.users")}
-              icon={<PeopleAltOutlinedIcon />}
+              icon={<img src={`${process.env.PUBLIC_URL}/icones/equipe.png`} alt="Usuários" style={{ width: '24px', height: '24px' }} />}
             />
             <ListItemLink
               to="/messages-api"
               primary={i18n.t("mainDrawer.listItems.messagesAPI")}
-              icon={<CodeRoundedIcon />}
+              icon={<img src={`${process.env.PUBLIC_URL}/icones/api.png`} alt="API" style={{ width: '24px', height: '24px' }} />}
             />
              <ListItemLink
                 to="/financeiro"
                 primary={i18n.t("mainDrawer.listItems.financeiro")}
-                icon={<LocalAtmIcon />}
+                icon={<img src={`${process.env.PUBLIC_URL}/icones/lucro.png`} alt="Financeiro" style={{ width: '24px', height: '24px' }} />}
               />
 
             <ListItemLink
               to="/settings"
               primary={i18n.t("mainDrawer.listItems.settings")}
-              icon={<SettingsOutlinedIcon />}
+              icon={<img src={`${process.env.PUBLIC_URL}/icones/configuracao.png`} alt="Configurações" style={{ width: '24px', height: '24px' }} />}
             />
-            
-              <Divider />
-              <Typography style={{ fontSize: "12px", padding: "10px", textAlign: "right", fontWeight: "bold" }}>
-                {`${gitinfo.tagName.replace("N/A", "") || gitinfo.branchName + " " + gitinfo.commitHash }`} 
-                &nbsp;/&nbsp;
-                {`${gitinfo.buildTimestamp }`}
-              </Typography>
-            
+
+            <ListItem
+              button
+              dense
+              onClick={handleClickLogout}>
+              
+              {<img src={`${process.env.PUBLIC_URL}/icones/sair.png`} alt="Sair" style={{ width: '24px', height: '24px' }} />}
+              <ListItemIcon></ListItemIcon>
+              <ListItemText primary={i18n.t("mainDrawer.listItems.logout")}
+            />
+
           {}
 
           </>

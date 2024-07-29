@@ -73,7 +73,7 @@ const AboutModal = ({ open, onClose }) => {
 				scroll="paper"
 			>
 				<DialogTitle id="form-dialog-title">
-					{i18n.t("about.aboutthe")} {currentUser?.super ? "ticketz" : theme.appName }
+					{i18n.t("about.aboutthe")} {currentUser?.super ? "Meuzap" : theme.appName }
 				</DialogTitle>
 				<DialogContent dividers>
 				{ currentUser?.super ? 
