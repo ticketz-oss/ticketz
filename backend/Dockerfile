@@ -32,6 +32,6 @@ EXPOSE 3000
 
 ENTRYPOINT ["dumb-init", "--"]
 CMD dockerize -wait tcp://${DB_HOST}:5432 -timeout 60s \
-  && npx sequelize db:migrate \
-  && npx sequelize db:seed:all \
+  && npx sequelize db:migrate  --config dist/config/database.js --migrations-path dist/database/migrations \
+  && npx sequelize db:seed:all --config dist/config/database.js --seeders-path dist/database/seeds \
   && node dist/server.js
