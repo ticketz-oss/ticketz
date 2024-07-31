@@ -1,0 +1,64 @@
+stages:
+  - build
+
+variables:
+  REGISTRY: "ghcr.io"
+  IMAGE_BACKEND: "ticketz-oss/ticketz-backend"
+  IMAGE_FRONTEND: "ticketz-oss/ticketz-frontend"
+  DOCKER_CONFIG: /kaniko/.docker/
+
+before_script:
+  - echo "{\"auths\":{\"$REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+  - export BUILD_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+  
+# Build and push backend Docker image
+build-and-push-backend:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:v1.14.0-debug
+    entrypoint: [""]
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /-pro$/'
+  script:
+    - |
+      cat <<EOT > backend/src/gitinfo.ts
+      export const GitInfo = {
+          commitHash: "${CI_COMMIT_SHORT_SHA}",
+          commitTimestamp: "N/A",
+          branchName: "${CI_COMMIT_REF_NAME",
+          tagName: "${CI_COMMIT_TAG}",
+          buildTimestamp: "${BUILD_TIMESTAMP}"
+      };
+      EOT
+    - |
+      /kaniko/executor --context "${CI_PROJECT_DIR}/backend" \
+        --dockerfile "${CI_PROJECT_DIR}/backend/Dockerfile" \
+        --destination "${REGISTRY}/${IMAGE_BACKEND}:${CI_COMMIT_TAG}" \
+        --destination "${REGISTRY}/${IMAGE_BACKEND}:latest" \
+        --build-arg PLATFORM=linux/amd64,linux/arm64
+
+# Build and push frontend Docker image
+build-and-push-frontend:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:v1.14.0-debug
+    entrypoint: [""]
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /-pro$/'
+  script:
+    - |
+      cat <<EOT > frontend/public/gitinfo.json
+      {
+          "commitHash": "${CI_COMMIT_SHORT_SHA}",
+          "commitTimestamp": "N/A",
+          "branchName": "${CI_COMMIT_REF_NAME",
+          "tagName": "${CI_COMMIT_TAG}",
+          "buildTimestamp": "${BUILD_TIMESTAMP}"
+      }
+      EOT
+    - |
+      /kaniko/executor --context "${CI_PROJECT_DIR}/frontend" \
+        --dockerfile "${CI_PROJECT_DIR}/frontend/Dockerfile" \
+        --destination "${REGISTRY}/${IMAGE_FRONTEND}:${CI_COMMIT_TAG}" \
+        --destination "${REGISTRY}/${IMAGE_FRONTEND}:latest" \
+        --build-arg PLATFORM=linux/amd64,linux/arm64
