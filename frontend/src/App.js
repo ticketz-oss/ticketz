@@ -91,7 +91,7 @@ const App = () => {
         optionsBackground: mode === "light" ? "#fafafa" : "#333",
         options: mode === "light" ? "#fafafa" : "#666",
         fontecor: mode === "light" ? primaryColorLight : primaryColorDark,
-        fancyBackground: mode === "light" ? "#fafafa" : "#333",
+        fancyBackground: mode === "light" ? "white" : "#333",
         bordabox: mode === "light" ? "#eee" : "#333",
         newmessagebox: mode === "light" ? "#eee" : "#333",
         inputdigita: mode === "light" ? "#fff" : "#666",

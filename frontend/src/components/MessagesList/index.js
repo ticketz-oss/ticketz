@@ -29,8 +29,6 @@ import {
 import MarkdownWrapper from "../MarkdownWrapper";
 import ModalImageCors from "../ModalImageCors";
 import MessageOptionsMenu from "../MessageOptionsMenu";
-import whatsBackground from "../../assets/wa-background.png";
-import whatsBackgroundDark from "../../assets/wa-background-dark.png";
 
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
@@ -53,7 +51,7 @@ const useStyles = makeStyles((theme) => ({
   },
 
   messagesList: {
-    backgroundImage: theme.mode === 'light' ? `url(${whatsBackground})` : `url(${whatsBackgroundDark})`,
+    backgroundColor: theme.mode === 'light' ? "#dfdfdf" : "#505050",
     display: "flex",
     flexDirection: "column",
     flexGrow: 1,
@@ -262,10 +260,10 @@ const useStyles = makeStyles((theme) => ({
     textAlign: "center",
     alignSelf: "center",
     width: "110px",
-    backgroundColor: "#e1f3fb",
+    backgroundColor: theme.mode === "light" ? "#e1f3fb" : "#424242",
     margin: "10px",
     borderRadius: "10px",
-    boxShadow: "0 1px 1px #b3b3b3",
+    boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000",
   },
 
   dailyTimestampText: {

@@ -47,6 +47,10 @@ import LanguageIcon from '@material-ui/icons/Language';
 import { getBackendURL } from "../services/config";
 import NestedMenuItem from "material-ui-nested-menu-item";
 
+import { loadJSON } from "../helpers/loadJSON";
+
+const gitinfo = loadJSON('/gitinfo.json');
+
 const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
@@ -67,25 +71,37 @@ const useStyles = makeStyles((theme) => ({
   },
   toolbar: {
     paddingRight: 24, // keep right padding when drawer closed
-    color: theme.palette.dark.main,
-    background: theme.palette.barraSuperior,
+    // color: theme.palette.dark.main,
+    background: theme.palette.primary.main,
+    marginRight: "10px",
+    marginTop: "10px",
+    marginBottom: "10px",
+    borderRadius: "10px",
   },
   toolbarIcon: {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    minHeight: "48px",
+    height: "68px",
+    margin: "auto",
   },
   appBar: {
+    marginLeft: "72px",
+    boxShadow: "unset",
+    width: "unset",
+    right: 0,
+    left: 0,
     zIndex: theme.zIndex.drawer + 1,
     transition: theme.transitions.create(["width", "margin"], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
   },
+  appBarMobile: {
+    marginLeft: "10px"
+  },
   appBarShift: {
     marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
     transition: theme.transitions.create(["width", "margin"], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
@@ -114,6 +130,7 @@ const useStyles = makeStyles((theme) => ({
       duration: theme.transitions.duration.enteringScreen,
     }),
     overflowY: "clip",
+    border: "unset",
     ...theme.scrollbarStylesSoft
   },
   drawerPaperClose: {
@@ -134,6 +151,36 @@ const useStyles = makeStyles((theme) => ({
   content: {
     flex: 1,
     overflow: "auto",
+    position: "absolute",
+    top: "68px",
+    bottom: "0px",
+    right: "0px",
+    left: "72px",
+    marginLeft: "0px",
+    marginRight: "10px",
+    marginBottom: "10px",
+    borderRadius: "10px",
+    borderColor: theme.palette.primary.main,
+    borderStyle: "solid",
+    borderWidth: "1px",
+    "&::-webkit-scrollbar": {
+      width: "10px",
+      height: "8px",
+    },
+    "&::-webkit-scrollbar-thumb": {
+      backgroundColor: theme.palette.primary.main,
+      borderRadius: "10px",
+    },    
+  },
+  contentShift: {
+    left: drawerWidth,
+    transition: theme.transitions.create(["width", "margin"], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+  },
+  contentMobile: {
+    left: "10px",
   },
   container: {
     paddingTop: theme.spacing(4),
@@ -157,12 +204,18 @@ const useStyles = makeStyles((theme) => ({
   },
   logo: {
     width: "192px",
-    maxHeight: "72px",
+    height: "68px",
     logo: theme.logo,
     content: "url(" + (theme.mode === "light" ? theme.calculatedLogoLight() : theme.calculatedLogoDark()) + ")"
   },
+  version: {
+    margin: "auto",
+    fontSize: "12px",
+    textAlign: "right",
+    fontWeight: "bold"
+  },
   hideLogo: {
-	display: "none",
+    display: "none",
   }
 }));
 
@@ -363,16 +416,28 @@ const LoggedInLayout = ({ children, themeToggle }) => {
         open={drawerOpen}
       >
         <div className={classes.toolbarIcon}>
-          <img  className={drawerOpen ? classes.logo : classes.hideLogo } alt="logo" />
+          { drawerOpen && <img className={drawerOpen ? classes.logo : classes.hideLogo} alt="logo" /> }
           <IconButton onClick={() => setDrawerOpen(!drawerOpen)}>
-            <ChevronLeftIcon />
+            {
+              drawerOpen ? <ChevronLeftIcon /> : <MenuIcon />
+            }
           </IconButton>
         </div>
-        <Divider />
         <List className={classes.containerWithScroll}>
           <MainListItems drawerClose={drawerClose} drawerOpen={drawerOpen} collapsed={!drawerOpen} />
         </List>
         <Divider />
+        {drawerOpen && gitinfo.commitHash === "N/A" &&
+          <>
+            <Typography className={classes.version}>
+              {`${gitinfo.tagName.replace("N/A", "") || gitinfo.branchName + " " + gitinfo.commitHash}`}
+            </Typography>
+            <Typography className={classes.version}>
+              {`${gitinfo.buildTimestamp}`}
+            </Typography>
+          </>
+        }
+            
       </Drawer>
       <UserModal
         open={userModalOpen}
@@ -385,8 +450,8 @@ const LoggedInLayout = ({ children, themeToggle }) => {
       />
       <AppBar
         position="absolute"
-        className={clsx(classes.appBar, drawerOpen && classes.appBarShift)}
-        color="primary"
+        className={clsx(classes.appBar, drawerVariant === "temporary" && classes.appBarMobile, drawerOpen && classes.appBarShift)}
+        color="transparent"
       >
         <Toolbar variant="dense" className={classes.toolbar}>
           <IconButton
@@ -396,7 +461,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
             onClick={() => setDrawerOpen(!drawerOpen)}
             className={clsx(
               classes.menuButton,
-              drawerOpen && classes.menuButtonHidden
+              drawerVariant === "temporary" || classes.menuButtonHidden
             )}
           >
             <MenuIcon />
@@ -513,9 +578,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
 
         </Toolbar>
       </AppBar>
-      <main className={classes.content}>
-        <div className={classes.appBarSpacer} />
-
+      <main className={clsx(drawerVariant === "temporary" && classes.contentMobile, drawerOpen && classes.contentShift, classes.content)}>
         {children ? children : null}
       </main>
     </div>

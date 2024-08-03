@@ -13,7 +13,7 @@ import WhatsappBackground from "../../assets/wa-background.png"
 const useStyles = makeStyles(theme => ({
 	chatContainer: {
 		flex: 1,
-		height: `calc(100% - 48px)`,
+		height: "100%",
 		overflowY: "hidden",
 	},
 

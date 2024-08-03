@@ -9,7 +9,6 @@ const useStyles = makeStyles(theme => ({
 		display: "flex",
 		alignItems: "center",
 		padding: "0px 6px 6px 6px",
-	    backgroundImage: theme.mode === 'light' ? `url(${whatsBackground})` : `url(${whatsBackgroundDark})`,
 		backgroundPosition: 'center', 
 		backgroundSize: 'cover', 
 		backgroundRepeat: 'no-repeat', 
