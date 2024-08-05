@@ -4,8 +4,8 @@ FROM node:20 AS build
 WORKDIR /usr/src/app
 COPY . .
 
-RUN npm install \
-    && npm run build
+RUN --mount=type=cache,target=/root/.npm \
+    npm install && npm run build
 
 # Stage 2: Create the final image without source files
 FROM ghcr.io/ticketz-oss/node
