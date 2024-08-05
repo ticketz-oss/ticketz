@@ -6,7 +6,7 @@ COPY . .
 ENV NODE_OPTIONS --openssl-legacy-provider
 
 RUN --mount=type=cache,target=/root/.npm \
-    npm install && npm run build
+    npm ci && npm run build
 
 FROM ghcr.io/ticketz-oss/nginx-alpine
 
