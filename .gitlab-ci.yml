@@ -1,7 +1,8 @@
 image: docker:20.10.16
 
 stages:
-  - build
+  - build-amd64
+  - build-arm64
   - tag-images
 
 variables:
@@ -13,6 +14,12 @@ variables:
   DOCKER_CLI_EXPERIMENTAL: enabled
   DOCKER_HOST: tcp://docker:2375
   DOCKER_TLS_CERTDIR: ""
+
+cache:
+  key: npm-cache
+  paths:
+    - .buildx-cache
+
 services:
   - docker:20.10.16-dind
 
@@ -23,13 +30,13 @@ before_script:
   - export TAG_MINOR=$(echo $BASE_TAG | cut -d'.' -f1,2)
   - export TAG_PATCH=$(echo $BASE_TAG | cut -d'.' -f1,2,3)
   - export BUILD_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-  - docker login $REGISTRY -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD
+  - echo $CI_REGISTRY_PASSWORD | docker login $REGISTRY -u $CI_REGISTRY_USER --password-stdin
   - docker run --privileged --rm tonistiigi/binfmt --install all
   - docker buildx create --name mybuilder --use
   - docker buildx inspect --bootstrap
   
 build-backend-amd64:
-  stage: build
+  stage: build-amd64
   only:
     - /^.*-(pro|theme)+$/
   script:
@@ -45,10 +52,12 @@ build-backend-amd64:
       EOT
     - |
       docker buildx build --platform linux/amd64 --push \
-        -t $REGISTRY/$IMAGE_FRONTEND:amd64-$CI_COMMIT_SHORT_SHA backend
+        --cache-from=type=local,src=.buildx-cache \
+        --cache-to=type=local,dest=.buildx-cache \
+        -t $REGISTRY/$IMAGE_BACKEND:amd64-$CI_COMMIT_SHORT_SHA backend
 
 build-backend-arm64:
-  stage: build
+  stage: build-arm64
   only:
     - /^.*-(pro|theme)+$/
   script:
@@ -64,10 +73,12 @@ build-backend-arm64:
       EOT
     - |
       docker buildx build --platform linux/arm64 --push \
-        -t $REGISTRY/$IMAGE_FRONTEND:arm64-$CI_COMMIT_SHORT_SHA backend
+        --cache-from=type=local,src=.buildx-cache \
+        --cache-to=type=local,dest=.buildx-cache \
+        -t $REGISTRY/$IMAGE_BACKEND:arm64-$CI_COMMIT_SHORT_SHA backend
 
 build-frontend-amd64:
-  stage: build
+  stage: build=-amd64
   only:
     - /^.*-(pro|theme)+$/
   script:
@@ -83,12 +94,14 @@ build-frontend-amd64:
       EOT
     - |
       docker buildx build --platform linux/amd64 --push \
+        --cache-from=type=local,src=.buildx-cache \
+        --cache-to=type=local,dest=.buildx-cache \
         -t $REGISTRY/$IMAGE_FRONTEND:amd64-$CI_COMMIT_SHORT_SHA frontend
 
 build-frontend-arm64:
   only:
     - /^.*-(pro|theme)+$/
-  stage: build
+  stage: build-arm64
   script:
     - |
       cat <<EOT > frontend/public/gitinfo.json
@@ -102,6 +115,8 @@ build-frontend-arm64:
       EOT
     - |
       docker buildx build --platform linux/arm64 --push \
+        --cache-from=type=local,src=.buildx-cache \
+        --cache-to=type=local,dest=.buildx-cache \
         -t $REGISTRY/$IMAGE_FRONTEND:arm64-$CI_COMMIT_SHORT_SHA frontend
 
         
