@@ -2,6 +2,7 @@ image: docker:20.10.16
 
 stages:
   - build
+  - tag-images
 
 variables:
   REGISTRY: "ghcr.io"
@@ -44,15 +45,12 @@ build-backend-amd64:
       EOT
     - |
       docker buildx build --platform linux/amd64 --push \
-        -t $REGISTRY/$IMAGE_BACKEND:$TAG_PATCH-$SUFFIX \
-        -t $REGISTRY/$IMAGE_BACKEND:$TAG_MINOR-$SUFFIX \
-        -t $REGISTRY/$IMAGE_BACKEND:$TAG_MAJOR-$SUFFIX \
-        -t $REGISTRY/$IMAGE_BACKEND:pro backend
+        -t $REGISTRY/$IMAGE_FRONTEND:amd64-$CI_COMMIT_SHORT_SHA backend
 
 build-backend-arm64:
   stage: build
   only:
-    - /^.*-[a-z0-9]+$/
+    - /^.*-(pro|theme)+$/
   script:
     - |
       cat <<EOT > backend/src/gitinfo.ts
@@ -66,15 +64,12 @@ build-backend-arm64:
       EOT
     - |
       docker buildx build --platform linux/arm64 --push \
-        -t $REGISTRY/$IMAGE_BACKEND:$TAG_PATCH-$SUFFIX \
-        -t $REGISTRY/$IMAGE_BACKEND:$TAG_MINOR-$SUFFIX \
-        -t $REGISTRY/$IMAGE_BACKEND:$TAG_MAJOR-$SUFFIX \
-        -t $REGISTRY/$IMAGE_BACKEND:$SUFFIX backend
+        -t $REGISTRY/$IMAGE_FRONTEND:arm64-$CI_COMMIT_SHORT_SHA backend
 
 build-frontend-amd64:
   stage: build
   only:
-    - /^.*-[a-z0-9]+$/
+    - /^.*-(pro|theme)+$/
   script:
     - |
       cat <<EOT > frontend/public/gitinfo.json
@@ -88,14 +83,11 @@ build-frontend-amd64:
       EOT
     - |
       docker buildx build --platform linux/amd64 --push \
-        -t $REGISTRY/$IMAGE_FRONTEND:$TAG_PATCH-$SUFFIX \
-        -t $REGISTRY/$IMAGE_FRONTEND:$TAG_MINOR-$SUFFIX \
-        -t $REGISTRY/$IMAGE_FRONTEND:$TAG_MAJOR-$SUFFIX \
-        -t $REGISTRY/$IMAGE_FRONTEND:$SUFFIX frontend
+        -t $REGISTRY/$IMAGE_FRONTEND:amd64-$CI_COMMIT_SHORT_SHA frontend
 
 build-frontend-arm64:
   only:
-    - /^.*-[a-z0-9]+$/
+    - /^.*-(pro|theme)+$/
   stage: build
   script:
     - |
@@ -110,7 +102,27 @@ build-frontend-arm64:
       EOT
     - |
       docker buildx build --platform linux/arm64 --push \
-        -t $REGISTRY/$IMAGE_FRONTEND:$TAG_PATCH-$SUFFIX \
-        -t $REGISTRY/$IMAGE_FRONTEND:$TAG_MINOR-$SUFFIX \
-        -t $REGISTRY/$IMAGE_FRONTEND:$TAG_MAJOR-$SUFFIX \
-        -t $REGISTRY/$IMAGE_FRONTEND:$SUFFIX frontend
+        -t $REGISTRY/$IMAGE_FRONTEND:arm64-$CI_COMMIT_SHORT_SHA frontend
+
+        
+tag-images:
+  stage: tag-images
+  only:
+    - /^.*-(pro|theme)+$/
+  script:
+    - |
+      docker buildx imagetools create \
+        --tag $REGISTRY/$IMAGE_BACKEND:$TAG_PATCH-$SUFFIX \
+        --tag $REGISTRY/$IMAGE_BACKEND:$TAG_MINOR-$SUFFIX \
+        --tag $REGISTRY/$IMAGE_BACKEND:$TAG_MAJOR-$SUFFIX \
+        --tag $REGISTRY/$IMAGE_BACKEND:$SUFFIX \
+        $REGISTRY/$IMAGE_BACKEND:amd64-$CI_COMMIT_SHORT_SHA \
+        $REGISTRY/$IMAGE_BACKEND:arm64-$CI_COMMIT_SHORT_SHA
+    - |
+      docker buildx imagetools create \
+        --tag $REGISTRY/$IMAGE_FRONTEND:$TAG_PATCH-$SUFFIX \
+        --tag $REGISTRY/$IMAGE_FRONTEND:$TAG_MINOR-$SUFFIX \
+        --tag $REGISTRY/$IMAGE_FRONTEND:$TAG_MAJOR-$SUFFIX \
+        --tag $REGISTRY/$IMAGE_FRONTEND:$SUFFIX \
+        $REGISTRY/$IMAGE_FRONTEND:amd64-$CI_COMMIT_SHORT_SHA \
+        $REGISTRY/$IMAGE_FRONTEND:arm64-$CI_COMMIT_SHORT_SHA
