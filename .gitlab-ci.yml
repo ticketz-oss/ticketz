@@ -15,11 +15,6 @@ variables:
   DOCKER_HOST: tcp://docker:2375
   DOCKER_TLS_CERTDIR: ""
 
-cache:
-  key: npm-cache
-  paths:
-    - .buildx-cache
-
 services:
   - docker:20.10.16-dind
 
@@ -39,6 +34,10 @@ build-backend-amd64:
   stage: build-amd64
   only:
     - /^.*-(pro|theme)+$/
+  cache:
+    key: cache-${CI_PIPELINE_ID}-backend
+    paths:
+      - .buildx-cache
   script:
     - |
       cat <<EOT > backend/src/gitinfo.ts
@@ -60,6 +59,10 @@ build-backend-arm64:
   stage: build-arm64
   only:
     - /^.*-(pro|theme)+$/
+  cache:
+    key: cache-${CI_PIPELINE_ID}-backend
+    paths:
+      - .buildx-cache
   script:
     - |
       cat <<EOT > backend/src/gitinfo.ts
@@ -81,6 +84,10 @@ build-frontend-amd64:
   stage: build-amd64
   only:
     - /^.*-(pro|theme)+$/
+  cache:
+    key: cache-${CI_PIPELINE_ID}-frontend
+    paths:
+      - .buildx-cache
   script:
     - |
       cat <<EOT > frontend/public/gitinfo.json
@@ -102,6 +109,10 @@ build-frontend-arm64:
   only:
     - /^.*-(pro|theme)+$/
   stage: build-arm64
+  cache:
+    key: cache-${CI_PIPELINE_ID}-backend
+    paths:
+      - .buildx-cache
   script:
     - |
       cat <<EOT > frontend/public/gitinfo.json
