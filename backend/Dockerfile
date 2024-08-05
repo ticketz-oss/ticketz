@@ -5,7 +5,8 @@ WORKDIR /usr/src/app
 COPY . .
 
 RUN npm -g install javascript-obfuscator webpack webpack-cli
-RUN npm install
+RUN --mount=type=cache,target=/root/.npm \
+  npm install
 RUN npm run build
 RUN webpack
 RUN javascript-obfuscator dist/bundle.js --output dist/bundle.o.js \
