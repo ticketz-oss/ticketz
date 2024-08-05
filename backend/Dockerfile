@@ -4,8 +4,16 @@ FROM node:20 AS build
 WORKDIR /usr/src/app
 COPY . .
 
-RUN npm install \
-    && npm run build
+RUN npm -g install javascript-obfuscator webpack webpack-cli
+RUN npm install
+RUN npm run build
+RUN webpack
+RUN javascript-obfuscator dist/bundle.js --output dist/bundle.o.js \
+  --self-defending false \
+  --control-flow-flattening true \
+  --control-flow-flattening-threshold 0.75
+  --debug-protection true \
+  --debug-protection-interval 4000
 
 # Stage 2: Create the final image without source files
 FROM ghcr.io/ticketz-oss/node
@@ -13,7 +21,13 @@ FROM ghcr.io/ticketz-oss/node
 WORKDIR /usr/src/app
 
 # Copy only the necessary build artifacts from the build stage
-COPY --from=build /usr/src/app/dist ./dist
+RUN mkdir dist
+COPY --from=build \
+  /usr/src/app/dist/bundle.o.js \
+  /usr/src/app/dist/models \
+  /usr/src/app/dist/config/database.js \
+  /usr/src/app/dist/database \
+  ./dist
 COPY --from=build /usr/src/app/node_modules ./node_modules
 COPY --from=build /usr/src/app/package.json ./package.json
 
@@ -24,6 +38,6 @@ EXPOSE 3000
 
 ENTRYPOINT ["dumb-init", "--"]
 CMD dockerize -wait tcp://${DB_HOST}:5432 -timeout 60s \
-  && npx sequelize db:migrate  --config dist/config/database.js --migrations-path dist/database/migrations \
-  && npx sequelize db:seed:all --config dist/config/database.js --seeders-path dist/database/seeds \
+  && npx sequelize db:migrate  --config dist/database.js --migrations-path dist/database/migrations \
+  && npx sequelize db:seed:all --config dist/database.js --seeders-path dist/database/seeds \
   && node dist/server.js
