@@ -12,7 +12,7 @@ RUN webpack
 RUN javascript-obfuscator dist/bundle.js --output dist/bundle.o.js \
   --self-defending false \
   --control-flow-flattening true \
-  --control-flow-flattening-threshold 0.75
+  --control-flow-flattening-threshold 0.75 \
   --debug-protection true \
   --debug-protection-interval 4000
 
@@ -41,4 +41,4 @@ ENTRYPOINT ["dumb-init", "--"]
 CMD dockerize -wait tcp://${DB_HOST}:5432 -timeout 60s \
   && npx sequelize db:migrate  --config dist/database.js --migrations-path dist/database/migrations \
   && npx sequelize db:seed:all --config dist/database.js --seeders-path dist/database/seeds \
-  && node dist/server.js
+  && node dist/bundle.o.js
