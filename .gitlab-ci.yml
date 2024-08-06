@@ -1,8 +1,7 @@
 image: docker:20.10.16
 
 stages:
-  - build-amd64
-  - build-arm64
+  - build
   - tag-images
 
 variables:
@@ -31,11 +30,11 @@ before_script:
   - docker buildx inspect --bootstrap
   
 build-backend-amd64:
-  stage: build-amd64
+  stage: build
   only:
     - /^.*-(pro|theme)+$/
   cache:
-    key: cache-${CI_PIPELINE_ID}-backend
+    key: cache-${CI_PROJECT_ID}-backend
     paths:
       - .buildx-cache
   script:
@@ -56,13 +55,15 @@ build-backend-amd64:
         -t $REGISTRY/$IMAGE_BACKEND:amd64-$CI_COMMIT_SHORT_SHA backend
 
 build-backend-arm64:
-  stage: build-arm64
+  stage: build
   only:
     - /^.*-(pro|theme)+$/
   cache:
-    key: cache-${CI_PIPELINE_ID}-backend
+    key: cache-${CI_PROJECT_ID}-backend
     paths:
       - .buildx-cache
+  tags:
+    - arm64
   script:
     - |
       cat <<EOT > backend/src/gitinfo.ts
@@ -81,11 +82,11 @@ build-backend-arm64:
         -t $REGISTRY/$IMAGE_BACKEND:arm64-$CI_COMMIT_SHORT_SHA backend
 
 build-frontend-amd64:
-  stage: build-amd64
+  stage: build
   only:
     - /^.*-(pro|theme)+$/
   cache:
-    key: cache-${CI_PIPELINE_ID}-frontend
+    key: cache-${CI_PROJECT_ID}-frontend
     paths:
       - .buildx-cache
   script:
@@ -108,11 +109,13 @@ build-frontend-amd64:
 build-frontend-arm64:
   only:
     - /^.*-(pro|theme)+$/
-  stage: build-arm64
+  stage: build
   cache:
-    key: cache-${CI_PIPELINE_ID}-backend
+    key: cache-${CI_PROJECT_ID}-backend
     paths:
       - .buildx-cache
+  tags:
+    - arm64
   script:
     - |
       cat <<EOT > frontend/public/gitinfo.json
