@@ -653,6 +653,11 @@ const messages = {
         licensefulltext: "Texto completo da licença",
         licensesourcecode: "Código fonte do ticketz"
       },
+      aboutpro: {
+        aboutdetail: "Sistema de Multiatendimento Whitelabel para fornecimento como serviço (SaaS)",
+        licenseheading: "Licença para uso exclusivo",
+        licensedetail: "O Ticketz PRO é licenciado para uso exclusivo nos sistemas autorizados, para maiores informações consulte o site do produto",
+      },
       schedules: {
         title: "Agendamentos",
         confirmationModal: {

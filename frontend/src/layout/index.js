@@ -25,7 +25,7 @@ import MainListItems from "./MainListItems";
 import NotificationsPopOver from "../components/NotificationsPopOver";
 import NotificationsVolume from "../components/NotificationsVolume";
 import UserModal from "../components/UserModal";
-import AboutModal from "../components/AboutModal";
+import AboutProModal from "../components/AboutProModal";
 import { AuthContext } from "../context/Auth/AuthContext";
 import BackdropLoading from "../components/BackdropLoading";
 import DarkMode from "../components/DarkMode";
@@ -379,7 +379,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
         onClose={() => setUserModalOpen(false)}
         userId={user?.id}
       />
-      <AboutModal
+      <AboutProModal
         open={aboutModalOpen}
         onClose={() => setAboutModalOpen(false)}
       />
@@ -503,7 +503,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
                 }
               </NestedMenuItem>
               <MenuItem onClick={handleOpenAboutModal}>
-                {i18n.t("about.aboutthe")} {currentUser?.super ? "ticketz" : theme.appName}
+                {i18n.t("about.aboutthe")} {currentUser?.super ? "Ticketz PRO" : theme.appName}
               </MenuItem>
               <MenuItem onClick={handleClickLogout}>
                 {i18n.t("mainDrawer.appBar.user.logout")}

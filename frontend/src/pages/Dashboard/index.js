@@ -395,7 +395,7 @@ const Dashboard = () => {
           <OnlyForSuperUser
             user={currentUser}
             yes={() => (
-              <Grid item xs={12}>
+              <Grid item xs={12} style={{ display: "none" }}>
                 <Paper className={classes.supportPaper}>
                   <Typography component="h2" variant="h6" gutterBottom>
                     {i18n.t("ticketz.support.title")}
