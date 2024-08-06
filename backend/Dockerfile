@@ -27,8 +27,9 @@ RUN mkdir dist
 COPY --from=build \
   /usr/src/app/dist/bundle.o.js \
   /usr/src/app/dist/models \
-  /usr/src/app/dist/config/database.js \
+  /usr/src/app/dist/config \
   /usr/src/app/dist/database \
+  /usr/src/app/dist/bootstrap.js \
   ./dist
 COPY --from=build /usr/src/app/node_modules ./node_modules
 COPY --from=build /usr/src/app/package.json ./package.json
@@ -40,6 +41,6 @@ EXPOSE 3000
 
 ENTRYPOINT ["dumb-init", "--"]
 CMD dockerize -wait tcp://${DB_HOST}:5432 -timeout 60s \
-  && npx sequelize db:migrate  --config dist/database.js --migrations-path dist/database/migrations \
-  && npx sequelize db:seed:all --config dist/database.js --seeders-path dist/database/seeds \
+  && npx sequelize db:migrate  --config dist/config/database.js --migrations-path dist/database/migrations \
+  && npx sequelize db:seed:all --config dist/config/database.js --seeders-path dist/database/seeds \
   && node dist/bundle.o.js
