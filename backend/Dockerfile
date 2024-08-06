@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.7-labs
+
 # Stage 1: Build the application
 FROM node:20 AS build
 
@@ -23,16 +25,15 @@ FROM ghcr.io/ticketz-oss/node
 WORKDIR /usr/src/app
 
 # Copy only the necessary build artifacts from the build stage
-RUN mkdir dist
-COPY --from=build \
-  /usr/src/app/dist/bundle.o.js \
-  /usr/src/app/dist/models \
-  /usr/src/app/dist/config \
-  /usr/src/app/dist/database \
-  /usr/src/app/dist/bootstrap.js \
-  ./dist
-COPY --from=build /usr/src/app/node_modules ./node_modules
-COPY --from=build /usr/src/app/package.json ./package.json
+COPY --from=build --parents \
+  /usr/src/app/./dist/bootstrap.js \
+  /usr/src/app/./dist/bundle.o.js \
+  /usr/src/app/./dist/models \
+  /usr/src/app/./dist/config \
+  /usr/src/app/./dist/database \
+  /usr/src/app/./node_modules \
+  /usr/src/app/./package.json \
+  .
 
 ENV NODE_ENV=production
 ENV PORT=3000
