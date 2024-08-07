@@ -24,6 +24,9 @@ import { faCopy, faGears } from '@fortawesome/free-solid-svg-icons';
 import { generateSecureToken } from "../../helpers/generateSecureToken";
 import { copyToClipboard } from "../../helpers/copyToClipboard";
 
+
+import Typography from "@material-ui/core/Typography";
+
 const useStyles = makeStyles((theme) => ({
   container: {
     paddingTop: theme.spacing(4),
@@ -119,6 +122,9 @@ export default function Options(props) {
 
   const downloadLimitInput = useRef(null);
 
+  const [ticketzProKey, setTicketzProKey] = useState("");
+  const ticketzProKeyInput = useRef(null);
+
   const { update } = useSettings();
 
   useEffect(() => {
@@ -165,6 +171,10 @@ export default function Options(props) {
 
       const downloadLimit = settings.find((s) => s.key === "downloadLimit");
       setDownloadLimit(downloadLimit?.value || "");
+      
+      const ticketzProKey = settings.find((s) => s.key === "ticketzProKey");
+      setTicketzProKey(ticketzProKey?.value || "");
+      
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
@@ -310,6 +320,17 @@ export default function Options(props) {
           scheduleTypeChanged(value);
         } */
   }
+
+  async function handleTicketzProKey(value) {
+    setTicketzProKey(value);
+    await update({
+      key: "ticketzProKey",
+      value,
+    });
+    toast.success("Operação atualizada com sucesso.");
+  }
+
+
 
   return (
     <>
@@ -559,6 +580,39 @@ export default function Options(props) {
           )}
         />
       </Grid>
+      
+      <OnlyForSuperUser
+        user={currentUser}
+        yes={() => (
+          <Grid spacing={3} container style={{ paddingTop: "15px" }}>
+            {
+              <Grid xs={12} item>
+                <Typography variant="h5" color="primary">
+                  Ticketz PRO
+                </Typography>
+              </Grid>
+            }
+            <Grid xs={12} sm={12} md={8} item>
+              <FormControl className={classes.selectContainer}>
+                <TextField
+                  id="ticketzprokey-field"
+                  label="Código de Ativação"
+                  variant="standard"
+                  name="ticketzProKey"
+                  value={ticketzProKey}
+                  inputRef={ticketzProKeyInput}
+                  onChange={(e) => {
+                    setTicketzProKey(e.target.value);
+                  }}
+                  onBlur={async (_) => {
+                    await handleTicketzProKey(ticketzProKey);
+                  }}
+                />
+              </FormControl>
+            </Grid>
+          </Grid>
+        )}
+      />
     </>
   );
 }
