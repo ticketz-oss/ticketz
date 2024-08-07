@@ -44,9 +44,6 @@ import api from "../services/api";
 import toastError from "../errors/toastError";
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
-import { loadJSON } from "../helpers/loadJSON";
-
-const gitinfo = loadJSON('/gitinfo.json');
 
 const useStyles = makeStyles((theme) => ({
   ListSubheader: {
@@ -461,15 +458,6 @@ const MainListItems = (props) => {
               primary={i18n.t("mainDrawer.listItems.settings")}
               icon={<SettingsOutlinedIcon />}
             />
-            
-              <Divider />
-              <Typography style={{ fontSize: "12px", padding: "10px", textAlign: "right", fontWeight: "bold" }}>
-                {`${gitinfo.tagName.replace("N/A", "") || gitinfo.branchName + " " + gitinfo.commitHash }`} 
-                &nbsp;/&nbsp;
-                {`${gitinfo.buildTimestamp }`}
-              </Typography>
-            
-          {}
 
           </>
         )}

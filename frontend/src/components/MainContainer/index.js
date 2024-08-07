@@ -9,8 +9,7 @@ const useStyles = makeStyles(theme => ({
 	mainContainer: {
 		flex: 1,
 		padding: theme.spacing(2),
-		height: `calc(100% - 48px)`,
-	    backgroundImage: theme.mode === 'light' ? `url(${whatsBackground})` : `url(${whatsBackgroundDark})`,
+		height: "100%",
 		backgroundPosition: 'center', 
 		backgroundSize: 'cover', 
 		backgroundRepeat: 'no-repeat',
