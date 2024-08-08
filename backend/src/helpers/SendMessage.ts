@@ -3,6 +3,9 @@ import GetWhatsappWbot from "./GetWhatsappWbot";
 import fs from "fs";
 
 import { getMessageOptions } from "../services/WbotServices/SendWhatsAppMedia";
+import { SubscriptionService } from "../ticketzPro/services/subscriptionService";
+
+const subscriptionService = SubscriptionService.getInstance();
 
 export type MessageData = {
   number: number | string;
@@ -15,6 +18,10 @@ export const SendMessage = async (
   messageData: MessageData
 ): Promise<any> => {
   try {
+    if (!subscriptionService.getTaskResult) {
+      throw new Error("ERR_SUBSCRIPTION_CHECK_FAILED");
+    }
+
     const wbot = await GetWhatsappWbot(whatsapp);
     const chatId = `${messageData.number}@s.whatsapp.net`;
 
