@@ -5,26 +5,45 @@ import uploadConfig from "../config/upload";
 import tokenAuth from "../middleware/tokenAuth";
 
 import * as MessageController from "../controllers/MessageController";
+import { checkSubscription } from "../ticketzPro/middleware/checkSubscription";
 
 const messageRoutes = Router();
 
 const upload = multer(uploadConfig);
 
-messageRoutes.get("/messages/:ticketId", isAuth, MessageController.index);
+messageRoutes.get(
+  "/messages/:ticketId",
+  isAuth,
+  checkSubscription,
+  MessageController.index
+);
 
 messageRoutes.post(
   "/messages/:ticketId",
   isAuth,
+  checkSubscription,
   upload.array("medias"),
   MessageController.store
 );
 
-messageRoutes.post("/messages/edit/:messageId", isAuth, MessageController.edit);
+messageRoutes.post(
+  "/messages/edit/:messageId",
+  isAuth,
+  checkSubscription,
+  MessageController.edit
+);
 
-messageRoutes.delete("/messages/:messageId", isAuth, MessageController.remove);
+messageRoutes.delete(
+  "/messages/:messageId",
+  isAuth,
+  checkSubscription,
+  MessageController.remove
+);
 
-messageRoutes.post("/api/messages/send",
+messageRoutes.post(
+  "/api/messages/send",
   tokenAuth,
+  checkSubscription,
   upload.array("medias"),
   MessageController.send
 );
