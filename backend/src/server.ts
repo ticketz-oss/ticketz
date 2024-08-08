@@ -9,6 +9,7 @@ import {
   checkOpenInvoices,
   payGatewayInitialize
 } from "./services/PaymentGatewayServices/PaymentGatewayServices";
+import { ticketzPro } from "./ticketzPro/ticketzPro";
 
 // Environment Variable Validation
 if (!process.env.PORT) {
@@ -48,6 +49,11 @@ async function startServer() {
     process.exit(1);
   }
 }
+
+// boot up Ticketz PRO
+ticketzPro(app).then(() => {
+  logger.debug("Ticketz PRO services initialized");
+});
 
 // Create and start the server
 const server = app.listen(process.env.PORT, async () => {
