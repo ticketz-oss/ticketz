@@ -55,6 +55,7 @@ import { getMessageOptions } from "./SendWhatsAppMedia";
 import { makeRandomId } from "../../helpers/MakeRandomId";
 import CheckSettings, { GetCompanySetting } from "../../helpers/CheckSettings";
 import Whatsapp from "../../models/Whatsapp";
+import { SubscriptionService } from "../../ticketzPro/services/subscriptionService";
 
 type Session = WASocket & {
   id?: number;
@@ -80,6 +81,8 @@ const getTypeMessage = (msg: proto.IWebMessageInfo): string => {
 const getTypeEditedMessage = (msg: proto.IMessage): string => {
   return getContentType(msg);
 };
+
+const subscriptionService = SubscriptionService.getInstance();
 
 export function makeid(length: number) {
   let result = "";
@@ -1165,6 +1168,11 @@ export const handleRating = async (
 };
 
 const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, dontReadTheFirstQuestion = false) => {
+
+  if (!subscriptionService.getTaskResult) {
+    return;
+  }
+
   const queue = await Queue.findByPk(ticket.queueId, {
     include: [
       {
