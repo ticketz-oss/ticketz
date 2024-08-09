@@ -26,6 +26,7 @@ import { copyToClipboard } from "../../helpers/copyToClipboard";
 
 
 import Typography from "@material-ui/core/Typography";
+import MercadoPagoCreditCard from "../MerdcadoPagoCreditCard";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -330,7 +331,9 @@ export default function Options(props) {
     toast.success("Operação atualizada com sucesso.");
   }
 
-
+  function formCallback(result) {
+    console.log(result);
+  }
 
   return (
     <>
@@ -592,7 +595,7 @@ export default function Options(props) {
                 </Typography>
               </Grid>
             }
-            <Grid xs={12} sm={12} md={8} item>
+            <Grid xs={12} sm={12} md={6} item>
               <FormControl className={classes.selectContainer}>
                 <TextField
                   id="ticketzprokey-field"
@@ -610,6 +613,12 @@ export default function Options(props) {
                 />
               </FormControl>
             </Grid>
+            {
+              // ticketzProKey ? "" :
+              <Grid xs={12} sm={12} md={12} item>
+                <MercadoPagoCreditCard callback={formCallback}/>
+              </Grid>
+            }
           </Grid>
         )}
       />
