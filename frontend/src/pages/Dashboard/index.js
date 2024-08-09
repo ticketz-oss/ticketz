@@ -49,6 +49,7 @@ import moment from "moment";
 import { i18n } from "../../translate/i18n";
 import OnlyForSuperUser from "../../components/OnlyForSuperUser";
 import useAuth from "../../hooks/useAuth.js";
+import TicketzProStatus from "../../components/TicketzProStatus";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -391,6 +392,12 @@ const Dashboard = () => {
     <div>
       <Container maxWidth="lg" className={classes.container}>
         <Grid container spacing={3} justifyContent="flex-end">
+
+          <OnlyForSuperUser
+            user={currentUser}
+            yes={() => (
+              <TicketzProStatus />
+            )} />
 
           <OnlyForSuperUser
             user={currentUser}
