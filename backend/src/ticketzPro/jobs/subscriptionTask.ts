@@ -13,12 +13,7 @@ subscriptionTaskQueue.process(async _job => {
 // check everyday 6 a.m.
 subscriptionTaskQueue.add({}, { repeat: { cron: "0 6 * * *" } });
 
-const recheckQueue = new Bull("recheck-task", {
-  redis: {
-    host: "127.0.0.1",
-    port: 6379
-  }
-});
+const recheckQueue = new Bull("recheck-task", connection);
 
 recheckQueue.process(async _job => {
   const subscriptionService = SubscriptionService.getInstance();
