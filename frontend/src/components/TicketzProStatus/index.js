@@ -41,12 +41,15 @@ export default function TicketzProStatus(props) {
   const [proStatus, setProStatus] = useState(null);
   const [status, setStatus] = useState(null);
 
-  useEffect (async () => {
-    const ticketzPro = await ticketzProStatus();
-    setProStatus(ticketzPro.status);
-
-    const ticketz = await ticketzStatus();
-    setStatus(ticketz);
+  useEffect (() => {
+    async function fetchData() {
+      const ticketzPro = await ticketzProStatus();
+      setProStatus(ticketzPro.status);
+  
+      const ticketz = await ticketzStatus();
+      setStatus(ticketz);
+    }
+    fetchData();
   }, []);
   
 	return (
