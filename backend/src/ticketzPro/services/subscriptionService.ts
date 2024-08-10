@@ -112,7 +112,7 @@ export class SubscriptionService {
       }
       return this.taskResult;
     } catch (error) {
-      logger.error("Error executing single check:", error);
+      logger.error(error, `Error executing single check: ${error?.message}`);
       this.taskResult = false;
       return false;
     }
