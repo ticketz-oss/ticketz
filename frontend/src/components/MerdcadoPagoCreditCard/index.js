@@ -73,6 +73,7 @@ export default function MercadoPagoCreditCard({ callback }) {
   };
 
   initMercadoPago("APP_USR-4e658725-1e50-49ef-976f-f866ca2a041c");
+  // initMercadoPago("TEST-7b3070b9-c99c-459b-8c35-79a50579a3af");
 
 	return (
     <Grid xs={12} sm={12} md={6} container>
