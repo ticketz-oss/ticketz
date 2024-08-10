@@ -168,22 +168,22 @@ export class SubscriptionService {
       throw new AppError("Invalid response signature", 403);
     }
 
-    const { success, id, subscriptionData, message } = response.data;
+    const { success, subscriptionData, message } = response.data;
 
     if (!success) {
       throw new AppError(message, 403);
     }
 
-    if (!id) {
-      throw new AppError("Didn't received subscription id", 500);
-    }
     if (!subscriptionData) {
       throw new AppError("Didn't received subscription data", 500);
     }
 
+    if (!subscriptionData.id) {
+      throw new AppError("Didn't received subscription id", 500);
+    }
     await UpdateSettingService({
       key: "ticketzProKey",
-      value: id,
+      value: subscriptionData.id,
       companyId: 1
     });
 
