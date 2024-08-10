@@ -14,6 +14,7 @@ import OnlyForSuperUser from "../OnlyForSuperUser";
 import useAuth from "../../hooks/useAuth.js";
 import { Loop, Delete } from "@material-ui/icons";
 import {
+  CircularProgress,
   IconButton,
   TextField
 } from "@material-ui/core";
@@ -26,7 +27,7 @@ import { copyToClipboard } from "../../helpers/copyToClipboard";
 
 
 import { Typography, Button } from "@material-ui/core";
-import MercadoPagoCreditCard from "../MerdcadoPagoCreditCard";
+import MercadoPagoCreditCard from "../MercadoPagoCreditCard";
 import useTicketzProSubscribe from "../../hooks/useTicketzProSubscribe";
 import moment from "moment/moment";
 import 'moment/locale/pt';
@@ -143,6 +144,7 @@ export default function Options(props) {
   const ticketzProKeyInput = useRef(null);
   const [showTicketzProKey, setShowTicketzProKey] = useState(false);
   const [showCardForm, setShowCardForm] = useState(false);
+  const [showSubscriptionLoading, setShowSubscriptionLoading] = useState(false);
   const [emailAddress, setEmailAddress] = useState("");
   const [subscribeError, setSubscribeError] = useState("");
   const [proStatus, setProStatus] = useState(null);
@@ -350,13 +352,18 @@ export default function Options(props) {
       value,
     });
     if (value) {
+      setShowSubscriptionLoading(true);
       ticketzProCheck().then(
-        _ => {
+        _result => {
+          setShowSubscriptionLoading(false);
           ticketzProStatus().then(
             ticketzPro => {
               setProStatus(ticketzPro.status);
             }
           )
+        },
+        _error => {
+          setShowSubscriptionLoading(false);
         }
       );
     } else {
@@ -367,12 +374,14 @@ export default function Options(props) {
 
   function formCallback(cardToken) {
     setShowCardForm(false);
+    setShowSubscriptionLoading(true);
 
     ticketzProSubscribe({
       emailAddress,
       cardToken: cardToken?.id,
     }).then(
       result => {
+        setShowSubscriptionLoading(false);
         setProStatus(result);
         if (result.id) {
           setTicketzProKey(result.id);
@@ -380,7 +389,10 @@ export default function Options(props) {
           setShowTicketzProKey(false);
         }
       },
-      error => setSubscribeError(error.message || "Erro desconhecido")
+      error => {
+        setShowSubscriptionLoading(false);
+        setSubscribeError(error.message || "Erro desconhecido");
+      }
     );
   }
   
@@ -392,6 +404,7 @@ export default function Options(props) {
     if (ticketzProKey) {
       fetchData();
     }
+    console.log("useEffect effecting", ticketzProKey);
   }, []);
 
   return (
@@ -653,7 +666,11 @@ export default function Options(props) {
               </Typography>
             </Grid>
             {
-            !ticketzProKey &&
+              showSubscriptionLoading &&
+              <CircularProgress />
+            }
+            {              
+              !ticketzProKey && !showSubscriptionLoading &&
               <Grid xs={12} sm={12} md={12} className={classes.buttonGrid}>
                 {!showCardForm &&
                   <Button
@@ -687,7 +704,7 @@ export default function Options(props) {
             }
 
             {
-            ticketzProKey &&
+              ticketzProKey && !showSubscriptionLoading &&
               <Grid xs={12} sm={12} md={12} className={classes.buttonGrid}>
                 <Button
                   className={classes.button}
@@ -705,61 +722,64 @@ export default function Options(props) {
               </Grid>
             }
 
-            { showTicketzProKey &&
-            <Grid xs={12} sm={12} md={6} item>
-              <FormControl className={classes.selectContainer}>
-                <TextField
-                  id="ticketzprokey-field"
-                  label="Código de Ativação"
-                  variant="standard"
-                  name="ticketzProKey"
-                  value={ticketzProKey}
-                  inputRef={ticketzProKeyInput}
-                  onBlur={async (_) => {
-                    await handleTicketzProKey(ticketzProKey);
-                  }}
-                />
-              </FormControl>
-            </Grid>
-            }
-            
-            {
-              showCardForm &&
-              <>
+            {showTicketzProKey && !showSubscriptionLoading &&
               <Grid xs={12} sm={12} md={6} item>
-                  <Typography component="h2" variant="h6">
-                    Assinatura: R$ 199/mês
-                  </Typography>
-
                 <FormControl className={classes.selectContainer}>
                   <TextField
-                    id="email-field"
-                    label="Endereço de e-mail"
+                    id="ticketzprokey-field"
+                    label="Código de Ativação"
                     variant="standard"
-                    name="emailAddress"
-                    value={emailAddress}
+                    name="ticketzProKey"
+                    value={ticketzProKey}
+                    inputRef={ticketzProKeyInput}
                     onChange={(e) => {
-                      setEmailAddress(e.target.value);
+                      setTicketzProKey(e.target.value);
+                    }}
+                    onBlur={async (_) => {
+                      await handleTicketzProKey(ticketzProKey);
                     }}
                   />
                 </FormControl>
               </Grid>
-              <Grid xs={12} sm={12} md={12} item>
-                <MercadoPagoCreditCard callback={formCallback}/>
-              </Grid>
+            }
+
+            {
+              showCardForm &&
+              <>
+                <Grid xs={12} sm={12} md={6} item>
+                  <Typography component="h2" variant="h6">
+                    Assinatura: R$ 199/mês
+                  </Typography>
+
+                  <FormControl className={classes.selectContainer}>
+                    <TextField
+                      id="email-field"
+                      label="Endereço de e-mail"
+                      variant="standard"
+                      name="emailAddress"
+                      value={emailAddress}
+                      onChange={(e) => {
+                        setEmailAddress(e.target.value);
+                      }}
+                    />
+                  </FormControl>
+                </Grid>
+                <Grid xs={12} sm={12} md={12} item>
+                  <MercadoPagoCreditCard callback={formCallback} />
+                </Grid>
               </>
             }
             {
-              subscribeError &&
+              subscribeError && !showSubscriptionLoading &&
               <Grid xs={12} item>
                 <Typography variant="h5" color="error">
-                  { subscribeError }
+                  {subscribeError}
                 </Typography>
               </Grid>
             }
 
             {
-              proStatus &&
+              proStatus && !showSubscriptionLoading &&
               <Typography component="h2" variant="h6">
                 Status da assinatura:&nbsp;
                 {
@@ -769,8 +789,8 @@ export default function Options(props) {
                     "Erro: " + proStatus?.message
                 }
               </Typography>
-            }            
-            
+            }
+
           </Grid>
         )}
       />
