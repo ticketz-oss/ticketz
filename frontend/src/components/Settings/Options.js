@@ -25,8 +25,14 @@ import { generateSecureToken } from "../../helpers/generateSecureToken";
 import { copyToClipboard } from "../../helpers/copyToClipboard";
 
 
-import Typography from "@material-ui/core/Typography";
+import { Typography, Button } from "@material-ui/core";
 import MercadoPagoCreditCard from "../MerdcadoPagoCreditCard";
+import useTicketzProSubscribe from "../../hooks/useTicketzProSubscribe";
+import moment from "moment/moment";
+import 'moment/locale/pt';
+import useTicketzProStatus from "../../hooks/useTicketzProStatus";
+
+moment.locale("pt-br");
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -92,6 +98,12 @@ const useStyles = makeStyles((theme) => ({
   uploadInput: {
     display: "none",
   },
+  
+  button: {
+    marginLeft: "12px",
+    position: "relative",
+  },
+
 }));
 
 export default function Options(props) {
@@ -123,8 +135,15 @@ export default function Options(props) {
 
   const downloadLimitInput = useRef(null);
 
+  const { ticketzProSubscribe } = useTicketzProSubscribe();
+  const { ticketzProStatus } = useTicketzProStatus();
   const [ticketzProKey, setTicketzProKey] = useState("");
   const ticketzProKeyInput = useRef(null);
+  const [showTicketzProKey, setShowTicketzProKey] = useState(false);
+  const [showCardForm, setShowCardForm] = useState(false);
+  const [emailAddress, setEmailAddress] = useState("");
+  const [subscribeError, setSubscribeError] = useState("");
+  const [proStatus, setProStatus] = useState(null);
 
   const { update } = useSettings();
 
@@ -331,9 +350,34 @@ export default function Options(props) {
     toast.success("Operação atualizada com sucesso.");
   }
 
-  function formCallback(result) {
-    console.log(result);
+  function formCallback(cardToken) {
+    setShowCardForm(false);
+
+    ticketzProSubscribe({
+      emailAddress,
+      cardToken: cardToken?.id,
+    }).then(
+      result => {
+        setProStatus(result);
+        if (result.id) {
+          setTicketzProKey(result.id);
+          setShowCardForm(false);
+          setShowTicketzProKey(false);
+        }
+      },
+      error => setSubscribeError(error.message || "Erro desconhecido")
+    );
   }
+  
+  useEffect(() => {
+    async function fetchData() {
+      const ticketzPro = await ticketzProStatus();
+      setProStatus(ticketzPro.status);
+    }
+    if (ticketzProKey) {
+      fetchData();
+    }
+  }, [ticketzProStatus, ticketzProKey]);
 
   return (
     <>
@@ -588,13 +632,46 @@ export default function Options(props) {
         user={currentUser}
         yes={() => (
           <Grid spacing={3} container style={{ paddingTop: "15px" }}>
+            <Grid xs={12} item>
+              <Typography variant="h5" color="primary">
+                Ticketz PRO
+              </Typography>
+            </Grid>
             {
-              <Grid xs={12} item>
-                <Typography variant="h5" color="primary">
-                  Ticketz PRO
-                </Typography>
+            !ticketzProKey &&
+              <Grid xs={12} sm={12} md={12} className={classes.buttonGrid}>
+                {!showCardForm &&
+                  <Button
+                    className={classes.button}
+                    variant="contained"
+                    color="primary"
+                    onClick={
+                      () => {
+                        setShowCardForm(true);
+                        setShowTicketzProKey(false);
+                      }
+                    }>
+                    Assinar o Ticketz PRO
+                  </Button>
+                }
+                {!showTicketzProKey &&
+                  <Button
+                    className={classes.button}
+                    variant="contained"
+                    color="primary"
+                    onClick={
+                      () => {
+                        setShowTicketzProKey(true);
+                        setShowCardForm(false);
+                      }
+                    }>
+                    Código de Ativação
+                  </Button>
+                }
               </Grid>
             }
+
+            { showTicketzProKey &&
             <Grid xs={12} sm={12} md={6} item>
               <FormControl className={classes.selectContainer}>
                 <TextField
@@ -613,12 +690,56 @@ export default function Options(props) {
                 />
               </FormControl>
             </Grid>
+            }
+            
             {
-              // ticketzProKey ? "" :
+              showCardForm &&
+              <>
+              <Grid xs={12} sm={12} md={6} item>
+                  <Typography component="h2" variant="h6">
+                    Assinatura: R$ 199/mês
+                  </Typography>
+
+                <FormControl className={classes.selectContainer}>
+                  <TextField
+                    id="email-field"
+                    label="Endereço de e-mail"
+                    variant="standard"
+                    name="emailAddress"
+                    value={emailAddress}
+                    onChange={(e) => {
+                      setEmailAddress(e.target.value);
+                    }}
+                  />
+                </FormControl>
+              </Grid>
               <Grid xs={12} sm={12} md={12} item>
                 <MercadoPagoCreditCard callback={formCallback}/>
               </Grid>
+              </>
             }
+            {
+              subscribeError &&
+              <Grid xs={12} item>
+                <Typography variant="h5" color="error">
+                  { subscribeError }
+                </Typography>
+              </Grid>
+            }
+
+            {
+              proStatus &&
+              <Typography component="h2" variant="h6">
+                Status da assinatura:&nbsp;
+                {
+                  proStatus?.success ?
+                    (proStatus?.subscriptionData?.next_payment_date ? "Válida até " + moment(proStatus.subscriptionData.next_payment_date).format("LL") : "OK")
+                    :
+                    "Erro: " + proStatus?.message
+                }
+              </Typography>
+            }            
+            
           </Grid>
         )}
       />
