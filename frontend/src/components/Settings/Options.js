@@ -377,7 +377,7 @@ export default function Options(props) {
     if (ticketzProKey) {
       fetchData();
     }
-  }, [ticketzProStatus, ticketzProKey]);
+  }, [ticketzProKey]);
 
   return (
     <>
@@ -668,6 +668,25 @@ export default function Options(props) {
                     Código de Ativação
                   </Button>
                 }
+              </Grid>
+            }
+
+            {
+            ticketzProKey &&
+              <Grid xs={12} sm={12} md={12} className={classes.buttonGrid}>
+                <Button
+                  className={classes.button}
+                  variant="contained"
+                  color="secondary"
+                  onClick={
+                    () => {
+                      setShowCardForm(false);
+                      handleTicketzProKey("");
+                      setProStatus(null);
+                    }
+                  }>
+                  Resetar Licença
+                </Button>
               </Grid>
             }
 
