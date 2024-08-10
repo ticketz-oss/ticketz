@@ -152,7 +152,7 @@ export class SubscriptionService {
       "https://m7afmggvk2xe7xakjkth4scpia.apigateway.sa-saopaulo-1.oci.customer-oci.com/mps/subscribe";
 
     const data = {
-      domain: "test.com" || getDomain(process.env.FRONTEND_URL),
+      domain: getDomain(process.env.FRONTEND_URL),
       cardToken,
       email,
       challenge: makeRandomId(32)
