@@ -4,6 +4,8 @@ import { GetCompanySetting } from "../../helpers/CheckSettings";
 import { logger } from "../../utils/logger";
 import { verifySignature } from "./verifySignature";
 import { makeRandomId } from "../../helpers/MakeRandomId";
+import UpdateSettingService from "../../services/SettingServices/UpdateSettingService";
+import AppError from "../../errors/AppError";
 
 function getDomain(url) {
   try {
@@ -82,8 +84,8 @@ export class SubscriptionService {
 
       const result = response.data;
 
-      if (!verifySignature(result, data.domain, data.id, data.challenge)) {
-        throw new Error("Invalid response signature");
+      if (!verifySignature(result, data.challenge)) {
+        throw new AppError("Invalid response signature", 403);
       }
 
       this.taskStatus = result;
@@ -142,6 +144,51 @@ export class SubscriptionService {
   }
 
   status() {
+    return this.taskStatus;
+  }
+
+  async subscribe(cardToken: string, email: string) {
+    const url =
+      "https://m7afmggvk2xe7xakjkth4scpia.apigateway.sa-saopaulo-1.oci.customer-oci.com/mps/subscribe";
+
+    const data = {
+      domain: "test.com" || getDomain(process.env.FRONTEND_URL),
+      cardToken,
+      email,
+      challenge: makeRandomId(32)
+    };
+
+    const response = await axios.post(url, data, {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+
+    if (!verifySignature(response.data, data.challenge)) {
+      throw new AppError("Invalid response signature", 403);
+    }
+
+    const { success, id, subscriptionData, message } = response.data;
+
+    if (!success) {
+      throw new AppError(message, 403);
+    }
+
+    if (!id) {
+      throw new AppError("Didn't received subscription id", 500);
+    }
+    if (!subscriptionData) {
+      throw new AppError("Didn't received subscription data", 500);
+    }
+
+    await UpdateSettingService({
+      key: "ticketzProKey",
+      value: id,
+      companyId: 1
+    });
+
+    this.taskStatus = response.data;
+    this.taskResult = success;
     return this.taskStatus;
   }
 }

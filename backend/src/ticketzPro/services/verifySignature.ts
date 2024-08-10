@@ -1,5 +1,5 @@
 // verifySignature.ts
-import * as crypto from 'crypto';
+import * as crypto from "crypto";
 
 const PUBLIC_KEY = `-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA/Y1UucXU7E69vmJ5RvsE
@@ -12,24 +12,19 @@ m75VFMh7d89Vp4OpeNkng31YXwiAYhwlXRtx15TKoCF5NNee/irjkG37sqZVwwx5
 -----END PUBLIC KEY-----`;
 
 // Function to verify a signature
-export function verifySignature(
-  response: any,
-  domain: string,
-  id: string,
-  challenge: string
-): boolean {
+export function verifySignature(response: any, challenge: string): boolean {
   try {
     const { signature } = response;
     delete response.signature;
-    const data = JSON.stringify({ ...response, domain, id, challenge });
-    const verifier = crypto.createVerify('SHA256');
+    const data = JSON.stringify({ ...response, challenge });
+    const verifier = crypto.createVerify("SHA256");
     verifier.update(data);
     verifier.end();
 
-    const isValid = verifier.verify(PUBLIC_KEY, signature, 'base64');
+    const isValid = verifier.verify(PUBLIC_KEY, signature, "base64");
     return isValid;
   } catch (error) {
-    console.error('Error verifying signature:', error);
+    console.error("Error verifying signature:", error);
     return false;
   }
 }

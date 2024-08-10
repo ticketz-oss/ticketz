@@ -1,10 +1,11 @@
 // src/server.ts
-import { Request, Response, Router } from "express";
+import { Router } from "express";
 import isAuth from "../middleware/isAuth";
 import isSuper from "../middleware/isSuper";
 import { logger } from "../utils/logger";
 import { subscriptionTaskQueue, recheckQueue } from "./jobs/subscriptionTask";
 import { SubscriptionService } from "./services/subscriptionService";
+import * as TicketzProController from "./controllers/TicketzProController";
 
 export const ticketzPro = async app => {
   subscriptionTaskQueue.on("completed", job => {
@@ -34,28 +35,21 @@ export const ticketzPro = async app => {
     "/ticketzPro/check",
     isAuth,
     isSuper,
-    async (_req: Request, res: Response) => {
-      const result = await subscriptionService.triggerSingleCheck();
-      if (result) {
-        res.json({ message: "SUBSCRIPTION_OK" });
-      } else {
-        res.status(403).json({ message: "ERR_SUBSCRIPTION_CHECK_FAILED" });
-      }
-    }
+    TicketzProController.checkStatus
   );
 
   routes.get(
     "/ticketzPro/status",
     isAuth,
     isSuper,
-    async (_req: Request, res: Response) => {
-      const status = subscriptionService.status();
-      if (status) {
-        res.json({ message: "SUBSCRIPTION_STATUS", status });
-      } else {
-        res.status(403).json({ message: "ERR_SUBSCRIPTION_CHECK_FAILED" });
-      }
-    }
+    TicketzProController.getStatus
+  );
+
+  routes.post(
+    "/ticketzPro/subscribe",
+    isAuth,
+    isSuper,
+    TicketzProController.subscribe
   );
 
   app.use(routes);
