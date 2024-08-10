@@ -31,6 +31,7 @@ import useTicketzProSubscribe from "../../hooks/useTicketzProSubscribe";
 import moment from "moment/moment";
 import 'moment/locale/pt';
 import useTicketzProStatus from "../../hooks/useTicketzProStatus";
+import useTicketzProCheck from "../../hooks/useTicketzProCheck";
 
 moment.locale("pt-br");
 
@@ -137,6 +138,7 @@ export default function Options(props) {
 
   const { ticketzProSubscribe } = useTicketzProSubscribe();
   const { ticketzProStatus } = useTicketzProStatus();
+  const { ticketzProCheck } = useTicketzProCheck();
   const [ticketzProKey, setTicketzProKey] = useState("");
   const ticketzProKeyInput = useRef(null);
   const [showTicketzProKey, setShowTicketzProKey] = useState(false);
@@ -347,6 +349,19 @@ export default function Options(props) {
       key: "ticketzProKey",
       value,
     });
+    if (value) {
+      ticketzProCheck().then(
+        _ => {
+          ticketzProStatus().then(
+            ticketzPro => {
+              setProStatus(ticketzPro.status);
+            }
+          )
+        }
+      );
+    } else {
+      setProStatus(null);
+    }
     toast.success("Operação atualizada com sucesso.");
   }
 
@@ -377,7 +392,7 @@ export default function Options(props) {
     if (ticketzProKey) {
       fetchData();
     }
-  }, [ticketzProKey]);
+  }, []);
 
   return (
     <>
@@ -700,9 +715,6 @@ export default function Options(props) {
                   name="ticketzProKey"
                   value={ticketzProKey}
                   inputRef={ticketzProKeyInput}
-                  onChange={(e) => {
-                    setTicketzProKey(e.target.value);
-                  }}
                   onBlur={async (_) => {
                     await handleTicketzProKey(ticketzProKey);
                   }}
