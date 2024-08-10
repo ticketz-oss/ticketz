@@ -352,10 +352,12 @@ export default function Options(props) {
       value,
     });
     if (value) {
+      setSubscribeError("");
       setShowSubscriptionLoading(true);
       ticketzProCheck().then(
         _result => {
           setShowSubscriptionLoading(false);
+          setShowTicketzProKey(false);
           ticketzProStatus().then(
             ticketzPro => {
               setProStatus(ticketzPro.status);
@@ -375,6 +377,7 @@ export default function Options(props) {
   function formCallback(cardToken) {
     setShowCardForm(false);
     setShowSubscriptionLoading(true);
+    setSubscribeError("");
 
     ticketzProSubscribe({
       emailAddress,
@@ -382,9 +385,9 @@ export default function Options(props) {
     }).then(
       result => {
         setShowSubscriptionLoading(false);
-        setProStatus(result);
-        if (result.id) {
-          setTicketzProKey(result.id);
+        setProStatus(result.status);
+        if (result.status?.subscriptionData?.id) {
+          setTicketzProKey(result.status.subscriptionData.id);
           setShowCardForm(false);
           setShowTicketzProKey(false);
         }
@@ -667,7 +670,9 @@ export default function Options(props) {
             </Grid>
             {
               showSubscriptionLoading &&
-              <CircularProgress />
+              <Grid xs={12} item>
+                <CircularProgress />
+              </Grid>
             }
             {              
               !ticketzProKey && !showSubscriptionLoading &&
@@ -722,7 +727,7 @@ export default function Options(props) {
               </Grid>
             }
 
-            {showTicketzProKey && !showSubscriptionLoading &&
+            {showTicketzProKey &&
               <Grid xs={12} sm={12} md={6} item>
                 <FormControl className={classes.selectContainer}>
                   <TextField
