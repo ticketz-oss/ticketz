@@ -1,12 +1,9 @@
 import Bull from "bull";
 import { SubscriptionService } from "../services/subscriptionService";
 
-const subscriptionTaskQueue = new Bull("subscription-task", {
-  redis: {
-    host: "127.0.0.1",
-    port: 6379
-  }
-});
+const connection = process.env.REDIS_URI || "redis://127.0.0.1:6379";
+
+const subscriptionTaskQueue = new Bull("subscription-task", connection);
 
 subscriptionTaskQueue.process(async _job => {
   const subscriptionService = SubscriptionService.getInstance();
