@@ -11,28 +11,6 @@ import InputMask from 'react-input-mask';
 moment.locale("pt-br");
 
 const useStyles = makeStyles((theme) => ({
-  ticketzProPaper: {
-    padding: theme.spacing(2),
-    display: "flex",
-    flexDirection: "column",
-    overflowY: "auto",
-    backgroundColor: theme.palette.primary.main,
-    color: theme.palette.primary.contrastText,
-    ...theme.scrollbarStyles,
-  },
-  ticketzProBox: {
-    backgroundColor: theme.palette.primary.light,
-    borderRadius: "10px",
-    textAlign: "center",
-    borderColor: theme.palette.primary.main,
-    borderWidth: "3px",
-    borderStyle: "solid",
-    padding: "15px"
-  },
-  ticketzProCounter: {
-    fontSize: "35pt",
-    fontWeight: "bold"
-  },
   field: {
     width: "100%",
     textAlign: "left",
