@@ -17,12 +17,17 @@ variables:
 services:
   - docker:20.10.16-dind
 
-before_script:
+.tagged-before-script: &tagged-before-script
   - export BASE_TAG=$(echo $CI_COMMIT_TAG | sed 's/^v//;s/-.*$//')
   - export SUFFIX=$(echo $CI_COMMIT_TAG | sed 's/^v[^-]*-//')
   - export TAG_MAJOR=$(echo $BASE_TAG | cut -d'.' -f1)
   - export TAG_MINOR=$(echo $BASE_TAG | cut -d'.' -f1,2)
   - export TAG_PATCH=$(echo $BASE_TAG | cut -d'.' -f1,2,3)
+
+.branch-before-script: &branch-before-script
+  - export SUFFIX=$CI_COMMIT_REF_NAME-head
+
+.common-before-script: &common-before-script
   - export BUILD_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
   - echo $CI_REGISTRY_PASSWORD | docker login $REGISTRY -u $CI_REGISTRY_USER --password-stdin
   - docker run --privileged --rm tonistiigi/binfmt --install all
@@ -32,11 +37,15 @@ before_script:
 build-backend-amd64:
   stage: build
   only:
+    - pro
+    - theme
     - /^.*-(pro|theme)+$/
   cache:
     key: cache-${CI_PROJECT_ID}-backend
     paths:
       - .buildx-cache
+  before_script:
+    - *common-before-script
   script:
     - |
       cat <<EOT > backend/src/gitinfo.ts
@@ -57,6 +66,8 @@ build-backend-amd64:
 build-backend-arm64:
   stage: build
   only:
+    - pro
+    - theme
     - /^.*-(pro|theme)+$/
   cache:
     key: cache-${CI_PROJECT_ID}-backend
@@ -64,6 +75,8 @@ build-backend-arm64:
       - .buildx-cache
   tags:
     - arm64
+  before_script:
+    - *common-before-script
   script:
     - |
       cat <<EOT > backend/src/gitinfo.ts
@@ -84,11 +97,15 @@ build-backend-arm64:
 build-frontend-amd64:
   stage: build
   only:
+    - pro
+    - theme
     - /^.*-(pro|theme)+$/
   cache:
     key: cache-${CI_PROJECT_ID}-frontend
     paths:
       - .buildx-cache
+  before_script:
+    - *common-before-script
   script:
     - |
       cat <<EOT > frontend/public/gitinfo.json
@@ -108,6 +125,8 @@ build-frontend-amd64:
 
 build-frontend-arm64:
   only:
+    - pro
+    - theme
     - /^.*-(pro|theme)+$/
   stage: build
   cache:
@@ -116,6 +135,8 @@ build-frontend-arm64:
       - .buildx-cache
   tags:
     - arm64
+  before_script:
+    - *common-before-script
   script:
     - |
       cat <<EOT > frontend/public/gitinfo.json
@@ -134,10 +155,13 @@ build-frontend-arm64:
         -t $REGISTRY/$IMAGE_FRONTEND:arm64-$CI_COMMIT_SHORT_SHA frontend
 
         
-tag-images:
+tag-versioned-images:
   stage: tag-images
   only:
-    - /^.*-(pro|theme)+$/
+    - /^v.*-(pro|theme)$/
+  before_script:
+    - *tagged-before-script
+    - *common-before-script
   script:
     - |
       docker buildx imagetools create \
@@ -155,3 +179,24 @@ tag-images:
         --tag $REGISTRY/$IMAGE_FRONTEND:$SUFFIX \
         $REGISTRY/$IMAGE_FRONTEND:amd64-$CI_COMMIT_SHORT_SHA \
         $REGISTRY/$IMAGE_FRONTEND:arm64-$CI_COMMIT_SHORT_SHA
+
+tag-branch-images:
+  stage: tag-images
+  only:
+    - pro
+    - theme
+  before_script:
+    - *branch-before-script
+    - *common-before-script
+  script:
+    - |
+      docker buildx imagetools create \
+        --tag $REGISTRY/$IMAGE_BACKEND:$SUFFIX \
+        $REGISTRY/$IMAGE_BACKEND:amd64-$CI_COMMIT_SHORT_SHA \
+        $REGISTRY/$IMAGE_BACKEND:arm64-$CI_COMMIT_SHORT_SHA
+    - |
+      docker buildx imagetools create \
+        --tag $REGISTRY/$IMAGE_FRONTEND:$SUFFIX \
+        $REGISTRY/$IMAGE_FRONTEND:amd64-$CI_COMMIT_SHORT_SHA \
+        $REGISTRY/$IMAGE_FRONTEND:arm64-$CI_COMMIT_SHORT_SHA
+
