@@ -15,6 +15,11 @@ import useAuth from "../../hooks/useAuth.js";
 import { Loop, Delete } from "@material-ui/icons";
 import {
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   IconButton,
   TextField
 } from "@material-ui/core";
@@ -148,6 +153,7 @@ export default function Options(props) {
   const [emailAddress, setEmailAddress] = useState("");
   const [subscribeError, setSubscribeError] = useState("");
   const [proStatus, setProStatus] = useState(null);
+  const [openResetLicense, setOpenResetLicense] = useState(false);
 
   const { update } = useSettings();
 
@@ -715,17 +721,43 @@ export default function Options(props) {
                   className={classes.button}
                   variant="contained"
                   color="secondary"
-                  onClick={
-                    () => {
-                      setShowCardForm(false);
-                      handleTicketzProKey("");
-                      setProStatus(null);
-                    }
-                  }>
+                  onClick={() => setOpenResetLicense(true)}>
                   Resetar Licença
                 </Button>
               </Grid>
             }
+
+            <Dialog
+              open={openResetLicense}
+              onClose={() => setOpenResetLicense(false)}
+              aria-labelledby="alert-dialog-title"
+              aria-describedby="alert-dialog-description"
+            >
+              <DialogTitle id="alert-dialog-title">Resetar configuração de licença?</DialogTitle>
+              <DialogContent>
+                <DialogContentText id="alert-dialog-description">
+                  Isso irá remover a licença atual do sistema, você poderá
+                  adicionar novamente através da chave de ativação ou
+                  contratar uma nova licença.
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={() => setOpenResetLicense(false)} variant="contained" color="primary" autofocus>
+                  Cancelar
+                </Button>
+                <Button onClick={
+                  () => {
+                    setOpenResetLicense(false);
+                    setShowCardForm(false);
+                    handleTicketzProKey("");
+                    setProStatus(null);
+                  }
+                }
+                  variant="contained" color="secondary">
+                  Resetar
+                </Button>
+              </DialogActions>
+            </Dialog>
 
             {showTicketzProKey &&
               <Grid xs={12} sm={12} md={6} item>
