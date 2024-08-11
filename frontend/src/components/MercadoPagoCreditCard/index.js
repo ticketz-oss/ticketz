@@ -36,7 +36,6 @@ const useStyles = makeStyles((theme) => ({
   field: {
     width: "100%",
     textAlign: "left",
-    paddingRight: "12px",
   },  
   button: {
     position: "relative",
@@ -44,7 +43,6 @@ const useStyles = makeStyles((theme) => ({
   buttonGrid: {
     display: "flex",
     justifyContent: "flex-end",
-    paddingRight: "12px",
     paddingTop: "6px",
   }
 }));
@@ -76,7 +74,7 @@ export default function MercadoPagoCreditCard({ callback }) {
   // initMercadoPago("TEST-7b3070b9-c99c-459b-8c35-79a50579a3af");
 
 	return (
-    <Grid xs={12} sm={12} md={6} container>
+    <Grid container spacing={1}>
       <Grid xs={12} sm={12} md={6} item>
         <FormControl className={classes.field}>
           <InputMask

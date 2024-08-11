@@ -107,7 +107,7 @@ const useStyles = makeStyles((theme) => ({
   },
   
   button: {
-    marginLeft: "12px",
+    marginRight: "12px",
     position: "relative",
   },
 
@@ -682,7 +682,7 @@ export default function Options(props) {
             }
             {              
               !ticketzProKey && !showSubscriptionLoading &&
-              <Grid xs={12} sm={12} md={12} className={classes.buttonGrid}>
+              <Grid xs={12} sm={12} md={12} className={classes.buttonGrid} item>
                 {!showCardForm &&
                   <Button
                     className={classes.button}
@@ -716,7 +716,7 @@ export default function Options(props) {
 
             {
               ticketzProKey && !showSubscriptionLoading &&
-              <Grid xs={12} sm={12} md={12} className={classes.buttonGrid}>
+              <Grid xs={12} sm={12} md={12} className={classes.buttonGrid} item>
                 <Button
                   className={classes.button}
                   variant="contained"
@@ -782,7 +782,6 @@ export default function Options(props) {
 
             {
               showCardForm &&
-              <>
                 <Grid xs={12} sm={12} md={6} item>
                   <Typography component="h2" variant="h6">
                     Assinatura: R$ 199/mês
@@ -800,11 +799,8 @@ export default function Options(props) {
                       }}
                     />
                   </FormControl>
-                </Grid>
-                <Grid xs={12} sm={12} md={12} item>
                   <MercadoPagoCreditCard callback={formCallback} />
                 </Grid>
-              </>
             }
             {
               subscribeError && !showSubscriptionLoading &&
