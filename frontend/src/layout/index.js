@@ -427,7 +427,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
           <MainListItems drawerClose={drawerClose} drawerOpen={drawerOpen} collapsed={!drawerOpen} />
         </List>
         <Divider />
-        {drawerOpen && gitinfo.commitHash === "N/A" &&
+        {drawerOpen && gitinfo.commitHash !== "N/A" &&
           <>
             <Typography className={classes.version}>
               {`${gitinfo.tagName.replace("N/A", "") || gitinfo.branchName + " " + gitinfo.commitHash}`}
