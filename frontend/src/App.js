@@ -125,6 +125,9 @@ const App = () => {
           return appLogoDark;
         }
         return appLogoLight;
+      },
+      calculatedLogoFavicon: () => {
+        return appLogoFavicon || defaultLogoFavicon;
       }
     },
     locale

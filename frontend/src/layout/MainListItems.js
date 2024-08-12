@@ -51,11 +51,43 @@ const useStyles = makeStyles((theme) => ({
     marginTop: "-15px",
     marginBottom: "-10px",
   },
+  menuLink: {
+    paddingLeft: "14px",
+    color: theme.palette.primary.main,
+    "&:hover": {
+      backgroundColor: theme.palette.primary.main,
+      color: theme.palette.primary.contrastText,
+    },    
+  },
+  menuIcon: {
+    color: "inherit",
+  },
+  submenuLink: {
+    paddingLeft: "0px",
+    color: theme.palette.primary.main,
+    paddingTop: 0,
+    paddingBottom: 0,
+    "&:hover": {
+      backgroundColor: theme.palette.primary.main,
+      color: theme.palette.primary.contrastText,
+    },    
+  },
+  submenuIcon: {
+    color: "inherit",
+  },
+  collapseMenu: {
+    marginLeft: "14px",
+    borderLeftStyle: "solid",
+    borderWidth: "1px",
+    borderColor: theme.palette.primary.main
+  }  
+  
 }));
 
 
 function ListItemLink(props) {
-  const { icon, primary, to, className } = props;
+  const classes = useStyles();
+  const { icon, primary, to } = props;
 
   const renderLink = React.useMemo(
     () =>
@@ -67,8 +99,8 @@ function ListItemLink(props) {
 
   return (
     <li>
-      <ListItem button dense component={renderLink} className={className}>
-        {icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
+      <ListItem button dense component={renderLink} className={classes.menuLink}>
+        {icon ? <ListItemIcon className={classes.menuIcon}>{icon}</ListItemIcon> : null}
         <ListItemText primary={primary} />
       </ListItem>
     </li>
@@ -366,10 +398,11 @@ const MainListItems = (props) => {
             {showCampaigns && (
               <>
                 <ListItem
+                  className={classes.menuLink}
                   button
                   onClick={() => setOpenCampaignSubmenu((prev) => !prev)}
                 >
-                  <ListItemIcon>
+                  <ListItemIcon className={classes.menuIcon}>
                     <EventAvailableIcon />
                   </ListItemIcon>
                   <ListItemText
@@ -382,32 +415,34 @@ const MainListItems = (props) => {
                   )}
                 </ListItem>
                 <Collapse
-                  style={{ paddingLeft: 15 }}
+                  className={classes.collapseMenu}
                   in={openCampaignSubmenu}
                   timeout="auto"
                   unmountOnExit
                 >
                   <List component="div" disablePadding>
-                    <ListItem onClick={() => history.push("/campaigns")} button>
-                      <ListItemIcon>
+                    <ListItem className={classes.submenuLink} onClick={() => history.push("/campaigns")} button>
+                      <ListItemIcon className={classes.submenuIcon}>
                         <ListIcon />
                       </ListItemIcon>
                       <ListItemText primary="Listagem" />
                     </ListItem>
                     <ListItem
+                      className={classes.submenuLink}
                       onClick={() => history.push("/contact-lists")}
                       button
                     >
-                      <ListItemIcon>
+                      <ListItemIcon className={classes.submenuIcon}>
                         <PeopleIcon />
                       </ListItemIcon>
                       <ListItemText primary="Listas de Contatos" />
                     </ListItem>
                     <ListItem
+                      className={classes.submenuLink}
                       onClick={() => history.push("/campaigns-config")}
                       button
                     >
-                      <ListItemIcon>
+                      <ListItemIcon className={classes.submenuIcon}>
                         <SettingsOutlinedIcon />
                       </ListItemIcon>
                       <ListItemText primary="Configurações" />
