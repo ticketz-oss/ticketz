@@ -111,7 +111,7 @@ const useStyles = makeStyles((theme) => ({
     }
   },
   menuButton: {
-    marginRight: 36,
+    color: theme.palette.primary.contrastText,
   },
   menuButtonHidden: {
     display: "none",
@@ -212,6 +212,7 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: theme.palette.primary.main,
       borderRadius: "10px",
     },    
+    color: theme.palette.primary.main
     // ...theme.scrollbarStyles,
   },
   containerNarrowWithScroll: {
@@ -231,7 +232,7 @@ const useStyles = makeStyles((theme) => ({
     "&::-webkit-scrollbar-thumb": {
       backgroundColor: theme.palette.primary.main,
       borderRadius: "10px",
-    },    
+    },
     // ...theme.scrollbarStyles,
   },
   NotificationsPopOver: {
@@ -242,6 +243,12 @@ const useStyles = makeStyles((theme) => ({
     height: "68px",
     logo: theme.logo,
     content: "url(" + (theme.mode === "light" ? theme.calculatedLogoLight() : theme.calculatedLogoDark()) + ")"
+  },
+  logoIcon: {
+    width: "48px",
+    height: "48px",
+    logo: theme.logo,
+    content: "url(" + theme.calculatedLogoFavicon() + ")"
   },
   version: {
     margin: "auto",
@@ -459,13 +466,8 @@ const LoggedInLayout = ({ children, themeToggle }) => {
         }}
         open={drawerOpen}
       >
-        <div className={classes.toolbarIcon}>
-          { drawerOpen && <img className={drawerOpen ? classes.logo : classes.hideLogo} alt="logo" /> }
-          <IconButton onClick={() => setDrawerOpen(!drawerOpen)}>
-            {
-              drawerOpen ? <ChevronLeftIcon /> : <MenuIcon />
-            }
-          </IconButton>
+        <div className={classes.toolbarIcon} onClick={() => setDrawerOpen(!drawerOpen)}>
+          <img className={drawerOpen ? classes.logo : classes.logoIcon} alt="logo" />
         </div>
         <List className={drawerOpen && classes.containerWideWithScroll || classes.containerNarrowWithScroll}>
           <MainListItems drawerClose={drawerClose} drawerOpen={drawerOpen} collapsed={!drawerOpen} />
@@ -494,17 +496,14 @@ const LoggedInLayout = ({ children, themeToggle }) => {
         color="transparent"
       >
         <Toolbar variant="dense" className={classes.toolbar}>
-          <IconButton
-            edge="start"
-            variant="contained"
-            aria-label="open drawer"
-            onClick={() => setDrawerOpen(!drawerOpen)}
+          <IconButton edge="start" onClick={() => setDrawerOpen(!drawerOpen)}
             className={clsx(
               classes.menuButton,
-              drawerVariant === "temporary" || classes.menuButtonHidden
             )}
           >
-            <MenuIcon />
+            {
+              drawerOpen ? <ChevronLeftIcon /> : <MenuIcon />
+            }
           </IconButton>
 
           <Typography
