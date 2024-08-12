@@ -131,11 +131,13 @@ const useStyles = makeStyles((theme) => ({
     }),
     overflowY: "clip",
     border: "unset",
+    backgroundColor: theme.palette.fancyBackground,
     ...theme.scrollbarStylesSoft
   },
   drawerPaperClose: {
     overflowX: "hidden",
     overflowY: "clip",
+    marginBottom: "10px",
     transition: theme.transitions.create("width", {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
@@ -192,12 +194,45 @@ const useStyles = makeStyles((theme) => ({
     overflow: "auto",
     flexDirection: "column"
   },
-  containerWithScroll: {
+  containerWideWithScroll: {
     flex: 1,
-    padding: theme.spacing(1),
     overflowY: "auto",
     overflowX: "clip",
-    ...theme.scrollbarStyles,
+    marginRight: "10px",
+    marginLeft: "10px",
+    borderStyle: "solid",
+    borderColor: theme.palette.primary.main,
+    borderWidth: "1px",
+    borderRadius: "10px",
+    "&::-webkit-scrollbar": {
+      width: "10px",
+      height: "8px",
+    },
+    "&::-webkit-scrollbar-thumb": {
+      backgroundColor: theme.palette.primary.main,
+      borderRadius: "10px",
+    },    
+    // ...theme.scrollbarStyles,
+  },
+  containerNarrowWithScroll: {
+    flex: 1,
+    overflowY: "auto",
+    overflowX: "clip",
+    marginRight: "10px",
+    marginLeft: "10px",
+    borderStyle: "solid",
+    borderColor: theme.palette.primary.main,
+    borderWidth: "1px",
+    borderRadius: "10px",
+    "&::-webkit-scrollbar": {
+      width: "10px",
+      height: "8px",
+    },
+    "&::-webkit-scrollbar-thumb": {
+      backgroundColor: theme.palette.primary.main,
+      borderRadius: "10px",
+    },    
+    // ...theme.scrollbarStyles,
   },
   NotificationsPopOver: {
     // color: theme.barraSuperior.secondary.main,
@@ -211,11 +246,18 @@ const useStyles = makeStyles((theme) => ({
   version: {
     margin: "auto",
     fontSize: "12px",
-    textAlign: "right",
+    textAlign: "center",
+    color: theme.palette.primary.contrastText,
     fontWeight: "bold"
   },
   hideLogo: {
     display: "none",
+  },
+  versionBox: {
+    backgroundColor: theme.palette.primary.main,
+    margin: "10px",
+    padding: "8px",
+    borderRadius: "10px",
   }
 }));
 
@@ -294,11 +336,13 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   // }, []);
   //##############################################################################
 
+  /* * /
   useEffect(() => {
     if (document.body.offsetWidth > 600) {
       setDrawerOpen(true);
     }
   }, []);
+  /* */
   
   useEffect(() => {
     getCurrentUserInfo().then(
@@ -423,19 +467,15 @@ const LoggedInLayout = ({ children, themeToggle }) => {
             }
           </IconButton>
         </div>
-        <List className={classes.containerWithScroll}>
+        <List className={drawerOpen && classes.containerWideWithScroll || classes.containerNarrowWithScroll}>
           <MainListItems drawerClose={drawerClose} drawerOpen={drawerOpen} collapsed={!drawerOpen} />
         </List>
-        <Divider />
         {drawerOpen && gitinfo.commitHash !== "N/A" &&
-          <>
+          <div className={classes.versionBox}>
             <Typography className={classes.version}>
               {`${gitinfo.tagName.replace("N/A", "") || gitinfo.branchName + " " + gitinfo.commitHash}`}
             </Typography>
-            <Typography className={classes.version}>
-              {`${gitinfo.buildTimestamp}`}
-            </Typography>
-          </>
+          </div>
         }
             
       </Drawer>
