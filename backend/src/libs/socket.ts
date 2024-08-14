@@ -50,6 +50,7 @@ import Queue from "../models/Queue";
 import Ticket from "../models/Ticket";
 import authConfig from "../config/auth";
 import { CounterManager } from "./counter";
+import UserSocketSession from "../models/UserSocketSession";
 
 let io: SocketIO;
 
@@ -72,6 +73,12 @@ export const initIO = (httpServer: Server): SocketIO => {
       });
     });
   }
+
+  UserSocketSession.update({ active: false }, { where: { active: true } }).then(
+    _ => {
+      logger.debug("Clossing all socket sessions");
+    }
+  );
 
   io.on("connection", async socket => {
     logger.info("Client Connected");
@@ -105,6 +112,23 @@ export const initIO = (httpServer: Server): SocketIO => {
       socket.disconnect();
       return io;
     }
+
+    UserSocketSession.create({
+      id: socket.id,
+      userId,
+      active: true
+    }).then(_ => {
+      logger.debug(`started session ${socket.id} for user ${userId}`);
+    });
+
+    socket.on("disconnect", async () => {
+      UserSocketSession.update(
+        { active: false },
+        { where: { id: socket.id } }
+      ).then(() => {
+        logger.debug(`finished session ${socket.id} for user ${userId}`);
+      });
+    });
 
     socket.join(`company-${user.companyId}-mainchannel`);
     socket.join(`user-${user.id}`);
