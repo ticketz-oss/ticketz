@@ -1,10 +1,9 @@
 import { Op } from "sequelize";
 import Company from "../../models/Company";
 import Whatsapp from "../../models/Whatsapp";
-import User from "../../models/User";
+import UserSocketSession from "../../models/UserSocketSession";
 
 const TicketzStatusService = async (): Promise<any> => {
-
   const companies = await Company.count({
     where: {
       dueDate: {
@@ -19,9 +18,11 @@ const TicketzStatusService = async (): Promise<any> => {
     }
   });
 
-  const agents = await User.count({
+  const agents = await UserSocketSession.count({
+    distinct: true,
+    col: "userId",
     where: {
-      online: true
+      active: true
     }
   });
 
