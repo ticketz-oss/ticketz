@@ -15,7 +15,9 @@ interface Request {
   body?: string;
 }
 
-const publicFolder = path.resolve(__dirname, "..", "..", "..", "public");
+const publicFolder = __dirname.endsWith("/dist")
+  ? path.resolve(__dirname, "..", "public")
+  : path.resolve(__dirname, "..", "..", "..", "public");
 
 const processAudio = async (audio: string): Promise<string> => {
   const outputAudio = `${publicFolder}/${new Date().getTime()}.mp3`;
