@@ -4,10 +4,10 @@ import fs from "fs";
 import { exec } from "child_process";
 import path from "path";
 import ffmpegPath from "@ffmpeg-installer/ffmpeg";
+import mime from "mime-types";
 import AppError from "../../errors/AppError";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
 import Ticket from "../../models/Ticket";
-import mime from "mime-types";
 
 interface Request {
   media: Express.Multer.File;
@@ -15,7 +15,9 @@ interface Request {
   body?: string;
 }
 
-const publicFolder = path.resolve(__dirname, "..", "..", "..", "public");
+const publicFolder = __dirname.endsWith("/dist")
+  ? path.resolve(__dirname, "..", "public")
+  : path.resolve(__dirname, "..", "..", "..", "public");
 
 const processAudio = async (audio: string): Promise<string> => {
   const outputAudio = `${publicFolder}/${new Date().getTime()}.mp3`;
@@ -62,7 +64,7 @@ export const getMessageOptions = async (
       options = {
         video: fs.readFileSync(pathMedia),
         // caption: fileName,
-        fileName: fileName
+        fileName
         // gifPlayback: true
       };
     } else if (typeMessage === "audio") {
@@ -85,14 +87,14 @@ export const getMessageOptions = async (
       options = {
         document: fs.readFileSync(pathMedia),
         caption: fileName,
-        fileName: fileName,
+        fileName,
         mimetype: mimeType
       };
     } else if (typeMessage === "application") {
       options = {
         document: fs.readFileSync(pathMedia),
         caption: fileName,
-        fileName: fileName,
+        fileName,
         mimetype: mimeType
       };
     } else {
@@ -152,7 +154,7 @@ const SendWhatsAppMedia = async ({
         fileName: media.originalname,
         mimetype: media.mimetype
       };
-     } else if (typeMessage === "application") {
+    } else if (typeMessage === "application") {
       options = {
         document: fs.readFileSync(pathMedia),
         caption: body,
