@@ -1,7 +1,10 @@
 import path from "path";
 import multer from "multer";
 
-const privateFolder = path.resolve(__dirname, "..", "..", "private");
+const privateFolder = __dirname.endsWith("/dist")
+  ? path.resolve(__dirname, "..", "private")
+  : path.resolve(__dirname, "..", "..", "private");
+
 export default {
   directory: privateFolder,
 
