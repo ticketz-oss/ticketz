@@ -34,6 +34,7 @@ import ChatMessage from "../models/ChatMessage";
 import Invoices from "../models/Invoices";
 import Subscriptions from "../models/Subscriptions";
 import BaileysKeys from "../models/BaileysKeys";
+import UserSocketSession from "../models/UserSocketSession";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const dbConfig = require("../config/database");
@@ -43,6 +44,7 @@ const sequelize = new Sequelize(dbConfig);
 const models = [
   Company,
   User,
+  UserSocketSession,
   Contact,
   Ticket,
   Message,

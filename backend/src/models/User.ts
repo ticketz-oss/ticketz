@@ -21,6 +21,7 @@ import Queue from "./Queue";
 import UserQueue from "./UserQueue";
 import Company from "./Company";
 import QuickMessage from "./QuickMessage";
+import UserSocketSession from "./UserSocketSession"; // Importação da nova model
 
 @Table
 class User extends Model<User> {
@@ -80,6 +81,12 @@ class User extends Model<User> {
     hooks: true
   })
   quickMessages: QuickMessage[];
+
+  @HasMany(() => UserSocketSession, {
+    onUpdate: "CASCADE",
+    onDelete: "CASCADE"
+  })
+  socketSessions: UserSocketSession[]; // Nova associação
 
   @BeforeUpdate
   @BeforeCreate

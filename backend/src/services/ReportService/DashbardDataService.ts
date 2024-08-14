@@ -25,7 +25,7 @@ export default async function DashboardDataService(
       select
         c.name "companyName",
         u.name "userName",
-        u.online "userOnline",
+        (select count(*) > 0 as online from "UserSocketSessions" tu where tu."userId" = tt."userId" and tu."active" is True) "userOnline",
         w.name "whatsappName",
         ct.name "contactName",
         ct.number "contactNumber",
@@ -89,7 +89,7 @@ export default async function DashboardDataService(
         coalesce(att."avgWaitTime", 0) "avgWaitTime",
         att.tickets,
         att.rating,
-        att.online,
+        (select count(*) > 0 as online from "UserSocketSessions" us where us."userId" = u.id and us."active" is True) online,
         att."closeCount",
         att."openCount"
 	from "Users" u
@@ -97,7 +97,7 @@ export default async function DashboardDataService(
         select
           u1.id,
           u1."name",
-          u1."online",
+          (select count(*) > 0 as online from "UserSocketSessions" us1 where us1."userId" = u1.id and us1."active" is True) "online",
           avg(t."supportTime") "avgSupportTime",
           avg(t."waitTime") "avgWaitTime",
           count(t."id") tickets,
