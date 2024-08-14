@@ -466,9 +466,13 @@ const verifyMediaMessage = async (
     media.filename = `${new Date().getTime()}.${ext}`;
   }
 
+  const filePath = __dirname.endsWith("/dist")
+    ? path.resolve(__dirname, "..", "public")
+    : path.resolve(__dirname, "..", "..", "..", "public");
+
   try {
     await writeFileAsync(
-      join(__dirname, "..", "..", "..", "public", media.filename),
+      join(filePath, media.filename),
       media.data,
       "base64"
     );
