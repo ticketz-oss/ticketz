@@ -2,6 +2,7 @@ import express from "express";
 import isAuth from "../middleware/isAuth";
 
 import * as WhatsAppController from "../controllers/WhatsAppController";
+import * as PrivacyController from "../controllers/PrivacyController";
 
 const whatsappRoutes = express.Router();
 
@@ -16,9 +17,12 @@ whatsappRoutes.get("/whatsapp/:whatsappId", isAuth, WhatsAppController.show);
 whatsappRoutes.put("/whatsapp/:whatsappId", isAuth, WhatsAppController.update);
 
 whatsappRoutes.delete(
-  "/whatsapp/:whatsappId",
-  isAuth,
-  WhatsAppController.remove
+    "/whatsapp/:whatsappId",
+    isAuth,
+    WhatsAppController.remove
 );
+
+whatsappRoutes.get("/whatsapp/privacy/:whatsappId", isAuth, PrivacyController.show);
+whatsappRoutes.put("/whatsapp/privacy/:whatsappId", isAuth, PrivacyController.update);
 
 export default whatsappRoutes;

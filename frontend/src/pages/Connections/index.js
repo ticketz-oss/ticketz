@@ -25,6 +25,7 @@ import {
 	SignalCellular4Bar,
 	CropFree,
 	DeleteOutline,
+	Lock
 } from "@material-ui/icons";
 
 import MainContainer from "../../components/MainContainer";
@@ -37,6 +38,7 @@ import api from "../../services/api";
 import WhatsAppModal from "../../components/WhatsAppModal";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import QrcodeModal from "../../components/QrcodeModal";
+import PrivacyModal from "../../components/PrivacyModal";
 import { i18n } from "../../translate/i18n";
 import { WhatsAppsContext } from "../../context/WhatsApp/WhatsAppsContext";
 import toastError from "../../errors/toastError";
@@ -97,6 +99,7 @@ const Connections = () => {
 
 	const { whatsApps, loading } = useContext(WhatsAppsContext);
 	const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false);
+	const [privacyModalOpen, setPrivacyModalOpen] = useState(false);
 	const [qrModalOpen, setQrModalOpen] = useState(false);
 	const [selectedWhatsApp, setSelectedWhatsApp] = useState(null);
 	const [confirmModalOpen, setConfirmModalOpen] = useState(false);
@@ -151,6 +154,16 @@ const Connections = () => {
 		setSelectedWhatsApp(whatsApp);
 		setWhatsAppModalOpen(true);
 	};
+
+	const handleOpenPrivacyWhatsApp = (whatsApp) => {
+		setSelectedWhatsApp(whatsApp);
+		setPrivacyModalOpen(true);
+	};
+
+	const handleClosePrivacyWhatsAppModal = useCallback(() => {
+		setSelectedWhatsApp(null);
+		setPrivacyModalOpen(false);
+	}, [setPrivacyModalOpen, setSelectedWhatsApp]);
 
 	const handleOpenConfirmationModal = (action, whatsAppId) => {
 		if (action === "disconnect") {
@@ -302,12 +315,19 @@ const Connections = () => {
 			<QrcodeModal
 				open={qrModalOpen}
 				onClose={handleCloseQrModal}
-				whatsAppId={!whatsAppModalOpen && selectedWhatsApp?.id}
+				whatsAppId={
+					!whatsAppModalOpen && !privacyModalOpen && selectedWhatsApp?.id
+				}
 			/>
 			<WhatsAppModal
 				open={whatsAppModalOpen}
 				onClose={handleCloseWhatsAppModal}
-				whatsAppId={!qrModalOpen && selectedWhatsApp?.id}
+				whatsAppId={!qrModalOpen && !privacyModalOpen && selectedWhatsApp?.id}
+			/>
+			<PrivacyModal
+				open={privacyModalOpen}
+				onClose={handleClosePrivacyWhatsAppModal}
+				whatsAppId={!qrModalOpen && !whatsAppModalOpen && selectedWhatsApp?.id}
 			/>
 			<MainHeader>
 				<Title>{i18n.t("connections.title")}</Title>
@@ -377,6 +397,15 @@ const Connections = () => {
 												>
 													<Edit />
 												</IconButton>
+
+												{whatsApp.status === "CONNECTED" && (
+													<IconButton
+														size="small"
+														onClick={() => handleOpenPrivacyWhatsApp(whatsApp)}
+													>
+														<Lock />
+													</IconButton>
+												)}
 
 												<IconButton
 													size="small"
