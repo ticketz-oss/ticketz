@@ -100,8 +100,9 @@ const messages = {
 					session: "Sessão",
 				},
 			},
-			internalChat: {
-				title: "Chat Interno",
+      internalChat:{
+        title: "Chat Interno"
+          
 			},
 			whatsappModal: {
 				title: {
@@ -190,20 +191,20 @@ const messages = {
 					cancel: "Cancelar",
 					attach: "Anexar Arquivo",
 				},
-				serviceHours: {
-					dayWeek: "Dia da semana",
-					startTimeA: "Hora Inicial - Turno A",
-					endTimeA: "Hora Final - Turno A",
-					startTimeB: "Hora Inicial - Turno B",
-					endTimeB: "Hora Final - Turno B",
-					monday: "Segunda-feira",
-					tuesday: "Terça-feira",
-					wednesday: "Quarta-feira",
-					thursday: "Quinta-feira",
-					friday: "Sexta-feira",
-					saturday: "Sábado",
-					sunday: "Domingo",
-				},
+        serviceHours:{
+          dayWeek:"Dia da semana",
+          startTimeA:"Hora Inicial - Turno A",
+          endTimeA:"Hora Final - Turno A",
+          startTimeB:"Hora Inicial - Turno B",
+          endTimeB:"Hora Final - Turno B",
+          monday:"Segunda-feira",
+          tuesday:"Terça-feira",
+          wednesday:"Quarta-feira",
+          thursday:"Quinta-feira",
+          friday:"Sexta-feira",
+          saturday:"Sábado",
+          sunday:"Domingo",
+        }
 			},
 			userModal: {
 				title: {
@@ -260,6 +261,7 @@ const messages = {
 				},
 				success: "Tag salvo com sucesso.",
 				successKanban: "Lane salva com sucesso.",
+
 			},
 			chat: {
 				noTicketMessage: "Selecione um ticket para começar a conversar.",
@@ -267,7 +269,7 @@ const messages = {
 			uploads: {
 				titles: {
 					titleUploadMsgDragDrop: "ARRASTE E SOLTE ARQUIVOS NO CAMPO ABAIXO",
-					titleFileList: "Lista de arquivo(s)",
+          titleFileList: "Lista de arquivo(s)"
 				},
 			},
 			ticketsManager: {
@@ -349,12 +351,12 @@ const messages = {
 					financeiro: "Financeiro",
 					logout: "Sair",
 					management: "Gerência",
-					kanban: "Kanban",
+       				kanban: "Kanban"
 				},
 				appBar: {
 					i18n: {
 						language: "Português",
-						language_short: "PT",
+           				language_short: "PT"
 					},
 					user: {
 						profile: "Perfil",
@@ -396,14 +398,14 @@ const messages = {
 			kanban: {
 				title: "Kanban",
 				searchPlaceholder: "Pesquisa",
-				subMenus: {
-					list: "Painel",
-					tags: "Lanes",
-				},
+        subMenus:{
+          list:"Painel",
+          tags:"Lanes"
+        }
 			},
 			tagsKanban: {
 				title: "Lanes",
-				laneDefault: "Em aberto",
+        laneDefault:"Em aberto",
 				confirmationModal: {
 					deleteTitle: "Você tem certeza que quer excluir esta Lane?",
 					deleteMessage: "Esta ação não pode ser revertida.",
@@ -642,16 +644,14 @@ const messages = {
 				buttonclose: "Fechar",
 				title: "Sobre o ticketz",
 				abouttitle: "Origem e melhorias",
-				aboutdetail:
-					"O ticketz é derivado indireto do projeto Whaticket com melhorias compartilhadas pelos desenvolvedores do sistema EquipeChat através do canal VemFazer no youtube, posteriormente melhoradas por Claudemir Todo Bom",
+        aboutdetail: "O ticketz é derivado indireto do projeto Whaticket com melhorias compartilhadas pelos desenvolvedores do sistema EquipeChat através do canal VemFazer no youtube, posteriormente melhoradas por Claudemir Todo Bom",
 				aboutauthorsite: "Site do autor",
 				aboutwhaticketsite: "Site do Whaticket Community no Github",
 				aboutvemfazersite: "Site do canal Vem Fazer no Github",
 				licenseheading: "Licença em Código Aberto",
-				licensedetail:
-					"O ticketz está licenciado sob a GNU Affero General Public License versão 3, isso significa que qualquer usuário que tiver acesso a esta aplicação tem o direito de obter acesso ao código fonte. Mais informações nos links abaixo:",
+        licensedetail: "O ticketz está licenciado sob a GNU Affero General Public License versão 3, isso significa que qualquer usuário que tiver acesso a esta aplicação tem o direito de obter acesso ao código fonte. Mais informações nos links abaixo:",
 				licensefulltext: "Texto completo da licença",
-				licensesourcecode: "Código fonte do ticketz",
+        licensesourcecode: "Código fonte do ticketz"
 			},
 			schedules: {
 				title: "Agendamentos",
@@ -728,7 +728,7 @@ const messages = {
 				editing: "Editando",
 			},
 			message: {
-				edited: "Editada",
+        edited: "Editada"
 			},
 
 			contactDrawer: {
@@ -776,7 +776,7 @@ const messages = {
 			},
 			messageHistoryModal: {
 				close: "Fechar",
-				title: "Histórico de edição da mensagem",
+		  title: "Histórico de edição da mensagem"
 			},
 			presence: {
 				unavailable: "Indisponível",
@@ -858,7 +858,7 @@ const messages = {
 					recurringbrl: "Doação recorrente em R$",
 					paypaltitle: "Cartão de Crédito",
 					international: "Internacional em US$",
-				},
+        }
 			},
 		},
 	},

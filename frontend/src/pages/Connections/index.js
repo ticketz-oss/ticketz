@@ -43,7 +43,7 @@ import { i18n } from "../../translate/i18n";
 import { WhatsAppsContext } from "../../context/WhatsApp/WhatsAppsContext";
 import toastError from "../../errors/toastError";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
 	mainPaper: {
 		flex: 1,
 		padding: theme.spacing(1),
@@ -114,7 +114,7 @@ const Connections = () => {
 		confirmationModalInitialState
 	);
 
-	const handleStartWhatsAppSession = async (whatsAppId) => {
+	const handleStartWhatsAppSession = async whatsAppId => {
 		try {
 			await api.post(`/whatsappsession/${whatsAppId}`);
 		} catch (err) {
@@ -122,7 +122,7 @@ const Connections = () => {
 		}
 	};
 
-	const handleRequestNewQrCode = async (whatsAppId) => {
+	const handleRequestNewQrCode = async whatsAppId => {
 		try {
 			await api.put(`/whatsappsession/${whatsAppId}`);
 		} catch (err) {
@@ -140,7 +140,7 @@ const Connections = () => {
 		setSelectedWhatsApp(null);
 	}, [setSelectedWhatsApp, setWhatsAppModalOpen]);
 
-	const handleOpenQrModal = (whatsApp) => {
+	const handleOpenQrModal = whatsApp => {
 		setSelectedWhatsApp(whatsApp);
 		setQrModalOpen(true);
 	};
@@ -150,7 +150,7 @@ const Connections = () => {
 		setQrModalOpen(false);
 	}, [setQrModalOpen, setSelectedWhatsApp]);
 
-	const handleEditWhatsApp = (whatsApp) => {
+	const handleEditWhatsApp = whatsApp => {
 		setSelectedWhatsApp(whatsApp);
 		setWhatsAppModalOpen(true);
 	};
@@ -207,7 +207,7 @@ const Connections = () => {
 		setConfirmModalInfo(confirmationModalInitialState);
 	};
 
-	const renderActionButtons = (whatsApp) => {
+	const renderActionButtons = whatsApp => {
 		return (
 			<>
 				{whatsApp.status === "qrcode" && (
@@ -263,7 +263,7 @@ const Connections = () => {
 		);
 	};
 
-	const renderStatusToolTips = (whatsApp) => {
+	const renderStatusToolTips = whatsApp => {
 		return (
 			<div className={classes.customTableCell}>
 				{whatsApp.status === "DISCONNECTED" && (
@@ -371,7 +371,7 @@ const Connections = () => {
 						) : (
 							<>
 								{whatsApps?.length > 0 &&
-									whatsApps.map((whatsApp) => (
+									whatsApps.map(whatsApp => (
 										<TableRow key={whatsApp.id}>
 											<TableCell align="center">{whatsApp.name}</TableCell>
 											<TableCell align="center">
@@ -409,7 +409,7 @@ const Connections = () => {
 
 												<IconButton
 													size="small"
-													onClick={(e) => {
+													onClick={e => {
 														handleOpenConfirmationModal("delete", whatsApp.id);
 													}}
 												>

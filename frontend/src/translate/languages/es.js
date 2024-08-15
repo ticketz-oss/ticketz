@@ -266,9 +266,8 @@ const messages = {
 			},
 			uploads: {
 				titles: {
-					titleUploadMsgDragDrop:
-						"ARRASTRA Y SUELTA ARCHIVOS EN EL CAMPO ABAJO",
-					titleFileList: "Lista de archivo(s)",
+          titleUploadMsgDragDrop: "ARRASTRA Y SUELTA ARCHIVOS EN EL CAMPO ABAJO",
+          titleFileList: "Lista de archivo(s)"
 				},
 			},
 			ticketsManager: {
@@ -355,7 +354,7 @@ const messages = {
 				appBar: {
 					i18n: {
 						language: "Español",
-						language_short: "ES",
+            language_short: "ES"
 					},
 					user: {
 						profile: "Perfil",
@@ -477,8 +476,7 @@ const messages = {
 				confirmationModal: {
 					deleteTitle: "Eliminar",
 					deleteMessage: "Esta acción no se puede deshacer.",
-					importMessage:
-						"¿Desea importar los contactos de esta hoja de cálculo?",
+          importMessage: "¿Desea importar los contactos de esta hoja de cálculo?",
 					importTitlte: "Importar",
 				},
 				toasts: {
@@ -643,16 +641,14 @@ const messages = {
 				buttonclose: "Cerrar",
 				title: "Acerca de ticketz",
 				abouttitle: "Origen y Mejoras",
-				aboutdetail:
-					"El ticketz es derivado indirecto del proyecto Whaticket con mejoras compartidas por los desarrolladores del sistema EquipeChat a través del canal VemFazer en YouTube, posteriormente mejorado por Claudemir Todo Bom.",
+        aboutdetail: "El ticketz es derivado indirecto del proyecto Whaticket con mejoras compartidas por los desarrolladores del sistema EquipeChat a través del canal VemFazer en YouTube, posteriormente mejorado por Claudemir Todo Bom.",
 				aboutauthorsite: "Sitio del autor",
 				aboutwhaticketsite: "Sitio de la Comunidad Whaticket en Github",
 				aboutvemfazersite: "Sitio del canal Vem Fazer en Github",
 				licenseheading: "Licencia de Código Abierto",
-				licensedetail:
-					"El ticketz está licenciado bajo la Licencia Pública General Affero de GNU versión 3, lo que significa que cualquier usuario que tenga acceso a esta aplicación tiene derecho a obtener acceso al código fuente. Más información en los siguientes enlaces:",
+        licensedetail: "El ticketz está licenciado bajo la Licencia Pública General Affero de GNU versión 3, lo que significa que cualquier usuario que tenga acceso a esta aplicación tiene derecho a obtener acceso al código fuente. Más información en los siguientes enlaces:",
 				licensefulltext: "Texto completo de la licencia",
-				licensesourcecode: "Código fuente de ticketz",
+        licensesourcecode: "Código fuente de ticketz"
 			},
 			schedules: {
 				title: "Agendamentos",
@@ -729,7 +725,7 @@ const messages = {
 				editing: "Editando",
 			},
 			message: {
-				edited: "Editada",
+        edited: "Editada"
 			},
 			contactDrawer: {
 				header: "Datos de contacto",
@@ -776,7 +772,7 @@ const messages = {
 			},
 			messageHistoryModal: {
 				close: "Cerrar",
-				title: "Historial de edición del mensaje",
+		  title: "Historial de edición del mensaje"
 			},
 			presence: {
 				unavailable: "Indisponible",
@@ -817,8 +813,7 @@ const messages = {
 				},
 			},
 			backendErrors: {
-				ERR_NO_OTHER_WHATSAPP:
-					"Debe haber al menos un WhatsApp predeterminado.",
+        		ERR_NO_OTHER_WHATSAPP: "Debe haber al menos un WhatsApp predeterminado.",
 				ERR_NO_DEF_WAPP_FOUND:
 					"No se encontró ningún WhatsApp predeterminado. Verifique la página de conexiones.",
 				ERR_WAPP_NOT_INITIALIZED:
@@ -840,8 +835,7 @@ const messages = {
 					"La creación de usuarios está deshabilitada por el administrador.",
 				ERR_NO_PERMISSION: "No tiene permisos para acceder a este recurso.",
 				ERR_DUPLICATED_CONTACT: "Ya existe un contacto con este número.",
-				ERR_NO_SETTING_FOUND:
-					"No se encontró ninguna configuración con este ID.",
+     			ERR_NO_SETTING_FOUND: "No se encontró ninguna configuración con este ID.",
 				ERR_NO_CONTACT_FOUND: "No se encontró ningún contacto con este ID.",
 				ERR_NO_TICKET_FOUND: "No se encontró ningún ticket con este ID.",
 				ERR_NO_USER_FOUND: "No se encontró ningún usuario con este ID.",
@@ -862,7 +856,7 @@ const messages = {
 					recurringbrl: "Donaciones recurrentes en BRL",
 					paypaltitle: "Tarjeta de crédito",
 					international: "Donaciones en USD",
-				},
+        }
 			},
 		},
 	},
