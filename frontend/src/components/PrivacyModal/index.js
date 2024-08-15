@@ -59,7 +59,7 @@ const PrivacyModal = ({ open, onClose, whatsAppId }) => {
         online: 'all',
         last: 'all',
         groupadd: 'all',
-        calladd: 'all',
+        // calladd: 'all',
         disappearing: '0'
 	};
 	const [privacy, setPrivacy] = useState(initialState);
@@ -353,7 +353,7 @@ const PrivacyModal = ({ open, onClose, whatsAppId }) => {
                                             </FormControl>
                                         </Grid>*/}
 
-                                        <Grid xs={6} md={6} item>
+                                        {/* <Grid xs={6} md={6} item>
                                             <FormControl
                                                 variant="outlined"
                                                 margin="dense"
@@ -379,7 +379,7 @@ const PrivacyModal = ({ open, onClose, whatsAppId }) => {
                                                     </MenuItem>
                                                 </Field>
                                             </FormControl>
-                                        </Grid>
+                                        </Grid> */}
 									</Grid>
 								</div>
 							</DialogContent>
