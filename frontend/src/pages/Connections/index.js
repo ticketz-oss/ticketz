@@ -25,6 +25,7 @@ import {
 	SignalCellular4Bar,
 	CropFree,
 	DeleteOutline,
+	LockIcon,
 } from "@material-ui/icons";
 
 import MainContainer from "../../components/MainContainer";
@@ -37,11 +38,12 @@ import api from "../../services/api";
 import WhatsAppModal from "../../components/WhatsAppModal";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import QrcodeModal from "../../components/QrcodeModal";
+import PrivacyModal from "../../components/PrivacyModal";
 import { i18n } from "../../translate/i18n";
 import { WhatsAppsContext } from "../../context/WhatsApp/WhatsAppsContext";
 import toastError from "../../errors/toastError";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
 	mainPaper: {
 		flex: 1,
 		padding: theme.spacing(1),
@@ -97,6 +99,7 @@ const Connections = () => {
 
 	const { whatsApps, loading } = useContext(WhatsAppsContext);
 	const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false);
+	const [privacyModalOpen, setPrivacyModalOpen] = useState(false);
 	const [qrModalOpen, setQrModalOpen] = useState(false);
 	const [selectedWhatsApp, setSelectedWhatsApp] = useState(null);
 	const [confirmModalOpen, setConfirmModalOpen] = useState(false);
@@ -111,7 +114,7 @@ const Connections = () => {
 		confirmationModalInitialState
 	);
 
-	const handleStartWhatsAppSession = async whatsAppId => {
+	const handleStartWhatsAppSession = async (whatsAppId) => {
 		try {
 			await api.post(`/whatsappsession/${whatsAppId}`);
 		} catch (err) {
@@ -119,7 +122,7 @@ const Connections = () => {
 		}
 	};
 
-	const handleRequestNewQrCode = async whatsAppId => {
+	const handleRequestNewQrCode = async (whatsAppId) => {
 		try {
 			await api.put(`/whatsappsession/${whatsAppId}`);
 		} catch (err) {
@@ -137,7 +140,7 @@ const Connections = () => {
 		setSelectedWhatsApp(null);
 	}, [setSelectedWhatsApp, setWhatsAppModalOpen]);
 
-	const handleOpenQrModal = whatsApp => {
+	const handleOpenQrModal = (whatsApp) => {
 		setSelectedWhatsApp(whatsApp);
 		setQrModalOpen(true);
 	};
@@ -147,10 +150,20 @@ const Connections = () => {
 		setQrModalOpen(false);
 	}, [setQrModalOpen, setSelectedWhatsApp]);
 
-	const handleEditWhatsApp = whatsApp => {
+	const handleEditWhatsApp = (whatsApp) => {
 		setSelectedWhatsApp(whatsApp);
 		setWhatsAppModalOpen(true);
 	};
+
+	const handleOpenPrivacyWhatsApp = (whatsApp) => {
+		setSelectedWhatsApp(whatsApp);
+		setPrivacyModalOpen(true);
+	};
+
+	const handleClosePrivacyWhatsAppModal = useCallback(() => {
+		setSelectedWhatsApp(null);
+		setPrivacyModalOpen(false);
+	}, [setPrivacyModalOpen, setSelectedWhatsApp]);
 
 	const handleOpenConfirmationModal = (action, whatsAppId) => {
 		if (action === "disconnect") {
@@ -194,7 +207,7 @@ const Connections = () => {
 		setConfirmModalInfo(confirmationModalInitialState);
 	};
 
-	const renderActionButtons = whatsApp => {
+	const renderActionButtons = (whatsApp) => {
 		return (
 			<>
 				{whatsApp.status === "qrcode" && (
@@ -250,7 +263,7 @@ const Connections = () => {
 		);
 	};
 
-	const renderStatusToolTips = whatsApp => {
+	const renderStatusToolTips = (whatsApp) => {
 		return (
 			<div className={classes.customTableCell}>
 				{whatsApp.status === "DISCONNECTED" && (
@@ -302,12 +315,19 @@ const Connections = () => {
 			<QrcodeModal
 				open={qrModalOpen}
 				onClose={handleCloseQrModal}
-				whatsAppId={!whatsAppModalOpen && selectedWhatsApp?.id}
+				whatsAppId={
+					!whatsAppModalOpen && !privacyModalOpen && selectedWhatsApp?.id
+				}
 			/>
 			<WhatsAppModal
 				open={whatsAppModalOpen}
 				onClose={handleCloseWhatsAppModal}
-				whatsAppId={!qrModalOpen && selectedWhatsApp?.id}
+				whatsAppId={!qrModalOpen && !privacyModalOpen && selectedWhatsApp?.id}
+			/>
+			<PrivacyModal
+				open={privacyModalOpen}
+				onClose={handleClosePrivacyWhatsAppModal}
+				whatsAppId={!qrModalOpen && !whatsAppModalOpen && selectedWhatsApp?.id}
 			/>
 			<MainHeader>
 				<Title>{i18n.t("connections.title")}</Title>
@@ -351,7 +371,7 @@ const Connections = () => {
 						) : (
 							<>
 								{whatsApps?.length > 0 &&
-									whatsApps.map(whatsApp => (
+									whatsApps.map((whatsApp) => (
 										<TableRow key={whatsApp.id}>
 											<TableCell align="center">{whatsApp.name}</TableCell>
 											<TableCell align="center">
@@ -378,9 +398,18 @@ const Connections = () => {
 													<Edit />
 												</IconButton>
 
+												{whatsApp.status === "CONNECTED" && (
+													<IconButton
+														size="small"
+														onClick={() => handleOpenPrivacyWhatsApp(whatsApp)}
+													>
+														<LockIcon style={{ color: green[500] }} />
+													</IconButton>
+												)}
+
 												<IconButton
 													size="small"
-													onClick={e => {
+													onClick={(e) => {
 														handleOpenConfirmationModal("delete", whatsApp.id);
 													}}
 												>

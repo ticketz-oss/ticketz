@@ -60,7 +60,8 @@ const messages = {
 					deleteTitle: "Delete",
 					deleteMessage: "Are you sure? This action cannot be undone.",
 					disconnectTitle: "Disconnect",
-					disconnectMessage: "Are you sure? You will need to scan the QR Code again.",
+					disconnectMessage:
+						"Are you sure? You will need to scan the QR Code again.",
 				},
 				buttons: {
 					add: "Add WhatsApp",
@@ -73,18 +74,21 @@ const messages = {
 				toolTips: {
 					disconnected: {
 						title: "Failed to initiate WhatsApp session",
-						content: "Make sure your phone is connected to the internet and try again, or request a new QR Code.",
+						content:
+							"Make sure your phone is connected to the internet and try again, or request a new QR Code.",
 					},
 					qrcode: {
 						title: "Waiting for QR Code scan",
-						content: "Click the 'QR CODE' button and scan the QR Code with your phone to start the session.",
+						content:
+							"Click the 'QR CODE' button and scan the QR Code with your phone to start the session.",
 					},
 					connected: {
 						title: "Connection established!",
 					},
 					timeout: {
 						title: "Connection to the phone has been lost",
-						content: "Make sure your phone is connected to the internet and WhatsApp is open, or click 'Disconnect' to get a new QR Code.",
+						content:
+							"Make sure your phone is connected to the internet and WhatsApp is open, or click 'Disconnect' to get a new QR Code.",
 					},
 				},
 				table: {
@@ -127,7 +131,8 @@ const messages = {
 				confirmationModal: {
 					deleteTitle: "Delete ",
 					importTitlte: "Import Contacts",
-					deleteMessage: "Are you sure you want to delete this contact? All related interactions will be lost.",
+					deleteMessage:
+						"Are you sure you want to delete this contact? All related interactions will be lost.",
 					importMessage: "Do you want to import all contacts from the phone?",
 				},
 				buttons: {
@@ -262,7 +267,7 @@ const messages = {
 			uploads: {
 				titles: {
 					titleUploadMsgDragDrop: "DRAG AND DROP FILES IN THE FIELD BELOW",
-					titleFileList: "List of file(s)"
+					titleFileList: "List of file(s)",
 				},
 			},
 			ticketsManager: {
@@ -343,18 +348,18 @@ const messages = {
 					financeiro: "Financial",
 					logout: "Logout",
 					management: "Management",
-					kanban: "Kanban"
+					kanban: "Kanban",
 				},
 				appBar: {
 					i18n: {
 						language: "English",
-						language_short: "EN"
+						language_short: "EN",
 					},
 					user: {
 						profile: "Profile",
-            darkmode: "Dark mode",
-            lightmode: "Light mode",
-            language: "Select language",						
+						darkmode: "Dark mode",
+						lightmode: "Light mode",
+						language: "Select language",
 						logout: "Logout",
 					},
 				},
@@ -391,8 +396,8 @@ const messages = {
 				searchPlaceholder: "Search",
 				subMenus: {
 					list: "Panel",
-					tags: "Lanes"
-				}
+					tags: "Lanes",
+				},
 			},
 			tagsKanban: {
 				title: "Lanes",
@@ -470,7 +475,8 @@ const messages = {
 				confirmationModal: {
 					deleteTitle: "Delete",
 					deleteMessage: "This action cannot be undone.",
-					importMessage: "Do you want to import the contacts from this spreadsheet? ",
+					importMessage:
+						"Do you want to import the contacts from this spreadsheet? ",
 					importTitlte: "Import",
 				},
 				toasts: {
@@ -630,19 +636,21 @@ const messages = {
 				title: "Help Center",
 			},
 			about: {
-        aboutthe: "About the",
-        copyright: "© 2024 - Powered by ticketz",
-        buttonclose: "Close",
+				aboutthe: "About the",
+				copyright: "© 2024 - Powered by ticketz",
+				buttonclose: "Close",
 				title: "About ticketz",
 				abouttitle: "Origin and improvements",
-				aboutdetail: "ticketz is indirectly derived from the Whaticket project with improvements shared by the developers of the EquipeChat system through the VemFazer channel on YouTube, later improved by Claudemir Todo Bom",
+				aboutdetail:
+					"ticketz is indirectly derived from the Whaticket project with improvements shared by the developers of the EquipeChat system through the VemFazer channel on YouTube, later improved by Claudemir Todo Bom",
 				aboutauthorsite: "Author's site",
 				aboutwhaticketsite: "Whaticket Community site on Github",
 				aboutvemfazersite: "Vem Fazer channel site on Github",
 				licenseheading: "Open Source License",
-				licensedetail: "ticketz is licensed under the GNU Affero General Public License version 3, which means that any user who has access to this application has the right to obtain access to the source code. More information at the links below:",
+				licensedetail:
+					"ticketz is licensed under the GNU Affero General Public License version 3, which means that any user who has access to this application has the right to obtain access to the source code. More information at the links below:",
 				licensefulltext: "Full text of the license",
-				licensesourcecode: "Ticketz source code"
+				licensesourcecode: "Ticketz source code",
 			},
 			schedules: {
 				title: "Schedules",
@@ -712,16 +720,15 @@ const messages = {
 			},
 			messagesInput: {
 				placeholderOpen: "Type a message",
-				placeholderClosed:
-					"Reopen or accept this ticket to send a message.",
+				placeholderClosed: "Reopen or accept this ticket to send a message.",
 				signMessage: "Sign",
 				replying: "Replying",
 				editing: "Editing",
 			},
 			message: {
-				edited: "Edited"
+				edited: "Edited",
 			},
-			
+
 			contactDrawer: {
 				header: "Contact Information",
 				buttons: {
@@ -767,30 +774,67 @@ const messages = {
 			},
 			messageHistoryModal: {
 				close: "Close",
-				title: "Message edit history"
+				title: "Message edit history",
 			},
 			presence: {
-			  unavailable: "Unavailable",
-			  available: "Available",
-			  composing: "Composing...",
-			  recording: "Recording...",
-			  paused: "Paused",
+				unavailable: "Unavailable",
+				available: "Available",
+				composing: "Composing...",
+				recording: "Recording...",
+				paused: "Paused",
+			},
+			privacyModal: {
+				title: "Edit Whatsapp Privacy",
+				buttons: {
+					cancel: "Cancel",
+					okEdit: "Save",
+				},
+				form: {
+					menu: {
+						all: "All",
+						none: "Nobody",
+						contacts: "My contacts",
+						contact_blacklist: "Selected contacts",
+						match_last_seen: "Match Last Seen",
+						known: "Known",
+						disable: "Disabled",
+						hrs24: "24 Hours",
+						dias7: "7 Days",
+						dias90: "90 Days",
+					},
+					readreceipts: "To update the Read Receipts privacy",
+					profile: "To update the Profile Picture privacy",
+					status: "To update the Messages privacy",
+					online: "To update the Online privacy",
+					last: "To update the LastSeen privacy",
+					groupadd: "To update the Groups Add privacy",
+					calladd: "To update the Call Add privacy",
+					disappearing: "To update the Default Disappearing Mode",
+				},
 			},
 			backendErrors: {
 				ERR_NO_OTHER_WHATSAPP: "There must be at least one default WhatsApp.",
-				ERR_NO_DEF_WAPP_FOUND: "No default WhatsApp found. Check the connections page.",
-				ERR_WAPP_NOT_INITIALIZED: "This WhatsApp session has not been initialized. Check the connections page.",
-				ERR_WAPP_CHECK_CONTACT: "Could not check WhatsApp contact. Check the connections page.",
+				ERR_NO_DEF_WAPP_FOUND:
+					"No default WhatsApp found. Check the connections page.",
+				ERR_WAPP_NOT_INITIALIZED:
+					"This WhatsApp session has not been initialized. Check the connections page.",
+				ERR_WAPP_CHECK_CONTACT:
+					"Could not check WhatsApp contact. Check the connections page.",
 				ERR_WAPP_INVALID_CONTACT: "This is not a valid WhatsApp number.",
-				ERR_WAPP_DOWNLOAD_MEDIA: "Could not download media from WhatsApp. Check the connections page.",
+				ERR_WAPP_DOWNLOAD_MEDIA:
+					"Could not download media from WhatsApp. Check the connections page.",
 				ERR_INVALID_CREDENTIALS: "Authentication error. Please try again.",
-				ERR_SENDING_WAPP_MSG: "Error sending WhatsApp message. Check the connections page.",
+				ERR_SENDING_WAPP_MSG:
+					"Error sending WhatsApp message. Check the connections page.",
 				ERR_DELETE_WAPP_MSG: "Could not delete WhatsApp message.",
 				ERR_EDITING_WAPP_MSG: "Could not edit WhatsApp message.",
-				ERR_OTHER_OPEN_TICKET: "There is already an open ticket for this contact.",
+				ERR_OTHER_OPEN_TICKET:
+					"There is already an open ticket for this contact.",
 				ERR_SESSION_EXPIRED: "Session expired. Please log in.",
-				ERR_USER_CREATION_DISABLED: "User creation has been disabled by the administrator.",
-				ERR_NO_PERMISSION: "You do not have permission to access this resource.",
+				ERR_USER_CREATION_DISABLED:
+					"User creation has been disabled by the administrator.",
+				ERR_NO_PERMISSION:
+					"You do not have permission to access this resource.",
 				ERR_DUPLICATED_CONTACT: "A contact with this number already exists.",
 				ERR_NO_SETTING_FOUND: "No setting found with this ID.",
 				ERR_NO_CONTACT_FOUND: "No contact found with this ID.",
@@ -799,19 +843,22 @@ const messages = {
 				ERR_NO_WAPP_FOUND: "No WhatsApp found with this ID.",
 				ERR_CREATING_MESSAGE: "Error creating message in the database.",
 				ERR_CREATING_TICKET: "Error creating ticket in the database.",
-				ERR_FETCH_WAPP_MSG: "Error fetching message from WhatsApp, perhaps it is too old.",
-				ERR_QUEUE_COLOR_ALREADY_EXISTS: "This color is already in use, choose another.",
-				ERR_WAPP_GREETING_REQUIRED: "Greeting message is mandatory when there is more than one queue.",
+				ERR_FETCH_WAPP_MSG:
+					"Error fetching message from WhatsApp, perhaps it is too old.",
+				ERR_QUEUE_COLOR_ALREADY_EXISTS:
+					"This color is already in use, choose another.",
+				ERR_WAPP_GREETING_REQUIRED:
+					"Greeting message is mandatory when there is more than one queue.",
 			},
-      ticketz: {
-        support: {
-          title: "Support Ticketz project",
-          mercadopagotitle: "Credit Card",
-          recurringbrl: "Recurring donations in BRL",
-          paypaltitle: "Credit Card",
-          international: "Donations in USD",
-        }
-      },
+			ticketz: {
+				support: {
+					title: "Support Ticketz project",
+					mercadopagotitle: "Credit Card",
+					recurringbrl: "Recurring donations in BRL",
+					paypaltitle: "Credit Card",
+					international: "Donations in USD",
+				},
+			},
 		},
 	},
 };
