@@ -102,7 +102,7 @@ const messages = {
 			},
       internalChat:{
         title: "Chat Interno"
-          
+
 			},
 			whatsappModal: {
 				title: {
@@ -850,6 +850,7 @@ const messages = {
 					"Esta cor já está em uso, escolha outra.",
 				ERR_WAPP_GREETING_REQUIRED:
 					"A mensagem de saudação é obrigatório quando há mais de uma fila.",
+				ERR_NO_PRIVACY_FOUND: "Não foi encontrato a Privacidade para esse WhatsApp, faça a releitura do QrCode",
 			},
 			ticketz: {
 				support: {

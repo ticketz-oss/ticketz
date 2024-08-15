@@ -848,6 +848,7 @@ const messages = {
 					"Este color ya está en uso, elija otro.",
 				ERR_WAPP_GREETING_REQUIRED:
 					"El mensaje de saludo es obligatorio cuando hay más de una cola.",
+				ERR_NO_PRIVACY_FOUND: "No se encontró privacidad para WhatsApp, vuelva a leer el QrCode",
 			},
 			ticketz: {
 				support: {
