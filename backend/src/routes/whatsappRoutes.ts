@@ -1,5 +1,6 @@
 import express from "express";
 import isAuth from "../middleware/isAuth";
+import isAdmin from "../middleware/isAdmin";
 
 import * as WhatsAppController from "../controllers/WhatsAppController";
 import * as PrivacyController from "../controllers/PrivacyController";
@@ -17,12 +18,22 @@ whatsappRoutes.get("/whatsapp/:whatsappId", isAuth, WhatsAppController.show);
 whatsappRoutes.put("/whatsapp/:whatsappId", isAuth, WhatsAppController.update);
 
 whatsappRoutes.delete(
-    "/whatsapp/:whatsappId",
-    isAuth,
-    WhatsAppController.remove
+  "/whatsapp/:whatsappId",
+  isAuth,
+  WhatsAppController.remove
 );
 
-whatsappRoutes.get("/whatsapp/privacy/:whatsappId", isAuth, PrivacyController.show);
-whatsappRoutes.put("/whatsapp/privacy/:whatsappId", isAuth, PrivacyController.update);
+whatsappRoutes.get(
+  "/whatsapp/privacy/:whatsappId",
+  isAuth,
+  isAdmin,
+  PrivacyController.show
+);
+whatsappRoutes.put(
+  "/whatsapp/privacy/:whatsappId",
+  isAuth,
+  isAdmin,
+  PrivacyController.update
+);
 
 export default whatsappRoutes;
