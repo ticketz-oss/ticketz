@@ -312,9 +312,6 @@ const PrivacyModal = ({ open, onClose, whatsAppId }) => {
                                                     <MenuItem value="contact_blacklist">
                                                         {i18n.t("privacyModal.form.menu.contact_blacklist")}
                                                     </MenuItem>
-                                                    <MenuItem value="none">
-                                                        {i18n.t("privacyModal.form.menu.none")}
-                                                    </MenuItem>
                                                 </Field>
                                             </FormControl>
                                         </Grid>

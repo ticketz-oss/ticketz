@@ -25,7 +25,7 @@ import {
 	SignalCellular4Bar,
 	CropFree,
 	DeleteOutline,
-	LockIcon,
+	Lock
 } from "@material-ui/icons";
 
 import MainContainer from "../../components/MainContainer";
@@ -403,7 +403,7 @@ const Connections = () => {
 														size="small"
 														onClick={() => handleOpenPrivacyWhatsApp(whatsApp)}
 													>
-														<LockIcon style={{ color: green[500] }} />
+														<Lock />
 													</IconButton>
 												)}
 
