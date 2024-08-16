@@ -420,6 +420,24 @@ const useStyles = makeStyles((theme) => ({
   },
   wavebar5: {
     animationName: 'quiet'
+  },
+  linkPreviewThumbnail: {
+    width: "328px",
+    height: "172px",
+  },
+  linkPreviewTitle: {
+    fontWeight: "bold",
+    marginBottom: "4px"
+  },
+  linkPreviewDescription: {
+    marginBottom: "4px"
+  },
+  linkPreviewUrl: {
+    opacity: 0.6
+  },
+  linkPreviewAnchor: {
+    textDecoration: "none",
+    color: theme.mode === 'light' ? "#303030" : "#ffffff",
   }
 }));
 
@@ -793,6 +811,59 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     );
   };
 
+  const renderPreview = (message) => {
+    const data = JSON.parse(message.dataJson);
+    
+    const title = data?.message?.extendedTextMessage?.title;
+    const description = data?.message?.extendedTextMessage?.description;
+    const canonicalUrl = data?.message?.extendedTextMessage?.canonicalUrl;
+    const url = canonicalUrl && new URL(
+      canonicalUrl,
+    );
+    
+    if (!title && !description && !url) {
+      return (<></>);
+    }
+    
+    const thumbnail = data?.message?.extendedTextMessage?.jpegThumbnail;
+    const imageUrl = thumbnail ? "data:image/png;base64, " + thumbnail : "";
+    return (
+      <a href={canonicalUrl} className={classes.linkPreviewAnchor} target="_blank">
+        <div
+          className={clsx(classes.quotedContainerLeft, {
+            [classes.quotedContainerRight]: message.fromMe,
+          })}
+        >
+          <span
+            className={clsx(classes.quotedSideColorLeft, {
+              [classes.quotedSideColorRight]: message.quotedMsg?.fromMe,
+            })}
+          ></span>
+          <div className={classes.quotedMsg}>
+            {title &&
+              <div className={classes.linkPreviewTitle}>
+                {title}
+              </div>
+            }
+            {description &&
+              <div className={classes.linkPreviewDescription}>
+                {description}
+              </div>
+            }
+            {url?.hostname &&
+              <div className={classes.linkPreviewUrl}>
+                {url.hostname}
+              </div>
+            }
+          </div>
+          {imageUrl && (
+            <img className={classes.quotedThumbnail} src={imageUrl} />
+          )}
+        </div>
+      </a>
+    );
+  };
+
   const formatVCardN = (n) => {
     return(
       (n[3] ? n[3] + " " : "") +
@@ -963,6 +1034,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                     [classes.textContentItemEdited]: message.isEdited
                   }),]}>
                     {message.quotedMsg && renderQuotedMessage(message)}
+                    {renderPreview(message)}
                     {!isSticker && (
                       message.mediaUrl ?
                         ""
@@ -1035,6 +1107,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
 
                     :
                     message.quotedMsg && renderQuotedMessage(message)}
+                {renderPreview(message)}
                 {!isSticker && (
                   message.mediaUrl ? "" : <MarkdownWrapper>{message.body}</MarkdownWrapper>
                 )
