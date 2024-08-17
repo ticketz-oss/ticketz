@@ -853,7 +853,7 @@ const messages = {
 			},
 			ticketz: {
 				support: {
-					title: "Apoie o projeto Ticketz",
+					title: "Apoie o projeto Ticketz Open Source",
 					mercadopagotitle: "Cartão de Crédito",
 					recurringbrl: "Doação recorrente em R$",
 					paypaltitle: "Cartão de Crédito",
