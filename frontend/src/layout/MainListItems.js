@@ -464,13 +464,11 @@ const MainListItems = (props) => {
             
               <Divider />
               <Typography style={{ fontSize: "12px", padding: "10px", textAlign: "right", fontWeight: "bold" }}>
-                {`${gitinfo.tagName.replace("N/A", "") || gitinfo.branchName + " " + gitinfo.commitHash }`} 
+                {`${gitinfo.tagName || gitinfo.branchName + " " + gitinfo.commitHash }`} 
                 &nbsp;/&nbsp;
                 {`${gitinfo.buildTimestamp }`}
               </Typography>
             
-          {}
-
           </>
         )}
       />

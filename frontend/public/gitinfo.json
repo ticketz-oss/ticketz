@@ -1,7 +1,7 @@
 {
-  "commitHash": "N/A",
-  "commitTimestamp": "N/A",
-  "branchName": "N/A",
-  "tagName": "N/A",
-  "buildTimestamp": "N/A"
+  "commitHash": "",
+  "commitTimestamp": "",
+  "branchName": "",
+  "tagName": "v0.99.x",
+  "buildTimestamp": "custom build"
 }
