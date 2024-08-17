@@ -783,8 +783,8 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     const data = JSON.parse(message.quotedMsg.dataJson);
     
     const thumbnail = data?.message?.imageMessage?.jpegThumbnail;
-    const stickerUrl = data?.message?.stickerMessage && message.quotedMsg?.mediaUrl;
-    const imageUrl = thumbnail ? "data:image/png;base64, " + thumbnail : stickerUrl;
+    const mediaUrl = message.quotedMsg?.mediaUrl;
+    const imageUrl = thumbnail ? "data:image/png;base64, " + thumbnail : mediaUrl;
     return (
       <div
         className={clsx(classes.quotedContainerLeft, {
