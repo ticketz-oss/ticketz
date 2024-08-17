@@ -98,7 +98,8 @@ const useStyles = makeStyles((theme) => ({
     paddingRight: 5,
     paddingTop: 5,
     paddingBottom: 0,
-    boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000"
+    boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000",
+    transition: 'background-color 0.5s ease-in-out',
   },
 
   quotedContainerLeft: {
@@ -108,6 +109,7 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: "7.5px",
     display: "flex",
     position: "relative",
+    cursor: "pointer",
   },
 
   quotedMsg: {
@@ -157,7 +159,8 @@ const useStyles = makeStyles((theme) => ({
     paddingRight: 5,
     paddingTop: 5,
     paddingBottom: 0,
-    boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000"
+    boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000",
+    transition: 'background-color 0.5s ease-in-out',
   },
 
   quotedContainerRight: {
@@ -438,6 +441,9 @@ const useStyles = makeStyles((theme) => ({
   linkPreviewAnchor: {
     textDecoration: "none",
     color: theme.mode === 'light' ? "#303030" : "#ffffff",
+  },
+  messageHighlighted: {
+    backgroundColor: theme.palette.primary.main,
   }
 }));
 
@@ -779,6 +785,21 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     }
   };
 
+  const scrollToMessage = (id) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+
+      // Add the highlight class
+      element.classList.add(classes.messageHighlighted);
+
+      // Remove the highlight class after 2 seconds
+      setTimeout(() => {
+        element.classList.remove(classes.messageHighlighted);
+      }, 2000);
+    }
+  };
+
   const renderQuotedMessage = (message) => {
     const data = JSON.parse(message.quotedMsg.dataJson);
     
@@ -790,6 +811,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
         className={clsx(classes.quotedContainerLeft, {
           [classes.quotedContainerRight]: message.fromMe,
         })}
+        onClick={() => scrollToMessage(message.quotedMsg.id)}
       >
         <span
           className={clsx(classes.quotedSideColorLeft, {
@@ -995,7 +1017,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
           <React.Fragment key={message.id}>
             {renderDailyTimestamps(message, index)}
             {renderMessageDivider(message, index)}
-            <div
+            <div id={message.id}
               className={[clsx(classes.messageLeft, {
                 [classes.messageMediaSticker]: isSticker,
               })]}
@@ -1069,7 +1091,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
           <React.Fragment key={message.id}>
             {renderDailyTimestamps(message, index)}
             {renderMessageDivider(message, index)}
-            <div
+            <div id={message.id}
               className={[clsx(classes.messageRight, {
                 [classes.messageMediaSticker]: isSticker,
               })]}
