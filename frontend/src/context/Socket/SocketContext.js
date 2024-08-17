@@ -87,7 +87,7 @@ class ManagedSocket {
   emit(event, ...params) {
     if (event.startsWith("join")) {
       this.joins.push({ event: event.substring(4), params });
-      console.log("Joining", { event: event.substring(4), params});
+      console.debug("Joining", { event: event.substring(4), params});
     }
     return this.rawSocket.emit(event, ...params);
   }
@@ -133,7 +133,7 @@ const socketManager = {
 
     if (companyId !== this.currentCompanyId || userId !== this.currentUserId) {
       if (this.currentSocket) {
-        console.warn("closing old socket - company or user changed");
+        console.debug("closing old socket - company or user changed");
         this.currentSocket.removeAllListeners();
         this.currentSocket.disconnect();
         this.currentSocket = null;
@@ -147,7 +147,7 @@ const socketManager = {
       }
       
       if ( isExpired(token) ) {
-        console.warn("Expired token, waiting for refresh");
+        console.debug("Expired token, waiting for refresh");
         setTimeout(() => {
           const currentToken = JSON.parse(localStorage.getItem("token"));
           if (isExpired(currentToken)) {
@@ -173,26 +173,26 @@ const socketManager = {
         this.currentSocket.io.opts.query.r = 1;
         token = JSON.parse(localStorage.getItem("token"));
         if ( isExpired(token) ) {
-          console.warn("Refreshing");
+          console.debug("Refreshing");
           window.location.reload();
         } else {
-          console.warn("Using new token");
+          console.debug("Using new token");
           this.currentSocket.io.opts.query.token = token;
         }
       });
       
       this.currentSocket.on("disconnect", (reason) => {
-        console.warn(`socket disconnected because: ${reason}`);
+        console.debug(`socket disconnected because: ${reason}`);
         if (reason.startsWith("io server disconnect")) {
-          console.warn("tryng to reconnect", this.currentSocket);
+          console.debug("tryng to reconnect", this.currentSocket);
           token = JSON.parse(localStorage.getItem("token"));
           
           if ( isExpired(token) ) {
-            console.warn("Expired token - refreshing");
+            console.debug("Expired token - refreshing");
             window.location.reload();
             return;
           }
-          console.warn("Reconnecting using refreshed token");
+          console.debug("Reconnecting using refreshed token");
           this.currentSocket.io.opts.query.token = token;
           this.currentSocket.io.opts.query.r = 1;
           this.currentSocket.connect();
@@ -200,7 +200,7 @@ const socketManager = {
       });
       
       this.currentSocket.on("connect", (...params) => {
-        console.warn("socket connected", params);
+        console.debug("socket connected", params);
       })
       
       this.currentSocket.onAny((event, ...args) => {
