@@ -19,6 +19,8 @@ export interface WhatsappData {
   queueIds?: number[];
   companyId?: number;
   token?: string;
+  restrictToQueues?: boolean;
+  transferToNewTicket?: boolean;
 }
 
 interface Request {
@@ -54,7 +56,9 @@ const UpdateWhatsAppService = async ({
     ratingMessage,
     transferMessage,
     queueIds = [],
-    token
+    token,
+    restrictToQueues,
+    transferToNewTicket
   } = whatsappData;
 
   try {
@@ -84,7 +88,7 @@ const UpdateWhatsAppService = async ({
 
   const whatsapp = await ShowWhatsAppService(whatsappId, companyId);
   // console.log(transferMessage)
-  console.log(whatsapp)
+  console.log(whatsapp);
   await whatsapp.update({
     name,
     status,
@@ -97,6 +101,8 @@ const UpdateWhatsAppService = async ({
     companyId,
     token,
     transferMessage,
+    restrictToQueues,
+    transferToNewTicket
   });
 
   await AssociateWhatsappQueue(whatsapp, queueIds);
