@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 
-const ga4Tag = "G-VXMW3XS5BD";
+const ga4Tag = "G-X6205W8E06";
 const scriptSrc = `https://www.googletagmanager.com/gtag/js?id={ga4Tag}`;
 
 const GoogleAnalytics = () => {
