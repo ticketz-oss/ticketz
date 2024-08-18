@@ -2,6 +2,6 @@ export const GitInfo = {
   commitHash: "",
   commitTimestamp: "",
   branchName: "",
-  tagName: "v1.0.x",
+  tagName: "ticketz pro",
   buildTimestamp: "custom build"
 };
