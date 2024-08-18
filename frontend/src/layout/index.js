@@ -46,6 +46,8 @@ import Brightness7Icon from '@material-ui/icons/Brightness7';
 import LanguageIcon from '@material-ui/icons/Language';
 import { getBackendURL } from "../services/config";
 import NestedMenuItem from "material-ui-nested-menu-item";
+import GoogleAnalytics from "../components/GoogleAnalytics";
+import OnlyForSuperUser from "../components/OnlyForSuperUser";
 
 import { loadJSON } from "../helpers/loadJSON";
 
@@ -475,7 +477,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
         {drawerOpen && gitinfo.commitHash !== "N/A" &&
           <div className={classes.versionBox}>
             <Typography className={classes.version}>
-              {`${gitinfo.tagName.replace("N/A", "") || gitinfo.branchName + " " + gitinfo.commitHash}`}
+              {`${gitinfo.tagName || gitinfo.branchName + " " + gitinfo.commitHash}`}
             </Typography>
           </div>
         }
@@ -618,6 +620,11 @@ const LoggedInLayout = ({ children, themeToggle }) => {
         </Toolbar>
       </AppBar>
       <main className={clsx(drawerVariant === "temporary" && classes.contentMobile, drawerOpen && classes.contentShift, classes.content)}>
+        <OnlyForSuperUser
+          user={currentUser}
+          yes={() => (
+            <GoogleAnalytics />
+          )} />
         {children ? children : null}
       </main>
     </div>

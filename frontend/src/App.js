@@ -108,6 +108,7 @@ const App = () => {
         barraSuperior: mode === "light" ? primaryColorLight : "#666",
         boxticket: mode === "light" ? "#EEE" : "#666",
         campaigntab: mode === "light" ? "#ededed" : "#666",
+        ticketzproad: { main: "#39ACE7", contrastText: "white" }
       },
       mode,
       appLogoLight,

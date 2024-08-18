@@ -96,7 +96,8 @@ const useStyles = makeStyles((theme) => ({
     paddingRight: 5,
     paddingTop: 5,
     paddingBottom: 0,
-    boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000"
+    boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000",
+    transition: 'background-color 0.5s ease-in-out',
   },
 
   quotedContainerLeft: {
@@ -106,6 +107,7 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: "7.5px",
     display: "flex",
     position: "relative",
+    cursor: "pointer",
   },
 
   quotedMsg: {
@@ -155,7 +157,8 @@ const useStyles = makeStyles((theme) => ({
     paddingRight: 5,
     paddingTop: 5,
     paddingBottom: 0,
-    boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000"
+    boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000",
+    transition: 'background-color 0.5s ease-in-out',
   },
 
   quotedContainerRight: {
@@ -418,6 +421,27 @@ const useStyles = makeStyles((theme) => ({
   },
   wavebar5: {
     animationName: 'quiet'
+  },
+  linkPreviewThumbnail: {
+    width: "328px",
+    height: "172px",
+  },
+  linkPreviewTitle: {
+    fontWeight: "bold",
+    marginBottom: "4px"
+  },
+  linkPreviewDescription: {
+    marginBottom: "4px"
+  },
+  linkPreviewUrl: {
+    opacity: 0.6
+  },
+  linkPreviewAnchor: {
+    textDecoration: "none",
+    color: theme.mode === 'light' ? "#303030" : "#ffffff",
+  },
+  messageHighlighted: {
+    backgroundColor: theme.palette.primary.main,
   }
 }));
 
@@ -759,17 +783,33 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     }
   };
 
+  const scrollToMessage = (id) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+
+      // Add the highlight class
+      element.classList.add(classes.messageHighlighted);
+
+      // Remove the highlight class after 2 seconds
+      setTimeout(() => {
+        element.classList.remove(classes.messageHighlighted);
+      }, 2000);
+    }
+  };
+
   const renderQuotedMessage = (message) => {
     const data = JSON.parse(message.quotedMsg.dataJson);
     
     const thumbnail = data?.message?.imageMessage?.jpegThumbnail;
-    const stickerUrl = data?.message?.stickerMessage && message.quotedMsg?.mediaUrl;
-    const imageUrl = thumbnail ? "data:image/png;base64, " + thumbnail : stickerUrl;
+    const mediaUrl = message.quotedMsg?.mediaUrl;
+    const imageUrl = thumbnail ? "data:image/png;base64, " + thumbnail : mediaUrl;
     return (
       <div
         className={clsx(classes.quotedContainerLeft, {
           [classes.quotedContainerRight]: message.fromMe,
         })}
+        onClick={() => scrollToMessage(message.quotedMsg.id)}
       >
         <span
           className={clsx(classes.quotedSideColorLeft, {
@@ -788,6 +828,59 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
           <img className={classes.quotedThumbnail} src={imageUrl} />
         )}
       </div>
+    );
+  };
+
+  const renderPreview = (message) => {
+    const data = JSON.parse(message.dataJson);
+    
+    const title = data?.message?.extendedTextMessage?.title;
+    const description = data?.message?.extendedTextMessage?.description;
+    const canonicalUrl = data?.message?.extendedTextMessage?.canonicalUrl;
+    const url = canonicalUrl && new URL(
+      canonicalUrl,
+    );
+    
+    if (!title && !description && !url) {
+      return (<></>);
+    }
+    
+    const thumbnail = data?.message?.extendedTextMessage?.jpegThumbnail;
+    const imageUrl = thumbnail ? "data:image/png;base64, " + thumbnail : "";
+    return (
+      <a href={canonicalUrl} className={classes.linkPreviewAnchor} target="_blank">
+        <div
+          className={clsx(classes.quotedContainerLeft, {
+            [classes.quotedContainerRight]: message.fromMe,
+          })}
+        >
+          <span
+            className={clsx(classes.quotedSideColorLeft, {
+              [classes.quotedSideColorRight]: message.quotedMsg?.fromMe,
+            })}
+          ></span>
+          <div className={classes.quotedMsg}>
+            {title &&
+              <div className={classes.linkPreviewTitle}>
+                {title}
+              </div>
+            }
+            {description &&
+              <div className={classes.linkPreviewDescription}>
+                {description}
+              </div>
+            }
+            {url?.hostname &&
+              <div className={classes.linkPreviewUrl}>
+                {url.hostname}
+              </div>
+            }
+          </div>
+          {imageUrl && (
+            <img className={classes.quotedThumbnail} src={imageUrl} />
+          )}
+        </div>
+      </a>
     );
   };
 
@@ -922,7 +1015,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
           <React.Fragment key={message.id}>
             {renderDailyTimestamps(message, index)}
             {renderMessageDivider(message, index)}
-            <div
+            <div id={message.id}
               className={[clsx(classes.messageLeft, {
                 [classes.messageMediaSticker]: isSticker,
               })]}
@@ -961,6 +1054,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                     [classes.textContentItemEdited]: message.isEdited
                   }),]}>
                     {message.quotedMsg && renderQuotedMessage(message)}
+                    {renderPreview(message)}
                     {!isSticker && (
                       message.mediaUrl ?
                         ""
@@ -995,7 +1089,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
           <React.Fragment key={message.id}>
             {renderDailyTimestamps(message, index)}
             {renderMessageDivider(message, index)}
-            <div
+            <div id={message.id}
               className={[clsx(classes.messageRight, {
                 [classes.messageMediaSticker]: isSticker,
               })]}
@@ -1033,6 +1127,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
 
                     :
                     message.quotedMsg && renderQuotedMessage(message)}
+                {renderPreview(message)}
                 {!isSticker && (
                   message.mediaUrl ? "" : <MarkdownWrapper>{message.body}</MarkdownWrapper>
                 )

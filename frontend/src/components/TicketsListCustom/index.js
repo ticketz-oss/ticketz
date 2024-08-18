@@ -262,7 +262,7 @@ const TicketsListCustom = (props) => {
     }
     
     const onCompanyAppMessage = (data) => {
-	  console.log("recebi mensagem", data);
+	  console.debug("appMessage event received", data);
 
       const queueIds = queues.map((q) => q.id);
       if (

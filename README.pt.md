@@ -76,7 +76,7 @@ curl -sSL get.ticke.tz | sudo bash -s app.exemplo.com nome@exemplo.com
 
 Após alguns minutos, você terá o servidor rodando no nome que você deu para o host.
 
-O login padrão é `admin@admin.com` e a senha padrão é `123456`, você deve alterá-la imediatamente.
+O login padrão é o endereço de email fornecido no comando de instalação e a senha padrão é `123456`, você deve alterá-la imediatamente.
 
 ### Atualização
 
@@ -147,7 +147,7 @@ docker compose -f docker-compose-local.yaml up -d
 Na primeira execução o sistema vai inicializar os bancos de dados e tabelas,
 e após alguns minutos o Ticketz estará acessível pela porta 3000
 
-O usuário padrão é admin@admin.com e a senha padrão é 123456
+O usuário padrão é `admin@ticketz.host` e a senha padrão é `123456`
 
 A aplicação irá se reiniciar automaticamente a cada reboot do servidor.
 
@@ -191,7 +191,7 @@ conteiners, e após isso o ticketz vai inicializar os bancos de dados e
 tabelas. Esta operação pode levar bastante tempo, depois disso o Ticketz
 estará acessível pelo endereço fornecido para oo frontend.
 
-O usuário padrão é admin@admin.com e a senha padrão é 123456
+O usuário padrão será o endereço de email fornecido na configuração do arquivo `.env-backend-acme` e a senha padrão é `123456`
 
 A aplicação irá se reiniciar automaticamente a cada reboot do servidor.
 
