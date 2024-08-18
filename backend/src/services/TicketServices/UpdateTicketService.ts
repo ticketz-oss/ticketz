@@ -192,27 +192,18 @@ const UpdateTicketService = async ({
           companyId
         );
 
-        if (transferMessage) {
-          const queueChangedMessage = await wbot.sendMessage(
-            `${ticket.contact.number}@${
-              ticket.isGroup ? "g.us" : "s.whatsapp.net"
-            }`,
-            {
-              text: `\u200e${transferMessage}`
-            }
-          );
-          await verifyMessage(queueChangedMessage, ticket, ticket.contact);
-        } else {
-          const queueChangedMessage = await wbot.sendMessage(
-            `${ticket.contact.number}@${
-              ticket.isGroup ? "g.us" : "s.whatsapp.net"
-            }`,
-            {
-              text: "\u200eVocê foi transferido, em breve iremos iniciar seu atendimento."
-            }
-          );
-          await verifyMessage(queueChangedMessage, ticket, ticket.contact);
-        }
+        const queueChangedMessage = await wbot.sendMessage(
+          `${ticket.contact.number}@${
+            ticket.isGroup ? "g.us" : "s.whatsapp.net"
+          }`,
+          {
+            text: `\u200e${
+              transferMessage ||
+              "Você foi transferido, em breve iremos iniciar seu atendimento."
+            }`
+          }
+        );
+        await verifyMessage(queueChangedMessage, ticket, ticket.contact);
       }
 
       if (["facebook", "instagram"].includes(ticket.channel)) {
