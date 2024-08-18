@@ -77,6 +77,8 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
     isDefault: false,
     token: "",
     provider: "beta",
+    restrictToQueues: false,
+    transferToNewTicket: false,
   };
   const [whatsApp, setWhatsApp] = useState(initialState);
   const [selectedQueueIds, setSelectedQueueIds] = useState([]);
@@ -297,6 +299,32 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                   selectedQueueIds={selectedQueueIds}
                   onChange={(selectedIds) => setSelectedQueueIds(selectedIds)}
                 />
+                <div>
+                  <FormControlLabel
+                    control={
+                      <Field
+                        as={Switch}
+                        color="primary"
+                        name="restrictToQueues"
+                        checked={values.restrictToQueues}
+                      />
+                    }
+                    label={i18n.t("whatsappModal.form.restrictToQueues")}
+                  />
+                </div>
+                <div>
+                  <FormControlLabel
+                    control={
+                      <Field
+                        as={Switch}
+                        color="primary"
+                        name="transferToNewTicket"
+                        checked={values.transferToNewTicket}
+                      />
+                    }
+                    label={i18n.t("whatsappModal.form.transferToNewTicket")}
+                  />
+                </div>
               </DialogContent>
               <DialogActions>
                 <Button

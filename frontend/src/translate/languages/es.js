@@ -111,6 +111,8 @@ const messages = {
 				form: {
 					name: "Nombre",
 					default: "Predeterminado",
+          restrictToQueues: "Restringir a las filas asociadas o filas sin asociación",
+          transferToNewTicket: "Forzar la transferencia a un nuevo ticket"
 				},
 				buttons: {
 					okAdd: "Agregar",
