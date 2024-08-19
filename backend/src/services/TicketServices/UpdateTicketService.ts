@@ -66,7 +66,7 @@ const UpdateTicketService = async ({
     }
     const { justClose } = ticketData;
     let { status } = ticketData;
-    let { queueId, userId } = ticketData;
+    const { queueId, userId } = ticketData;
     let chatbot: boolean | null = ticketData.chatbot || false;
     let queueOptionId: number | null = ticketData.queueOptionId || null;
 
@@ -179,9 +179,6 @@ const UpdateTicketService = async ({
       ticketTraking.finishedAt = moment().toDate();
       ticketTraking.whatsappId = ticket.whatsappId;
       ticketTraking.userId = ticket.userId;
-
-      queueId = null;
-      userId = null;
     }
 
     if (queueId !== undefined && queueId !== null) {
@@ -234,9 +231,7 @@ const UpdateTicketService = async ({
 
         if (transferToNewTicket) {
           await ticket.update({
-            status: "closed",
-            userId: null,
-            queueId: null
+            status: "closed"
           });
           await ticket.reload();
           io.to(`company-${companyId}-mainchannel`).emit(
