@@ -313,7 +313,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                   selectedQueueIds={selectedQueueIds}
                   onChange={(selectedIds) => setSelectedQueueIds(selectedIds)}
                 />
-                {settings.restrictTransferConnection === "connection" &&
+                {(settings.restrictTransferConnection || "connection") === "connection" &&
                   <div>
                     <FormControlLabel
                       control={
@@ -328,7 +328,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                     />
                   </div>
                 }
-                {settings.transferToNewTicket === "connection" &&
+                {(settings.transferToNewTicket || "connection") === "connection" &&
                   <div>
                     <FormControlLabel
                       control={
