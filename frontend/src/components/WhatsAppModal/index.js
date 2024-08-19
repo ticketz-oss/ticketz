@@ -81,6 +81,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
     transferToNewTicket: false,
   };
   const [whatsApp, setWhatsApp] = useState(initialState);
+  const [settings, setSettings] = useState({});
   const [selectedQueueIds, setSelectedQueueIds] = useState([]);
 
   useEffect(() => {
@@ -96,6 +97,19 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
       } catch (err) {
         toastError(err);
       }
+      
+      try {
+        const { data } = await api.get("/settings");
+        const settingsObject = data.reduce((acc, item) => {
+          acc[item.key] = item.value;
+          return acc;
+        }, {});
+
+        setSettings(settingsObject);
+      } catch (err) {
+        toastError(err);
+      }
+      
     };
     fetchSession();
   }, [whatsAppId]);
@@ -299,32 +313,36 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                   selectedQueueIds={selectedQueueIds}
                   onChange={(selectedIds) => setSelectedQueueIds(selectedIds)}
                 />
-                <div>
-                  <FormControlLabel
-                    control={
-                      <Field
-                        as={Switch}
-                        color="primary"
-                        name="restrictToQueues"
-                        checked={values.restrictToQueues}
-                      />
-                    }
-                    label={i18n.t("whatsappModal.form.restrictToQueues")}
-                  />
-                </div>
-                <div>
-                  <FormControlLabel
-                    control={
-                      <Field
-                        as={Switch}
-                        color="primary"
-                        name="transferToNewTicket"
-                        checked={values.transferToNewTicket}
-                      />
-                    }
-                    label={i18n.t("whatsappModal.form.transferToNewTicket")}
-                  />
-                </div>
+                {settings.restrictTransferConnection === "connection" &&
+                  <div>
+                    <FormControlLabel
+                      control={
+                        <Field
+                          as={Switch}
+                          color="primary"
+                          name="restrictToQueues"
+                          checked={values.restrictToQueues}
+                        />
+                      }
+                      label={i18n.t("whatsappModal.form.restrictToQueues")}
+                    />
+                  </div>
+                }
+                {settings.transferToNewTicket === "connection" &&
+                  <div>
+                    <FormControlLabel
+                      control={
+                        <Field
+                          as={Switch}
+                          color="primary"
+                          name="transferToNewTicket"
+                          checked={values.transferToNewTicket}
+                        />
+                      }
+                      label={i18n.t("whatsappModal.form.transferToNewTicket")}
+                    />
+                  </div>
+                }
               </DialogContent>
               <DialogActions>
                 <Button
