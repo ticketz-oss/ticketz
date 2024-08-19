@@ -126,6 +126,9 @@ export default function Options(props) {
   const [CheckMsgIsGroup, setCheckMsgIsGroupType] = useState("enabled");
   const [apiToken, setApiToken] = useState("");
   const [downloadLimit, setDownloadLimit] = useState("15");
+  const [transferToNewTicket, setTransferToNewTicket] = useState("connection");
+  const [restrictTransferConnection, setRestrictTransferConnection] = useState("connection");
+  
 
   const [loadingUserRating, setLoadingUserRating] = useState(false);
   const [loadingScheduleType, setLoadingScheduleType] = useState(false);
@@ -201,10 +204,15 @@ export default function Options(props) {
 
       const downloadLimit = settings.find((s) => s.key === "downloadLimit");
       setDownloadLimit(downloadLimit?.value || "");
+
+      const restrictTransferConnection = settings.find((s) => s.key === "restrictTransferConnection");
+      setRestrictTransferConnection(restrictTransferConnection?.value || "connection");
       
+      const transferToNewTicket = settings.find((s) => s.key === "transferToNewTicket");
+      setTransferToNewTicket(transferToNewTicket?.value || "connection");
+            
       const ticketzProKey = settings.find((s) => s.key === "ticketzProKey");
       setTicketzProKey(ticketzProKey?.value || "");
-      
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
@@ -285,6 +293,24 @@ export default function Options(props) {
     });
     toast.success("Operação atualizada com sucesso.");
     setLoadingQuickMessages(false);
+  }
+
+  async function handleTransferToNewTicket(value) {
+    setTransferToNewTicket(value);
+    await update({
+      key: "transferToNewTicket",
+      value,
+    });
+    toast.success("Operação atualizada com sucesso.");
+  }
+
+  async function handleRestrictTransferConnection(value) {
+    setRestrictTransferConnection(value);
+    await update({
+      key: "restrictTransferConnection",
+      value,
+    });
+    toast.success("Operação atualizada com sucesso.");
   }
 
   async function handleAllowSignup(value) {
@@ -558,6 +584,42 @@ export default function Options(props) {
             <FormHelperText>
               {loadingQuickMessages && "Atualizando..."}
             </FormHelperText>
+          </FormControl>
+        </Grid>
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="connrestricttoqueues-label">
+              Transferência força troca de conexão
+            </InputLabel>
+            <Select
+              labelId="connrestricttoqueues-label"
+              value={restrictTransferConnection}
+              onChange={async (e) => {
+                handleRestrictTransferConnection(e.target.value);
+              }}
+            >
+              <MenuItem value={"connection"}>Configurada por conexão</MenuItem>
+              <MenuItem value={"enabled"}>Ativada</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="transfernewticket-label">
+              Transferência como novo ticket
+            </InputLabel>
+            <Select
+              labelId="transfernewticket-label"
+              value={transferToNewTicket}
+              onChange={async (e) => {
+                handleTransferToNewTicket(e.target.value);
+              }}
+            >
+              <MenuItem value={"connection"}>Configurada por conexão</MenuItem>
+              <MenuItem value={"enabled"}>Ativada</MenuItem>
+            </Select>
           </FormControl>
         </Grid>
         

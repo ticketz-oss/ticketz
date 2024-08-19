@@ -107,8 +107,9 @@ const messages = {
 				},
 				form: {
 					name: "Nama",
-                default:
-                    "Default",
+          default: "Default",
+          restrictToQueues: "Batasi ke antrian terkait atau antrian tanpa asosiasi",
+          transferToNewTicket: "Paksa transfer ke tiket baru"
 				},
 				buttons: {
 					okAdd: "Tambah",

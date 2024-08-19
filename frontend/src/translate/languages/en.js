@@ -107,6 +107,8 @@ const messages = {
 				form: {
 					name: "Name",
 					default: "Default",
+          restrictToQueues: "Restritct to associated queues or queues without association",
+          transferToNewTicket: "Force transfer to new ticket"
 				},
 				buttons: {
 					okAdd: "Add",

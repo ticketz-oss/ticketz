@@ -121,6 +121,16 @@ class Whatsapp extends Model<Whatsapp> {
 
   @Column(DataType.TEXT)
   channel: string;
+
+  @Default(false)
+  @AllowNull
+  @Column
+  restrictToQueues: boolean;
+
+  @Default(false)
+  @AllowNull
+  @Column
+  transferToNewTicket: boolean;
 }
 
 export default Whatsapp;
