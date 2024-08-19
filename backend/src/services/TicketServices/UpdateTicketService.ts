@@ -18,6 +18,7 @@ import AppError from "../../errors/AppError";
 import FindOrCreateTicketService from "./FindOrCreateTicketService";
 import { logger } from "../../utils/logger";
 import Whatsapp from "../../models/Whatsapp";
+import { GetCompanySetting } from "../../helpers/CheckSettings";
 
 interface TicketData {
   status?: string;
@@ -196,16 +197,28 @@ const UpdateTicketService = async ({
           }
         ]
       });
+
       if (ticket.channel === "whatsapp") {
         const whatsapp = await ShowWhatsAppService(
           ticket.whatsappId,
           companyId
         );
 
+        const restrictTransferConnection =
+          (await GetCompanySetting(
+            companyId,
+            "restrictTransferConnection",
+            ""
+          )) === "enabled" || whatsapp.restrictToQueues;
+
+        const transferToNewTicket =
+          (await GetCompanySetting(companyId, "transferToNewTicket", "")) ===
+            "enabled" || whatsapp.transferToNewTicket;
+
         // let oldTicket: Ticket = null;
         let newWhatsapp: Whatsapp = null;
 
-        if (whatsapp.restrictToQueues && queue.whatsapps.length) {
+        if (restrictTransferConnection && queue.whatsapps.length) {
           const isSameConnection = queue.whatsapps.find(
             e => e.id === whatsapp.id
           );
@@ -219,7 +232,7 @@ const UpdateTicketService = async ({
           }
         }
 
-        if (whatsapp.transferToNewTicket) {
+        if (transferToNewTicket) {
           await ticket.update({
             status: "closed",
             userId: null,
