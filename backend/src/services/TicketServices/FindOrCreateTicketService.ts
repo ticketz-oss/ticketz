@@ -17,7 +17,8 @@ const FindOrCreateTicketService = async (
   whatsappId: number,
   unreadMessages: number,
   companyId: number,
-  groupContact?: Contact
+  groupContact?: Contact,
+  doNotReopen?: boolean
 ): Promise<Ticket> => {
   let ticket = await Ticket.findOne({
     where: {
@@ -64,7 +65,7 @@ const FindOrCreateTicketService = async (
     const value = msgIsGroupBlock ? parseInt(msgIsGroupBlock.value, 10) : 7200;
   }
 
-  if (!ticket && !groupContact) {
+  if (!doNotReopen && !ticket && !groupContact) {
     ticket = await Ticket.findOne({
       where: {
         updatedAt: {

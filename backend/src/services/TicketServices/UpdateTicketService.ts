@@ -15,6 +15,9 @@ import GetTicketWbot from "../../helpers/GetTicketWbot";
 import { verifyMessage } from "../WbotServices/wbotMessageListener";
 import sendFaceMessage from "../FacebookServices/sendFacebookMessage";
 import AppError from "../../errors/AppError";
+import FindOrCreateTicketService from "./FindOrCreateTicketService";
+import { logger } from "../../utils/logger";
+import Whatsapp from "../../models/Whatsapp";
 
 interface TicketData {
   status?: string;
@@ -60,7 +63,8 @@ const UpdateTicketService = async ({
     if (tokenData) {
       companyId = tokenData.companyId;
     }
-    let { status, justClose } = ticketData;
+    const { justClose } = ticketData;
+    let { status } = ticketData;
     let { queueId, userId } = ticketData;
     let chatbot: boolean | null = ticketData.chatbot || false;
     let queueOptionId: number | null = ticketData.queueOptionId || null;
@@ -75,7 +79,7 @@ const UpdateTicketService = async ({
       }
     });
 
-    const ticket = await ShowTicketService(ticketId, companyId);
+    let ticket = await ShowTicketService(ticketId, companyId);
 
     if (tokenData && ticket.status !== "pending") {
       if (
@@ -184,21 +188,89 @@ const UpdateTicketService = async ({
     }
 
     if (oldQueueId !== queueId && !isNil(oldQueueId) && !isNil(queueId)) {
-      const queue = await Queue.findByPk(queueId);
+      const queue = await Queue.findByPk(queueId, {
+        include: [
+          {
+            model: Whatsapp,
+            as: "whatsapps"
+          }
+        ]
+      });
       if (ticket.channel === "whatsapp") {
-        const wbot = await GetTicketWbot(ticket);
-        const { transferMessage } = await ShowWhatsAppService(
+        const whatsapp = await ShowWhatsAppService(
           ticket.whatsappId,
           companyId
         );
 
+        // let oldTicket: Ticket = null;
+        let newWhatsapp: Whatsapp = null;
+
+        if (whatsapp.restrictToQueues && queue.whatsapps.length) {
+          const isSameConnection = queue.whatsapps.find(
+            e => e.id === whatsapp.id
+          );
+
+          if (!isSameConnection) {
+            newWhatsapp = queue.whatsapps.find(e => e.status === "CONNECTED");
+
+            if (!newWhatsapp) {
+              throw new AppError("ERR_WAPP_NOT_FOUND", 404);
+            }
+          }
+        }
+
+        if (whatsapp.transferToNewTicket) {
+          await ticket.update({
+            status: "closed",
+            userId: null,
+            queueId: null
+          });
+          await ticket.reload();
+          io.to(`company-${companyId}-mainchannel`).emit(
+            `company-${companyId}-ticket`,
+            {
+              action: "removeFromList",
+              ticketId: ticket?.id
+            }
+          );
+
+          const { contact } = ticket;
+
+          // oldTicket = ticket;
+
+          const newTicket = await FindOrCreateTicketService(
+            contact,
+            newWhatsapp?.id || whatsapp.id,
+            1,
+            companyId,
+            null,
+            true
+          );
+
+          if (!newTicket) {
+            logger.error(
+              { contact: ticket.contact, whatsapp: newWhatsapp },
+              "Error creating new ticket"
+            );
+            throw new AppError("ERR_INTERNAL_ERROR", 500);
+          }
+
+          ticket = newTicket;
+        } else if (newWhatsapp) {
+          await ticket.update({
+            whatsappId: newWhatsapp.id
+          });
+          await ticket.reload();
+        }
+
+        const wbot = await GetTicketWbot(ticket);
         const queueChangedMessage = await wbot.sendMessage(
           `${ticket.contact.number}@${
             ticket.isGroup ? "g.us" : "s.whatsapp.net"
           }`,
           {
             text: `\u200e${
-              transferMessage ||
+              whatsapp.transferMessage ||
               "Você foi transferido, em breve iremos iniciar seu atendimento."
             }`
           }
@@ -307,6 +379,7 @@ const UpdateTicketService = async ({
   } catch (err) {
     Sentry.captureException(err);
   }
+  return null;
 };
 
 export default UpdateTicketService;
