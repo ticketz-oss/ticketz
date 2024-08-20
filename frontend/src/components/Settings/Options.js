@@ -118,6 +118,7 @@ export default function Options(props) {
   const [loadingApiToken, setLoadingApiToken] = useState(false);
   const [loadingDownloadLimit, setLoadingDownloadLimit] = useState(false);
   const [ratingsTimeout, setRatingsTimeout] = useState(false);
+  const [autoReopenTimeout, setAutoReopenTimeout] = useState(false);
   const { getCurrentUserInfo } = useAuth();
   const [currentUser, setCurrentUser] = useState({});
 
@@ -178,6 +179,9 @@ export default function Options(props) {
 
       const ratingsTimeout = settings.find((s) => s.key === "ratingsTimeout");
       setRatingsTimeout(ratingsTimeout?.value || "5");
+
+      const autoReopenTimeout = settings.find((s) => s.key === "autoReopenTimeout");
+      setAutoReopenTimeout(autoReopenTimeout?.value || "0");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
@@ -309,6 +313,15 @@ export default function Options(props) {
     toast.success("Operação atualizada com sucesso.");
   }
 
+  async function handleAutoReopenTimeout(value) {
+    setAutoReopenTimeout(value);
+    await update({
+      key: "autoReopenTimeout",
+      value,
+    });
+    toast.success("Operação atualizada com sucesso.");
+  }
+
   async function generateApiToken() {
     const newToken = generateSecureToken(32);
     setApiToken(newToken);
@@ -390,6 +403,25 @@ export default function Options(props) {
               }}
               onBlur={async (_) => {
                 await handleRatingsTimeout(ratingsTimeout);
+              }}
+            />
+          </FormControl>
+        </Grid>
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <TextField
+              id="autoreopen-timeout-field"
+              label="Tempo limite para reabertura automática (minutos)"
+              variant="standard"
+              name="autoReopenTimeout"
+              type="number"
+              value={autoReopenTimeout}
+              onChange={(e) => {
+                setAutoReopenTimeout(e.target.value);
+              }}
+              onBlur={async (_) => {
+                await handleAutoReopenTimeout(autoReopenTimeout);
               }}
             />
           </FormControl>
