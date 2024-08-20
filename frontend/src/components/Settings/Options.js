@@ -117,6 +117,7 @@ export default function Options(props) {
   const [loadingCheckMsgIsGroup, setCheckMsgIsGroup] = useState(false);
   const [loadingApiToken, setLoadingApiToken] = useState(false);
   const [loadingDownloadLimit, setLoadingDownloadLimit] = useState(false);
+  const [ratingsTimeout, setRatingsTimeout] = useState(false);
   const { getCurrentUserInfo } = useAuth();
   const [currentUser, setCurrentUser] = useState({});
 
@@ -174,6 +175,9 @@ export default function Options(props) {
       
       const transferToNewTicket = settings.find((s) => s.key === "transferToNewTicket");
       setTransferToNewTicket(transferToNewTicket?.value || "connection");
+
+      const ratingsTimeout = settings.find((s) => s.key === "ratingsTimeout");
+      setRatingsTimeout(ratingsTimeout?.value || "5");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
@@ -296,6 +300,15 @@ export default function Options(props) {
     setLoadingDownloadLimit(false);
   }
 
+  async function handleRatingsTimeout(value) {
+    setRatingsTimeout(value);
+    await update({
+      key: "ratingsTimeout",
+      value,
+    });
+    toast.success("Operação atualizada com sucesso.");
+  }
+
   async function generateApiToken() {
     const newToken = generateSecureToken(32);
     setApiToken(newToken);
@@ -362,6 +375,26 @@ export default function Options(props) {
             </FormHelperText>
           </FormControl>
         </Grid>
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <TextField
+              id="ratings-timeout-field"
+              label="Timeout para avaliação (minutos)"
+              variant="standard"
+              name="ratingsTimeout"
+              type="number"
+              value={ratingsTimeout}
+              onChange={(e) => {
+                setRatingsTimeout(e.target.value);
+              }}
+              onBlur={async (_) => {
+                await handleRatingsTimeout(ratingsTimeout);
+              }}
+            />
+          </FormControl>
+        </Grid>
+
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="schedule-type-label">
@@ -607,7 +640,6 @@ export default function Options(props) {
                     variant="standard"
                     name="appName"
                     value={downloadLimit}
-                    inputRef={downloadLimitInput}
                     onChange={(e) => {
                       setDownloadLimit(e.target.value);
                     }}
