@@ -52,6 +52,9 @@ class TicketTraking extends Model<TicketTraking> {
   @Column
   rated: boolean;
 
+  @Column
+  expired: boolean;
+
   @BelongsTo(() => User)
   user: User;
 
