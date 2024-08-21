@@ -48,7 +48,6 @@ interface DispatchCampaignData {
 
 export const userMonitor = new Queue("UserMonitor", connection);
 
-
 export const messageQueue = new Queue("MessageQueue", connection, {
   limiter: {
     max: limiterMax as number,
@@ -150,7 +149,10 @@ async function handleSendScheduledMessage(job) {
     await scheduleRecord?.update({
       status: "ERRO"
     });
-    logger.error("SendScheduledMessage -> SendMessage: error", (e as Error).message);
+    logger.error(
+      "SendScheduledMessage -> SendMessage: error",
+      (e as Error).message
+    );
     throw e;
   }
 }
@@ -170,7 +172,7 @@ async function handleVerifyCampaigns() {
   if (campaigns.length) {
     logger.info(`Campanhas encontradas: ${campaigns.length}`);
   }
-  campaigns.forEach( (campaign) => {
+  campaigns.forEach(campaign => {
     try {
       const now = moment();
       const scheduledAt = moment(campaign.scheduledAt);
@@ -413,7 +415,7 @@ async function handleProcessCampaign(job) {
       const { contacts } = campaign.contactList;
       if (isArray(contacts)) {
         let index = 0;
-        contacts.forEach( (contact) => {
+        contacts.forEach(contact => {
           campaignQueue.add(
             "PrepareContact",
             {
@@ -430,7 +432,7 @@ async function handleProcessCampaign(job) {
           logger.info(
             `Registro enviado pra fila de disparo: Campanha=${campaign.id};Contato=${contact.name};delay=${delay}`
           );
-          index+=1;
+          index += 1;
           if (index % settings.longerIntervalAfter === 0) {
             // intervalo maior após intervalo configurado de mensagens
             delay += parseToMilliseconds(settings.greaterInterval);
@@ -448,7 +450,7 @@ async function handleProcessCampaign(job) {
   }
 }
 
-async function handlePrepareContact(job: { data: PrepareContactData; }) {
+async function handlePrepareContact(job: { data: PrepareContactData }) {
   try {
     const { contactId, campaignId, delay, variables } = job.data;
     const campaign = await getCampaign(campaignId);
@@ -523,7 +525,9 @@ async function handlePrepareContact(job: { data: PrepareContactData; }) {
     await verifyAndFinalizeCampaign(campaign);
   } catch (err: unknown) {
     Sentry.captureException(err);
-    logger.error(`campaignQueue -> PrepareContact -> error: ${(err as Error).message}`);
+    logger.error(
+      `campaignQueue -> PrepareContact -> error: ${(err as Error).message}`
+    );
   }
 }
 
@@ -585,10 +589,10 @@ async function handleDispatchCampaign(job) {
 
 async function handleLoginStatus() {
   const users: { id: number }[] = await sequelize.query(
-    "select id from \"Users\" where \"updatedAt\" < now() - '5 minutes'::interval and online = true",
+    'select id from "Users" where "updatedAt" < now() - \'5 minutes\'::interval and online = true',
     { type: QueryTypes.SELECT }
   );
-  users.forEach( async (item) => {
+  users.forEach(async item => {
     try {
       const user = await User.findByPk(item.id);
       await user.update({ online: false });
@@ -599,48 +603,44 @@ async function handleLoginStatus() {
   });
 }
 
-
 async function handleInvoiceCreate() {
   const job = new CronJob("0 * * * * *", async () => {
-
-
     const companies = await Company.findAll();
     companies.map(async c => {
-      const {dueDate} = c;
+      const { dueDate } = c;
       const date = moment(dueDate).format();
       const timestamp = moment().format();
       const hoje = moment(moment()).format("DD/MM/yyyy");
       const vencimento = moment(dueDate).format("DD/MM/yyyy");
 
-      const diff = moment(vencimento, "DD/MM/yyyy").diff(moment(hoje, "DD/MM/yyyy"));
+      const diff = moment(vencimento, "DD/MM/yyyy").diff(
+        moment(hoje, "DD/MM/yyyy")
+      );
       const dias = moment.duration(diff).asDays();
 
       if (dias < 20) {
         const plan = await Plan.findByPk(c.planId);
 
-        const sql = `SELECT COUNT(*) mycount FROM "Invoices" WHERE "companyId" = ${c.id} AND "dueDate"::text LIKE '${moment(dueDate).format("yyyy-MM-DD")}%';`
-        const invoice: { mycount: number }[] = await sequelize.query(sql,
-          { type: QueryTypes.SELECT }
-        );
+        const sql = `SELECT COUNT(*) mycount FROM "Invoices" WHERE "companyId" = ${
+          c.id
+        } AND "dueDate"::text LIKE '${moment(dueDate).format("yyyy-MM-DD")}%';`;
+        const invoice: { mycount: number }[] = await sequelize.query(sql, {
+          type: QueryTypes.SELECT
+        });
         if (+invoice[0].mycount === 0) {
           // eslint-disable-next-line no-shadow
           const sql = `INSERT INTO "Invoices" (detail, status, value, "updatedAt", "createdAt", "dueDate", "companyId")
-          VALUES ('${plan.name}', 'open', '${plan.value}', '${timestamp}', '${timestamp}', '${date}', ${c.id});`
+          VALUES ('${plan.name}', 'open', '${plan.value}', '${timestamp}', '${timestamp}', '${date}', ${c.id});`;
 
-          await sequelize.query(sql,
-            { type: QueryTypes.INSERT }
-          );
-
+          await sequelize.query(sql, { type: QueryTypes.INSERT });
         }
       }
-
     });
   });
-  job.start()
+  job.start();
 }
 
-
-handleInvoiceCreate()
+handleInvoiceCreate();
 
 export async function startQueueProcess() {
   logger.info("Iniciando processamento de filas");
@@ -660,9 +660,6 @@ export async function startQueueProcess() {
   campaignQueue.process("DispatchCampaign", handleDispatchCampaign);
 
   userMonitor.process("VerifyLoginStatus", handleLoginStatus);
-
-
-
 
   scheduleMonitor.add(
     "Verify",

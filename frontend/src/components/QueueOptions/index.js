@@ -14,6 +14,8 @@ import toastError from "../../errors/toastError";
 import { AttachFile, DeleteOutline } from "@material-ui/icons";
 import { head } from "lodash";
 import useQueues from "../../hooks/useQueues";
+import ConfirmationModal from "../ConfirmationModal";
+import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -138,6 +140,24 @@ export function QueueOptionStepper({ queueId, options, updateOptions }) {
     }
   };
 
+
+  const deleteMedia = async (index) => {
+    const option = options[index];
+    if (attachment) {
+      setAttachment(null);
+      attachmentFile.current.value = null;
+    }
+
+    if (option.mediaPath) {
+      await api.delete(`/queue-options/${option.id}/media-upload`);
+
+      option.mediaPath = null;
+      option.mediaName = null;
+      updateOptions();
+    }
+  };
+  
+  
   const handleEdition = (index) => {
     options[index].edition = !options[index].edition;
     updateOptions();
@@ -202,6 +222,16 @@ export function QueueOptionStepper({ queueId, options, updateOptions }) {
     if (option.edition) {
       return (
         <>
+
+          <ConfirmationModal
+            title={i18n.t("queueModal.confirmationModal.deleteTitle")}
+            open={confirmationOpen}
+            onClose={() => setConfirmationOpen(false)}
+            onConfirm={() => deleteMedia(index)}
+          >
+            {i18n.t("queueModal.confirmationModal.deleteMessage")}
+          </ConfirmationModal>
+              
           <TextField
             value={option.title}
             onChange={(event) => handleOptionChangeTitle(event, index)}

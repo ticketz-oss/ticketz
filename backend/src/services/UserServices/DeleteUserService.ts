@@ -17,10 +17,6 @@ const DeleteUserService = async (
     throw new AppError("ERR_FORBIDDEN", 403);
   }
 
-  if (user.companyId !== requestUser.companyId) {
-    throw new AppError("ERR_FORBIDDEN", 403);
-  }
-
   if (!user) {
     throw new AppError("ERR_NO_USER_FOUND", 404);
   }

@@ -1,8 +1,5 @@
-import { WASocket, WAMessage } from "@whiskeysockets/baileys";
-import * as Sentry from "@sentry/node";
 import AppError from "../../errors/AppError";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
-import GetWbotMessage from "../../helpers/GetWbotMessage";
 import Message from "../../models/Message";
 import OldMessage from "../../models/OldMessage";
 import Ticket from "../../models/Ticket";
@@ -18,9 +15,8 @@ interface Request {
 const EditWhatsAppMessage = async ({
   messageId,
   companyId,
-  body,
-}: Request): Promise<{ ticketId: number , message: Message}> => {
-  
+  body
+}: Request): Promise<{ ticketId: number; message: Message }> => {
   const message = await Message.findOne({
     where: {
       id: messageId,
@@ -34,7 +30,7 @@ const EditWhatsAppMessage = async ({
       }
     ]
   });
-  
+
   if (!message) {
     throw new AppError("No message found with this ID.");
   }
@@ -42,24 +38,29 @@ const EditWhatsAppMessage = async ({
   const { ticket } = message;
 
   const wbot = await GetTicketWbot(ticket);
-  
+
   const msg = JSON.parse(message.dataJson);
-  
+  const formattedBody = formatBody(body, ticket.contact);
+
   try {
-    await wbot.sendMessage(message.remoteJid, {
-      text: body,
-      edit: msg.key,
-    }, {});
+    await wbot.sendMessage(
+      message.remoteJid,
+      {
+        text: formattedBody,
+        edit: msg.key
+      },
+      {}
+    );
 
     const oldMessage = {
       messageId,
       body: message.body,
-      ticketId: message.ticketId,
-    }
+      ticketId: message.ticketId
+    };
 
     await OldMessage.upsert(oldMessage);
 
-    await message.update({ body, isEdited: true });
+    await message.update({ body: formattedBody, isEdited: true });
 
     const savedMessage = await Message.findOne({
       where: {
@@ -73,29 +74,30 @@ const EditWhatsAppMessage = async ({
           include: ["contact"]
         },
         {
-          model: Message, as: "quotedMsg",
+          model: Message,
+          as: "quotedMsg",
           include: ["contact"],
           where: {
             companyId
           },
-          required: false,
+          required: false
         },
         {
-          model: OldMessage, as: "oldMessages",
+          model: OldMessage,
+          as: "oldMessages",
           where: {
-            ticketId: message.ticketId,
+            ticketId: message.ticketId
           },
-          required: false,
-        },
+          required: false
+        }
       ]
     });
-	
-    return { ticketId: savedMessage.ticketId , message: savedMessage };
+
+    return { ticketId: savedMessage.ticketId, message: savedMessage };
   } catch (err) {
-	console.log(err);
+    console.log(err);
     throw new AppError("ERR_EDITING_WAPP_MSG");
   }
-
 };
 
 export default EditWhatsAppMessage;

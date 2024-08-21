@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 import Grid from "@material-ui/core/Grid";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -12,6 +12,17 @@ import { makeStyles } from "@material-ui/core/styles";
 import { grey, blue } from "@material-ui/core/colors";
 import OnlyForSuperUser from "../OnlyForSuperUser";
 import useAuth from "../../hooks/useAuth.js";
+import { Loop, Delete } from "@material-ui/icons";
+import {
+  IconButton,
+  TextField
+} from "@material-ui/core";
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCopy, faGears } from '@fortawesome/free-solid-svg-icons';
+
+import { generateSecureToken } from "../../helpers/generateSecureToken";
+import { copyToClipboard } from "../../helpers/copyToClipboard";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -88,7 +99,10 @@ export default function Options(props) {
   const [chatbotType, setChatbotType] = useState("");
   const [quickMessages, setQuickMessages] = useState("");
   const [allowSignup, setAllowSignup] = useState("disabled");
+  const [chatbotAutoExit, setChatbotAutoExit] = useState("disabled");
   const [CheckMsgIsGroup, setCheckMsgIsGroupType] = useState("enabled");
+  const [apiToken, setApiToken] = useState("");
+  const [downloadLimit, setDownloadLimit] = useState("15");
 
   const [loadingUserRating, setLoadingUserRating] = useState(false);
   const [loadingScheduleType, setLoadingScheduleType] = useState(false);
@@ -96,9 +110,14 @@ export default function Options(props) {
   const [loadingChatbotType, setLoadingChatbotType] = useState(false);
   const [loadingQuickMessages, setLoadingQuickMessages] = useState(false);
   const [loadingAllowSignup, setLoadingAllowSignup] = useState(false);
+  const [loadingChatbotAutoExit, setLoadingChatbotAutoExit] = useState(false);
   const [loadingCheckMsgIsGroup, setCheckMsgIsGroup] = useState(false);
+  const [loadingApiToken, setLoadingApiToken] = useState(false);
+  const [loadingDownloadLimit, setLoadingDownloadLimit] = useState(false);
   const { getCurrentUserInfo } = useAuth();
   const [currentUser, setCurrentUser] = useState({});
+
+  const downloadLimitInput = useRef(null);
 
   const { update } = useSettings();
 
@@ -130,12 +149,22 @@ export default function Options(props) {
       if (chatbotType) {
         setChatbotType(chatbotType.value);
       }
+      const chatbotAutoExit = settings.find((s) => s.key === "chatbotAutoExit");
+      if (chatbotAutoExit) {
+        setChatbotAutoExit(chatbotAutoExit.value);
+      }
       const allowSignup = settings.find((s) => s.key === "allowSignup");
       if (allowSignup) {
         setAllowSignup(allowSignup.value);
       }
       const quickMessages = settings.find((s) => s.key === "quickMessages");
       setQuickMessages(quickMessages?.value || "individual");
+
+      const apiToken = settings.find((s) => s.key === "apiToken");
+      setApiToken(apiToken?.value || "");
+
+      const downloadLimit = settings.find((s) => s.key === "downloadLimit");
+      setDownloadLimit(downloadLimit?.value || "");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
@@ -196,6 +225,17 @@ export default function Options(props) {
     setLoadingChatbotType(false);
   }
 
+  async function handleChatbotAutoExit(value) {
+    setChatbotAutoExit(value);
+    setLoadingChatbotAutoExit(true);
+    await update({
+      key: "chatbotAutoExit",
+      value,
+    });
+    toast.success("Operação atualizada com sucesso.");
+    setLoadingChatbotAutoExit(false);
+  }
+
   async function handleQuickMessages(value) {
     setQuickMessages(value);
     setLoadingQuickMessages(true);
@@ -216,6 +256,45 @@ export default function Options(props) {
     });
     toast.success("Operação atualizada com sucesso.");
     setLoadingAllowSignup(false);
+  }
+
+  async function handleDownloadLimit(value) {
+    setDownloadLimit(value);
+    setLoadingDownloadLimit(true);
+    await update({
+      key: "downloadLimit",
+      value,
+    });
+    toast.success("Operação atualizada com sucesso.");
+    setLoadingDownloadLimit(false);
+  }
+
+  async function generateApiToken() {
+    const newToken = generateSecureToken(32);
+    setApiToken(newToken);
+    setLoadingApiToken(true);
+    await update({
+      key: "apiToken",
+      value: newToken,
+    });
+    toast.success("Operação atualizada com sucesso.");
+    setLoadingApiToken(false);
+  }
+
+  async function deleteApiToken() {
+    setApiToken("");
+    setLoadingApiToken(true);
+    await update({
+      key: "apiToken",
+      value: "",
+    });
+    toast.success("Operação atualizada com sucesso.");
+    setLoadingApiToken(false);
+  }
+  
+  async function copyApiToken() {
+    copyToClipboard(apiToken);
+    toast.success("Token copied to clipboard");
   }
 
   async function handleGroupType(value) {
@@ -300,7 +379,7 @@ export default function Options(props) {
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="call-type-label">
-              Aceitar Chamada
+              Chamadas de Voz e Vídeo
             </InputLabel>
             <Select
               labelId="call-type-label"
@@ -309,8 +388,8 @@ export default function Options(props) {
                 handleCallType(e.target.value);
               }}
             >
-              <MenuItem value={"disabled"}>Não Aceitar</MenuItem>
-              <MenuItem value={"enabled"}>Aceitar</MenuItem>
+              <MenuItem value={"disabled"}>Informar indisponibilidade</MenuItem>
+              <MenuItem value={"enabled"}>Ignorar</MenuItem>
             </Select>
             <FormHelperText>
               {loadingCallType && "Atualizando..."}
@@ -338,6 +417,26 @@ export default function Options(props) {
         </Grid>
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
+            <InputLabel id="group-type-label">
+              Saída automática de chatbot
+            </InputLabel>
+            <Select
+              labelId="chatbot-autoexit"
+              value={chatbotAutoExit}
+              onChange={async (e) => {
+                handleChatbotAutoExit(e.target.value);
+              }}
+            >
+              <MenuItem value={"disabled"}>Desativado</MenuItem>
+              <MenuItem value={"enabled"}>Ativado</MenuItem>
+            </Select>
+            <FormHelperText>
+              {loadingChatbotAutoExit && "Atualizando..."}
+            </FormHelperText>
+          </FormControl>
+        </Grid>
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
             <InputLabel id="quickmessages-label">
               Mensagens Rápidas
             </InputLabel>
@@ -356,9 +455,65 @@ export default function Options(props) {
             </FormHelperText>
           </FormControl>
         </Grid>
+        
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <TextField
+              id="primary-color-light-field"
+              label="API Token"
+              variant="standard"
+              value={apiToken}
+              InputProps={{
+                endAdornment: (
+                  <>
+                    {apiToken &&
+                      <>
+                        <IconButton
+                          size="small"
+                          color="default"
+                          onClick={() => {
+                            copyApiToken();
+                          }
+                          }
+                        >
+                          <FontAwesomeIcon icon={faCopy} />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          color="default"
+                          onClick={() => {
+                            deleteApiToken();
+                          }
+                          }
+                        >
+                          <Delete />
+                        </IconButton>
+                      </>
+                    }
+                    {
+                      !apiToken &&
+                      <IconButton
+                        size="small"
+                        color="default"
+                        onClick={() => {
+                          generateApiToken();
+                        }
+                        }
+                      >
+                        <FontAwesomeIcon icon={faGears} />
+                      </IconButton>
+                    }
+                  </>
+                ),
+              }}
+            />
+          </FormControl>
+        </Grid>
+
         <OnlyForSuperUser
           user={currentUser}
           yes={() => (
+            <>
               <Grid xs={12} sm={6} md={4} item>
                 <FormControl className={classes.selectContainer}>
                   <InputLabel id="group-type-label">
@@ -379,6 +534,28 @@ export default function Options(props) {
                   </FormHelperText>
                 </FormControl>
               </Grid>
+
+
+              <Grid xs={12} sm={6} md={4} item>
+                <FormControl className={classes.selectContainer}>
+                  <TextField
+                    id="appname-field"
+                    label="Limite de Download de arquivos (MB)"
+                    variant="standard"
+                    name="appName"
+                    value={downloadLimit}
+                    inputRef={downloadLimitInput}
+                    onChange={(e) => {
+                      setDownloadLimit(e.target.value);
+                    }}
+                    onBlur={async (_) => {
+                      await handleDownloadLimit(downloadLimit);
+                    }}
+                  />
+                </FormControl>
+              </Grid>
+            </>
+
           )}
         />
       </Grid>

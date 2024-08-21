@@ -108,6 +108,7 @@ const App = () => {
         barraSuperior: mode === "light" ? primaryColorLight : "#666",
         boxticket: mode === "light" ? "#EEE" : "#666",
         campaigntab: mode === "light" ? "#ededed" : "#666",
+        ticketzproad: { main: "#39ACE7", contrastText: "white" }
       },
       mode,
       appLogoLight,
@@ -131,7 +132,11 @@ const App = () => {
   ), [appLogoLight, appLogoDark, appLogoFavicon, appName, locale, mode, primaryColorDark, primaryColorLight]);
 
   useEffect(() => {
-    const i18nlocale = localStorage.getItem("i18nextLng");
+    const i18nlocale = localStorage.getItem("language");
+    if (!i18nlocale) {
+      return;
+    }
+    
     const browserLocale =
       i18nlocale.substring(0, 2) + i18nlocale.substring(3, 5);
 
@@ -158,7 +163,7 @@ const App = () => {
       .then((file) => { setAppLogoDark(file ? (getBackendURL()+"/public/"+file) : defaultLogoDark) })
       .catch((error) => { console.log("Error reading setting", error); });
     getPublicSetting("appLogoFavicon")
-      .then((file) => { setAppLogoFavicon(file ? (getBackendURL()+"/public/"+file) : defaultLogoFavicon) })
+      .then((file) => { setAppLogoFavicon(file ? (getBackendURL()+"/public/"+file) : null) })
       .catch((error) => { console.log("Error reading setting", error); });
     getPublicSetting("appName").then((name) => { setAppName(name || "ticketz") })
       .catch((error) => { console.log("Error reading setting", error); setAppName("whitelabel chat") });

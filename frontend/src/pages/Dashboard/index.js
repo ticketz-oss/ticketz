@@ -49,6 +49,10 @@ import moment from "moment";
 import { i18n } from "../../translate/i18n";
 import OnlyForSuperUser from "../../components/OnlyForSuperUser";
 import useAuth from "../../hooks/useAuth.js";
+import clsx from "clsx";
+import { loadJSON } from "../../helpers/loadJSON";
+
+const gitinfo = loadJSON('/gitinfo.json');
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -202,6 +206,37 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: "#bd3c58",
     color: "#eee",
   },
+  ticketzProPaper: {
+    padding: theme.spacing(2),
+    display: "flex",
+    flexDirection: "column",
+    overflowY: "auto",
+    backgroundColor: theme.palette.ticketzproad.main,
+    color: theme.palette.ticketzproad.contrastText,
+    ...theme.scrollbarStyles,
+  },
+  ticketzProBox: {
+    textAlign: "center",
+    alignContent: "center"
+  },
+  ticketzProTitle: {
+    fontWeight: "bold"
+  },
+  ticketzProScreen: {
+    maxHeight: "300px",
+    maxWidth: "100%"
+  },
+  ticketzProFeatures: {
+    padding: 0,
+    listStyleType: "none"
+  },
+  ticketzProCommand: {
+    fontFamily: "monospace",
+    backgroundColor: "#00000080"
+  },
+  clickpointer: {
+    cursor: "pointer"
+  }
 }));
 
 const Dashboard = () => {
@@ -220,6 +255,18 @@ const Dashboard = () => {
   const { find } = useDashboard();
   const { finding } = useCompanies();
   const { getCurrentUserInfo } = useAuth();
+    
+  const [supportBoxOpen, setSupportBoxOpen] = useState(false);
+  const [proInstructionsOpen, setProInstructionsOpen] = useState(false);
+  
+  async function showProInstructions() {
+    if (gitinfo.commitHash) {
+      setProInstructionsOpen(true);
+      return;
+    }
+    
+    window.open("https://pro.ticke.tz", "_blank");
+  }
   
   useEffect(() => {
     getCurrentUserInfo().then(
@@ -396,10 +443,88 @@ const Dashboard = () => {
             user={currentUser}
             yes={() => (
               <Grid item xs={12}>
-                <Paper className={classes.supportPaper}>
+                <Paper className={clsx(classes.ticketzProPaper, {
+                  [classes.clickpointer]: !proInstructionsOpen,
+                })} onClick={() => showProInstructions()}>
+                  <Grid container justifyContent="flex-end">
+                    <Grid className={classes.ticketzProBox} item xs={12} md={proInstructionsOpen ? 4 : 6} sm={12}>
+                      <div>
+                        <img className={classes.ticketzProScreen} src="https://pro.ticke.tz/images/0/7/3/0/b/0730b234af7b4b0dac72d09828863bb7cb9193ea-ticketz-computador.png" />
+                      </div>
+                    </Grid>
+                    { !proInstructionsOpen &&
+                    <Grid className={classes.ticketzProBox} item xs={12} md={6} sm={12}>
+                      <Typography className={classes.ticketzProTitle} component="h3" variant="h5" gutterBottom>
+                        Ticketz PRO
+                      </Typography>
+                      <Typography component="h3" variant="h7" gutterBottom>
+                      <ul className={classes.ticketzProFeatures}>
+                        <li>Funcionalidades exclusivas</li>
+                        <li>Suporte Avançado</li>
+                        <li>Migração Facilitada</li>
+                      </ul>
+                      </Typography>
+                      <Typography component="h3" variant="h5">
+                        Assine por R$ 199/mês
+                      </Typography>
+                      <Typography component="h3" variant="h7" gutterBottom>
+                        direto dentro do sistema
+                      </Typography>
+                      { gitinfo.commitHash && 
+                      <Typography component="h3" variant="h5">
+                        Clique para instruções de Upgrade
+                      </Typography>
+                      }
+                      { !gitinfo.commitHash && 
+                      <Typography component="h3" variant="h5">
+                        Clique para visitar o site!
+                      </Typography>
+                      }
+                    </Grid>
+                    }
+                    { proInstructionsOpen &&
+                    <Grid className={classes.ticketzProBox} item xs={12} md={8} sm={12}>
+                      <Typography className={classes.ticketzProTitle} component="h3" variant="h5" gutterBottom>
+                        Instruções de Upgrade
+                      </Typography>
+                      <Typography paragraph>
+                        Se você instalou as imagens disponibilizadas pelo projeto em um
+                        servidor ou VPS utilizando as instruções facilitadas tudo o que
+                        você precisa fazer é acessar seu servidor e digitar o comando abaixo:
+                      </Typography>
+                      <Typography className={classes.ticketzProCommand} paragraph>
+                        curl -sSL update.ticke.tz | sudo bash -s pro
+                      </Typography>
+                      <Typography paragraph>
+                        Em instantes o Ticketz PRO estará instalado com todos os teus dados,
+                        agora só precisa ir até a página de configurações (⚙️) e fazer a sua
+                        assinatura.
+                      </Typography>
+                      <Typography paragraph>
+                        Se a tua instalação for diferente ou acredita que precisa
+                        de auxílio para instalar o Ticketz
+                        Pro, <a href="https://wa.me/554935670707"> entre
+                        em contato</a> que nós ajudamos!
+                      </Typography>
+                    </Grid>
+                    }
+                  </Grid>
+                </Paper>
+              </Grid>
+            )} />
+
+
+          <OnlyForSuperUser
+            user={currentUser}
+            yes={() => (
+              <Grid item xs={12}>
+                <Paper className={clsx(classes.supportPaper, {
+                  [classes.clickpointer]: !supportBoxOpen,
+                })} onClick={() => setSupportBoxOpen(true)}>
                   <Typography component="h2" variant="h6" gutterBottom>
                     {i18n.t("ticketz.support.title")}
                   </Typography>
+                  { supportBoxOpen &&
                   <Grid container justifyContent="flex-end">
                     <Grid className={classes.supportBox} item xs={12} md={4} sm={12}>
                       <Typography component="h3" variant="h6" gutterBottom>
@@ -435,6 +560,7 @@ const Dashboard = () => {
                       </a></div>
                     </Grid>
                   </Grid>
+                  }
                 </Paper>
               </Grid>
             )} />

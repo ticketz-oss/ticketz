@@ -46,6 +46,8 @@ import Brightness7Icon from '@material-ui/icons/Brightness7';
 import LanguageIcon from '@material-ui/icons/Language';
 import { getBackendURL } from "../services/config";
 import NestedMenuItem from "material-ui-nested-menu-item";
+import GoogleAnalytics from "../components/GoogleAnalytics";
+import OnlyForSuperUser from "../components/OnlyForSuperUser";
 
 const drawerWidth = 240;
 
@@ -515,7 +517,11 @@ const LoggedInLayout = ({ children, themeToggle }) => {
       </AppBar>
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
-
+        <OnlyForSuperUser
+          user={currentUser}
+          yes={() => (
+            <GoogleAnalytics />
+          )} />
         {children ? children : null}
       </main>
     </div>

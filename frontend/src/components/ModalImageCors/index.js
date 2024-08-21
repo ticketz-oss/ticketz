@@ -8,7 +8,7 @@ import api from "../../services/api";
 const useStyles = makeStyles(theme => ({
 	messageMedia: {
 		objectFit: "cover",
-		width: 250,
+		width: "100%",
 		height: 200,
 		borderTopLeftRadius: 8,
 		borderTopRightRadius: 8,

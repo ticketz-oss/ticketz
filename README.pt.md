@@ -66,17 +66,17 @@ Antes de começar, você deve completar esta lista de verificação:
 
 - [ ] Ter um servidor limpo rodando Ubuntu 20 ou mais recente
 - [ ] Portas 80 e 443 disponíveis e não filtradas pelo firewall
-- [ ] Dois nomes de host com DNS configurado apontando para o seu servidor (um para o backend e outro para o frontend)
+- [ ] Um nome de host com DNS configurado apontando para o seu servidor
 
 Após isso, basta fazer login no seu servidor e emitir o seguinte comando, substituindo os nomes de host que você já configurou e seu endereço de email:
 
 ```bash
-curl -sSL get.ticke.tz | sudo bash -s backend.exemplo.com frontend.exemplo.com nome@exemplo.com
+curl -sSL get.ticke.tz | sudo bash -s app.exemplo.com nome@exemplo.com
 ```
 
-Após alguns minutos, você terá o servidor rodando no nome que você deu para o host do frontend.
+Após alguns minutos, você terá o servidor rodando no nome que você deu para o host.
 
-O login padrão é `admin@admin.com` e a senha padrão é `123456`, você deve alterá-la imediatamente.
+O login padrão é o endereço de email fornecido no comando de instalação e a senha padrão é `123456`, você deve alterá-la imediatamente.
 
 ### Atualização
 
@@ -147,7 +147,7 @@ docker compose -f docker-compose-local.yaml up -d
 Na primeira execução o sistema vai inicializar os bancos de dados e tabelas,
 e após alguns minutos o Ticketz estará acessível pela porta 3000
 
-O usuário padrão é admin@admin.com e a senha padrão é 123456
+O usuário padrão é `admin@ticketz.host` e a senha padrão é `123456`
 
 A aplicação irá se reiniciar automaticamente a cada reboot do servidor.
 
@@ -191,7 +191,7 @@ conteiners, e após isso o ticketz vai inicializar os bancos de dados e
 tabelas. Esta operação pode levar bastante tempo, depois disso o Ticketz
 estará acessível pelo endereço fornecido para oo frontend.
 
-O usuário padrão é admin@admin.com e a senha padrão é 123456
+O usuário padrão será o endereço de email fornecido na configuração do arquivo `.env-backend-acme` e a senha padrão é `123456`
 
 A aplicação irá se reiniciar automaticamente a cada reboot do servidor.
 

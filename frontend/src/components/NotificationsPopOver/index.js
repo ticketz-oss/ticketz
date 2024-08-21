@@ -168,6 +168,7 @@ const NotificationsPopOver = (props) => {
       renotify: true,
     };
 
+    try {
     const notification = new Notification(
       `${i18n.t("tickets.notification.message")} ${contact.name}`,
       options
@@ -189,6 +190,9 @@ const NotificationsPopOver = (props) => {
       }
       return [notification, ...prevState];
     });
+    } catch (e) {
+      console.error("Failed to push browser notification");
+    }
 
     soundAlertRef.current();
   };

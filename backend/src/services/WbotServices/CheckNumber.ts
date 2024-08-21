@@ -20,7 +20,7 @@ const CheckContactNumber = async (
   const wbot = getWbot(defaultWhatsapp.id);
   const isNumberExit = await checker(number, wbot);
 
-  if (!isNumberExit.exists) {
+  if (!isNumberExit?.exists) {
     throw new Error("ERR_CHECK_NUMBER");
   }
   return isNumberExit;

@@ -1,6 +1,47 @@
+/*
+
+   DO NOT REMOVE / NÃO REMOVER
+
+   VERSÃO EM PORTUGUÊS MAIS ABAIXO
+
+   
+   BASIC LICENSE INFORMATION:
+
+   Author: Claudemir Todo Bom
+   Email: claudemir@todobom.com
+   
+   Licensed under the AGPLv3 as stated on LICENSE.md file
+   
+   Any work that uses code from this file is obligated to 
+   give access to its source code to all of its users (not only
+   the system's owner running it)
+   
+   EXCLUSIVE LICENSE to use on closed source derived work can be
+   purchased from the author and put at the root of the source
+   code tree as proof-of-purchase.
+
+
+
+   INFORMAÇÕES BÁSICAS DE LICENÇA
+
+   Autor: Claudemir Todo Bom
+   Email: claudemir@todobom.com
+
+   Licenciado sob a licença AGPLv3 conforme arquivo LICENSE.md
+    
+   Qualquer sistema que inclua este código deve ter o seu código
+   fonte fornecido a todos os usuários do sistema (não apenas ao
+   proprietário da infraestrutura que o executa)
+   
+   LICENÇA EXCLUSIVA para uso em produto derivado em código fechado
+   pode ser adquirida com o autor e colocada na raiz do projeto
+   como prova de compra. 
+   
+ */
+
 import { createContext } from "react";
 import openSocket from "socket.io-client";
-import { getBackendURL } from "../../services/config";
+import { getBackendSocketURL } from "../../services/config";
 import { isExpired } from "react-jwt";
 
 class ManagedSocket {
@@ -46,7 +87,7 @@ class ManagedSocket {
   emit(event, ...params) {
     if (event.startsWith("join")) {
       this.joins.push({ event: event.substring(4), params });
-      console.log("Joining", { event: event.substring(4), params});
+      console.debug("Joining", { event: event.substring(4), params});
     }
     return this.rawSocket.emit(event, ...params);
   }
@@ -92,7 +133,7 @@ const socketManager = {
 
     if (companyId !== this.currentCompanyId || userId !== this.currentUserId) {
       if (this.currentSocket) {
-        console.warn("closing old socket - company or user changed");
+        console.debug("closing old socket - company or user changed");
         this.currentSocket.removeAllListeners();
         this.currentSocket.disconnect();
         this.currentSocket = null;
@@ -106,7 +147,7 @@ const socketManager = {
       }
       
       if ( isExpired(token) ) {
-        console.warn("Expired token, waiting for refresh");
+        console.debug("Expired token, waiting for refresh");
         setTimeout(() => {
           const currentToken = JSON.parse(localStorage.getItem("token"));
           if (isExpired(currentToken)) {
@@ -121,7 +162,7 @@ const socketManager = {
       this.currentCompanyId = companyId;
       this.currentUserId = userId;
       
-      this.currentSocket = openSocket(getBackendURL(), {
+      this.currentSocket = openSocket(getBackendSocketURL(), {
         transports: ["websocket"],
         pingTimeout: 18000,
         pingInterval: 18000,
@@ -132,26 +173,26 @@ const socketManager = {
         this.currentSocket.io.opts.query.r = 1;
         token = JSON.parse(localStorage.getItem("token"));
         if ( isExpired(token) ) {
-          console.warn("Refreshing");
+          console.debug("Refreshing");
           window.location.reload();
         } else {
-          console.warn("Using new token");
+          console.debug("Using new token");
           this.currentSocket.io.opts.query.token = token;
         }
       });
       
       this.currentSocket.on("disconnect", (reason) => {
-        console.warn(`socket disconnected because: ${reason}`);
+        console.debug(`socket disconnected because: ${reason}`);
         if (reason.startsWith("io server disconnect")) {
-          console.warn("tryng to reconnect", this.currentSocket);
+          console.debug("tryng to reconnect", this.currentSocket);
           token = JSON.parse(localStorage.getItem("token"));
           
           if ( isExpired(token) ) {
-            console.warn("Expired token - refreshing");
+            console.debug("Expired token - refreshing");
             window.location.reload();
             return;
           }
-          console.warn("Reconnecting using refreshed token");
+          console.debug("Reconnecting using refreshed token");
           this.currentSocket.io.opts.query.token = token;
           this.currentSocket.io.opts.query.r = 1;
           this.currentSocket.connect();
@@ -159,7 +200,7 @@ const socketManager = {
       });
       
       this.currentSocket.on("connect", (...params) => {
-        console.warn("socket connected", params);
+        console.debug("socket connected", params);
       })
       
       this.currentSocket.onAny((event, ...args) => {

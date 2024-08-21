@@ -34,6 +34,8 @@ import VisibilityIcon from "@material-ui/icons/Visibility";
 import TicketMessagesDialog from "../TicketMessagesDialog";
 import DoneIcon from '@material-ui/icons/Done';
 import ClearOutlinedIcon from '@material-ui/icons/ClearOutlined';
+import { generateColor } from "../../helpers/colorGenerator";
+import { getInitials } from "../../helpers/getInitials";
 
 const useStyles = makeStyles((theme) => ({
   ticket: {
@@ -91,7 +93,6 @@ const useStyles = makeStyles((theme) => ({
   },
 
   contactLastMessage: {
-    paddingRight: "50%",
   },
 
   newMessagesCount: {
@@ -146,7 +147,10 @@ const useStyles = makeStyles((theme) => ({
     "& .MuiBadge-anchorOriginTopRightRectangle": {
       transform: "scale(1) translate(0%, -40%)",
     },
-
+  },
+  presence: {
+    color: theme.mode === 'light' ? "green" : "lightgreen",
+    fontWeight: "bold",
   }
 }));
 
@@ -162,10 +166,6 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
   const { setCurrentTicket } = useContext(TicketsContext);
   const { user } = useContext(AuthContext);
   const { profile } = user;
-
-  useEffect(() => {
-    
-  }, []);
 
   useEffect(() => {
     if (ticket.userId && ticket.user) {
@@ -491,7 +491,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
           ></span>
         </Tooltip>
         <ListItemAvatar>
-          <Avatar src={ticket?.contact?.profilePicUrl} />
+          <Avatar style={{ backgroundColor: generateColor(ticket?.contact?.number), color: "white", fontWeight: "bold" }} src={ticket?.contact?.profilePicUrl}>{ getInitials(ticket?.contact?.name || "") }</Avatar>
         </ListItemAvatar>
         <ListItemText
           disableTypography
@@ -522,8 +522,16 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
                 component="span"
                 variant="body2"
                 color="textSecondary"
-              > {ticket.lastMessage.includes('data:image/png;base64') ? <MarkdownWrapper> Localização</MarkdownWrapper> : <MarkdownWrapper>{ticket.lastMessage}</MarkdownWrapper>}
-                {/* {ticket.lastMessage === "" ? <br /> : <MarkdownWrapper>{ticket.lastMessage}</MarkdownWrapper>} */}
+              >
+                {["composing", "recording"].includes(ticket?.presence) ? (
+                  <span className={classes.presence}>
+                    {i18n.t(`presence.${ticket.presence}`)}
+                  </span>
+                ) : (
+                <>
+                  {ticket.lastMessage?.includes('data:image/png;base64') ? <MarkdownWrapper> Localização</MarkdownWrapper> : <MarkdownWrapper>{ticket.lastMessage.startsWith('{"ticketzvCard"') ? "🪪" : ticket.lastMessage}</MarkdownWrapper>}
+                </>
+              )}
               </Typography>
               <ListItemSecondaryAction style={{ left: 73 }}>
                 <Box className={classes.ticketInfo1}>{renderTicketInfo()}</Box>
