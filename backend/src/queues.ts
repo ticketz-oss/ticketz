@@ -633,8 +633,6 @@ async function setRatingExpired(tracking, date) {
 }
 
 async function handleRatingsTimeout() {
-  logger.debug("Processing ratings timeouts");
-
   const openTrackingRatings = await TicketTraking.findAll({
     where: {
       rated: false,
