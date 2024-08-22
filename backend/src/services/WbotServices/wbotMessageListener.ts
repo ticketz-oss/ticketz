@@ -42,7 +42,6 @@ import UserRating from "../../models/UserRating";
 import SendWhatsAppMessage from "./SendWhatsAppMessage";
 import Queue from "../../models/Queue";
 import QueueOption from "../../models/QueueOption";
-import FindOrCreateATicketTrakingService from "../TicketServices/FindOrCreateATicketTrakingService";
 import VerifyCurrentSchedule, { ScheduleResult } from "../CompanyService/VerifyCurrentSchedule";
 import Campaign from "../../models/Campaign";
 import CampaignShipping from "../../models/CampaignShipping";
@@ -1420,50 +1419,74 @@ const handleMessage = async (
       return;
     }
 
-    const ticketTraking = await FindOrCreateATicketTrakingService({
-      ticketId: ticket.id,
-      companyId,
-      whatsappId: whatsapp?.id
-    });
+    if (!msg.key.fromMe) {
+      const userRatingEnabled = await GetCompanySetting(companyId, "userRating", "") === "enabled"
 
-    try {
-      if (!msg.key.fromMe) {
-        /**
-         * Tratamento para avaliação do atendente
-         */
-
-        // dev Ricardo: insistir a responder avaliação
-        const rate = Number(bodyMessage);
-
-        if ((ticket?.lastMessage.includes("_Insatisfeito_") || ticket?.lastMessage.includes("Por favor avalie nosso atendimento.")) && (!Number.isFinite(rate))) {
-          const debouncedSentMessage = debounce(
-            async () => {
-              await wbot.sendMessage(
-                `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"
-                }`,
-                {
-                  text: "Por favor avalie nosso atendimento."
-                }
-              );
+      const ticketTracking = userRatingEnabled && await TicketTraking.findOne({
+        where: {
+          whatsappId: whatsapp.id,
+          rated: false,
+          ratingAt: { [Op.not]: null }
+        },
+        include: [{
+          model: Ticket,
+          where: {
+            status: "closed",
+            contactId: contact.id,
+          },
+          include: [
+            {
+              model: Contact
             },
-            1000,
-            ticket.id
-          );
-          debouncedSentMessage();
-          return;
-        }
-        // dev Ricardo
+            {
+              model: User
+            },
+            {
+              model: Queue
+            }
+          ]
+        }]
+      });
 
-        if (ticketTraking !== null && verifyRating(ticketTraking)) {
-          handleRating(msg, ticket, ticketTraking);
-          return;
+      if (ticketTracking) {
+        try {
+          /**
+           * Tratamento para avaliação do atendente
+           */
+
+          // insistir a responder avaliação
+          const rate = Number(bodyMessage);
+
+          if (!Number.isFinite(rate)) {
+            const debouncedSentMessage = debounce(
+              async () => {
+                await wbot.sendMessage(
+                  `${ticketTracking.ticket.contact.number}@${ticketTracking.ticket.isGroup ? "g.us" : "s.whatsapp.net"
+                  }`,
+                  {
+                    text: "\u200e\n*Por favor avalie nosso atendimento com uma nota de 1 a 5*"
+                  }
+                );
+              },
+              1000,
+              ticketTracking.ticket.id
+            );
+            debouncedSentMessage();
+            return;
+          }
+          // dev Ricardo
+
+          if (verifyRating(ticketTracking)) {
+            handleRating(msg, ticketTracking.ticket, ticketTracking);
+            return;
+          }
+        } catch (e) {
+          Sentry.captureException(e);
+          console.log(e);
         }
+
       }
-    } catch (e) {
-      Sentry.captureException(e);
-      console.log(e);
     }
-
 
     if (messageMedia) {
       await verifyMediaMessage(msg, ticket, contact, wbot);
@@ -1557,18 +1580,6 @@ const handleMessage = async (
           }
         }
 
-      }
-    } catch (e) {
-      Sentry.captureException(e);
-      console.log(e);
-    }
-
-    try {
-      if (!msg.key.fromMe) {
-        if (ticketTraking !== null && verifyRating(ticketTraking)) {
-          handleRating(msg, ticket, ticketTraking);
-          return;
-        }
       }
     } catch (e) {
       Sentry.captureException(e);
