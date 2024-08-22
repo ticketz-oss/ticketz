@@ -68,6 +68,22 @@ export const removeWbot = async (
   }
 };
 
+function getGreaterVersion(a, b) {
+  for (let i = 0; i < Math.max(a.length, b.length); i += 1) {
+    const numA = a[i] || 0;
+    const numB = b[i] || 0;
+
+    if (numA > numB) {
+      return a;
+    }
+    if (numA < numB) {
+      return b;
+    }
+  }
+
+  return a;
+}
+
 export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
   return new Promise((resolve, reject) => {
     try {
@@ -82,8 +98,11 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
 
         const { id, name, provider } = whatsappUpdate;
 
-        const { version, isLatest } = await fetchLatestBaileysVersion();
+        const { version: autoVersion, isLatest } =
+          await fetchLatestBaileysVersion();
         const isLegacy = provider === "stable";
+
+        const version = getGreaterVersion(autoVersion, [2, 3000, 1015891883]);
 
         logger.info(`using WA v${version.join(".")}, isLatest: ${isLatest}`);
         logger.info(`isLegacy: ${isLegacy}`);
