@@ -19,6 +19,8 @@ const FindOrCreateATicketTrakingService = async ({
   const ticketTraking = await TicketTraking.findOne({
     where: {
       ticketId,
+      rated: false,
+      expired: false,
       finishedAt: {
         [Op.is]: null
       }

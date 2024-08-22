@@ -1,10 +1,11 @@
-import { subHours } from "date-fns";
+import { subMinutes } from "date-fns";
 import { Op } from "sequelize";
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
 import ShowTicketService from "./ShowTicketService";
 import FindOrCreateATicketTrakingService from "./FindOrCreateATicketTrakingService";
 import Setting from "../../models/Setting";
+import { GetCompanySetting } from "../../helpers/CheckSettings";
 
 interface TicketData {
   status?: string;
@@ -66,16 +67,22 @@ const FindOrCreateTicketService = async (
   }
 
   if (!doNotReopen && !ticket && !groupContact) {
-    ticket = await Ticket.findOne({
-      where: {
-        updatedAt: {
-          [Op.between]: [+subHours(new Date(), 2), +new Date()]
+    const reopenTimeout = parseInt(
+      await GetCompanySetting(companyId, "autoReopenTimeout", "0"),
+      10
+    );
+    ticket =
+      reopenTimeout &&
+      (await Ticket.findOne({
+        where: {
+          updatedAt: {
+            [Op.between]: [+subMinutes(new Date(), reopenTimeout), +new Date()]
+          },
+          contactId: contact.id,
+          whatsappId
         },
-        contactId: contact.id,
-        whatsappId
-      },
-      order: [["updatedAt", "DESC"]]
-    });
+        order: [["updatedAt", "DESC"]]
+      }));
 
     if (ticket) {
       await ticket.update({

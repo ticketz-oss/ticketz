@@ -140,6 +140,8 @@ export default function Options(props) {
   const [loadingCheckMsgIsGroup, setCheckMsgIsGroup] = useState(false);
   const [loadingApiToken, setLoadingApiToken] = useState(false);
   const [loadingDownloadLimit, setLoadingDownloadLimit] = useState(false);
+  const [ratingsTimeout, setRatingsTimeout] = useState(false);
+  const [autoReopenTimeout, setAutoReopenTimeout] = useState(false);
   const { getCurrentUserInfo } = useAuth();
   const [currentUser, setCurrentUser] = useState({});
 
@@ -210,7 +212,13 @@ export default function Options(props) {
       
       const transferToNewTicket = settings.find((s) => s.key === "transferToNewTicket");
       setTransferToNewTicket(transferToNewTicket?.value || "connection");
-            
+
+      const ratingsTimeout = settings.find((s) => s.key === "ratingsTimeout");
+      setRatingsTimeout(ratingsTimeout?.value || "5");
+
+      const autoReopenTimeout = settings.find((s) => s.key === "autoReopenTimeout");
+      setAutoReopenTimeout(autoReopenTimeout?.value || "0");
+
       const ticketzProKey = settings.find((s) => s.key === "ticketzProKey");
       setTicketzProKey(ticketzProKey?.value || "");
     }
@@ -333,6 +341,24 @@ export default function Options(props) {
     });
     toast.success("Operação atualizada com sucesso.");
     setLoadingDownloadLimit(false);
+  }
+
+  async function handleRatingsTimeout(value) {
+    setRatingsTimeout(value);
+    await update({
+      key: "ratingsTimeout",
+      value,
+    });
+    toast.success("Operação atualizada com sucesso.");
+  }
+
+  async function handleAutoReopenTimeout(value) {
+    setAutoReopenTimeout(value);
+    await update({
+      key: "autoReopenTimeout",
+      value,
+    });
+    toast.success("Operação atualizada com sucesso.");
   }
 
   async function generateApiToken() {
@@ -466,6 +492,45 @@ export default function Options(props) {
             </FormHelperText>
           </FormControl>
         </Grid>
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <TextField
+              id="ratings-timeout-field"
+              label="Timeout para avaliação (minutos)"
+              variant="standard"
+              name="ratingsTimeout"
+              type="number"
+              value={ratingsTimeout}
+              onChange={(e) => {
+                setRatingsTimeout(e.target.value);
+              }}
+              onBlur={async (_) => {
+                await handleRatingsTimeout(ratingsTimeout);
+              }}
+            />
+          </FormControl>
+        </Grid>
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <TextField
+              id="autoreopen-timeout-field"
+              label="Tempo limite para reabertura automática (minutos)"
+              variant="standard"
+              name="autoReopenTimeout"
+              type="number"
+              value={autoReopenTimeout}
+              onChange={(e) => {
+                setAutoReopenTimeout(e.target.value);
+              }}
+              onBlur={async (_) => {
+                await handleAutoReopenTimeout(autoReopenTimeout);
+              }}
+            />
+          </FormControl>
+        </Grid>
+
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="schedule-type-label">
@@ -711,7 +776,6 @@ export default function Options(props) {
                     variant="standard"
                     name="appName"
                     value={downloadLimit}
-                    inputRef={downloadLimitInput}
                     onChange={(e) => {
                       setDownloadLimit(e.target.value);
                     }}

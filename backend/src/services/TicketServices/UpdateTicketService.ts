@@ -66,7 +66,7 @@ const UpdateTicketService = async ({
     }
     const { justClose } = ticketData;
     let { status } = ticketData;
-    let { queueId, userId } = ticketData;
+    const { queueId, userId } = ticketData;
     let chatbot: boolean | null = ticketData.chatbot || false;
     let queueOptionId: number | null = ticketData.queueOptionId || null;
 
@@ -121,10 +121,9 @@ const UpdateTicketService = async ({
 
       if (!ticket.contact.disableBot && setting?.value === "enabled") {
         if (ticketTraking.ratingAt == null && !justClose) {
-          const ratingTxt = ratingMessage?.trim() || "";
-          let bodyRatingMessage = `\u200e${ratingTxt}\n\n`;
-          bodyRatingMessage +=
-            "Digite de 1 à 3 para qualificar nosso atendimento:\n*1* - _Insatisfeito_\n*2* - _Satisfeito_\n*3* - _Muito Satisfeito_\n\n";
+          const ratingTxt =
+            ratingMessage?.trim() || "Por favor avalie nosso atendimento";
+          const bodyRatingMessage = `\u200e${ratingTxt}\n\n*Digite uma nota de 1 a 5*`;
 
           if (ticket.channel === "whatsapp") {
             await SendWhatsAppMessage({ body: bodyRatingMessage, ticket });
@@ -141,6 +140,14 @@ const UpdateTicketService = async ({
             ratingAt: moment().toDate()
           });
 
+          await ticket.update({
+            chatbot: null,
+            queueOptionId: null,
+            status: "closed"
+          });
+
+          await ticket.reload();
+
           io.to(`company-${ticket.companyId}-open`)
             .to(`queue-${ticket.queueId}-open`)
             .to(ticketId.toString())
@@ -148,6 +155,16 @@ const UpdateTicketService = async ({
               action: "delete",
               ticketId: ticket.id
             });
+
+          io.to(`company-${ticket.companyId}-closed`)
+            .to(`queue-${ticket.queueId}-closed`)
+            .to(ticket.id.toString())
+            .emit(`company-${ticket.companyId}-ticket`, {
+              action: "update",
+              ticket,
+              ticketId: ticket.id
+            });
+
 
           return { ticket, oldStatus, oldUserId };
         }
@@ -179,9 +196,6 @@ const UpdateTicketService = async ({
       ticketTraking.finishedAt = moment().toDate();
       ticketTraking.whatsappId = ticket.whatsappId;
       ticketTraking.userId = ticket.userId;
-
-      queueId = null;
-      userId = null;
     }
 
     if (queueId !== undefined && queueId !== null) {
@@ -234,9 +248,7 @@ const UpdateTicketService = async ({
 
         if (transferToNewTicket) {
           await ticket.update({
-            status: "closed",
-            userId: null,
-            queueId: null
+            status: "closed"
           });
           await ticket.reload();
           io.to(`company-${companyId}-mainchannel`).emit(

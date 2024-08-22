@@ -5,6 +5,7 @@ import { Op, QueryTypes } from "sequelize";
 import { isEmpty, isNil, isArray } from "lodash";
 import path from "path";
 import { CronJob } from "cron";
+import { subMinutes } from "date-fns";
 import { MessageData, SendMessage } from "./helpers/SendMessage";
 import Whatsapp from "./models/Whatsapp";
 import { logger } from "./utils/logger";
@@ -23,6 +24,11 @@ import { getIO } from "./libs/socket";
 import User from "./models/User";
 import Company from "./models/Company";
 import Plan from "./models/Plan";
+import TicketTraking from "./models/TicketTraking";
+import { GetCompanySetting } from "./helpers/CheckSettings";
+import { getWbot } from "./libs/wbot";
+import formatBody from "./helpers/Mustache";
+import Ticket from "./models/Ticket";
 
 const connection = process.env.REDIS_URI || "";
 const limiterMax = process.env.REDIS_OPT_LIMITER_MAX || 1;
@@ -603,6 +609,79 @@ async function handleLoginStatus() {
   });
 }
 
+async function setRatingExpired(tracking, date) {
+  const wbot = getWbot(tracking.whatsapp.id);
+
+  tracking.update({
+    finishedAt: date,
+    expired: true
+  });
+
+  const complationMessage =
+    tracking.whatsapp.complationMessage.trim() || "Atendimento finalizado";
+
+  await wbot.sendMessage(
+    `${tracking.ticket.contact.number}@${
+      tracking.ticket.isGroup ? "g.us" : "s.whatsapp.net"
+    }`,
+    {
+      text: formatBody(`\u200e${complationMessage}`, tracking.ticket.contact)
+    }
+  );
+
+  logger.debug({ tracking }, "rating timedout");
+}
+
+async function handleRatingsTimeout() {
+  logger.debug("Processing ratings timeouts");
+
+  const openTrackingRatings = await TicketTraking.findAll({
+    where: {
+      rated: false,
+      expired: false,
+      finishedAt: null,
+      ratingAt: { [Op.not]: null }
+    },
+    include: [
+      {
+        model: Ticket,
+        include: [
+          {
+            model: Contact
+          }
+        ]
+      },
+      {
+        model: Whatsapp
+      }
+    ]
+  });
+
+  const ratingThresholds = [];
+  const currentTime = new Date();
+
+  // eslint-disable-next-line no-restricted-syntax
+  for await (const tracking of openTrackingRatings) {
+    if (!ratingThresholds[tracking.companyId]) {
+      const timeout =
+        parseInt(
+          await GetCompanySetting(tracking.companyId, "ratingsTimeout", "5"),
+          10
+        ) || 5;
+
+      ratingThresholds[tracking.companyId] = subMinutes(currentTime, timeout);
+    }
+    if (tracking.ratingAt < ratingThresholds[tracking.companyId]) {
+      setRatingExpired(tracking, currentTime);
+    }
+  }
+}
+
+async function handleEveryMinute() {
+  handleLoginStatus();
+  handleRatingsTimeout();
+}
+
 async function handleInvoiceCreate() {
   const job = new CronJob("0 * * * * *", async () => {
     const companies = await Company.findAll();
@@ -659,7 +738,7 @@ export async function startQueueProcess() {
 
   campaignQueue.process("DispatchCampaign", handleDispatchCampaign);
 
-  userMonitor.process("VerifyLoginStatus", handleLoginStatus);
+  userMonitor.process("EveryMinute", handleEveryMinute);
 
   scheduleMonitor.add(
     "Verify",
@@ -680,7 +759,7 @@ export async function startQueueProcess() {
   );
 
   userMonitor.add(
-    "VerifyLoginStatus",
+    "EveryMinute",
     {},
     {
       repeat: { cron: "* * * * *" },

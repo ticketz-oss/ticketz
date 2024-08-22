@@ -23,6 +23,7 @@ import { Op } from "sequelize";
 import moment from "moment";
 import { Transform } from "stream";
 import { Throttle } from "stream-throttle";
+import { subMinutes } from "date-fns";
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
 import Message from "../../models/Message";
@@ -42,7 +43,6 @@ import UserRating from "../../models/UserRating";
 import SendWhatsAppMessage from "./SendWhatsAppMessage";
 import Queue from "../../models/Queue";
 import QueueOption from "../../models/QueueOption";
-import FindOrCreateATicketTrakingService from "../TicketServices/FindOrCreateATicketTrakingService";
 import VerifyCurrentSchedule, { ScheduleResult } from "../CompanyService/VerifyCurrentSchedule";
 import Campaign from "../../models/Campaign";
 import CampaignShipping from "../../models/CampaignShipping";
@@ -1102,9 +1102,9 @@ export const verifyRating = (ticketTraking: TicketTraking) => {
 export const handleRating = async (
   msg: WAMessage,
   ticket: Ticket,
-  ticketTraking: TicketTraking
+  ticketTraking: TicketTraking,
+  wbot
 ) => {
-  const io = getIO();
   let rate: number | null = null;
 
   if (msg?.message?.conversation || msg?.message?.extendedTextMessage) {
@@ -1134,39 +1134,18 @@ export const handleRating = async (
     });
 
     const complationMessage = whatsapp.complationMessage.trim() || "Atendimento finalizado";
-    const body = formatBody(`\u200e${complationMessage}`, ticket.contact);
-    await SendWhatsAppMessage({ body, ticket });
+
+    await wbot.sendMessage(
+      `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net" }`,
+      {
+        text: formatBody(`\u200e${complationMessage}`, ticket.contact, ticket)
+      }
+    );
 
     await ticketTraking.update({
       finishedAt: moment().toDate(),
       rated: true,
     });
-
-    await ticket.update({
-      queueId: null,
-      chatbot: null,
-      queueOptionId: null,
-      userId: null,
-      status: "closed",
-    });
-
-    io.to(`company-${ticket.companyId}-open`)
-      .to(`queue-${ticket.queueId}-open`)
-      .emit(`company-${ticket.companyId}-ticket`, {
-        action: "delete",
-        ticket,
-        ticketId: ticket.id,
-      });
-
-    io.to(`company-${ticket.companyId}-${ticket.status}`)
-      .to(`queue-${ticket.queueId}-${ticket.status}`)
-      .to(ticket.id.toString())
-      .emit(`company-${ticket.companyId}-ticket`, {
-        action: "update",
-        ticket,
-        ticketId: ticket.id,
-      });
-
   }
 
 };
@@ -1410,6 +1389,68 @@ const handleMessage = async (
       return;
     }
 
+    if (!msg.key.fromMe) {
+      const userRatingEnabled = await GetCompanySetting(companyId, "userRating", "") === "enabled"
+
+      if (userRatingEnabled) {
+        const ticketTracking = await TicketTraking.findOne({
+          where: {
+            whatsappId: whatsapp.id,
+            rated: false,
+            expired: false,
+            ratingAt: { [Op.not]: null }
+          },
+          include: [{
+            model: Ticket,
+            where: {
+              status: "closed",
+              contactId: contact.id,
+            },
+            include: [{
+              model: Contact
+            }]
+          }]
+        });
+
+        try {
+          /**
+           * Tratamento para avaliação do atendente
+           */
+
+          // insistir a responder avaliação
+          const rate = Number(bodyMessage);
+
+          if (!Number.isFinite(rate)) {
+            const debouncedSentMessage = debounce(
+              async () => {
+                await wbot.sendMessage(
+                  `${ticketTracking.ticket.contact.number}@${ticketTracking.ticket.isGroup ? "g.us" : "s.whatsapp.net"
+                  }`,
+                  {
+                    text: "\u200e\n*Por favor avalie nosso atendimento com uma nota de 1 a 5*"
+                  }
+                );
+              },
+              1000,
+              ticketTracking.ticket.id
+            );
+            debouncedSentMessage();
+            return;
+          }
+          // dev Ricardo
+
+          if (verifyRating(ticketTracking)) {
+            handleRating(msg, ticketTracking.ticket, ticketTracking, wbot);
+            return;
+          }
+        } catch (e) {
+          Sentry.captureException(e);
+          console.log(e);
+        }
+
+      }
+    }
+
     const mutex = new Mutex();
     const ticket = await mutex.runExclusive(async () => {
       const result = await FindOrCreateTicketService(contact, wbot.id!, unreadMessages, companyId, groupContact);
@@ -1426,50 +1467,6 @@ const handleMessage = async (
       });
       await verifyQueue(wbot, msg, ticket, ticket.contact);
       return;
-    }
-
-    const ticketTraking = await FindOrCreateATicketTrakingService({
-      ticketId: ticket.id,
-      companyId,
-      whatsappId: whatsapp?.id
-    });
-
-    try {
-      if (!msg.key.fromMe) {
-        /**
-         * Tratamento para avaliação do atendente
-         */
-
-        // dev Ricardo: insistir a responder avaliação
-        const rate = Number(bodyMessage);
-
-        if ((ticket?.lastMessage.includes("_Insatisfeito_") || ticket?.lastMessage.includes("Por favor avalie nosso atendimento.")) && (!Number.isFinite(rate))) {
-          const debouncedSentMessage = debounce(
-            async () => {
-              await wbot.sendMessage(
-                `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"
-                }`,
-                {
-                  text: "Por favor avalie nosso atendimento."
-                }
-              );
-            },
-            1000,
-            ticket.id
-          );
-          debouncedSentMessage();
-          return;
-        }
-        // dev Ricardo
-
-        if (ticketTraking !== null && verifyRating(ticketTraking)) {
-          handleRating(msg, ticket, ticketTraking);
-          return;
-        }
-      }
-    } catch (e) {
-      Sentry.captureException(e);
-      console.log(e);
     }
 
 
@@ -1521,7 +1518,7 @@ const handleMessage = async (
                 `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"
                 }`,
                 {
-                  text: body
+                  text: `\u200e${body}`
                 }
               );
             },
@@ -1553,7 +1550,7 @@ const handleMessage = async (
                   `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"
                   }`,
                   {
-                    text: body
+                    text: `\u200e${body}`
                   }
                 );
               },
@@ -1565,18 +1562,6 @@ const handleMessage = async (
           }
         }
 
-      }
-    } catch (e) {
-      Sentry.captureException(e);
-      console.log(e);
-    }
-
-    try {
-      if (!msg.key.fromMe) {
-        if (ticketTraking !== null && verifyRating(ticketTraking)) {
-          handleRating(msg, ticket, ticketTraking);
-          return;
-        }
       }
     } catch (e) {
       Sentry.captureException(e);
@@ -1619,7 +1604,7 @@ const handleMessage = async (
                   `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"
                   }`,
                   {
-                    text: body
+                    text: `\u200e${body}`
                   }
                 );
               },
@@ -1659,7 +1644,7 @@ const handleMessage = async (
               `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"
               }`,
               {
-                text: formatBody(whatsapp.greetingMessage, contact, ticket)
+                text: formatBody(`\u200e${whatsapp.greetingMessage}`, contact, ticket)
               }
             );
           },
