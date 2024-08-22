@@ -1426,12 +1426,13 @@ const handleMessage = async (
         where: {
           whatsappId: whatsapp.id,
           rated: false,
-          ratingAt: { [Op.not]: null }
+          ratingAt: { [Op.not]: null },
+          finishedAt: null
         },
         include: [{
           model: Ticket,
           where: {
-            status: "closed",
+            status: "open",
             contactId: contact.id,
           },
           include: [
