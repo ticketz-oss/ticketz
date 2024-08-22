@@ -29,6 +29,7 @@ import { GetCompanySetting } from "./helpers/CheckSettings";
 import { getWbot } from "./libs/wbot";
 import formatBody from "./helpers/Mustache";
 import Ticket from "./models/Ticket";
+import QueueModel from "./models/Queue";
 
 const connection = process.env.REDIS_URI || "";
 const limiterMax = process.env.REDIS_OPT_LIMITER_MAX || 1;
@@ -625,7 +626,11 @@ async function setRatingExpired(tracking, date) {
       tracking.ticket.isGroup ? "g.us" : "s.whatsapp.net"
     }`,
     {
-      text: formatBody(`\u200e${complationMessage}`, tracking.ticket.contact)
+      text: formatBody(
+        `\u200e${complationMessage}`,
+        tracking.ticket.contact,
+        tracking.ticket
+      )
     }
   );
 
@@ -646,6 +651,13 @@ async function handleRatingsTimeout() {
         include: [
           {
             model: Contact
+          },
+          {
+            model: User
+          },
+          {
+            model: QueueModel,
+            as: "queue"
           }
         ]
       },

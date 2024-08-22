@@ -3,7 +3,7 @@ import path, { join } from "path";
 import { promisify } from "util";
 import fs, { writeFile } from "fs";
 import * as Sentry from "@sentry/node";
-import { isNil, isNull, head } from "lodash";
+import { isNil, head } from "lodash";
 
 import {
   WASocket,
@@ -23,7 +23,6 @@ import { Op } from "sequelize";
 import moment from "moment";
 import { Transform } from "stream";
 import { Throttle } from "stream-throttle";
-import { subMinutes } from "date-fns";
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
 import Message from "../../models/Message";
@@ -1097,53 +1096,50 @@ export const verifyRating = (ticketTraking: TicketTraking) => {
 };
 
 export const handleRating = async (
-  msg: WAMessage,
+  rate: number,
   ticket: Ticket,
   ticketTraking: TicketTraking,
-  wbot
+  wbot: Session
 ) => {
-  let rate: number | null = null;
+  const whatsapp = await ShowWhatsAppService(
+    ticket.whatsappId,
+    ticket.companyId
+  );
 
-  if (msg?.message?.conversation || msg?.message?.extendedTextMessage) {
-    rate = parseInt(msg.message.conversation || msg.message.extendedTextMessage.text , 10) || null;
+  let finalRate = rate;
+
+  if (rate < 1) {
+    finalRate = 1;
+  }
+  if (rate > 5) {
+    finalRate = 5;
   }
 
-  if (!Number.isNaN(rate) && Number.isInteger(rate) && !isNull(rate)) {
-    const whatsapp = await ShowWhatsAppService(
-      ticket.whatsappId,
-      ticket.companyId
-    );
+  await UserRating.create({
+    ticketId: ticketTraking.ticketId,
+    companyId: ticketTraking.companyId,
+    userId: ticketTraking.userId,
+    rate: finalRate,
+  });
 
-    let finalRate = rate;
+  const complationMessage = whatsapp.complationMessage.trim() || "Atendimento finalizado";
 
-    if (rate < 1) {
-      finalRate = 1;
+  const text = formatBody(`\u200e${complationMessage}`, ticket.contact, ticket);
+  const jid = `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`;
+
+  wbot.sendMessage(
+    jid,
+    {
+      text
     }
-    if (rate > 5) {
-      finalRate = 5;
-    }
-
-    await UserRating.create({
-      ticketId: ticketTraking.ticketId,
-      companyId: ticketTraking.companyId,
-      userId: ticketTraking.userId,
-      rate: finalRate,
-    });
-
-    const complationMessage = whatsapp.complationMessage.trim() || "Atendimento finalizado";
-
-    await wbot.sendMessage(
-      `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net" }`,
-      {
-        text: formatBody(`\u200e${complationMessage}`, ticket.contact, ticket)
-      }
-    );
-
-    await ticketTraking.update({
+  ).then(() => {
+    ticketTraking.update({
       finishedAt: moment().toDate(),
       rated: true,
     });
-  }
+  },
+    (e) => logger.error({ e }, "error sending message")
+  );
 
 };
 
@@ -1384,26 +1380,34 @@ const handleMessage = async (
     if (!msg.key.fromMe) {
       const userRatingEnabled = await GetCompanySetting(companyId, "userRating", "") === "enabled"
 
-      if (userRatingEnabled) {
-        const ticketTracking = await TicketTraking.findOne({
+      const ticketTracking = userRatingEnabled && await TicketTraking.findOne({
+        where: {
+          whatsappId: whatsapp.id,
+          rated: false,
+          expired: false,
+          ratingAt: { [Op.not]: null }
+        },
+        include: [{
+          model: Ticket,
           where: {
-            whatsappId: whatsapp.id,
-            rated: false,
-            expired: false,
-            ratingAt: { [Op.not]: null }
+            status: "closed",
+            contactId: contact.id,
           },
-          include: [{
-            model: Ticket,
-            where: {
-              status: "closed",
-              contactId: contact.id,
-            },
-            include: [{
+          include: [
+            {
               model: Contact
-            }]
-          }]
-        });
+            },
+            {
+              model: User
+            },
+            {
+              model: Queue
+            }
+          ]
+        }]
+      });
 
+      if (ticketTracking) {
         try {
           /**
            * Tratamento para avaliação do atendente
@@ -1432,7 +1436,7 @@ const handleMessage = async (
           // dev Ricardo
 
           if (verifyRating(ticketTracking)) {
-            handleRating(msg, ticketTracking.ticket, ticketTracking, wbot);
+            handleRating(rate, ticketTracking.ticket, ticketTracking, wbot);
             return;
           }
         } catch (e) {
