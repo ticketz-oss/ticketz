@@ -36,7 +36,7 @@ export function RatingBox ({ rating }) {
     const ratingTrunc = rating === null ? 0 : Math.trunc(rating);
     return <Rating
         defaultValue={ratingTrunc}
-        max={3}
+        max={5}
         readOnly
     />
 }
@@ -49,7 +49,7 @@ export default function TableAttendantsStatus(props) {
         return attendants.map((a, k) => (
             <TableRow key={k}>
                 <TableCell>{a.name}</TableCell>
-                <TableCell align="center" title="1 - Insatisfeito, 2 - Satisfeito, 3 - Muito Satisfeito" className={classes.pointer}>
+                <TableCell align="center" className={classes.pointer}>
                     <RatingBox rating={a.rating} />
                 </TableCell>
                 <TableCell align="center">{a.tickets}</TableCell>
