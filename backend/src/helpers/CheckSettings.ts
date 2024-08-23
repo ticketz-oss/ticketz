@@ -12,7 +12,7 @@ const CheckSettings = async (
     }
   });
 
-  if (!setting && !defaultValue) {
+  if (!setting && defaultValue === null) {
     throw new AppError("ERR_NO_SETTING_FOUND", 404);
   }
 
@@ -31,7 +31,7 @@ export const GetCompanySetting = async (
     }
   });
 
-  if (!setting && !defaultValue) {
+  if (!setting && defaultValue === null) {
     throw new AppError("ERR_NO_SETTING_FOUND", 404);
   }
 
