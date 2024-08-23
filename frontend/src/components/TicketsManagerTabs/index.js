@@ -116,11 +116,13 @@ const TicketsManagerTabs = () => {
   const [selectedUsers, setSelectedUsers] = useState([]);
 
   useEffect(() => {
-    if (user.profile.toUpperCase() === "ADMIN") {
+    if (
+      user.profile.toUpperCase() === "ADMIN" ||
+      user.profile.toUpperCase() === "SUPERVISOR"
+    ) {
       setShowAllTickets(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (tab === "search") {
@@ -320,7 +322,7 @@ const TicketsManagerTabs = () => {
       </TabPanel>
       <TabPanel value={tab} name="search" className={classes.ticketsWrapper}>
         <TagsFilter onFiltered={handleSelectedTags} />
-        {profile === "admin" && (
+        {(profile === "admin" || profile === "supervisor") && (
           <UsersFilter onFiltered={handleSelectedUsers} />
         )}
         <TicketsList

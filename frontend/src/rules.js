@@ -3,6 +3,16 @@ const rules = {
 		static: [],
 	},
 
+	supervisor: {
+		static: [
+			"dashboard:view",
+			"tickets-manager:showall",
+			"ticket-options:deleteTicket",
+			"contacts-page:deleteContact",
+			"contact-modal:editUserDefault",
+		],
+	},
+
 	admin: {
 		static: [
 			//"dashboard:view",
