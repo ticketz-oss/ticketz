@@ -114,7 +114,11 @@ const UpdateTicketService = async ({
         companyId
       );
 
-      if (!ticket.contact.disableBot && setting?.value === "enabled") {
+      if (
+        !ticket.contact.isGroup &&
+        !ticket.contact.disableBot &&
+        setting?.value === "enabled"
+      ) {
         if (ticketTraking.ratingAt == null && !justClose) {
           const ratingTxt = ratingMessage?.trim() || "";
           let bodyRatingMessage = `\u200e${ratingTxt}\n\n`;
@@ -151,6 +155,7 @@ const UpdateTicketService = async ({
       }
 
       if (
+        !ticket.contact.isGroup &&
         !ticket.contact.disableBot &&
         !isNil(complationMessage) &&
         complationMessage !== ""

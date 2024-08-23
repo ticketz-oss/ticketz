@@ -1419,7 +1419,7 @@ const handleMessage = async (
       return;
     }
 
-    if (!msg.key.fromMe) {
+    if (!msg.key.fromMe && !contact.isGroup) {
       const userRatingEnabled = await GetCompanySetting(companyId, "userRating", "") === "enabled"
 
       const ticketTracking = userRatingEnabled && await TicketTraking.findOne({
