@@ -1377,7 +1377,7 @@ const handleMessage = async (
       return;
     }
 
-    if (!msg.key.fromMe) {
+    if (!msg.key.fromMe && !contact.isGroup) {
       const userRatingEnabled = await GetCompanySetting(companyId, "userRating", "") === "enabled"
 
       const ticketTracking = userRatingEnabled && await TicketTraking.findOne({
@@ -1385,7 +1385,8 @@ const handleMessage = async (
           whatsappId: whatsapp.id,
           rated: false,
           expired: false,
-          ratingAt: { [Op.not]: null }
+          ratingAt: { [Op.not]: null },
+          finishedAt: null
         },
         include: [{
           model: Ticket,
