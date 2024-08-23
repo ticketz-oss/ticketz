@@ -1,13 +1,15 @@
 import Setting from "../models/Setting";
 import AppError from "../errors/AppError";
 
-const CheckSettings = async (key: string, defaultValue: string = null ): Promise<string> => {
+const CheckSettings = async (
+  key: string,
+  defaultValue: string = null
+): Promise<string> => {
   const setting = await Setting.findOne({
-    where:
-     {
-       companyId: 1,
-       key
-     }
+    where: {
+      companyId: 1,
+      key
+    }
   });
 
   if (!setting && !defaultValue) {
@@ -17,13 +19,16 @@ const CheckSettings = async (key: string, defaultValue: string = null ): Promise
   return setting?.value || defaultValue;
 };
 
-export const GetCompanySetting = async (companyId: number, key: string, defaultValue: string = null ): Promise<string> => {
+export const GetCompanySetting = async (
+  companyId: number,
+  key: string,
+  defaultValue: string = null
+): Promise<string> => {
   const setting = await Setting.findOne({
-    where:
-     {
-       companyId,
-       key
-     }
+    where: {
+      companyId,
+      key
+    }
   });
 
   if (!setting && !defaultValue) {
@@ -32,6 +37,5 @@ export const GetCompanySetting = async (companyId: number, key: string, defaultV
 
   return setting?.value || defaultValue;
 };
-
 
 export default CheckSettings;
