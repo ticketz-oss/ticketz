@@ -16,10 +16,6 @@ type PrivateFileRequest = {
 };
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
-  if (req.user.profile !== "admin") {
-    throw new AppError("ERR_NO_PERMISSION", 403);
-  }
-
   const settings = await ListSettingsService(req.user);
 
   return res.status(200).json(settings);
@@ -29,10 +25,6 @@ export const update = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  if (req.user.profile !== "admin") {
-    throw new AppError("ERR_NO_PERMISSION", 403);
-  }
-
   const { settingKey: key } = req.params;
   const { value } = req.body;
   const { companyId } = req.user;

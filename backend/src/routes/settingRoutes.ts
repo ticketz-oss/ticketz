@@ -1,6 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
 import isAuth from "../middleware/isAuth";
+import isAdmin from "../middleware/isAdmin";
 import envTokenAuth from "../middleware/envTokenAuth";
 
 import * as SettingController from "../controllers/SettingController";
@@ -10,7 +11,7 @@ import uploadPrivateConfig from "../config/privateFiles";
 
 const settingRoutes = Router();
 
-settingRoutes.get("/settings", isAuth, SettingController.index);
+settingRoutes.get("/settings", isAuth, isAdmin, SettingController.index);
 
 settingRoutes.get(
   "/public-settings/:settingKey",
@@ -19,7 +20,12 @@ settingRoutes.get(
 );
 
 // change setting key to key in future
-settingRoutes.put("/settings/:settingKey", isAuth, SettingController.update);
+settingRoutes.put(
+  "/settings/:settingKey",
+  isAuth,
+  isAdmin,
+  SettingController.update
+);
 
 const upload = multer(uploadConfig);
 const uploadPrivate = multer(uploadPrivateConfig);
