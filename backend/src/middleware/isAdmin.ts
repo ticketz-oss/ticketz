@@ -9,7 +9,7 @@ const isSuper = async (
 ): Promise<any> => {
   const { profile } = await User.findByPk(req.user.id);
   if (profile !== "admin") {
-    throw new AppError("Acesso não permitido", 401);
+    throw new AppError("Acesso não permitido", 403);
   }
 
   return next();
