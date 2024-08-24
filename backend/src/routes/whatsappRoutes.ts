@@ -17,12 +17,20 @@ whatsappRoutes.get("/whatsapp/:whatsappId", isAuth, WhatsAppController.show);
 whatsappRoutes.put("/whatsapp/:whatsappId", isAuth, WhatsAppController.update);
 
 whatsappRoutes.delete(
-    "/whatsapp/:whatsappId",
-    isAuth,
-    WhatsAppController.remove
+  "/whatsapp/:whatsappId",
+  isAuth,
+  WhatsAppController.remove
 );
 
-whatsappRoutes.get("/whatsapp/privacy/:whatsappId", isAuth, PrivacyController.show);
-whatsappRoutes.put("/whatsapp/privacy/:whatsappId", isAuth, PrivacyController.update);
+whatsappRoutes.get(
+  "/whatsapp/privacy/:whatsappId",
+  isAuth,
+  PrivacyController.show
+);
+whatsappRoutes.put(
+  "/whatsapp/privacy/:whatsappId",
+  isAuth,
+  PrivacyController.update
+);
 
 export default whatsappRoutes;
