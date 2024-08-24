@@ -23,6 +23,7 @@ import { faCopy, faGears } from '@fortawesome/free-solid-svg-icons';
 
 import { generateSecureToken } from "../../helpers/generateSecureToken";
 import { copyToClipboard } from "../../helpers/copyToClipboard";
+import useQueues from "../../hooks/useQueues";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -105,7 +106,12 @@ export default function Options(props) {
   const [downloadLimit, setDownloadLimit] = useState("15");
   const [transferToNewTicket, setTransferToNewTicket] = useState("connection");
   const [restrictTransferConnection, setRestrictTransferConnection] = useState("connection");
-  
+  const [noQueueTimeout, setNoQueueTimeout] = useState("0");
+  const [noQueueTimeoutAction, setNoQueueTimeoutAction] = useState("0");
+  const [openTicketTimeout, setOpenTicketTimeout] = useState("0");
+  const [openTicketTimeoutAction, setOpenTicketTimeoutAction] = useState("pending");
+  const [queues, setQueues] = useState([]);
+  const { findAll: findAllQueues } = useQueues();
 
   const [loadingUserRating, setLoadingUserRating] = useState(false);
   const [loadingScheduleType, setLoadingScheduleType] = useState(false);
@@ -125,6 +131,14 @@ export default function Options(props) {
   const downloadLimitInput = useRef(null);
 
   const { update } = useSettings();
+
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     getCurrentUserInfo().then(
@@ -182,9 +196,32 @@ export default function Options(props) {
 
       const autoReopenTimeout = settings.find((s) => s.key === "autoReopenTimeout");
       setAutoReopenTimeout(autoReopenTimeout?.value || "0");
+
+      const noQueueTimeout = settings.find((s) => s.key === "noQueueTimeout");
+      setNoQueueTimeout(noQueueTimeout?.value || "0");
+
+      const noQueueTimeoutAction = settings.find((s) => s.key === "noQueueTimeoutAction");
+      setNoQueueTimeoutAction(noQueueTimeoutAction?.value || "0");
+
+      const openTicketTimeout = settings.find((s) => s.key === "openTicketTimeout");
+      setOpenTicketTimeout(openTicketTimeout?.value || "0");
+
+      const openTicketTimeoutAction = settings.find((s) => s.key === "openTicketTimeoutAction");
+      setOpenTicketTimeoutAction(openTicketTimeoutAction?.value || "pending");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
+
+
+  useEffect(() => {
+    if (isMounted.current) {
+      const loadQueues = async () => {
+        const list = await findAllQueues();
+        setQueues(list);
+      };
+      loadQueues();
+    }
+  }, []);
 
   async function handleChangeUserRating(value) {
     setUserRating(value);
@@ -321,6 +358,17 @@ export default function Options(props) {
     });
     toast.success("Operação atualizada com sucesso.");
   }
+  
+  async function handleSetting(key, value, setter = null ) {
+    if (setter) {
+      setter(value);
+    }
+    await update({
+      key,
+      value,
+    });
+    toast.success("Operação atualizada com sucesso.");
+  }
 
   async function generateApiToken() {
     const newToken = generateSecureToken(32);
@@ -412,7 +460,7 @@ export default function Options(props) {
           <FormControl className={classes.selectContainer}>
             <TextField
               id="autoreopen-timeout-field"
-              label="Tempo limite para reabertura automática (minutos)"
+              label="Timeout para reabertura automática (minutos)"
               variant="standard"
               name="autoReopenTimeout"
               type="number"
@@ -424,6 +472,85 @@ export default function Options(props) {
                 await handleAutoReopenTimeout(autoReopenTimeout);
               }}
             />
+          </FormControl>
+        </Grid>
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <TextField
+              id="noqueue-timeout-field"
+              label="Timeout para ticket sem fila (minutos)"
+              variant="standard"
+              name="noQueueTimeout"
+              type="number"
+              value={noQueueTimeout}
+              onChange={(e) => {
+                setNoQueueTimeout(e.target.value);
+              }}
+              onBlur={async (_) => {
+                await handleSetting("noQueueTimeout", noQueueTimeout);
+              }}
+            />
+          </FormControl>
+        </Grid>
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="noqueue-timeout-action-label">
+              Ação para timeout de ticket sem fila
+            </InputLabel>
+            <Select
+              labelId="open-timeout-action-label"
+              value={noQueueTimeoutAction}
+              onChange={async (e) => {
+                handleSetting("noQueueTimeoutAction", e.target.value, setNoQueueTimeoutAction);
+              }}
+            >
+              <MenuItem value={"0"}>Fechar</MenuItem>
+              {queues.map((queue) => (
+                <MenuItem key={queue.id} value={queue.id}>
+                  Transferir para {queue.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <TextField
+              id="openticket-timeout-field"
+              label="Timeout para ticket em atendimento (minutos)"
+              variant="standard"
+              name="openTicketTimeout"
+              type="number"
+              value={openTicketTimeout}
+              onChange={(e) => {
+                setOpenTicketTimeout(e.target.value);
+              }}
+              onBlur={async (_) => {
+                await handleSetting("openTicketTimeout", openTicketTimeout);
+              }}
+            />
+          </FormControl>
+        </Grid>
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="opentimeout-action-label">
+              Ação para timeout de ticket aberto
+            </InputLabel>
+            <Select
+              labelId="open-timeout-action-label"
+              value={openTicketTimeoutAction}
+              onChange={async (e) => {
+                handleSetting("openTicketTimeoutAction", e.target.value, setOpenTicketTimeoutAction);
+              }}
+            >
+              <MenuItem value={"pending"}>Retornar para a fila</MenuItem>
+              <MenuItem value={"closed"}>Fechar atendimento</MenuItem>
+            </Select>
           </FormControl>
         </Grid>
 
