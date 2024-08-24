@@ -30,6 +30,7 @@ import { getWbot } from "./libs/wbot";
 import formatBody from "./helpers/Mustache";
 import Ticket from "./models/Ticket";
 import QueueModel from "./models/Queue";
+import UpdateTicketService from "./services/TicketServices/UpdateTicketService";
 
 const connection = process.env.REDIS_URI || "";
 const limiterMax = process.env.REDIS_OPT_LIMITER_MAX || 1;
@@ -687,9 +688,98 @@ async function handleRatingsTimeout() {
   }
 }
 
+async function handleNoQueueTimeout(
+  company: Company,
+  timeout: number,
+  action: number
+) {
+  const tickets = await Ticket.findAll({
+    where: {
+      status: "pending",
+      companyId: company.id,
+      queueId: null,
+      updatedAt: {
+        [Op.lt]: subMinutes(new Date(), timeout)
+      }
+    }
+  });
+
+  const status = action ? "pending" : "closed";
+  const queueId = action || null;
+
+  tickets.forEach(ticket => {
+    const userId = status === "pending" ? null : ticket.userId;
+    UpdateTicketService({
+      ticketId: ticket.id,
+      ticketData: { status, userId, queueId },
+      companyId: company.id
+    });
+  });
+}
+
+async function handleOpenTicketTimeout(
+  company: Company,
+  timeout: number,
+  status: string
+) {
+  const tickets = await Ticket.findAll({
+    where: {
+      status: "open",
+      companyId: company.id,
+      updatedAt: {
+        [Op.lt]: subMinutes(new Date(), timeout)
+      }
+    }
+  });
+
+  tickets.forEach(ticket => {
+    UpdateTicketService({
+      ticketId: ticket.id,
+      ticketData: {
+        status,
+        queueId: ticket.queueId,
+        userId: ticket.userId
+      },
+      companyId: company.id
+    });
+  });
+}
+
+async function handleTicketTimeouts() {
+  const companies = await Company.findAll();
+
+  companies.forEach(async company => {
+    const noQueueTimeout = Number(
+      await GetCompanySetting(company.id, "noQueueTimeout", "0")
+    );
+    if (noQueueTimeout) {
+      const noQueueTimeoutAction = Number(
+        await GetCompanySetting(company.id, "noQueueTimeoutAction", "0")
+      );
+      handleNoQueueTimeout(company, noQueueTimeout, noQueueTimeoutAction || 0);
+    }
+    const openTicketTimeout = Number(
+      await GetCompanySetting(company.id, "openTicketTimeout", "0")
+    );
+    if (openTicketTimeout) {
+      const openTicketTimeoutAction = await GetCompanySetting(
+        company.id,
+        "openTicketTimeoutAction",
+        "pending"
+      );
+      handleOpenTicketTimeout(
+        company,
+        openTicketTimeout,
+        openTicketTimeoutAction
+      );
+    }
+  });
+}
+
 async function handleEveryMinute() {
   handleLoginStatus();
   handleRatingsTimeout();
+  handleTicketTimeouts();
 }
 
 async function handleInvoiceCreate() {
