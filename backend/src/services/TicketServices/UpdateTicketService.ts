@@ -5,7 +5,6 @@ import CheckContactOpenTickets from "../../helpers/CheckContactOpenTickets";
 import SetTicketMessagesAsRead from "../../helpers/SetTicketMessagesAsRead";
 import { getIO } from "../../libs/socket";
 import Ticket from "../../models/Ticket";
-import Setting from "../../models/Setting";
 import Queue from "../../models/Queue";
 import ShowTicketService from "./ShowTicketService";
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
@@ -72,13 +71,11 @@ const UpdateTicketService = async ({
 
     const io = getIO();
 
-    const key = "userRating";
-    const setting = await Setting.findOne({
-      where: {
-        companyId,
-        key
-      }
-    });
+    const userRatingSetting = await GetCompanySetting(
+      companyId,
+      "userRating",
+      "disabled"
+    );
 
     let ticket = await ShowTicketService(ticketId, companyId);
 
@@ -120,9 +117,10 @@ const UpdateTicketService = async ({
       );
 
       if (
+        userRatingSetting === "enabled" &&
+        ticket.userId &&
         !ticket.contact.isGroup &&
-        !ticket.contact.disableBot &&
-        setting?.value === "enabled"
+        !ticket.contact.disableBot
       ) {
         if (ticketTraking.ratingAt == null && !justClose) {
           const ratingTxt =
@@ -168,7 +166,6 @@ const UpdateTicketService = async ({
               ticket,
               ticketId: ticket.id
             });
-
 
           return { ticket, oldStatus, oldUserId };
         }
@@ -293,19 +290,21 @@ const UpdateTicketService = async ({
           await ticket.reload();
         }
 
-        const wbot = await GetTicketWbot(ticket);
-        const queueChangedMessage = await wbot.sendMessage(
-          `${ticket.contact.number}@${
-            ticket.isGroup ? "g.us" : "s.whatsapp.net"
-          }`,
-          {
-            text: `\u200e${
-              whatsapp.transferMessage ||
-              "Você foi transferido, em breve iremos iniciar seu atendimento."
-            }`
-          }
-        );
-        await verifyMessage(queueChangedMessage, ticket, ticket.contact);
+        if (!ticket.contact.isGroup) {
+          const wbot = await GetTicketWbot(ticket);
+          const queueChangedMessage = await wbot.sendMessage(
+            `${ticket.contact.number}@${
+              ticket.isGroup ? "g.us" : "s.whatsapp.net"
+            }`,
+            {
+              text: `\u200e${
+                whatsapp.transferMessage ||
+                "Você foi transferido, em breve iremos iniciar seu atendimento."
+              }`
+            }
+          );
+          await verifyMessage(queueChangedMessage, ticket, ticket.contact);
+        }
       }
 
       if (["facebook", "instagram"].includes(ticket.channel)) {
