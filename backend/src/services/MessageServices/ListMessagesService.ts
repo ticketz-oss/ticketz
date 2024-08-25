@@ -1,5 +1,4 @@
-import { FindOptions } from "sequelize/types";
-import { Op } from "sequelize";
+import { FindOptions, Op } from "sequelize";
 import AppError from "../../errors/AppError";
 import Message from "../../models/Message";
 import OldMessage from "../../models/OldMessage";
@@ -44,6 +43,7 @@ const ListMessagesService = async ({
   };
 
   if (queues.length > 0) {
+    // eslint-disable-next-line dot-notation
     options.where["queueId"] = {
       [Op.or]: {
         [Op.in]: queues,
@@ -58,19 +58,21 @@ const ListMessagesService = async ({
     include: [
       "contact",
       {
-        model: Message, as: "quotedMsg",
+        model: Message,
+        as: "quotedMsg",
         include: ["contact"],
         where: {
           companyId: ticket.companyId
         },
-        required: false,
+        required: false
       },
       {
-        model: OldMessage, as: "oldMessages",
+        model: OldMessage,
+        as: "oldMessages",
         where: {
-          ticketId: ticket.id,
+          ticketId: ticket.id
         },
-        required: false,
+        required: false
       },
       {
         model: Queue,
