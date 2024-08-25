@@ -5,16 +5,19 @@ import OldMessage from "../../models/OldMessage";
 import Ticket from "../../models/Ticket";
 
 import formatBody from "../../helpers/Mustache";
+import User from "../../models/User";
 
 interface Request {
   messageId: string;
   companyId: number;
+  userId: number;
   body: string;
 }
 
 const EditWhatsAppMessage = async ({
   messageId,
   companyId,
+  userId,
   body
 }: Request): Promise<{ ticketId: number; message: Message }> => {
   const message = await Message.findOne({
@@ -55,12 +58,13 @@ const EditWhatsAppMessage = async ({
     const oldMessage = {
       messageId,
       body: message.body,
-      ticketId: message.ticketId
+      ticketId: message.ticketId,
+      userId: message.userId
     };
 
     await OldMessage.upsert(oldMessage);
 
-    await message.update({ body: formattedBody, isEdited: true });
+    await message.update({ body: formattedBody, isEdited: true, userId });
 
     const savedMessage = await Message.findOne({
       where: {
@@ -76,7 +80,14 @@ const EditWhatsAppMessage = async ({
         {
           model: Message,
           as: "quotedMsg",
-          include: ["contact"],
+          include: [
+            "contact",
+            {
+              model: User,
+              attributes: { exclude: ["passwordHash"] },
+              required: false
+            }
+          ],
           where: {
             companyId
           },
@@ -88,6 +99,11 @@ const EditWhatsAppMessage = async ({
           where: {
             ticketId: message.ticketId
           },
+          required: false
+        },
+        {
+          model: User,
+          attributes: { exclude: ["passwordHash"] },
           required: false
         }
       ]

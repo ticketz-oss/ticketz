@@ -3,10 +3,13 @@ import Message from "../../models/Message";
 
 interface Request {
   id: string;
-  ticketId: number
+  ticketId: number;
 }
 
-const GetMessageService = async ({ id, ticketId }: Request): Promise<Message> => {
+const GetMessageService = async ({
+  id,
+  ticketId
+}: Request): Promise<Message> => {
   const messageExists = await Message.findOne({
     where: { id, ticketId }
   });
