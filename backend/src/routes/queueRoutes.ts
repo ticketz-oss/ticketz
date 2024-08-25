@@ -9,11 +9,11 @@ import uploadConfig from "../config/upload";
 const upload = multer(uploadConfig);
 const queueRoutes = Router();
 
-queueRoutes.get("/queue", isAuth, isAdmin, QueueController.index);
+queueRoutes.get("/queue", isAuth, QueueController.index);
 
 queueRoutes.post("/queue", isAuth, isAdmin, QueueController.store);
 
-queueRoutes.get("/queue/:queueId", isAuth, isAdmin, QueueController.show);
+queueRoutes.get("/queue/:queueId", isAuth, QueueController.show);
 
 queueRoutes.put("/queue/:queueId", isAuth, isAdmin, QueueController.update);
 
