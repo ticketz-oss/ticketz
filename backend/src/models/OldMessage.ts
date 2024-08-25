@@ -1,15 +1,15 @@
 import {
-    Table,
-    Column,
-    CreatedAt,
-    UpdatedAt,
-    Model,
-    PrimaryKey,
-    ForeignKey,
-    BelongsTo,
-    DataType,
-    AutoIncrement   
-  } from "sequelize-typescript";
+  Table,
+  Column,
+  CreatedAt,
+  UpdatedAt,
+  Model,
+  PrimaryKey,
+  ForeignKey,
+  BelongsTo,
+  DataType,
+  AutoIncrement
+} from "sequelize-typescript";
 
 import Message from "./Message";
 import Ticket from "./Ticket";
@@ -38,7 +38,7 @@ class OldMessage extends Model {
 
   @BelongsTo(() => Message)
   message: Message;
-  
+
   @ForeignKey(() => Ticket)
   @Column(DataType.INTEGER)
   ticketId: number;
