@@ -29,7 +29,7 @@ import Message from "../../models/Message";
 import OldMessage from "../../models/OldMessage";
 
 import { getIO } from "../../libs/socket";
-import CreateMessageService from "../MessageServices/CreateMessageService";
+import CreateMessageService, { MessageData } from "../MessageServices/CreateMessageService";
 import { logger } from "../../utils/logger";
 import CreateOrUpdateContactService from "../ContactServices/CreateOrUpdateContactService";
 import FindOrCreateTicketService from "../TicketServices/FindOrCreateTicketService";
@@ -443,11 +443,12 @@ const verifyQuotedMessage = async (
   return quotedMsg;
 };
 
-const verifyMediaMessage = async (
+export const verifyMediaMessage = async (
   msg: proto.IWebMessageInfo,
   ticket: Ticket,
   contact: Contact,
-  wbot: Session = null
+  wbot: Session = null,
+  userId: number = null
 ): Promise<Message> => {
   const io = getIO();
   const quotedMsg = await verifyQuotedMessage(msg);
@@ -479,7 +480,7 @@ const verifyMediaMessage = async (
 
   const body = getBodyMessage(msg);
 
-  const messageData = {
+  const messageData: MessageData = {
     id: msg.key.id,
     ticketId: ticket.id,
     contactId: msg.key.fromMe ? undefined : contact.id,
@@ -494,6 +495,10 @@ const verifyMediaMessage = async (
     participant: msg.key.participant,
     dataJson: JSON.stringify(msg),
   };
+
+  if (userId) {
+    messageData.userId = userId;
+  }
 
   await ticket.update({
     lastMessage: body || media.filename,
@@ -538,13 +543,14 @@ const verifyMediaMessage = async (
 export const verifyMessage = async (
   msg: proto.IWebMessageInfo,
   ticket: Ticket,
-  contact: Contact
+  contact: Contact,
+  userId: number = null
 ) => {
   const io = getIO();
   const quotedMsg = await verifyQuotedMessage(msg);
   const body = getBodyMessage(msg);
 
-  const messageData = {
+  const messageData: MessageData = {
     id: msg.key.id,
     ticketId: ticket.id,
     contactId: msg.key.fromMe ? undefined : contact.id,
@@ -559,6 +565,10 @@ export const verifyMessage = async (
     dataJson: JSON.stringify(msg),
     isEdited: false,
   };
+  
+  if (userId) {
+    messageData.userId = userId;
+  }
 
   await ticket.update({
     lastMessage: body
@@ -1684,6 +1694,11 @@ const handleMsgAck = async (
     const messageToUpdate = await Message.findByPk(msg.key.id, {
       include: [
         "contact",
+        { 
+          model: User,
+          attributes: { exclude: ["passwordHash"] },
+          required: false
+        },
         {
           model: Message,
           as: "quotedMsg",

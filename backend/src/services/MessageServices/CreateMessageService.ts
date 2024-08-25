@@ -2,21 +2,28 @@ import { getIO } from "../../libs/socket";
 import Message from "../../models/Message";
 import OldMessage from "../../models/OldMessage";
 import Ticket from "../../models/Ticket";
+import User from "../../models/User";
 import Whatsapp from "../../models/Whatsapp";
 import { logger } from "../../utils/logger";
 
-interface MessageData {
+export interface MessageData {
   id: string;
   ticketId: number;
   body: string;
   contactId?: number;
   fromMe?: boolean;
   read?: boolean;
+  quotedMsgId?: string;
   mediaType?: string;
   mediaUrl?: string;
   ack?: number;
+  remoteJid?: string;
+  participant?: string;
+  dataJson?: string;
+  isEdited?: boolean;
   queueId?: number;
   channel?: string;
+  userId?: number;
 }
 interface Request {
   messageData: MessageData;
@@ -64,6 +71,18 @@ const CreateMessageService = async ({
         where: {
           ticketId: messageData.ticketId
         },
+        required: false,
+        include: [
+          {
+            model: User,
+            attributes: { exclude: ["passwordHash"] },
+            required: false
+          }
+        ]
+      },
+      {
+        model: User,
+        attributes: { exclude: ["passwordHash"] },
         required: false
       }
     ]

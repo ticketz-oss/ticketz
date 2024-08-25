@@ -13,6 +13,7 @@ import {
 
 import Message from "./Message";
 import Ticket from "./Ticket";
+import User from "./User";
 
 @Table
 class OldMessage extends Model {
@@ -45,6 +46,13 @@ class OldMessage extends Model {
 
   @BelongsTo(() => Ticket)
   ticket: Ticket;
+
+  @ForeignKey(() => User)
+  @Column
+  userId: number;
+
+  @BelongsTo(() => User)
+  user: User;
 }
 
 export default OldMessage;

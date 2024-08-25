@@ -19,6 +19,10 @@ import EditWhatsAppMessage from "../services/WbotServices/EditWhatsAppMessage";
 import { sendFacebookMessageMedia } from "../services/FacebookServices/sendFacebookMessageMedia";
 import sendFaceMessage from "../services/FacebookServices/sendFacebookMessage";
 import { logger } from "../utils/logger";
+import {
+  verifyMediaMessage,
+  verifyMessage
+} from "../services/WbotServices/wbotMessageListener";
 
 type IndexQuery = {
   pageNumber: string;
@@ -77,7 +81,14 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     if (channel === "whatsapp") {
       await Promise.all(
         medias.map(async (media: Express.Multer.File) => {
-          await SendWhatsAppMedia({ media, ticket });
+          const message = await SendWhatsAppMedia({ media, ticket });
+          verifyMediaMessage(
+            message,
+            ticket,
+            ticket.contact,
+            null,
+            Number(req.user.id) || null
+          );
         })
       );
     }
@@ -98,7 +109,13 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     }
 
     if (channel === "whatsapp") {
-      await SendWhatsAppMessage({ body, ticket, quotedMsg });
+      const message = await SendWhatsAppMessage({ body, ticket, quotedMsg });
+      verifyMessage(
+        message,
+        ticket,
+        ticket.contact,
+        Number(req.user.id) || null
+      );
     }
   }
 
@@ -113,6 +130,7 @@ export const edit = async (req: Request, res: Response): Promise<Response> => {
   const { ticketId, message } = await EditWhatsAppMessage({
     messageId,
     companyId,
+    userId: Number(req.user.id) || null,
     body
   });
 

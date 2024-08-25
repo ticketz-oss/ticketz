@@ -16,6 +16,7 @@ import Ticket from "./Ticket";
 import Company from "./Company";
 import Queue from "./Queue";
 import OldMessage from "./OldMessage";
+import User from "./User";
 
 @Table
 class Message extends Model {
@@ -117,6 +118,13 @@ class Message extends Model {
 
   @HasMany(() => OldMessage)
   oldMessages: OldMessage[];
+
+  @ForeignKey(() => User)
+  @Column
+  userId: number;
+
+  @BelongsTo(() => User)
+  user: User;
 }
 
 export default Message;
