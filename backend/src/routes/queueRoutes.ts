@@ -1,34 +1,37 @@
 import { Router } from "express";
+import multer from "multer";
 import isAuth from "../middleware/isAuth";
+import isAdmin from "../middleware/isAdmin";
 
 import * as QueueController from "../controllers/QueueController";
-import multer from "multer";
 import uploadConfig from "../config/upload";
 
 const upload = multer(uploadConfig);
 const queueRoutes = Router();
 
-queueRoutes.get("/queue", isAuth, QueueController.index);
+queueRoutes.get("/queue", isAuth, isAdmin, QueueController.index);
 
-queueRoutes.post("/queue", isAuth, QueueController.store);
+queueRoutes.post("/queue", isAuth, isAdmin, QueueController.store);
 
-queueRoutes.get("/queue/:queueId", isAuth, QueueController.show);
+queueRoutes.get("/queue/:queueId", isAuth, isAdmin, QueueController.show);
 
-queueRoutes.put("/queue/:queueId", isAuth, QueueController.update);
+queueRoutes.put("/queue/:queueId", isAuth, isAdmin, QueueController.update);
 
-queueRoutes.delete("/queue/:queueId", isAuth, QueueController.remove);
+queueRoutes.delete("/queue/:queueId", isAuth, isAdmin, QueueController.remove);
 
 queueRoutes.post(
-    "/queue/:queueId/media-upload",
-    isAuth,
-    upload.array("file"),
-    QueueController.mediaUpload
-  );
-  
+  "/queue/:queueId/media-upload",
+  isAuth,
+  isAdmin,
+  upload.array("file"),
+  QueueController.mediaUpload
+);
+
 queueRoutes.delete(
-    "/queue/:queueId/media-upload",
-    isAuth,
-    QueueController.deleteMedia
-  );
+  "/queue/:queueId/media-upload",
+  isAuth,
+  isAdmin,
+  QueueController.deleteMedia
+);
 
 export default queueRoutes;
