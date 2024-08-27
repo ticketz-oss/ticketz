@@ -14,6 +14,7 @@ interface MessageData {
   read?: boolean;
   mediaType?: string;
   mediaUrl?: string;
+  thumbnailUrl?: string;
   ack?: number;
   queueId?: number;
   channel?: string;

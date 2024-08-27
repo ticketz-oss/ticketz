@@ -286,6 +286,70 @@ const getMessageMedia = (message: proto.IMessage) => {
   );
 }
 
+const downloadStream = async (stream: Transform): Promise<Buffer> => {
+  const MAX_SPEED = 5 * 1024 * 1024 / 8; // 5Mbps
+  const THROTTLE_SPEED = 1024 * 1024 / 8; // 1Mbps
+  const LARGE_FILE_SIZE = 1024 * 1024; // 1 MiB
+
+  const throttle = new Throttle({ rate: MAX_SPEED });
+  let buffer = Buffer.from([]);
+  let totalSize = 0;
+
+  try {
+    // eslint-disable-next-line no-restricted-syntax
+    for await (const chunk of stream.pipe(throttle)) {
+      buffer = Buffer.concat([buffer, chunk]);
+      totalSize += chunk.length;
+
+      if (totalSize > LARGE_FILE_SIZE) {
+        throttle.rate = THROTTLE_SPEED;
+      }
+    }
+  } catch (error) {
+    Sentry.setExtra("ERR_WAPP_DOWNLOAD_MEDIA", { error });
+    Sentry.captureException(new Error("ERR_WAPP_DOWNLOAD_MEDIA"));
+    throw new Error("ERR_WAPP_DOWNLOAD_MEDIA");
+  }
+
+  return buffer;  
+}
+
+type ThumbnailMessage = {
+    mediaKey?: Uint8Array | null;
+    thumbnailDirectPath?: string | null;
+    mimetype?: string;
+};
+
+const downloadThumbnail = async ({ thumbnailDirectPath: directPath, mediaKey, mimetype }: ThumbnailMessage) => {
+  if (!directPath || !mediaKey) {
+    return null;
+  }
+  
+  const stream = await downloadContentFromMessage(
+    { mediaKey, directPath },
+    mimetype ? "thumbnail-document" : "thumbnail-link"
+  );
+
+  if (!stream) {
+    throw new Error("Failed to get stream");
+  }
+
+  const buffer = await downloadStream(stream);
+
+  if (!buffer) {
+    throw new Error("ERR_WAPP_DOWNLOAD_MEDIA");
+  }
+
+  const filename = `thumbnail-${makeRandomId(5)}-${new Date().getTime()}.jpg`;
+
+  const media = {
+    data: buffer,
+    mimetype: "image/jpeg",
+    filename
+  };
+  return media;
+}
+
 const downloadMedia = async (msg: proto.IWebMessageInfo, wbot: Session, ticket: Ticket) => {
   const unpackedMessage = getUnpackedMessage(msg);
   const message = getMessageMedia(unpackedMessage);
@@ -321,7 +385,7 @@ const downloadMedia = async (msg: proto.IWebMessageInfo, wbot: Session, ticket: 
         .replace("application", "document") as MediaType)
       : (message.mimetype.split("/")[0] as MediaType);
 
-  let stream: Transform | undefined;
+  let stream: Transform;
   let contDownload = 0;
 
   while (contDownload < 10 && !stream) {
@@ -345,6 +409,14 @@ const downloadMedia = async (msg: proto.IWebMessageInfo, wbot: Session, ticket: 
     throw new Error("Failed to get stream");
   }
 
+  const buffer = await downloadStream(stream);
+
+  if (!buffer) {
+    Sentry.setExtra("ERR_WAPP_DOWNLOAD_MEDIA", { msg });
+    Sentry.captureException(new Error("ERR_WAPP_DOWNLOAD_MEDIA"));
+    throw new Error("ERR_WAPP_DOWNLOAD_MEDIA");
+  }
+
   let filename = unpackedMessage?.documentMessage?.fileName || "";
 
   if (!filename) {
@@ -352,42 +424,6 @@ const downloadMedia = async (msg: proto.IWebMessageInfo, wbot: Session, ticket: 
     filename = `${makeRandomId(5)}-${new Date().getTime()}.${ext}`;
   } else {
     filename = `${filename.split(".").slice(0, -1).join(".")}.${makeRandomId(5)}.${filename.split(".").slice(-1)}`;
-  }
-
-  const MAX_SPEED = 5 * 1024 * 1024 / 8; // 5Mbps
-  const THROTTLE_SPEED = 1024 * 1024 / 8; // 1Mbps
-  const LARGE_FILE_SIZE = 1024 * 1024; // 1 MiB
-
-  const throttle = new Throttle({ rate: MAX_SPEED });
-  let buffer = Buffer.from([]);
-  let totalSize = 0;
-  const startTime = Date.now();
-
-  try {
-    // eslint-disable-next-line no-restricted-syntax
-    for await (const chunk of stream.pipe(throttle)) {
-      buffer = Buffer.concat([buffer, chunk]);
-      totalSize += chunk.length;
-
-      if (totalSize > LARGE_FILE_SIZE) {
-        throttle.rate = THROTTLE_SPEED;
-      }
-    }
-  } catch (error) {
-    Sentry.setExtra("ERR_WAPP_DOWNLOAD_MEDIA", { error, msg });
-    Sentry.captureException(new Error("ERR_WAPP_DOWNLOAD_MEDIA"));
-    throw new Error("ERR_WAPP_DOWNLOAD_MEDIA");
-  }
-
-  const endTime = Date.now();
-  const durationInSeconds = (endTime - startTime) / 1000;
-  const effectiveSpeed = totalSize / durationInSeconds; // bytes per second
-  logger.debug(`${filename} Download completed in ${durationInSeconds.toFixed(2)} seconds with an effective speed of ${(effectiveSpeed / 1024 / 1024).toFixed(2)} MBps`);
-
-  if (!buffer) {
-    Sentry.setExtra("ERR_WAPP_DOWNLOAD_MEDIA", { msg });
-    Sentry.captureException(new Error("ERR_WAPP_DOWNLOAD_MEDIA"));
-    throw new Error("ERR_WAPP_DOWNLOAD_MEDIA");
   }
 
   const media = {
@@ -443,20 +479,7 @@ const verifyQuotedMessage = async (
   return quotedMsg;
 };
 
-const verifyMediaMessage = async (
-  msg: proto.IWebMessageInfo,
-  ticket: Ticket,
-  contact: Contact,
-  wbot: Session = null
-): Promise<Message> => {
-  const io = getIO();
-  const quotedMsg = await verifyQuotedMessage(msg);
-  const media = await downloadMedia(msg, wbot, ticket);
-
-  if (!media) {
-    throw new Error("ERR_WAPP_DOWNLOAD_MEDIA");
-  }
-
+const saveMediaToFile = async (media) => {
   if (!media.filename) {
     const ext = media.mimetype.split("/")[1].split(";")[0];
     media.filename = `${new Date().getTime()}.${ext}`;
@@ -476,6 +499,32 @@ const verifyMediaMessage = async (
     Sentry.captureException(err);
     logger.error(err);
   }
+}
+
+const verifyMediaMessage = async (
+  msg: proto.IWebMessageInfo,
+  ticket: Ticket,
+  contact: Contact,
+  wbot: Session = null,
+  messageMedia = null,
+): Promise<Message> => {
+  const io = getIO();
+  const quotedMsg = await verifyQuotedMessage(msg);
+  
+  const thumbnailMedia = await downloadThumbnail(messageMedia || msg?.message?.extendedTextMessage);
+  const media = await downloadMedia(msg, wbot, ticket);
+
+  if (!media && !thumbnailMedia) {
+    throw new Error("ERR_WAPP_DOWNLOAD_MEDIA");
+  }
+
+  if (media) {
+    await saveMediaToFile(media);
+  }
+  
+  if (thumbnailMedia) {
+    await saveMediaToFile(thumbnailMedia);
+  }
 
   const body = getBodyMessage(msg);
 
@@ -483,11 +532,12 @@ const verifyMediaMessage = async (
     id: msg.key.id,
     ticketId: ticket.id,
     contactId: msg.key.fromMe ? undefined : contact.id,
-    body: body || media.filename,
+    body: body || media?.filename,
     fromMe: msg.key.fromMe,
     read: msg.key.fromMe,
-    mediaUrl: media.filename,
-    mediaType: media.mimetype.split("/")[0],
+    mediaUrl: media?.filename,
+    mediaType: media?.mimetype.split("/")[0],
+    thumbnailUrl: thumbnailMedia?.filename,
     quotedMsgId: quotedMsg?.id,
     ack: msg.status,
     remoteJid: msg.key.remoteJid,
@@ -496,7 +546,7 @@ const verifyMediaMessage = async (
   };
 
   await ticket.update({
-    lastMessage: body || media.filename,
+    lastMessage: body || media?.filename,
   });
 
   const newMessage = await CreateMessageService({
@@ -1489,8 +1539,8 @@ const handleMessage = async (
       }
     }
 
-    if (messageMedia) {
-      await verifyMediaMessage(msg, ticket, contact, wbot);
+    if (messageMedia || msg?.message?.extendedTextMessage?.thumbnailDirectPath) {
+      await verifyMediaMessage(msg, ticket, contact, wbot, messageMedia);
     } else if (msg.message?.editedMessage?.message?.protocolMessage?.editedMessage) {
       // message edited by Whatsapp App
       await verifyEditedMessage(msg.message.editedMessage.message.protocolMessage.editedMessage, ticket, msg.message.editedMessage.message.protocolMessage.key.id);
