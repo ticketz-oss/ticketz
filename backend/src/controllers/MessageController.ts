@@ -20,9 +20,14 @@ import { sendFacebookMessageMedia } from "../services/FacebookServices/sendFaceb
 import sendFaceMessage from "../services/FacebookServices/sendFacebookMessage";
 import { logger } from "../utils/logger";
 import {
+  makeid,
   verifyMediaMessage,
   verifyMessage
 } from "../services/WbotServices/wbotMessageListener";
+import CreateMessageService, {
+  MessageData as CreateMessageData
+} from "../services/MessageServices/CreateMessageService";
+import { CreateInternalMessageService } from "../services/MessageServices/CreateInternalMessageService";
 
 type IndexQuery = {
   pageNumber: string;
@@ -34,6 +39,7 @@ type MessageData = {
   read: boolean;
   quotedMsg?: Message;
   number?: string;
+  internal?: boolean;
 };
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
@@ -67,7 +73,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const { ticketId } = req.params;
-  const { body, quotedMsg }: MessageData = req.body;
+  const { body, quotedMsg, internal }: MessageData = req.body;
   const medias = req.files as Express.Multer.File[];
   const { companyId } = req.user;
 
@@ -75,6 +81,15 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   const { channel } = ticket;
   if (channel === "whatsapp") {
     SetTicketMessagesAsRead(ticket);
+  }
+
+  if (internal) {
+    await CreateInternalMessageService(
+      ticket,
+      body,
+      Number(req.user.id) || null
+    );
+    return res.send();
   }
 
   if (medias) {

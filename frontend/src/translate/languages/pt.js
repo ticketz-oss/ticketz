@@ -305,6 +305,7 @@ const messages = {
 				title: "Transferir Ticket",
 				fieldLabel: "Digite para buscar usuários",
 				fieldQueueLabel: "Transferir para fila",
+				annotationLabel: "Anotação",
 				fieldQueuePlaceholder: "Selecione uma fila",
 				noOptions: "Nenhum usuário encontrado com esse nome",
 				buttons: {
@@ -730,6 +731,7 @@ const messages = {
         placeholderOpen: "Digite uma mensagem",
         placeholderClosed:
           "Reabra ou aceite esse ticket para enviar uma mensagem.",
+        annotateMessage: "Anotação interna",
         signMessage: "Assinar",
         replying: "Respondendo",
         editing: "Editando",

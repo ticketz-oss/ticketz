@@ -43,6 +43,7 @@ const TransferTicketModalCustom = ({ modalOpen, onClose, ticketid }) => {
   const [searchParam, setSearchParam] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedQueue, setSelectedQueue] = useState("");
+  const [annotation, setAnnotation] = useState("");
   const classes = useStyles();
   const { findAll: findAllQueues } = useQueues();
   const isMounted = useRef(true);
@@ -94,6 +95,7 @@ const TransferTicketModalCustom = ({ modalOpen, onClose, ticketid }) => {
     onClose();
     setSearchParam("");
     setSelectedUser(null);
+    setAnnotation("");
   };
 
   const handleSaveTicket = async (e) => {
@@ -102,7 +104,9 @@ const TransferTicketModalCustom = ({ modalOpen, onClose, ticketid }) => {
     if (!selectedQueue || selectedQueue === "") return;
     setLoading(true);
     try {
-      let data = {};
+      let data = {
+        annotation,
+      };
 
       if (selectedUser) {
         data.userId = selectedUser.id;
@@ -118,7 +122,7 @@ const TransferTicketModalCustom = ({ modalOpen, onClose, ticketid }) => {
       }
 
       await api.put(`/tickets/${ticketid}`, data);
-      console.log(data)
+      console.log(data);
 
       history.push(`/tickets`);
     } catch (err) {
@@ -189,6 +193,17 @@ const TransferTicketModalCustom = ({ modalOpen, onClose, ticketid }) => {
               ))}
             </Select>
           </FormControl>
+          {/* New Annotation Field */}
+          <TextField
+            label={i18n.t("transferTicketModal.annotationLabel")} // Add this label to your i18n file
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            multiline
+            rows={4}
+            value={annotation}
+            onChange={(e) => setAnnotation(e.target.value)}
+          />
         </DialogContent>
         <DialogActions>
           <Button
