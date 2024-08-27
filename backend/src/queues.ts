@@ -738,7 +738,7 @@ async function handleOpenTicketTimeout(
       ticketData: {
         status,
         queueId: ticket.queueId,
-        userId: ticket.userId
+        userId: status !== "pending" ? ticket.userId : null
       },
       companyId: company.id
     });
