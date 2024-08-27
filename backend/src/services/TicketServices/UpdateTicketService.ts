@@ -18,6 +18,8 @@ import FindOrCreateTicketService from "./FindOrCreateTicketService";
 import { logger } from "../../utils/logger";
 import Whatsapp from "../../models/Whatsapp";
 import { GetCompanySetting } from "../../helpers/CheckSettings";
+import { CreateInternalMessageService } from "../MessageServices/CreateInternalMessageService";
+import User from "../../models/User";
 
 interface TicketData {
   status?: string;
@@ -26,11 +28,13 @@ interface TicketData {
   chatbot?: boolean;
   queueOptionId?: number;
   justClose?: boolean;
+  annotation?: string;
 }
 
 interface Request {
   ticketData: TicketData;
   ticketId: number;
+  reqUserId?: number;
   companyId?: number | undefined;
   tokenData?:
     | {
@@ -54,7 +58,8 @@ const UpdateTicketService = async ({
   ticketData,
   ticketId,
   tokenData,
-  companyId
+  companyId,
+  reqUserId
 }: Request): Promise<Response> => {
   try {
     if (!companyId && !tokenData) {
@@ -63,7 +68,7 @@ const UpdateTicketService = async ({
     if (tokenData) {
       companyId = tokenData.companyId;
     }
-    const { justClose } = ticketData;
+    const { justClose, annotation } = ticketData;
     let { status } = ticketData;
     const { queueId, userId } = ticketData;
     let chatbot: boolean | null = ticketData.chatbot || false;
@@ -103,6 +108,8 @@ const UpdateTicketService = async ({
     const oldStatus = ticket.status;
     const oldUserId = ticket.user?.id;
     const oldQueueId = ticket.queueId;
+
+    const requestUser = reqUserId ? await User.findByPk(reqUserId) : null;
 
     if (oldStatus === "closed") {
       await CheckContactOpenTickets(ticket.contact.id);
@@ -282,6 +289,17 @@ const UpdateTicketService = async ({
             throw new AppError("ERR_INTERNAL_ERROR", 500);
           }
 
+          CreateInternalMessageService(
+            ticket,
+            `Transferido para o ticket #${newTicket.id}`
+          );
+          CreateInternalMessageService(
+            newTicket,
+            `Transferido a partir do ticket #${ticket.id} ${
+              requestUser ? `por ${requestUser.name}` : ""
+            }`
+          );
+
           ticket = newTicket;
         } else if (newWhatsapp) {
           await ticket.update({
@@ -316,6 +334,10 @@ const UpdateTicketService = async ({
           ticket
         });
       }
+    }
+
+    if (annotation) {
+      CreateInternalMessageService(ticket, annotation, reqUserId);
     }
 
     await ticket.update({
