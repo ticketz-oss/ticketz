@@ -298,6 +298,7 @@ const messages = {
 				title: "Transfer Ticket",
 				fieldLabel: "Type to search for users",
 				fieldQueueLabel: "Transfer to queue",
+        annotationLabel: "Annotation",
 				fieldQueuePlaceholder: "Select a queue",
 				noOptions: "No user found with that name",
 				buttons: {
@@ -716,6 +717,7 @@ const messages = {
 				placeholderOpen: "Type a message",
 				placeholderClosed:
 					"Reopen or accept this ticket to send a message.",
+        annotateMessage: "Internal note",
 				signMessage: "Sign",
 				replying: "Replying",
 				editing: "Editing",

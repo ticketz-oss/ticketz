@@ -163,6 +163,29 @@ const useStyles = makeStyles((theme) => ({
     transition: 'background-color 0.5s ease-in-out',
   },
 
+  messageInternal: {
+    marginLeft: 20,
+    marginTop: 2,
+    minWidth: 100,
+    maxWidth: 600,
+    height: "auto",
+    display: "block",
+    position: "relative",
+    whiteSpace: "pre-wrap",
+    backgroundColor: "#ffa",
+    color: "black",
+    alignSelf: "flex-end",
+    borderRadius: "8px",
+    paddingLeft: 15,
+    paddingRight: 5,
+    paddingTop: 5,
+    paddingBottom: 0,
+    marginBottom: 5,
+    marginTop: 5,
+    boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000",
+    transition: 'background-color 0.5s ease-in-out',
+  },
+
   quotedContainerRight: {
     margin: "-3px -80px 6px -6px",
     overflowY: "hidden",
@@ -238,6 +261,14 @@ const useStyles = makeStyles((theme) => ({
     bottom: 0,
     right: 5,
     color: theme.mode === 'light' ? "#999" : "#d0d0d0"
+  },
+
+  noteTimestamp: {
+    fontSize: 11,
+    position: "absolute",
+    bottom: 0,
+    right: 5,
+    color: "#444"
   },
 
   timestampStickerLeft: {
@@ -1012,6 +1043,28 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     const viewMessagesList = messagesList.map((message, index) => {
       const data = JSON.parse(message.dataJson);
       const isSticker = data?.message && ("stickerMessage" in data.message);
+      if (message.channel === "internal") {
+        return (
+          <React.Fragment key={message.id}>
+            {renderDailyTimestamps(message, index)}
+            {renderMessageDivider(message, index)}
+            <div id={message.id}
+              className={classes.messageInternal}
+              title={message.queueId && message.queue?.name}
+            >
+              <div className={classes.textContentItem}>
+                <MarkdownWrapper>
+                  {message.body}
+                </MarkdownWrapper>
+              </div>
+              <span className={classes.noteTimestamp}>
+                {format(parseISO(message.createdAt), "HH:mm")}
+              </span>
+            </div>
+          </React.Fragment>
+        )
+      }
+      
       if (!message.fromMe) {
         return (
           <React.Fragment key={message.id}>

@@ -19,7 +19,7 @@ import ClearIcon from "@material-ui/icons/Clear";
 import MicIcon from "@material-ui/icons/Mic";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
-import { FormControlLabel, Switch } from "@material-ui/core";
+import { FormControlLabel, Switch, Tooltip } from "@material-ui/core";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { isString, isEmpty, isObject, has } from "lodash";
 
@@ -37,6 +37,8 @@ import useQuickMessages from "../../hooks/useQuickMessages";
 import Compressor from 'compressorjs';
 import LinearWithValueLabel from "./ProgressBarCustom";
 import MarkdownWrapper from "../MarkdownWrapper";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSignature, faNoteSticky } from '@fortawesome/free-solid-svg-icons';
 
 const Mp3Recorder = new MicRecorder({ bitRate: 128 });
 
@@ -169,6 +171,13 @@ const useStyles = makeStyles((theme) => ({
     color: "#6bcbef",
     fontWeight: 500,
   },
+  
+  iconSwitch: {
+    color: (props) => (props.value ? theme.palette.primary.main : "gray"),
+    width: 48,
+    height: 48
+  },
+
 }));
 
 const EmojiOptions = (props) => {
@@ -199,28 +208,33 @@ const EmojiOptions = (props) => {
 };
 
 const SignSwitch = (props) => {
-  const { width, setSignMessage, signMessage } = props;
-  if (isWidthUp("md", width)) {
-    return (
-      <FormControlLabel
-        style={{ marginRight: 7, color: "gray" }}
-        label={i18n.t("messagesInput.signMessage")}
-        labelPlacement="start"
-        control={
-          <Switch
-            size="small"
-            checked={signMessage}
-            onChange={(e) => {
-              setSignMessage(e.target.checked);
-            }}
-            name="showAllTickets"
-            color="primary"
-          />
-        }
-      />
-    );
-  }
-  return null;
+  const { setSignMessage, signMessage } = props;
+  const classes = useStyles({ signMessage });
+
+  return (
+    <IconButton
+      onClick={() => setSignMessage(!signMessage)}
+      className={classes.signatureIcon}
+    >
+      <FontAwesomeIcon icon={faSignature} />
+    </IconButton>
+  );
+};
+
+const IconSwitch = (props) => {
+  const { setter, value, icon, tooltip } = props;
+  const classes = useStyles({ value });
+
+  return (
+    <Tooltip title={tooltip}>
+      <IconButton
+        onClick={() => setter(!value)}
+        className={classes.iconSwitch}
+      >
+        <FontAwesomeIcon icon={icon} />
+      </IconButton>
+    </Tooltip>
+  );
 };
 
 const FileInput = (props) => {
@@ -470,22 +484,23 @@ const MessageInputCustom = (props) => {
   const { setReplyingMessage, replyingMessage } =
     useContext(ReplyMessageContext);
   const { setEditingMessage, editingMessage } = useContext(
-		EditMessageContext
-	);  
+    EditMessageContext
+  );
   const { user } = useContext(AuthContext);
 
   const [signMessage, setSignMessage] = useLocalStorage("signOption", true);
+  const [annotateMessage, setAnnotateMessage] = useState(false);
 
   useEffect(() => {
     if (editingMessage) {
       if (signMessage && editingMessage.body.startsWith(`*${user.name}:*\n`)) {
-        setInputMessage(editingMessage.body.substr(editingMessage.body.indexOf("\n")+1));
+        setInputMessage(editingMessage.body.substr(editingMessage.body.indexOf("\n") + 1));
       } else {
         setInputMessage(editingMessage.body);
       }
     }
   }, [replyingMessage, editingMessage, signMessage, user.name]);
-  
+
   useEffect(() => {
     inputRef.current.focus();
     return () => {
@@ -565,7 +580,7 @@ const MessageInputCustom = (props) => {
 
     },);
 
-    setTimeout(async()=> {
+    setTimeout(async () => {
 
       try {
         await api.post(`/messages/${ticketId}`, formData, {
@@ -599,7 +614,7 @@ const MessageInputCustom = (props) => {
       }
 
 
-    },2000)
+    }, 2000)
 
   }
 
@@ -616,14 +631,16 @@ const MessageInputCustom = (props) => {
         ? `*${user?.name}:*\n${inputMessage.trim()}`
         : inputMessage.trim(),
       quotedMsg: replyingMessage,
+      internal: annotateMessage
     };
+    setAnnotateMessage(false);
     try {
-		if (editingMessage !== null) {
-			await api.post(`/messages/edit/${editingMessage.id}`, message);
-		}
-		else {
-			await api.post(`/messages/${ticketId}`, message);
-		}
+      if (editingMessage !== null) {
+        await api.post(`/messages/edit/${editingMessage.id}`, message);
+      }
+      else {
+        await api.post(`/messages/${ticketId}`, message);
+      }
     } catch (err) {
       toastError(err);
     }
@@ -636,7 +653,7 @@ const MessageInputCustom = (props) => {
   };
 
   const handleStartRecording = async () => {
-    if(disableOption)return;
+    if (disableOption) return;
     setLoading(true);
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -683,7 +700,7 @@ const MessageInputCustom = (props) => {
     }
   };
 
-  const disableOption =  loading || recording || ticketStatus === "closed";
+  const disableOption = loading || recording || ticketStatus === "closed";
 
   const renderReplyingMessage = (message) => {
     return (
@@ -720,9 +737,9 @@ const MessageInputCustom = (props) => {
           component="span"
           disabled={disableOption}
           onClick={() => {
-              setReplyingMessage(null);
-              setEditingMessage(null);
-              setInputMessage("");
+            setReplyingMessage(null);
+            setEditingMessage(null);
+            setInputMessage("");
           }}
         >
           <ClearIcon className={classes.sendMessageIcons} />
@@ -781,12 +798,20 @@ const MessageInputCustom = (props) => {
             handleChangeMedias={handleChangeMedias}
           />
 
-          <SignSwitch
-            width={props.width}
-            setSignMessage={setSignMessage}
-            signMessage={signMessage}
+          <IconSwitch
+            setter={setAnnotateMessage}
+            value={annotateMessage}
+            icon={faNoteSticky}
+            tooltip={i18n.t("messagesInput.annotateMessage")}
           />
 
+          <IconSwitch
+            setter={setSignMessage}
+            value={signMessage}
+            icon={faSignature}
+            tooltip={i18n.t("messagesInput.signMessage")}
+          />
+          
           <CustomInput
             loading={loading}
             inputRef={inputRef}

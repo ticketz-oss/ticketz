@@ -303,6 +303,7 @@ const messages = {
 				title: "Transferir Ticket",
 				fieldLabel: "Escribe para buscar usuarios",
 				fieldQueueLabel: "Transferir a cola",
+        annotationLabel: "Anotación",
 				fieldQueuePlaceholder: "Selecciona una cola",
 				noOptions: "Ningún usuario encontrado con ese nombre",
 				buttons: {
@@ -722,6 +723,7 @@ const messages = {
 				placeholderOpen: "Ingrese un mensaje",
 				placeholderClosed:
 					"Reabra o acepte este ticket para enviar un mensaje.",
+        annotateMessage: "Anotación Interna",
 				signMessage: "Firmar",
 				replying: "Respondiendo",
 				editing: "Editando",

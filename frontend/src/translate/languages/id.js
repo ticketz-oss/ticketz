@@ -305,6 +305,7 @@ const messages = {
 				title: "Transfer Tiket",
 				fieldLabel: "Ketik untuk mencari pengguna",
 				fieldQueueLabel: "Transfer ke antrian",
+        annotationLabel: "Catatan",
 				fieldQueuePlaceholder: "Pilih antrian",
 				noOptions: "Tidak ada pengguna yang ditemukan dengan nama itu",
 				buttons: {
@@ -721,6 +722,7 @@ const messages = {
 			messagesInput: {
 				placeholderOpen: "Ketik pesan",
                 placeholderClosed: "Buka kembali atau terima tiket ini untuk mengirim pesan.",
+        annotateMessage: "Catatan Internal",
 				signMessage: "Tandatangani",
 				replying: "Membalas",
 				editing: "Mengedit",
