@@ -16,6 +16,7 @@ export interface MessageData {
   quotedMsgId?: string;
   mediaType?: string;
   mediaUrl?: string;
+  thumbnailUrl?: string;
   ack?: number;
   remoteJid?: string;
   participant?: string;
