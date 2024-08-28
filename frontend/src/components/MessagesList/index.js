@@ -41,6 +41,14 @@ import { generateColor } from "../../helpers/colorGenerator";
 import { getInitials } from "../../helpers/getInitials";
 
 const useStyles = makeStyles((theme) => ({
+  messageContainer: {
+    "& a": {
+      color: theme.palette.primary.main,
+      fontWeight: "bold",
+      textDecoration: "none",
+    },    
+  },
+  
   messagesListWrapper: {
     overflow: "hidden",
     position: "relative",
@@ -1013,7 +1021,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
             {renderDailyTimestamps(message, index)}
             {renderMessageDivider(message, index)}
             <div id={message.id}
-              className={[clsx(classes.messageLeft, {
+              className={[clsx(classes.messageContainer, classes.messageLeft, {
                 [classes.messageMediaSticker]: isSticker,
               })]}
               title={message.queueId && message.queue?.name}
@@ -1091,7 +1099,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
             {renderDailyTimestamps(message, index)}
             {renderMessageDivider(message, index)}
             <div id={message.id}
-              className={[clsx(classes.messageRight, {
+              className={[clsx(classes.messageContainer, classes.messageRight, {
                 [classes.messageMediaSticker]: isSticker,
               })]}
               title={message.queueId && message.queue?.name}
