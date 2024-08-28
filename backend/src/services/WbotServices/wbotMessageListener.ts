@@ -72,6 +72,8 @@ interface IMe {
 
 const writeFileAsync = promisify(writeFile);
 
+const mutex = new Mutex();
+
 const getTypeMessage = (msg: proto.IWebMessageInfo): string => {
   return getContentType(msg.message);
 };
@@ -1451,7 +1453,6 @@ const handleMessage = async (
       return;
     }
 
-    const mutex = new Mutex();
     const ticket = await mutex.runExclusive(async () => {
       const result = await FindOrCreateTicketService(contact, wbot.id!, unreadMessages, companyId, groupContact);
       return result;
