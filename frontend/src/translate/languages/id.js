@@ -840,6 +840,16 @@ const messages = {
                 ERR_QUEUE_COLOR_ALREADY_EXISTS: "Warna ini sudah digunakan, pilih yang lain.",
                 ERR_WAPP_GREETING_REQUIRED: "Pesan sambutan wajib jika ada lebih dari satu antrian.",
 			},
+      "ccform": {
+        "cardNumber": "Nomor Kartu",
+        "expirationDate": "Tanggal Kedaluwarsa",
+        "securityCode": "CVV",
+        "cardholderName": "Nama Pemegang Kartu",
+        "documentType": "Jenis Dokumen",
+        "cpf": "CPF",
+        "cnpj": "CNPJ",
+        "submit": "Kirim"
+      },
 			ticketz: {
 				support: {
 					title: "Dukung proyek Ticketz",

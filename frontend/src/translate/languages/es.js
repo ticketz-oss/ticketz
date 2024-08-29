@@ -853,6 +853,16 @@ const messages = {
 				ERR_WAPP_GREETING_REQUIRED:
 					"El mensaje de saludo es obligatorio cuando hay más de una cola.",
 			},
+      "ccform": {
+        "cardNumber": "Número de Tarjeta",
+        "expirationDate": "Fecha de Expiración",
+        "securityCode": "CVV",
+        "cardholderName": "Nombre en la Tarjeta",
+        "documentType": "Tipo de Documento",
+        "cpf": "CPF",
+        "cnpj": "CNPJ",
+        "submit": "Enviar"
+      },
 			ticketz: {
 				support: {
 					title: "Apoyar el proyecto Ticketz",
