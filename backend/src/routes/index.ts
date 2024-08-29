@@ -30,6 +30,8 @@ import webHookMetaRoutes from "./WebHookMetaRoutes";
 import ticketTagRoutes from "./ticketTagRoutes";
 import pwaRoutes from "./pwaRoutes";
 import versionRoutes from "./versionRoutes";
+import binlistRoutes from "./binlistRoutes";
+
 const routes = Router();
 
 routes.use(userRoutes);
@@ -63,5 +65,6 @@ routes.use(ticketTagRoutes);
 routes.use(pwaRoutes);
 routes.use("/webhook/fb", webHookMetaRoutes);
 routes.use(versionRoutes);
+routes.use(binlistRoutes);
 
 export default routes;
