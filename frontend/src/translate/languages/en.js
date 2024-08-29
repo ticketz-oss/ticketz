@@ -836,6 +836,16 @@ const messages = {
 				ERR_QUEUE_COLOR_ALREADY_EXISTS: "This color is already in use, choose another.",
 				ERR_WAPP_GREETING_REQUIRED: "Greeting message is mandatory when there is more than one queue.",
 			},
+      "ccform": {
+        "cardNumber": "Card Number",
+        "expirationDate": "Expiration Date",
+        "securityCode": "CVV",
+        "cardholderName": "Cardholder Name",
+        "documentType": "Document Type",
+        "cpf": "CPF",
+        "cnpj": "CNPJ",
+        "submit": "Submit"
+      },
 			ticketz: {
 				support: {
 					title: "Support Ticketz project",

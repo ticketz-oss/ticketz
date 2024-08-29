@@ -860,6 +860,16 @@ const messages = {
 				ERR_WAPP_GREETING_REQUIRED:
 					"A mensagem de saudação é obrigatório quando há mais de uma fila.",
 			},
+      "ccform": {
+        "cardNumber": "Número do Cartão",
+        "expirationDate": "Validade",
+        "securityCode": "CVV",
+        "cardholderName": "Nome no Cartão",
+        "documentType": "Tipo do documento",
+        "cpf": "CPF",
+        "cnpj": "CNPJ",
+        "submit": "Enviar"
+      },
 			ticketz: {
 				support: {
 					title: "Apoie o projeto Ticketz Open Source",
