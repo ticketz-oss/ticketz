@@ -698,6 +698,59 @@ const messages = {
 						},
 					},
 				},
+				validations: {
+					title:"validations",
+					options: {
+						enabled: "enabled",
+						disabled: "disabled",
+					},
+				},
+				OfficeManagement: {
+					title:"Office Management",
+					options: {
+						disabled: "disabled",
+						ManagementByDepartment: "Management By Department",
+						ManagementByCompany: "Management By Company",
+					},
+				},
+				IgnoreGroupMessages: {
+					title:"Ignore Group Messages",
+					options: {
+						enabled: "enabled",
+						disabled: "disabled",
+					},
+				},
+				VoiceAndVideoCalls: {
+					title:"Voice and video calls",
+					options: {
+						enabled: "Ignore",
+						disabled: "unavailability report",
+					},
+				},
+				AutomaticChatbotOutput: {
+					title:"Automatic Chatbot Output",
+					options: {
+						enabled: "enabled",
+						disabled: "disabled",
+					},
+				},
+				QuickMessages: {
+					title:"Quick Messages",
+					options: {
+						enabled: "By company",
+						disabled: "By User",
+					},
+				},
+				AllowRegistration: {
+					title:"Allow Registration",
+					options: {
+						enabled: "enabled",
+						disabled: "disabled",
+					},
+				},
+				FileDownloadLimit: {
+					title:"File Download Limit (MB)",
+				},
 			},
 			messagesList: {
 				header: {
