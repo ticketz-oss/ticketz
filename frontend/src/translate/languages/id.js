@@ -758,6 +758,11 @@ const messages = {
 				FileDownloadLimit: {
 					title:"Batas unduhan file (MB)",
 				},
+				WelcomeGreeting: {
+					greetings: "Hello",
+					welcome: "Welcome to",
+					expirationTime: "Aktif sampai",
+				},
 			},
 			messagesList: {
 				header: {

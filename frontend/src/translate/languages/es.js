@@ -757,6 +757,11 @@ const messages = {
 				FileDownloadLimit: {
 					title:"Límite de descarga de archivos (MB)",
 				},
+				WelcomeGreeting: {
+					greetings: "hola",
+					welcome: "bienvenido a",
+					expirationTime: "Activo hasta",
+				},
 			},
 			messagesList: {
 				header: {
