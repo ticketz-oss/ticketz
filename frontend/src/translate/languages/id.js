@@ -759,9 +759,30 @@ const messages = {
 					title:"Batas unduhan file (MB)",
 				},
 				WelcomeGreeting: {
-					greetings: "Hello",
-					welcome: "Welcome to",
+					greetings: "halo",
+					welcome: "selamat datang di",
 					expirationTime: "Aktif sampai",
+				},
+				Options: {
+					title:"Pilihan",
+				},
+				Companies: {
+					title:"Perusahaan",
+				},
+				schedules: {
+					title:"Jadwal",
+				},
+				Plans: {
+					title:"Rencana",
+				},
+				Help: {
+					title:"Bantuan",
+				},
+				Whitelabel: {
+					title:"Whitelabel",
+				},
+				PaymentGateways: {
+					title:"Payment Gateways",
 				},
 			},
 			messagesList: {

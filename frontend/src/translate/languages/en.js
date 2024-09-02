@@ -756,6 +756,27 @@ const messages = {
 					welcome: "Welcome to",
 					expirationTime: "Active until",
 				},
+				Options: {
+					title:"Options",
+				},
+				Companies: {
+					title:"Companies",
+				},
+				schedules: {
+					title:"schedules",
+				},
+				Plans: {
+					title:"Plans",
+				},
+				Help: {
+					title:"Help",
+				},
+				Whitelabel: {
+					title:"Whitelabel",
+				},
+				PaymentGateways: {
+					title:"Pasarelas de pago",
+				},
 			},
 			messagesList: {
 				header: {
