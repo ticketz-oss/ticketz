@@ -13,34 +13,13 @@ import { grey, blue } from "@material-ui/core/colors";
 import OnlyForSuperUser from "../OnlyForSuperUser";
 import useAuth from "../../hooks/useAuth.js";
 import { Loop, Delete } from "@material-ui/icons";
-import {
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  IconButton,
-  TextField
-} from "@material-ui/core";
-
+import { IconButton, TextField } from "@material-ui/core";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCopy, faGears } from '@fortawesome/free-solid-svg-icons';
 
 import { generateSecureToken } from "../../helpers/generateSecureToken";
 import { copyToClipboard } from "../../helpers/copyToClipboard";
 import useQueues from "../../hooks/useQueues";
-
-
-import { Typography, Button } from "@material-ui/core";
-import MercadoPagoCreditCard from "../MercadoPagoCreditCard";
-import useTicketzProSubscribe from "../../hooks/useTicketzProSubscribe";
-import moment from "moment/moment";
-import 'moment/locale/pt';
-import useTicketzProStatus from "../../hooks/useTicketzProStatus";
-import useTicketzProCheck from "../../hooks/useTicketzProCheck";
-
-moment.locale("pt-br");
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -107,11 +86,6 @@ const useStyles = makeStyles((theme) => ({
     display: "none",
   },
   
-  button: {
-    marginRight: "12px",
-    position: "relative",
-  },
-
 }));
 
 export default function Options(props) {
@@ -152,19 +126,6 @@ export default function Options(props) {
   const [currentUser, setCurrentUser] = useState({});
 
   const downloadLimitInput = useRef(null);
-
-  const { ticketzProSubscribe } = useTicketzProSubscribe();
-  const { ticketzProStatus } = useTicketzProStatus();
-  const { ticketzProCheck } = useTicketzProCheck();
-  const [ticketzProKey, setTicketzProKey] = useState("");
-  const ticketzProKeyInput = useRef(null);
-  const [showTicketzProKey, setShowTicketzProKey] = useState(false);
-  const [showCardForm, setShowCardForm] = useState(false);
-  const [showSubscriptionLoading, setShowSubscriptionLoading] = useState(false);
-  const [emailAddress, setEmailAddress] = useState("");
-  const [subscribeError, setSubscribeError] = useState("");
-  const [proStatus, setProStatus] = useState(null);
-  const [openResetLicense, setOpenResetLicense] = useState(false);
 
   const { update } = useSettings();
 
@@ -244,9 +205,6 @@ export default function Options(props) {
 
       const openTicketTimeoutAction = settings.find((s) => s.key === "openTicketTimeoutAction");
       setOpenTicketTimeoutAction(openTicketTimeoutAction?.value || "pending");
-
-      const ticketzProKey = settings.find((s) => s.key === "ticketzProKey");
-      setTicketzProKey(ticketzProKey?.value || "");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
@@ -450,71 +408,6 @@ export default function Options(props) {
           scheduleTypeChanged(value);
         } */
   }
-
-  async function handleTicketzProKey(value) {
-    setTicketzProKey(value);
-    await update({
-      key: "ticketzProKey",
-      value,
-    });
-    if (value) {
-      setSubscribeError("");
-      setShowSubscriptionLoading(true);
-      ticketzProCheck().then(
-        _result => {
-          setShowSubscriptionLoading(false);
-          setShowTicketzProKey(false);
-          ticketzProStatus().then(
-            ticketzPro => {
-              setProStatus(ticketzPro.status);
-            }
-          )
-        },
-        _error => {
-          setShowSubscriptionLoading(false);
-        }
-      );
-    } else {
-      setProStatus(null);
-    }
-    toast.success("Operação atualizada com sucesso.");
-  }
-
-  function formCallback(cardToken) {
-    setShowCardForm(false);
-    setShowSubscriptionLoading(true);
-    setSubscribeError("");
-
-    ticketzProSubscribe({
-      emailAddress,
-      cardToken: cardToken?.id,
-    }).then(
-      result => {
-        setShowSubscriptionLoading(false);
-        setProStatus(result.status);
-        if (result.status?.subscriptionData?.id) {
-          setTicketzProKey(result.status.subscriptionData.id);
-          setShowCardForm(false);
-          setShowTicketzProKey(false);
-        }
-      },
-      error => {
-        setShowSubscriptionLoading(false);
-        setSubscribeError(error.message || "Erro desconhecido");
-      }
-    );
-  }
-  
-  useEffect(() => {
-    async function fetchData() {
-      const ticketzPro = await ticketzProStatus();
-      setProStatus(ticketzPro.status);
-    }
-    if (ticketzProKey) {
-      fetchData();
-    }
-    console.log("useEffect effecting", ticketzProKey);
-  }, []);
 
   return (
     <>
@@ -917,169 +810,6 @@ export default function Options(props) {
           )}
         />
       </Grid>
-      
-      <OnlyForSuperUser
-        user={currentUser}
-        yes={() => (
-          <Grid spacing={3} container style={{ paddingTop: "15px" }}>
-            <Grid xs={12} item>
-              <Typography variant="h5" color="primary">
-                Ticketz PRO
-              </Typography>
-            </Grid>
-            {
-              showSubscriptionLoading &&
-              <Grid xs={12} item>
-                <CircularProgress />
-              </Grid>
-            }
-            {              
-              !ticketzProKey && !showSubscriptionLoading &&
-              <Grid xs={12} sm={12} md={12} className={classes.buttonGrid} item>
-                {!showCardForm &&
-                  <Button
-                    className={classes.button}
-                    variant="contained"
-                    color="primary"
-                    onClick={
-                      () => {
-                        setShowCardForm(true);
-                        setShowTicketzProKey(false);
-                      }
-                    }>
-                    Assinar o Ticketz PRO
-                  </Button>
-                }
-                {!showTicketzProKey &&
-                  <Button
-                    className={classes.button}
-                    variant="contained"
-                    color="primary"
-                    onClick={
-                      () => {
-                        setShowTicketzProKey(true);
-                        setShowCardForm(false);
-                      }
-                    }>
-                    Código de Ativação
-                  </Button>
-                }
-              </Grid>
-            }
-
-            {
-              ticketzProKey && !showSubscriptionLoading &&
-              <Grid xs={12} sm={12} md={12} className={classes.buttonGrid} item>
-                <Button
-                  className={classes.button}
-                  variant="contained"
-                  color="secondary"
-                  onClick={() => setOpenResetLicense(true)}>
-                  Resetar Licença
-                </Button>
-              </Grid>
-            }
-
-            <Dialog
-              open={openResetLicense}
-              onClose={() => setOpenResetLicense(false)}
-              aria-labelledby="alert-dialog-title"
-              aria-describedby="alert-dialog-description"
-            >
-              <DialogTitle id="alert-dialog-title">Resetar configuração de licença?</DialogTitle>
-              <DialogContent>
-                <DialogContentText id="alert-dialog-description">
-                  Isso irá remover a licença atual do sistema, você poderá
-                  adicionar novamente através da chave de ativação ou
-                  contratar uma nova licença.
-                </DialogContentText>
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={() => setOpenResetLicense(false)} variant="contained" color="primary" autofocus>
-                  Cancelar
-                </Button>
-                <Button onClick={
-                  () => {
-                    setOpenResetLicense(false);
-                    setShowCardForm(false);
-                    handleTicketzProKey("");
-                    setProStatus(null);
-                  }
-                }
-                  variant="contained" color="secondary">
-                  Resetar
-                </Button>
-              </DialogActions>
-            </Dialog>
-
-            {showTicketzProKey &&
-              <Grid xs={12} sm={12} md={6} item>
-                <FormControl className={classes.selectContainer}>
-                  <TextField
-                    id="ticketzprokey-field"
-                    label="Código de Ativação"
-                    variant="standard"
-                    name="ticketzProKey"
-                    value={ticketzProKey}
-                    inputRef={ticketzProKeyInput}
-                    onChange={(e) => {
-                      setTicketzProKey(e.target.value);
-                    }}
-                    onBlur={async (_) => {
-                      await handleTicketzProKey(ticketzProKey);
-                    }}
-                  />
-                </FormControl>
-              </Grid>
-            }
-
-            {
-              showCardForm &&
-                <Grid xs={12} sm={12} md={6} item>
-                  <Typography component="h2" variant="h6">
-                    Assinatura: R$ 199/mês
-                  </Typography>
-
-                  <FormControl className={classes.selectContainer}>
-                    <TextField
-                      id="email-field"
-                      label="Endereço de e-mail"
-                      variant="standard"
-                      name="emailAddress"
-                      value={emailAddress}
-                      onChange={(e) => {
-                        setEmailAddress(e.target.value);
-                      }}
-                    />
-                  </FormControl>
-                  <MercadoPagoCreditCard callback={formCallback} />
-                </Grid>
-            }
-            {
-              subscribeError && !showSubscriptionLoading &&
-              <Grid xs={12} item>
-                <Typography variant="h5" color="error">
-                  {subscribeError}
-                </Typography>
-              </Grid>
-            }
-
-            {
-              proStatus && !showSubscriptionLoading &&
-              <Typography component="h2" variant="h6">
-                Status da assinatura:&nbsp;
-                {
-                  proStatus?.success ?
-                    (proStatus?.subscriptionData?.next_payment_date ? "Válida até " + moment(proStatus.subscriptionData.next_payment_date).format("LL") : "OK")
-                    :
-                    "Erro: " + proStatus?.message
-                }
-              </Typography>
-            }
-
-          </Grid>
-        )}
-      />
     </>
   );
 }
