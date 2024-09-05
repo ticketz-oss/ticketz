@@ -50,10 +50,20 @@ export const subscribe = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const { emailAddress: email, cardToken } = req.body;
+  const {
+    paymentService,
+    emailAddress,
+    cardToken,
+    addressData
+  } = req.body;
 
   try {
-    const status = await subscriptionService.subscribe(cardToken, email);
+    const status = await subscriptionService.subscribe(
+      paymentService,
+      emailAddress,
+      cardToken,
+      addressData
+    );
     if (status) {
       return res.json({ message: "SUBSCRIPTION_STATUS", status });
     }

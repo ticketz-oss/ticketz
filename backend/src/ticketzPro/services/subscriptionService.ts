@@ -7,6 +7,16 @@ import { makeRandomId } from "../../helpers/MakeRandomId";
 import UpdateSettingService from "../../services/SettingServices/UpdateSettingService";
 import AppError from "../../errors/AppError";
 
+type SubscriptionRequestData = {
+  domain: string;
+  paymentService: string;
+  email: string;
+  cardToken: object;
+  addressData: object;
+  challenge: string;
+  debug?: boolean;
+};
+
 function getDomain(url) {
   try {
     const parsedUrl = new URL(url);
@@ -58,7 +68,7 @@ export class SubscriptionService {
   // eslint-disable-next-line class-methods-use-this
   async checkSubscriptionStatus(): Promise<{ success: boolean }> {
     const url =
-      "https://m7afmggvk2xe7xakjkth4scpia.apigateway.sa-saopaulo-1.oci.customer-oci.com/mps/check";
+      "https://m7afmggvk2xe7xakjkth4scpia.apigateway.sa-saopaulo-1.oci.customer-oci.com/mps/check-test";
 
     const ticketzProKey = await GetCompanySetting(1, "ticketzProKey", "");
 
@@ -85,7 +95,7 @@ export class SubscriptionService {
       const result = response.data;
 
       if (!verifySignature(result, data.challenge)) {
-        throw new AppError("Invalid response signature", 403);
+        throw new AppError("Invalid response signature", 500);
       }
 
       this.taskStatus = result;
@@ -147,16 +157,29 @@ export class SubscriptionService {
     return this.taskStatus;
   }
 
-  async subscribe(cardToken: string, email: string) {
+  async subscribe(
+    paymentService: string,
+    email: string,
+    cardToken: object,
+    addressData: object
+  ) {
     const url =
-      "https://m7afmggvk2xe7xakjkth4scpia.apigateway.sa-saopaulo-1.oci.customer-oci.com/mps/subscribe";
+      "https://m7afmggvk2xe7xakjkth4scpia.apigateway.sa-saopaulo-1.oci.customer-oci.com/mps/subscribe-test";
 
-    const data = {
+    const data: SubscriptionRequestData = {
       domain: getDomain(process.env.FRONTEND_URL),
-      cardToken,
+      paymentService,
       email,
+      cardToken,
+      addressData,
       challenge: makeRandomId(32)
     };
+
+    if (process.env.FRONTEND_URL.endsWith(".ticke.tz")) {
+      data.debug = true;
+    }
+
+    logger.debug({ data }, "Sending subscription data");
 
     const response = await axios.post(url, data, {
       headers: {
@@ -164,14 +187,16 @@ export class SubscriptionService {
       }
     });
 
+    logger.debug({ data: response?.data }, "Received subscription response");
+
     if (!verifySignature(response.data, data.challenge)) {
-      throw new AppError("Invalid response signature", 403);
+      throw new AppError("Invalid response signature", 500);
     }
 
     const { success, subscriptionData, message } = response.data;
 
     if (!success) {
-      throw new AppError(message, 403);
+      throw new AppError(message, 402);
     }
 
     if (!subscriptionData) {
