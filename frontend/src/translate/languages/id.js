@@ -850,6 +850,16 @@ const messages = {
         "cnpj": "CNPJ",
         "submit": "Kirim"
       },
+      "addressForm": {
+        "country": "Negara",
+        "postalCode": "Kode Pos",
+        "street": "Nama Jalan",
+        "streetNumber": "Nomor Jalan",
+        "addressLine1": "Alamat Baris 1",
+        "addressLine2": "Alamat Baris 2",
+        "city": "Kota",
+        "state": "Provinsi atau Wilayah"
+      },
 			ticketz: {
 				support: {
 					title: "Dukung proyek Ticketz",

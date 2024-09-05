@@ -865,7 +865,18 @@ const messages = {
         "cnpj": "CNPJ",
         "submit": "Enviar"
       },
+      "addressForm": {
+        "country": "País",
+        "postalCode": "CEP / Código Postal",
+        "street": "Logradouro",
+        "streetNumber": "Número",
+        "addressLine1": "Endereço Linha 1",
+        "addressLine2": "Complemento",
+        "city": "Cidade",
+        "state": "Estado ou Região"
+      },
 			ticketz: {
+        subscription: "Assinatura",
 				support: {
 					title: "Apoie o projeto Ticketz Open Source",
 					mercadopagotitle: "Cartão de Crédito",
