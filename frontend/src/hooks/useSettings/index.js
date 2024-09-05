@@ -2,6 +2,14 @@ import api, { openApi } from "../../services/api";
 
 const useSettings = () => {
 
+    const get = async (key) => {
+        const { data } = await api.request({
+            url: `/settings/${key}`,
+            method: 'GET'
+        });
+        return data;
+    }
+
     const getAll = async (params) => {
         const { data } = await api.request({
             url: '/settings',
@@ -29,6 +37,7 @@ const useSettings = () => {
     }
 
     return {
+      get,
 		  getAll,
 		  getPublicSetting,
       update

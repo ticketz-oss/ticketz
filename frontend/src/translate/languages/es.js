@@ -863,6 +863,16 @@ const messages = {
         "cnpj": "CNPJ",
         "submit": "Enviar"
       },
+      "addressForm": {
+        "country": "País",
+        "postalCode": "Código Postal",
+        "street": "Nombre de la Calle",
+        "streetNumber": "Número de la Calle",
+        "addressLine1": "Línea de Dirección 1",
+        "addressLine2": "Línea de Dirección 2",
+        "city": "Ciudad",
+        "state": "Estado o Región"
+      },
 			ticketz: {
 				support: {
 					title: "Apoyar el proyecto Ticketz",

@@ -6,6 +6,9 @@ import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 
 const useStyles = makeStyles((theme) => ({
+  container: {
+    marginTop: "8px"
+  },
   field: {
     width: "100%",
     textAlign: "left",
@@ -20,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export function CreditCardForm({ onSubmit }) {
+export function CreditCardForm({ onSubmit, forceBR = false }) {
   const classes = useStyles();
   const [formData, setFormData] = useState({
     cardNumber: "",
@@ -44,7 +47,7 @@ export function CreditCardForm({ onSubmit }) {
       
       setLastBin(bin);
       
-      api.get(`/binlist/${bin}`).then(
+      !forceBR && api.get(`/binlist/${bin}`).then(
         ({ data }) => {
           setIsBrazilianCard(data.country.alpha2 === 'BR');
         }
@@ -67,7 +70,7 @@ export function CreditCardForm({ onSubmit }) {
   };
 
   return (
-    <Grid container spacing={1}>
+    <Grid className={classes.container} container spacing={2}>
       <Grid xs={12} sm={12} md={6} item>
         <FormControl className={classes.field}>
           <InputMask
