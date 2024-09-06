@@ -835,6 +835,7 @@ const messages = {
 				ERR_FETCH_WAPP_MSG: "Error fetching message from WhatsApp, perhaps it is too old.",
 				ERR_QUEUE_COLOR_ALREADY_EXISTS: "This color is already in use, choose another.",
 				ERR_WAPP_GREETING_REQUIRED: "Greeting message is mandatory when there is more than one queue.",
+				ERR_SUBSCRIPTION_CHECK_FAILED: "Subscription invalid or not found",
 			},
       "ccform": {
         "cardNumber": "Card Number",
