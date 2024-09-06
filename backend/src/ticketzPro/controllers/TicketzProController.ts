@@ -18,7 +18,7 @@ export const checkStatus = async (
   if (result) {
     return res.json({ message: "SUBSCRIPTION_OK" });
   }
-  return res.status(403).json({ message: "ERR_SUBSCRIPTION_CHECK_FAILED" });
+  return res.status(402).json({ message: "ERR_SUBSCRIPTION_CHECK_FAILED" });
 };
 
 /**
@@ -36,7 +36,7 @@ export const getStatus = async (
   if (status) {
     return res.json({ message: "SUBSCRIPTION_STATUS", status });
   }
-  return res.status(403).json({ message: "ERR_SUBSCRIPTION_CHECK_FAILED" });
+  return res.status(402).json({ message: "ERR_SUBSCRIPTION_CHECK_FAILED" });
 };
 
 /**
