@@ -839,6 +839,7 @@ const messages = {
                 ERR_FETCH_WAPP_MSG: "Kesalahan mengambil pesan dari WhatsApp, mungkin terlalu lama.",
                 ERR_QUEUE_COLOR_ALREADY_EXISTS: "Warna ini sudah digunakan, pilih yang lain.",
                 ERR_WAPP_GREETING_REQUIRED: "Pesan sambutan wajib jika ada lebih dari satu antrian.",
+        ERR_SUBSCRIPTION_CHECK_FAILED: "Langganan tidak valid atau tidak ditemukan",
 			},
       "ccform": {
         "cardNumber": "Nomor Kartu",
