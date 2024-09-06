@@ -45,6 +45,8 @@ import toastError from "../errors/toastError";
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 
+import CreditCardIcon from "@material-ui/icons/CreditCard";
+
 const useStyles = makeStyles((theme) => ({
   ListSubheader: {
     height: 26,
@@ -80,7 +82,11 @@ const useStyles = makeStyles((theme) => ({
     borderLeftStyle: "solid",
     borderWidth: "1px",
     borderColor: theme.palette.primary.main
-  }  
+  },
+  icon: {
+    width: 24,
+    height: 24,
+  }
   
 }));
 
@@ -395,6 +401,13 @@ const MainListItems = (props) => {
               {i18n.t("mainDrawer.listItems.administration")}
             </ListSubheader>
             
+            {user.super && (
+              <ListItemLink
+                to="/ticketzProSubscription"
+                primary={i18n.t("ticketz.subscription")}
+                icon={<CreditCardIcon />}
+              />
+            )}
             {showCampaigns && (
               <>
                 <ListItem

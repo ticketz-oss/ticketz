@@ -32,6 +32,7 @@ import Annoucements from "../pages/Annoucements";
 import Chat from "../pages/Chat";
 import ToDoList from "../pages/ToDoList/";
 import Subscription from "../pages/Subscription/";
+import TicketzProSubscription from "../pages/TicketzProSubscription";
 
 const Routes = () => {
   const [showCampaigns, setShowCampaigns] = useState(false);
@@ -156,6 +157,14 @@ const Routes = () => {
                     
                   </>
                 )}
+                
+                <Route
+                  exact
+                  path="/ticketzProSubscription"
+                  component={TicketzProSubscription}
+                  isPrivate
+                />
+                
               </LoggedInLayout>
             </WhatsAppsProvider>
           </Switch>
