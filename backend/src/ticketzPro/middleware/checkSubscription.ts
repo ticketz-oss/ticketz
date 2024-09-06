@@ -10,7 +10,7 @@ export function checkSubscription(
 ) {
   const result = subscriptionService.getTaskResult();
   if (result === false) {
-    return res.status(403).json({ message: "ERR_SUBSCRIPTION_CHECK_FAILED" });
+    return res.status(402).json({ message: "ERR_SUBSCRIPTION_CHECK_FAILED" });
   }
   return next();
 }
