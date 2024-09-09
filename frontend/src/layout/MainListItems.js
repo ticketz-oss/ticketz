@@ -45,8 +45,6 @@ import toastError from "../errors/toastError";
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 
-import CreditCardIcon from "@material-ui/icons/CreditCard";
-
 const useStyles = makeStyles((theme) => ({
   ListSubheader: {
     height: 26,
@@ -400,14 +398,7 @@ const MainListItems = (props) => {
             color="inherit">
               {i18n.t("mainDrawer.listItems.administration")}
             </ListSubheader>
-            
-            {user.super && (
-              <ListItemLink
-                to="/ticketzProSubscription"
-                primary={i18n.t("ticketz.subscription")}
-                icon={<CreditCardIcon />}
-              />
-            )}
+
             {showCampaigns && (
               <>
                 <ListItem
