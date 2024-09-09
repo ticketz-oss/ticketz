@@ -3,7 +3,16 @@ import { Grid, TextField, FormControl, InputLabel, Select, MenuItem } from "@mat
 import { makeStyles } from "@material-ui/core/styles";
 import { i18n } from '../../translate/i18n';
 
-// Country loader placed outside the component functions
+const countriesRequiringPostalCode = [
+  "US", "CA", "GB", "AU", "DE", "FR", "IT", "ES", "BR", "IN", "RU", "JP", "CN", "MX", 
+  "NL", "KR", "ZA", "NZ", "AR", "BE", "DK", "FI", "NO", "SE", "CH", "IE", "PL", 
+  "PT", "SG", "TR", "IL", "AT", "CZ", "HU", "RO", "GR"
+];
+
+const countriesRequiringState = [
+  "US", "CA", "AU", "IN", "BR", "MX", "AR", "CN", "JP", "RU"
+];
+
 const loadCountries = async () => {
   try {
     const response = await fetch("https://raw.githubusercontent.com/dr5hn/countries-states-cities-database/master/countries.json");
@@ -11,32 +20,65 @@ const loadCountries = async () => {
 
     const language = localStorage.getItem("language") || "en";
 
-    // Map and sort countries
     const countries = data.map(country => {
-      // Full match
-      let countryName = country.translations[language];
-
-      // Two-letter match
-      if (!countryName && language.length === 5) {
-        countryName = country.translations[language.slice(0, 2)];
-      }
-
-      // Fallback to English
-      if (!countryName) {
-        countryName = country.name;
-      }
-
-      return {
-        iso2: country.iso2,
-        name: countryName,
-        emoji: country.emoji
-      };
+      let countryName = country.translations[language] || country.translations[language.slice(0, 2)] || country.name;
+      return { iso2: country.iso2, name: countryName, emoji: country.emoji };
     }).sort((a, b) => a.name.localeCompare(b.name));
 
     return countries;
   } catch (error) {
     console.error("Error fetching countries:", error);
     return [];
+  }
+};
+
+// Function to fetch address data from ViaCEP API
+const fetchBrazilianAddressData = async (postalCode) => {
+  if (postalCode.length !== 8) {
+    return;
+  }
+  try {
+    const response = await fetch(`https://viacep.com.br/ws/${postalCode}/json`);
+    const data = await response.json();
+
+    if (data.erro) {
+      throw new Error("Postal code not found");
+    }
+
+    return {
+      street: data.logradouro,
+      city: data.localidade,
+      state: data.uf,
+      addressLine2: `Bairro ${data.bairro}`
+    };
+  } catch (error) {
+    console.error("Error fetching address data from ViaCEP:", error);
+    return { street: "", city: "", state: "", addressLine2: "" };
+  }
+};
+
+const fetchZippopotamusData = async (country, zipCode) => {
+  if (!country || !zipCode) {
+    return;
+  }
+  try {
+    const response = await fetch(`https://api.zippopotam.us/${country.toLowerCase()}/${zipCode}`);
+    const data = await response.json();
+
+    if (!data.places || data.places.length === 0) {
+      throw new Error("ZIP code not found");
+    }
+
+    const place = data.places[0];
+    return {
+      street: "",
+      city: place['place name'],
+      state: place['state abbreviation'],
+      addressLine2: ""
+    };
+  } catch (error) {
+    console.error("Error fetching address data from Zippopotamus:", error);
+    return { street: "", city: "", state: "", addressLine2: "" };
   }
 };
 
@@ -51,6 +93,9 @@ const useStyles = makeStyles((theme) => ({
   addressLine1: {
     width: "100%",
   },
+  errorField: {
+    borderColor: theme.palette.error.main,
+  }
 }));
 
 export function useAddressData() {
@@ -63,6 +108,7 @@ export function useAddressData() {
     postalCode: "",
     city: "",
     state: "",
+    complete: false,
   });
 }
 
@@ -70,29 +116,62 @@ export function AddressForm({ formData, setFormData }) {
   const classes = useStyles();
   const [countries, setCountries] = useState([]);
   const [showNumber, setShowNumber] = useState(true);
+  const [errors, setErrors] = useState({ 
+    country: false, addressLine1: false, street: false, number: false, 
+    city: false, postalCode: false, state: false 
+  });
 
-  // Fetch countries on component mount
   useEffect(() => {
     loadCountries().then(setCountries);
+    validateFields(formData);
   }, []);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  const validateFields = (updatedFormData) => {
+    const newErrors = {
+      country: !updatedFormData.country,
+      addressLine1: !updatedFormData.addressLine1,
+      city: !updatedFormData.city,
+      postalCode: countriesRequiringPostalCode.includes(updatedFormData.country) && !updatedFormData.postalCode,
+      street: updatedFormData.country === "BR" && !updatedFormData.street,
+      number: updatedFormData.country === "BR" && !updatedFormData.number,
+      state: countriesRequiringState.includes(updatedFormData.country) && !updatedFormData.state
+    };
+    setErrors(newErrors);
 
+    const isComplete = !Object.values(newErrors).some((error) => error);
+    return isComplete;
+  };
+
+  const handlePostalCode = async (e) => {
+    const { value } = e.target;
+    const addressData = (formData.country === "BR")
+      ? await fetchBrazilianAddressData(value)
+      : await fetchZippopotamusData(formData.country, value);
+    const updatedFormData = { ...formData, ...addressData };
+
+    const isComplete = validateFields(updatedFormData);
+    updatedFormData.complete = isComplete;
+    setFormData(updatedFormData);
+  }
+
+  const handleChange = async (e) => {
+    const { name, value } = e.target;
     let updatedFormData = { ...formData, [name]: value };
 
     if (name === "country") {
-      if (value === "BR") {
-        setShowNumber(true);
-      } else {
-        setShowNumber(false);
+      setShowNumber(value === "BR");
+      if (value === "BR" && formData.postalCode) {
+        const addressData = await fetchBrazilianAddressData(formData.postalCode);
+        updatedFormData = { ...updatedFormData, ...addressData };
       }
     }
 
-    if (updatedFormData.country === "BR" && ["street", "number"].includes(name))
-    {
+    if (updatedFormData.country === "BR" && ["street", "number"].includes(name)) {
       updatedFormData.addressLine1 = `${updatedFormData.street}, ${updatedFormData.number}`;
     }
+
+    const isComplete = validateFields(updatedFormData);
+    updatedFormData.complete = isComplete;
 
     setFormData(updatedFormData);
   };
@@ -108,6 +187,8 @@ export function AddressForm({ formData, setFormData }) {
             name="country"
             value={formData.country}
             onChange={handleChange}
+            error={errors.country}
+            className={errors.country ? classes.errorField : ""}
           >
             {countries.map((country) => (
               <MenuItem key={country.iso2} value={country.iso2}>
@@ -126,6 +207,9 @@ export function AddressForm({ formData, setFormData }) {
             variant="standard"
             value={formData.postalCode}
             onChange={handleChange}
+            onBlur={handlePostalCode}
+            error={errors.postalCode}
+            className={errors.postalCode ? classes.errorField : ""}
           />
         </FormControl>
       </Grid>
@@ -140,7 +224,8 @@ export function AddressForm({ formData, setFormData }) {
                 variant="standard"
                 value={formData.street}
                 onChange={handleChange}
-                className={classes.addressLine1}
+                error={errors.street}
+                className={errors.street ? classes.errorField : ""}
               />
             </FormControl>
           </Grid>
@@ -153,6 +238,8 @@ export function AddressForm({ formData, setFormData }) {
                 variant="standard"
                 value={formData.number}
                 onChange={handleChange}
+                error={errors.number}
+                className={errors.number ? classes.errorField : ""}
               />
             </FormControl>
           </Grid>
@@ -167,11 +254,12 @@ export function AddressForm({ formData, setFormData }) {
             variant="standard"
             value={formData.addressLine1}
             onChange={handleChange}
-            className={classes.addressLine1}
+            error={errors.addressLine1}
+            className={`${classes.addressLine1} ${errors.addressLine1 ? classes.errorField : ""}`}
           />
         </FormControl>
       </Grid>
-      <Grid item xs={12}>
+      <Grid item xs={12} sm={12}>
         <FormControl className={classes.field}>
           <TextField
             id="addressLine2"
@@ -192,6 +280,8 @@ export function AddressForm({ formData, setFormData }) {
             variant="standard"
             value={formData.city}
             onChange={handleChange}
+            error={errors.city}
+            className={errors.city ? classes.errorField : ""}
           />
         </FormControl>
       </Grid>
@@ -204,6 +294,8 @@ export function AddressForm({ formData, setFormData }) {
             variant="standard"
             value={formData.state}
             onChange={handleChange}
+            error={errors.state}
+            className={errors.state ? classes.errorField : ""}
           />
         </FormControl>
       </Grid>
