@@ -924,7 +924,7 @@ const messages = {
       "ccform": {
         "cardNumber": "Nomor Kartu",
         "expirationDate": "Tanggal Kedaluwarsa",
-        "securityCode": "CVV",
+        "securityCode": "CVC",
         "cardholderName": "Nama Pemegang Kartu",
         "documentType": "Jenis Dokumen",
         "cpf": "CPF",

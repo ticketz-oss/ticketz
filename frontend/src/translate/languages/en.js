@@ -920,7 +920,7 @@ const messages = {
       "ccform": {
         "cardNumber": "Card Number",
         "expirationDate": "Expiration Date",
-        "securityCode": "CVV",
+        "securityCode": "CVC",
         "cardholderName": "Cardholder Name",
         "documentType": "Document Type",
         "cpf": "CPF",

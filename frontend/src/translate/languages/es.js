@@ -937,7 +937,7 @@ const messages = {
       "ccform": {
         "cardNumber": "Número de Tarjeta",
         "expirationDate": "Fecha de Expiración",
-        "securityCode": "CVV",
+        "securityCode": "CVC",
         "cardholderName": "Nombre en la Tarjeta",
         "documentType": "Tipo de Documento",
         "cpf": "CPF",
