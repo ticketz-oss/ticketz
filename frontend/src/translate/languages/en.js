@@ -938,6 +938,12 @@ const messages = {
         state: "State or Region"
       },
 			ticketz: {
+        pro: {
+          markProStart: "used only to mark position of the start of PRO exclusive strings",
+          markProEnd: "used only to mark position of the end of PRO exclusive strings",
+          markSubscriptionStart: "used to mark position of the start of subscription exclusive strings",          
+          markSubscriptionEnd: "used to mark position of the end of subscription exclusive strings",
+        },
 				support: {
 					title: "Support Ticketz project",
 					mercadopagotitle: "Credit Card",

@@ -958,7 +958,12 @@ const messages = {
         "state": "Estado ou Região"
       },
 			ticketz: {
-        subscription: "Assinatura",
+        pro: {
+          markProStart: "usado apenas para marcar a posição do início das strings exclusivas do PRO",
+          markProEnd: "usado apenas para marcar a posição do fim das strings exclusivas do PRO",
+          markSubscriptionStart: "usado para marcar a posição do início das strings exclusivas de assinatura",
+          markSubscriptionEnd: "usado para marcar a posição do fim das strings exclusivas de assinatura"
+        },
 				support: {
 					title: "Apoie o projeto Ticketz Open Source",
 					mercadopagotitle: "Cartão de Crédito",
