@@ -50,6 +50,7 @@ import GoogleAnalytics from "../components/GoogleAnalytics";
 import OnlyForSuperUser from "../components/OnlyForSuperUser";
 
 import { loadJSON } from "../helpers/loadJSON";
+import { TicketzProSubscriptionModal } from "../components/TicketzProSubscriptionModal";
 
 const gitinfo = loadJSON('/gitinfo.json');
 
@@ -274,6 +275,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   const classes = useStyles();
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
+  const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
@@ -424,6 +426,11 @@ const LoggedInLayout = ({ children, themeToggle }) => {
     handleCloseProfileMenu();
   };
 
+  const handleOpenSubscriptionModal = () => {
+    setSubscriptionModalOpen(true);
+    handleCloseProfileMenu();
+  };
+
   const handleClickLogout = () => {
     handleCloseProfileMenu();
     handleLogout();
@@ -487,6 +494,10 @@ const LoggedInLayout = ({ children, themeToggle }) => {
         open={userModalOpen}
         onClose={() => setUserModalOpen(false)}
         userId={user?.id}
+      />
+      <TicketzProSubscriptionModal
+        open={subscriptionModalOpen}
+        onClose={() => setSubscriptionModalOpen(false)}
       />
       <AboutProModal
         open={aboutModalOpen}
@@ -608,6 +619,13 @@ const LoggedInLayout = ({ children, themeToggle }) => {
                   ))
                 }
               </NestedMenuItem>
+              <OnlyForSuperUser
+                user={currentUser}
+                yes={() => (
+                  <MenuItem onClick={handleOpenSubscriptionModal}>
+                    {i18n.t("ticketzPro.subscriptionStatus")}
+                  </MenuItem>
+                )} />              
               <MenuItem onClick={handleOpenAboutModal}>
                 {i18n.t("about.aboutthe")} {currentUser?.super ? "Ticketz PRO" : theme.appName}
               </MenuItem>
