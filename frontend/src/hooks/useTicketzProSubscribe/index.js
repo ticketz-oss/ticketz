@@ -18,8 +18,23 @@ const useTicketzProSubscribe = () => {
       }
     }
 
+    const ticketzProCancelSubscription = async (data) => {
+      try {
+        const { data: responseData } = await api.request({
+            url: `/ticketzPro/cancel`,
+            method: 'GET'
+        });
+        return responseData;
+      } catch (error) {
+        if (error instanceof AxiosError) {
+          throw new Error(error.response.data.message);
+        }
+      }
+    }
+
     return {
-        ticketzProSubscribe
+        ticketzProSubscribe,
+        ticketzProCancelSubscription,
     }
 }
 

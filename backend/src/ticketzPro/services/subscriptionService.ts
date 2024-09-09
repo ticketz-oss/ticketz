@@ -68,12 +68,13 @@ export class SubscriptionService {
   // eslint-disable-next-line class-methods-use-this
   async checkSubscriptionStatus(): Promise<{ success: boolean }> {
     const url =
-      "https://m7afmggvk2xe7xakjkth4scpia.apigateway.sa-saopaulo-1.oci.customer-oci.com/mps/check-test";
+      "https://m7afmggvk2xe7xakjkth4scpia.apigateway.sa-saopaulo-1.oci.customer-oci.com/mps/check";
 
     const ticketzProKey = await GetCompanySetting(1, "ticketzProKey", "");
 
     if (!ticketzProKey) {
       logger.debug("Ticketz PRO key not configured");
+      this.taskStatus = {};
       return { success: false };
     }
 
@@ -128,6 +129,49 @@ export class SubscriptionService {
     }
   }
 
+  async cancel() {
+    const url =
+      "https://m7afmggvk2xe7xakjkth4scpia.apigateway.sa-saopaulo-1.oci.customer-oci.com/mps/subscribe";
+
+    const ticketzProKey = await GetCompanySetting(1, "ticketzProKey", "");
+
+    if (!ticketzProKey) {
+      logger.debug("Ticketz PRO key not configured");
+      return this.taskStatus;
+    }
+
+    const data = {
+      id: ticketzProKey,
+      cancel: true,
+      challenge: makeRandomId(32)
+    };
+
+    logger.debug(data, "Cancelling subscription");
+
+    try {
+      const response = await axios.post(url, data, {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+
+      const result = response.data;
+
+      if (!verifySignature(result, data.challenge)) {
+        throw new AppError("Invalid response signature", 500);
+      }
+
+      this.taskStatus = result;
+
+      logger.debug({ result }, "License cancel result");
+
+      await this.triggerSingleCheck();
+    } catch (error) {
+      logger.error(`Error cancelling subscription status: ${error.message}`);
+    }
+    return this.taskStatus;
+  }
+
   getTaskResult(): boolean | null {
     return this.taskResult;
   }
@@ -164,7 +208,7 @@ export class SubscriptionService {
     addressData: object
   ) {
     const url =
-      "https://m7afmggvk2xe7xakjkth4scpia.apigateway.sa-saopaulo-1.oci.customer-oci.com/mps/subscribe-test";
+      "https://m7afmggvk2xe7xakjkth4scpia.apigateway.sa-saopaulo-1.oci.customer-oci.com/mps/subscribe";
 
     const data: SubscriptionRequestData = {
       domain: getDomain(process.env.FRONTEND_URL),

@@ -72,3 +72,20 @@ export const subscribe = async (
     return res.status(error.statusCode || 500).json({ message: error.message });
   }
 };
+
+/**
+ * cancel
+ *
+ * call license server to cancel the license
+ */
+
+export const cancel = async (
+  _req: Request,
+  res: Response
+): Promise<Response> => {
+  const status = await subscriptionService.cancel();
+  if (status) {
+    return res.json({ message: "SUBSCRIPTION_CANCEL_STATUS", status });
+  }
+  return res.status(402).json({ message: "ERR_SUBSCRIPTION_CANCEL_FAILED" });
+};

@@ -52,5 +52,12 @@ export const ticketzPro = async app => {
     TicketzProController.subscribe
   );
 
+  routes.get(
+    "/ticketzPro/cancel",
+    isAuth,
+    isSuper,
+    TicketzProController.cancel
+  );
+
   app.use(routes);
 };
