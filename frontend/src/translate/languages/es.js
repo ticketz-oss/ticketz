@@ -707,6 +707,85 @@ const messages = {
 						},
 					},
 				},
+				validations: {
+					title:"Validaciones",
+					options: {
+						enabled: "Habilitado",
+						disabled: "Deshabilitado",
+					},
+				},
+				OfficeManagement: {
+					title:"Gestión de despachos",
+					options: {
+						disabled: "Deshabilitado",
+						ManagementByDepartment: "Gestión por departamento",
+						ManagementByCompany: "Gestión por empresa",
+					},
+				},
+				IgnoreGroupMessages: {
+					title:"Ignorar mensajes de grupo",
+					options: {
+						enabled: "Activado",
+						disabled: "Desactivado",
+					},
+				},
+				VoiceAndVideoCalls: {
+					title:"Llamadas de voz y vídeo",
+					options: {
+						enabled: "Ignorar",
+						disabled: "informe de indisponibilidad",
+					},
+				},
+				AutomaticChatbotOutput: {
+					title:"Salida automática del chatbot",
+					options: {
+						enabled: "Activado",
+						disabled: "Desactivado",
+					},
+				},
+				QuickMessages: {
+					title:"Respuestas rápidas",
+					options: {
+						enabled: "Por empresa",
+						disabled: "Por Usuario",
+					},
+				},
+				AllowRegistration: {
+					title:"Permitir el registro",
+					options: {
+						enabled: "Activado",
+						disabled: "Desactivado",
+					},
+				},
+				FileDownloadLimit: {
+					title:"Límite de descarga de archivos (MB)",
+				},
+				WelcomeGreeting: {
+					greetings: "hola",
+					welcome: "bienvenido a",
+					expirationTime: "Activo hasta",
+				},
+				Options: {
+					title:"Opciones",
+				},
+				Companies: {
+					title:"Empresas",
+				},
+				schedules: {
+					title:"horarios",
+				},
+				Plans: {
+					title:"Planes",
+				},
+				Help: {
+					title:"Ayuda",
+				},
+				Whitelabel: {
+					title:"Whitelabel",
+				},
+				PaymentGateways: {
+					title:"Payment gateways",
+				},
 			},
 			messagesList: {
 				header: {
@@ -853,6 +932,7 @@ const messages = {
 				ERR_WAPP_GREETING_REQUIRED:
 					"El mensaje de saludo es obligatorio cuando hay más de una cola.",
 				ERR_SUBSCRIPTION_CHECK_FAILED: "Suscripción inválida o no encontrada",
+				ERR_UNKNOWN: "Error desconocido",
 			},
       "ccform": {
         "cardNumber": "Número de Tarjeta",

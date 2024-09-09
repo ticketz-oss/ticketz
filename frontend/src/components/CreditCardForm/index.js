@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useImperativeHandle, forwardRef } from "react";
 import { Grid, TextField, FormControl, InputLabel, Select, MenuItem, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import InputMask from 'react-input-mask';
@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export function CreditCardForm({ onSubmit, forceBR = false }) {
+export const CreditCardForm = forwardRef(({ onSubmit, forceBR = false, renderSubmit = true }, ref) => {
   const classes = useStyles();
   const [formData, setFormData] = useState({
     cardNumber: "",
@@ -36,17 +36,22 @@ export function CreditCardForm({ onSubmit, forceBR = false }) {
   const [isBrazilianCard, setIsBrazilianCard] = useState(true);
   const [lastBin, setLastBin] = useState("");
 
+  useImperativeHandle(ref, () => ({
+    submitPayment() {
+      handleSubmit();
+    }
+  }));
+
   useEffect(() => {
-    
     const bin = formData.cardNumber.replace(/\s+/g, '').substring(0, 6);
     if (bin.length === 6) {
-      
+
       if (bin === lastBin) {
         return;
       }
-      
+
       setLastBin(bin);
-      
+
       !forceBR && api.get(`/binlist/${bin}`).then(
         ({ data }) => {
           setIsBrazilianCard(data.country.alpha2 === 'BR');
@@ -173,16 +178,18 @@ export function CreditCardForm({ onSubmit, forceBR = false }) {
         </>
       )}
 
-      <Grid xs={12} sm={12} md={12} className={classes.buttonGrid}>
-        <Button
-          className={classes.button}
-          variant="contained"
-          color="primary"
-          onClick={handleSubmit}
-        >
-          {i18n.t('ccform.submit')}
-        </Button>
-      </Grid>
+      {renderSubmit &&
+        <Grid xs={12} sm={12} md={12} className={classes.buttonGrid}>
+          <Button
+            className={classes.button}
+            variant="contained"
+            color="primary"
+            onClick={handleSubmit}
+          >
+            {i18n.t('ccform.submit')}
+          </Button>
+        </Grid>
+      }
     </Grid>
   );
-}
+});

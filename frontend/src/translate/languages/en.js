@@ -701,6 +701,85 @@ const messages = {
 						},
 					},
 				},
+				validations: {
+					title:"validations",
+					options: {
+						enabled: "enabled",
+						disabled: "disabled",
+					},
+				},
+				OfficeManagement: {
+					title:"Office Management",
+					options: {
+						disabled: "disabled",
+						ManagementByDepartment: "Management By Department",
+						ManagementByCompany: "Management By Company",
+					},
+				},
+				IgnoreGroupMessages: {
+					title:"Ignore Group Messages",
+					options: {
+						enabled: "enabled",
+						disabled: "disabled",
+					},
+				},
+				VoiceAndVideoCalls: {
+					title:"Voice and video calls",
+					options: {
+						enabled: "Ignore",
+						disabled: "unavailability report",
+					},
+				},
+				AutomaticChatbotOutput: {
+					title:"Automatic Chatbot Output",
+					options: {
+						enabled: "enabled",
+						disabled: "disabled",
+					},
+				},
+				QuickMessages: {
+					title:"Quick Messages",
+					options: {
+						enabled: "By company",
+						disabled: "By User",
+					},
+				},
+				AllowRegistration: {
+					title:"Allow Registration",
+					options: {
+						enabled: "enabled",
+						disabled: "disabled",
+					},
+				},
+				FileDownloadLimit: {
+					title:"File Download Limit (MB)",
+				},
+				WelcomeGreeting: {
+					greetings: "Hello",
+					welcome: "Welcome to",
+					expirationTime: "Active until",
+				},
+				Options: {
+					title:"Options",
+				},
+				Companies: {
+					title:"Companies",
+				},
+				schedules: {
+					title:"schedules",
+				},
+				Plans: {
+					title:"Plans",
+				},
+				Help: {
+					title:"Help",
+				},
+				Whitelabel: {
+					title:"Whitelabel",
+				},
+				PaymentGateways: {
+					title:"Pasarelas de pago",
+				},
 			},
 			messagesList: {
 				header: {
@@ -836,6 +915,7 @@ const messages = {
 				ERR_QUEUE_COLOR_ALREADY_EXISTS: "This color is already in use, choose another.",
 				ERR_WAPP_GREETING_REQUIRED: "Greeting message is mandatory when there is more than one queue.",
 				ERR_SUBSCRIPTION_CHECK_FAILED: "Subscription invalid or not found",
+				ERR_UNKOWN: "Unknown error",
 			},
       "ccform": {
         "cardNumber": "Card Number",

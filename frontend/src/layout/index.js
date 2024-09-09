@@ -528,11 +528,11 @@ const LoggedInLayout = ({ children, themeToggle }) => {
           >
              {greaterThenSm && user?.profile === "admin" && user?.company?.dueDate ? (
               <>
-                Olá <b>{user.name}</b>, seja bem-vindo a <b>{user?.company?.name}</b>! (Ativo até {dateToClient(user?.company?.dueDate)})
+                {i18n.t("settings.WelcomeGreeting.greetings")} <b>{user.name}</b>, {i18n.t("settings.WelcomeGreeting.welcome")} <b>{user?.company?.name}</b>! ({i18n.t("settings.WelcomeGreeting.expirationTime")} {dateToClient(user?.company?.dueDate)})
               </>
             ) : (
               <>
-                Olá <b>{user.name}</b>, seja bem-vindo a <b>{user?.company?.name}</b>!
+                {i18n.t("settings.WelcomeGreeting.greetings")} <b>{user.name}</b>, {i18n.t("settings.WelcomeGreeting.welcome")} <b>{user?.company?.name}</b>! ({i18n.t("settings.WelcomeGreeting.expirationTime")} {dateToClient(user?.company?.dueDate)})
               </>
             )}
           </Typography>

@@ -707,6 +707,85 @@ const messages = {
 						},
 					},
 				},
+				validations:{
+					title:"validasi",
+					options: {
+						enabled: "Diaktifkan",
+						disabled: "Dinonaktifkan",
+					},
+				},
+				OfficeManagement: {
+					title:"Manajemen kantor",
+					options: {
+						disabled: "Dinonaktifkan",
+						ManagementByDepartment: "Manajemen berdasarkan departemen",
+						ManagementByCompany: "Manajemen oleh perusahaan",
+					},
+				},
+				IgnoreGroupMessages: {
+					title:"Abaikan pesan grup",
+					options: {
+						enabled: "Diaktifkan",
+						disabled: "Dinonaktifkan",
+					},
+				},
+				VoiceAndVideoCalls: {
+					title:"Panggilan suara dan video",
+					options: {
+						enabled: "Abaikan.",
+						disabled: "laporan ketidaktersediaan",
+					},
+				},
+				AutomaticChatbotOutput: {
+					title:"Output chatbot otomatis",
+					options: {
+						enabled: "Diaktifkan",
+						disabled: "Dinonaktifkan",
+					},
+				},
+				QuickMessages: {
+					title:"Pesan cepat",
+					options: {
+						enabled: "Berdasarkan perusahaan",
+						disabled: "Oleh Pengguna",
+					},
+				},
+				AllowRegistration: {
+					title:"Izinkan pendaftaran",
+					options: {
+						enabled: "Diaktifkan",
+						disabled: "Dinonaktifkan",
+					},
+				},
+				FileDownloadLimit: {
+					title:"Batas unduhan file (MB)",
+				},
+				WelcomeGreeting: {
+					greetings: "halo",
+					welcome: "selamat datang di",
+					expirationTime: "Aktif sampai",
+				},
+				Options: {
+					title:"Pilihan",
+				},
+				Companies: {
+					title:"Perusahaan",
+				},
+				schedules: {
+					title:"Jadwal",
+				},
+				Plans: {
+					title:"Rencana",
+				},
+				Help: {
+					title:"Bantuan",
+				},
+				Whitelabel: {
+					title:"Whitelabel",
+				},
+				PaymentGateways: {
+					title:"Payment Gateways",
+				},
 			},
 			messagesList: {
 				header: {
@@ -840,6 +919,7 @@ const messages = {
                 ERR_QUEUE_COLOR_ALREADY_EXISTS: "Warna ini sudah digunakan, pilih yang lain.",
                 ERR_WAPP_GREETING_REQUIRED: "Pesan sambutan wajib jika ada lebih dari satu antrian.",
         ERR_SUBSCRIPTION_CHECK_FAILED: "Langganan tidak valid atau tidak ditemukan",
+        ERR_UNKNOWN: "Kesalahan tidak diketahui",
 			},
       "ccform": {
         "cardNumber": "Nomor Kartu",

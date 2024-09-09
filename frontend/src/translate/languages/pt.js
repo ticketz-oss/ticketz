@@ -660,83 +660,162 @@ const messages = {
         aboutdetail: "Sistema de Multiatendimento Whitelabel para fornecimento como serviço (SaaS)",
         licenseheading: "Licença para uso exclusivo",
         licensedetail: "O Ticketz PRO é licenciado para uso exclusivo nos sistemas autorizados, para maiores informações consulte o site do produto",
-      },
-      schedules: {
-        title: "Agendamentos",
-        confirmationModal: {
-          deleteTitle: "Você tem certeza que quer excluir este Agendamento?",
-          deleteMessage: "Esta ação não pode ser revertida.",
-        },
-        table: {
-          contact: "Contato",
-          body: "Mensagem",
-          sendAt: "Data de Agendamento",
-          sentAt: "Data de Envio",
-          status: "Status",
-          actions: "Ações",
-        },
-        buttons: {
-          add: "Novo Agendamento",
-        },
-        toasts: {
-          deleted: "Agendamento excluído com sucesso.",
-        },
-      },
-      tags: {
-        title: "Tags",
-        confirmationModal: {
-          deleteTitle: "Você tem certeza que quer excluir esta Tag?",
-          deleteMessage: "Esta ação não pode ser revertida.",
-        },
-         table: {
-          name: "Nome",
-          color: "Cor",
-          tickets: "Registros",
-          actions: "Ações",
-          id: "Id",
-          kanban: "Kanban",
-        },
-        buttons: {
-          add: "Nova Tag",
-        },
-        toasts: {
-          deleted: "Tag excluído com sucesso.",
-        },
-      },
-      settings: {
-        success: "Configurações salvas com sucesso.",
-        title: "Configurações",
-        settings: {
-          userCreation: {
-            name: "Criação de usuário",
-            options: {
-              enabled: "Ativado",
-              disabled: "Desativado",
-            },
-          },
-        },
-      },
-      messagesList: {
-        header: {
-          assignedTo: "Atribuído à:",
-          buttons: {
-            return: "Retornar",
-            resolve: "Resolver",
-            reopen: "Reabrir",
-            accept: "Aceitar",
-          },
-        },
-      },
-      messagesInput: {
-        placeholderOpen: "Digite uma mensagem",
-        placeholderClosed:
-          "Reabra ou aceite esse ticket para enviar uma mensagem.",
+			},
+			schedules: {
+				title: "Agendamentos",
+				confirmationModal: {
+					deleteTitle: "Você tem certeza que quer excluir este Agendamento?",
+					deleteMessage: "Esta ação não pode ser revertida.",
+				},
+				table: {
+					contact: "Contato",
+					body: "Mensagem",
+					sendAt: "Data de Agendamento",
+					sentAt: "Data de Envio",
+					status: "Status",
+					actions: "Ações",
+				},
+				buttons: {
+					add: "Novo Agendamento",
+				},
+				toasts: {
+					deleted: "Agendamento excluído com sucesso.",
+				},
+			},
+			tags: {
+				title: "Tags",
+				confirmationModal: {
+					deleteTitle: "Você tem certeza que quer excluir esta Tag?",
+					deleteMessage: "Esta ação não pode ser revertida.",
+				},
+				table: {
+					name: "Nome",
+					color: "Cor",
+					tickets: "Registros",
+					actions: "Ações",
+					id: "Id",
+					kanban: "Kanban",
+				},
+				buttons: {
+					add: "Nova Tag",
+				},
+				toasts: {
+					deleted: "Tag excluído com sucesso.",
+				},
+			},
+			settings: {
+				success: "Configurações salvas com sucesso.",
+				title: "Configurações",
+				settings: {
+					userCreation: {
+						name: "Criação de usuário",
+						options: {
+							enabled: "Ativado",
+							disabled: "Desativado",
+						},
+					},
+				},
+			validations:{
+				title:"validações",
+				options: {
+					enabled: "habilitado",
+					disabled: "Desabilitado",
+				},
+			},
+			OfficeManagement: {
+				title:"Gerenciamento de Expediente",
+				options: {
+					disabled: "Desabilitado",
+					ManagementByDepartment: "Gerenciamento Por Fila",
+					ManagementByCompany: "Gerenciamento Por Empresa",
+				},
+			},
+			IgnoreGroupMessages: {
+				title:"Ignorar Mensagens de Grupos",
+				options: {
+					enabled: "Ativado",
+					disabled: "Desativado",
+				},
+			},
+			VoiceAndVideoCalls: {
+				title:"Chamadas de Voz e Vídeo",
+				options: {
+					enabled: "Ignorar",
+					disabled: "informar indisponibilidade",
+				},
+			},
+			AutomaticChatbotOutput: {
+				title:"Saída automática de chatbot",
+				options: {
+					enabled: "Activado",
+					disabled: "Desativado",
+				},
+			},
+			QuickMessages: {
+				title:"Mensagens Rápidas",
+				options: {
+					enabled: "Por empresa",
+					disabled: "Por Usuário",
+				},
+			},
+			AllowRegistration: {
+				title:"Permitir cadastro",
+				options: {
+					enabled: "Ativado",
+					disabled: "Desativado",
+				},
+			},
+			FileDownloadLimit: {
+				title:"Limite de Download de arquivos (MB)",
+			},
+			WelcomeGreeting: {
+				greetings: "Olá",
+				welcome: "Seja bem-vindo a",
+				expirationTime: "Ativo até",
+			},
+			Options: {
+				title:"Opções",
+			},
+			Companies: {
+				title:"Empresas",
+			},
+			schedules: {
+				title:"Horários",
+			},
+			Plans: {
+				title:"Planos",
+			},
+			Help: {
+				title:"Ajuda",
+			},
+			Whitelabel: {
+				title:"Whitelabel",
+			},
+			PaymentGateways: {
+				title:"Payment gateways",
+			},
+		},
+			messagesList: {
+				header: {
+					assignedTo: "Atribuído à:",
+					buttons: {
+						return: "Retornar",
+						resolve: "Resolver",
+						reopen: "Reabrir",
+						accept: "Aceitar",
+					},
+				},
+			},
+			messagesInput: {
+				placeholderOpen: "Digite uma mensagem",
+				placeholderClosed:
+					"Reabra ou aceite esse ticket para enviar uma mensagem.",
         annotateMessage: "Anotação interna",
-        signMessage: "Assinar",
-        replying: "Respondendo",
-        editing: "Editando",
-      },
-      message: {
+				signMessage: "Assinar",
+				replying: "Respondendo",
+				editing: "Editando",
+			},
+			message: {
         edited: "Editada"
 			},
 
@@ -860,7 +939,8 @@ const messages = {
 				ERR_WAPP_GREETING_REQUIRED:
 					"A mensagem de saudação é obrigatório quando há mais de uma fila.",
         ERR_SUBSCRIPTION_CHECK_FAILED: "Assinatura inválida ou não encontrada",
-	
+        ERR_UNKOWN: "Erro desconhecido",
+
 			},
       "ccform": {
         "cardNumber": "Número do Cartão",
