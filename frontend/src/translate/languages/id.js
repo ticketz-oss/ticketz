@@ -840,6 +840,7 @@ const messages = {
                 ERR_QUEUE_COLOR_ALREADY_EXISTS: "Warna ini sudah digunakan, pilih yang lain.",
                 ERR_WAPP_GREETING_REQUIRED: "Pesan sambutan wajib jika ada lebih dari satu antrian.",
         ERR_SUBSCRIPTION_CHECK_FAILED: "Langganan tidak valid atau tidak ditemukan",
+        ERR_UNKNOWN: "Kesalahan tidak diketahui",
 			},
       "ccform": {
         "cardNumber": "Nomor Kartu",
