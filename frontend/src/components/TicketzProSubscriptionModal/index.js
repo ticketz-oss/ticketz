@@ -28,6 +28,8 @@ import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import WarningIcon from "@material-ui/icons/Warning";
 import moment from 'moment';
 import useAuth from "../../hooks/useAuth.js";
+import { i18n } from "../../translate/i18n";
+import Markdown from "markdown-to-jsx";
 
 // Get preferred language from localStorage or browser
 const storedLanguage = localStorage.getItem('language');
@@ -182,7 +184,12 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
   const stripeRef = useRef(null);
   const mercadoPagoRef = useRef(null);
 
-  const steps = ["Start", "Fill Email and Address", "Complete Payment", "Subscription Status"];
+  const steps = [
+    "ticketz.pro.stepperStart",
+    "ticketz.pro.stepperAddress",
+    "ticketz.pro.stepperPayment",
+    "ticketz.pro.stepperDone",
+  ];
 
   const handleNext = async () => {
     if (activeStep === 2) {
@@ -333,7 +340,7 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
     <Dialog open={open} onClose={onClose} fullWidth disableBackdropClick maxWidth="sm">
       <div className={classes.loadingContainer}>
         <div className={classes.stepperContent}>
-          <DialogTitle>Ticketz PRO Subscription</DialogTitle>
+          <DialogTitle>{i18n.t("ticketz.pro.subscriptionTitle")}</DialogTitle>
           <DialogContent>
             {loading && (
               <div className={classes.loadingOverlay}>
@@ -343,40 +350,23 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
             <Stepper activeStep={activeStep} alternativeLabel>
               {steps.map((label) => (
                 <Step key={label}>
-                  <StepLabel>{label}</StepLabel>
+                  <StepLabel>{i18n.t(label)}</StepLabel>
                 </Step>
               ))}
             </Stepper>
 
             {activeStep === 0 &&
               <>
-                {
-                  !showTicketzProKey &&
-                  <>
-                    <Button
-                      className={classes.button}
-                      variant="outlined"
-                      color="primary"
-                      onClick={
-                        () => {
-                          setShowTicketzProKey(true);
-                        }
-                      }>
-                      Tenho um código de ativação
-                    </Button>
-                    <Button
-                      className={classes.button}
-                      variant="contained"
-                      color="primary"
-                      onClick={
-                        () => {
-                          setActiveStep(1);
-                        }
-                      }>
-                      Desejo assinar o Ticketz PRO
-                    </Button>
-                  </>
+                {!showTicketzProKey &&
+                  <div>
+                    <Typography component="body1">
+                      <Markdown>
+                       {i18n.t("ticketz.pro.subscribeInstructions")}
+                      </Markdown>
+                    </Typography>
+                  </div>
                 }
+                  
 
                 {showTicketzProKey &&
                   <>
@@ -384,7 +374,7 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
                       <FormControl className={classes.selectContainer}>
                         <TextField
                           id="ticketzprokey-field"
-                          label="Código de Ativação"
+                          label={i18n.t("ticketz.pro.activationCode")}
                           variant="standard"
                           name="ticketzProKey"
                           value={ticketzProKey}
@@ -395,60 +385,24 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
                         />
                       </FormControl>
                     </Grid>
-                    <Grid className={classes.buttonGrid} xs={12} sm={12} md={12} item>
-                      <Button
-                        className={classes.button}
-                        variant="outlined"
-                        color="primary"
-                        onClick={
-                          () => {
-                            setShowTicketzProKey(false);
-                          }
-                        }>
-                        Cancelar
-                      </Button>
-                      <Button
-                        className={classes.button}
-                        variant="contained"
-                        color="primary"
-                        onClick={
-                          () => {
-                            handleTicketzProKey(ticketzProKey);
-                          }
-                        }>
-                        Ativar
-                      </Button>
-                    </Grid>
                   </>
                 }
               </>
             }
 
             {activeStep >= 1 && activeStep <= 2 && (
-              <>
-                {currency === "BRL" && (
-                  <Typography component="h2" variant="h6">
-                    Assinatura: R$ 199/mês
-                  </Typography>
-                )}
-                {currency === "USD" && (
-                  <Typography component="h2" variant="h6">
-                    Assinatura: US$ 49/mês
-                  </Typography>
-                )}
-                {currency === "EUR" && (
-                  <Typography component="h2" variant="h6">
-                    Assinatura: €44/mês
-                  </Typography>
-                )}
-              </>
+              <Typography component="h2" variant="h6">
+                {i18n.t("ticketz.pro.subscriptionPrice")}:&nbsp;
+                {currency === "BRL" ? "R$ 199" : (currency === "EUR" ? "€44" : "US$ 49")}
+                {i18n.t("ticketz.pro.perMonth")}
+              </Typography>
             )}
 
             {activeStep === 1 && (
               <>
                 <FormControl fullWidth margin="normal">
                   <TextField
-                    label="Email Address"
+                    label={i18n.t("ticketz.pro.emailAddress")}
                     variant="standard"
                     value={emailAddress || ""}
                     onChange={(e) => setEmailAddress(e.target.value)}
@@ -491,8 +445,8 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
                   {proStatus?.subscriptionData?.cancel_date && 
                     <WarningIcon className={classes.warningIcon} />}
                   <Typography variant="h5" align="center">
-                    {proStatus?.subscriptionData?.next_payment_date && "Renova em " + moment(proStatus.subscriptionData.next_payment_date).format("LL")}
-                    {proStatus?.subscriptionData?.cancel_date && "Será cancelada em " + moment(proStatus.subscriptionData.cancel_date).format("LL")}
+                    {proStatus?.subscriptionData?.next_payment_date && i18n.t("ticketz.pro.renewAt") + " " + moment(proStatus.subscriptionData.next_payment_date).format("LL")}
+                    {proStatus?.subscriptionData?.cancel_date && i18n.t("ticketz.pro.willCancelAt") + " " + moment(proStatus.subscriptionData.cancel_date).format("LL")}
                   </Typography>
 
                   {proStatus?.subscriptionData?.next_payment_date &&
@@ -501,7 +455,7 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
                       variant="contained"
                       color="secondary"
                       onClick={() => setOpenCancelSubscription(true)}>
-                      Cancelar Assinatura
+                      {i18n.t("ticketz.pro.cancelSubscription")}
                     </Button>
                   }
 
@@ -511,7 +465,7 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
                       variant="contained"
                       color="secondary"
                       onClick={() => setOpenResetLicense(true)}>
-                      Resetar Licença
+                      {i18n.t("ticketz.pro.resetLicense")}
                     </Button>
                   }
 
@@ -521,18 +475,17 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
                     aria-labelledby="alert-dialog-title"
                     aria-describedby="alert-dialog-description"
                   >
-                    <DialogTitle id="alert-dialog-title">Cancelar a assinatura?</DialogTitle>
+                    <DialogTitle id="alert-dialog-title">{i18n.t("ticketz.pro.cancelSubscriptionQuestion")}</DialogTitle>
                     <DialogContent>
                       <DialogContentText id="alert-dialog-description">
-                        A assinatura será cancelada ao final do período já
-                        contratado. Essa ação não pode ser revertida e para
-                        voltar a utilizar o sistema será necessário fazer
-                        uma nova assinatura.
+                        <Markdown>
+                          {i18n.t("ticketz.pro.cancelSubscriptionDetails")}
+                        </Markdown>
                       </DialogContentText>
                     </DialogContent>
                     <DialogActions>
                       <Button onClick={() => setOpenCancelSubscription(false)} variant="contained" color="primary" autofocus>
-                        Voltar
+                        {i18n.t("ticketz.pro.back")}
                       </Button>
                       <Button onClick={
                         () => {
@@ -541,7 +494,7 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
                         }
                       }
                         variant="contained" color="secondary">
-                        Cancelar Assinatura
+                        {i18n.t("ticketz.pro.cancelSubscription")}
                       </Button>
                     </DialogActions>
                   </Dialog>
@@ -552,18 +505,17 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
                     aria-labelledby="alert-dialog-title"
                     aria-describedby="alert-dialog-description"
                   >
-                    <DialogTitle id="alert-dialog-title">Resetar configuração de licença?</DialogTitle>
+                    <DialogTitle id="alert-dialog-title">{i18n.t("ticketz.pro.resetLicenseQuestion")}</DialogTitle>
                     <DialogContent>
                       <DialogContentText id="alert-dialog-description">
-                        <p>Isso irá remover a licença que ainda está ativa,
-                          você poderá adicionar novamente através da chave
-                          de ativação ou contratar uma nova licença.</p>
-                        <p><b>ATENÇÃO: O sistema vai parar de operar imediatamente!</b></p>
+                        <Markdown>
+                          {i18n.t("ticketz.pro.resetLicenseDetails")}
+                        </Markdown>
                       </DialogContentText>
                     </DialogContent>
                     <DialogActions>
                       <Button onClick={() => setOpenResetLicense(false)} variant="contained" color="primary" autofocus>
-                        Voltar
+                        {i18n.t("ticketz.pro.back")}
                       </Button>
                       <Button onClick={
                         () => {
@@ -574,7 +526,7 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
                         }
                       }
                         variant="contained" color="secondary">
-                        Resetar
+                        {i18n.t("resetLicense")}
                       </Button>
                     </DialogActions>
                   </Dialog>
@@ -583,27 +535,82 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
                 </>
                 :
                 <Typography variant="h5" align="center">
-                  {proStatus?.message || "Assinatura nao encontrada" }
+                  {proStatus?.message || i18n.t("ticketz.pro.subscriptionNotFound") }
                 </Typography>
             )}
           </DialogContent>
 
           <DialogActions>
             <Button onClick={onClose}>
-              Close
+              {i18n.t("ticketz.pro.close")}
             </Button>
 
-            {activeStep > 0 && activeStep < 3 && <Button onClick={handleBack}>Back</Button>}
+            {activeStep > 0 && activeStep < 3 && <Button onClick={handleBack}>{i18n.t("ticketz.pro.back")}</Button>}
+
+            {activeStep === 0 &&
+              <>
+                {!showTicketzProKey &&
+                  <>
+                    <Button
+                      className={classes.button}
+                      onClick={
+                        () => {
+                          setShowTicketzProKey(true);
+                        }
+                      }>
+                      {i18n.t("ticketz.pro.enterCode")}
+                    </Button>
+                    <Button
+                      className={classes.button}
+                      color="primary"
+                      onClick={
+                        () => {
+                          setActiveStep(1);
+                        }
+                      }>
+                      {i18n.t("ticketz.pro.subscribe")}
+                    </Button>
+                  </>
+                }
+                {showTicketzProKey &&
+                <>
+                  <Button
+                    className={classes.button}
+                    onClick={
+                      () => {
+                        setShowTicketzProKey(false);
+                      }
+                    }>
+                    {i18n.t("ticketz.pro.cancel")}
+                  </Button>
+                  <Button
+                    className={classes.button}
+                    disabled={!ticketzProKey}
+                    color="primary"
+                    onClick={
+                      () => {
+                        handleTicketzProKey(ticketzProKey);
+                      }
+                    }>
+                    {i18n.t("ticketz.pro.activate")}
+                  </Button>
+                </>                
+                
+                }
+                
+              </>
+            }
+
 
             {activeStep === 2 ? (
               <Button onClick={handleNext} color="primary">
-                Pay
+                {i18n.t("ticketz.pro.pay")}
               </Button>
             ) : activeStep === 3 ? (
               <></>
             ) : activeStep > 0 ? (
               <Button onClick={handleNext} color="primary" disabled={!addressData.complete || !isValidEmail(emailAddress)}>
-                Next
+                {i18n.t("ticketz.pro.next")}
               </Button>
             ) : ""}
           </DialogActions>

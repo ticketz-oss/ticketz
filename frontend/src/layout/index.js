@@ -623,7 +623,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
                 user={currentUser}
                 yes={() => (
                   <MenuItem onClick={handleOpenSubscriptionModal}>
-                    {i18n.t("ticketzPro.subscriptionStatus")}
+                    {i18n.t("ticketz.pro.subscriptionTitle")}
                   </MenuItem>
                 )} />              
               <MenuItem onClick={handleOpenAboutModal}>
