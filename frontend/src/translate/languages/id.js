@@ -653,6 +653,11 @@ const messages = {
         licensefulltext: "Teks lengkap lisensi",
         licensesourcecode: "Kode sumber Ticketz"
       },
+      aboutpro: {
+        aboutdetail: "Sistem Multi-Layanan Whitelabel untuk penyediaan sebagai layanan (SaaS)",
+        licenseheading: "Lisensi untuk penggunaan eksklusif",
+        licensedetail: "Ticketz PRO dilisensikan untuk penggunaan eksklusif di sistem yang diotorisasi. Untuk informasi lebih lanjut, kunjungi situs web produk."
+      },
       schedules: {
         title: "Jadwal",
         confirmationModal: {
