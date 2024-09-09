@@ -937,7 +937,7 @@ const messages = {
       "ccform": {
         "cardNumber": "Número de Tarjeta",
         "expirationDate": "Fecha de Expiración",
-        "securityCode": "CVV",
+        "securityCode": "CVC",
         "cardholderName": "Nombre en la Tarjeta",
         "documentType": "Tipo de Documento",
         "cpf": "CPF",
@@ -955,6 +955,12 @@ const messages = {
         "state": "Estado o Región"
       },
 			ticketz: {
+        pro: {
+          markProStart: "usado solo para marcar la posición del inicio de las cadenas exclusivas de PRO",
+          markProEnd: "usado solo para marcar la posición del final de las cadenas exclusivas de PRO",
+          markSubscriptionStart: "usado para marcar la posición del inicio de las cadenas exclusivas de suscripción",
+          markSubscriptionEnd: "usado para marcar la posición del final de las cadenas exclusivas de suscripción"
+        },
 				support: {
 					title: "Apoyar el proyecto Ticketz",
 					mercadopagotitle: "Tarjeta de crédito",
