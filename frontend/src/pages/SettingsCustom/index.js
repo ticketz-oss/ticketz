@@ -165,13 +165,13 @@ const SettingsCustom = () => {
           onChange={handleTabChange}
           className={classes.tab}
         >
-          <Tab label="Opções" value={"options"} />
-          {schedulesEnabled && <Tab label="Horários" value={"schedules"} />}
-          {isSuper() ? <Tab label="Empresas" value={"companies"} /> : null}
-          {isSuper() ? <Tab label="Planos" value={"plans"} /> : null}
-          {isSuper() ? <Tab label="Ajuda" value={"helps"} /> : null}
-          {isSuper() ? <Tab label="Whitelabel" value={"whitelabel"} /> : null}
-          {isSuper() ? <Tab label="Pay Gateways" value={"paymentGateway"} /> : null}
+          <Tab label={i18n.t("settings.Options.title")} value={"options"} />
+          {schedulesEnabled && <Tab label={i18n.t("settings.schedules.title")} value={"schedules"} />}
+          {isSuper() ? <Tab label={i18n.t("settings.Companies.title")} value={"companies"} /> : null}
+          {isSuper() ? <Tab label={i18n.t("settings.Plans.title")} value={"plans"} /> : null}
+          {isSuper() ? <Tab label={i18n.t("settings.Help.title")} value={"helps"} /> : null}
+          {isSuper() ? <Tab label={i18n.t("settings.Whitelabel.title")} value={"whitelabel"} /> : null}
+          {isSuper() ? <Tab label={i18n.t("settings.PaymentGateways.title")} value={"paymentGateway"} /> : null}
         </Tabs>
         <Paper className={classes.paper} elevation={0}>
           <TabPanel
