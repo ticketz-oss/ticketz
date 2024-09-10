@@ -4,6 +4,9 @@ import GetDefaultWhatsApp from "../../helpers/GetDefaultWhatsApp";
 import Ticket from "../../models/Ticket";
 import ShowContactService from "../ContactServices/ShowContactService";
 import { getIO } from "../../libs/socket";
+import Queue from "../../models/Queue";
+import { GetCompanySetting } from "../../helpers/CheckSettings";
+import Whatsapp from "../../models/Whatsapp";
 
 interface Request {
   contactId: number;
@@ -20,9 +23,35 @@ const CreateTicketService = async ({
   queueId,
   companyId
 }: Request): Promise<Ticket> => {
-  const defaultWhatsapp = await GetDefaultWhatsApp(companyId);
+  const queue = await Queue.findByPk(queueId, {
+    include: [
+      {
+        model: Whatsapp,
+        as: "whatsapps"
+      }
+    ]
+  });
 
-  await CheckContactOpenTickets(contactId);
+  let queueWhatsapp: Whatsapp = null;
+  if (queue.whatsapps.length) {
+    queueWhatsapp = queue.whatsapps.find(e => e.status === "CONNECTED");
+    if (!queueWhatsapp) {
+      const companyForceQueue =
+        (await GetCompanySetting(
+          companyId,
+          "restrictTransferConnection",
+          ""
+        )) === "enabled";
+      if (companyForceQueue) {
+        throw new AppError("ERR_WAPP_NOT_FOUND", 404);
+      }
+    }
+  }
+
+  const defaultWhatsapp =
+    queueWhatsapp || (await GetDefaultWhatsApp(companyId));
+
+  await CheckContactOpenTickets(contactId, queueId);
 
   const { isGroup } = await ShowContactService(contactId, companyId);
 
@@ -42,7 +71,13 @@ const CreateTicketService = async ({
   });
 
   await Ticket.update(
-    { companyId, queueId, userId, whatsappId: defaultWhatsapp.id, status: "open" },
+    {
+      companyId,
+      queueId,
+      userId,
+      whatsappId: defaultWhatsapp.id,
+      status: "open"
+    },
     { where: { id } }
   );
 
