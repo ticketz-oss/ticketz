@@ -151,6 +151,13 @@ const useStyles = makeStyles((theme) => ({
   stepperContent: {
     opacity: (props) => (props.loading ? 0.5 : 1), // Makes content semi-transparent when loading
   },
+  errorMessage: {
+    color: "yellow",
+    backgroundColor: "red",
+    textAlign: "center",
+    fontSize: "large",
+    padding: 3
+  }
 }));
 
 function isValidEmail(email) {
@@ -178,6 +185,7 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
   const { ticketzProSubscribe, ticketzProCancelSubscription } = useTicketzProSubscribe();
   const { ticketzProStatus } = useTicketzProStatus();
   const { ticketzProCheck } = useTicketzProCheck();
+  const [ errorMessage, setErrorMessage ] = useState("");
 
   const settings = useSettings();
   
@@ -230,9 +238,9 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
         }
         setLoading(false);
       },
-      _error => {
+      error => {
+        setErrorMessage(`${i18n.t("ticketz.pro.paymentRefused")}: ${error.message}`);
         setLoading(false);
-        // setSubscribeError(error.message || "Erro desconhecido");
       }
     );
   };
@@ -258,6 +266,9 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
 
   useEffect(() => {
     if (open) {
+      setErrorMessage("");
+      setTicketzProKey("");
+      setShowTicketzProKey(false);
       setActiveStep(-1);
       setLoading(true);
       setTimeout(() => {
@@ -310,6 +321,7 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
   }, [activeStep])
 
   async function handleTicketzProKey(value) {
+    setErrorMessage("");
     setLoading(true);
     try {
       await settings.update({
@@ -318,22 +330,23 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
       });
 
       await ticketzProCheck();
-      setShowTicketzProKey(false);
 
       try {
         const ticketzPro = await ticketzProStatus();
         setProStatus(ticketzPro.status);
-        setActiveStep(ticketzPro.status?.success ? 3 : 0);
-      } catch (_error) {
-        setActiveStep(0);
-        setProStatus(null);
+        if (ticketzPro.status?.success) {
+          setShowTicketzProKey(false);
+          setActiveStep(3);
+        } else {
+          value && setErrorMessage(`${i18n.t("ticketz.pro.invalidKey")}: ${i18n.t(ticketzPro?.status?.message)}`);
+        }
+      } catch (error) {
+        setErrorMessage(`${i18n.t("ticketz.pro.errorCheckingStatus")}: ${error?.message}`);
       }
-    } catch (_error) {
-      setActiveStep(0);
-      setProStatus(null);
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      setErrorMessage(`${i18n.t("ticketz.pro.errorActivating")}: ${error?.message}`);
     }
+    setLoading(false);
   }
 
   return (
@@ -538,6 +551,13 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
                   {proStatus?.message || i18n.t("ticketz.pro.subscriptionNotFound") }
                 </Typography>
             )}
+            {
+              errorMessage &&
+              <div className={classes.errorMessage}>
+                { errorMessage }
+              </div>
+            }
+            
           </DialogContent>
 
           <DialogActions>
@@ -578,6 +598,7 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
                     className={classes.button}
                     onClick={
                       () => {
+                        setErrorMessage("");
                         setShowTicketzProKey(false);
                       }
                     }>

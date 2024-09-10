@@ -963,6 +963,8 @@ const messages = {
           activationCode: "Kode Aktivasi",
           subscriptionPrice: "Harga Langganan",
           perMonth: "/bulan",
+          invalidKey: "Kode Aktivasi Tidak Valid",
+          paymentRefused: "Pembayaran ditolak",
           renewAt: "Akan diperbarui pada",
           cancelSubscription: "Batalkan Langganan",
           cancelSubscriptionQuestion: "Batalkan Langganan?",

@@ -979,6 +979,8 @@ const messages = {
           activationCode: "Código de Ativação",
           subscriptionPrice: "Preço da Assinatura",
           perMonth: "/mês",
+          invalidKey: "Código de Ativação Inválido",
+          paymentRefused: "Pagamento recusado",
           renewAt: "Será renovado em",
           cancelSubscription: "Cancelar Assinatura",
           cancelSubscriptionQuestion: "Cancelar Assinatura?",
