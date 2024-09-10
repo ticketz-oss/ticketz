@@ -1,6 +1,7 @@
+import fs from "fs";
+import { proto } from "@whiskeysockets/baileys";
 import Whatsapp from "../models/Whatsapp";
 import GetWhatsappWbot from "./GetWhatsappWbot";
-import fs from "fs";
 
 import { getMessageOptions } from "../services/WbotServices/SendWhatsAppMedia";
 
@@ -16,9 +17,10 @@ export const SendMessage = async (
 ): Promise<any> => {
   try {
     const wbot = await GetWhatsappWbot(whatsapp);
-    const chatId = `${messageData.number}@s.whatsapp.net`;
+    const number = messageData.number.toString();
+    const chatId = number.includes("@") ? number : `${number}@s.whatsapp.net`;
 
-    let message;
+    let message: proto.WebMessageInfo;
 
     if (messageData.mediaPath) {
       const options = await getMessageOptions(
@@ -26,7 +28,7 @@ export const SendMessage = async (
         messageData.mediaPath
       );
       if (options) {
-        const body = fs.readFileSync(messageData.mediaPath);
+        // const body = fs.readFileSync(messageData.mediaPath);
         message = await wbot.sendMessage(chatId, {
           ...options
         });
