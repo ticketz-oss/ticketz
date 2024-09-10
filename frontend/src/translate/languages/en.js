@@ -920,6 +920,7 @@ const messages = {
 				ERR_QUEUE_COLOR_ALREADY_EXISTS: "This color is already in use, choose another.",
 				ERR_WAPP_GREETING_REQUIRED: "Greeting message is mandatory when there is more than one queue.",
 				ERR_SUBSCRIPTION_CHECK_FAILED: "Subscription invalid or not found",
+				ERR_WAPP_NOT_FOUND: "Connection unavailable",
 				ERR_UNKOWN: "Unknown error",
 			},
       "ccform": {

@@ -939,6 +939,7 @@ const messages = {
 				ERR_WAPP_GREETING_REQUIRED:
 					"A mensagem de saudação é obrigatório quando há mais de uma fila.",
         ERR_SUBSCRIPTION_CHECK_FAILED: "Assinatura inválida ou não encontrada",
+        ERR_WAPP_NOT_FOUND: "Conexão indisponível",
         ERR_UNKOWN: "Erro desconhecido",
 
 			},

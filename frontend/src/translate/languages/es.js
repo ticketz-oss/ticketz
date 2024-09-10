@@ -937,6 +937,7 @@ const messages = {
 				ERR_WAPP_GREETING_REQUIRED:
 					"El mensaje de saludo es obligatorio cuando hay más de una cola.",
 				ERR_SUBSCRIPTION_CHECK_FAILED: "Suscripción inválida o no encontrada",
+        ERR_WAPP_NOT_FOUND: "Conexión no disponible",
 				ERR_UNKNOWN: "Error desconocido",
 			},
       "ccform": {

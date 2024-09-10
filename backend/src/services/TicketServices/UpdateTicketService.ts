@@ -112,7 +112,7 @@ const UpdateTicketService = async ({
     const requestUser = reqUserId ? await User.findByPk(reqUserId) : null;
 
     if (oldStatus === "closed") {
-      await CheckContactOpenTickets(ticket.contact.id);
+      await CheckContactOpenTickets(ticket.contact.id, ticket.queueId);
       chatbot = null;
       queueOptionId = null;
     }
