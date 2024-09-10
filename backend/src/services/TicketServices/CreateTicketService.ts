@@ -55,33 +55,19 @@ const CreateTicketService = async ({
 
   const { isGroup } = await ShowContactService(contactId, companyId);
 
-  const [{ id }] = await Ticket.findOrCreate({
-    where: {
-      contactId,
-      companyId
-    },
-    defaults: {
-      contactId,
-      companyId,
-      whatsappId: defaultWhatsapp.id,
-      status,
-      isGroup,
-      userId
-    }
+  const { id } = await Ticket.create({
+    contactId,
+    isGroup,
+    companyId,
+    queueId,
+    userId,
+    whatsappId: defaultWhatsapp.id,
+    status: "open"
   });
 
-  await Ticket.update(
-    {
-      companyId,
-      queueId,
-      userId,
-      whatsappId: defaultWhatsapp.id,
-      status: "open"
-    },
-    { where: { id } }
-  );
-
-  const ticket = await Ticket.findByPk(id, { include: ["contact", "queue"] });
+  const ticket = await Ticket.findByPk(id, {
+    include: ["contact", "queue", "whatsapp"]
+  });
 
   if (!ticket) {
     throw new AppError("ERR_CREATING_TICKET");
