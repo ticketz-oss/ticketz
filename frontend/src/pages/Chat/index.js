@@ -284,9 +284,7 @@ function Chat(props) {
     }
         
     return () => {
-      socket.off(`company-${companyId}-chat-user-${user.id}`, onChatUser); 
-      socket.off(`company-${companyId}-chat`, onChat);
-      socket.off(`company-${companyId}-chat-${currentChat.id}`, onCurrentChat);
+      socket.disconnect();
     };
     
     // eslint-disable-next-line react-hooks/exhaustive-deps

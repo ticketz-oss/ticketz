@@ -11,6 +11,8 @@ import CompaniesManager from "../../components/CompaniesManager";
 import PlansManager from "../../components/PlansManager";
 import HelpsManager from "../../components/HelpsManager";
 import Options from "../../components/Settings/Options";
+import Whitelabel from "../../components/Settings/Whitelabel";
+import PaymentGateway from "../../components/Settings/PaymentGateway";
 
 import { i18n } from "../../translate/i18n.js";
 import { toast } from "react-toastify";
@@ -163,11 +165,13 @@ const SettingsCustom = () => {
           onChange={handleTabChange}
           className={classes.tab}
         >
-          <Tab label="Opções" value={"options"} />
-          {schedulesEnabled && <Tab label="Horários" value={"schedules"} />}
-          {isSuper() ? <Tab label="Empresas" value={"companies"} /> : null}
-          {isSuper() ? <Tab label="Planos" value={"plans"} /> : null}
-          {isSuper() ? <Tab label="Ajuda" value={"helps"} /> : null}
+          <Tab label={i18n.t("settings.Options.title")} value={"options"} />
+          {schedulesEnabled && <Tab label={i18n.t("settings.schedules.title")} value={"schedules"} />}
+          {isSuper() ? <Tab label={i18n.t("settings.Companies.title")} value={"companies"} /> : null}
+          {isSuper() ? <Tab label={i18n.t("settings.Plans.title")} value={"plans"} /> : null}
+          {isSuper() ? <Tab label={i18n.t("settings.Help.title")} value={"helps"} /> : null}
+          {isSuper() ? <Tab label={i18n.t("settings.Whitelabel.title")} value={"whitelabel"} /> : null}
+          {isSuper() ? <Tab label={i18n.t("settings.PaymentGateways.title")} value={"paymentGateway"} /> : null}
         </Tabs>
         <Paper className={classes.paper} elevation={0}>
           <TabPanel
@@ -184,6 +188,25 @@ const SettingsCustom = () => {
           <OnlyForSuperUser
             user={currentUser}
             yes={() => (
+              <>
+              <TabPanel
+                className={classes.container}
+                value={tab}
+                name={"whitelabel"}
+              >
+                  <Whitelabel
+                    settings={settings}
+                  />
+              </TabPanel>
+              <TabPanel
+                className={classes.container}
+                value={tab}
+                name={"paymentGateway"}
+              >
+                  <PaymentGateway
+                    settings={settings}
+                  />
+              </TabPanel>
               <TabPanel
                 className={classes.container}
                 value={tab}
@@ -191,11 +214,6 @@ const SettingsCustom = () => {
               >
                 <CompaniesManager />
               </TabPanel>
-            )}
-          />
-          <OnlyForSuperUser
-            user={currentUser}
-            yes={() => (
               <TabPanel
                 className={classes.container}
                 value={tab}
@@ -203,11 +221,6 @@ const SettingsCustom = () => {
               >
                 <PlansManager />
               </TabPanel>
-            )}
-          />
-          <OnlyForSuperUser
-            user={currentUser}
-            yes={() => (
               <TabPanel
                 className={classes.container}
                 value={tab}
@@ -215,6 +228,7 @@ const SettingsCustom = () => {
               >
                 <HelpsManager />
               </TabPanel>
+              </>
             )}
           />
           <TabPanel className={classes.container} value={tab} name={"options"}>

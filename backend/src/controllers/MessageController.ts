@@ -14,11 +14,11 @@ import DeleteWhatsAppMessage from "../services/WbotServices/DeleteWhatsAppMessag
 import SendWhatsAppMedia from "../services/WbotServices/SendWhatsAppMedia";
 import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import CheckContactNumber from "../services/WbotServices/CheckNumber";
-import CheckIsValidContact from "../services/WbotServices/CheckIsValidContact";
 import EditWhatsAppMessage from "../services/WbotServices/EditWhatsAppMessage";
 
-import {sendFacebookMessageMedia} from "../services/FacebookServices/sendFacebookMessageMedia";
+import { sendFacebookMessageMedia } from "../services/FacebookServices/sendFacebookMessageMedia";
 import sendFaceMessage from "../services/FacebookServices/sendFacebookMessage";
+import { logger } from "../utils/logger";
 
 type IndexQuery = {
   pageNumber: string;
@@ -89,21 +89,17 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
         })
       );
     }
-
-
   } else {
-
-
-
     if (["facebook", "instagram"].includes(channel)) {
-      console.log(`Checking if ${ticket.contact.number} is a valid ${channel} contact`)
+      console.log(
+        `Checking if ${ticket.contact.number} is a valid ${channel} contact`
+      );
       await sendFaceMessage({ body, ticket, quotedMsg });
     }
 
     if (channel === "whatsapp") {
       await SendWhatsAppMessage({ body, ticket, quotedMsg });
     }
-
   }
 
   return res.send();
@@ -114,7 +110,11 @@ export const edit = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.user;
   const { body }: MessageData = req.body;
 
-  const { ticketId , message } = await EditWhatsAppMessage({messageId, body});
+  const { ticketId, message } = await EditWhatsAppMessage({
+    messageId,
+    companyId,
+    body
+  });
 
   const io = getIO();
   io.to(ticketId.toString()).emit(`company-${companyId}-appMessage`, {
@@ -123,7 +123,7 @@ export const edit = async (req: Request, res: Response): Promise<Response> => {
   });
 
   return res.send();
-}
+};
 
 export const remove = async (
   req: Request,
@@ -144,25 +144,24 @@ export const remove = async (
 };
 
 export const send = async (req: Request, res: Response): Promise<Response> => {
-  const { whatsappId } = req.params as unknown as { whatsappId: number };
+  const { whatsappId } = req.params;
   const messageData: MessageData = req.body;
   const medias = req.files as Express.Multer.File[];
 
+  if (messageData.number === undefined) {
+    throw new AppError("ERR_SYNTAX", 400);
+  }
+  const whatsapp = await Whatsapp.findByPk(whatsappId);
+
+  if (!whatsapp) {
+    throw new AppError("ERR_WHATSAPP_NOT_FOUND", 404);
+  }
+
   try {
-    const whatsapp = await Whatsapp.findByPk(whatsappId);
-
-    if (!whatsapp) {
-      throw new Error("Não foi possível realizar a operação");
-    }
-
-    if (messageData.number === undefined) {
-      throw new Error("O número é obrigatório");
-    }
-
     const numberToTest = messageData.number;
-    const body = messageData.body;
+    const { body } = messageData;
 
-    const companyId = whatsapp.companyId;
+    const { companyId } = whatsapp;
 
     const CheckValidNumber = await CheckContactNumber(numberToTest, companyId);
     const number = CheckValidNumber.jid.replace(/\D/g, "");
@@ -196,18 +195,20 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
         },
 
         { removeOnComplete: false, attempts: 3 }
-
       );
     }
 
-    return res.send({ mensagem: "Mensagem enviada" });
-  } catch (err: any) {
-    if (Object.keys(err).length === 0) {
-      throw new AppError(
-        "Não foi possível enviar a mensagem, tente novamente em alguns instantes"
-      );
+    return res.send({ mensagem: "Message added to queue" });
+  } catch (err) {
+    const error = { errType: typeof err, serialized: JSON.stringify(err), err };
+    if (err?.message) {
+      console.error(error, `MessageController.send: ${err.message}`);
     } else {
-      throw new AppError(err.message);
+      logger.error(
+        error,
+        "MessageController.send: Failed to put message on queue"
+      );
     }
+    throw new AppError("ERR_INTERNAL_ERROR", 500);
   }
 };

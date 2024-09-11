@@ -36,6 +36,8 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 import { Can } from "../../components/Can";
 import NewTicketModal from "../../components/NewTicketModal";
 import { SocketContext } from "../../context/Socket/SocketContext";
+import { generateColor } from "../../helpers/colorGenerator";
+import { getInitials } from "../../helpers/getInitials";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_CONTACTS") {
@@ -152,7 +154,7 @@ const Contacts = () => {
     socket.on(`company-${companyId}-contact`, onContact);
 
     return () => {
-      socket.off(`company-${companyId}-contact`, onContact);
+      socket.disconnect();
     };
   }, [socketManager]);
 
@@ -324,7 +326,7 @@ const Contacts = () => {
               {contacts.map((contact) => (
                 <TableRow key={contact.id}>
                   <TableCell style={{ paddingRight: 0 }}>
-                    {<Avatar src={contact.profilePicUrl} />}
+                    {<Avatar style={{ backgroundColor: generateColor(contact?.number), fontWeight: "bold", color: "white" }} src={contact.profilePicUrl}>{getInitials(contact?.name)}</Avatar>}
                   </TableCell>
                   <TableCell>{contact.name}</TableCell>
                   <TableCell align="center">{contact.number}</TableCell>

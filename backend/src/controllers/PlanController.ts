@@ -51,12 +51,12 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 };
 
 export const list = async (req: Request, res: Response): Promise<Response> => {
+  const plans: Plan[] = await FindAllPlanService(false);
+  return res.status(200).json(plans);
+};
 
-  const {listPublic} = req.query as IndexQuery;;
-
-  const plans: Plan[] = await FindAllPlanService(listPublic);
-
-  console.log(listPublic)
+export const listPublic = async (req: Request, res: Response): Promise<Response> => {
+  const plans: Plan[] = await FindAllPlanService(true);
   return res.status(200).json(plans);
 };
 

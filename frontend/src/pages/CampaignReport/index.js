@@ -117,7 +117,7 @@ const CampaignReport = () => {
     socket.on(`company-${companyId}-campaign`, onCampaign);
     
     return () => {
-      socket.off(`company-${companyId}-campaign`, onCampaign);
+      socket.disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [campaignId, socketManager]);

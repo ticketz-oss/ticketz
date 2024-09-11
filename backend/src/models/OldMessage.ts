@@ -1,20 +1,21 @@
 import {
-    Table,
-    Column,
-    CreatedAt,
-    UpdatedAt,
-    Model,
-    PrimaryKey,
-    ForeignKey,
-    BelongsTo,
-    DataType,
-    AutoIncrement   
-  } from "sequelize-typescript";
+  Table,
+  Column,
+  CreatedAt,
+  UpdatedAt,
+  Model,
+  PrimaryKey,
+  ForeignKey,
+  BelongsTo,
+  DataType,
+  AutoIncrement
+} from "sequelize-typescript";
 
 import Message from "./Message";
+import Ticket from "./Ticket";
 
 @Table
-class OldMessage extends Model<OldMessage> {
+class OldMessage extends Model {
   @PrimaryKey
   @AutoIncrement
   @Column
@@ -37,6 +38,13 @@ class OldMessage extends Model<OldMessage> {
 
   @BelongsTo(() => Message)
   message: Message;
+
+  @ForeignKey(() => Ticket)
+  @Column(DataType.INTEGER)
+  ticketId: number;
+
+  @BelongsTo(() => Ticket)
+  ticket: Ticket;
 }
 
 export default OldMessage;

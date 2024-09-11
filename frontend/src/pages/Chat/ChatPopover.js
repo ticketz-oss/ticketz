@@ -156,7 +156,7 @@ export default function ChatPopover() {
     socket.on(`company-${companyId}-chat`, onCompanyChatPopover);
 
     return () => {
-      socket.off(`company-${companyId}-chat`, onCompanyChatPopover);
+      socket.disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socketManager]);

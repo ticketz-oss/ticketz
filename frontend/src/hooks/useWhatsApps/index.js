@@ -66,9 +66,8 @@ const useWhatsApps = () => {
         const { data } = await api.get("/whatsapp/?session=0");
         dispatch({ type: "LOAD_WHATSAPPS", payload: data });
         setLoading(false);
-      } catch (err) {
+      } catch (_) {
         setLoading(false);
-        toastError(err);
       }
     };
     fetchSession();
@@ -97,8 +96,7 @@ const useWhatsApps = () => {
     socket.on(`company-${companyId}-whatsappSession`, onCompanyWhatsappSession);
 
     return () => {
-	    socket.off(`company-${companyId}-whatsapp`, onCompanyWhatsapp);
-	    socket.off(`company-${companyId}-whatsappSession`, onCompanyWhatsappSession);
+	    socket.disconnect();
     };
   }, [socketManager]);
 

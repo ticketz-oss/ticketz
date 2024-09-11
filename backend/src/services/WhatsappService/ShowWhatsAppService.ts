@@ -2,7 +2,7 @@ import Whatsapp from "../../models/Whatsapp";
 import AppError from "../../errors/AppError";
 import Queue from "../../models/Queue";
 import QueueOption from "../../models/QueueOption";
-import { FindOptions } from "sequelize/types";
+import { FindOptions, Op } from "sequelize/types";
 
 const ShowWhatsAppService = async (
   id: string | number,
@@ -15,13 +15,23 @@ const ShowWhatsAppService = async (
         model: Queue,
         as: "queues",
         attributes: ["id", "name", "color", "greetingMessage","mediaPath", "mediaName"],
-        include: [{ model: QueueOption, as: "options" }]
+        include: [
+          {
+            model: QueueOption,
+            as: "options",
+            required: false,
+            where: { parentId: null },
+          }
+        ]
       }
     ],
-    order: [["queues", "name", "ASC"]]
+    order: [
+      ["queues", "name", "ASC"],
+      ["queues", "options", "option", "ASC"],
+    ]
   };
 
-  if (session !== undefined && session == 0) {
+  if (session !== undefined && session === 0) {
     findOptions.attributes = { exclude: ["session"] };
   }
 

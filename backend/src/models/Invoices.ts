@@ -8,8 +8,11 @@ import {
   AutoIncrement,
   AllowNull,
   HasMany,
-  Unique
+  Unique,
+  BelongsTo,
+  ForeignKey
 } from "sequelize-typescript";
+import Company from "./Company";
 
 @Table({ tableName: "Invoices" })
 class Invoices extends Model<Invoices> {
@@ -26,6 +29,15 @@ class Invoices extends Model<Invoices> {
 
   @Column
   value: number;
+  
+  @Column
+  txId: string;
+
+  @Column
+  payGw: string;
+
+  @Column
+  payGwData: string;
 
   @CreatedAt
   createdAt: Date;
@@ -36,9 +48,12 @@ class Invoices extends Model<Invoices> {
   @Column
   dueDate: string;
 
+  @ForeignKey(() => Company)
   @Column
   companyId: number;
 
+  @BelongsTo(() => Company)
+  company: Company;
 }
 
 export default Invoices;

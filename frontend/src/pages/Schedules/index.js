@@ -161,7 +161,7 @@ const Schedules = () => {
 
     const onSchedule = (data) => {
       if (data.action === "update" || data.action === "create") {
-        dispatch({ type: "UPDATE_SCHEDULES", payload: data.schedules });
+        dispatch({ type: "UPDATE_SCHEDULES", payload: data?.schedules || data?.schedule });
       }
 
       if (data.action === "delete") {
@@ -172,7 +172,7 @@ const Schedules = () => {
     socket.on(`company-${user.companyId}-schedule`, onSchedule);
 
     return () => {
-      socket.off(`company-${user.companyId}-schedule`, onSchedule);
+      socket.disconnect();
     };
   }, [handleOpenScheduleModalFromContactId, user, socketManager]);
 

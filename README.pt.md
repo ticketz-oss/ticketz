@@ -1,5 +1,5 @@
 [![en](https://img.shields.io/badge/lang-en-red.svg)](README.md)
-[![pt-br](https://img.shields.io/badge/lang-pt--br-green.svg)](README-pt.md)
+[![pt-br](https://img.shields.io/badge/lang-pt--br-green.svg)](README.pt.md)
 
 # Sobre o projeto
 
@@ -17,9 +17,7 @@ de código fonte, e de acordo com informações [deste vídeo acabou em algum mo
 sendo vazado e publicado abertamente](https://www.youtube.com/watch?v=SX_cGD5RLkQ)
 
 Após algumas pesquisas foi ainda identificado que a primeira versão SaaS do
-Whaticket foi criada pelo desenvolvedor [Wender
-Teixeira](https://github.com/w3nder), inclusive uma versão do [https://github.com/unkbot/whaticket-free](Whaticket
-Single) que faz uso da biblioteca Baileys para acesso ao Whatsapp.
+Whaticket foi criada pelo desenvolvedor [Wender Teixeira](https://github.com/w3nder), inclusive uma versão do [Whaticket Single](https://github.com/unkbot/whaticket-free) que faz uso da biblioteca Baileys para acesso ao Whatsapp.
 
 É praticamente impossível identificar e creditar os autores das melhorias, [o
 código publicado pelo canal Vem Fazer](https://github.com/vemfazer/whaticket-versao-03-12-canal-vem-fazer)
@@ -57,10 +55,67 @@ do Whaticket Community ou do Whaticket SaaS.
 Sempre que possível pretendo fazer backport de alguns ajustes feitos aqui
 aos projetos originais
 
-Rodando o projeto:
-------------------
+Início Muito Rápido em um Servidor Público
+------------------------------------------
 
-O projeto atualmente suporta execução utilizando containers Docker, para a
+Existem imagens Docker fornecidas pelo projeto, então você pode fazer o **ticketz** funcionar muito facilmente em um servidor público (baremetal ou VPS).
+
+### Primeira configuração
+
+Antes de começar, você deve completar esta lista de verificação:
+
+- [ ] Ter um servidor limpo rodando Ubuntu 20 ou mais recente
+- [ ] Portas 80 e 443 disponíveis e não filtradas pelo firewall
+- [ ] Um nome de host com DNS configurado apontando para o seu servidor
+
+Após isso, basta fazer login no seu servidor e emitir o seguinte comando, substituindo os nomes de host que você já configurou e seu endereço de email:
+
+```bash
+curl -sSL get.ticke.tz | sudo bash -s app.exemplo.com nome@exemplo.com
+```
+
+Após alguns minutos, você terá o servidor rodando no nome que você deu para o host.
+
+O login padrão é o endereço de email fornecido no comando de instalação e a senha padrão é `123456`, você deve alterá-la imediatamente.
+
+### Atualização
+
+A atualização é tão fácil quanto a instalação, você só precisa fazer login no seu servidor usando o mesmo nome de usuário que você usou na instalação e emitir o seguinte comando:
+
+```bash
+curl -sSL update.ticke.tz | sudo bash
+```
+
+Seu servidor ficará fora do ar e após alguns minutos ele estará rodando na última versão lançada.
+
+### Inspecionar logs
+
+Como todos os elementos estão rodando em containers, os logs devem ser verificados através do comando docker.
+
+Você deve fazer login no seu servidor usando o mesmo usuário que você usou para a instalação.
+
+Primeiro você precisa mover o diretório atual para a pasta de instalação:
+
+```bash
+cd ~/ticketz-docker-acme
+```
+
+Após isso, você pode obter um relatório completo de logs com o seguinte comando:
+
+```bash
+docker compose logs -t
+```
+
+Se você quiser "seguir" os logs em tempo real, basta adicionar um parâmetro `-f` a esse comando:
+
+```bash
+docker compose logs -t -f
+```
+
+Rodando o projeto a partir do Código Fonte usando Docker:
+---------------------------------------------------------
+
+Para a
 instalação é necessário ter o Docker Community Edition e o cliente Git
 instalados. O ideal é buscar a melhor forma de instalar estes recursos no
 sistema operacional de sua preferência. [O guia oficial de instalação do
@@ -71,7 +126,7 @@ Em ambos os casos é necessário clonar o repositório, necessário então abrir
 um terminal de comandos:
 
 ```bash
-git -c core.autocrlf=input clone https://github.com/allgood/ticketz.git
+git clone https://github.com/allgood/ticketz.git
 cd ticketz
 ```
 
@@ -92,7 +147,7 @@ docker compose -f docker-compose-local.yaml up -d
 Na primeira execução o sistema vai inicializar os bancos de dados e tabelas,
 e após alguns minutos o Ticketz estará acessível pela porta 3000
 
-O usuário padrão é admin@admin.com e a senha padrão é 123456
+O usuário padrão é `admin@ticketz.host` e a senha padrão é `123456`
 
 A aplicação irá se reiniciar automaticamente a cada reboot do servidor.
 
@@ -136,7 +191,7 @@ conteiners, e após isso o ticketz vai inicializar os bancos de dados e
 tabelas. Esta operação pode levar bastante tempo, depois disso o Ticketz
 estará acessível pelo endereço fornecido para oo frontend.
 
-O usuário padrão é admin@admin.com e a senha padrão é 123456
+O usuário padrão será o endereço de email fornecido na configuração do arquivo `.env-backend-acme` e a senha padrão é `123456`
 
 A aplicação irá se reiniciar automaticamente a cada reboot do servidor.
 

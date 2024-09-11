@@ -36,6 +36,7 @@ import useQuickMessages from "../../hooks/useQuickMessages";
 
 import Compressor from 'compressorjs';
 import LinearWithValueLabel from "./ProgressBarCustom";
+import MarkdownWrapper from "../MarkdownWrapper";
 
 const Mp3Recorder = new MicRecorder({ bitRate: 128 });
 
@@ -338,8 +339,7 @@ const CustomInput = (props) => {
 
   useEffect(() => {
     async function fetchData() {
-      const companyId = localStorage.getItem("companyId");
-      const messages = await listQuickMessages({ companyId, userId: user.id });
+      const messages = await listQuickMessages();
       const options = messages.map((m) => {
         let truncatedMessage = m.message;
         if (isString(truncatedMessage) && truncatedMessage.length > 35) {
@@ -477,12 +477,15 @@ const MessageInputCustom = (props) => {
   const [signMessage, setSignMessage] = useLocalStorage("signOption", true);
 
   useEffect(() => {
-    inputRef.current.focus();
     if (editingMessage) {
-		setInputMessage(editingMessage.body);
-	}
-  }, [replyingMessage, editingMessage]);
-
+      if (signMessage && editingMessage.body.startsWith(`*${user.name}:*\n`)) {
+        setInputMessage(editingMessage.body.substr(editingMessage.body.indexOf("\n")+1));
+      } else {
+        setInputMessage(editingMessage.body);
+      }
+    }
+  }, [replyingMessage, editingMessage, signMessage, user.name]);
+  
   useEffect(() => {
     inputRef.current.focus();
     return () => {
@@ -692,16 +695,25 @@ const MessageInputCustom = (props) => {
             })}
           ></span>
           {replyingMessage && (
-	          <div className={classes.replyginMsgBody}>
-	            {!message.fromMe && (
-	              <span className={classes.messageContactName}>
-	                {message.contact?.name}
-	              </span>
-	            )}
-	            {message.body}
-	          </div>
-			  )
-		  }
+            <div className={classes.replyginMsgBody}>
+              <span className={classes.messageContactName}>
+                {i18n.t("messagesInput.replying")} {message.contact?.name}
+              </span>
+              <MarkdownWrapper>
+                {message.body}
+              </MarkdownWrapper>
+            </div>
+          )}
+          {editingMessage && (
+            <div className={classes.replyginMsgBody}>
+              <span className={classes.messageContactName}>
+                {i18n.t("messagesInput.editing")}
+              </span>
+              <MarkdownWrapper>
+                {message.body}
+              </MarkdownWrapper>
+            </div>
+          )}
         </div>
         <IconButton
           aria-label="showRecorder"

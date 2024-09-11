@@ -46,6 +46,13 @@ import useCompanies from "../../hooks/useCompanies";
 
 import { isEmpty } from "lodash";
 import moment from "moment";
+import { i18n } from "../../translate/i18n";
+import OnlyForSuperUser from "../../components/OnlyForSuperUser";
+import useAuth from "../../hooks/useAuth.js";
+import clsx from "clsx";
+import { loadJSON } from "../../helpers/loadJSON";
+
+const gitinfo = loadJSON('/gitinfo.json');
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -59,6 +66,39 @@ const useStyles = makeStyles((theme) => ({
     height: 240,
     overflowY: "auto",
     ...theme.scrollbarStyles,
+  },
+  pixkey: {
+    fontSize: "9pt",
+  },
+  paymentimg: {
+    maxWidth: "100%",
+    marginTop: "30px",
+  },
+  paymentpix: {
+    maxWidth: "100%",
+    maxHeight: "150px",
+    padding: "5px",
+    backgroundColor: "white",
+    borderColor: "black",
+    borderStyle: "solid",
+    borderWidth: "2px",
+  },
+  supportPaper: {
+    padding: theme.spacing(2),
+    display: "flex",
+    flexDirection: "column",
+    overflowY: "auto",
+    backgroundColor: theme.palette.secondary.main,
+    color: theme.palette.secondary.contrastText,
+    ...theme.scrollbarStyles,
+  },
+  supportBox: {
+    backgroundColor: theme.palette.secondary.light,
+    borderRadius: "10px",
+    textAlign: "center",
+    borderColor: theme.palette.secondary.main,
+    borderWidth: "3px",
+    borderStyle: "solid",
   },
   cardAvatar: {
     fontSize: "55px",
@@ -166,6 +206,37 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: "#bd3c58",
     color: "#eee",
   },
+  ticketzProPaper: {
+    padding: theme.spacing(2),
+    display: "flex",
+    flexDirection: "column",
+    overflowY: "auto",
+    backgroundColor: theme.palette.ticketzproad.main,
+    color: theme.palette.ticketzproad.contrastText,
+    ...theme.scrollbarStyles,
+  },
+  ticketzProBox: {
+    textAlign: "center",
+    alignContent: "center"
+  },
+  ticketzProTitle: {
+    fontWeight: "bold"
+  },
+  ticketzProScreen: {
+    maxHeight: "300px",
+    maxWidth: "100%"
+  },
+  ticketzProFeatures: {
+    padding: 0,
+    listStyleType: "none"
+  },
+  ticketzProCommand: {
+    fontFamily: "monospace",
+    backgroundColor: "#00000080"
+  },
+  clickpointer: {
+    cursor: "pointer"
+  }
 }));
 
 const Dashboard = () => {
@@ -175,6 +246,7 @@ const Dashboard = () => {
   const [filterType, setFilterType] = useState(1);
   const [period, setPeriod] = useState(0);
   const [companyDueDate, setCompanyDueDate] = useState();
+  const [currentUser, setCurrentUser] = useState({});
   const [dateFrom, setDateFrom] = useState(
     moment("1", "D").format("YYYY-MM-DD")
   );
@@ -182,6 +254,29 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(false);
   const { find } = useDashboard();
   const { finding } = useCompanies();
+  const { getCurrentUserInfo } = useAuth();
+    
+  const [supportBoxOpen, setSupportBoxOpen] = useState(false);
+  const [proInstructionsOpen, setProInstructionsOpen] = useState(false);
+  
+  async function showProInstructions() {
+    if (gitinfo.commitHash) {
+      setProInstructionsOpen(true);
+      return;
+    }
+    
+    window.open("https://pro.ticke.tz", "_blank");
+  }
+  
+  useEffect(() => {
+    getCurrentUserInfo().then(
+      (user) => {
+        setCurrentUser(user);
+      }
+    );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  
   useEffect(() => {
     async function firstLoad() {
       await fetchData();
@@ -239,6 +334,10 @@ const Dashboard = () => {
 
     const data = await find(params);
 
+    if (!data) {
+      setLoading(false);
+      return;
+    }
 
 
     setCounters(data.counters);
@@ -339,6 +438,134 @@ const Dashboard = () => {
     <div>
       <Container maxWidth="lg" className={classes.container}>
         <Grid container spacing={3} justifyContent="flex-end">
+
+          <OnlyForSuperUser
+            user={currentUser}
+            yes={() => (
+              <Grid item xs={12}>
+                <Paper className={clsx(classes.ticketzProPaper, {
+                  [classes.clickpointer]: !proInstructionsOpen,
+                })} onClick={() => showProInstructions()}>
+                  <Grid container justifyContent="flex-end">
+                    <Grid className={classes.ticketzProBox} item xs={12} md={proInstructionsOpen ? 4 : 6} sm={12}>
+                      <div>
+                        <img className={classes.ticketzProScreen} src="https://pro.ticke.tz/images/0/7/3/0/b/0730b234af7b4b0dac72d09828863bb7cb9193ea-ticketz-computador.png" />
+                      </div>
+                    </Grid>
+                    { !proInstructionsOpen &&
+                    <Grid className={classes.ticketzProBox} item xs={12} md={6} sm={12}>
+                      <Typography className={classes.ticketzProTitle} component="h3" variant="h5" gutterBottom>
+                        Ticketz PRO
+                      </Typography>
+                      <Typography component="h3" variant="h7" gutterBottom>
+                      <ul className={classes.ticketzProFeatures}>
+                        <li>Funcionalidades exclusivas</li>
+                        <li>Suporte Avançado</li>
+                        <li>Migração Facilitada</li>
+                      </ul>
+                      </Typography>
+                      <Typography component="h3" variant="h5">
+                        Assine por R$ 199/mês
+                      </Typography>
+                      <Typography component="h3" variant="h7" gutterBottom>
+                        direto dentro do sistema
+                      </Typography>
+                      { gitinfo.commitHash && 
+                      <Typography component="h3" variant="h5">
+                        Clique para instruções de Upgrade
+                      </Typography>
+                      }
+                      { !gitinfo.commitHash && 
+                      <Typography component="h3" variant="h5">
+                        Clique para visitar o site!
+                      </Typography>
+                      }
+                    </Grid>
+                    }
+                    { proInstructionsOpen &&
+                    <Grid className={classes.ticketzProBox} item xs={12} md={8} sm={12}>
+                      <Typography className={classes.ticketzProTitle} component="h3" variant="h5" gutterBottom>
+                        Instruções de Upgrade
+                      </Typography>
+                      <Typography paragraph>
+                        Se você instalou as imagens disponibilizadas pelo projeto em um
+                        servidor ou VPS utilizando as instruções facilitadas tudo o que
+                        você precisa fazer é acessar seu servidor e digitar o comando abaixo:
+                      </Typography>
+                      <Typography className={classes.ticketzProCommand} paragraph>
+                        curl -sSL update.ticke.tz | sudo bash -s pro
+                      </Typography>
+                      <Typography paragraph>
+                        Em instantes o Ticketz PRO estará instalado com todos os teus dados,
+                        agora só precisa ir até a página de configurações (⚙️) e fazer a sua
+                        assinatura.
+                      </Typography>
+                      <Typography paragraph>
+                        Se a tua instalação for diferente ou acredita que precisa
+                        de auxílio para instalar o Ticketz
+                        Pro, <a href="https://wa.me/554935670707"> entre
+                        em contato</a> que nós ajudamos!
+                      </Typography>
+                    </Grid>
+                    }
+                  </Grid>
+                </Paper>
+              </Grid>
+            )} />
+
+
+          <OnlyForSuperUser
+            user={currentUser}
+            yes={() => (
+              <Grid item xs={12}>
+                <Paper className={clsx(classes.supportPaper, {
+                  [classes.clickpointer]: !supportBoxOpen,
+                })} onClick={() => setSupportBoxOpen(true)}>
+                  <Typography component="h2" variant="h6" gutterBottom>
+                    {i18n.t("ticketz.support.title")}
+                  </Typography>
+                  { supportBoxOpen &&
+                  <Grid container justifyContent="flex-end">
+                    <Grid className={classes.supportBox} item xs={12} md={4} sm={12}>
+                      <Typography component="h3" variant="h6" gutterBottom>
+                        PIX
+                      </Typography>
+                      <div>
+                        <img className={classes.paymentpix} src="/ticketzpix.png" />
+                      </div>
+                      <Typography className={classes.pixkey} component="body2" paragraph>
+                        1ab11506-9480-4303-8e1e-988e7c49ed4d
+                      </Typography>
+                    </Grid>
+                    <Grid className={classes.supportBox} item xs={12} md={4} sm={12}>
+                      <Typography component="h3" variant="h6" gutterBottom>
+                        {i18n.t("ticketz.support.mercadopagotitle")}
+                      </Typography>
+                      <Typography component="body2" paragraph>
+                        {i18n.t("ticketz.support.recurringbrl")}
+                      </Typography>
+                      <div><a href="https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=2c9380848f1b8ed1018f2b011f90061f" target="_blank">
+                        <img className={classes.paymentimg} src="/mercadopago.png" />
+                      </a></div>
+                    </Grid>
+                    <Grid className={classes.supportBox} item xs={12} md={4} sm={12}>
+                      <Typography component="h3" variant="h6" gutterBottom>
+                        {i18n.t("ticketz.support.paypaltitle")}
+                      </Typography>
+                      <Typography component="body2" paragraph>
+                        {i18n.t("ticketz.support.international")}
+                      </Typography>
+                      <div><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=X6XHVCPMRQEL4" target="_blank">
+                        <img className={classes.paymentimg} src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" />
+                      </a></div>
+                    </Grid>
+                  </Grid>
+                  }
+                </Paper>
+              </Grid>
+            )} />
+
+          {/* DASHBOARD ATENDIMENTOS HOJE */}
           
           {/* GRID DO VENCIMENTO */}
           {/* <Grid item xs={12} sm={6} md={3}>

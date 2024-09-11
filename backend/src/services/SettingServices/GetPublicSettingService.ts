@@ -5,7 +5,13 @@ interface Request {
 }
 
 const publicSettingsKeys = [
-  "allowSignup"
+  "allowSignup",
+  "primaryColorLight",
+  "primaryColorDark",
+  "appLogoLight",
+  "appLogoDark",
+  "appLogoFavicon",
+  "appName"
 ]
 
 const GetPublicSettingService = async ({
@@ -23,7 +29,7 @@ const GetPublicSettingService = async ({
     }
   });
 
-  return setting.value;
+  return setting?.value;
 };
 
 export default GetPublicSettingService;

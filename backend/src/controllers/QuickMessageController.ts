@@ -25,11 +25,6 @@ type StoreData = {
   userId: number | number;
 };
 
-type FindParams = {
-  companyId: string;
-  userId: string;
-};
-
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const { searchParam, pageNumber, userId } = req.query as IndexQuery;
   const { companyId } = req.user;
@@ -139,8 +134,7 @@ export const findList = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const params = req.query as FindParams;
-  const records: QuickMessage[] = await FindService(params);
+  const records: QuickMessage[] = await FindService({userId: parseInt(req.user.id,10), companyId: req.user.companyId});
 
   return res.status(200).json(records);
 };

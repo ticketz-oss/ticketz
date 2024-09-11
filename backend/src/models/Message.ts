@@ -9,7 +9,7 @@ import {
   Default,
   BelongsTo,
   ForeignKey,
-  HasMany,
+  HasMany
 } from "sequelize-typescript";
 import Contact from "./Contact";
 import Ticket from "./Ticket";
@@ -18,7 +18,7 @@ import Queue from "./Queue";
 import OldMessage from "./OldMessage";
 
 @Table
-class Message extends Model<Message> {
+class Message extends Model {
   @PrimaryKey
   @Column
   id: string;
@@ -60,6 +60,15 @@ class Message extends Model<Message> {
     return null;
   }
 
+  @Column(DataType.STRING)
+  get thumbnailUrl(): string | null {
+    const value = this.getDataValue("thumbnailUrl");
+    if (value) {
+      return `${process.env.BACKEND_URL}/public/${value}`;
+    }
+    return null;
+  }
+
   @Column
   mediaType: string;
 
@@ -87,6 +96,7 @@ class Message extends Model<Message> {
   quotedMsg: Message;
 
   @ForeignKey(() => Ticket)
+  @PrimaryKey
   @Column
   ticketId: number;
 
@@ -113,7 +123,7 @@ class Message extends Model<Message> {
 
   @BelongsTo(() => Queue)
   queue: Queue;
-  
+
   @HasMany(() => OldMessage)
   oldMessages: OldMessage[];
 }

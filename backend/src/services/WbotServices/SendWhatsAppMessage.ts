@@ -22,45 +22,47 @@ const SendWhatsAppMessage = async ({
 
   const wbot = await GetTicketWbot(ticket);
 
-  const number = ticket.isGroup ? `${ticket.contact.number}@g.us` : `${ticket.contact.number}@s.whatsapp.net`
+  const number = ticket.isGroup
+    ? `${ticket.contact.number}@g.us`
+    : `${ticket.contact.number}@s.whatsapp.net`;
   // const number = `${ticket.contact.number.substring(12,0)}-${ticket.contact.number.substring(12)}@${
 
   //   ticket.isGroup ? "g.us" : "s.whatsapp.net"
   // }`;
   if (quotedMsg) {
+    const chatMessage = await Message.findOne({
+      where: {
+        id: quotedMsg.id
+      }
+    });
 
+    if (chatMessage) {
+      const msgFound = JSON.parse(chatMessage.dataJson);
 
-      const chatMessages = await Message.findOne({
-        where: {
-          id: quotedMsg.id
+      options = {
+        quoted: {
+          key: msgFound?.key || chatMessage.id,
+          message: {
+            extendedTextMessage: msgFound?.message.extendedTextMessage
+          }
         }
-      });
-
-      if (chatMessages) {
-        const msgFound = JSON.parse(chatMessages.dataJson);
-
-        options = {
-          quoted: {
-            key: msgFound.key,
-            message: {
-              extendedTextMessage: msgFound.message.extendedTextMessage
-            }
-          }
-        };
-          }
+      };
+    }
   }
 
   try {
-
-    const sentMessage = await wbot.sendMessage(number,{
-        text: formatBody(body, ticket.contact)
+    const formattedBody = formatBody(body, ticket.contact);
+    const sentMessage = await wbot.sendMessage(
+      number,
+      {
+        text: formattedBody
       },
       {
         ...options
       }
     );
 
-    await ticket.update({ lastMessage: formatBody(body, ticket.contact) });
+    await ticket.update({ lastMessage: formattedBody });
 
     return sentMessage;
   } catch (err) {

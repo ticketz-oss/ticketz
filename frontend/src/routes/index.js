@@ -16,7 +16,6 @@ import Queues from "../pages/Queues/";
 import Tags from "../pages/Tags/";
 import MessagesAPI from "../pages/MessagesAPI/";
 import Helps from "../pages/Helps/";
-import About from "../pages/About/";
 import ContactLists from "../pages/ContactLists/";
 import ContactListItems from "../pages/ContactListItems/";
 // import Companies from "../pages/Companies/";
@@ -33,9 +32,6 @@ import Annoucements from "../pages/Annoucements";
 import Chat from "../pages/Chat";
 import ToDoList from "../pages/ToDoList/";
 import Subscription from "../pages/Subscription/";
-
-import Kanban from "../pages/Kanban";
-import TagsKanban from "../pages/TagsKanban";
 
 const Routes = () => {
   const [showCampaigns, setShowCampaigns] = useState(false);
@@ -91,7 +87,6 @@ const Routes = () => {
                 <Route exact path="/tags" component={Tags} isPrivate />
                 <Route exact path="/contacts" component={Contacts} isPrivate />
                 <Route exact path="/helps" component={Helps} isPrivate />
-                <Route exact path="/about" component={About} isPrivate />
                 <Route exact path="/users" component={Users} isPrivate />
                 <Route
                   exact
@@ -125,20 +120,6 @@ const Routes = () => {
                   isPrivate
                 />
                 
-                <Route
-                  exact
-                  path="/Kanban"
-                  component={Kanban}
-                  isPrivate
-                />
-                
-                <Route
-                  exact
-                  path="/tagsKanban"
-                  component={TagsKanban}
-                  isPrivate
-                />
-
                 <Route exact path="/chats/:id?" component={Chat} isPrivate />
                 {showCampaigns && (
                   <>

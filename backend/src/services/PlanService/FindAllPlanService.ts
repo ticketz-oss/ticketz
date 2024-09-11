@@ -1,8 +1,8 @@
 import Plan from "../../models/Plan";
 
-const FindAllPlanService = async (listPublic?: any): Promise<Plan[]> => {
-  let plan
-  if (listPublic === "false") 
+const FindAllPlanService = async (listPublic: boolean): Promise<Plan[]> => {
+  let plan: Plan[];
+  if (listPublic) 
   {
     plan = await Plan.findAll({
       where: {

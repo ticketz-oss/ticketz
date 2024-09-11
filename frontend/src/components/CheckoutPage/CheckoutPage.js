@@ -37,6 +37,7 @@ export default function CheckoutPage(props) {
   const [activeStep, setActiveStep] = useState(1);
   const [datePayment, setDatePayment] = useState(null);
   const [invoiceId, ] = useState(props.Invoice.id);
+  const onClose = props.onClose;
   const currentValidationSchema = validationSchema[activeStep];
   const isLastStep = activeStep === steps.length - 1;
   const { user } = useContext(AuthContext);
@@ -125,7 +126,7 @@ function _renderStepContent(step, setFieldValue, setActiveStep, values ) {
       </Stepper>
       <React.Fragment>
         {activeStep === steps.length ? (
-          <CheckoutSuccess pix={datePayment} />
+          <CheckoutSuccess pix={datePayment} onClose={onClose} />
         ) : (
           <Formik
             initialValues={{

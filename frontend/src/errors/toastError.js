@@ -3,7 +3,10 @@ import { i18n } from "../translate/i18n";
 import { isString } from 'lodash';
 
 const toastError = err => {
-	const errorMsg = err.response?.data?.error;
+  const errorMsg = typeof err === 'string'
+    ? err
+    : err.response?.data?.error || err.response?.data?.message || err.message || "ERR_UNKNOWN";
+
 	if (errorMsg) {
 		if (i18n.exists(`backendErrors.${errorMsg}`)) {
 			toast.error(i18n.t(`backendErrors.${errorMsg}`), {

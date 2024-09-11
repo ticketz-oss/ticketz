@@ -25,18 +25,15 @@ import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import { useTheme } from "@material-ui/core";
 import Container from "@material-ui/core/Container";
-import logo from "../../assets/vector/logo.svg";
-import logoDark from "../../assets/vector/logo-dark.svg";
 import { i18n } from "../../translate/i18n";
 
 import { openApi } from "../../services/api";
 import toastError from "../../errors/toastError";
-import moment from "moment";
 
 import ReCAPTCHA from "react-google-recaptcha";
 import config from "../../services/config";
 import useSettings from "../../hooks/useSettings";
-
+import { getBackendURL } from "../../services/config";
 
 const Copyright = () => {
 	return (
@@ -69,6 +66,13 @@ const useStyles = makeStyles(theme => ({
 	submit: {
 		margin: theme.spacing(3, 0, 2),
 	},
+	
+  logoImg: {
+    width: "100%",
+    margin: "0 auto",
+    content: "url(" + (theme.mode === "light" ? theme.calculatedLogoLight() : theme.calculatedLogoDark()) + ")"
+  }
+	
 }));
 
 const UserSchema = Yup.object().shape({
@@ -97,7 +101,6 @@ const SignUp = () => {
 	const initialState = { name: "", email: "", phone: "", password: "", planId: "", };
 
 	const [user] = useState(initialState);
-	const dueDate = moment().add(3, "day").format();
 
 	const handleSignUp = async (values) => {
 		if (config.RECAPTCHA_SITE_KEY) {
@@ -105,7 +108,6 @@ const SignUp = () => {
 		}
 		
 		Object.assign(values, { recurrence: "MENSAL" });
-		Object.assign(values, { dueDate: dueDate });
 		Object.assign(values, { status: "t" });
 		Object.assign(values, { campaignsEnabled: true });
 		try {
@@ -119,11 +121,11 @@ const SignUp = () => {
 	};
 
 	const [plans, setPlans] = useState([]);
-	const { list: listPlans } = usePlans();
+	const { listPublic: listPublicPlans } = usePlans();
 
 	useEffect(() => {
 		async function fetchData() {
-			const list = await listPlans();
+			const list = await listPublicPlans();
 			setPlans(list);
 		}
 		fetchData();
@@ -141,9 +143,9 @@ const SignUp = () => {
 		<Container component="main" maxWidth="xs">
 			<CssBaseline />
 			<div className={classes.paper}>
-				<div>
-					<img style={{ margin: "0 auto", height: "80px", width: "100%" }} src={theme.mode === "light" ? logo : logoDark} alt="Whats" />
-				</div>
+        <div>
+          <img className={classes.logoImg} />
+        </div>
 				{/*<Typography component="h1" variant="h5">
 					{i18n.t("signup.title")}
 				</Typography>*/}

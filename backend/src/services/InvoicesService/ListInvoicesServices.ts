@@ -31,6 +31,7 @@ const ListInvoicesServices = async ({
   const offset = limit * (+pageNumber - 1);
 
   const { count, rows: invoices } = await Invoices.findAndCountAll({
+    attributes: [ "id", "detail", "value", "dueDate", "status", "createdAt", "updatedAt" ],
     where: whereCondition,
     limit,
     offset,

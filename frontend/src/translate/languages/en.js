@@ -154,6 +154,7 @@ const messages = {
 					email: "Email",
 					extraName: "Field Name",
 					extraValue: "Value",
+					disableBot: "Disable chatbot",
 				},
 				buttons: {
 					addExtraInfo: "Add Information",
@@ -334,7 +335,6 @@ const messages = {
 					users: "Users",
 					settings: "Settings",
 					helps: "Help",
-					about: "About Ticketz",
 					messagesAPI: "API",
 					schedules: "Schedules",
 					campaigns: "Campaigns",
@@ -352,6 +352,9 @@ const messages = {
 					},
 					user: {
 						profile: "Profile",
+						darkmode: "Dark mode",
+						lightmode: "Light mode",
+						language: "Select language",
 						logout: "Logout",
 					},
 				},
@@ -627,6 +630,9 @@ const messages = {
 				title: "Help Center",
 			},
 			about: {
+				aboutthe: "About the",
+				copyright: "© 2024 - Powered by ticketz",
+				buttonclose: "Close",
 				title: "About ticketz",
 				abouttitle: "Origin and improvements",
 				aboutdetail: "ticketz is indirectly derived from the Whaticket project with improvements shared by the developers of the EquipeChat system through the VemFazer channel on YouTube, later improved by Claudemir Todo Bom",
@@ -634,7 +640,7 @@ const messages = {
 				aboutwhaticketsite: "Whaticket Community site on Github",
 				aboutvemfazersite: "Vem Fazer channel site on Github",
 				licenseheading: "Open Source License",
-				licensedetail: "Ticketz is licensed under the GNU Affero General Public License version 3, which means that any user who has access to this application has the right to obtain access to the source code. More information at the links below:",
+				licensedetail: "ticketz is licensed under the GNU Affero General Public License version 3, which means that any user who has access to this application has the right to obtain access to the source code. More information at the links below:",
 				licensefulltext: "Full text of the license",
 				licensesourcecode: "Ticketz source code"
 			},
@@ -692,6 +698,85 @@ const messages = {
 						},
 					},
 				},
+				validations: {
+					title:"validations",
+					options: {
+						enabled: "enabled",
+						disabled: "disabled",
+					},
+				},
+				OfficeManagement: {
+					title:"Office Management",
+					options: {
+						disabled: "disabled",
+						ManagementByDepartment: "Management By Department",
+						ManagementByCompany: "Management By Company",
+					},
+				},
+				IgnoreGroupMessages: {
+					title:"Ignore Group Messages",
+					options: {
+						enabled: "enabled",
+						disabled: "disabled",
+					},
+				},
+				VoiceAndVideoCalls: {
+					title:"Voice and video calls",
+					options: {
+						enabled: "Ignore",
+						disabled: "unavailability report",
+					},
+				},
+				AutomaticChatbotOutput: {
+					title:"Automatic Chatbot Output",
+					options: {
+						enabled: "enabled",
+						disabled: "disabled",
+					},
+				},
+				QuickMessages: {
+					title:"Quick Messages",
+					options: {
+						enabled: "By company",
+						disabled: "By User",
+					},
+				},
+				AllowRegistration: {
+					title:"Allow Registration",
+					options: {
+						enabled: "enabled",
+						disabled: "disabled",
+					},
+				},
+				FileDownloadLimit: {
+					title:"File Download Limit (MB)",
+				},
+				WelcomeGreeting: {
+					greetings: "Hello",
+					welcome: "Welcome to",
+					expirationTime: "Active until",
+				},
+				Options: {
+					title:"Options",
+				},
+				Companies: {
+					title:"Companies",
+				},
+				schedules: {
+					title:"schedules",
+				},
+				Plans: {
+					title:"Plans",
+				},
+				Help: {
+					title:"Help",
+				},
+				Whitelabel: {
+					title:"Whitelabel",
+				},
+				PaymentGateways: {
+					title:"Pasarelas de pago",
+				},
 			},
 			messagesList: {
 				header: {
@@ -709,11 +794,13 @@ const messages = {
 				placeholderClosed:
 					"Reopen or accept this ticket to send a message.",
 				signMessage: "Sign",
+				replying: "Replying",
+				editing: "Editing",
 			},
 			message: {
 				edited: "Edited"
 			},
-			
+
 			contactDrawer: {
 				header: "Contact Information",
 				buttons: {
@@ -761,6 +848,42 @@ const messages = {
 				close: "Close",
 				title: "Message edit history"
 			},
+			presence: {
+				unavailable: "Unavailable",
+				available: "Available",
+				composing: "Composing...",
+				recording: "Recording...",
+				paused: "Paused",
+			},
+			privacyModal: {
+				title: "Edit Whatsapp Privacy",
+				buttons: {
+					cancel: "Cancel",
+					okEdit: "Save",
+				},
+				form: {
+					menu: {
+						all: "All",
+						none: "Nobody",
+						contacts: "My contacts",
+						contact_blacklist: "Selected contacts",
+						match_last_seen: "Match Last Seen",
+						known: "Known",
+						disable: "Disabled",
+						hrs24: "24 Hours",
+						dias7: "7 Days",
+						dias90: "90 Days",
+					},
+					readreceipts: "To update the Read Receipts privacy",
+					profile: "To update the Profile Picture privacy",
+					status: "To update the Messages privacy",
+					online: "To update the Online privacy",
+					last: "To update the LastSeen privacy",
+					groupadd: "To update the Groups Add privacy",
+					calladd: "To update the Call Add privacy",
+					disappearing: "To update the Default Disappearing Mode",
+				},
+			},
 			backendErrors: {
 				ERR_NO_OTHER_WHATSAPP: "There must be at least one default WhatsApp.",
 				ERR_NO_DEF_WAPP_FOUND: "No default WhatsApp found. Check the connections page.",
@@ -787,6 +910,15 @@ const messages = {
 				ERR_FETCH_WAPP_MSG: "Error fetching message from WhatsApp, perhaps it is too old.",
 				ERR_QUEUE_COLOR_ALREADY_EXISTS: "This color is already in use, choose another.",
 				ERR_WAPP_GREETING_REQUIRED: "Greeting message is mandatory when there is more than one queue.",
+			},
+			ticketz: {
+				support: {
+					title: "Support Ticketz project",
+					mercadopagotitle: "Credit Card",
+					recurringbrl: "Recurring donations in BRL",
+					paypaltitle: "Credit Card",
+					international: "Donations in USD",
+        }
 			},
 		},
 	},

@@ -3,6 +3,7 @@ import isAuth from "../middleware/isAuth";
 
 import * as ContactController from "../controllers/ContactController";
 import * as ImportPhoneContactsController from "../controllers/ImportPhoneContactsController";
+import apiTokenAuth from "../middleware/apiTokenAuth";
 
 const contactRoutes = express.Router();
 
@@ -12,16 +13,36 @@ contactRoutes.post(
   ImportPhoneContactsController.store
 );
 
-contactRoutes.get("/contacts", isAuth, ContactController.index);
+contactRoutes.get("/contacts", apiTokenAuth, isAuth, ContactController.index);
 
-contactRoutes.get("/contacts/list", isAuth, ContactController.list);
+contactRoutes.get(
+  "/contacts/list",
+  apiTokenAuth,
+  isAuth,
+  ContactController.list
+);
 
-contactRoutes.get("/contacts/:contactId", isAuth, ContactController.show);
+contactRoutes.get(
+  "/contacts/:contactId",
+  apiTokenAuth,
+  isAuth,
+  ContactController.show
+);
 
-contactRoutes.post("/contacts", isAuth, ContactController.store);
+contactRoutes.post("/contacts", apiTokenAuth, isAuth, ContactController.store);
 
-contactRoutes.put("/contacts/:contactId", isAuth, ContactController.update);
+contactRoutes.put(
+  "/contacts/:contactId",
+  apiTokenAuth,
+  isAuth,
+  ContactController.update
+);
 
-contactRoutes.delete("/contacts/:contactId", isAuth, ContactController.remove);
+contactRoutes.delete(
+  "/contacts/:contactId",
+  apiTokenAuth,
+  isAuth,
+  ContactController.remove
+);
 
 export default contactRoutes;

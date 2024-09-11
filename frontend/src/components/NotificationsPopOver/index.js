@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useContext } from "react";
+import { useTheme } from "@material-ui/core/styles";
 
 import { useHistory } from "react-router-dom";
 import { format } from "date-fns";
@@ -20,7 +21,9 @@ import alertSound from "../../assets/sound.mp3";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { SocketContext } from "../../context/Socket/SocketContext";
 import Favicon from "react-favicon";
-import zapIcon from "../../assets/vector/favicon.svg";
+import { getBackendURL } from "../../services/config";
+
+const defaultLogoFavicon = "/vector/favicon.svg";
 
 const useStyles = makeStyles((theme) => ({
   tabContainer: {
@@ -44,6 +47,7 @@ const useStyles = makeStyles((theme) => ({
 
 const NotificationsPopOver = (props) => {
   const classes = useStyles();
+  const theme = useTheme();
 
   const history = useHistory();
   const { user } = useContext(AuthContext);
@@ -150,10 +154,7 @@ const NotificationsPopOver = (props) => {
     socket.on(`company-${companyId}-appMessage`, onCompanyAppMessageNotificationsPopover);
 
     return () => {
-       socket.emit("leaveNotification");
-       socket.off("connect", onConnectNotificationsPopover);
-       socket.off(`company-${companyId}-ticket`, onCompanyTicketNotificationsPopover);
-       socket.off(`company-${companyId}-appMessage`, onCompanyAppMessageNotificationsPopover);
+       socket.disconnect();
     };
   }, [user, profile, queues, socketManager]);
 
@@ -167,6 +168,7 @@ const NotificationsPopOver = (props) => {
       renotify: true,
     };
 
+    try {
     const notification = new Notification(
       `${i18n.t("tickets.notification.message")} ${contact.name}`,
       options
@@ -188,6 +190,9 @@ const NotificationsPopOver = (props) => {
       }
       return [notification, ...prevState];
     });
+    } catch (e) {
+      console.error("Failed to push browser notification");
+    }
 
     soundAlertRef.current();
   };
@@ -207,19 +212,19 @@ const NotificationsPopOver = (props) => {
   const browserNotification = () => {
 	const numbers = "⓿➊➋➌➍➎➏➐➑➒➓⓫⓬⓭⓮⓯⓰⓱⓲⓳⓴";
     if (notifications.length > 0) {
-		if (notifications.length < 21 ) {
-	      document.title = numbers.substring(notifications.length,notifications.length+1) + " - ticketz";
-        } else {
-	      document.title = "(" + notifications.length + ") ticketz";
-		}		
+      if (notifications.length < 21) {
+        document.title = numbers.substring(notifications.length, notifications.length + 1) + " - " + (theme.appName || "...");
+      } else {
+        document.title = "(" + notifications.length + ")" + (theme.appName || "...");
+      }
     } else {
-      document.title = "ticketz";
+      document.title = theme.appName || "...";
     }
     return (
       <>
         <Favicon
           animated={true}
-          url={zapIcon}
+          url={ (theme?.appLogoFavicon) ? theme.appLogoFavicon : defaultLogoFavicon }
           alertCount={notifications.length}
           iconSize={195}
         />

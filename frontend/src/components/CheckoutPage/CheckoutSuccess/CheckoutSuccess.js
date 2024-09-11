@@ -14,6 +14,7 @@ function CheckoutSuccess(props) {
   const [pixString,] = useState(pix.qrcode.qrcode);
   const [copied, setCopied] = useState(false);
   const history = useHistory();
+  const onClose = props.onClose;
 
   const { dateToClient } = useDate();
 
@@ -31,12 +32,17 @@ function CheckoutSuccess(props) {
           history.push("/");
         }, 4000);
       }
+      
+      if (data.action === "EXPIRADA") {
+        toast.error("Transação de cobrança expirou");
+        onClose();
+      }
     }
 
     socket.on(`company-${companyId}-payment`, onCompanyPayment);
     
     return () => {
-      socket.off("connect", onCompanyPayment);
+      socket.disconnect();
     }
   }, [history, dateToClient, socketManager]);
 
@@ -54,7 +60,15 @@ function CheckoutSuccess(props) {
         <strong>R${pix.valor.original.toLocaleString('pt-br', { minimumFractionDigits: 2 })}</strong>
       </Total>
       <SuccessContent>
-        <QRCode value={pixString} />
+        <QRCode value={pixString}
+          style={
+            { borderStyle: "solid",
+              borderWidth: "1px",
+              padding: "5px", 
+              borderColor: "black",
+              backgroundColor: "white",
+              height: "auto",
+              maxWidth: "100%" }} />
         <CopyToClipboard text={pixString} onCopy={handleCopyQR}>
           <button className="copy-button" type="button">
             {copied ? (

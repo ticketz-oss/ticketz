@@ -174,7 +174,7 @@ export default function AnnouncementsPopover() {
     socket.on(`company-announcement`, onCompanyAnnouncement);
 
     return () => {
-      socket.off(`company-announcement`, onCompanyAnnouncement);
+      socket.disconnect();
     };
   }, [socketManager]);
 

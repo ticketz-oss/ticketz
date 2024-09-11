@@ -59,7 +59,7 @@ const ContactModal = ({ open, onClose, Invoice, contactId, initialValues, onSave
       <Dialog open={open} onClose={handleClose} maxWidth="md" scroll="paper">
         <DialogContent dividers>
           <CheckoutPage
-            Invoice={Invoice}
+            Invoice={Invoice} onClose={handleClose}
           />
         </DialogContent>
       </Dialog>

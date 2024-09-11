@@ -90,7 +90,7 @@ const useAuth = () => {
     socket.on(`company-${companyId}-user`, onCompanyUserUseAuth);
 
     return () => {
-      socket.off(`company-${companyId}-user`, onCompanyUserUseAuth);
+      socket.disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
@@ -122,8 +122,6 @@ const useAuth = () => {
 
       var before = moment(moment().format()).isBefore(dueDate);
       var dias = moment.duration(diff).asDays();
-      var diasVenc = vencimento.valueOf() - hoje.valueOf()
-      console.log("🚀 Console Log : diasVenc", diasVenc);
 
       if (before === true) {
         localStorage.setItem("token", JSON.stringify(data.token));
@@ -137,7 +135,11 @@ const useAuth = () => {
         if (Math.round(dias) < 5) {
           toast.warn(`Sua assinatura vence em ${Math.round(dias)} ${Math.round(dias) === 1 ? 'dia' : 'dias'} `);
         }
-        history.push("/tickets");
+        if (data.user.profile === "admin") {
+          history.push("/");
+        } else {
+          history.push("/tickets");
+        }
         setLoading(false);
       } else {
         
@@ -177,8 +179,8 @@ Entre em contato com o Suporte para mais informações! `);
     try {
       const { data } = await api.get("/auth/me");
       return data;
-    } catch (err) {
-      toastError(err);
+    } catch (_) {
+      return null;
     }
   };
 

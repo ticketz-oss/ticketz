@@ -1,8 +1,5 @@
-import { WASocket, WAMessage } from "@whiskeysockets/baileys";
-import * as Sentry from "@sentry/node";
 import AppError from "../../errors/AppError";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
-import GetWbotMessage from "../../helpers/GetWbotMessage";
 import Message from "../../models/Message";
 import OldMessage from "../../models/OldMessage";
 import Ticket from "../../models/Ticket";
@@ -11,15 +8,20 @@ import formatBody from "../../helpers/Mustache";
 
 interface Request {
   messageId: string;
+  companyId: number;
   body: string;
 }
 
 const EditWhatsAppMessage = async ({
   messageId,
-  body,
-}: Request): Promise<{ ticketId: number , message: Message}> => {
-  
-  const message = await Message.findByPk(messageId, {
+  companyId,
+  body
+}: Request): Promise<{ ticketId: number; message: Message }> => {
+  const message = await Message.findOne({
+    where: {
+      id: messageId,
+      companyId
+    },
     include: [
       {
         model: Ticket,
@@ -28,7 +30,7 @@ const EditWhatsAppMessage = async ({
       }
     ]
   });
-  
+
   if (!message) {
     throw new AppError("No message found with this ID.");
   }
@@ -36,30 +38,66 @@ const EditWhatsAppMessage = async ({
   const { ticket } = message;
 
   const wbot = await GetTicketWbot(ticket);
-  
+
   const msg = JSON.parse(message.dataJson);
-  
+  const formattedBody = formatBody(body, ticket.contact);
+
   try {
-	await wbot.sendMessage(message.remoteJid, {
-	  text: body,
-	  edit: msg.key,
-	},{});
-	
+    await wbot.sendMessage(
+      message.remoteJid,
+      {
+        text: formattedBody,
+        edit: msg.key
+      },
+      {}
+    );
+
     const oldMessage = {
-      messageId: messageId,
-      body: message.body
-	}
+      messageId,
+      body: message.body,
+      ticketId: message.ticketId
+    };
 
     await OldMessage.upsert(oldMessage);
 
-	message.update({ body: body, isEdited: true});
-	
-    return { ticketId: message.ticketId , message: message };
+    await message.update({ body: formattedBody, isEdited: true });
+
+    const savedMessage = await Message.findOne({
+      where: {
+        id: messageId,
+        companyId
+      },
+      include: [
+        {
+          model: Ticket,
+          as: "ticket",
+          include: ["contact"]
+        },
+        {
+          model: Message,
+          as: "quotedMsg",
+          include: ["contact"],
+          where: {
+            companyId
+          },
+          required: false
+        },
+        {
+          model: OldMessage,
+          as: "oldMessages",
+          where: {
+            ticketId: message.ticketId
+          },
+          required: false
+        }
+      ]
+    });
+
+    return { ticketId: savedMessage.ticketId, message: savedMessage };
   } catch (err) {
-	console.log(err);
+    console.log(err);
     throw new AppError("ERR_EDITING_WAPP_MSG");
   }
-
 };
 
 export default EditWhatsAppMessage;
