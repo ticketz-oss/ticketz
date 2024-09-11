@@ -268,6 +268,11 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
     if (open) {
       setErrorMessage("");
       setTicketzProKey("");
+      settings.get("ticketzProKey").then(
+        (proKey) => {
+          setTicketzProKey(proKey);
+        }
+      );
       setShowTicketzProKey(false);
       setActiveStep(-1);
       setLoading(true);
@@ -463,6 +468,7 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
                   </Typography>
 
                   {proStatus?.subscriptionData?.next_payment_date &&
+                    !ticketzProKey.startsWith("wwGo:") &&
                     <Button
                       className={classes.center}
                       variant="contained"
@@ -472,7 +478,8 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
                     </Button>
                   }
 
-                  {proStatus?.subscriptionData?.cancel_date &&
+                  {(proStatus?.subscriptionData?.cancel_date ||
+                    ticketzProKey.startsWith("wwGo:")) &&
                     <Button
                       className={classes.center}
                       variant="contained"
@@ -539,7 +546,7 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
                         }
                       }
                         variant="contained" color="secondary">
-                        {i18n.t("resetLicense")}
+                        {i18n.t("ticketz.pro.resetLicense")}
                       </Button>
                     </DialogActions>
                   </Dialog>
