@@ -126,6 +126,10 @@ export function AddressForm({ formData, setFormData }) {
     validateFields(formData);
   }, []);
 
+  useEffect(() => {
+    setShowNumber(formData.country === "BR");
+  }, [formData]);
+
   const validateFields = (updatedFormData) => {
     const newErrors = {
       country: !updatedFormData.country,
@@ -159,7 +163,6 @@ export function AddressForm({ formData, setFormData }) {
     let updatedFormData = { ...formData, [name]: value };
 
     if (name === "country") {
-      setShowNumber(value === "BR");
       if (value === "BR" && formData.postalCode) {
         const addressData = await fetchBrazilianAddressData(formData.postalCode);
         updatedFormData = { ...updatedFormData, ...addressData };
