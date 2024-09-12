@@ -30,6 +30,7 @@
     "material-ui-popup-state": "^1.7.0",
     "mic-recorder-to-mp3": "^2.2.2",
     "moment": "^2.29.1",
+    "ogv": "^1.9.0",
     "qrcode.react": "^1.0.0",
     "query-string": "^7.0.0",
     "react": "^17.0.2",
@@ -63,11 +64,12 @@
     "yup": "^1.4.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "legacy": "react-scripts start",
-    "build": "GENERATE_SOURCEMAP=false react-scripts build",
-    "builddev": "react-scripts build",
-    "winBuild": "set \"GENERATE_SOURCEMAP=false\" && react-scripts build",
+    "copy-ogv-files": "copyfiles -u 2 \"node_modules/ogv/dist/**/*\" public/ogv",
+    "start": "npm run copy-ogv-files && react-scripts start",
+    "legacy": "npm run copy-ogv-files && react-scripts start",
+    "build": "npm run copy-ogv-files && GENERATE_SOURCEMAP=false react-scripts build",
+    "builddev": "npm run copy-ogv-files && react-scripts build",
+    "winBuild": "npm run copy-ogv-files && set \"GENERATE_SOURCEMAP=false\" && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -91,6 +93,7 @@
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.0.4",
     "@testing-library/user-event": "^12.1.7",
+    "copyfiles": "^2.4.1",
     "react-scripts": "^5.0.1"
   }
 }
