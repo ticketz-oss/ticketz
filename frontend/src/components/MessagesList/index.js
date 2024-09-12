@@ -42,6 +42,7 @@ import { generateColor } from "../../helpers/colorGenerator";
 import { getInitials } from "../../helpers/getInitials";
 import { Html5AudioPlayer } from "../Html5AudioPlayer";
 import { OggAudioPlayer } from "../OggAudioPlayer";
+import { canPlayOggOpus, canRecordOggOpus } from "../../helpers/detectOggOpusSupport";
 
 const useStyles = makeStyles((theme) => ({
   messageContainer: {
@@ -496,6 +497,9 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
+const recordOpus = canRecordOggOpus();
+const playOpus = recordOpus || canPlayOggOpus();
+
 const reducer = (state, action) => {
   if (action.type === "LOAD_MESSAGES") {
     const messages = action.payload;
@@ -714,7 +718,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     }
     if (!document && message.mediaType === "audio") {
       return (
-        message.mediaUrl.endsWith(".ogg") ?
+        !playOpus && message.mediaUrl.endsWith(".ogg") ?
           <OggAudioPlayer src={message.mediaUrl}>
             {message.fromMe ?
               <Avatar className={classes.businessAvatar} src={message.contact?.profilePicUrl}><Business /></Avatar> :
