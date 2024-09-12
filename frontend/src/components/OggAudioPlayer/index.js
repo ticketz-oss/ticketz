@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay, faPause, faBackward, faForward } from '@fortawesome/free-solid-svg-icons';
-import { IconButton, makeStyles, Slider } from '@material-ui/core'; // Import Slider and IconButton here
+import { IconButton, makeStyles, Slider } from '@material-ui/core';
 const ogv = require('ogv');
 ogv.OGVLoader.base = '/ogv/dist';
+
+window.currentPlayerControllers = null;
 
 const useStyles = makeStyles((theme) => ({
   iconButton: {
@@ -89,13 +91,19 @@ export function OggAudioPlayer({ src, children }) {
   const [duration, setDuration] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1);
 
+  let thisPlayerControllers = null;
+
   const playAudio = () => {
+    if (window.currentPlayerControllers && window.currentPlayerControllers !== thisPlayerControllers) {
+      window.currentPlayerControllers.pauseAudio();
+    }
     const storedPlaybackRate = localStorage.getItem('playbackRate');
     if (storedPlaybackRate) {
       player.playbackRate = parseFloat(storedPlaybackRate);
       setPlaybackRate(parseFloat(storedPlaybackRate));
     }
     player.play();
+    window.currentPlayerControllers = thisPlayerControllers;
     setIsPlaying(true);
   };
 
@@ -116,10 +124,12 @@ export function OggAudioPlayer({ src, children }) {
     setCurrentTime(newTime);
   };
 
+  thisPlayerControllers = { pauseAudio };
+
   useEffect(() => {
     const ogvPlayer = new ogv.OGVPlayer();
     ogvPlayer.src = src;
-    ogvPlayer.load(); // Load the player
+    ogvPlayer.load();
     ogvPlayer.addEventListener('loadedmetadata', () => setDuration(ogvPlayer.duration));
     ogvPlayer.addEventListener('ended', () => setIsPlaying(false));
 
@@ -156,7 +166,7 @@ export function OggAudioPlayer({ src, children }) {
             onClick={isPlaying ? pauseAudio : playAudio}>
             <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
           </IconButton>
-          <Slider // Replace input with Slider
+          <Slider
             value={currentTime}
             max={duration}
             onChange={(e, newValue) => handleProgressChange(newValue)}

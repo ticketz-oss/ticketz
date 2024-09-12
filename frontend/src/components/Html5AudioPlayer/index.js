@@ -3,6 +3,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay, faPause } from '@fortawesome/free-solid-svg-icons';
 import { IconButton, makeStyles, Slider } from '@material-ui/core';
 
+window.currentPlayerControllers = null;
+
 const useStyles = makeStyles((theme) => ({
   iconButton: {
     color: "black",
@@ -88,13 +90,19 @@ export function Html5AudioPlayer({ src, children }) {
   const [position, setPosition] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1);
 
+  let thisPlayerControllers = null;
+    
   const playAudio = () => {
+    if (window.currentPlayerControllers && window.currentPlayerControllers !== thisPlayerControllers) {
+      window.currentPlayerControllers.pauseAudio();
+    }    
     const storedPlaybackRate = localStorage.getItem('playbackRate');
     if (storedPlaybackRate) {
       audioRef.current.playbackRate = parseFloat(storedPlaybackRate);
       setPlaybackRate(parseFloat(storedPlaybackRate));
     }
     audioRef.current.play();
+    window.currentPlayerControllers = thisPlayerControllers;
     setIsPlaying(true);
   };
 
@@ -115,6 +123,8 @@ export function Html5AudioPlayer({ src, children }) {
     audioRef.current.currentTime = newValue;
     setCurrentTime(newValue);
   };
+  
+  thisPlayerControllers = { pauseAudio };
 
   useEffect(() => {
     audioRef.current.addEventListener('loadedmetadata', () => setDuration(audioRef.current.duration));
