@@ -39,8 +39,10 @@ import LinearWithValueLabel from "./ProgressBarCustom";
 import MarkdownWrapper from "../MarkdownWrapper";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSignature, faNoteSticky } from '@fortawesome/free-solid-svg-icons';
+import { RecordOggOpus } from "../../helpers/recordOggOpus";
 
-const Mp3Recorder = new MicRecorder({ bitRate: 128 });
+const Mp3Recorder = new RecordOggOpus();
+ // new MicRecorder({ bitRate: 128 });
 
 const useStyles = makeStyles((theme) => ({
   mainWrapper: {
@@ -669,7 +671,7 @@ const MessageInputCustom = (props) => {
   const handleUploadAudio = async () => {
     setLoading(true);
     try {
-      const [, blob] = await Mp3Recorder.stop().getMp3();
+      const blob = await Mp3Recorder.export();
       if (blob.size < 10000) {
         setLoading(false);
         setRecording(false);
@@ -693,7 +695,8 @@ const MessageInputCustom = (props) => {
 
   const handleCancelAudio = async () => {
     try {
-      await Mp3Recorder.stop().getMp3();
+      debugger;
+      await Mp3Recorder.stop();
       setRecording(false);
     } catch (err) {
       toastError(err);
