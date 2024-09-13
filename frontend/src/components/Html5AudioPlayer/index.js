@@ -49,7 +49,7 @@ const useStyles = makeStyles((theme) => ({
   },
   
   sliderRoot: {
-    marginTop: 4,
+    marginTop: 3,
     width: 200,
     color: theme.palette.primary.main,
   },
