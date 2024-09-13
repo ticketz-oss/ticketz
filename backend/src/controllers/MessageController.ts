@@ -40,6 +40,7 @@ type MessageData = {
   quotedMsg?: Message;
   number?: string;
   internal?: boolean;
+  ptt?: boolean;
 };
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
@@ -73,7 +74,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const { ticketId } = req.params;
-  const { body, quotedMsg, internal }: MessageData = req.body;
+  const { body, quotedMsg, internal, ptt }: MessageData = req.body;
   const medias = req.files as Express.Multer.File[];
   const { companyId } = req.user;
 
@@ -96,7 +97,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     if (channel === "whatsapp") {
       await Promise.all(
         medias.map(async (media: Express.Multer.File) => {
-          const message = await SendWhatsAppMedia({ media, ticket });
+          const message = await SendWhatsAppMedia({ media, ticket, ptt });
           verifyMediaMessage(
             message,
             ticket,

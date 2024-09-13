@@ -24,6 +24,7 @@ import {
   Facebook,
   Instagram,
   Description,
+  Business
 } from "@material-ui/icons";
 
 import MarkdownWrapper from "../MarkdownWrapper";
@@ -37,6 +38,9 @@ import { i18n } from "../../translate/i18n";
 import vCard from "vcard-parser";
 import { generateColor } from "../../helpers/colorGenerator";
 import { getInitials } from "../../helpers/getInitials";
+import { Html5AudioPlayer } from "../Html5AudioPlayer";
+import { OggAudioPlayer } from "../OggAudioPlayer";
+import { canPlayOggOpus, canRecordOggOpus } from "../../helpers/detectOggOpusSupport";
 
 const useStyles = makeStyles((theme) => ({
   messageContainer: {
@@ -484,8 +488,15 @@ const useStyles = makeStyles((theme) => ({
   },
   previewThumbnail: {
     width: "383px",
+  },
+  businessAvatar: {
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.primary.contrastText
   }
 }));
+
+const recordOpus = canRecordOggOpus();
+const playOpus = recordOpus || canPlayOggOpus();
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_MESSAGES") {
@@ -704,11 +715,18 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
       )
     }
     if (!document && message.mediaType === "audio") {
-
       return (
-        <audio controls>
-          <source src={message.mediaUrl} type="audio/ogg"></source>
-        </audio>
+        !playOpus && message.mediaUrl.endsWith(".ogg") ?
+          <OggAudioPlayer src={message.mediaUrl}>
+            {message.fromMe ?
+              <Avatar className={classes.businessAvatar} src={message.contact?.profilePicUrl}><Business /></Avatar> :
+              <Avatar style={{ backgroundColor: generateColor(message.contact?.number), color: "white", fontWeight: "bold" }} src={message.contact?.profilePicUrl}>{getInitials(message.contact?.name || "")}</Avatar>}
+          </OggAudioPlayer> :
+          <Html5AudioPlayer src={message.mediaUrl}>
+            {message.fromMe ?
+              <Avatar className={classes.businessAvatar} src={message.contact?.profilePicUrl}><Business /></Avatar> :
+              <Avatar style={{ backgroundColor: generateColor(message.contact?.number), color: "white", fontWeight: "bold" }} src={message.contact?.profilePicUrl}>{getInitials(message.contact?.name || "")}</Avatar>}
+          </Html5AudioPlayer>
       );
     }
 
