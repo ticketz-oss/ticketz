@@ -40,6 +40,7 @@ import MarkdownWrapper from "../MarkdownWrapper";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSignature, faNoteSticky } from '@fortawesome/free-solid-svg-icons';
 import { RecordOggOpus } from "../../helpers/recordOggOpus";
+import { makeRandomId } from "../../helpers/makeRandomId";
 
 const Mp3Recorder = new RecordOggOpus();
  // new MicRecorder({ bitRate: 128 });
@@ -671,20 +672,27 @@ const MessageInputCustom = (props) => {
   const handleUploadAudio = async () => {
     setLoading(true);
     try {
-      const blob = await Mp3Recorder.export();
-      if (blob.size < 10000) {
-        setLoading(false);
-        setRecording(false);
-        return;
-      }
+      Mp3Recorder.export(async (blob) => {
+        if (blob.size < 10000) {
+          setLoading(false);
+          setRecording(false);
+          return;
+        }
 
-      const formData = new FormData();
-      const filename = `audio-record-site-${new Date().getTime()}.mp3`;
-      formData.append("medias", blob, filename);
-      formData.append("body", filename);
-      formData.append("fromMe", true);
+        try {
+          const formData = new FormData();
+          const filename = `ticketz-audio-${makeRandomId(10)}.ogg`;
+          formData.append("medias", blob, filename);
+          formData.append("body", filename);
+          formData.append("fromMe", true);
+          formData.append("ptt", true);
 
-      await api.post(`/messages/${ticketId}`, formData);
+          await api.post(`/messages/${ticketId}`, formData);
+          setLoading(false);
+        } catch (err) {
+          toastError(err);
+        }
+      });
     } catch (err) {
       toastError(err);
     }

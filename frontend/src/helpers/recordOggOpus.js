@@ -1,33 +1,37 @@
+import Recorder from "opus-recorder";
+
 export class RecordOggOpus {
   constructor() {
     this.recorder = null;
-    this.stream = null;
     this.chunks = [];
-    this.mediaRecorder = null;
+    this.callback = null;
   }
 
   async start() {
-    this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    this.mediaRecorder = new MediaRecorder(this.stream);
-    this.mediaRecorder.ondataavailable = (event) => {
-      this.chunks.push(event.data);
-    };
-    this.mediaRecorder.start();
-  }
+    this.chunks = [];
+    this.recorder = new Recorder({
+      encoderPath: '/opus-recorder/dist/encoderWorker.min.js',
+      encoderSampleRate: 16000,
+      originalSampleRateOverride: 16000,
+    });
 
-  async stop() {
-    return new Promise((resolve) => {
-      this.mediaRecorder.addEventListener('stop', () => {
-        this.stream.getTracks().forEach(track => track.stop());
-        resolve();
-      });
-      this.mediaRecorder.stop();
+    this.recorder.ondataavailable = (typedArray) => {
+      if (!this.callback) {
+        throw new Error('No callback set');
+      }
+      this.callback(new Blob([typedArray], { type: 'audio/ogg; codecs=opus' }));
+    };
+    this.recorder.start().catch(function(e) {
+      console.debug('Error encountered:', e.message);
     });
   }
 
-  async export() {
-    await this.stop();
-    return new Blob(this.chunks, { type: 'audio/webm; codecs=opus' });
+  async stop() {
+    this.recorder.stop();
   }
-  
+
+  async export(callback) {
+    this.callback = callback;
+    await this.stop();
+  }
 }
