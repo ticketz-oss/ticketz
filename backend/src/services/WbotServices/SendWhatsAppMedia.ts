@@ -13,6 +13,7 @@ interface Request {
   media: Express.Multer.File;
   ticket: Ticket;
   body?: string;
+  ptt?: boolean;
 }
 
 const publicFolder = __dirname.endsWith("/dist")
@@ -115,7 +116,8 @@ export const getMessageOptions = async (
 const SendWhatsAppMedia = async ({
   media,
   ticket,
-  body
+  body,
+  ptt
 }: Request): Promise<WAMessage> => {
   try {
     const wbot = await GetTicketWbot(ticket);
@@ -132,21 +134,11 @@ const SendWhatsAppMedia = async ({
         // gifPlayback: true
       };
     } else if (typeMessage === "audio") {
-      const typeAudio = media.originalname.includes("audio-record-site");
-      if (typeAudio) {
-        const convert = await processAudio(media.path);
-        options = {
-          audio: fs.readFileSync(convert),
-          mimetype: typeAudio ? "audio/mp4" : media.mimetype,
-          ptt: true
-        };
-      } else {
-        const convert = await processAudioFile(media.path);
-        options = {
-          audio: fs.readFileSync(convert),
-          mimetype: typeAudio ? "audio/mp4" : media.mimetype
-        };
-      }
+      options = {
+        audio: fs.readFileSync(pathMedia),
+        mimetype: "audio/ogg; codecs=opus",
+        ptt: !!ptt
+      };
     } else if (typeMessage === "document" || typeMessage === "text") {
       options = {
         document: fs.readFileSync(pathMedia),
