@@ -8,6 +8,7 @@ export class RecordOggOpus {
   }
 
   async start() {
+    this.callback = null;
     this.chunks = [];
     this.recorder = new Recorder({
       encoderPath: '/opus-recorder/dist/encoderWorker.min.js',
@@ -16,10 +17,9 @@ export class RecordOggOpus {
     });
 
     this.recorder.ondataavailable = (typedArray) => {
-      if (!this.callback) {
-        throw new Error('No callback set');
+      if (this.callback) {
+        this.callback(new Blob([typedArray], { type: 'audio/ogg; codecs=opus' }));
       }
-      this.callback(new Blob([typedArray], { type: 'audio/ogg; codecs=opus' }));
     };
     this.recorder.start().catch(function(e) {
       console.debug('Error encountered:', e.message);
