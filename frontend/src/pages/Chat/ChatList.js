@@ -38,11 +38,12 @@ const useStyles = makeStyles((theme) => ({
     position: "relative",
     flex: 1,
     overflowY: "scroll",
+    overflowX: "hidden",
     ...theme.scrollbarStyles,
   },
   listItem: {
     cursor: "pointer",
-    height: 64,
+    height: 96,
   },
   lastMessageTime: {
     position: "absolute",
@@ -61,10 +62,16 @@ const useStyles = makeStyles((theme) => ({
     paddingTop: 32,
   },
   message: {
+    display: "unset",
     textWrap: "nowrap",
     textOverflow: "ellipsis",
     overflow: "hidden",
-  }
+  },
+  chip: {
+    position: "absolute",
+    right: 0,
+    marginRight: 5,
+  },
 }));
 
 export default function ChatList({
@@ -78,7 +85,7 @@ export default function ChatList({
   const classes = useStyles();
   const history = useHistory();
   const { user } = useContext(AuthContext);
-  const { datetimeToClient, relativePastTime } = useDate();
+  const { simpleRelativePastTime } = useDate();
 
   const [confirmationModal, setConfirmModalOpen] = useState(false);
   const [selectedChat, setSelectedChat] = useState({});
@@ -105,24 +112,6 @@ export default function ChatList({
   const unreadMessages = (chat) => {
     const currentUser = chat.users.find((u) => u.userId === user.id);
     return currentUser.unreads;
-  };
-
-  const getPrimaryText = (chat) => {
-    const mainText = chat.title;
-    const unreads = unreadMessages(chat);
-    return (
-      <>
-        {mainText}
-        {unreads > 0 && (
-          <Chip
-            size="small"
-            style={{ marginLeft: 5 }}
-            label={unreads}
-            color="secondary"
-          />
-        )}
-      </>
-    );
   };
 
   const getItemStyle = (chat) => {
@@ -162,13 +151,24 @@ export default function ChatList({
                       variant="body2"
                       color="textSecondary"
                     >
-                      {relativePastTime(chat.updatedAt)}
+                      {simpleRelativePastTime(chat.updatedAt)}
                     </Typography>
 
                     <ListItemText className={classes.message}
-                      primary={getPrimaryText(chat)}
+                      primary={chat.title}
                       secondary={chat.lastMessage}
                     />
+
+                    {unreadMessages(chat) > 0 && (
+                      <Chip
+                        className={classes.chip}
+                        size="small"
+                        style={{ marginLeft: 5 }}
+                        label={unreadMessages(chat)}
+                        color="secondary"
+                      />
+                    )}
+
                     <ListItemSecondaryAction className={classes.actionButtons}>
                       {chat.ownerId === user.id && (
                         <>
@@ -181,7 +181,6 @@ export default function ChatList({
                             edge="end"
                             aria-label="delete"
                             size="small"
-                            style={{ marginRight: 5 }}
                           >
                             <EditIcon />
                           </IconButton>
