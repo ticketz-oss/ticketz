@@ -72,7 +72,9 @@ interface IMe {
 
 const writeFileAsync = promisify(writeFile);
 
-const mutex = new Mutex();
+const createTicketMutex = new Mutex();
+const wbotMutex = new Mutex();
+const ackMutex = new Mutex();
 
 const getTypeMessage = (msg: proto.IWebMessageInfo): string => {
   return getContentType(msg.message);
@@ -751,6 +753,10 @@ export const verifyDeleteMessage = async (
       }
     ]
   });
+  
+  if (!message) {
+    return;
+  }
 
   await message.update({
     isDeleted: true
@@ -1399,7 +1405,10 @@ const handleMessage = async (
     }
 
     if (isGroup) {
-      const grupoMeta = await wbot.groupMetadata(msg.key.remoteJid);
+      const grupoMeta = await wbotMutex.runExclusive(async () => {
+        const result = await wbot.groupMetadata(msg.key.remoteJid);
+        return result;
+      });      
 
       const msgGroupContact = {
         id: grupoMeta.id,
@@ -1510,7 +1519,7 @@ const handleMessage = async (
       }
     }
 
-    const ticket = await mutex.runExclusive(async () => {
+    const ticket = await createTicketMutex.runExclusive(async () => {
       const result = await FindOrCreateTicketService(contact, wbot.id!, unreadMessages, companyId, groupContact);
       return result;
     });
@@ -1951,7 +1960,9 @@ const wbotMessageListener = async (wbot: Session, companyId: number): Promise<vo
       messageUpdate.forEach(async (message: WAMessageUpdate) => {
         (wbot as WASocket)!.readMessages([message.key])
 
-        handleMsgAck(message, message.update.status);
+        await ackMutex.runExclusive(async () => {
+          handleMsgAck(message, message.update.status);
+        });
       });
     });
 
