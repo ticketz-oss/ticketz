@@ -34,11 +34,24 @@ export function useDate() {
       });
     }
   }
+  
+  function simpleRelativePastTime(strDate) {
+    if (moment(strDate).isValid()) {
+      return moment(strDate).calendar({
+        sameDay: 'LT',
+        nextDay: 'L',
+        lastDay: 'dddd',
+        lastWeek: 'dddd',
+        sameElse: 'L'
+      });
+    }
+  }
 
   return {
     dateToClient,
     datetimeToClient,
     dateToDatabase,
     relativePastTime,
+    simpleRelativePastTime,
   };
 }
