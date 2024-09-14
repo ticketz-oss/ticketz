@@ -1,4 +1,4 @@
-import moment from "moment";
+const moment = window.ticketz.moment;
 
 export function useDate() {
   function dateToClient(strDate) {
@@ -21,10 +21,24 @@ export function useDate() {
     }
     return strDate;
   }
+  
+  function relativePastTime(strDate) {
+    if (moment(strDate).isValid()) {
+      return moment(strDate).calendar({
+        sameDay: 'LT',
+        nextDay: 'L LT',
+        nextWeek: '[Next] dddd LT',
+        lastDay: 'dddd LT',
+        lastWeek: 'dddd LT',
+        sameElse: 'L LT'
+      });
+    }
+  }
 
   return {
     dateToClient,
     datetimeToClient,
     dateToDatabase,
+    relativePastTime,
   };
 }
