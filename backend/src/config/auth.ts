@@ -26,9 +26,9 @@ async function generateSecretIfNotExists(cacheKey: string): Promise<string> {
     if (!secret) {
         secret = generateSecret(32);
         await cacheLayer.set(cacheKey, secret);
-        logger.debug(`[auth.ts] Generated ${cacheKey}: ${secret}`);
+        logger.debug(`[auth.ts] Generated ${cacheKey}`);
     } else {
-        logger.debug(`[auth.ts] Loaded ${cacheKey}: ${secret}`);
+        logger.debug(`[auth.ts] Loaded ${cacheKey}`);
     }
     return secret;
 }

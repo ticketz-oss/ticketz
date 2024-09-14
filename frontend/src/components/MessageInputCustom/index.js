@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext, useRef } from "react";
 import withWidth, { isWidthUp } from "@material-ui/core/withWidth";
 import "emoji-mart/css/emoji-mart.css";
 import { Picker } from "emoji-mart";
-import MicRecorder from "mic-recorder-to-mp3";
 import clsx from "clsx";
 
 import { makeStyles } from "@material-ui/core/styles";
@@ -42,8 +41,7 @@ import { faSignature, faNoteSticky } from '@fortawesome/free-solid-svg-icons';
 import { RecordOggOpus } from "../../helpers/recordOggOpus";
 import { makeRandomId } from "../../helpers/makeRandomId";
 
-const Mp3Recorder = new RecordOggOpus();
- // new MicRecorder({ bitRate: 128 });
+const oggRecorder = new RecordOggOpus();
 
 const useStyles = makeStyles((theme) => ({
   mainWrapper: {
@@ -660,11 +658,12 @@ const MessageInputCustom = (props) => {
     setLoading(true);
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
-      await Mp3Recorder.start();
+      await oggRecorder.start();
       setRecording(true);
       setLoading(false);
     } catch (err) {
       toastError(err);
+      setRecording(false);
       setLoading(false);
     }
   };
@@ -672,7 +671,7 @@ const MessageInputCustom = (props) => {
   const handleUploadAudio = async () => {
     setLoading(true);
     try {
-      Mp3Recorder.export(async (blob) => {
+      oggRecorder.export(async (blob) => {
         if (blob.size < 10000) {
           setLoading(false);
           setRecording(false);
@@ -688,23 +687,20 @@ const MessageInputCustom = (props) => {
           formData.append("ptt", true);
 
           await api.post(`/messages/${ticketId}`, formData);
-          setLoading(false);
         } catch (err) {
           toastError(err);
         }
+        setLoading(false);
+        setRecording(false);
       });
     } catch (err) {
       toastError(err);
     }
-
-    setRecording(false);
-    setLoading(false);
   };
 
   const handleCancelAudio = async () => {
     try {
-      debugger;
-      await Mp3Recorder.stop();
+      await oggRecorder.stop();
       setRecording(false);
     } catch (err) {
       toastError(err);

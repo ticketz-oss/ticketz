@@ -59,8 +59,18 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
   },
   btnContainer: {
+    display: "flex",
+    width: "100%",
     textAlign: "right",
     padding: 10,
+  },
+  title: {
+    width: "100%",
+    textAlign: "left",
+  },
+  titleButton: {
+    selfAlign: "flex-end",
+    marginLeft: 10,
   },
 }));
 
@@ -346,12 +356,14 @@ function Chat(props) {
   const renderGrid = () => {
     return (
       <>
-      <Title>{i18n.t("internalChat.title")}</Title>
       <Grid className={classes.gridContainer} container>
         <Grid className={classes.gridItem} md={3} item>
          
             <div className={classes.btnContainer}>
-              <Button
+              <Title className={classes.title}>
+                {i18n.t("internalChat.title")}
+              </Title>
+              <Button className={classes.titleButton}
                 onClick={() => {
                   setDialogType("new");
                   setShowDialog(true);

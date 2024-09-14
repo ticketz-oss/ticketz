@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import {
+    Avatar,
   Box,
   Button,
   FormControl,
@@ -23,11 +24,17 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import ModalImageCors from "../../components/ModalImageCors";
 import { GetApp } from "@material-ui/icons";
 import toastError from "../../errors/toastError";
-import MicRecorder from "mic-recorder-to-mp3";
 import MicIcon from "@material-ui/icons/Mic";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import RecordingTimer from "../../components/MessageInputCustom/RecordingTimer";
+import { canPlayOggOpus, canRecordOggOpus } from "../../helpers/detectOggOpusSupport";
+import { Html5AudioPlayer } from "../../components/Html5AudioPlayer";
+import { OggAudioPlayer } from "../../components/OggAudioPlayer";
+import { generateColor } from "../../helpers/colorGenerator";
+import { getInitials } from "../../helpers/getInitials";
+import { RecordOggOpus } from "../../helpers/recordOggOpus";
+import { makeRandomId } from "../../helpers/makeRandomId";
 
 const useStyles = makeStyles((theme) => ({
   mainContainer: {
@@ -42,10 +49,12 @@ const useStyles = makeStyles((theme) => ({
   },
   messageList: {
     position: "relative",
+    display: "flex",
+    flexDirection: "column",
     overflowY: "auto",
     height: "100%",
     ...theme.scrollbarStyles,
-    backgroundColor: theme.palette.chatlist, //DARK MODE PLW DESIGN//
+    backgroundColor: theme.palette.chatlist.main,
   },
   inputArea: {
     position: "relative",
@@ -58,27 +67,44 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(1),
   },
   boxLeft: {
-    padding: "10px 10px 5px",
-    margin: "10px",
+    padding: "5px 5px 0px 5px",
+    marginBottom: 0,
+    marginLeft: 10,
+    marginRight: 10,
+    marginTop: 2,
     position: "relative",
-    backgroundColor: "blue",
-    maxWidth: 300,
+    alignSelf: "flex-start",
+    backgroundColor: theme.palette.chatBubbleReceived.main,
+    color: theme.palette.chatBubbleReceived.contrastText,
+    minWidth: 100,
+    maxWidth: 600,
     borderRadius: 10,
     borderBottomLeftRadius: 0,
     border: "1px solid rgba(0, 0, 0, 0.12)",
+    boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000",
   },
   boxRight: {
-    padding: "10px 10px 5px",
-    margin: "10px 10px 10px auto",
+    padding: "5px 5px 0px 5px",
+    marginBottom: 0,
+    marginLeft: 10,
+    marginRight: 10,
+    marginTop: 2,
     position: "relative",
-    backgroundColor: "green", //DARK MODE PLW DESIGN//
-    textAlign: "right",
-    maxWidth: 300,
+    alignSelf: "flex-end",
+    backgroundColor: theme.palette.chatBubbleFromMe.main,
+    color: theme.palette.chatBubbleFromMe.contrastText,
+    minWidth: 100,
+    maxWidth: 600,
     borderRadius: 10,
     borderBottomRightRadius: 0,
     border: "1px solid rgba(0, 0, 0, 0.12)",
+    boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000",
   },
-
+  messageContactName: {
+    display: "flex",
+    color: "#6bcbef",
+    fontWeight: 500,
+  },
   sendMessageIcons: {
     color: "grey",
   },
@@ -140,10 +166,29 @@ const useStyles = makeStyles((theme) => ({
   sendAudioIcon: {
     color: "green",
   },
-
+  
+  timestamp: {
+    color: theme.mode === 'light' ? "#999" : "#d0d0d0",
+    right: 5,
+    bottom: 0,
+    position: "absolute",
+    fontSize: 11
+  },
+  messageText: {
+    padding: "3px 80px 6px 6px",
+    overflowWrap: "break-word",
+    marginBottom: 5,
+  },
+  
+  spacer: {
+    marginTop: 16,
+  }
 }));
 
-const Mp3Recorder = new MicRecorder({ bitRate: 128 });
+const oggRecorder = new RecordOggOpus();
+
+const recordOpus = canRecordOggOpus();
+const playOpus = recordOpus || canPlayOggOpus();
 
 export default function ChatMessages({
   chat,
@@ -155,7 +200,7 @@ export default function ChatMessages({
 }) {
   const classes = useStyles();
   const { user } = useContext(AuthContext);
-  const { datetimeToClient } = useDate();
+  const { relativePastTime } = useDate();
   const baseRef = useRef();
 
   const [contentMessage, setContentMessage] = useState("");
@@ -213,9 +258,13 @@ export default function ChatMessages({
     }
     if (message.mediaType === "audio") {
       return (
-        <audio controls>
-          <source src={message.mediaPath} type="audio/ogg"></source>
-        </audio>
+        !playOpus && message.mediaPath.endsWith(".ogg") ?
+          <OggAudioPlayer src={message.mediaPath}>
+            <Avatar style={{ backgroundColor: generateColor(message.sender.name), color: "white", fontWeight: "bold" }}>{getInitials(message.sender.name || "")}</Avatar>
+          </OggAudioPlayer> :
+          <Html5AudioPlayer src={message.mediaPath}>
+            <Avatar style={{ backgroundColor: generateColor(message.sender.name), color: "white", fontWeight: "bold" }}>{getInitials(message.sender.name || "")}</Avatar>
+          </Html5AudioPlayer>
       );
     }
 
@@ -255,7 +304,7 @@ export default function ChatMessages({
     formData.append("fromMe", true);
     medias.forEach((media) => {
       formData.append("medias", media);
-      formData.append("body", media.name);
+      formData.append("message", media.name);
     });
 
     try {
@@ -273,7 +322,7 @@ export default function ChatMessages({
     setLoading(true);
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
-      await Mp3Recorder.start();
+      await oggRecorder.start();
       setRecording(true);
       setLoading(false);
     } catch (err) {
@@ -285,69 +334,83 @@ export default function ChatMessages({
   const handleUploadAudio = async () => {
     setLoading(true);
     try {
-      const [, blob] = await Mp3Recorder.stop().getMp3();
+      oggRecorder.export(async (blob) => {
 
-      if (blob.size < 10000) {
+        if (blob.size < 10000) {
+          setLoading(false);
+          setRecording(false);
+          return;
+        }
+
+        try {
+          const formData = new FormData();
+          const filename = `ticketz-audio-${makeRandomId(10)}.ogg`;
+          formData.append("medias", blob, filename);
+          formData.append("message", "audio");
+          formData.append("fromMe", true);
+
+          await api.post(`/chats/${chat.id}/messages`, formData);
+        } catch (err) {
+          toastError(err);
+        }
         setLoading(false);
         setRecording(false);
-        return;
-      }
-
-      const formData = new FormData();
-      const filename = `audio-${new Date().getTime()}.mp3`;
-
-      formData.append("medias", blob, filename);
-      formData.append("body", filename);
-      formData.append("fromMe", true);
-
-      await api.post(`/chats/${chat.id}/messages`, formData);
+      });
     } catch (err) {
       toastError(err);
     }
-
-    setRecording(false);
-    setLoading(false);
   };
 
   const handleCancelAudio = async () => {
     try {
-      await Mp3Recorder.stop().getMp3();
+      await oggRecorder.stop();
       setRecording(false);
     } catch (err) {
       toastError(err);
     }
   };
 
+  let previousSenderId = null;
+
   return (
     <Paper className={classes.mainContainer}>
       <div onScroll={handleScroll} className={classes.messageList}>
         {Array.isArray(messages) &&
           messages.map((item, key) => {
+            let spacer = null;
+            if (previousSenderId !== null && previousSenderId !== item.senderId) {
+              spacer = <div className={classes.spacer}></div>;
+            }
+            previousSenderId = item.senderId;
+            
             if (item.senderId === user.id) {
               return (
-                <Box key={key} className={classes.boxRight}>
-                  <Typography variant="subtitle2">
-                    {item.sender.name}
-                  </Typography>
-                  {item.mediaPath && checkMessageMedia(item)}
-                  {item.message}
-                  <Typography variant="caption" display="block">
-                    {datetimeToClient(item.createdAt)}
-                  </Typography>
-                </Box>
+                <>
+                  {spacer}
+                  <Box key={key} className={classes.boxRight}>
+                    {item.mediaPath && checkMessageMedia(item)}
+                    {!item.mediaPath && <div className={classes.messageText}>{item.message}</div>}
+                    <Typography className={classes.timestamp} variant="caption" display="block">
+                      {relativePastTime(item.createdAt)}
+                    </Typography>
+                  </Box>
+                </>
               );
             } else {
               return (
-                <Box key={key} className={classes.boxLeft}>
-                  <Typography variant="subtitle2">
-                    {item.sender.name}
-                  </Typography>
-                  {item.mediaPath && checkMessageMedia(item)}
-                  {item.message}
-                  <Typography variant="caption" display="block">
-                    {datetimeToClient(item.createdAt)}
-                  </Typography>
-                </Box>
+                <>
+                  {spacer}
+                  <Box key={key} className={classes.boxLeft}>
+                    <Typography className={classes.messageContactName} variant="subtitle2">
+                      {item.sender.name}
+                    </Typography>
+                    {item.mediaPath && checkMessageMedia(item)}
+                    {!item.mediaPath && <div className={classes.messageText}>{item.message}</div>}
+                    <Typography className={classes.timestamp} variant="caption" display="block">
+                      {relativePastTime(item.createdAt)}
+                    </Typography>
+                  </Box>
+                </>
               );
             }
           })}

@@ -135,7 +135,7 @@ export const saveMessage = async (
         newMessage = await CreateMessageService({
           chatId,
           senderId,
-          message: media.originalname,
+          message: message || media.originalname,
           mediaPath: media.filename,
           mediaName: media.originalname,
           mediaType: media.mimetype.split("/")[0]

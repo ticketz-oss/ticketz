@@ -54,6 +54,8 @@ import { getMessageOptions } from "./SendWhatsAppMedia";
 import { makeRandomId } from "../../helpers/MakeRandomId";
 import CheckSettings, { GetCompanySetting } from "../../helpers/CheckSettings";
 import Whatsapp from "../../models/Whatsapp";
+import { SimpleObjectCache } from "../../helpers/simpleObjectCache";
+
 import { SubscriptionService } from "../../ticketzPro/services/subscriptionService";
 
 type Session = WASocket & {
@@ -73,7 +75,11 @@ interface IMe {
 
 const writeFileAsync = promisify(writeFile);
 
-const mutex = new Mutex();
+const createTicketMutex = new Mutex();
+const wbotMutex = new Mutex();
+const ackMutex = new Mutex();
+
+const groupContactCache = new SimpleObjectCache(1000 * 5 * 30);
 
 const getTypeMessage = (msg: proto.IWebMessageInfo): string => {
   return getContentType(msg.message);
@@ -754,6 +760,10 @@ export const verifyDeleteMessage = async (
       }
     ]
   });
+  
+  if (!message) {
+    return;
+  }
 
   await message.update({
     isDeleted: true
@@ -1407,13 +1417,19 @@ const handleMessage = async (
     }
 
     if (isGroup) {
-      const grupoMeta = await wbot.groupMetadata(msg.key.remoteJid);
-
-      const msgGroupContact = {
-        id: grupoMeta.id,
-        name: grupoMeta.subject
-      };
-      groupContact = await verifyContact(msgGroupContact, wbot, companyId);
+      groupContact = await wbotMutex.runExclusive(async () => {
+        let result = groupContactCache.get(msg.key.remoteJid);
+        if (!result) {
+          const groupMetadata = await wbot.groupMetadata(msg.key.remoteJid);
+          const msgGroupContact = {
+            id: groupMetadata.id,
+            name: groupMetadata.subject,
+          }
+          result = await verifyContact(msgGroupContact, wbot, companyId);
+          groupContactCache.set(msg.key.remoteJid, result);
+        }
+        return result;
+      });      
     }
 
     const whatsapp = await ShowWhatsAppService(wbot.id!, companyId);
@@ -1518,7 +1534,7 @@ const handleMessage = async (
       }
     }
 
-    const ticket = await mutex.runExclusive(async () => {
+    const ticket = await createTicketMutex.runExclusive(async () => {
       const result = await FindOrCreateTicketService(contact, wbot.id!, unreadMessages, companyId, groupContact);
       return result;
     });
@@ -1959,7 +1975,9 @@ const wbotMessageListener = async (wbot: Session, companyId: number): Promise<vo
       messageUpdate.forEach(async (message: WAMessageUpdate) => {
         (wbot as WASocket)!.readMessages([message.key])
 
-        handleMsgAck(message, message.update.status);
+        await ackMutex.runExclusive(async () => {
+          handleMsgAck(message, message.update.status);
+        });
       });
     });
 

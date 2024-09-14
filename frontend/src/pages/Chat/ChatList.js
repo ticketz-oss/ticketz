@@ -1,11 +1,13 @@
 import React, { useContext, useState } from "react";
 import {
   Chip,
+  Divider,
   IconButton,
   List,
   ListItem,
   ListItemSecondaryAction,
   ListItemText,
+  Typography,
   makeStyles,
 } from "@material-ui/core";
 
@@ -36,10 +38,39 @@ const useStyles = makeStyles((theme) => ({
     position: "relative",
     flex: 1,
     overflowY: "scroll",
+    overflowX: "hidden",
     ...theme.scrollbarStyles,
   },
   listItem: {
     cursor: "pointer",
+    height: 96,
+  },
+  lastMessageTime: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    fontSize: 12,
+    marginTop: 5,
+    marginRight: 5,
+  },
+  actionButtons: {
+    position: "absolute",
+    bottom: -32,
+    right: 0,
+    top: "unset",
+    height: 64,
+    paddingTop: 32,
+  },
+  message: {
+    display: "unset",
+    textWrap: "nowrap",
+    textOverflow: "ellipsis",
+    overflow: "hidden",
+  },
+  chip: {
+    position: "absolute",
+    right: 0,
+    marginRight: 5,
   },
 }));
 
@@ -54,7 +85,7 @@ export default function ChatList({
   const classes = useStyles();
   const history = useHistory();
   const { user } = useContext(AuthContext);
-  const { datetimeToClient } = useDate();
+  const { simpleRelativePastTime } = useDate();
 
   const [confirmationModal, setConfirmModalOpen] = useState(false);
   const [selectedChat, setSelectedChat] = useState({});
@@ -83,33 +114,9 @@ export default function ChatList({
     return currentUser.unreads;
   };
 
-  const getPrimaryText = (chat) => {
-    const mainText = chat.title;
-    const unreads = unreadMessages(chat);
-    return (
-      <>
-        {mainText}
-        {unreads > 0 && (
-          <Chip
-            size="small"
-            style={{ marginLeft: 5 }}
-            label={unreads}
-            color="secondary"
-          />
-        )}
-      </>
-    );
-  };
-
-  const getSecondaryText = (chat) => {
-    return chat.lastMessage !== ""
-      ? `${datetimeToClient(chat.updatedAt)}: ${chat.lastMessage}`
-      : "";
-  };
-
   const getItemStyle = (chat) => {
     return {
-      borderLeft: chat.uuid === id ? "6px solid #002d6e" : null,
+      borderLeft: chat.uuid === id ? "6px solid #002d6e" : "6px solid transparent",
      // backgroundColor: chat.uuid === id ? "#eee" : null,
     };
   };
@@ -130,46 +137,70 @@ export default function ChatList({
             {Array.isArray(chats) &&
               chats.length > 0 &&
               chats.map((chat, key) => (
-                <ListItem
-                  onClick={() => goToMessages(chat)}
-                  key={key}
-                  className={classes.listItem}
-                  style={getItemStyle(chat)}
-                  button
-                >
-                  <ListItemText
-                    primary={getPrimaryText(chat)}
-                    secondary={getSecondaryText(chat)}
-                  />
-                  {chat.ownerId === user.id && (
-                    <ListItemSecondaryAction>
-                      <IconButton
-                        onClick={() => {
-                          goToMessages(chat).then(() => {
-                            handleEditChat(chat);
-                          });
-                        }}
-                        edge="end"
-                        aria-label="delete"
+                <>
+                  <ListItem
+                    onClick={() => goToMessages(chat)}
+                    key={key}
+                    className={classes.listItem}
+                    style={getItemStyle(chat)}
+                    button
+                  >
+                    <Typography
+                      className={classes.lastMessageTime}
+                      component="span"
+                      variant="body2"
+                      color="textSecondary"
+                    >
+                      {simpleRelativePastTime(chat.updatedAt)}
+                    </Typography>
+
+                    <ListItemText className={classes.message}
+                      primary={chat.title}
+                      secondary={chat.lastMessage}
+                    />
+
+                    {unreadMessages(chat) > 0 && (
+                      <Chip
+                        className={classes.chip}
                         size="small"
-                        style={{ marginRight: 5 }}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        onClick={() => {
-                          setSelectedChat(chat);
-                          setConfirmModalOpen(true);
-                        }}
-                        edge="end"
-                        aria-label="delete"
-                        size="small"
-                      >
-                        <DeleteIcon />
-                      </IconButton>
+                        style={{ marginLeft: 5 }}
+                        label={unreadMessages(chat)}
+                        color="secondary"
+                      />
+                    )}
+
+                    <ListItemSecondaryAction className={classes.actionButtons}>
+                      {chat.ownerId === user.id && (
+                        <>
+                          <IconButton
+                            onClick={() => {
+                              goToMessages(chat).then(() => {
+                                handleEditChat(chat);
+                              });
+                            }}
+                            edge="end"
+                            aria-label="delete"
+                            size="small"
+                          >
+                            <EditIcon />
+                          </IconButton>
+                          <IconButton
+                            onClick={() => {
+                              setSelectedChat(chat);
+                              setConfirmModalOpen(true);
+                            }}
+                            edge="end"
+                            aria-label="delete"
+                            size="small"
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </>
+                      )}
                     </ListItemSecondaryAction>
-                  )}
-                </ListItem>
+                  </ListItem>
+                  <Divider component="li" />
+                </>
               ))}
           </List>
         </div>
