@@ -79,7 +79,7 @@ const createTicketMutex = new Mutex();
 const wbotMutex = new Mutex();
 const ackMutex = new Mutex();
 
-const groupContactCache = new SimpleObjectCache(1000 * 5 * 30);
+const groupContactCache = new SimpleObjectCache(1000 * 30, logger);
 
 const getTypeMessage = (msg: proto.IWebMessageInfo): string => {
   return getContentType(msg.message);
