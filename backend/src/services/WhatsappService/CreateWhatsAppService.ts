@@ -52,7 +52,7 @@ const CreateWhatsAppService = async ({
 }: Request): Promise<Response> => {
   const company = await Company.findOne({
     where: {
-      id: companyId,
+      id: companyId
     },
     include: [{ model: Plan, as: "plan" }]
   });
@@ -96,15 +96,13 @@ const CreateWhatsAppService = async ({
     throw new AppError((err as Error).message);
   }
 
-  const whatsappFound = await Whatsapp.findOne({ where: { companyId} });
+  const whatsappFound = await Whatsapp.findOne({ where: { companyId } });
 
-  isDefault = channel === "whatsapp" ? !whatsappFound : false
-
-
+  isDefault = channel === "whatsapp" ? !whatsappFound : false;
 
   let oldDefaultWhatsapp: Whatsapp | null = null;
 
-  if(channel === "whatsapp" && isDefault) {
+  if (channel === "whatsapp" && isDefault) {
     oldDefaultWhatsapp = await Whatsapp.findOne({
       where: { isDefault: true, companyId, channel }
     });
@@ -159,7 +157,7 @@ const CreateWhatsAppService = async ({
       facebookUserId,
       facebookUserToken,
       facebookPageUserId,
-      tokenMeta,
+      tokenMeta
     },
     { include: ["queues"] }
   );
