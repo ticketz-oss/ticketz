@@ -808,6 +808,19 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     }
   };
 
+  const getQuotedMessageText = (quotedMsg) => {
+    if (quotedMsg.mediaUrl?.endsWith(quotedMsg.body)) {
+      return "";
+    }
+
+    if (isVCard(quotedMsg.body)) {
+      return "🪪";
+    }
+    
+    return quotedMsg.body;
+  }
+    
+
   const renderQuotedMessage = (message) => {
     const data = JSON.parse(message.quotedMsg.dataJson);
     
@@ -832,7 +845,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
               {message.quotedMsg?.contact?.name}
             </span>
           )}
-          <MarkdownWrapper>{!message.quotedMsg?.mediaUrl?.endsWith(message.quotedMsg?.body) && message.quotedMsg?.body}</MarkdownWrapper>
+          <MarkdownWrapper>{getQuotedMessageText(message.quotedMsg)}</MarkdownWrapper>
         </div>
         {imageUrl && (
           <img className={classes.quotedThumbnail} src={imageUrl} />

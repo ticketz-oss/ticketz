@@ -700,7 +700,7 @@ const MessageInputCustom = (props) => {
                 {i18n.t("messagesInput.replying")} {message.contact?.name}
               </span>
               <MarkdownWrapper>
-                {message.body}
+                { message.body.startsWith('{"ticketzvCard":') ? "🪪" : message.body }
               </MarkdownWrapper>
             </div>
           )}
