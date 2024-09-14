@@ -7,6 +7,7 @@ import {
   IconButton,
   Input,
   InputAdornment,
+  InputBase,
   makeStyles,
   Paper,
   Typography,
@@ -35,6 +36,7 @@ import { generateColor } from "../../helpers/colorGenerator";
 import { getInitials } from "../../helpers/getInitials";
 import { RecordOggOpus } from "../../helpers/recordOggOpus";
 import { makeRandomId } from "../../helpers/makeRandomId";
+import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles((theme) => ({
   mainContainer: {
@@ -55,13 +57,16 @@ const useStyles = makeStyles((theme) => ({
     height: "100%",
     ...theme.scrollbarStyles,
     backgroundColor: theme.palette.chatlist.main,
+    padding: 20,
   },
   inputArea: {
     position: "relative",
     height: "auto",
   },
-  input: {
-    padding: "20px",
+  messageInput: {
+    paddingLeft: 10,
+    flex: 1,
+    border: "none",
   },
   buttonSend: {
     margin: theme.spacing(1),
@@ -121,7 +126,6 @@ const useStyles = makeStyles((theme) => ({
   },
   viewMediaInputWrapper: {
     display: "flex",
-    padding: "10px 13px",
     position: "relative",
     justifyContent: "space-between",
     alignItems: "center",
@@ -182,7 +186,16 @@ const useStyles = makeStyles((theme) => ({
   
   spacer: {
     marginTop: 16,
-  }
+  },
+  messageInputWrapper: {
+    padding: 6,
+    marginRight: 7,
+    border: "1px solid #ccc",
+    display: "flex",
+    borderRadius: 20,
+    flex: 1,
+  },  
+  
 }));
 
 const oggRecorder = new RecordOggOpus();
@@ -482,26 +495,24 @@ export default function ChatMessages({
                   </Paper>
                 </>
                 :
-                <React.Fragment>
-                  <Input
-                    multiline
-                    value={contentMessage}
-                    onKeyUp={(e) => {
-                      if (e.key === "Enter" && contentMessage.trim() !== "") {
+                <Paper elevation={0} square className={classes.viewMediaInputWrapper}>
+                  <FileInput disableOption={loading} handleChangeMedias={handleChangeMedias} />
+                  <div className={classes.messageInputWrapper}>
+                    <InputBase
+                      multiline
+                      value={contentMessage}
+                      onKeyUp={(e) => {
+                        if (e.key === "Enter" && contentMessage.trim() !== "") {
 
-                        handleSendMessage(contentMessage);
-                        setContentMessage("");
-                      }
-                    }}
-                    onChange={(e) => setContentMessage(e.target.value)}
-                    className={classes.input}
-                    startAdornment={
-                      <InputAdornment position="start">
-                        <FileInput disableOption={loading} handleChangeMedias={handleChangeMedias} />
-                      </InputAdornment>
-                    }
-                    endAdornment={
-                      <InputAdornment position="end">
+                          handleSendMessage(contentMessage);
+                          setContentMessage("");
+                        }
+                      }}
+                      placeholder={i18n.t("messagesInput.placeholderOpen")}
+                      onChange={(e) => setContentMessage(e.target.value)}
+                      className={classes.messageInput}
+                    />
+                  </div>
                         {contentMessage ? (
                           <IconButton
                             onClick={() => {
@@ -516,7 +527,6 @@ export default function ChatMessages({
                           </IconButton>
 
                         )
-
                           : (
                             <IconButton
                               aria-label="showRecorder"
@@ -524,15 +534,13 @@ export default function ChatMessages({
                               disabled={loading}
                               onClick={handleStartRecording}
                             >
-                              <MicIcon className={classes.sendMessageIcons} />
+                              <MicIcon className={classes.buttonSend} />
                             </IconButton>
                           )
 
                         }
-                      </InputAdornment>
-                    }
-                  />
-                </React.Fragment>
+                  
+                </Paper>
               }
             </>
           }
@@ -562,7 +570,7 @@ const FileInput = (props) => {
           component="span"
           disabled={disableOption}
         >
-          <AttachFileIcon className={classes.sendMessageIcons} />
+          <AttachFileIcon className={classes.buttonSend} />
         </IconButton>
       </label>
     </>

@@ -25,8 +25,6 @@ import { has, isObject } from "lodash";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
 import withWidth, { isWidthUp } from "@material-ui/core/withWidth";
-import whatsBackground from "../../assets/wa-background.png"
-import whatsBackgroundDark from "../../assets/wa-background-dark.png";
 
 import { i18n } from "../../translate/i18n";
 import Title from "../../components/Title";
@@ -36,19 +34,12 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "column",
     position: "relative",
     flex: 1,
-    padding: theme.spacing(2),
-    height: `calc(100% - 48px)`,
+    height: "100%",
     overflowY: "hidden",
-    border: "1px solid rgba(0, 0, 0, 0.12)",
-    backgroundImage: theme.mode === 'light' ? `url(${whatsBackground})` : `url(${whatsBackgroundDark})`,
-		backgroundPosition: 'center', 
-		backgroundSize: 'cover', 
-		backgroundRepeat: 'no-repeat', 
   },
   gridContainer: {
     flex: 1,
     height: "100%",
-    border: "1px solid rgba(0, 0, 0, 0.12)",
     backgroundColor: "inherit",
   },
   gridItem: {
@@ -357,7 +348,7 @@ function Chat(props) {
     return (
       <>
       <Grid className={classes.gridContainer} container>
-        <Grid className={classes.gridItem} md={3} item>
+        <Grid className={classes.gridItem} md={4} item>
          
             <div className={classes.btnContainer}>
               <Title className={classes.title}>
@@ -387,7 +378,7 @@ function Chat(props) {
             }}
           />
         </Grid>
-        <Grid className={classes.gridItem} md={9} item>
+        <Grid className={classes.gridItem} md={8} item>
           {isObject(currentChat) && has(currentChat, "id") && (
             <ChatMessages
               chat={currentChat}
