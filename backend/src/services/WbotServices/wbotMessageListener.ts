@@ -54,6 +54,7 @@ import { getMessageOptions } from "./SendWhatsAppMedia";
 import { makeRandomId } from "../../helpers/MakeRandomId";
 import CheckSettings, { GetCompanySetting } from "../../helpers/CheckSettings";
 import Whatsapp from "../../models/Whatsapp";
+import { SimpleObjectCache } from "../../helpers/simpleObjectCache";
 
 type Session = WASocket & {
   id?: number;
@@ -75,6 +76,8 @@ const writeFileAsync = promisify(writeFile);
 const createTicketMutex = new Mutex();
 const wbotMutex = new Mutex();
 const ackMutex = new Mutex();
+
+const groupContactCache = new SimpleObjectCache(1000 * 5 * 30);
 
 const getTypeMessage = (msg: proto.IWebMessageInfo): string => {
   return getContentType(msg.message);
@@ -1405,16 +1408,19 @@ const handleMessage = async (
     }
 
     if (isGroup) {
-      const grupoMeta = await wbotMutex.runExclusive(async () => {
-        const result = await wbot.groupMetadata(msg.key.remoteJid);
+      groupContact = await wbotMutex.runExclusive(async () => {
+        let result = groupContactCache.get(msg.key.remoteJid);
+        if (!result) {
+          const groupMetadata = await wbot.groupMetadata(msg.key.remoteJid);
+          const msgGroupContact = {
+            id: groupMetadata.id,
+            name: groupMetadata.subject,
+          }
+          result = await verifyContact(msgGroupContact, wbot, companyId);
+          groupContactCache.set(msg.key.remoteJid, result);
+        }
         return result;
       });      
-
-      const msgGroupContact = {
-        id: grupoMeta.id,
-        name: grupoMeta.subject
-      };
-      groupContact = await verifyContact(msgGroupContact, wbot, companyId);
     }
 
     const whatsapp = await ShowWhatsAppService(wbot.id!, companyId);
