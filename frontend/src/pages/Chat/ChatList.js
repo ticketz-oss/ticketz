@@ -1,11 +1,13 @@
 import React, { useContext, useState } from "react";
 import {
   Chip,
+  Divider,
   IconButton,
   List,
   ListItem,
   ListItemSecondaryAction,
   ListItemText,
+  Typography,
   makeStyles,
 } from "@material-ui/core";
 
@@ -40,7 +42,29 @@ const useStyles = makeStyles((theme) => ({
   },
   listItem: {
     cursor: "pointer",
+    height: 64,
   },
+  lastMessageTime: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    fontSize: 12,
+    marginTop: 5,
+    marginRight: 5,
+  },
+  actionButtons: {
+    position: "absolute",
+    bottom: -32,
+    right: 0,
+    top: "unset",
+    height: 64,
+    paddingTop: 32,
+  },
+  message: {
+    textWrap: "nowrap",
+    textOverflow: "ellipsis",
+    overflow: "hidden",
+  }
 }));
 
 export default function ChatList({
@@ -54,7 +78,7 @@ export default function ChatList({
   const classes = useStyles();
   const history = useHistory();
   const { user } = useContext(AuthContext);
-  const { datetimeToClient } = useDate();
+  const { datetimeToClient, relativePastTime } = useDate();
 
   const [confirmationModal, setConfirmModalOpen] = useState(false);
   const [selectedChat, setSelectedChat] = useState({});
@@ -101,15 +125,9 @@ export default function ChatList({
     );
   };
 
-  const getSecondaryText = (chat) => {
-    return chat.lastMessage !== ""
-      ? `${datetimeToClient(chat.updatedAt)}: ${chat.lastMessage}`
-      : "";
-  };
-
   const getItemStyle = (chat) => {
     return {
-      borderLeft: chat.uuid === id ? "6px solid #002d6e" : null,
+      borderLeft: chat.uuid === id ? "6px solid #002d6e" : "6px solid transparent",
      // backgroundColor: chat.uuid === id ? "#eee" : null,
     };
   };
@@ -130,46 +148,60 @@ export default function ChatList({
             {Array.isArray(chats) &&
               chats.length > 0 &&
               chats.map((chat, key) => (
-                <ListItem
-                  onClick={() => goToMessages(chat)}
-                  key={key}
-                  className={classes.listItem}
-                  style={getItemStyle(chat)}
-                  button
-                >
-                  <ListItemText
-                    primary={getPrimaryText(chat)}
-                    secondary={getSecondaryText(chat)}
-                  />
-                  {chat.ownerId === user.id && (
-                    <ListItemSecondaryAction>
-                      <IconButton
-                        onClick={() => {
-                          goToMessages(chat).then(() => {
-                            handleEditChat(chat);
-                          });
-                        }}
-                        edge="end"
-                        aria-label="delete"
-                        size="small"
-                        style={{ marginRight: 5 }}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        onClick={() => {
-                          setSelectedChat(chat);
-                          setConfirmModalOpen(true);
-                        }}
-                        edge="end"
-                        aria-label="delete"
-                        size="small"
-                      >
-                        <DeleteIcon />
-                      </IconButton>
+                <>
+                  <ListItem
+                    onClick={() => goToMessages(chat)}
+                    key={key}
+                    className={classes.listItem}
+                    style={getItemStyle(chat)}
+                    button
+                  >
+                    <Typography
+                      className={classes.lastMessageTime}
+                      component="span"
+                      variant="body2"
+                      color="textSecondary"
+                    >
+                      {relativePastTime(chat.updatedAt)}
+                    </Typography>
+
+                    <ListItemText className={classes.message}
+                      primary={getPrimaryText(chat)}
+                      secondary={chat.lastMessage}
+                    />
+                    <ListItemSecondaryAction className={classes.actionButtons}>
+                      {chat.ownerId === user.id && (
+                        <>
+                          <IconButton
+                            onClick={() => {
+                              goToMessages(chat).then(() => {
+                                handleEditChat(chat);
+                              });
+                            }}
+                            edge="end"
+                            aria-label="delete"
+                            size="small"
+                            style={{ marginRight: 5 }}
+                          >
+                            <EditIcon />
+                          </IconButton>
+                          <IconButton
+                            onClick={() => {
+                              setSelectedChat(chat);
+                              setConfirmModalOpen(true);
+                            }}
+                            edge="end"
+                            aria-label="delete"
+                            size="small"
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </>
+                      )}
                     </ListItemSecondaryAction>
-                  )}
-                </ListItem>
+                  </ListItem>
+                  <Divider component="li" />
+                </>
               ))}
           </List>
         </div>
