@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 
-export function UsersFilter({ onFiltered, initialUsers }) {
+export function UsersFilter({ onFiltered, initialUsers, excludeId }) {
   const [users, setUsers] = useState([]);
   const [selecteds, setSelecteds] = useState([]);
 
@@ -30,7 +30,10 @@ export function UsersFilter({ onFiltered, initialUsers }) {
   const loadUsers = async () => {
     try {
       const { data } = await api.get(`/users/list`);
-      const userList = data.map((u) => ({ id: u.id, name: u.name }));
+      let userList = data.map((u) => ({ id: u.id, name: u.name }));
+      if (excludeId) {
+        userList = userList.filter(user => user.id !== excludeId);
+      }      
       setUsers(userList);
     } catch (err) {
       toastError(err);

@@ -42,9 +42,7 @@ const SendWhatsAppMessage = async ({
       options = {
         quoted: {
           key: msgFound?.key || chatMessage.id,
-          message: {
-            extendedTextMessage: msgFound?.message.extendedTextMessage
-          }
+          message: msgFound?.message
         }
       };
     }
