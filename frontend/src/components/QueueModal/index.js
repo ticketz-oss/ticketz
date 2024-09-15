@@ -327,6 +327,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
                         {schedulesEnabled && (
                             <Field
                               as={TextField}
+                              InputLabelProps={{ shrink: true }}
                               label={i18n.t("queueModal.form.outOfHoursMessage")}
                               type="outOfHoursMessage"
                               multiline

@@ -500,6 +500,11 @@ const MessageInputCustom = (props) => {
         setInputMessage(editingMessage.body);
       }
     }
+    
+    if (replyingMessage || editingMessage) {
+      inputRef.current.focus();
+    }
+    
   }, [replyingMessage, editingMessage, signMessage, user.name]);
 
   useEffect(() => {
@@ -724,7 +729,7 @@ const MessageInputCustom = (props) => {
                 {i18n.t("messagesInput.replying")} {message.contact?.name}
               </span>
               <MarkdownWrapper>
-                {message.body}
+                { message.body.startsWith('{"ticketzvCard":') ? "🪪" : message.body }
               </MarkdownWrapper>
             </div>
           )}

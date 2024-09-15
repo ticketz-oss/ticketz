@@ -442,6 +442,7 @@ const messages = {
 				},
 				toasts: {
 					deleted: "Record deleted",
+					created: "Record created",
 				},
 			},
 			contactListItems: {

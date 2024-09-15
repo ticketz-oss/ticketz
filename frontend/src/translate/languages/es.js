@@ -448,6 +448,7 @@ const messages = {
 				},
 				toasts: {
 					deleted: "Registro eliminado",
+					created: "Registro creado",
 				},
 			},
 			contactListItems: {

@@ -451,6 +451,7 @@ const messages = {
 				},
 				toasts: {
 					deleted: "Registro excluído",
+					created: "Registro criado",
 				},
 			},
 			contactListItems: {
