@@ -398,12 +398,13 @@ const downloadMedia = async (msg: proto.IWebMessageInfo, wbot: Session, ticket: 
   while (contDownload < 10 && !stream) {
     try {
 
-      if (message?.directPath) {
-        message.url = "";
+      const tmpMessage = { ...message }; 
+      if (tmpMessage?.directPath) {
+        tmpMessage.url = "";
       }
 
       // eslint-disable-next-line no-await-in-loop
-      stream = await downloadContentFromMessage(message, messageType);
+      stream = await downloadContentFromMessage(tmpMessage, messageType);
     } catch (error) {
       contDownload += 1;
       // eslint-disable-next-line no-await-in-loop, no-loop-func
