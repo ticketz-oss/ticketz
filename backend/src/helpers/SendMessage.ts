@@ -20,19 +20,16 @@ export const SendMessage = async (
 
     let message;
 
+    const body = `\u200e${messageData.body}`;
+
     if (messageData.mediaPath) {
-      const options = await getMessageOptions(
-        messageData.body,
-        messageData.mediaPath
-      );
+      const options = await getMessageOptions(body, messageData.mediaPath);
       if (options) {
-        const body = fs.readFileSync(messageData.mediaPath);
         message = await wbot.sendMessage(chatId, {
           ...options
         });
       }
     } else {
-      const body = `\u200e${messageData.body}`;
       message = await wbot.sendMessage(chatId, { text: body });
     }
 
