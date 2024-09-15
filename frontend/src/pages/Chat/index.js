@@ -70,6 +70,7 @@ export function ChatModal({
   type,
   handleClose,
   handleLoadNewChat,
+  user,
 }) {
   const [users, setUsers] = useState([]);
   const [title, setTitle] = useState("");
@@ -77,7 +78,7 @@ export function ChatModal({
   useEffect(() => {
     setTitle("");
     setUsers([]);
-    if (type === "edit") {
+    if (type === "edit" && chat?.users) {
       const userList = chat.users.map((u) => ({
         id: u.user.id,
         name: u.user.name,
@@ -140,6 +141,7 @@ export function ChatModal({
             <UsersFilter
               onFiltered={(users) => setUsers(users)}
               initialUsers={users}
+              excludeId={user.id}
             />
           </Grid>
         </Grid>
@@ -460,6 +462,7 @@ function Chat(props) {
           history.push(`/chats/${data.uuid}`);
         }}
         handleClose={() => setShowDialog(false)}
+        user={user}
       />
       <Paper className={classes.mainContainer}>
         {isWidthUp("md", props.width) ? renderGrid() : renderTab()}
