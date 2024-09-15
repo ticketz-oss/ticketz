@@ -484,6 +484,11 @@ const MessageInputCustom = (props) => {
         setInputMessage(editingMessage.body);
       }
     }
+    
+    if (replyingMessage || editingMessage) {
+      inputRef.current.focus();
+    }
+    
   }, [replyingMessage, editingMessage, signMessage, user.name]);
   
   useEffect(() => {
