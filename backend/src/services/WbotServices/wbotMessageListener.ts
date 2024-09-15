@@ -1773,11 +1773,6 @@ const handleMsgAck = async (
     const messageToUpdate = await Message.findByPk(msg.key.id, {
       include: [
         "contact",
-        { 
-          model: User,
-          attributes: { exclude: ["passwordHash"] },
-          required: false
-        },
         {
           model: Message,
           as: "quotedMsg",
