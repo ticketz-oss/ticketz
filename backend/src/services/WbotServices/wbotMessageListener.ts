@@ -54,6 +54,7 @@ import { getMessageOptions } from "./SendWhatsAppMedia";
 import { makeRandomId } from "../../helpers/MakeRandomId";
 import CheckSettings, { GetCompanySetting } from "../../helpers/CheckSettings";
 import Whatsapp from "../../models/Whatsapp";
+import { SimpleObjectCache } from "../../helpers/simpleObjectCache";
 
 type Session = WASocket & {
   id?: number;
@@ -72,7 +73,11 @@ interface IMe {
 
 const writeFileAsync = promisify(writeFile);
 
-const mutex = new Mutex();
+const createTicketMutex = new Mutex();
+const wbotMutex = new Mutex();
+const ackMutex = new Mutex();
+
+const groupContactCache = new SimpleObjectCache(1000 * 30, logger);
 
 const getTypeMessage = (msg: proto.IWebMessageInfo): string => {
   return getContentType(msg.message);
@@ -741,6 +746,10 @@ export const verifyDeleteMessage = async (
       }
     ]
   });
+  
+  if (!message) {
+    return;
+  }
 
   await message.update({
     isDeleted: true
@@ -1413,13 +1422,19 @@ const handleMessage = async (
     }
 
     if (isGroup) {
-      const grupoMeta = await wbot.groupMetadata(msg.key.remoteJid);
-
-      const msgGroupContact = {
-        id: grupoMeta.id,
-        name: grupoMeta.subject
-      };
-      groupContact = await verifyContact(msgGroupContact, wbot, companyId);
+      groupContact = await wbotMutex.runExclusive(async () => {
+        let result = groupContactCache.get(msg.key.remoteJid);
+        if (!result) {
+          const groupMetadata = await wbot.groupMetadata(msg.key.remoteJid);
+          const msgGroupContact = {
+            id: groupMetadata.id,
+            name: groupMetadata.subject,
+          }
+          result = await verifyContact(msgGroupContact, wbot, companyId);
+          groupContactCache.set(msg.key.remoteJid, result);
+        }
+        return result;
+      });      
     }
 
     const whatsapp = await ShowWhatsAppService(wbot.id!, companyId);
@@ -1450,23 +1465,6 @@ const handleMessage = async (
     const complationMessage = whatsapp.complationMessage.trim() || "Atendimento finalizado";
 
     if (unreadMessages === 0 && complationMessage && formatBody(complationMessage, contact).trim().toLowerCase() === lastMessage?.body.trim().toLowerCase()) {
-      return;
-    }
-
-    const ticket = await mutex.runExclusive(async () => {
-      const result = await FindOrCreateTicketService(contact, wbot.id!, unreadMessages, companyId, groupContact);
-      return result;
-    });
-
-    // voltar para o menu inicial
-
-    if (bodyMessage === "#") {
-      await ticket.update({
-        queueOptionId: null,
-        chatbot: false,
-        queueId: null,
-      });
-      await verifyQueue(wbot, msg, ticket, ticket.contact);
       return;
     }
 
@@ -1540,6 +1538,24 @@ const handleMessage = async (
       }
     }
 
+    const ticket = await createTicketMutex.runExclusive(async () => {
+      const result = await FindOrCreateTicketService(contact, wbot.id!, unreadMessages, companyId, groupContact);
+      return result;
+    });
+
+    // voltar para o menu inicial
+
+    if (bodyMessage === "#") {
+      await ticket.update({
+        queueOptionId: null,
+        chatbot: false,
+        queueId: null,
+      });
+      await verifyQueue(wbot, msg, ticket, ticket.contact);
+      return;
+    }
+
+
     if (messageMedia || msg?.message?.extendedTextMessage?.thumbnailDirectPath) {
       await verifyMediaMessage(msg, ticket, contact, wbot, messageMedia);
     } else if (msg.message?.editedMessage?.message?.protocolMessage?.editedMessage) {
@@ -1588,7 +1604,7 @@ const handleMessage = async (
                 `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"
                 }`,
                 {
-                  text: body
+                  text: `\u200e${body}`
                 }
               );
             },
@@ -1620,7 +1636,7 @@ const handleMessage = async (
                   `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"
                   }`,
                   {
-                    text: body
+                    text: `\u200e${body}`
                   }
                 );
               },
@@ -1674,7 +1690,7 @@ const handleMessage = async (
                   `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"
                   }`,
                   {
-                    text: body
+                    text: `\u200e${body}`
                   }
                 );
               },
@@ -1714,7 +1730,7 @@ const handleMessage = async (
               `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"
               }`,
               {
-                text: formatBody(whatsapp.greetingMessage, contact, ticket)
+                text: formatBody(`\u200e${whatsapp.greetingMessage}`, contact, ticket)
               }
             );
           },
@@ -1757,6 +1773,11 @@ const handleMsgAck = async (
     const messageToUpdate = await Message.findByPk(msg.key.id, {
       include: [
         "contact",
+        { 
+          model: User,
+          attributes: { exclude: ["passwordHash"] },
+          required: false
+        },
         {
           model: Message,
           as: "quotedMsg",
@@ -1958,7 +1979,9 @@ const wbotMessageListener = async (wbot: Session, companyId: number): Promise<vo
       messageUpdate.forEach(async (message: WAMessageUpdate) => {
         (wbot as WASocket)!.readMessages([message.key])
 
-        handleMsgAck(message, message.update.status);
+        await ackMutex.runExclusive(async () => {
+          handleMsgAck(message, message.update.status);
+        });
       });
     });
 
