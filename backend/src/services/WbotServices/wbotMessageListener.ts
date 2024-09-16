@@ -370,16 +370,18 @@ const downloadMedia = async (msg: proto.IWebMessageInfo, wbot: Session, ticket: 
     const fileLimitMessage = {
       text: `\u200e*Mensagem Automática*:\nNosso sistema aceita apenas arquivos com no máximo ${fileLimit} MiB`
     };
-    
-    const sendMsg = await wbot.sendMessage(
-      `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-      fileLimitMessage
-    );
 
-    sendMsg.message.extendedTextMessage.text = "\u200e*Mensagem do sistema*:\nArquivo recebido além do limite de tamanho do sistema, se for necessário ele pode ser obtido no aplicativo do whatsapp.";
+    if (!ticket.isGroup) {
+      const sendMsg = await wbot.sendMessage(
+        `${ticket.contact.number}@s.whatsapp.net`,
+        fileLimitMessage
+      );
 
-    // eslint-disable-next-line no-use-before-define
-    await verifyMessage(sendMsg, ticket, ticket.contact);
+      sendMsg.message.extendedTextMessage.text = "\u200e*Mensagem do sistema*:\nArquivo recebido além do limite de tamanho do sistema, se for necessário ele pode ser obtido no aplicativo do whatsapp.";
+
+      // eslint-disable-next-line no-use-before-define
+      await verifyMessage(sendMsg, ticket, ticket.contact);
+    }
     throw new Error("ERR_FILESIZE_OVER_LIMIT");
   }
 
