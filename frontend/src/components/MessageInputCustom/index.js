@@ -41,6 +41,10 @@ import { faSignature, faNoteSticky } from '@fortawesome/free-solid-svg-icons';
 import { RecordOggOpus } from "../../helpers/recordOggOpus";
 import { makeRandomId } from "../../helpers/makeRandomId";
 
+import AddIcon from '@material-ui/icons/Add';
+import Popover from '@material-ui/core/Popover';
+import useMediaQuery from '@material-ui/core/useMediaQuery';
+
 const oggRecorder = new RecordOggOpus();
 
 const useStyles = makeStyles((theme) => ({
@@ -116,7 +120,7 @@ const useStyles = makeStyles((theme) => ({
   recorderWrapper: {
     display: "flex",
     alignItems: "center",
-    alignContent: "middle",
+    marginLeft: "auto",
   },
 
   cancelAudioIcon: {
@@ -172,12 +176,16 @@ const useStyles = makeStyles((theme) => ({
     color: "#6bcbef",
     fontWeight: 500,
   },
-  
+
   iconSwitch: {
     color: (props) => (props.value ? theme.palette.primary.main : "gray"),
     width: 48,
     height: 48
   },
+
+  hideInput: {
+    display: "none"
+  }
 
 }));
 
@@ -335,6 +343,7 @@ const ActionButtons = (props) => {
 const CustomInput = (props) => {
   const {
     loading,
+    recording,
     inputRef,
     ticketStatus,
     inputMessage,
@@ -418,7 +427,7 @@ const CustomInput = (props) => {
   };
 
   return (
-    <div className={classes.messageInputWrapper}>
+    <div className={recording ? classes.hideInput : classes.messageInputWrapper}>
       <Autocomplete
         disabled={disableOption}
         freeSolo
@@ -492,6 +501,22 @@ const MessageInputCustom = (props) => {
   const [signMessage, setSignMessage] = useLocalStorage("signOption", true);
   const [annotateMessage, setAnnotateMessage] = useState(false);
 
+  const isNarrowScreen = useMediaQuery(theme => theme.breakpoints.down('sm'));
+
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+  
+  const open = Boolean(anchorEl);
+  const id = open ? 'simple-popover' : undefined;
+
+
   useEffect(() => {
     if (editingMessage) {
       if (signMessage && editingMessage.body.startsWith(`*${user.name}:*\n`)) {
@@ -500,11 +525,11 @@ const MessageInputCustom = (props) => {
         setInputMessage(editingMessage.body);
       }
     }
-    
+
     if (replyingMessage || editingMessage) {
       inputRef.current.focus();
     }
-    
+
   }, [replyingMessage, editingMessage, signMessage, user.name]);
 
   useEffect(() => {
@@ -729,7 +754,7 @@ const MessageInputCustom = (props) => {
                 {i18n.t("messagesInput.replying")} {message.contact?.name}
               </span>
               <MarkdownWrapper>
-                { message.body.startsWith('{"ticketzvCard":') ? "🪪" : message.body }
+                {message.body.startsWith('{"ticketzvCard":') ? "🪪" : message.body}
               </MarkdownWrapper>
             </div>
           )}
@@ -805,27 +830,70 @@ const MessageInputCustom = (props) => {
             setShowEmoji={setShowEmoji}
           />
 
-          <FileInput
-            disableOption={disableOption}
-            handleChangeMedias={handleChangeMedias}
-          />
+          {isNarrowScreen ? (
+            <div>
+              <IconButton aria-describedby={id} variant="contained" color="primary" onClick={handleMenuClick}>
+                <AddIcon className={classes.sendMessageIcons} />
+              </IconButton>
+              <Popover
+                id={id}
+                open={open}
+                anchorEl={anchorEl}
+                onClose={handleMenuClose}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'center',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'center',
+                }}
+              >
+                <FileInput
+                  disableOption={disableOption}
+                  handleChangeMedias={handleChangeMedias}
+                />
 
-          <IconSwitch
-            setter={setAnnotateMessage}
-            value={annotateMessage}
-            icon={faNoteSticky}
-            tooltip={i18n.t("messagesInput.annotateMessage")}
-          />
+                <IconSwitch
+                  setter={setAnnotateMessage}
+                  value={annotateMessage}
+                  icon={faNoteSticky}
+                  tooltip={i18n.t("messagesInput.annotateMessage")}
+                />
 
-          <IconSwitch
-            setter={setSignMessage}
-            value={signMessage}
-            icon={faSignature}
-            tooltip={i18n.t("messagesInput.signMessage")}
-          />
-          
+                <IconSwitch
+                  setter={setSignMessage}
+                  value={signMessage}
+                  icon={faSignature}
+                  tooltip={i18n.t("messagesInput.signMessage")}
+                />
+              </Popover>
+            </div>
+          ) : (
+            <>
+              <FileInput
+                disableOption={disableOption}
+                handleChangeMedias={handleChangeMedias}
+              />
+
+              <IconSwitch
+                setter={setAnnotateMessage}
+                value={annotateMessage}
+                icon={faNoteSticky}
+                tooltip={i18n.t("messagesInput.annotateMessage")}
+              />
+
+              <IconSwitch
+                setter={setSignMessage}
+                value={signMessage}
+                icon={faSignature}
+                tooltip={i18n.t("messagesInput.signMessage")}
+              />
+            </>
+          )}
           <CustomInput
             loading={loading}
+            recording={recording}
             inputRef={inputRef}
             ticketStatus={ticketStatus}
             inputMessage={inputMessage}
