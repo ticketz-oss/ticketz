@@ -5,6 +5,7 @@ import { exec } from "child_process";
 import path from "path";
 import ffmpegPath from "@ffmpeg-installer/ffmpeg";
 import mime from "mime-types";
+import iconv from 'iconv-lite';
 import AppError from "../../errors/AppError";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
 import Ticket from "../../models/Ticket";
@@ -124,15 +125,25 @@ const SendWhatsAppMedia = async ({
     const typeMessage = media.mimetype.split("/")[0];
     let options: AnyMessageContent;
 
+    let originalNameUtf8 = "";
+    try {
+      originalNameUtf8 = iconv.decode(
+        Buffer.from(media.originalname, "binary"),
+        "utf8"
+      );
+    } catch (error) {
+      console.error("Error converting filename to UTF-8:", error);
+    }
+
     if (typeMessage === "video") {
       options = {
         video: fs.readFileSync(pathMedia),
         caption: body,
-        fileName: media.originalname
+        fileName: originalNameUtf8
         // gifPlayback: true
       };
     } else if (typeMessage === "audio") {
-      const typeAudio = media.originalname.includes("audio-record-site");
+      const typeAudio = originalNameUtf8.includes("audio-record-site");
       if (typeAudio) {
         const convert = await processAudio(media.path);
         options = {
@@ -151,14 +162,14 @@ const SendWhatsAppMedia = async ({
       options = {
         document: fs.readFileSync(pathMedia),
         caption: body,
-        fileName: media.originalname,
+        fileName: originalNameUtf8,
         mimetype: media.mimetype
       };
     } else if (typeMessage === "application") {
       options = {
         document: fs.readFileSync(pathMedia),
         caption: body,
-        fileName: media.originalname,
+        fileName: originalNameUtf8,
         mimetype: media.mimetype
       };
     } else {

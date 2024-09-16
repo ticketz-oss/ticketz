@@ -41,6 +41,14 @@ import { generateColor } from "../../helpers/colorGenerator";
 import { getInitials } from "../../helpers/getInitials";
 
 const useStyles = makeStyles((theme) => ({
+  messageContainer: {
+    "& a": {
+      color: theme.palette.primary.main,
+      fontWeight: "bold",
+      textDecoration: "none",
+    },    
+  },
+  
   messagesListWrapper: {
     overflow: "hidden",
     position: "relative",
@@ -114,7 +122,7 @@ const useStyles = makeStyles((theme) => ({
 
   quotedMsg: {
     padding: 10,
-    maxWidth: 300,
+    // maxWidth: 300,
     width: "100%",
     height: "auto",
     display: "block",
@@ -174,7 +182,7 @@ const useStyles = makeStyles((theme) => ({
 
   quotedMsgRight: {
     padding: 10,
-    maxWidth: 300,
+    // maxWidth: 300,
     height: "auto",
     whiteSpace: "pre-wrap",
   },
@@ -444,6 +452,9 @@ const useStyles = makeStyles((theme) => ({
   },
   messageHighlighted: {
     backgroundColor: theme.palette.primary.main,
+  },
+  previewThumbnail: {
+    width: "383px",
   }
 }));
 
@@ -638,15 +649,14 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     setAnchorEl(null);
   };
 
-  const checkMessageMedia = (message, messageData) => {
-    const data = JSON.parse(message.dataJson);
+  const checkMessageMedia = (message, data) => {
     const document =
       data?.message?.documentMessage
       || data?.message?.documentWithCaptionMessage?.message?.documentMessage;
     if (!document && message.mediaType === "image") {
       return (
         <>
-          <ModalImageCors imageUrl={message.mediaUrl} isDeleted={message.isDeleted} />
+          { <ModalImageCors imageUrl={message.mediaUrl} isDeleted={message.isDeleted} /> }
           <>
             <div className={[clsx({
               [classes.textContentItemDeleted]: message.isDeleted,
@@ -654,7 +664,6 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
             }),]}>
               {data?.message?.imageMessage?.caption &&
                 <>
-                  <Divider />
                   <MarkdownWrapper>
                     {data.message.imageMessage.caption}
                   </MarkdownWrapper>
@@ -699,7 +708,6 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
           </div>
           {message.body !== document?.fileName &&
             <>
-              <Divider />
               <div className={[clsx({
                 [classes.textContentItemDeleted]: message.isDeleted,
               }),]}>
@@ -800,6 +808,19 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     }
   };
 
+  const getQuotedMessageText = (quotedMsg) => {
+    if (quotedMsg.mediaUrl?.endsWith(quotedMsg.body)) {
+      return "";
+    }
+
+    if (isVCard(quotedMsg.body)) {
+      return "🪪";
+    }
+    
+    return quotedMsg.body;
+  }
+    
+
   const renderQuotedMessage = (message) => {
     const data = JSON.parse(message.quotedMsg.dataJson);
     
@@ -824,7 +845,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
               {message.quotedMsg?.contact?.name}
             </span>
           )}
-          <MarkdownWrapper>{!message.quotedMsg?.mediaUrl?.endsWith(message.quotedMsg?.body) && message.quotedMsg?.body}</MarkdownWrapper>
+          <MarkdownWrapper>{getQuotedMessageText(message.quotedMsg)}</MarkdownWrapper>
         </div>
         {imageUrl && (
           <img className={classes.quotedThumbnail} src={imageUrl} />
@@ -833,7 +854,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     );
   };
 
-  const renderPreview = (message) => {
+  const renderLinkPreview = (message) => {
     const data = JSON.parse(message.dataJson);
     
     const title = data?.message?.extendedTextMessage?.title;
@@ -856,11 +877,6 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
             [classes.quotedContainerRight]: message.fromMe,
           })}
         >
-          <span
-            className={clsx(classes.quotedSideColorLeft, {
-              [classes.quotedSideColorRight]: message.quotedMsg?.fromMe,
-            })}
-          ></span>
           <div className={classes.quotedMsg}>
             {title &&
               <div className={classes.linkPreviewTitle}>
@@ -878,7 +894,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
               </div>
             }
           </div>
-          {imageUrl && (
+          {!message.thumbnailUrl && imageUrl && (
             <img className={classes.quotedThumbnail} src={imageUrl} />
           )}
         </div>
@@ -1018,7 +1034,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
             {renderDailyTimestamps(message, index)}
             {renderMessageDivider(message, index)}
             <div id={message.id}
-              className={[clsx(classes.messageLeft, {
+              className={[clsx(classes.messageContainer, classes.messageLeft, {
                 [classes.messageMediaSticker]: isSticker,
               })]}
               title={message.queueId && message.queue?.name}
@@ -1039,6 +1055,10 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                 </span>
               )}
 
+              {message.thumbnailUrl && (
+                <img className={classes.previewThumbnail} src={message.thumbnailUrl} />
+              )}
+
               {message.body.includes('data:image') ? messageLocation(message.body, message.createdAt)
                 :
                 isVCard(message.body) ?
@@ -1056,9 +1076,9 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                     [classes.textContentItemEdited]: message.isEdited
                   }),]}>
                     {message.quotedMsg && renderQuotedMessage(message)}
-                    {renderPreview(message)}
+                    {renderLinkPreview(message)}
                     {!isSticker && (
-                      message.mediaUrl ?
+                      message.mediaUrl && !data?.message?.extendedTextMessage ?
                         ""
                         :
                         <>
@@ -1082,7 +1102,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
                       {format(parseISO(message.createdAt), "HH:mm")}
                     </span>
                   </div>)}
-                  {message.mediaUrl && checkMessageMedia(message, data)}
+                  {message.mediaUrl && !data?.message?.extendedTextMessage && checkMessageMedia(message, data)}
             </div>
           </React.Fragment>
         );
@@ -1092,7 +1112,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
             {renderDailyTimestamps(message, index)}
             {renderMessageDivider(message, index)}
             <div id={message.id}
-              className={[clsx(classes.messageRight, {
+              className={[clsx(classes.messageContainer, classes.messageRight, {
                 [classes.messageMediaSticker]: isSticker,
               })]}
               title={message.queueId && message.queue?.name}
@@ -1129,7 +1149,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
 
                     :
                     message.quotedMsg && renderQuotedMessage(message)}
-                {renderPreview(message)}
+                {renderLinkPreview(message)}
                 {!isSticker && (
                   message.mediaUrl ? "" : <MarkdownWrapper>{message.body}</MarkdownWrapper>
                 )

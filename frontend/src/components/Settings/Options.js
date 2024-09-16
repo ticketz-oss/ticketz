@@ -23,6 +23,7 @@ import { faCopy, faGears } from '@fortawesome/free-solid-svg-icons';
 
 import { generateSecureToken } from "../../helpers/generateSecureToken";
 import { copyToClipboard } from "../../helpers/copyToClipboard";
+import { i18n } from "../../translate/i18n.js";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -319,7 +320,7 @@ export default function Options(props) {
                 </Grid> */}
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
-            <InputLabel id="ratings-label">Avaliações</InputLabel>
+            <InputLabel id="ratings-label">{i18n.t("settings.validations.title")}</InputLabel>
             <Select
               labelId="ratings-label"
               value={userRating}
@@ -327,8 +328,8 @@ export default function Options(props) {
                 handleChangeUserRating(e.target.value);
               }}
             >
-              <MenuItem value={"disabled"}>Desabilitadas</MenuItem>
-              <MenuItem value={"enabled"}>Habilitadas</MenuItem>
+              <MenuItem value={"disabled"}>{i18n.t("settings.validations.options.disabled")}</MenuItem>
+              <MenuItem value={"enabled"}>{i18n.t("settings.validations.options.enabled")}</MenuItem>
             </Select>
             <FormHelperText>
               {loadingUserRating && "Atualizando..."}
@@ -338,7 +339,7 @@ export default function Options(props) {
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="schedule-type-label">
-              Gerenciamento de Expediente
+            {i18n.t("settings.OfficeManagement.title")}
             </InputLabel>
             <Select
               labelId="schedule-type-label"
@@ -347,9 +348,9 @@ export default function Options(props) {
                 handleScheduleType(e.target.value);
               }}
             >
-              <MenuItem value={"disabled"}>Desabilitado</MenuItem>
-              <MenuItem value={"queue"}>Gerenciamento Por Fila</MenuItem>
-              <MenuItem value={"company"}>Gerenciamento Por Empresa</MenuItem>
+              <MenuItem value={"disabled"}>{i18n.t("settings.OfficeManagement.options.disabled")}</MenuItem>
+              <MenuItem value={"queue"}>{i18n.t("settings.OfficeManagement.options.ManagementByDepartment")}</MenuItem>
+              <MenuItem value={"company"}>{i18n.t("settings.OfficeManagement.options.ManagementByCompany")}</MenuItem>
             </Select>
             <FormHelperText>
               {loadingScheduleType && "Atualizando..."}
@@ -359,7 +360,7 @@ export default function Options(props) {
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="group-type-label">
-              Ignorar Mensagens de Grupos
+            {i18n.t("settings.IgnoreGroupMessages.title")}
             </InputLabel>
             <Select
               labelId="group-type-label"
@@ -368,8 +369,8 @@ export default function Options(props) {
                 handleGroupType(e.target.value);
               }}
             >
-              <MenuItem value={"disabled"}>Desativado</MenuItem>
-              <MenuItem value={"enabled"}>Ativado</MenuItem>
+              <MenuItem value={"disabled"}>{i18n.t("settings.IgnoreGroupMessages.options.disabled")}</MenuItem>
+              <MenuItem value={"enabled"}>{i18n.t("settings.IgnoreGroupMessages.options.enabled")}</MenuItem>
             </Select>
             <FormHelperText>
               {loadingScheduleType && "Atualizando..."}
@@ -379,7 +380,7 @@ export default function Options(props) {
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="call-type-label">
-              Chamadas de Voz e Vídeo
+            {i18n.t("settings.VoiceAndVideoCalls.title")}
             </InputLabel>
             <Select
               labelId="call-type-label"
@@ -388,8 +389,8 @@ export default function Options(props) {
                 handleCallType(e.target.value);
               }}
             >
-              <MenuItem value={"disabled"}>Informar indisponibilidade</MenuItem>
-              <MenuItem value={"enabled"}>Ignorar</MenuItem>
+              <MenuItem value={"disabled"}>{i18n.t("settings.VoiceAndVideoCalls.options.disabled")}</MenuItem>
+              <MenuItem value={"enabled"}>{i18n.t("settings.VoiceAndVideoCalls.options.enabled")}</MenuItem>
             </Select>
             <FormHelperText>
               {loadingCallType && "Atualizando..."}
@@ -418,7 +419,7 @@ export default function Options(props) {
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="group-type-label">
-              Saída automática de chatbot
+            {i18n.t("settings.AutomaticChatbotOutput.title")}
             </InputLabel>
             <Select
               labelId="chatbot-autoexit"
@@ -427,8 +428,8 @@ export default function Options(props) {
                 handleChatbotAutoExit(e.target.value);
               }}
             >
-              <MenuItem value={"disabled"}>Desativado</MenuItem>
-              <MenuItem value={"enabled"}>Ativado</MenuItem>
+              <MenuItem value={"disabled"}>{i18n.t("settings.AutomaticChatbotOutput.options.disabled")}</MenuItem>
+              <MenuItem value={"enabled"}>{i18n.t("settings.AutomaticChatbotOutput.options.enabled")}</MenuItem>
             </Select>
             <FormHelperText>
               {loadingChatbotAutoExit && "Atualizando..."}
@@ -438,7 +439,7 @@ export default function Options(props) {
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="quickmessages-label">
-              Mensagens Rápidas
+            {i18n.t("settings.QuickMessages.title")}
             </InputLabel>
             <Select
               labelId="quickmessages-label"
@@ -447,8 +448,8 @@ export default function Options(props) {
                 handleQuickMessages(e.target.value);
               }}
             >
-              <MenuItem value={"company"}>Por empresa</MenuItem>
-              <MenuItem value={"individual"}>Por usuário</MenuItem>
+              <MenuItem value={"company"}>{i18n.t("settings.QuickMessages.options.enabled")}</MenuItem>
+              <MenuItem value={"individual"}>{i18n.t("settings.QuickMessages.options.disabled")}</MenuItem>
             </Select>
             <FormHelperText>
               {loadingQuickMessages && "Atualizando..."}
@@ -517,7 +518,7 @@ export default function Options(props) {
               <Grid xs={12} sm={6} md={4} item>
                 <FormControl className={classes.selectContainer}>
                   <InputLabel id="group-type-label">
-                    Permitir cadastro
+                  {i18n.t("settings.AllowRegistration.title")}
                   </InputLabel>
                   <Select
                     labelId="allow-signup"
@@ -526,8 +527,8 @@ export default function Options(props) {
                       handleAllowSignup(e.target.value);
                     }}
                   >
-                    <MenuItem value={"disabled"}>Desativado</MenuItem>
-                    <MenuItem value={"enabled"}>Ativado</MenuItem>
+                    <MenuItem value={"disabled"}>{i18n.t("settings.AllowRegistration.options.disabled")}</MenuItem>
+                    <MenuItem value={"enabled"}>{i18n.t("settings.AllowRegistration.options.enabled")}</MenuItem>
                   </Select>
                   <FormHelperText>
                     {loadingAllowSignup && "Atualizando..."}
@@ -540,7 +541,7 @@ export default function Options(props) {
                 <FormControl className={classes.selectContainer}>
                   <TextField
                     id="appname-field"
-                    label="Limite de Download de arquivos (MB)"
+                    label={i18n.t("settings.FileDownloadLimit.title")}
                     variant="standard"
                     name="appName"
                     value={downloadLimit}

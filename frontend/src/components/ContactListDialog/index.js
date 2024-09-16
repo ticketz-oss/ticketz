@@ -94,7 +94,7 @@ const ContactListModal = ({ open, onClose, contactListId }) => {
       } else {
         await api.post("/contact-lists", contactListData);
       }
-      toast.success(i18n.t("contactList.dialog"));
+      toast.success(i18n.t("contactLists.toasts.created"));
     } catch (err) {
       toastError(err);
     }

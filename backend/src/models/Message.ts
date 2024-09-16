@@ -9,7 +9,7 @@ import {
   Default,
   BelongsTo,
   ForeignKey,
-  HasMany,
+  HasMany
 } from "sequelize-typescript";
 import Contact from "./Contact";
 import Ticket from "./Ticket";
@@ -56,6 +56,15 @@ class Message extends Model {
       return `${process.env.BACKEND_URL}/public/${this.getDataValue(
         "mediaUrl"
       )}`;
+    }
+    return null;
+  }
+
+  @Column(DataType.STRING)
+  get thumbnailUrl(): string | null {
+    const value = this.getDataValue("thumbnailUrl");
+    if (value) {
+      return `${process.env.BACKEND_URL}/public/${value}`;
     }
     return null;
   }
@@ -114,7 +123,7 @@ class Message extends Model {
 
   @BelongsTo(() => Queue)
   queue: Queue;
-  
+
   @HasMany(() => OldMessage)
   oldMessages: OldMessage[];
 }

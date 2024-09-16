@@ -448,6 +448,7 @@ const messages = {
 				},
 				toasts: {
 					deleted: "Registro excluído",
+					created: "Registro criado",
 				},
 			},
 			contactListItems: {
@@ -707,7 +708,86 @@ const messages = {
 						},
 					},
 				},
+			validations:{
+				title:"validações",
+				options: {
+					enabled: "habilitado",
+					disabled: "Desabilitado",
+				},
 			},
+			OfficeManagement: {
+				title:"Gerenciamento de Expediente",
+				options: {
+					disabled: "Desabilitado",
+					ManagementByDepartment: "Gerenciamento Por Fila",
+					ManagementByCompany: "Gerenciamento Por Empresa",
+				},
+			},
+			IgnoreGroupMessages: {
+				title:"Ignorar Mensagens de Grupos",
+				options: {
+					enabled: "Ativado",
+					disabled: "Desativado",
+				},
+			},
+			VoiceAndVideoCalls: {
+				title:"Chamadas de Voz e Vídeo",
+				options: {
+					enabled: "Ignorar",
+					disabled: "informar indisponibilidade",
+				},
+			},
+			AutomaticChatbotOutput: {
+				title:"Saída automática de chatbot",
+				options: {
+					enabled: "Activado",
+					disabled: "Desativado",
+				},
+			},
+			QuickMessages: {
+				title:"Mensagens Rápidas",
+				options: {
+					enabled: "Por empresa",
+					disabled: "Por Usuário",
+				},
+			},
+			AllowRegistration: {
+				title:"Permitir cadastro",
+				options: {
+					enabled: "Ativado",
+					disabled: "Desativado",
+				},
+			},
+			FileDownloadLimit: {
+				title:"Limite de Download de arquivos (MB)",
+			},
+			WelcomeGreeting: {
+				greetings: "Olá",
+				welcome: "Seja bem-vindo a",
+				expirationTime: "Ativo até",
+			},
+			Options: {
+				title:"Opções",
+			},
+			Companies: {
+				title:"Empresas",
+			},
+			schedules: {
+				title:"Horários",
+			},
+			Plans: {
+				title:"Planos",
+			},
+			Help: {
+				title:"Ajuda",
+			},
+			Whitelabel: {
+				title:"Whitelabel",
+			},
+			PaymentGateways: {
+				title:"Payment gateways",
+			},
+		},
 			messagesList: {
 				header: {
 					assignedTo: "Atribuído à:",
