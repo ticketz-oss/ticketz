@@ -131,6 +131,10 @@ const useStyles = makeStyles((theme) => ({
     color: "green",
   },
 
+  disabledIcon: {
+    color: "gray",
+  },
+  
   replyginMsgWrapper: {
     display: "flex",
     width: "100%",
@@ -283,6 +287,7 @@ const ActionButtons = (props) => {
     handleUploadAudio,
     handleStartRecording,
     disableOption,
+    pastOneSecond
   } = props;
   const classes = useStyles();
   if (inputMessage) {
@@ -320,9 +325,9 @@ const ActionButtons = (props) => {
           aria-label="sendRecordedAudio"
           component="span"
           onClick={handleUploadAudio}
-          disabled={disableOption}
+          disabled={disableOption || !pastOneSecond}
         >
-          <CheckCircleOutlineIcon className={classes.sendAudioIcon} />
+          <CheckCircleOutlineIcon className={ pastOneSecond ? classes.sendAudioIcon : classes.disabledIcon } />
         </IconButton>
       </div>
     );
@@ -504,6 +509,8 @@ const MessageInputCustom = (props) => {
   const isNarrowScreen = useMediaQuery(theme => theme.breakpoints.down('sm'));
 
   const [anchorEl, setAnchorEl] = React.useState(null);
+  
+  const [pastOneSecond, setPastOneSecond] = useState(false);
   
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -690,6 +697,10 @@ const MessageInputCustom = (props) => {
       await navigator.mediaDevices.getUserMedia({ audio: true });
       await oggRecorder.start();
       setRecording(true);
+      setPastOneSecond(false);
+      setTimeout(() => {
+        setPastOneSecond(true);
+        }, 1000);
       setLoading(false);
     } catch (err) {
       toastError(err);
@@ -702,7 +713,7 @@ const MessageInputCustom = (props) => {
     setLoading(true);
     try {
       oggRecorder.export(async (blob) => {
-        if (blob.size < 10000) {
+        if (blob.size < 1000) {
           setLoading(false);
           setRecording(false);
           return;
@@ -914,6 +925,7 @@ const MessageInputCustom = (props) => {
             handleCancelAudio={handleCancelAudio}
             handleUploadAudio={handleUploadAudio}
             handleStartRecording={handleStartRecording}
+            pastOneSecond={pastOneSecond}
           />
         </div>
       </Paper>
