@@ -108,7 +108,7 @@ export function OggAudioPlayer({ src, children }) {
   };
 
   const pauseAudio = () => {
-    player.pause();
+    player?.pause();
     setIsPlaying(false);
   };
 
