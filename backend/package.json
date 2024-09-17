@@ -52,7 +52,7 @@
     "pino-pretty": "^9.4.1",
     "qrcode-terminal": "^0.12.0",
     "reflect-metadata": "^0.1.14",
-    "sdk-typescript-apis-efi": "^1.0.2",
+    "sdk-typescript-apis-efi": "1.0.2",
     "sequelize": "^6.37.2",
     "sequelize-cli": "^5.5.1",
     "sequelize-typescript": "^2.1.6",
