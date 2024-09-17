@@ -161,7 +161,6 @@ const useStyles = makeStyles((theme) => ({
     color: "red",
   },
 
-
   audioLoading: {
     color: green[500],
     opacity: "70%",
@@ -169,6 +168,10 @@ const useStyles = makeStyles((theme) => ({
 
   sendAudioIcon: {
     color: "green",
+  },
+  
+  disabledIcon: {
+    color: "grey",
   },
   
   timestamp: {
@@ -220,6 +223,7 @@ export default function ChatMessages({
   const [medias, setMedias] = useState([]);
   const [loading, setLoading] = useState(false);
   const [recording, setRecording] = useState(false);
+  const [pastOneSecond, setPastOneSecond] = useState(false);
 
   const scrollToBottom = () => {
     if (baseRef.current) {
@@ -338,6 +342,10 @@ export default function ChatMessages({
       await oggRecorder.start();
       setRecording(true);
       setLoading(false);
+      setPastOneSecond(false);
+      setTimeout(() => {
+        setPastOneSecond(true);
+      }, 1000);
     } catch (err) {
       toastError(err);
       setLoading(false);
@@ -349,7 +357,7 @@ export default function ChatMessages({
     try {
       oggRecorder.export(async (blob) => {
 
-        if (blob.size < 10000) {
+        if (blob.size < 1000) {
           setLoading(false);
           setRecording(false);
           return;
@@ -455,9 +463,9 @@ export default function ChatMessages({
                 aria-label="sendRecordedAudio"
                 component="span"
                 onClick={handleUploadAudio}
-                disabled={loading}
+                disabled={loading || !pastOneSecond}
               >
-                <CheckCircleOutlineIcon className={classes.sendAudioIcon} />
+                <CheckCircleOutlineIcon className={pastOneSecond ? classes.sendAudioIcon : classes.disabledIcon} />
               </IconButton>
             </div>
 
