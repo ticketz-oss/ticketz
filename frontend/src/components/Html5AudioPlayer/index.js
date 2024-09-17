@@ -107,7 +107,7 @@ export function Html5AudioPlayer({ src, children }) {
   };
 
   const pauseAudio = () => {
-    audioRef.current.pause();
+    audioRef.current?.pause();
     setIsPlaying(false);
   };
 
