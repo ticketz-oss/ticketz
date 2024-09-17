@@ -909,7 +909,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     const title = data?.message?.extendedTextMessage?.title;
     const description = data?.message?.extendedTextMessage?.description;
     const canonicalUrl = data?.message?.extendedTextMessage?.canonicalUrl;
-    const url = canonicalUrl && new URL(
+    const url = canonicalUrl?.startsWith("http") && new URL(
       canonicalUrl,
     );
     
