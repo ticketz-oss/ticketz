@@ -55,6 +55,7 @@ import { makeRandomId } from "../../helpers/MakeRandomId";
 import CheckSettings, { GetCompanySetting } from "../../helpers/CheckSettings";
 import Whatsapp from "../../models/Whatsapp";
 import { SimpleObjectCache } from "../../helpers/simpleObjectCache";
+import { CreateInternalMessageService } from "../MessageServices/CreateInternalMessageService";
 
 type Session = WASocket & {
   id?: number;
@@ -371,17 +372,19 @@ const downloadMedia = async (msg: proto.IWebMessageInfo, wbot: Session, ticket: 
       text: `\u200e*Mensagem Automática*:\nNosso sistema aceita apenas arquivos com no máximo ${fileLimit} MiB`
     };
 
-    if (!ticket.isGroup) {
-      const sendMsg = await wbot.sendMessage(
+    if (!ticket.isGroup && !msg.key?.fromMe) {
+      await wbot.sendMessage(
         `${ticket.contact.number}@s.whatsapp.net`,
         fileLimitMessage
       );
-
-      sendMsg.message.extendedTextMessage.text = "\u200e*Mensagem do sistema*:\nArquivo recebido além do limite de tamanho do sistema, se for necessário ele pode ser obtido no aplicativo do whatsapp.";
-
-      // eslint-disable-next-line no-use-before-define
-      await verifyMessage(sendMsg, ticket, ticket.contact);
     }
+
+    await CreateInternalMessageService(
+      ticket,
+      "*Mensagem do sistema*:\nArquivo recebido além do limite de tamanho do sistema, se for necessário ele pode ser obtido no aplicativo do whatsapp.",
+      null
+    );
+
     throw new Error("ERR_FILESIZE_OVER_LIMIT");
   }
 
