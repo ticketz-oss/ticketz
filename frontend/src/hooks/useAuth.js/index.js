@@ -120,35 +120,25 @@ const useAuth = () => {
       
       var diff = moment(dueDate).diff(moment(moment()).format());
 
-      var before = moment(moment().format()).isBefore(dueDate);
       var dias = moment.duration(diff).asDays();
 
-      if (before === true) {
-        localStorage.setItem("token", JSON.stringify(data.token));
-        localStorage.setItem("companyId", companyId);
-        localStorage.setItem("userId", id);
-        localStorage.setItem("companyDueDate", vencimento);
-        api.defaults.headers.Authorization = `Bearer ${data.token}`;
-        setUser(data.user);
-        setIsAuth(true);
-        toast.success(i18n.t("auth.toasts.success"));
-        if (Math.round(dias) < 5) {
-          toast.warn(`Sua assinatura vence em ${Math.round(dias)} ${Math.round(dias) === 1 ? 'dia' : 'dias'} `);
-        }
-        if (data.user.profile === "admin") {
-          history.push("/");
-        } else {
-          history.push("/tickets");
-        }
-        setLoading(false);
-      } else {
-        
-        toastError(`Opss! Sua assinatura venceu ${vencimento}.
-Entre em contato com o Suporte para mais informações! `);
-        setLoading(false);
+      localStorage.setItem("token", JSON.stringify(data.token));
+      localStorage.setItem("companyId", companyId);
+      localStorage.setItem("userId", id);
+      localStorage.setItem("companyDueDate", vencimento);
+      api.defaults.headers.Authorization = `Bearer ${data.token}`;
+      setUser(data.user);
+      setIsAuth(true);
+      toast.success(i18n.t("auth.toasts.success"));
+      if (Math.round(dias) < 5) {
+        toast.warn(`Sua assinatura vence em ${Math.round(dias)} ${Math.round(dias) === 1 ? 'dia' : 'dias'} `);
       }
-
-      //quebra linha 
+      if (data.user.profile === "admin") {
+        history.push("/");
+      } else {
+        history.push("/tickets");
+      }
+      setLoading(false);
     } catch (err) {
       toastError(err);
       setLoading(false);
