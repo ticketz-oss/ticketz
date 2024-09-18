@@ -1548,7 +1548,7 @@ const handleMessage = async (
 
     // voltar para o menu inicial
 
-    if (bodyMessage === "#") {
+    if (bodyMessage === "#" && !isGroup) {
       await ticket.update({
         queueOptionId: null,
         chatbot: false,
@@ -1573,7 +1573,7 @@ const handleMessage = async (
       await verifyMessage(msg, ticket, contact);
     }
     
-    if (contact.disableBot) {
+    if (isGroup || contact.disableBot) {
       return;
     }
 
