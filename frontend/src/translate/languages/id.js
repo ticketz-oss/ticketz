@@ -760,6 +760,9 @@ const messages = {
         FileDownloadLimit: {
           title: "Batas unduhan file (MB)",
         },
+        GracePeriod: {
+          title: "Periode penundaan langganan berakhir (hari)",
+        },
         WelcomeGreeting: {
           greetings: "halo",
           welcome: "selamat datang di",

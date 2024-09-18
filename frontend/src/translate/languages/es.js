@@ -761,6 +761,9 @@ const messages = {
 				FileDownloadLimit: {
 					title:"Límite de descarga de archivos (MB)",
 				},
+        GracePeriod: {
+          title: "Período de gracia después del vencimiento (días)",
+        },				
 				WelcomeGreeting: {
 					greetings: "hola",
 					welcome: "bienvenido a",

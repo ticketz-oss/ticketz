@@ -8,6 +8,7 @@ import { SerializeUser } from "../../helpers/SerializeUser";
 import Queue from "../../models/Queue";
 import Company from "../../models/Company";
 import Setting from "../../models/Setting";
+import { GetCompanySetting } from "../../helpers/CheckSettings";
 
 interface SerializedUser {
   id: number;
@@ -46,7 +47,13 @@ const AuthUserService = async ({
     throw new AppError("ERR_INVALID_CREDENTIALS", 401);
   }
 
-  if (new Date(user.company.dueDate) < new Date()) {
+  const gracePeriod =
+    Number(await GetCompanySetting(1, "gracePeriod", "0")) || 0;
+
+  const dueDate = new Date(user.company.dueDate);
+  dueDate.setDate(dueDate.getDate() + gracePeriod);
+
+  if (new Date() > dueDate) {
     throw new AppError("ERR_SUBSCRIPTION_EXPIRED", 402);
   }
 

@@ -129,9 +129,12 @@ const useAuth = () => {
       api.defaults.headers.Authorization = `Bearer ${data.token}`;
       setUser(data.user);
       setIsAuth(true);
-      toast.success(i18n.t("auth.toasts.success"));
-      if (Math.round(dias) < 5) {
+      if (dias < 0) {
+        toast.warn(`Sua assinatura venceu há ${Math.round(dias) * -1} ${Math.round(dias) * -1 === 1 ? 'dia' : 'dias'} `);
+      } else if (Math.round(dias) < 5) {
         toast.warn(`Sua assinatura vence em ${Math.round(dias)} ${Math.round(dias) === 1 ? 'dia' : 'dias'} `);
+      } else {
+        toast.success(i18n.t("auth.toasts.success"));
       }
       if (data.user.profile === "admin") {
         history.push("/");
@@ -139,6 +142,8 @@ const useAuth = () => {
         history.push("/tickets");
       }
       setLoading(false);
+
+      //quebra linha 
     } catch (err) {
       toastError(err);
       setLoading(false);

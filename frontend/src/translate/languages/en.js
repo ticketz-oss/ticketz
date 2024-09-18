@@ -755,6 +755,9 @@ const messages = {
 				FileDownloadLimit: {
 					title:"File Download Limit (MB)",
 				},
+				GracePeriod: {
+          title: "Subscription Grace Period (days)",
+        },
 				WelcomeGreeting: {
 					greetings: "Hello",
 					welcome: "Welcome to",
