@@ -31,6 +31,7 @@ import formatBody from "./helpers/Mustache";
 import Ticket from "./models/Ticket";
 import QueueModel from "./models/Queue";
 import UpdateTicketService from "./services/TicketServices/UpdateTicketService";
+import Invoice from "./models/Invoices";
 
 const connection = process.env.REDIS_URI || "";
 const limiterMax = process.env.REDIS_OPT_LIMITER_MAX || 1;
@@ -786,36 +787,33 @@ async function handleInvoiceCreate() {
   const job = new CronJob("0 * * * * *", async () => {
     const companies = await Company.findAll();
     companies.map(async c => {
-      const { dueDate } = c;
-      const date = moment(dueDate).format();
-      const timestamp = moment().format();
-      const hoje = moment(moment()).format("DD/MM/yyyy");
-      const vencimento = moment(dueDate).format("DD/MM/yyyy");
+      const diffDays = moment(c.dueDate).diff(moment(), "days");
 
-      const diff = moment(vencimento, "DD/MM/yyyy").diff(
-        moment(hoje, "DD/MM/yyyy")
-      );
-      const dias = moment.duration(diff).asDays();
-
-      if (dias < 20) {
+      if (diffDays < 20) {
         const plan = await Plan.findByPk(c.planId);
 
-        const sql = `SELECT COUNT(*) mycount FROM "Invoices" WHERE "companyId" = ${
-          c.id
-        } AND "dueDate"::text LIKE '${moment(dueDate).format("yyyy-MM-DD")}%';`;
-        const invoice: { mycount: number }[] = await sequelize.query(sql, {
-          type: QueryTypes.SELECT
+        const invoiceCount = await Invoice.count({
+          where: {
+            companyId: c.id,
+            dueDate: {
+              [Op.like]: `${moment(c.dueDate).format("yyyy-MM-DD")}%`
+            }
+          }
         });
-        if (+invoice[0].mycount === 0) {
-          // eslint-disable-next-line no-shadow
-          const sql = `INSERT INTO "Invoices" (detail, status, value, "updatedAt", "createdAt", "dueDate", "companyId")
-          VALUES ('${plan.name}', 'open', '${plan.value}', '${timestamp}', '${timestamp}', '${date}', ${c.id});`;
 
-          await sequelize.query(sql, { type: QueryTypes.INSERT });
+        if (invoiceCount === 0) {
+          await Invoice.create({
+            detail: plan.name,
+            status: "open",
+            value: plan.value,
+            dueDate: moment(c.dueDate).format(),
+            companyId: c.id
+          });
         }
       }
     });
   });
+
   job.start();
 }
 
