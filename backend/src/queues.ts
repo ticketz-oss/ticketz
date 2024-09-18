@@ -32,6 +32,7 @@ import Ticket from "./models/Ticket";
 import QueueModel from "./models/Queue";
 import UpdateTicketService from "./services/TicketServices/UpdateTicketService";
 import Invoice from "./models/Invoices";
+import { checkNewInvoice } from "./services/PaymentGatewayServices/PaymentGatewayServices";
 
 const connection = process.env.REDIS_URI || "";
 const limiterMax = process.env.REDIS_OPT_LIMITER_MAX || 1;
@@ -802,13 +803,14 @@ async function handleInvoiceCreate() {
         });
 
         if (invoiceCount === 0) {
-          await Invoice.create({
+          const newInvoice = await Invoice.create({
             detail: plan.name,
             status: "open",
             value: plan.value,
             dueDate: moment(c.dueDate).format(),
             companyId: c.id
           });
+          await checkNewInvoice(newInvoice);
         }
       }
     });

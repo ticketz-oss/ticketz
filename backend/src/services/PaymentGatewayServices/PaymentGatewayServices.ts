@@ -58,6 +58,10 @@ import {
 import Invoices from "../../models/Invoices";
 import { getIO } from "../../libs/socket";
 import Company from "../../models/Company";
+import {
+  whmcsCheckAndUpdateOpenInvoice,
+  whmcsCheckNewInvoice
+} from "./WhmcsServices";
 
 export const payGatewayInitialize = async () => {
   const paymentGateway = await GetSuperSettingService({
@@ -200,4 +204,38 @@ export const checkOpenInvoices = async () => {
   invoices.forEach(invoice => {
     checkInvoicePayment(invoice);
   });
+};
+
+export const checkNewInvoice = async (invoice: Invoices) => {
+  if (!invoice.payGw) {
+    if (await whmcsCheckNewInvoice(invoice)) {
+      return true;
+    }
+  }
+  return false;
+};
+
+export const checkAndUpdateOpenInvoice = async (company: Company) => {
+  const openInvoice = await Invoices.findOne({
+    where: {
+      companyId: company.id,
+      status: "open",
+      dueDate: {
+        [Op.like]: `${moment(company.dueDate).format("yyyy-MM-DD")}%`
+      }
+    }
+  });
+
+  if (!openInvoice) {
+    return;
+  }
+
+  switch (openInvoice.payGw) {
+    case "whmcs":
+      await whmcsCheckAndUpdateOpenInvoice(openInvoice);
+      break;
+    default:
+  }
+
+  company.reload();
 };
