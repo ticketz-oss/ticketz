@@ -10,6 +10,7 @@
     "@material-ui/icons": "^4.11.3",
     "@material-ui/lab": "^4.0.0-alpha.61",
     "@material-ui/pickers": "^3.3.11",
+    "async-mutex": "^0.4.1",
     "axios": "^1.6.8",
     "bootstrap": "^5.2.3",
     "compressorjs": "^1.2.1",
