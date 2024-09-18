@@ -46,6 +46,10 @@ const AuthUserService = async ({
     throw new AppError("ERR_INVALID_CREDENTIALS", 401);
   }
 
+  if (new Date(user.company.dueDate) < new Date()) {
+    throw new AppError("ERR_SUBSCRIPTION_EXPIRED", 402);
+  }
+
   const token = createAccessToken(user);
   const refreshToken = createRefreshToken(user);
 
