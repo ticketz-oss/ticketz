@@ -5,12 +5,12 @@ var getInitials = function(string) {
   }
 
   var names = string.split(' '),
-    initials = Array.from(names[0])[0].toUpperCase();
+    initials = Array.from(names[0])[0];
 
   if (names.length > 1) {
-    initials += Array.from(names[names.length - 1])[0].toUpperCase();
+    initials += Array.from(names[names.length - 1])[0];
   }
-  return initials;
+  return initials.toUpperCase();
 };
 
 export { getInitials };
