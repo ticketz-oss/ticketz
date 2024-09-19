@@ -202,7 +202,8 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
 
       const CheckValidNumber = await CheckContactNumber(
         numberToTest,
-        companyId
+        companyId,
+        whatsapp
       );
       number = CheckValidNumber.jid.replace(/\D/g, "");
     }
