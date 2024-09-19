@@ -5,6 +5,7 @@ import uploadConfig from "../config/upload";
 import tokenAuth from "../middleware/tokenAuth";
 
 import * as MessageController from "../controllers/MessageController";
+import gammuAuth from "../middleware/gammuAuth";
 
 const messageRoutes = Router();
 
@@ -23,17 +24,13 @@ messageRoutes.post("/messages/edit/:messageId", isAuth, MessageController.edit);
 
 messageRoutes.delete("/messages/:messageId", isAuth, MessageController.remove);
 
-messageRoutes.post("/api/messages/send",
+messageRoutes.post(
+  "/api/messages/send",
   tokenAuth,
   upload.array("medias"),
   MessageController.send
 );
 
-/* * /
-messageRoutes.get("/api/messages/sendGammu",
-  basicAuth,
-  MessageController.sendGammu);
-);
-/* */
+messageRoutes.get("/api/messages/send", gammuAuth, MessageController.send);
 
 export default messageRoutes;
