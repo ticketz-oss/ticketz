@@ -717,7 +717,7 @@ const messages = {
 					},
 				},
 			validations:{
-				title:"validações",
+				title:"Avaliações",
 				options: {
 					enabled: "habilitado",
 					disabled: "Desabilitado",
@@ -769,6 +769,9 @@ const messages = {
 			FileDownloadLimit: {
 				title:"Limite de Download de arquivos (MB)",
 			},
+      GracePeriod: {
+        title: "Carência após vencimento (dias)",
+      },
 			WelcomeGreeting: {
 				greetings: "Olá",
 				welcome: "Seja bem-vindo a",
@@ -941,6 +944,7 @@ const messages = {
 					"A mensagem de saudação é obrigatório quando há mais de uma fila.",
         ERR_SUBSCRIPTION_CHECK_FAILED: "Assinatura inválida ou não encontrada",
         ERR_WAPP_NOT_FOUND: "Conexão indisponível",
+        ERR_SUBSCRIPTION_EXPIRED: "Assinatura expirada",
         ERR_UNKOWN: "Erro desconhecido",
 
 			},

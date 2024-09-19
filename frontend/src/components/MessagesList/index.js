@@ -38,9 +38,12 @@ import { i18n } from "../../translate/i18n";
 import vCard from "vcard-parser";
 import { generateColor } from "../../helpers/colorGenerator";
 import { getInitials } from "../../helpers/getInitials";
+import { Mutex } from "async-mutex";
 import { Html5AudioPlayer } from "../Html5AudioPlayer";
 import { OggAudioPlayer } from "../OggAudioPlayer";
 import { canPlayOggOpus, canRecordOggOpus } from "../../helpers/detectOggOpusSupport";
+
+const loadPageMutex = new Mutex();
 
 const useStyles = makeStyles((theme) => ({
   messageContainer: {
@@ -563,22 +566,15 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
 
   const socketManager = useContext(SocketContext);
 
-  useEffect(() => {
-    dispatch({ type: "RESET" });
-    setPageNumber(1);
-    setContactPresence("available");
-
-    currentTicketId.current = ticketId;
-  }, [ticketId]);
-
-  useEffect(() => {
+  function loadData(incrementPage = false) {
     setLoading(true);
+    const thisPageNumber = incrementPage ? pageNumber + 1 : 1;
     const delayDebounceFn = setTimeout(() => {
       const fetchMessages = async () => {
         if (ticketId === undefined) return;
         try {
           const { data } = await api.get("/messages/" + ticketId, {
-            params: { pageNumber },
+            params: { pageNumber: thisPageNumber },
           });
 
           if (currentTicketId.current === ticketId) {
@@ -596,11 +592,23 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
         }
       };
       fetchMessages();
+      setPageNumber(thisPageNumber);
     }, 500);
     return () => {
       clearTimeout(delayDebounceFn);
     };
-  }, [pageNumber, ticketId]);
+  }
+
+  useEffect(async () => {
+    dispatch({ type: "RESET" });
+    setContactPresence("available");
+
+    currentTicketId.current = ticketId;
+    
+    await loadPageMutex.runExclusive(async () => {
+      loadData();
+    });
+  }, [ticketId]);
 
   useEffect(() => {
     if (!ticket.id) {
@@ -652,8 +660,10 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     };
   }, [ticketId, ticket, socketManager]);
 
-  const loadMore = () => {
-    setPageNumber((prevPageNumber) => prevPageNumber + 1);
+  const loadMore = async () => {
+    await loadPageMutex.runExclusive(async () => {
+      loadData(true);
+    });
   };
 
   const scrollToBottom = () => {

@@ -760,6 +760,9 @@ const messages = {
 				FileDownloadLimit: {
 					title:"File Download Limit (MB)",
 				},
+				GracePeriod: {
+          title: "Subscription Grace Period (days)",
+        },
 				WelcomeGreeting: {
 					greetings: "Hello",
 					welcome: "Welcome to",
@@ -922,6 +925,7 @@ const messages = {
 				ERR_WAPP_GREETING_REQUIRED: "Greeting message is mandatory when there is more than one queue.",
 				ERR_SUBSCRIPTION_CHECK_FAILED: "Subscription invalid or not found",
 				ERR_WAPP_NOT_FOUND: "Connection unavailable",
+				ERR_SUBSCRIPTION_EXPIRED: "Subscription expired",
 				ERR_UNKOWN: "Unknown error",
 			},
       "ccform": {

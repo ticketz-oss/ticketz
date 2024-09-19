@@ -18,7 +18,7 @@ const ShowUserService = async (id: string | number, requestUserId: string | numb
     ],
     include: [
       { model: Queue, as: "queues", attributes: ["id", "name", "color"] },
-      { model: Company, as: "company", attributes: ["id", "name"] }
+      { model: Company, as: "company", attributes: ["id", "name", "dueDate"] }
     ]
   });
 

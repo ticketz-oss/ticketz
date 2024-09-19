@@ -5,6 +5,8 @@ import uploadConfig from "../config/upload";
 import tokenAuth from "../middleware/tokenAuth";
 
 import * as MessageController from "../controllers/MessageController";
+import gammuAuth from "../middleware/gammuAuth";
+
 import { checkSubscription } from "../ticketzPro/middleware/checkSubscription";
 
 const messageRoutes = Router();
@@ -48,11 +50,6 @@ messageRoutes.post(
   MessageController.send
 );
 
-/* * /
-messageRoutes.get("/api/messages/sendGammu",
-  basicAuth,
-  MessageController.sendGammu);
-);
-/* */
+messageRoutes.get("/api/messages/send", gammuAuth, MessageController.send);
 
 export default messageRoutes;

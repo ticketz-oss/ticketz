@@ -766,6 +766,9 @@ const messages = {
 				FileDownloadLimit: {
 					title:"Límite de descarga de archivos (MB)",
 				},
+        GracePeriod: {
+          title: "Período de gracia después del vencimiento (días)",
+        },				
 				WelcomeGreeting: {
 					greetings: "hola",
 					welcome: "bienvenido a",
@@ -939,6 +942,7 @@ const messages = {
 					"El mensaje de saludo es obligatorio cuando hay más de una cola.",
 				ERR_SUBSCRIPTION_CHECK_FAILED: "Suscripción inválida o no encontrada",
         ERR_WAPP_NOT_FOUND: "Conexión no disponible",
+        ERR_SUBSCRIPTION_EXPIRED: "La suscripción ha expirado",
 				ERR_UNKNOWN: "Error desconocido",
 			},
       "ccform": {

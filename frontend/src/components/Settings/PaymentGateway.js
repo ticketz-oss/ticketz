@@ -50,6 +50,7 @@ import useSettings from "../../hooks/useSettings";
 import { toast } from 'react-toastify';
 import { makeStyles } from "@material-ui/core/styles";
 import EfiSettings from "../PaymentGateways/Efi/EfiSettings";
+import WhmcsSettings from "../PaymentGateways/Whmcs/WhmcsSettings";
 import OwenSettings from "../PaymentGateways/Owen/OwenSettings";
 import OwenAd from "../PaymentGateways/Owen/OwenAd";
 
@@ -101,12 +102,17 @@ export default function PaymentGateway(props) {
               <MenuItem value={""}>None</MenuItem>
               <MenuItem value={"owen"}>Owen Payments 💎</MenuItem>
               <MenuItem value={"efi"}>Efí</MenuItem>
+              <MenuItem value={"whmcs"}>WHMCS</MenuItem>
             </Select>
           </FormControl>
         </Grid>
       </Grid>
       { paymentGateway === "efi" && 
         <EfiSettings settings={settings} />
+      }
+      {
+        paymentGateway === "whmcs" &&
+        <WhmcsSettings settings={settings} />
       }
       { paymentGateway === "owen" && 
         <OwenSettings settings={settings} />

@@ -788,6 +788,31 @@ export const verifyDeleteMessage = async (
 
 }
 
+const quickMessage = async (
+  wbot: Session,
+  ticket: Ticket,
+  text: string,
+  updateTicket = false
+) => {
+  const debouncedSentMessage = debounce(
+    async () => {
+      const sentMessage = await wbot.sendMessage(
+        `${ticket.contact.number}@s.whatsapp.net"
+        }`,
+        {
+          text: `\u200e${text}`
+        }
+      );
+      if (updateTicket) {
+        verifyMessage(sentMessage, ticket, ticket.contact);
+      } 
+    },
+    1000,
+    ticket.id
+  );
+  debouncedSentMessage();
+}
+
 const isValidMsg = (msg: proto.IWebMessageInfo): boolean => {
   if (msg.key.remoteJid === "status@broadcast") return false;
   try {
@@ -1506,31 +1531,35 @@ const handleMessage = async (
            * Tratamento para avaliação do atendente
            */
 
-          // insistir a responder avaliação
           const rate = Number(bodyMessage);
 
-          if (!Number.isFinite(rate)) {
-            const debouncedSentMessage = debounce(
-              async () => {
-                await wbot.sendMessage(
-                  `${ticketTracking.ticket.contact.number}@${ticketTracking.ticket.isGroup ? "g.us" : "s.whatsapp.net"
-                  }`,
-                  {
-                    text: "\u200e\n*Por favor avalie nosso atendimento com uma nota de 1 a 5*"
-                  }
-                );
-              },
-              1000,
-              ticketTracking.ticket.id
-            );
-            debouncedSentMessage();
+          if (Number.isFinite(rate)) {
+            if (verifyRating(ticketTracking)) {
+              handleRating(rate, ticketTracking.ticket, ticketTracking, wbot);
+              return;
+            }
+          } else if (bodyMessage.trim() === "!") {
+            // abort rating and reopen ticket
+            ticketTracking.update({
+              ratingAt: null
+            });
+            ticketTracking.ticket.update({
+              status: "open",
+              userId: ticketTracking.userId
+            });
+            quickMessage(wbot, ticketTracking.ticket, "Atendimento reaberto", true);
             return;
-          }
-          // dev Ricardo
-
-          if (verifyRating(ticketTracking)) {
-            handleRating(rate, ticketTracking.ticket, ticketTracking, wbot);
-            return;
+          } else {
+            // expire rating
+            ticketTracking.update({
+              finishedAt: new Date(),
+              expired: true
+            });
+            quickMessage(wbot, ticketTracking.ticket, "Avaliação cancelada");
+            if (bodyMessage.length < 10) {
+              // short message just stop the processing
+              return;
+            }
           }
         } catch (e) {
           Sentry.captureException(e);
@@ -1547,7 +1576,7 @@ const handleMessage = async (
 
     // voltar para o menu inicial
 
-    if (bodyMessage === "#") {
+    if (bodyMessage === "#" && !isGroup) {
       await ticket.update({
         queueOptionId: null,
         chatbot: false,
@@ -1572,7 +1601,7 @@ const handleMessage = async (
       await verifyMessage(msg, ticket, contact);
     }
     
-    if (contact.disableBot) {
+    if (isGroup || contact.disableBot) {
       return;
     }
 

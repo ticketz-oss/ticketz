@@ -123,6 +123,8 @@ export default function Options(props) {
   const [loadingDownloadLimit, setLoadingDownloadLimit] = useState(false);
   const [ratingsTimeout, setRatingsTimeout] = useState(false);
   const [autoReopenTimeout, setAutoReopenTimeout] = useState(false);
+  const [gracePeriod, setGracePeriod] = useState(0);
+  
   const { getCurrentUserInfo } = useAuth();
   const [currentUser, setCurrentUser] = useState({});
 
@@ -206,6 +208,9 @@ export default function Options(props) {
 
       const openTicketTimeoutAction = settings.find((s) => s.key === "openTicketTimeoutAction");
       setOpenTicketTimeoutAction(openTicketTimeoutAction?.value || "pending");
+      
+      const gracePeriod = settings.find((s) => s.key === "gracePeriod");
+      setGracePeriod(gracePeriod?.value || 0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
@@ -806,6 +811,26 @@ export default function Options(props) {
                   />
                 </FormControl>
               </Grid>
+              
+              <Grid xs={12} sm={6} md={4} item>
+                <FormControl className={classes.selectContainer}>
+                  <TextField
+                    id="grace-period-field"
+                    label={i18n.t("settings.GracePeriod.title")}
+                    variant="standard"
+                    name="gracePeriod"
+                    type="number"
+                    value={gracePeriod}
+                    onChange={(e) => {
+                      setGracePeriod(e.target.value);
+                    }}
+                    onBlur={async (_) => {
+                      await handleSetting("gracePeriod", gracePeriod);
+                    }}
+                  />
+                </FormControl>
+              </Grid>
+              
             </>
 
           )}
