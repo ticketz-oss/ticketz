@@ -6,6 +6,7 @@ import ShowTicketService from "./ShowTicketService";
 import FindOrCreateATicketTrakingService from "./FindOrCreateATicketTrakingService";
 import { GetCompanySetting } from "../../helpers/CheckSettings";
 import sequelize from "../../database";
+import Whatsapp from "../../models/Whatsapp";
 
 const FindOrCreateTicketService = async (
   contact: Contact,
@@ -93,6 +94,18 @@ const FindOrCreateTicketService = async (
       }
     }
 
+    let queueId = null;
+
+    if (groupContact) {
+      const whatsapp = await Whatsapp.findByPk(whatsappId, {
+        include: ["queues"]
+      });
+
+      if (whatsapp?.queues.length === 1) {
+        queueId = whatsapp.queues[0].id;
+      }
+    }
+
     if (!ticket) {
       ticket = await Ticket.create({
         contactId: groupContact ? groupContact.id : contact.id,
@@ -100,6 +113,7 @@ const FindOrCreateTicketService = async (
         isGroup: !!groupContact,
         unreadMessages,
         whatsappId,
+        queueId,
         companyId
       });
 
