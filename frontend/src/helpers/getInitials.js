@@ -1,13 +1,14 @@
+
 var getInitials = function(string) {
   if (!string) {
     return "";
   }
 
   var names = string.split(' '),
-    initials = names[0].substring(0, 1).toUpperCase();
+    initials = Array.from(names[0])[0].toUpperCase();
 
   if (names.length > 1) {
-    initials += names[names.length - 1].substring(0, 1).toUpperCase();
+    initials += Array.from(names[names.length - 1])[0].toUpperCase();
   }
   return initials;
 };
