@@ -50,6 +50,11 @@ messageRoutes.post(
   MessageController.send
 );
 
-messageRoutes.get("/api/messages/send", gammuAuth, MessageController.send);
+messageRoutes.get(
+  "/api/messages/send",
+  gammuAuth,
+  checkSubscription,
+  MessageController.send
+);
 
 export default messageRoutes;
