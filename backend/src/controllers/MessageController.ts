@@ -20,7 +20,6 @@ import { sendFacebookMessageMedia } from "../services/FacebookServices/sendFaceb
 import sendFaceMessage from "../services/FacebookServices/sendFacebookMessage";
 import { logger } from "../utils/logger";
 import {
-  makeid,
   verifyMediaMessage,
   verifyMessage
 } from "../services/WbotServices/wbotMessageListener";
