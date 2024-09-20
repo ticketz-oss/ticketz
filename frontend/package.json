@@ -10,6 +10,7 @@
     "@material-ui/icons": "^4.11.3",
     "@material-ui/lab": "^4.0.0-alpha.61",
     "@material-ui/pickers": "^3.3.11",
+    "async-mutex": "^0.4.1",
     "axios": "^1.6.8",
     "bootstrap": "^5.2.3",
     "compressorjs": "^1.2.1",
@@ -89,6 +90,8 @@
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.0.4",
     "@testing-library/user-event": "^12.1.7",
-    "react-scripts": "^5.0.1"
+    "@types/react": "^17.0.82",
+    "react-scripts": "^5.0.1",
+    "typescript": "^4.9.5"
   }
 }
