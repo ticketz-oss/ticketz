@@ -856,6 +856,7 @@ const messages = {
 					title: "¿Borrar mensaje?",
 					message: "Esta acción no se puede deshacer.",
 				},
+        download: "Descargar",
 			},
 			messageHistoryModal: {
 				close: "Cerrar",

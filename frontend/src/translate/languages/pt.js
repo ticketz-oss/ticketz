@@ -860,6 +860,7 @@ const messages = {
 					title: "Apagar mensagem?",
 					message: "Esta ação não pode ser revertida.",
 				},
+        download: "Baixar arquivo",
 			},
 			messageHistoryModal: {
 				close: "Fechar",

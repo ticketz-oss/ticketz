@@ -48,6 +48,19 @@ const MessageOptionsMenu = ({ message, data, menuOpen, handleClose, anchorEl }) 
 		handleClose();
 	}
 
+  const handleDownload = () => {
+    const link = document.createElement('a');
+    link.href = message.mediaUrl;
+    link.download = message.mediaUrl.substring(message.mediaUrl.lastIndexOf('/')+1);
+    link.style.display = 'none';
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    handleClose();
+  };
+
   const isSticker = data?.message && ("stickerMessage" in data.message);
 
 	return (
@@ -80,6 +93,11 @@ const MessageOptionsMenu = ({ message, data, menuOpen, handleClose, anchorEl }) 
 				open={menuOpen}
 				onClose={handleClose}
 			>
+			  {message.mediaUrl && 
+          <MenuItem key="download" onClick={() => handleDownload()}>
+            {i18n.t("messageOptionsMenu.download")}
+          </MenuItem>
+			  }
 				{message.fromMe && [
 					<MenuItem key="delete" onClick={handleOpenConfirmationModal}>
 						{i18n.t("messageOptionsMenu.delete")}

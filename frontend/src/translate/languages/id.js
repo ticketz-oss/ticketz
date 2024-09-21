@@ -854,6 +854,7 @@ const messages = {
           title: "Hapus pesan?",
           message: "Tindakan ini tidak dapat dibatalkan.",
         },
+        download: "Unduh",
       },
       messageHistoryModal: {
         close: "Tutup",
