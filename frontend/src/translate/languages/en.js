@@ -319,6 +319,8 @@ const messages = {
 				title: "Create Ticket",
 				fieldLabel: "Type to search for contact",
 				add: "Add",
+				queue: "Queue",
+				connection: "Connection",
 				buttons: {
 					ok: "Save",
 					cancel: "Cancel",

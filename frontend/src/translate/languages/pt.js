@@ -327,6 +327,8 @@ const messages = {
 				title: "Criar Ticket",
 				fieldLabel: "Digite para pesquisar o contato",
 				add: "Adicionar",
+        queue: "Fila",
+        connection: "Conexão",
 				buttons: {
 					ok: "Salvar",
 					cancel: "Cancelar",
