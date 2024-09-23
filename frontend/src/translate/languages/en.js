@@ -856,6 +856,7 @@ const messages = {
 					title: "Delete message?",
 					message: "This action cannot be undone.",
 				},
+				download: "Download media",
 			},
 			messageHistoryModal: {
 				close: "Close",

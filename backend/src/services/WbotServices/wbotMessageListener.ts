@@ -1583,15 +1583,25 @@ const handleMessage = async (
            * Tratamento para avaliação do atendente
            */
 
+          logger.debug(
+            { ticketTracking },
+            `start handling tracking rating for ticket ${ticketTracking.ticketId}`
+          );
+
           const rate = Number(bodyMessage);
 
           if (Number.isFinite(rate)) {
-            if (verifyRating(ticketTracking)) {
-              handleRating(rate, ticketTracking.ticket, ticketTracking, wbot);
-              return;
-            }
-          } else if (bodyMessage.trim() === "!") {
+            logger.debug(
+              `received rate ${rate} for ticket ${ticketTracking.ticketId}`
+            );
+            handleRating(rate, ticketTracking.ticket, ticketTracking, wbot);
+            return;
+          }
+          if (bodyMessage.trim() === "!") {
             // abort rating and reopen ticket
+            logger.debug(
+              `ticket ${ticketTracking.ticketId} reopen by contact request`
+            );
             ticketTracking.update({
               ratingAt: null
             });
@@ -1606,17 +1616,19 @@ const handleMessage = async (
               true
             );
             return;
-          } else {
-            // expire rating
-            ticketTracking.update({
-              finishedAt: new Date(),
-              expired: true
-            });
-            quickMessage(wbot, ticketTracking.ticket, "Avaliação cancelada");
-            if (bodyMessage.length < 10) {
-              // short message just stop the processing
-              return;
-            }
+          }
+          // expire rating
+          logger.debug(
+            `tracking of ticket ${ticketTracking.ticketId} expired by wrong rate ${bodyMessage}`
+          );
+          ticketTracking.update({
+            finishedAt: new Date(),
+            expired: true
+          });
+          quickMessage(wbot, ticketTracking.ticket, "Avaliação cancelada");
+          if (bodyMessage.length < 10) {
+            // short message just stop the processing
+            return;
           }
         } catch (e) {
           Sentry.captureException(e);

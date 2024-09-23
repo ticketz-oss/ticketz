@@ -18,14 +18,22 @@ import ButtonWithSpinner from "../ButtonWithSpinner";
 import ContactModal from "../ContactModal";
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
-import { Grid, ListItemText, MenuItem, Select } from "@material-ui/core";
+import { FormControl, Grid, InputLabel, ListItemText, MenuItem, Select, makeStyles } from "@material-ui/core";
 import { toast } from "react-toastify";
+
+const useStyles = makeStyles((theme) => ({
+  selectContainer: {
+    width: "100%",
+    textAlign: "left",
+  },
+}));  
 
 const filter = createFilterOptions({
 	trim: true,
 });
 
 const NewTicketModal = ({ modalOpen, onClose, initialContact }) => {
+  const classes = useStyles();
 
 	const [options, setOptions] = useState([]);
 	const [loading, setLoading] = useState(false);
@@ -35,6 +43,49 @@ const NewTicketModal = ({ modalOpen, onClose, initialContact }) => {
 	const [newContact, setNewContact] = useState({});
 	const [contactModalOpen, setContactModalOpen] = useState(false);
 	const { user } = useContext(AuthContext);
+
+  const [connections, setConnections] = useState([]);
+  const [selectedConnection, setSelectedConnection] = useState("");
+
+  useEffect(() => {
+    setConnections([]);
+    setSelectedConnection('');
+    setSelectedQueue('');
+  }, [modalOpen]);
+      
+  useEffect(() => {
+    if (selectedQueue) {
+      const fetchConnections = async () => {
+        try {
+          const { data } = await api.get('/whatsapp', {
+            params: { queueId: selectedQueue },
+          });
+          setConnections(data);
+          if (data.length === 1) {
+            setSelectedConnection(data[0].id);
+            return;
+          }
+
+          if (data.length > 1) {
+            const connection = data.find((c) => {
+              return c.queues.find((q) => q.id === selectedQueue);
+            });
+            if (connection) {
+              setSelectedConnection(connection.id);
+              return;
+            }
+          }
+          
+          setSelectedConnection('');
+                    
+        } catch (err) {
+          toastError(err);
+        }
+      };
+
+      fetchConnections();
+    }
+  }, [selectedQueue]);
 
 	useEffect(() => {
 		if (initialContact?.id !== undefined) {
@@ -82,10 +133,12 @@ const NewTicketModal = ({ modalOpen, onClose, initialContact }) => {
 		}
 		setLoading(true);
 		try {
-			const queueId = selectedQueue !== "" ? selectedQueue : null;
+			const queueId = selectedQueue || null;
+			const whatsappId = selectedConnection || null;
 			const { data: ticket } = await api.post("/tickets", {
 				contactId: contactId,
 				queueId,
+				whatsappId,
 				userId: user.id,
 				status: "open",
 			});
@@ -161,7 +214,6 @@ const NewTicketModal = ({ modalOpen, onClose, initialContact }) => {
 							<TextField
 								{...params}
 								label={i18n.t("newTicketModal.fieldLabel")}
-								variant="outlined"
 								autoFocus
 								onChange={e => setSearchParam(e.target.value)}
 								onKeyPress={e => {
@@ -206,41 +258,68 @@ const NewTicketModal = ({ modalOpen, onClose, initialContact }) => {
 					<Grid style={{ width: 300 }} container spacing={2}>
 						{renderContactAutocomplete()}
 						<Grid xs={12} item>
-							<Select
-								fullWidth
-								displayEmpty
-								variant="outlined"
-								value={selectedQueue}
-								onChange={(e) => {
-									setSelectedQueue(e.target.value)
-								}}
-								MenuProps={{
-									anchorOrigin: {
-										vertical: "bottom",
-										horizontal: "left",
-									},
-									transformOrigin: {
-										vertical: "top",
-										horizontal: "left",
-									},
-									getContentAnchorEl: null,
-								}}
-								renderValue={() => {
-									if (selectedQueue === "") {
-										return "Selecione uma fila"
-									}
-									const queue = user.queues.find(q => q.id === selectedQueue)
-									return queue.name
-								}}
-							>
-								{user.queues?.length > 0 &&
-									user.queues.map((queue, key) => (
-										<MenuItem dense key={key} value={queue.id}>
-											<ListItemText primary={queue.name} />
-										</MenuItem>
-									))}
-							</Select>
+              <FormControl className={classes.selectContainer}>
+                <InputLabel id="queue-label">{i18n.t("newTicketModal.queue")}</InputLabel>
+  							<Select
+  								fullWidth
+  								displayEmpty
+  								value={selectedQueue}
+  								onChange={(e) => {
+  									setSelectedQueue(e.target.value)
+  								}}
+  								MenuProps={{
+  									anchorOrigin: {
+  										vertical: "bottom",
+  										horizontal: "left",
+  									},
+  									transformOrigin: {
+  										vertical: "top",
+  										horizontal: "left",
+  									},
+  									getContentAnchorEl: null,
+  								}}
+  							>
+  								{user.queues?.length > 0 &&
+  									user.queues.map((queue, key) => (
+  										<MenuItem dense key={key} value={queue.id}>
+  											<ListItemText primary={queue.name} />
+  										</MenuItem>
+  									))}
+  							</Select>
+							</FormControl>
 						</Grid>
+            {selectedQueue && <Grid xs={12} item>
+              <FormControl className={classes.selectContainer}>
+                <InputLabel id="connection-label">{i18n.t("newTicketModal.connection")}</InputLabel>
+                <Select
+                  fullWidth
+                  displayEmpty
+                  value={selectedConnection}
+                  onChange={(e) => {
+                    setSelectedConnection(e.target.value);
+                  }}
+                  MenuProps={{
+                    anchorOrigin: {
+                      vertical: 'bottom',
+                      horizontal: 'left',
+                    },
+                    transformOrigin: {
+                      vertical: 'top',
+                      horizontal: 'left',
+                    },
+                    getContentAnchorEl: null,
+                  }}
+                >
+                  {connections?.length > 0 &&
+                    connections.map((connection, key) => (
+                      <MenuItem dense key={key} value={connection.id}>
+                        <ListItemText primary={connection.name} />
+                      </MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            }
 					</Grid>
 				</DialogContent>
 				<DialogActions>
