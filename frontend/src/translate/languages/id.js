@@ -326,6 +326,8 @@ const messages = {
         title: "Buat Tiket",
         fieldLabel: "Cari kontak",
         add: "Tambah",
+        queue: "Antrian",
+        connection: "Koneksi",
         buttons: {
           ok: "Simpan",
           cancel: "Batal",
