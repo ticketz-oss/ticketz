@@ -105,7 +105,16 @@ export class SubscriptionService {
 
       return { success: result.success };
     } catch (error) {
-      logger.error(`Error checking subscription status: ${error.message}`);
+      logger.error(
+        { error },
+        `Error checking subscription status: ${error.message}`
+      );
+
+      // if error.status>=500, return cached response
+      if (error.status >= 500) {
+        return { success: this.taskResult };
+      }
+
       return { success: false };
     }
   }
