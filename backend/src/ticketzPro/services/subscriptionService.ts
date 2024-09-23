@@ -199,11 +199,11 @@ export class SubscriptionService {
 
   // eslint-disable-next-line class-methods-use-this
   async cancelRechecks(): Promise<void> {
-    const repeatOptions = {
-      cron: "0 * * * *"
-    };
-
-    await recheckQueue.removeRepeatable(repeatOptions);
+    recheckQueue.getRepeatableJobs().then(jobs => {
+      jobs.forEach(async job => {
+        await recheckQueue.removeRepeatableByKey(job.key);
+      });
+    });
   }
 
   status() {
