@@ -14,6 +14,7 @@ interface Request {
   userId: number;
   companyId: number;
   queueId?: number;
+  whatsappId?: number;
 }
 
 const CreateTicketService = async ({
@@ -21,6 +22,7 @@ const CreateTicketService = async ({
   status,
   userId,
   queueId,
+  whatsappId,
   companyId
 }: Request): Promise<Ticket> => {
   const queue = await Queue.findByPk(queueId, {
@@ -33,15 +35,34 @@ const CreateTicketService = async ({
   });
 
   let queueWhatsapp: Whatsapp = null;
+  const companyForceQueue =
+    (await GetCompanySetting(companyId, "restrictTransferConnection", "")) ===
+    "enabled";
+
+  if (whatsappId) {
+    queueWhatsapp = queue.whatsapps.find(e => e.id === whatsappId);
+
+    if (!queueWhatsapp) {
+      const selectedWhatsapp = await Whatsapp.findByPk(whatsappId, {
+        include: [
+          {
+            model: Queue,
+            as: "queues"
+          }
+        ]
+      });
+
+      if (companyForceQueue && selectedWhatsapp.queues.length > 0) {
+        throw new AppError("ERR_WAPP_NOT_FOUND", 404);
+      }
+
+      queueWhatsapp = selectedWhatsapp;
+    }
+  }
+
   if (queue.whatsapps.length) {
     queueWhatsapp = queue.whatsapps.find(e => e.status === "CONNECTED");
     if (!queueWhatsapp) {
-      const companyForceQueue =
-        (await GetCompanySetting(
-          companyId,
-          "restrictTransferConnection",
-          ""
-        )) === "enabled";
       if (companyForceQueue) {
         throw new AppError("ERR_WAPP_NOT_FOUND", 404);
       }
