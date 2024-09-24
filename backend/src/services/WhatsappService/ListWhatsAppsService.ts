@@ -1,4 +1,4 @@
-import { FindOptions } from "sequelize/types";
+import { FindOptions, Op } from "sequelize";
 import Queue from "../../models/Queue";
 import Whatsapp from "../../models/Whatsapp";
 import { GetCompanySetting } from "../../helpers/CheckSettings";
@@ -28,12 +28,25 @@ const ListWhatsAppsService = async ({
   };
 
   if (queueId) {
+    const queue = await Queue.findByPk(queueId, {
+      include: [
+        {
+          model: Whatsapp,
+          as: "whatsapps",
+          attributes: ["id"]
+        }
+      ]
+    });
+
     const restrictTransferConnection =
       (await GetCompanySetting(companyId, "restrictTransferConnection", "")) ===
       "enabled";
 
-    if (restrictTransferConnection) {
-      options.include[0].where = { id: queueId };
+    if (queue.whatsapps.length && restrictTransferConnection) {
+      options.where[Op.or] = [
+        { "$queues.id$": queueId },
+        { "$queues.id$": null }
+      ];
       options.include[0].required = false;
     }
   }
