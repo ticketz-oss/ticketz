@@ -4,7 +4,7 @@ var getInitials = function(string) {
     return "";
   }
 
-  var names = string.split(' '),
+  var names = string.trim().split(' '),
     initials = Array.from(names[0])[0];
 
   if (names.length > 1) {
