@@ -7,6 +7,7 @@ import * as Sentry from "@sentry/node";
 
 import { Op } from "sequelize";
 // import { getIO } from "../../libs/socket";
+import { Mutex } from "async-mutex";
 import { Store } from "../../libs/store";
 import Contact from "../../models/Contact";
 import Setting from "../../models/Setting";
@@ -15,6 +16,8 @@ import Whatsapp from "../../models/Whatsapp";
 import { logger } from "../../utils/logger";
 import createOrUpdateBaileysService from "../BaileysServices/CreateOrUpdateBaileysService";
 import CreateMessageService from "../MessageServices/CreateMessageService";
+
+const contactMutex = new Mutex();
 
 type Session = WASocket & {
   id?: number;
@@ -99,10 +102,11 @@ const wbotMonitor = async (
     });
 
     wbot.ev.on("contacts.upsert", async (contacts: BContact[]) => {
-      console.log("upsert", contacts);
-      await createOrUpdateBaileysService({
-        whatsappId: whatsapp.id,
-        contacts
+      contactMutex.runExclusive(async () => {
+        await createOrUpdateBaileysService({
+          whatsappId: whatsapp.id,
+          contacts
+        });
       });
     });
 
