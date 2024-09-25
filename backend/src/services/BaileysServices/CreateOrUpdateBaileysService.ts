@@ -24,7 +24,7 @@ const createOrUpdateBaileysService = async ({
     const getContacts = [];
 
     const baileysContacts = baileysExists.contacts
-      ? JSON.parse(JSON.stringify(baileysExists.contacts))
+      ? JSON.parse(baileysExists.contacts)
       : [];
 
     if (isArray(baileysContacts)) {
