@@ -1095,7 +1095,8 @@ const verifyQueue = async (
   wbot: Session,
   msg: proto.IWebMessageInfo | null,
   ticket: Ticket,
-  contact: Contact
+  contact: Contact,
+  ignoreMessage = false
 ) => {
   const { queues, greetingMessage } = await ShowWhatsAppService(
     wbot.id!,
@@ -1192,8 +1193,19 @@ const verifyQueue = async (
     await verifyMessage(sendMsg, ticket, ticket.contact);
   };
 
-  if (choosenQueue) {
+  const chatbotAutoExit =
+    (await GetCompanySetting(ticket.companyId, "chatbotAutoExit")) ===
+    "enabled";
+
+  if (!ignoreMessage && choosenQueue) {
     await startQueue(wbot, ticket, choosenQueue);
+  } else if (!ignoreMessage && !choosenQueue && chatbotAutoExit) {
+    await ticket.update({ chatbot: false });
+    const whatsapp = await Whatsapp.findByPk(ticket.whatsappId);
+    if (whatsapp.transferMessage) {
+      const body = formatBody(`\u200e${whatsapp.transferMessage}`, contact);
+      await SendWhatsAppMessage({ body, ticket });
+    }
   } else {
     switch (buttonActive.value) {
       case "list":
@@ -1365,10 +1377,7 @@ const handleChartbot = async (
 
   await ticket.reload();
 
-  /* * /
-  if (!isNil(queue) && isNil(ticket.queueOptionId)) {
-    sendMenu(wbot, ticket, queue);
-  } else /* */ if (!isNil(queue) && !isNil(ticket.queueOptionId)) {
+  if (!isNil(queue) && !isNil(ticket.queueOptionId)) {
     const currentOption = await QueueOption.findByPk(ticket.queueOptionId, {
       include: [
         {
@@ -1640,6 +1649,14 @@ const handleMessage = async (
       return result;
     });
 
+    const ticketMessages = await Message.findAll({
+      where: {
+        ticketId: ticket.id
+      }
+    });
+
+    const isNewTicket = ticketMessages.length === 0;
+
     // voltar para o menu inicial
 
     if (bodyMessage === "#" && !isGroup) {
@@ -1648,7 +1665,7 @@ const handleMessage = async (
         chatbot: false,
         queueId: null
       });
-      await verifyQueue(wbot, msg, ticket, ticket.contact);
+      await verifyQueue(wbot, msg, ticket, ticket.contact, true);
       return;
     }
 
@@ -1778,10 +1795,10 @@ const handleMessage = async (
       !ticket.userId &&
       whatsapp.queues.length >= 1
     ) {
-      await verifyQueue(wbot, msg, ticket, ticket.contact);
+      await verifyQueue(wbot, msg, ticket, ticket.contact, isNewTicket);
     }
 
-    const dontReadTheFirstQuestion = ticket.queue === null;
+    const dontReadTheFirstQuestion = isNewTicket || ticket.queue === null;
 
     await ticket.reload();
 
@@ -1874,15 +1891,8 @@ const handleMessage = async (
       }
     }
 
-    if (whatsapp.queues.length === 1 && ticket.queue) {
-      if (ticket.chatbot && !msg.key.fromMe) {
-        await handleChartbot(ticket, msg, wbot);
-      }
-    }
-    if (whatsapp.queues.length > 1 && ticket.queue) {
-      if (ticket.chatbot && !msg.key.fromMe) {
-        await handleChartbot(ticket, msg, wbot, dontReadTheFirstQuestion);
-      }
+    if (ticket.chatbot && !msg.key.fromMe) {
+      await handleChartbot(ticket, msg, wbot, dontReadTheFirstQuestion);
     }
   } catch (err) {
     console.log(err);
