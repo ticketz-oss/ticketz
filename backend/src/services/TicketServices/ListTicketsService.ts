@@ -11,6 +11,7 @@ import Tag from "../../models/Tag";
 import TicketTag from "../../models/TicketTag";
 import { intersection } from "lodash";
 import Whatsapp from "../../models/Whatsapp";
+import { GetCompanySetting } from "../../helpers/CheckSettings";
 
 interface Request {
   searchParam?: string;
@@ -47,10 +48,39 @@ const ListTicketsService = async ({
   withUnreadMessages,
   companyId
 }: Request): Promise<Response> => {
+  const orCondition = [{ userId }, { status: "pending" }];
+
   let whereCondition: Filterable["where"] = {
-    [Op.or]: [{ userId }, { status: "pending" }],
+    [Op.or]: orCondition,
     queueId: { [Op.or]: [queueIds, null] }
   };
+
+  if (!status || status === "closed") {
+    let closedCondition = null;
+    const closedTicketVisibility = await GetCompanySetting(
+      companyId,
+      "closedTicketVisibility",
+      "User"
+    );
+
+    if (closedTicketVisibility === "User") {
+      closedCondition = [{ status: "closed" }, { userId }];
+    } else if (closedTicketVisibility === "Queue") {
+      const user = await User.findByPk(userId, {
+        include: [{ model: Queue, as: "queues", attributes: ["id"] }]
+      });
+
+      // queueId of closedCondition must be one of the queues the user is in
+      const userQueueIds = user?.queues.map(queue => queue.id) || [];
+      closedCondition = [{ status: "closed" }, { queueId: userQueueIds }];
+    } else {
+      // "Company"
+      closedCondition = { status: "closed" };
+    }
+
+    orCondition.push(closedCondition);
+  }
+
   let includeCondition: Includeable[];
 
   includeCondition = [
@@ -80,10 +110,6 @@ const ListTicketsService = async ({
       attributes: ["id","name"]
     },
   ];
-
-  if (showAll === "true") {
-    whereCondition = { queueId: { [Op.or]: [queueIds, null] } };
-  }
 
   if (status) {
     whereCondition = {

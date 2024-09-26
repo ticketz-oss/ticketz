@@ -765,6 +765,21 @@ const messages = {
 				GracePeriod: {
           title: "Subscription Grace Period (days)",
         },
+        showPrevTickets: {
+          title: "Messagelist Show Previous Tickets Conversations",
+          options: {
+            enabled: "enabled",
+            disabled: "disabled",
+          },
+        },
+        closedTicketVisibility: {
+          title: "Closed Ticket Visibility",
+          options: {
+            company: "Company",
+            queue: "Queue",
+            user: "User",
+          },
+        },
 				WelcomeGreeting: {
 					greetings: "Hello",
 					welcome: "Welcome to",

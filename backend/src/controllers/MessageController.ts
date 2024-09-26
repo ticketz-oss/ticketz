@@ -48,10 +48,11 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   const { companyId, profile } = req.user;
   const queues: number[] = [];
 
+  const user = await User.findByPk(req.user.id, {
+    include: [{ model: Queue, as: "queues" }]
+  });
+
   if (profile !== "admin") {
-    const user = await User.findByPk(req.user.id, {
-      include: [{ model: Queue, as: "queues" }]
-    });
     user.queues.forEach(queue => {
       queues.push(queue.id);
     });
@@ -61,7 +62,8 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     pageNumber,
     ticketId,
     companyId,
-    queues
+    queues,
+    user
   });
 
   if (ticket.channel === "whatsapp") {

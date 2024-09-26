@@ -77,16 +77,6 @@ const Ticket = () => {
       const fetchTicket = async () => {
         try {
           const { data } = await api.get("/tickets/u/" + ticketId);
-          const { queueId } = data;
-          const { queues, profile } = user;
-
-          const queueAllowed = queues.find((q) => q.id === queueId);
-          if (queueAllowed === undefined && profile !== "admin") {
-            toast.error("Acesso não permitido");
-            history.push("/tickets");
-            return;
-          }
-
           setContact(data.contact);
           setTicket(data);
           setLoading(false);
@@ -117,7 +107,6 @@ const Ticket = () => {
       }
 
       if (data.action === "delete" && data.ticketId === ticket.id) {
-        toast.success("Ticket deleted sucessfully.");
         history.push("/tickets");
       }
     };
