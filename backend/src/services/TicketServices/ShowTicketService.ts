@@ -53,7 +53,7 @@ const ShowTicketService = async (
   });
 
   if (ticket?.companyId !== companyId) {
-    throw new AppError("Não é possível consultar registros de outra empresa");
+    throw new AppError("ERR_NO_PERMISSION", 403);
   }
 
   if (!ticket) {
