@@ -789,6 +789,17 @@ const messages = {
           user: "Usuário",
         },
       },
+      "ticketAcceptedMessage": {
+        "title": "Mensagem de ticket aceito",
+        "placeholder": "Digite sua mensagem de ticket aceito aqui"
+      },
+      "transferMessage": {
+        "title": "Mensagem de transferência",
+        "placeholder": "Digite sua mensagem de transferência aqui"
+      },
+      "mustacheVariables": {
+        "title": "Variáveis disponíveis: name user queue"
+      },
 			WelcomeGreeting: {
 				greetings: "Olá",
 				welcome: "Seja bem-vindo a",

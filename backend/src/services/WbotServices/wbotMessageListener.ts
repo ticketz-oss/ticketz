@@ -540,9 +540,9 @@ export const verifyMediaMessage = async (
   const io = getIO();
   const quotedMsg = await verifyQuotedMessage(msg);
 
-  const thumbnailMedia = await downloadThumbnail(
-    messageMedia || msg?.message?.extendedTextMessage
-  );
+  const thumbnailMsg = messageMedia || msg?.message?.extendedTextMessage;
+  const thumbnailMedia =
+    thumbnailMsg && (await downloadThumbnail(thumbnailMsg));
   const media = await downloadMedia(msg, wbot, ticket);
 
   if (!media && !thumbnailMedia) {
@@ -973,21 +973,6 @@ const sendMenu = async (
     );
 
     await verifyMessage(sendMsg, ticket, ticket.contact);
-
-    if (currentOption.mediaPath !== null && currentOption.mediaPath !== "") {
-      const filePath = path.resolve("public", currentOption.mediaPath);
-      const optionsMsg = await getMessageOptions(
-        currentOption.mediaName,
-        filePath
-      );
-      const sentMessage = await wbot.sendMessage(
-        `${ticket.contact.number}@${
-          ticket.isGroup ? "g.us" : "s.whatsapp.net"
-        }`,
-        { ...optionsMsg }
-      );
-      await verifyMediaMessage(sentMessage, ticket, ticket.contact);
-    }
   };
 
   switch (buttonActive.value) {
@@ -1020,6 +1005,16 @@ const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue) => {
     ticketId: ticket.id,
     companyId: ticket.companyId
   });
+
+  if (queue.mediaPath !== null && queue.mediaPath !== "") {
+    const filePath = path.resolve("public", queue.mediaPath);
+    const optionsMsg = await getMessageOptions(queue.mediaName, filePath);
+    const sentMediaMessage = await wbot.sendMessage(
+      `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
+      { ...optionsMsg }
+    );
+    await verifyMediaMessage(sentMediaMessage, ticket, contact);
+  }
 
   /* Tratamento para envio de mensagem quando a fila está fora do expediente */
   if (queue.options.length === 0) {
@@ -1075,21 +1070,6 @@ const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue) => {
       );
       await verifyMessage(sentMessage, ticket, contact);
     }
-
-    if (queue.mediaPath !== null && queue.mediaPath !== "") {
-      const filePath = path.resolve("public", queue.mediaPath);
-
-      const optionsMsg = await getMessageOptions(queue.mediaName, filePath);
-
-      const sentMediaMessage = await wbot.sendMessage(
-        `${ticket.contact.number}@${
-          ticket.isGroup ? "g.us" : "s.whatsapp.net"
-        }`,
-        { ...optionsMsg }
-      );
-
-      await verifyMediaMessage(sentMediaMessage, ticket, contact);
-    }
   } else {
     sendMenu(wbot, ticket, queue);
   }
@@ -1099,7 +1079,8 @@ const verifyQueue = async (
   wbot: Session,
   msg: proto.IWebMessageInfo | null,
   ticket: Ticket,
-  contact: Contact
+  contact: Contact,
+  ignoreMessage = false
 ) => {
   const { queues, greetingMessage } = await ShowWhatsAppService(
     wbot.id!,
@@ -1196,8 +1177,19 @@ const verifyQueue = async (
     await verifyMessage(sendMsg, ticket, ticket.contact);
   };
 
-  if (choosenQueue) {
+  const chatbotAutoExit =
+    (await GetCompanySetting(ticket.companyId, "chatbotAutoExit")) ===
+    "enabled";
+
+  if (!ignoreMessage && choosenQueue) {
     await startQueue(wbot, ticket, choosenQueue);
+  } else if (!ignoreMessage && !choosenQueue && chatbotAutoExit) {
+    await ticket.update({ chatbot: false });
+    const whatsapp = await Whatsapp.findByPk(ticket.whatsappId);
+    if (whatsapp.transferMessage) {
+      const body = formatBody(`\u200e${whatsapp.transferMessage}`, contact);
+      await SendWhatsAppMessage({ body, ticket });
+    }
   } else {
     switch (buttonActive.value) {
       case "list":
@@ -1373,10 +1365,7 @@ const handleChartbot = async (
 
   await ticket.reload();
 
-  /* * /
-  if (!isNil(queue) && isNil(ticket.queueOptionId)) {
-    sendMenu(wbot, ticket, queue);
-  } else /* */ if (!isNil(queue) && !isNil(ticket.queueOptionId)) {
+  if (!isNil(queue) && !isNil(ticket.queueOptionId)) {
     const currentOption = await QueueOption.findByPk(ticket.queueOptionId, {
       include: [
         {
@@ -1401,6 +1390,21 @@ const handleChartbot = async (
         ["options", "option", "ASC"]
       ]
     });
+
+    if (currentOption.mediaPath !== null && currentOption.mediaPath !== "") {
+      const filePath = path.resolve("public", currentOption.mediaPath);
+      const optionsMsg = await getMessageOptions(
+        currentOption.mediaName,
+        filePath
+      );
+      const sentMessage = await wbot.sendMessage(
+        `${ticket.contact.number}@${
+          ticket.isGroup ? "g.us" : "s.whatsapp.net"
+        }`,
+        { ...optionsMsg }
+      );
+      await verifyMediaMessage(sentMessage, ticket, ticket.contact);
+    }
 
     if (currentOption.exitChatbot || currentOption.forwardQueueId) {
       const textMessage = {
@@ -1648,6 +1652,14 @@ const handleMessage = async (
       return result;
     });
 
+    const ticketMessages = await Message.findAll({
+      where: {
+        ticketId: ticket.id
+      }
+    });
+
+    const isNewTicket = ticketMessages.length === 0;
+
     // voltar para o menu inicial
 
     if (bodyMessage === "#" && !isGroup) {
@@ -1656,7 +1668,7 @@ const handleMessage = async (
         chatbot: false,
         queueId: null
       });
-      await verifyQueue(wbot, msg, ticket, ticket.contact);
+      await verifyQueue(wbot, msg, ticket, ticket.contact, true);
       return;
     }
 
@@ -1786,10 +1798,10 @@ const handleMessage = async (
       !ticket.userId &&
       whatsapp.queues.length >= 1
     ) {
-      await verifyQueue(wbot, msg, ticket, ticket.contact);
+      await verifyQueue(wbot, msg, ticket, ticket.contact, isNewTicket);
     }
 
-    const dontReadTheFirstQuestion = ticket.queue === null;
+    const dontReadTheFirstQuestion = isNewTicket || ticket.queue === null;
 
     await ticket.reload();
 
@@ -1882,15 +1894,8 @@ const handleMessage = async (
       }
     }
 
-    if (whatsapp.queues.length === 1 && ticket.queue) {
-      if (ticket.chatbot && !msg.key.fromMe) {
-        await handleChartbot(ticket, msg, wbot);
-      }
-    }
-    if (whatsapp.queues.length > 1 && ticket.queue) {
-      if (ticket.chatbot && !msg.key.fromMe) {
-        await handleChartbot(ticket, msg, wbot, dontReadTheFirstQuestion);
-      }
+    if (ticket.chatbot && !msg.key.fromMe) {
+      await handleChartbot(ticket, msg, wbot, dontReadTheFirstQuestion);
     }
   } catch (err) {
     console.log(err);
