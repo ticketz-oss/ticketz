@@ -20,6 +20,7 @@ import Whatsapp from "../../models/Whatsapp";
 import { GetCompanySetting } from "../../helpers/CheckSettings";
 import { CreateInternalMessageService } from "../MessageServices/CreateInternalMessageService";
 import User from "../../models/User";
+import formatBody from "../../helpers/Mustache";
 
 interface TicketData {
   status?: string;
@@ -71,7 +72,8 @@ const UpdateTicketService = async ({
     const { justClose, annotation } = ticketData;
     let { status } = ticketData;
     const { queueId, userId } = ticketData;
-    let chatbot: boolean | null = ticketData.chatbot || false;
+    const fromChatbot = ticketData.chatbot || false;
+    let chatbot: boolean | null = fromChatbot;
     let queueOptionId: number | null = ticketData.queueOptionId || null;
 
     const io = getIO();
@@ -308,17 +310,30 @@ const UpdateTicketService = async ({
           await ticket.reload();
         }
 
-        if (!ticket.contact.isGroup) {
+        if (
+          !fromChatbot &&
+          !ticket.contact.isGroup &&
+          !ticket.contact.disableBot
+        ) {
+          const systemTransferMessage = await GetCompanySetting(
+            companyId,
+            "transferMessage",
+            "Você foi transferido, em breve iremos iniciar seu atendimento."
+          );
+          const transferMessage =
+            whatsapp.transferMessage || systemTransferMessage;
+
           const wbot = await GetTicketWbot(ticket);
           const queueChangedMessage = await wbot.sendMessage(
             `${ticket.contact.number}@${
               ticket.isGroup ? "g.us" : "s.whatsapp.net"
             }`,
             {
-              text: `\u200e${
-                whatsapp.transferMessage ||
-                "Você foi transferido, em breve iremos iniciar seu atendimento."
-              }`
+              text: `\u200e${formatBody(
+                transferMessage,
+                ticket.contact,
+                ticket
+              )}`
             }
           );
           await verifyMessage(queueChangedMessage, ticket, ticket.contact);
@@ -333,6 +348,39 @@ const UpdateTicketService = async ({
           body: "\u200eVocê foi transferido, em breve iremos iniciar seu atendimento.",
           ticket
         });
+      }
+    }
+
+    if (
+      !fromChatbot &&
+      status === "open" &&
+      userId !== ticket.userId &&
+      !ticket.isGroup &&
+      !ticket.contact.disableBot
+    ) {
+      const acceptedMessage = await GetCompanySetting(
+        companyId,
+        "ticketAcceptedMessage",
+        ""
+      );
+
+      if (acceptedMessage) {
+        const wbot = await GetTicketWbot(ticket);
+        const user = await User.findByPk(userId);
+        const queueChangedMessage = await wbot.sendMessage(
+          `${ticket.contact.number}@${
+            ticket.isGroup ? "g.us" : "s.whatsapp.net"
+          }`,
+          {
+            text: `\u200e${formatBody(
+              acceptedMessage,
+              ticket.contact,
+              ticket,
+              user
+            )}`
+          }
+        );
+        await verifyMessage(queueChangedMessage, ticket, ticket.contact);
       }
     }
 
