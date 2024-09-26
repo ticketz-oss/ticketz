@@ -521,7 +521,8 @@ const verifyMediaMessage = async (
   const io = getIO();
   const quotedMsg = await verifyQuotedMessage(msg);
   
-  const thumbnailMedia = await downloadThumbnail(messageMedia || msg?.message?.extendedTextMessage);
+  const thumbnailMsg = messageMedia || msg?.message?.extendedTextMessage;
+  const thumbnailMedia = thumbnailMsg && await downloadThumbnail(thumbnailMsg);
   const media = await downloadMedia(msg, wbot, ticket);
 
   if (!media && !thumbnailMedia) {
@@ -920,13 +921,6 @@ const sendMenu = async (
     );
 
     await verifyMessage(sendMsg, ticket, ticket.contact);
-
-    if (currentOption.mediaPath !== null && currentOption.mediaPath !== "") {
-      const filePath = path.resolve("public", currentOption.mediaPath);
-      const optionsMsg = await getMessageOptions(currentOption.mediaName, filePath);
-      const sentMessage = await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, { ...optionsMsg });
-      await verifyMediaMessage(sentMessage, ticket, ticket.contact);
-    }
   };
 
   switch (buttonActive.value) {
@@ -945,6 +939,7 @@ const sendMenu = async (
       break;
     default:
   }
+  
 }
 
 const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue) => {
@@ -960,6 +955,12 @@ const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue) => {
       companyId: ticket.companyId,
     });
 
+    if (queue.mediaPath !== null && queue.mediaPath !== "") {
+      const filePath = path.resolve("public", queue.mediaPath);
+      const optionsMsg = await getMessageOptions(queue.mediaName, filePath);
+      const sentMediaMessage = await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, { ...optionsMsg });
+      await verifyMediaMessage(sentMediaMessage, ticket, contact);
+    }
 
     /* Tratamento para envio de mensagem quando a fila está fora do expediente */
     if (queue.options.length === 0) {
@@ -1004,16 +1005,6 @@ const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue) => {
         }
         );
         await verifyMessage(sentMessage, ticket, contact);
-      }
-
-      if (queue.mediaPath !== null && queue.mediaPath !== "") {
-        const filePath = path.resolve("public", queue.mediaPath);
-
-        const optionsMsg = await getMessageOptions(queue.mediaName, filePath);
-
-        const sentMediaMessage = await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, { ...optionsMsg });
-
-        await verifyMediaMessage(sentMediaMessage, ticket, contact);
       }
     } else {
       sendMenu(wbot, ticket, queue);
@@ -1337,6 +1328,13 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
         ["options", "option", "ASC"],
       ]
     });
+
+    if (currentOption.mediaPath !== null && currentOption.mediaPath !== "") {
+      const filePath = path.resolve("public", currentOption.mediaPath);
+      const optionsMsg = await getMessageOptions(currentOption.mediaName, filePath);
+      const sentMessage = await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, { ...optionsMsg });
+      await verifyMediaMessage(sentMessage, ticket, ticket.contact);
+    }
 
     if (currentOption.exitChatbot || currentOption.forwardQueueId) {
 
