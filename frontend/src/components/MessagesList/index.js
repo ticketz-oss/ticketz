@@ -497,7 +497,27 @@ const useStyles = makeStyles((theme) => ({
   businessAvatar: {
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.primary.contrastText
-  }
+  },
+  ticketDivider: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    border: 'none',
+    textAlign: 'center',
+    marginBottom: '10px',
+    '&:before, &:after': {
+      content: '""',
+      flex: '1',
+      borderBottom: '1px solid ' + (theme.mode === 'light' ? "#333" : "#fff"),
+    },
+    '&:before': {
+      marginRight: '.5em',
+    },
+    '&:after': {
+      marginLeft: '.5em',
+    },
+  },
 }));
 
 const recordOpus = canRecordOggOpus();
@@ -840,9 +860,27 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
   };
 
   const renderMessageDivider = (message, index) => {
-    if (index < messagesList.length && index > 0) {
+    if (index < messagesList.length) {
       let messageUser = messagesList[index].fromMe;
-      let previousMessageUser = messagesList[index - 1].fromMe;
+      let previousMessageUser = messagesList[index - 1]?.fromMe;
+      
+      let messageTicketId = messagesList[index].ticketId;
+      let previousMessageTicketId = messagesList[index - 1]?.ticketId;
+
+      if (!previousMessageTicketId && messageTicketId != ticketId) {
+        return (
+          <div className={classes.ticketDivider} key={`ticketmark-${messageTicketId}`}>#{ messageTicketId }</div>
+        );
+      }
+      
+      if (previousMessageTicketId && messageTicketId !== previousMessageTicketId) {
+        return (
+          <>
+            <span style={{ marginTop: 16 }} key={`divider-${message.id}`}></span>
+            <div className={classes.ticketDivider} key={`ticketmark-${messageTicketId}`}>#{ messageTicketId }</div>
+          </>
+        );
+      }
 
       if (messageUser !== previousMessageUser) {
         return (
