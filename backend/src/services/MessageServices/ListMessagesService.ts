@@ -1,14 +1,17 @@
-import { FindOptions, Op } from "sequelize";
+import { FindAndCountOptions, FindOptions, Op, WhereOptions } from "sequelize";
 import AppError from "../../errors/AppError";
 import Message from "../../models/Message";
 import OldMessage from "../../models/OldMessage";
 import Ticket from "../../models/Ticket";
 import ShowTicketService from "../TicketServices/ShowTicketService";
 import Queue from "../../models/Queue";
+import User from "../../models/User";
+import { GetCompanySetting } from "../../helpers/CheckSettings";
 
 interface Request {
   ticketId: string;
   companyId: number;
+  user: User;
   pageNumber?: string;
   queues?: number[];
 }
@@ -23,6 +26,7 @@ interface Response {
 const ListMessagesService = async ({
   pageNumber = "1",
   ticketId,
+  user,
   companyId,
   queues = []
 }: Request): Promise<Response> => {
@@ -32,15 +36,112 @@ const ListMessagesService = async ({
     throw new AppError("ERR_NO_TICKET_FOUND", 404);
   }
 
+  if (ticket.companyId !== companyId) {
+    throw new AppError("ERR_NO_PERMISSION", 403);
+  }
+
+  if (
+    ticket.status === "open" &&
+    user.profile !== "admin" &&
+    ticket.userId !== user.id
+  ) {
+    throw new AppError("ERR_NO_PERMISSION", 403);
+  }
+
+  if (user.profile !== "admin" && ticket.status === "closed") {
+    const closedTicketVisibility = await GetCompanySetting(
+      companyId,
+      "closedTicketVisibility",
+      "User"
+    );
+
+    if (closedTicketVisibility === "User" && ticket.userId !== user.id) {
+      throw new AppError("ERR_NO_PERMISSION", 403);
+    } else if (closedTicketVisibility === "Queue") {
+      const userQueues = user.queues.map(queue => queue.id);
+      if (!userQueues.includes(ticket.queueId)) {
+        throw new AppError("ERR_NO_PERMISSION", 403);
+      }
+    }
+  }
+
+  if (ticket.status === "pending" && user.profile !== "admin") {
+    throw new AppError("ERR_NO_PERMISSION", 403);
+  }
+
   const limit = 20;
   const offset = limit * (+pageNumber - 1);
 
-  const options: FindOptions = {
-    where: {
-      ticketId,
-      companyId
+  const showPrevTickets =
+    (await GetCompanySetting(companyId, "showPrevTickets", "disabled")) ===
+    "enabled";
+
+  let prevTicketCondition: WhereOptions = { id: ticketId };
+
+  let options: FindAndCountOptions;
+
+  if (showPrevTickets) {
+    const closedTicketVisibility = await GetCompanySetting(
+      companyId,
+      "closedTicketVisibility",
+      "User"
+    );
+
+    if (closedTicketVisibility === "User") {
+      // add ticketId <= ticketId condition
+      prevTicketCondition = {
+        [Op.or]: [
+          { id: ticketId },
+          {
+            [Op.and]: [
+              { id: { [Op.lt]: ticketId } },
+              { status: "closed" },
+              { userId: user.id }
+            ]
+          }
+        ]
+      };
+    } else if (closedTicketVisibility === "Queue") {
+      const userQueueIds = user?.queues.map(queue => queue.id) || [];
+      prevTicketCondition = {
+        [Op.or]: [
+          { id: ticketId },
+          {
+            [Op.and]: [
+              { id: { [Op.lt]: ticketId } },
+              { status: "closed" },
+              { [Op.or]: [{ queueId: userQueueIds }, { userId: user.id }] }
+            ]
+          }
+        ]
+      };
+    } else {
+      // "Company"
+      prevTicketCondition = {
+        [Op.or]: [
+          { id: ticketId },
+          {
+            [Op.and]: [{ id: { [Op.lt]: ticketId } }, { status: "closed" }]
+          }
+        ]
+      };
     }
-  };
+
+    options = {
+      where: {
+        ticketId: { [Op.lte]: ticketId },
+        companyId
+      }
+    };
+  } else {
+    options = {
+      where: {
+        ticketId,
+        companyId
+      }
+    };
+  }
+
 
   if (queues.length > 0) {
     // eslint-disable-next-line dot-notation
@@ -57,6 +158,11 @@ const ListMessagesService = async ({
     limit,
     include: [
       "contact",
+      {
+        model: Ticket,
+        as: "ticket",
+        where: prevTicketCondition
+      },
       {
         model: Message,
         as: "quotedMsg",
