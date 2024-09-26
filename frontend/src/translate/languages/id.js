@@ -780,6 +780,17 @@ const messages = {
             user: "Pengguna",
           },
         },
+        "ticketAcceptedMessage": {
+          "title": "Pesan Tiket Diterima",
+          "placeholder": "Masukkan pesan tiket diterima di sini"
+        },
+        "transferMessage": {
+          "title": "Pesan Transfer",
+          "placeholder": "Masukkan pesan transfer di sini"
+        },
+        "mustacheVariables": {
+          "title": "Variabel yang tersedia: {{name}} {{user}} {{queue}}"
+        },
         WelcomeGreeting: {
           greetings: "halo",
           welcome: "selamat datang di",

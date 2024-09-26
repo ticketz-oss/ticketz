@@ -86,7 +86,7 @@ const useStyles = makeStyles((theme) => ({
     width: 20,
     height: 20,
   },
-  
+
   uploadInput: {
     display: "none",
   },
@@ -129,6 +129,11 @@ export default function Options(props) {
   const [gracePeriod, setGracePeriod] = useState(0);
   const [showPrevTickets, setShowPrevTickets] = useState("disabled");
   const [closedTicketVisibility, setClosedTicketVisibility] = useState("User");
+  const [ticketAcceptedMessage, setTicketAcceptedMessage] = useState("");
+  const [transferMessage, setTransferMessage] = useState("");
+
+  const ticketAcceptedMessageRef = useRef(null);
+  const transferMessageRef = useRef(null);
 
   const { getCurrentUserInfo } = useAuth();
   const [currentUser, setCurrentUser] = useState({});
@@ -189,10 +194,10 @@ export default function Options(props) {
 
       const downloadLimit = settings.find((s) => s.key === "downloadLimit");
       setDownloadLimit(downloadLimit?.value || "");
-      
+
       const restrictTransferConnection = settings.find((s) => s.key === "restrictTransferConnection");
       setRestrictTransferConnection(restrictTransferConnection?.value || "connection");
-      
+
       const transferToNewTicket = settings.find((s) => s.key === "transferToNewTicket");
       setTransferToNewTicket(transferToNewTicket?.value || "connection");
 
@@ -213,15 +218,21 @@ export default function Options(props) {
 
       const openTicketTimeoutAction = settings.find((s) => s.key === "openTicketTimeoutAction");
       setOpenTicketTimeoutAction(openTicketTimeoutAction?.value || "pending");
-      
+
       const gracePeriod = settings.find((s) => s.key === "gracePeriod");
       setGracePeriod(gracePeriod?.value || 0);
-      
+
       const closedTicketVisibility = settings.find((s) => s.key === "closedTicketVisibility");
       setClosedTicketVisibility(closedTicketVisibility?.value || "User");
-      
+
       const showPrevTickets = settings.find((s) => s.key === "showPrevTickets");
       setShowPrevTickets(showPrevTickets?.value || "disabled");
+
+      const ticketAcceptedMessage = settings.find((s) => s.key === "ticketAcceptedMessage");
+      setTicketAcceptedMessage(ticketAcceptedMessage?.value || "");
+
+      const transferMessage = settings.find((s) => s.key === "transferMessage");
+      setTransferMessage(transferMessage?.value || "");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
@@ -372,8 +383,8 @@ export default function Options(props) {
     });
     toast.success("Operação atualizada com sucesso.");
   }
-  
-  async function handleSetting(key, value, setter = null ) {
+
+  async function handleSetting(key, value, setter = null) {
     if (setter) {
       setter(value);
     }
@@ -406,7 +417,7 @@ export default function Options(props) {
     toast.success("Operação atualizada com sucesso.");
     setLoadingApiToken(false);
   }
-  
+
   async function copyApiToken() {
     copyToClipboard(apiToken);
     toast.success("Token copied to clipboard");
@@ -571,7 +582,7 @@ export default function Options(props) {
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="schedule-type-label">
-            {i18n.t("settings.OfficeManagement.title")}
+              {i18n.t("settings.OfficeManagement.title")}
             </InputLabel>
             <Select
               labelId="schedule-type-label"
@@ -592,7 +603,7 @@ export default function Options(props) {
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="group-type-label">
-            {i18n.t("settings.IgnoreGroupMessages.title")}
+              {i18n.t("settings.IgnoreGroupMessages.title")}
             </InputLabel>
             <Select
               labelId="group-type-label"
@@ -612,7 +623,7 @@ export default function Options(props) {
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="call-type-label">
-            {i18n.t("settings.VoiceAndVideoCalls.title")}
+              {i18n.t("settings.VoiceAndVideoCalls.title")}
             </InputLabel>
             <Select
               labelId="call-type-label"
@@ -651,7 +662,7 @@ export default function Options(props) {
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="group-type-label">
-            {i18n.t("settings.AutomaticChatbotOutput.title")}
+              {i18n.t("settings.AutomaticChatbotOutput.title")}
             </InputLabel>
             <Select
               labelId="chatbot-autoexit"
@@ -671,7 +682,7 @@ export default function Options(props) {
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="quickmessages-label">
-            {i18n.t("settings.QuickMessages.title")}
+              {i18n.t("settings.QuickMessages.title")}
             </InputLabel>
             <Select
               labelId="quickmessages-label"
@@ -823,7 +834,7 @@ export default function Options(props) {
               <Grid xs={12} sm={6} md={4} item>
                 <FormControl className={classes.selectContainer}>
                   <InputLabel id="group-type-label">
-                  {i18n.t("settings.AllowRegistration.title")}
+                    {i18n.t("settings.AllowRegistration.title")}
                   </InputLabel>
                   <Select
                     labelId="allow-signup"
@@ -859,7 +870,7 @@ export default function Options(props) {
                   />
                 </FormControl>
               </Grid>
-              
+
               <Grid xs={12} sm={6} md={4} item>
                 <FormControl className={classes.selectContainer}>
                   <TextField
@@ -878,11 +889,56 @@ export default function Options(props) {
                   />
                 </FormControl>
               </Grid>
-              
+
             </>
 
           )}
         />
+
+        <Grid xs={12} sm={6} md={6} item>
+          <FormControl className={classes.selectContainer}>
+            <TextField
+              id="ticket-accepted-message-field"
+              label={i18n.t("settings.ticketAcceptedMessage.title")}
+              placeholder={i18n.t("settings.ticketAcceptedMessage.placeholder")}
+              variant="standard"
+              multiline
+              rows={4}
+              ref={ticketAcceptedMessageRef}
+              value={ticketAcceptedMessage}
+              onChange={(e) => {
+                setTicketAcceptedMessage(e.target.value);
+              }}
+              onBlur={(e) => {
+                handleSetting("ticketAcceptedMessage", ticketAcceptedMessage);
+              }}
+            />
+            <span>{i18n.t("settings.mustacheVariables.title")}</span>
+          </FormControl>
+        </Grid>
+
+        <Grid xs={12} sm={6} md={6} item>
+          <FormControl className={classes.selectContainer}>
+            <TextField
+              id="transfer-message-field"
+              label={i18n.t("settings.transferMessage.title")}
+              placeholder={i18n.t("settings.transferMessage.placeholder")}
+              variant="standard"
+              multiline
+              rows={4}
+              ref={transferMessageRef}
+              value={transferMessage}
+              onChange={(e) => {
+                setTransferMessage(e.target.value);
+              }}
+              onBlur={(e) => {
+                handleSetting("transferMessage", transferMessage);
+              }}
+            />
+            <span>{i18n.t("settings.mustacheVariables.title")}</span>
+          </FormControl>
+        </Grid>
+
       </Grid>
     </>
   );
