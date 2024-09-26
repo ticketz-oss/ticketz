@@ -201,15 +201,7 @@ const TicketsListCustom = (props) => {
 
   useEffect(() => {
     const queueIds = queues.map((q) => q.id);
-    const filteredTickets = tickets.filter(
-      (t) => queueIds.indexOf(t.queueId) > -1
-    );
-
-    if (profile === "user") {
-      dispatch({ type: "LOAD_TICKETS", payload: filteredTickets });
-    } else {
-      dispatch({ type: "LOAD_TICKETS", payload: tickets });
-    }
+    dispatch({ type: "LOAD_TICKETS", payload: tickets });
   }, [tickets, queues, profile]);
 
   useEffect(() => {
