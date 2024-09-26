@@ -765,7 +765,22 @@ const messages = {
 				},
         GracePeriod: {
           title: "Período de gracia después del vencimiento (días)",
-        },				
+        },
+        showPrevTickets: {
+          title: "Mostrar conversaciones de tickets anteriores en la lista de mensajes",
+          options: {
+            enabled: "Activado",
+            disabled: "Desactivado",
+          },
+        },
+        closedTicketVisibility: {
+          title: "Visibilidad de tickets cerrados",
+          options: {
+            company: "Empresa",
+            queue: "Fila",
+            user: "Usuario",
+          },
+        },
 				WelcomeGreeting: {
 					greetings: "hola",
 					welcome: "bienvenido a",

@@ -765,6 +765,21 @@ const messages = {
         GracePeriod: {
           title: "Periode penundaan langganan berakhir (hari)",
         },
+        showPrevTickets: {
+          title: "Tampilkan percakapan tiket sebelumnya",
+          options: {
+            enabled: "Diaktifkan",
+            disabled: "Dinonaktifkan",
+          },
+        },
+        closedTicketVisibility: {
+          title: "Visibilitas tiket tertutup",
+          options: {
+            company: "Perusahaan",
+            queue: "Antrian",
+            user: "Pengguna",
+          },
+        },
         WelcomeGreeting: {
           greetings: "halo",
           welcome: "selamat datang di",

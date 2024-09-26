@@ -127,7 +127,9 @@ export default function Options(props) {
   const [ratingsTimeout, setRatingsTimeout] = useState(false);
   const [autoReopenTimeout, setAutoReopenTimeout] = useState(false);
   const [gracePeriod, setGracePeriod] = useState(0);
-  
+  const [showPrevTickets, setShowPrevTickets] = useState("disabled");
+  const [closedTicketVisibility, setClosedTicketVisibility] = useState("User");
+
   const { getCurrentUserInfo } = useAuth();
   const [currentUser, setCurrentUser] = useState({});
 
@@ -214,6 +216,12 @@ export default function Options(props) {
       
       const gracePeriod = settings.find((s) => s.key === "gracePeriod");
       setGracePeriod(gracePeriod?.value || 0);
+      
+      const closedTicketVisibility = settings.find((s) => s.key === "closedTicketVisibility");
+      setClosedTicketVisibility(closedTicketVisibility?.value || "User");
+      
+      const showPrevTickets = settings.find((s) => s.key === "showPrevTickets");
+      setShowPrevTickets(showPrevTickets?.value || "disabled");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
@@ -716,7 +724,44 @@ export default function Options(props) {
             </Select>
           </FormControl>
         </Grid>
-        
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="show-prev-tickets-label">
+              {i18n.t("settings.showPrevTickets.title")}
+            </InputLabel>
+            <Select
+              labelId="show-prev-tickets-label"
+              value={showPrevTickets}
+              onChange={async (e) => {
+                handleSetting("showPrevTickets", e.target.value, setShowPrevTickets);
+              }}
+            >
+              <MenuItem value={"disabled"}>{i18n.t("settings.showPrevTickets.options.disabled")}</MenuItem>
+              <MenuItem value={"enabled"}>{i18n.t("settings.showPrevTickets.options.enabled")}</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="closed-ticket-visibility-label">
+              {i18n.t("settings.closedTicketVisibility.title")}
+            </InputLabel>
+            <Select
+              labelId="closed-ticket-visibility-label"
+              value={closedTicketVisibility}
+              onChange={async (e) => {
+                handleSetting("closedTicketVisibility", e.target.value, setClosedTicketVisibility);
+              }}
+            >
+              <MenuItem value={"Company"}>{i18n.t("settings.closedTicketVisibility.options.company")}</MenuItem>
+              <MenuItem value={"Queue"}>{i18n.t("settings.closedTicketVisibility.options.queue")}</MenuItem>
+              <MenuItem value={"User"}>{i18n.t("settings.closedTicketVisibility.options.user")}</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <TextField

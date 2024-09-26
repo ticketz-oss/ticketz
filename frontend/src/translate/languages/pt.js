@@ -769,6 +769,21 @@ const messages = {
       GracePeriod: {
         title: "Carência após vencimento (dias)",
       },
+      showPrevTickets: {
+        title: "Mostrar conversa de tickets anteriores",
+        options: {
+          enabled: "Ativado",
+          disabled: "Desativado",
+        },
+      },
+      closedTicketVisibility: {
+        title: "Visibilidade de tickets fechados",
+        options: {
+          company: "Empresa",
+          queue: "Fila",
+          user: "Usuário",
+        },
+      },
 			WelcomeGreeting: {
 				greetings: "Olá",
 				welcome: "Seja bem-vindo a",
