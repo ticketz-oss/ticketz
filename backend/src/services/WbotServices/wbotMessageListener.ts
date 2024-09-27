@@ -1288,7 +1288,7 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
     const option = queue?.options.find((o) => o.option === messageBody);
     if (option) {
       await ticket.update({ queueOptionId: option?.id });
-    } else if (await GetCompanySetting(ticket.companyId, "chatbotAutoExit") === "enabled" ) {
+    } else if (await GetCompanySetting(ticket.companyId, "chatbotAutoExit", "disabled") === "enabled" ) {
       // message didn't identified an option and company setting to exit chatbot
       await ticket.update({ chatbot: false });
       const whatsapp = await Whatsapp.findByPk(ticket.whatsappId);
