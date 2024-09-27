@@ -1,4 +1,4 @@
-import { FindAndCountOptions, FindOptions, Op, WhereOptions } from "sequelize";
+import { FindAndCountOptions, Op, WhereOptions } from "sequelize";
 import AppError from "../../errors/AppError";
 import Message from "../../models/Message";
 import OldMessage from "../../models/OldMessage";
@@ -96,7 +96,8 @@ const ListMessagesService = async ({
             [Op.and]: [
               { id: { [Op.lt]: ticketId } },
               { status: "closed" },
-              { userId: user.id }
+              { userId: user.id },
+              { contactId: ticket.contactId }
             ]
           }
         ]
@@ -110,7 +111,8 @@ const ListMessagesService = async ({
             [Op.and]: [
               { id: { [Op.lt]: ticketId } },
               { status: "closed" },
-              { [Op.or]: [{ queueId: userQueueIds }, { userId: user.id }] }
+              { [Op.or]: [{ queueId: userQueueIds }, { userId: user.id }] },
+              { contactId: ticket.contactId }
             ]
           }
         ]
@@ -121,7 +123,11 @@ const ListMessagesService = async ({
         [Op.or]: [
           { id: ticketId },
           {
-            [Op.and]: [{ id: { [Op.lt]: ticketId } }, { status: "closed" }]
+            [Op.and]: [
+              { id: { [Op.lt]: ticketId } },
+              { status: "closed" },
+              { contactId: ticket.contactId }
+            ]
           }
         ]
       };
@@ -141,7 +147,6 @@ const ListMessagesService = async ({
       }
     };
   }
-
 
   if (queues.length > 0) {
     // eslint-disable-next-line dot-notation
