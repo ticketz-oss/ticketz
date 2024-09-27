@@ -320,6 +320,7 @@ const messages = {
 				fieldLabel: "Type to search for contact",
 				add: "Add",
 				queue: "Queue",
+				noQueue: "No Queue",
 				connection: "Connection",
 				buttons: {
 					ok: "Save",

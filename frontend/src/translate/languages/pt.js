@@ -328,6 +328,7 @@ const messages = {
 				fieldLabel: "Digite para pesquisar o contato",
 				add: "Adicionar",
         queue: "Fila",
+        noQueue: "Sem fila",
         connection: "Conexão",
 				buttons: {
 					ok: "Salvar",

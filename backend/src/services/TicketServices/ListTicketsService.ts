@@ -1,15 +1,14 @@
 import { Op, fn, where, col, Filterable, Includeable } from "sequelize";
 import { startOfDay, endOfDay, parseISO } from "date-fns";
 
+import { intersection } from "lodash";
 import Ticket from "../../models/Ticket";
 import Contact from "../../models/Contact";
 import Message from "../../models/Message";
 import Queue from "../../models/Queue";
 import User from "../../models/User";
-import ShowUserService from "../UserServices/ShowUserService";
 import Tag from "../../models/Tag";
 import TicketTag from "../../models/TicketTag";
-import { intersection } from "lodash";
 import Whatsapp from "../../models/Whatsapp";
 import { GetCompanySetting } from "../../helpers/CheckSettings";
 
@@ -48,6 +47,10 @@ const ListTicketsService = async ({
   withUnreadMessages,
   companyId
 }: Request): Promise<Response> => {
+  const user = await User.findByPk(userId, {
+    include: [{ model: Queue, as: "queues", attributes: ["id"] }]
+  });
+
   const orCondition = [{ userId }, { status: "pending" }];
 
   let whereCondition: Filterable["where"] = {
@@ -66,10 +69,6 @@ const ListTicketsService = async ({
     if (closedTicketVisibility === "User") {
       closedCondition = [{ status: "closed" }, { userId }];
     } else if (closedTicketVisibility === "Queue") {
-      const user = await User.findByPk(userId, {
-        include: [{ model: Queue, as: "queues", attributes: ["id"] }]
-      });
-
       // queueId of closedCondition must be one of the queues the user is in
       const userQueueIds = user?.queues.map(queue => queue.id) || [];
       closedCondition = [{ status: "closed" }, { queueId: userQueueIds }];
@@ -107,9 +106,13 @@ const ListTicketsService = async ({
     {
       model: Whatsapp,
       as: "whatsapp",
-      attributes: ["id","name"]
-    },
+      attributes: ["id", "name"]
+    }
   ];
+
+  if (showAll === "true" && user?.profile === "admin") {
+    whereCondition = { queueId: { [Op.or]: [queueIds, null] } };
+  }
 
   if (status) {
     whereCondition = {
@@ -181,7 +184,6 @@ const ListTicketsService = async ({
   }
 
   if (withUnreadMessages === "true") {
-    const user = await ShowUserService(userId);
     const userQueueIds = user.queues.map(queue => queue.id);
 
     whereCondition = {
@@ -193,7 +195,8 @@ const ListTicketsService = async ({
 
   if (Array.isArray(tags) && tags.length > 0) {
     const ticketsTagFilter: any[] | null = [];
-    for (let tag of tags) {
+    // eslint-disable-next-line no-restricted-syntax
+    for await (const tag of tags) {
       const ticketTags = await TicketTag.findAll({
         where: { tagId: tag }
       });
@@ -214,9 +217,10 @@ const ListTicketsService = async ({
 
   if (Array.isArray(users) && users.length > 0) {
     const ticketsUserFilter: any[] | null = [];
-    for (let user of users) {
+    // eslint-disable-next-line no-restricted-syntax
+    for await (const uid of users) {
       const ticketUsers = await Ticket.findAll({
-        where: { userId: user }
+        where: { userId: uid }
       });
       if (ticketUsers) {
         ticketsUserFilter.push(ticketUsers.map(t => t.id));

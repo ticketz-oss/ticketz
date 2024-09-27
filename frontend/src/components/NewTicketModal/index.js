@@ -279,6 +279,11 @@ const NewTicketModal = ({ modalOpen, onClose, initialContact }) => {
   									getContentAnchorEl: null,
   								}}
   							>
+                  {user.profile === "admin" &&
+                    <MenuItem dense key="-1" value="0">
+                      <ListItemText primary={i18n.t("newTicketModal.noQueue")} />
+                    </MenuItem>
+                  }
   								{user.queues?.length > 0 &&
   									user.queues.map((queue, key) => (
   										<MenuItem dense key={key} value={queue.id}>
