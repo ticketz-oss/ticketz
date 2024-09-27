@@ -327,6 +327,7 @@ const messages = {
         fieldLabel: "Cari kontak",
         add: "Tambah",
         queue: "Antrian",
+        noQueue: "Tidak ada antrian",
         connection: "Koneksi",
         buttons: {
           ok: "Simpan",

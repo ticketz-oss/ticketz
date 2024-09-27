@@ -326,6 +326,7 @@ const messages = {
 				fieldLabel: "Escribe para buscar el contacto",
 				add: "Agregar",
         queue: "Fila",
+        noQueue: "Sin fila",
         connection: "Conexión",
 				buttons: {
 					ok: "Guardar",
