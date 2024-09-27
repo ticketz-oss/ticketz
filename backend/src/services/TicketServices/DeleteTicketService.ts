@@ -1,6 +1,7 @@
 import Ticket from "../../models/Ticket";
 import AppError from "../../errors/AppError";
 import TicketTraking from "../../models/TicketTraking";
+import { logger } from "../../utils/logger";
 
 const DeleteTicketService = async (id: string): Promise<Ticket> => {
   const ticket = await Ticket.findOne({
@@ -17,10 +18,10 @@ const DeleteTicketService = async (id: string): Promise<Ticket> => {
 
   if (tracking) {
     tracking.finishedAt = new Date();
-    tracking.save();
+    tracking.save().catch(error => {
+      logger.error(`Error on save tracking: ${error.message}`);
+    });
   }
-
-  await tracking.save();
 
   await ticket.destroy();
 
