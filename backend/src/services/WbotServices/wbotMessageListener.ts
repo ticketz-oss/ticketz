@@ -324,19 +324,34 @@ type ThumbnailMessage = {
   mimetype?: string;
 };
 
+type MediaInfo = {
+  data: Buffer;
+  mimetype: string;
+  filename: string;
+};
+
 const downloadThumbnail = async ({
   thumbnailDirectPath: directPath,
   mediaKey,
   mimetype
-}: ThumbnailMessage) => {
+}: ThumbnailMessage): Promise<MediaInfo> => {
   if (!directPath || !mediaKey) {
     return null;
   }
 
-  const stream = await downloadContentFromMessage(
-    { mediaKey, directPath },
-    mimetype ? "thumbnail-document" : "thumbnail-link"
-  );
+  let stream: Transform;
+  try {
+    stream = await downloadContentFromMessage(
+      { mediaKey, directPath },
+      mimetype ? "thumbnail-document" : "thumbnail-link"
+    );
+  } catch (error) {
+    logger.debug(
+      { directPath, mediaKey, mimetype },
+      `Error downloading thumbnail: ${error.message}`
+    );
+    throw new Error("ERR_WAPP_DOWNLOAD_MEDIA");
+  }
 
   if (!stream) {
     throw new Error("Failed to get stream");
@@ -362,7 +377,7 @@ const downloadMedia = async (
   msg: proto.IWebMessageInfo,
   wbot: Session,
   ticket: Ticket
-) => {
+): Promise<MediaInfo> => {
   const unpackedMessage = getUnpackedMessage(msg);
   const message = getMessageMedia(unpackedMessage);
 
@@ -537,9 +552,24 @@ export const verifyMediaMessage = async (
   const quotedMsg = await verifyQuotedMessage(msg);
 
   const thumbnailMsg = messageMedia || msg?.message?.extendedTextMessage;
-  const thumbnailMedia =
-    thumbnailMsg && (await downloadThumbnail(thumbnailMsg));
-  const media = await downloadMedia(msg, wbot, ticket);
+
+  let thumbnailMedia: MediaInfo = null;
+  let media: MediaInfo = null;
+
+  try {
+    thumbnailMedia = thumbnailMsg && (await downloadThumbnail(thumbnailMsg));
+  } catch (error) {
+    logger.error(
+      { thumbnailMsg },
+      `Error downloading thumbnail ${error.message}`
+    );
+  }
+
+  try {
+    media = await downloadMedia(msg, wbot, ticket);
+  } catch (error) {
+    logger.error({ msg }, `Error downloading media ${error.message}`);
+  }
 
   if (!media && !thumbnailMedia) {
     throw new Error("ERR_WAPP_DOWNLOAD_MEDIA");
