@@ -19,7 +19,6 @@ interface Request {
 
 const CreateTicketService = async ({
   contactId,
-  status,
   userId,
   queueId,
   whatsappId,
@@ -40,7 +39,7 @@ const CreateTicketService = async ({
     "enabled";
 
   if (whatsappId) {
-    queueWhatsapp = queue.whatsapps.find(e => e.id === whatsappId);
+    queueWhatsapp = queue?.whatsapps.find(e => e.id === whatsappId);
 
     if (!queueWhatsapp) {
       const selectedWhatsapp = await Whatsapp.findByPk(whatsappId, {
@@ -60,7 +59,7 @@ const CreateTicketService = async ({
     }
   }
 
-  if (queue.whatsapps.length) {
+  if (queue?.whatsapps?.length) {
     queueWhatsapp = queue.whatsapps.find(e => e.status === "CONNECTED");
     if (!queueWhatsapp) {
       if (companyForceQueue) {
@@ -80,7 +79,7 @@ const CreateTicketService = async ({
     contactId,
     isGroup,
     companyId,
-    queueId,
+    queueId: queue?.id,
     userId,
     whatsappId: defaultWhatsapp.id,
     status: "open"
