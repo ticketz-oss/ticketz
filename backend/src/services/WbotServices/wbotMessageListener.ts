@@ -1341,8 +1341,11 @@ const handleChartbot = async (
     if (option) {
       await ticket.update({ queueOptionId: option?.id });
     } else if (
-      (await GetCompanySetting(ticket.companyId, "chatbotAutoExit")) ===
-      "enabled"
+      (await GetCompanySetting(
+        ticket.companyId,
+        "chatbotAutoExit",
+        "disabled"
+      )) === "enabled"
     ) {
       // message didn't identified an option and company setting to exit chatbot
       await ticket.update({ chatbot: false });
