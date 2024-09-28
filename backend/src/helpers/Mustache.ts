@@ -55,15 +55,16 @@ export function formatBody(
   const hora = `${hh}:${min}:${ss}`;
 
   const view = {
-    name: contact ? contact.name : "",
+    name: contact?.name.trim() || "",
+    firstname: contact?.name.trim().split(" ")[0] || "",
     gretting: greeting(),
     ms,
     protocol,
     hora,
     fila: setor,
     usuario,
-    user: user?.name || ticket?.user?.name || "username",
-    queue: ticket?.queue?.name || "queue",
+    user: user?.name || ticket?.user?.name || "{{username}}",
+    queue: ticket?.queue?.name || "{{queue}}",
     ticket: ticket?.id
   };
   return Mustache.render(body, view);

@@ -910,7 +910,7 @@ export default function Options(props) {
                 handleSetting("ticketAcceptedMessage", ticketAcceptedMessage);
               }}
             />
-            <span>{i18n.t("settings.mustacheVariables.title")}</span>
+            <span>{i18n.t("settings.mustacheVariables.title")} {'{{firstname}} {{name}} {{user}} {{queue}}'}</span>
           </FormControl>
         </Grid>
 
@@ -932,7 +932,7 @@ export default function Options(props) {
                 handleSetting("transferMessage", transferMessage);
               }}
             />
-            <span>{i18n.t("settings.mustacheVariables.title")}</span>
+            <span>{i18n.t("settings.mustacheVariables.title")} {'{{firstname}} {{name}} {{user}} {{queue}}'}</span>
           </FormControl>
         </Grid>
 

@@ -795,7 +795,7 @@ const messages = {
           "placeholder": "Masukkan pesan transfer di sini"
         },
         "mustacheVariables": {
-          "title": "Variabel yang tersedia: {{name}} {{user}} {{queue}}"
+          "title": "Variabel yang tersedia:"
         },
         WelcomeGreeting: {
           greetings: "halo",

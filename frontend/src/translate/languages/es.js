@@ -796,7 +796,7 @@ const messages = {
           "placeholder": "Ingrese su mensaje de transferencia aquí"
         },
         "mustacheVariables": {
-          "title": "Variables disponibles: {{name}} {{user}} {{queue}}",
+          "title": "Variables disponibles:",
         },
 				WelcomeGreeting: {
 					greetings: "hola",
