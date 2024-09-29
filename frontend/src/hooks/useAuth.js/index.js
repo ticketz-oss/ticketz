@@ -95,55 +95,73 @@ const useAuth = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
+
+  const posLogin = (data, impersonated = false) => {
+    const {
+      user: { companyId, id, company },
+    } = data;
+
+    if (has(company, "settings") && isArray(company.settings)) {
+      const setting = company.settings.find(
+        (s) => s.key === "campaignsEnabled"
+      );
+      if (setting && setting.value === "true") {
+        localStorage.setItem("cshow", null); //regra pra exibir campanhas
+      }
+    }
+
+    moment.locale('pt-br');
+    const dueDate = data.user.company.dueDate;
+    const hoje = moment(moment()).format("DD/MM/yyyy");
+    const vencimento = moment(dueDate).format("DD/MM/yyyy");
+
+    var diff = moment(dueDate).diff(moment(moment()).format());
+
+    var dias = moment.duration(diff).asDays();
+
+    localStorage.setItem("token", JSON.stringify(data.token));
+    localStorage.setItem("companyId", companyId);
+    localStorage.setItem("userId", id);
+    localStorage.setItem("companyDueDate", vencimento);
+    localStorage.setItem("impersonated", impersonated);
+    api.defaults.headers.Authorization = `Bearer ${data.token}`;
+    setUser(data.user);
+    setIsAuth(true);
+    if (dias < 0) {
+      toast.warn(`Sua assinatura venceu há ${Math.round(dias) * -1} ${Math.round(dias) * -1 === 1 ? 'dia' : 'dias'} `);
+    } else if (Math.round(dias) < 5) {
+      toast.warn(`Sua assinatura vence em ${Math.round(dias)} ${Math.round(dias) === 1 ? 'dia' : 'dias'} `);
+    } else {
+      toast.success(i18n.t("auth.toasts.success"));
+    }
+    if (data.user.profile === "admin") {
+      history.push("/");
+    } else {
+      history.push("/tickets");
+    }
+  }
+
   const handleLogin = async (userData) => {
     setLoading(true);
 
     try {
       const { data } = await api.post("/auth/login", userData);
-      const {
-        user: { companyId, id, company },
-      } = data;
-
-      if (has(company, "settings") && isArray(company.settings)) {
-        const setting = company.settings.find(
-          (s) => s.key === "campaignsEnabled"
-        );
-        if (setting && setting.value === "true") {
-          localStorage.setItem("cshow", null); //regra pra exibir campanhas
-        }
-      }
-
-      moment.locale('pt-br');
-      const dueDate = data.user.company.dueDate;
-      const hoje = moment(moment()).format("DD/MM/yyyy");
-      const vencimento = moment(dueDate).format("DD/MM/yyyy");
-      
-      var diff = moment(dueDate).diff(moment(moment()).format());
-
-      var dias = moment.duration(diff).asDays();
-
-      localStorage.setItem("token", JSON.stringify(data.token));
-      localStorage.setItem("companyId", companyId);
-      localStorage.setItem("userId", id);
-      localStorage.setItem("companyDueDate", vencimento);
-      api.defaults.headers.Authorization = `Bearer ${data.token}`;
-      setUser(data.user);
-      setIsAuth(true);
-      if (dias < 0) {
-        toast.warn(`Sua assinatura venceu há ${Math.round(dias) * -1} ${Math.round(dias) * -1 === 1 ? 'dia' : 'dias'} `);
-      } else if (Math.round(dias) < 5) {
-        toast.warn(`Sua assinatura vence em ${Math.round(dias)} ${Math.round(dias) === 1 ? 'dia' : 'dias'} `);
-      } else {
-        toast.success(i18n.t("auth.toasts.success"));
-      }
-      if (data.user.profile === "admin") {
-        history.push("/");
-      } else {
-        history.push("/tickets");
-      }
+      posLogin(data);
       setLoading(false);
+    } catch (err) {
+      toastError(err);
+      setLoading(false);
+    }
+  };
 
-      //quebra linha 
+  const handleImpersonate = async (companyId) => {
+    setLoading(true);
+
+    try {
+      const { data } = await api.get(`/auth/impersonate/${companyId}`);
+      posLogin(data, true);
+      setLoading(false);
+      window.location.reload(false);
     } catch (err) {
       toastError(err);
       setLoading(false);
@@ -184,6 +202,7 @@ const useAuth = () => {
     user,
     loading,
     handleLogin,
+    handleImpersonate,
     handleLogout,
     getCurrentUserInfo,
   };
