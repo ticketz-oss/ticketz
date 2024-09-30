@@ -6,7 +6,7 @@ import SetTicketMessagesAsRead from "../../helpers/SetTicketMessagesAsRead";
 import { getIO } from "../../libs/socket";
 import Ticket from "../../models/Ticket";
 import Queue from "../../models/Queue";
-import ShowTicketService from "./ShowTicketService";
+import ShowTicketService, { reloadTicketService } from "./ShowTicketService";
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
 import SendWhatsAppMessage from "../WbotServices/SendWhatsAppMessage";
 import FindOrCreateATicketTrakingService from "./FindOrCreateATicketTrakingService";
@@ -54,6 +54,21 @@ interface Response {
   oldStatus: string;
   oldUserId: number | undefined;
 }
+
+const sendFormattedMessage = async (
+  message: string,
+  ticket: Ticket,
+  user?: User
+) => {
+  const wbot = await GetTicketWbot(ticket);
+  const queueChangedMessage = await wbot.sendMessage(
+    `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
+    {
+      text: `\u200e${formatBody(message, ticket.contact, ticket, user)}`
+    }
+  );
+  await verifyMessage(queueChangedMessage, ticket, ticket.contact);
+};
 
 const UpdateTicketService = async ({
   ticketData,
@@ -309,35 +324,6 @@ const UpdateTicketService = async ({
           });
           await ticket.reload();
         }
-
-        if (
-          !fromChatbot &&
-          !ticket.contact.isGroup &&
-          !ticket.contact.disableBot
-        ) {
-          const systemTransferMessage = await GetCompanySetting(
-            companyId,
-            "transferMessage",
-            "Você foi transferido, em breve iremos iniciar seu atendimento."
-          );
-          const transferMessage =
-            whatsapp.transferMessage || systemTransferMessage;
-
-          const wbot = await GetTicketWbot(ticket);
-          const queueChangedMessage = await wbot.sendMessage(
-            `${ticket.contact.number}@${
-              ticket.isGroup ? "g.us" : "s.whatsapp.net"
-            }`,
-            {
-              text: `\u200e${formatBody(
-                transferMessage,
-                ticket.contact,
-                ticket
-              )}`
-            }
-          );
-          await verifyMessage(queueChangedMessage, ticket, ticket.contact);
-        }
       }
 
       if (["facebook", "instagram"].includes(ticket.channel)) {
@@ -348,39 +334,6 @@ const UpdateTicketService = async ({
           body: "\u200eVocê foi transferido, em breve iremos iniciar seu atendimento.",
           ticket
         });
-      }
-    }
-
-    if (
-      !fromChatbot &&
-      status === "open" &&
-      userId !== ticket.userId &&
-      !ticket.isGroup &&
-      !ticket.contact.disableBot
-    ) {
-      const acceptedMessage = await GetCompanySetting(
-        companyId,
-        "ticketAcceptedMessage",
-        ""
-      );
-
-      if (acceptedMessage) {
-        const wbot = await GetTicketWbot(ticket);
-        const user = await User.findByPk(userId);
-        const queueChangedMessage = await wbot.sendMessage(
-          `${ticket.contact.number}@${
-            ticket.isGroup ? "g.us" : "s.whatsapp.net"
-          }`,
-          {
-            text: `\u200e${formatBody(
-              acceptedMessage,
-              ticket.contact,
-              ticket,
-              user
-            )}`
-          }
-        );
-        await verifyMessage(queueChangedMessage, ticket, ticket.contact);
       }
     }
 
@@ -397,7 +350,7 @@ const UpdateTicketService = async ({
       queueOptionId
     });
 
-    await ticket.reload();
+    await reloadTicketService(ticket);
 
     status = ticket.status;
 
@@ -443,6 +396,43 @@ const UpdateTicketService = async ({
     }
 
     await ticketTraking.save();
+
+    if (!ticket.contact.isGroup && !ticket.contact.disableBot && !fromChatbot) {
+      if (oldQueueId && oldQueueId !== ticket.queueId) {
+        const whatsapp = await ShowWhatsAppService(
+          ticket.whatsappId,
+          companyId
+        );
+        const systemTransferMessage = await GetCompanySetting(
+          companyId,
+          "transferMessage",
+          ""
+        );
+        const transferMessage =
+          whatsapp.transferMessage || systemTransferMessage;
+
+        if (transferMessage) {
+          await sendFormattedMessage(transferMessage, ticket);
+        }
+      }
+
+      if (
+        ticket.userId &&
+        ticket.status === "open" &&
+        ticket.userId !== oldUserId
+      ) {
+        const acceptedMessage = await GetCompanySetting(
+          companyId,
+          "ticketAcceptedMessage",
+          ""
+        );
+
+        if (acceptedMessage) {
+          const user = await User.findByPk(userId);
+          await sendFormattedMessage(acceptedMessage, ticket, user);
+        }
+      }
+    }
 
     if (justClose && status === "closed") {
       io.to(`company-${companyId}-mainchannel`).emit(
