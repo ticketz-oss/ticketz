@@ -40,6 +40,7 @@
  */
 
 import { Server as SocketIO } from "socket.io";
+import eiows from 'eiows';
 import { instrument } from "@socket.io/admin-ui";
 import { Server } from "http";
 import { verify } from "jsonwebtoken";
@@ -56,9 +57,18 @@ let io: SocketIO;
 
 export const initIO = (httpServer: Server): SocketIO => {
   io = new SocketIO(httpServer, {
+    wsEngine: eiows.Server,
+    pingTimeout: 10000,
+    pingInterval: 5000,
+    transports: ['websocket'],
+    allowUpgrades: false,
+    perMessageDeflate: {
+      threshold: 32768
+    },
     cors: {
-      origin: process.env.FRONTEND_URL
-    }
+      credentials: true,
+      origin: process.env.FRONTEND_URL,
+    },
   });
 
   if (process.env.SOCKET_ADMIN && JSON.parse(process.env.SOCKET_ADMIN)) {
