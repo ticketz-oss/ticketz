@@ -179,8 +179,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
     return () => {
       isMounted.current = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [ticket]);
 
   const handleCloseTicket = async (id) => {
     try {
