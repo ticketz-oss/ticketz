@@ -1208,8 +1208,11 @@ const verifyQueue = async (
   };
 
   const chatbotAutoExit =
-    (await GetCompanySetting(ticket.companyId, "chatbotAutoExit")) ===
-    "enabled";
+    (await GetCompanySetting(
+      ticket.companyId,
+      "chatbotAutoExit",
+      "disabled"
+    )) === "enabled";
 
   if (!ignoreMessage && choosenQueue) {
     await startQueue(wbot, ticket, choosenQueue);
