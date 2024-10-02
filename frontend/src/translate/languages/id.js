@@ -786,6 +786,13 @@ const messages = {
         FileDownloadLimit: {
           title: "Batas unduhan file (MB)",
         },
+        "messageVisibility": {
+          "title": "Visibilitas Pesan",
+          "options": {
+            "respectMessageQueue": "Hormati Antrian Pesan",
+            "respectTicketQueue": "Hormati Antrian Tiket"
+          }
+        },
         WelcomeGreeting: {
           greetings: "halo",
           welcome: "selamat datang di",

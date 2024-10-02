@@ -760,7 +760,14 @@ const messages = {
 			},
 			FileDownloadLimit: {
 				title:"Limite de Download de arquivos (MB)",
-			},
+      },
+      "messageVisibility": {
+        "title": "Visibilidade da mensagem",
+        "options": {
+          "respectMessageQueue": "Respeitar fila da mensagem",
+          "respectTicketQueue": "Respeitar fila do ticket"
+        }
+      },
 			WelcomeGreeting: {
 				greetings: "Olá",
 				welcome: "Seja bem-vindo a",

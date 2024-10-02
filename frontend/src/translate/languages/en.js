@@ -752,7 +752,14 @@ const messages = {
 				FileDownloadLimit: {
 					title:"File Download Limit (MB)",
 				},
-				WelcomeGreeting: {
+        "messageVisibility": {
+          "title": "Message Visibility",
+          "options": {
+            "respectMessageQueue": "Respect queue of message",
+            "respectTicketQueue": "Respect queue of ticket"
+          }
+        },
+        WelcomeGreeting: {
 					greetings: "Hello",
 					welcome: "Welcome to",
 					expirationTime: "Active until",
