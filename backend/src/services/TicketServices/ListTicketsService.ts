@@ -55,7 +55,8 @@ const ListTicketsService = async ({
 
   let whereCondition: Filterable["where"] = {
     [Op.or]: orCondition,
-    queueId: { [Op.or]: [queueIds, null] }
+    queueId:
+      user?.profile === "admin" ? { [Op.or]: [queueIds, null] } : queueIds
   };
 
   if (!status || status === "closed") {
