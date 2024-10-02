@@ -1,5 +1,4 @@
 import moment from "moment";
-import * as Sentry from "@sentry/node";
 import { isNil } from "lodash";
 import CheckContactOpenTickets from "../../helpers/CheckContactOpenTickets";
 import SetTicketMessagesAsRead from "../../helpers/SetTicketMessagesAsRead";
@@ -77,7 +76,8 @@ const UpdateTicketService = async ({
   companyId,
   reqUserId
 }: Request): Promise<Response> => {
-  try {
+  // eslint-disable-next-line no-lone-blocks
+  {
     if (!companyId && !tokenData) {
       throw new Error("Need companyId or tokenData");
     }
@@ -100,6 +100,7 @@ const UpdateTicketService = async ({
     );
 
     let ticket = await ShowTicketService(ticketId, companyId);
+    const isGroup = ticket.contact?.isGroup || ticket.isGroup;
 
     if (tokenData && ticket.status !== "pending") {
       if (
@@ -128,6 +129,14 @@ const UpdateTicketService = async ({
 
     const requestUser = reqUserId ? await User.findByPk(reqUserId) : null;
 
+    // only admin can accept pending tickets that have no queue
+    if (!oldQueueId && userId && oldStatus === "pending" && status === "open") {
+      const acceptUser = await User.findByPk(userId);
+      if (acceptUser.profile !== "admin") {
+        throw new AppError("ERR_NO_PERMISSION", 403);
+      }
+    }
+
     if (oldStatus === "closed") {
       await CheckContactOpenTickets(ticket.contact.id, ticket.queueId);
       chatbot = null;
@@ -143,7 +152,7 @@ const UpdateTicketService = async ({
       if (
         userRatingSetting === "enabled" &&
         ticket.userId &&
-        !ticket.contact.isGroup &&
+        !isGroup &&
         !ticket.contact.disableBot
       ) {
         if (ticketTraking.ratingAt == null && !justClose) {
@@ -198,14 +207,14 @@ const UpdateTicketService = async ({
       }
 
       if (
-        !ticket.contact.isGroup &&
+        !isGroup &&
         !ticket.contact.disableBot &&
         !isNil(complationMessage) &&
         complationMessage !== ""
       ) {
         const body = `\u200e${complationMessage}`;
 
-        if (ticket.channel === "whatsapp" && !ticket.isGroup) {
+        if (ticket.channel === "whatsapp" && !isGroup) {
           const sentMessage = await SendWhatsAppMessage({ body, ticket });
 
           await verifyMessage(sentMessage, ticket, ticket.contact);
@@ -397,7 +406,7 @@ const UpdateTicketService = async ({
 
     await ticketTraking.save();
 
-    if (!ticket.contact.isGroup && !ticket.contact.disableBot && !fromChatbot) {
+    if (!isGroup && !ticket.contact.disableBot && !fromChatbot) {
       if (oldQueueId && oldQueueId !== ticket.queueId) {
         const whatsapp = await ShowWhatsAppService(
           ticket.whatsappId,
@@ -428,8 +437,8 @@ const UpdateTicketService = async ({
         );
 
         if (acceptedMessage) {
-          const user = await User.findByPk(userId);
-          await sendFormattedMessage(acceptedMessage, ticket, user);
+          const acceptUser = await User.findByPk(userId);
+          await sendFormattedMessage(acceptedMessage, ticket, acceptUser);
         }
       }
     }
@@ -465,10 +474,7 @@ const UpdateTicketService = async ({
       });
 
     return { ticket, oldStatus, oldUserId };
-  } catch (err) {
-    Sentry.captureException(err);
   }
-  return null;
 };
 
 export default UpdateTicketService;
