@@ -105,6 +105,9 @@ export default function Options(props) {
   const [CheckMsgIsGroup, setCheckMsgIsGroupType] = useState("enabled");
   const [apiToken, setApiToken] = useState("");
   const [downloadLimit, setDownloadLimit] = useState("15");
+  
+  const [messageVisibility, setMessageVisibility] = useState("Respect Message Queue");
+
   const [transferToNewTicket, setTransferToNewTicket] = useState("connection");
   const [restrictTransferConnection, setRestrictTransferConnection] = useState("connection");
   const [noQueueTimeout, setNoQueueTimeout] = useState("0");
@@ -194,6 +197,9 @@ export default function Options(props) {
 
       const downloadLimit = settings.find((s) => s.key === "downloadLimit");
       setDownloadLimit(downloadLimit?.value || "");
+      
+      const messageVisibility = settings.find((s) => s.key === "messageVisibility");
+      setMessageVisibility(messageVisibility?.value || "message");
 
       const restrictTransferConnection = settings.find((s) => s.key === "restrictTransferConnection");
       setRestrictTransferConnection(restrictTransferConnection?.value || "connection");
@@ -697,6 +703,24 @@ export default function Options(props) {
             <FormHelperText>
               {loadingQuickMessages && "Atualizando..."}
             </FormHelperText>
+          </FormControl>
+        </Grid>
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="message-visibility-label">
+              {i18n.t("settings.messageVisibility.title")}
+            </InputLabel>
+            <Select
+              labelId="message-visibility-label"
+              value={messageVisibility}
+              onChange={async (e) => {
+                await handleSetting("messageVisibility", e.target.value, setMessageVisibility);
+              }}
+            >
+              <MenuItem value={"message"}>{i18n.t("settings.messageVisibility.options.respectMessageQueue")}</MenuItem>
+              <MenuItem value={"ticket"}>{i18n.t("settings.messageVisibility.options.respectTicketQueue")}</MenuItem>
+            </Select>
           </FormControl>
         </Grid>
 
