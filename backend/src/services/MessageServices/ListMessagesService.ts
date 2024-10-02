@@ -180,9 +180,6 @@ const ListMessagesService = async ({
       {
         model: OldMessage,
         as: "oldMessages",
-        where: {
-          ticketId: ticket.id
-        },
         required: false
       },
       {
