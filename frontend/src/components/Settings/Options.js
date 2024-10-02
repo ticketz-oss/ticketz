@@ -270,6 +270,17 @@ export default function Options(props) {
     setLoadingDownloadLimit(false);
   }
 
+  async function handleSetting(key, value, setter = null) {
+    if (setter) {
+      setter(value);
+    }
+    await update({
+      key,
+      value,
+    });
+    toast.success("Operação atualizada com sucesso.");
+  }
+
   async function generateApiToken() {
     const newToken = generateSecureToken(32);
     setApiToken(newToken);
