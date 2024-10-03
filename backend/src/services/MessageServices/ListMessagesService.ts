@@ -148,7 +148,11 @@ const ListMessagesService = async ({
     };
   }
 
-  if (queues.length > 0) {
+  if (
+    queues.length > 0 &&
+    (await GetCompanySetting(companyId, "messageVisibility", "message")) ===
+      "message"
+  ) {
     // eslint-disable-next-line dot-notation
     options.where["queueId"] = {
       [Op.or]: {
@@ -180,9 +184,6 @@ const ListMessagesService = async ({
       {
         model: OldMessage,
         as: "oldMessages",
-        where: {
-          ticketId: ticket.id
-        },
         required: false
       },
       {

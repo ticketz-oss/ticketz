@@ -763,6 +763,13 @@ const messages = {
 				FileDownloadLimit: {
 					title:"File Download Limit (MB)",
 				},
+        "messageVisibility": {
+          "title": "Message Visibility",
+          "options": {
+            "respectMessageQueue": "Respect queue of message",
+            "respectTicketQueue": "Respect queue of ticket"
+          }
+        },
 				GracePeriod: {
           title: "Subscription Grace Period (days)",
         },

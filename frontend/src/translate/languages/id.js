@@ -768,6 +768,13 @@ const messages = {
         FileDownloadLimit: {
           title: "Batas unduhan file (MB)",
         },
+        "messageVisibility": {
+          "title": "Visibilitas Pesan",
+          "options": {
+            "respectMessageQueue": "Hormati Antrian Pesan",
+            "respectTicketQueue": "Hormati Antrian Tiket"
+          }
+        },
         GracePeriod: {
           title: "Periode penundaan langganan berakhir (hari)",
         },
