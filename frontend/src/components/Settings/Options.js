@@ -918,7 +918,9 @@ export default function Options(props) {
 
           )}
         />
-
+      </Grid>
+        
+      <Grid spacing={3} container>
         <Grid xs={12} sm={6} md={6} item>
           <FormControl className={classes.selectContainer}>
             <TextField
