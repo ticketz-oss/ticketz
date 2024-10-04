@@ -14,7 +14,8 @@
     "pretest": "NODE_ENV=test sequelize db:migrate && NODE_ENV=test sequelize db:seed:all",
     "test": "NODE_ENV=test jest",
     "posttest": "NODE_ENV=test sequelize db:migrate:undo:all",
-    "lint": "eslint src/**/*.ts"
+    "lint": "eslint src/**/*.ts",
+    "mark-seeds": "node dist/database/markSeedsAsExecuted.js"
   },
   "author": "",
   "license": "MIT",
