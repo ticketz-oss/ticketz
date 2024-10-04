@@ -19,6 +19,7 @@ COPY --from=build --parents \
   /usr/src/app/./dist \
   /usr/src/app/./node_modules \
   /usr/src/app/./package.json \
+  /usr/src/app/./scripts \
   .
 
 ENV NODE_ENV=production
