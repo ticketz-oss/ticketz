@@ -71,4 +71,15 @@ for input_file in "$INPUT_DIR"/*.csv; do
         echo "Error importing data from $input_file into table '$table'."
     fi
 done
+
+echo "Clearing Whatsapp Sessions"
+PGPASSWORD="${DB_PASS}" psql -h "${DB_HOST}" -U "${DB_USER}" -d "${DB_NAME}" -c "UPDATE \"Whatsapps\" SET session='', status='CLOSED'" &> /tmp/clearwhatsapps.log
+
+if [ $? -gt 0 ]; then
+    echo "Error clearing Whatsapp sessions:"
+    cat /tmp/clearwhatsapps.log
+    exit 100
+fi
+    
+
 exit 1
