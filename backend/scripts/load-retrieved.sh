@@ -73,7 +73,7 @@ for input_file in "$INPUT_DIR"/*.csv; do
 done
 
 echo "Clearing Whatsapp Sessions"
-PGPASSWORD="${DB_PASS}" psql -h "${DB_HOST}" -U "${DB_USER}" -d "${DB_NAME}" -c "UPDATE \"Whatsapps\" SET session='', status='CLOSED'" &> /tmp/clearwhatsapps.log
+PGPASSWORD="${DB_PASS}" psql -h "${DB_HOST}" -U "${DB_USER}" -d "${DB_NAME}" -c "UPDATE \"Whatsapps\" SET session='', status='DISCONNECTED'" &> /tmp/clearwhatsapps.log
 
 if [ $? -gt 0 ]; then
     echo "Error clearing Whatsapp sessions:"
