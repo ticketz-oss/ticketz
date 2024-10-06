@@ -389,7 +389,7 @@ const CustomInput = (props) => {
     if (
       isString(inputMessage) &&
       !isEmpty(inputMessage) &&
-      inputMessage.length > 1
+      inputMessage.length
     ) {
       const firstWord = inputMessage.charAt(0);
       setPopupOpen(firstWord.indexOf("/") > -1);
