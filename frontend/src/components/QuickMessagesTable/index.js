@@ -43,6 +43,7 @@ function QuickMessagesTable(props) {
                 <TableRow key={message.id}>
                     <TableCell align="center">{message.shortcode}</TableCell>
                     <TableCell align="left">{message.message}</TableCell>
+                    <TableCell align="left">{message.mediaName}</TableCell>
                     { !readOnly ? (
                         <TableCell align="center">
                             <IconButton
@@ -71,6 +72,7 @@ function QuickMessagesTable(props) {
                 <TableRow>
                     <TableCell align="center">Atalho</TableCell>
                     <TableCell align="left">Mensagem</TableCell>
+                    <TableCell align="left">Mídia</TableCell>
                     { !readOnly ? (
                         <TableCell align="center">Ações</TableCell>
                     ) : null}
