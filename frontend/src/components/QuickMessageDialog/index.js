@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { Button, TextField, DialogContent, DialogActions, Grid } from '@material-ui/core';
 import PropType from 'prop-types'
 import Dialog from '../Dialog';
@@ -8,6 +8,9 @@ import { i18n } from '../../translate/i18n';
 import { makeStyles } from '@material-ui/core/styles';
 import ButtonWithSpinner from '../ButtonWithSpinner';
 import { AuthContext } from "../../context/Auth/AuthContext";
+import AttachFileIcon from "@material-ui/icons/AttachFile";
+import DeleteIcon from "@material-ui/icons/Delete";
+
 
 import { isNil, isObject, has, get } from 'lodash';
 
@@ -47,7 +50,7 @@ function QuickMessageDialog(props) {
     const initialMessage = {
         id: null,
         shortcode: '',
-        message: ''
+        message: '',
     };
 
     const { modalOpen, saveMessage, editMessage, onClose, messageSelected } = props;
@@ -55,11 +58,15 @@ function QuickMessageDialog(props) {
     const [message, setMessage] = useState(initialMessage);
     const [loading, setLoading] = useState(false);
 
+    const [selectedFile, setSelectedFile] = useState(null);
+    const fileInput = useRef(null);
+
     const { user } = useContext(AuthContext);
 
     useEffect(() => {
         verifyAndSetMessage()
         setDialogOpen(modalOpen)
+        setSelectedFile(null)
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [modalOpen])
 
@@ -86,16 +93,27 @@ function QuickMessageDialog(props) {
         setLoading(false)
     }
 
+    const handleFileSelect = (event) => {
+        setSelectedFile(event.target.files[0]);
+    }
+
+    const handleUploadClick = () => {
+        fileInput.current.value = null;
+        fileInput.current.click();
+    }
+
     const handleSave = async (values) => {
         if (messageSelectedIsValid()) {
             editMessage({
                 ...messageSelected,
                 ...values,
+                file: selectedFile,
                 userId: user.id
             });
         } else {
             saveMessage({
                 ...values,
+                file: selectedFile,
                 userId: user.id
             });
         }
@@ -146,6 +164,30 @@ function QuickMessageDialog(props) {
                                         helperText={touched.message && errors.message}
                                         variant="outlined"
                                     />
+                                </Grid>
+                                <Grid item>
+                                  { !!selectedFile ||
+                                    <>
+                                      <Button onClick={handleUploadClick} color="primary">
+                                        <AttachFileIcon />
+                                      </Button>
+                                      <span>{messageSelected?.mediaName || ""}</span>
+                                    </>
+                                  }
+                                  { !!selectedFile &&
+                                    <>
+                                      <Button onClick={() => setSelectedFile(null)} color="primary">
+                                        <DeleteIcon />
+                                      </Button>
+                                      <span>{selectedFile.name || ""}</span>
+                                    </>
+                                  }
+                                  <input
+                                      type="file"
+                                      ref={fileInput}
+                                      style={{ display: 'none' }}
+                                      onChange={handleFileSelect}
+                                  />
                                 </Grid>
                             </Grid>
                         </DialogContent>
