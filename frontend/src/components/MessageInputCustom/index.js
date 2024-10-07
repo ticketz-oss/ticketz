@@ -197,8 +197,7 @@ const useStyles = makeStyles((theme) => ({
   },
   
   attachmentInfo: {
-    height: 48,
-    paddingTop: 7,
+    minHeight: 48,
     width: "100%",
     textAlign: "right",
     paddingRight: 72,
@@ -618,6 +617,8 @@ const MessageInputCustom = (props) => {
     const formData = new FormData();
     formData.append("fromMe", true);
 
+    inputMessage && formData.append("body", inputMessage);
+
     medias.forEach(async (media, idx) => {
 
       const file = media;
@@ -634,7 +635,6 @@ const MessageInputCustom = (props) => {
             //formData.append('file', result, result.name);
 
             formData.append("medias", media);
-            formData.append("body", inputMessage || media.name);
           },
           error(err) {
             alert('erro')
@@ -644,7 +644,6 @@ const MessageInputCustom = (props) => {
         });
       } else {
         formData.append("medias", media);
-        formData.append("body", inputMessage || media.name);
       }
 
 
@@ -879,8 +878,15 @@ const MessageInputCustom = (props) => {
         {(replyingMessage && renderReplyingMessage(replyingMessage)) || (editingMessage && renderReplyingMessage(editingMessage))}
         { ( medias.length > 0 || quickMessageAttachment ) &&
           <div className={classes.attachmentInfo}>
-            <AttachmentIcon className={classes.verticalMiddle} />
-            <div className={classes.verticalMiddle}>{ quickMessageAttachment?.mediaName || medias[0]?.name || "attached file"}</div>
+            {
+              medias.map((media) => {
+                return <div className={classes.verticalMiddle}><AttachmentIcon />{ media.name || "attached file"}</div>
+              })
+            }
+            {
+              quickMessageAttachment &&
+                <div className={classes.verticalMiddle}><AttachmentIcon />{quickMessageAttachment?.mediaName || "attached file"}</div>
+            }
             {loading ? (
               <CircularProgress className={classes.attachmentLoading} variant={percentLoading < 5 ? "indeterminate" : "determinate"} value={percentLoading} />
             ) : (
