@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { isArray } from "lodash";
 import AppError from "../errors/AppError";
 
 import SetTicketMessagesAsRead from "../helpers/SetTicketMessagesAsRead";
@@ -102,9 +103,13 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   if (medias) {
     if (channel === "whatsapp") {
-      const caption = formatBody(body, ticket.contact, ticket, user);
+      let first = body && true;
       await Promise.all(
         medias.map(async (media: Express.Multer.File) => {
+          const caption = first
+            ? formatBody(body, ticket.contact, ticket, user)
+            : null;
+          first = false;
           const message = await SendWhatsAppMedia({
             media,
             ticket,
