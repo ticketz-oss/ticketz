@@ -199,6 +199,9 @@ const useStyles = makeStyles((theme) => ({
     marginTop: 5,
     boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000",
     transition: 'background-color 0.5s ease-in-out',
+    borderWidth: 2,
+    borderColor: theme.mode === 'light' ? "#000" : "#fff",
+    borderStyle: "solid",
   },
 
   quotedContainerRight: {
