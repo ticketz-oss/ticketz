@@ -476,7 +476,9 @@ const CustomInput = (props) => {
         onChange={(event, opt) => {
           if (isObject(opt) && has(opt, "value")) {
             console.log(opt);
-            setQuickMessageAttachment({ id: opt.id, mediaName: opt.mediaName });
+            setQuickMessageAttachment(
+              opt.mediaName ? { id: opt.id, mediaName: opt.mediaName } : null
+            );
             setMedias([]);
             setInputMessage(opt.value);
             setTimeout(() => {
