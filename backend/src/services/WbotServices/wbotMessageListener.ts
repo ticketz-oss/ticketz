@@ -53,7 +53,7 @@ import User from "../../models/User";
 import Setting from "../../models/Setting";
 import { cacheLayer } from "../../libs/cache";
 import { debounce } from "../../helpers/Debounce";
-import { getMessageOptions } from "./SendWhatsAppMedia";
+import { getMessageFileOptions } from "./SendWhatsAppMedia";
 import { makeRandomId } from "../../helpers/MakeRandomId";
 import CheckSettings, { GetCompanySetting } from "../../helpers/CheckSettings";
 import Whatsapp from "../../models/Whatsapp";
@@ -1034,7 +1034,7 @@ const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue) => {
 
   if (queue.mediaPath !== null && queue.mediaPath !== "") {
     const filePath = path.resolve("public", queue.mediaPath);
-    const optionsMsg = await getMessageOptions(queue.mediaName, filePath);
+    const optionsMsg = await getMessageFileOptions(queue.mediaName, filePath);
     const sentMediaMessage = await wbot.sendMessage(
       `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
       { ...optionsMsg }
@@ -1421,7 +1421,7 @@ const handleChartbot = async (
 
     if (currentOption.mediaPath !== null && currentOption.mediaPath !== "") {
       const filePath = path.resolve("public", currentOption.mediaPath);
-      const optionsMsg = await getMessageOptions(
+      const optionsMsg = await getMessageFileOptions(
         currentOption.mediaName,
         filePath
       );

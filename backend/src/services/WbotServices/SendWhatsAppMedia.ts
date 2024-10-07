@@ -13,7 +13,7 @@ import Ticket from "../../models/Ticket";
 interface Request {
   media: Express.Multer.File;
   ticket: Ticket;
-  body?: string;
+  caption?: string;
   ptt?: boolean;
 }
 
@@ -49,7 +49,7 @@ const processAudioFile = async (audio: string): Promise<string> => {
   });
 };
 
-export const getMessageOptions = async (
+export const getMessageFileOptions = async (
   fileName: string,
   pathMedia: string
 ): Promise<any> => {
@@ -117,7 +117,7 @@ export const getMessageOptions = async (
 const SendWhatsAppMedia = async ({
   media,
   ticket,
-  body,
+  caption,
   ptt
 }: Request): Promise<WAMessage> => {
   try {
@@ -140,7 +140,7 @@ const SendWhatsAppMedia = async ({
     if (typeMessage === "video") {
       options = {
         video: fs.readFileSync(pathMedia),
-        caption: body,
+        caption,
         fileName: originalNameUtf8
         // gifPlayback: true
       };
@@ -153,21 +153,21 @@ const SendWhatsAppMedia = async ({
     } else if (typeMessage === "document" || typeMessage === "text") {
       options = {
         document: fs.readFileSync(pathMedia),
-        caption: body,
+        caption,
         fileName: originalNameUtf8,
         mimetype: media.mimetype
       };
     } else if (typeMessage === "application") {
       options = {
         document: fs.readFileSync(pathMedia),
-        caption: body,
+        caption,
         fileName: originalNameUtf8,
         mimetype: media.mimetype
       };
     } else {
       options = {
         image: fs.readFileSync(pathMedia),
-        caption: body
+        caption
       };
     }
 

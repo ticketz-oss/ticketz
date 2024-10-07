@@ -3,7 +3,7 @@ import { proto } from "@whiskeysockets/baileys";
 import Whatsapp from "../models/Whatsapp";
 import GetWhatsappWbot from "./GetWhatsappWbot";
 
-import { getMessageOptions } from "../services/WbotServices/SendWhatsAppMedia";
+import { getMessageFileOptions } from "../services/WbotServices/SendWhatsAppMedia";
 
 export type MessageData = {
   number: number | string;
@@ -25,7 +25,7 @@ export const SendMessage = async (
     const body = `\u200e${messageData.body}`;
 
     if (messageData.mediaPath) {
-      const options = await getMessageOptions(body, messageData.mediaPath);
+      const options = await getMessageFileOptions(body, messageData.mediaPath);
       if (options) {
         message = await wbot.sendMessage(chatId, {
           ...options
