@@ -26,9 +26,6 @@ import {
   verifyMediaMessage,
   verifyMessage
 } from "../services/WbotServices/wbotMessageListener";
-import CreateMessageService, {
-  MessageData as CreateMessageData
-} from "../services/MessageServices/CreateMessageService";
 import { CreateInternalMessageService } from "../services/MessageServices/CreateInternalMessageService";
 import QuickMessage from "../models/QuickMessage";
 import formatBody from "../helpers/Mustache";
