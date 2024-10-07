@@ -11,7 +11,9 @@ export default {
   storage: multer.diskStorage({
     destination: publicFolder,
     filename(req, file, cb) {
-      const fileName = new Date().getTime() + path.extname(file.originalname);
+      const fileName = `${new Date().getTime()} ${path.basename(
+        file.originalname
+      )}`;
 
       return cb(null, fileName);
     }

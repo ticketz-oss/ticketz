@@ -19,7 +19,7 @@ import CampaignSetting from "./models/CampaignSetting";
 import CampaignShipping from "./models/CampaignShipping";
 import GetWhatsappWbot from "./helpers/GetWhatsappWbot";
 import sequelize from "./database";
-import { getMessageOptions } from "./services/WbotServices/SendWhatsAppMedia";
+import { getMessageFileOptions } from "./services/WbotServices/SendWhatsAppMedia";
 import { getIO } from "./libs/socket";
 import User from "./models/User";
 import Company from "./models/Company";
@@ -572,7 +572,10 @@ async function handleDispatchCampaign(job) {
       });
       if (campaign.mediaPath) {
         const filePath = path.resolve("public", campaign.mediaPath);
-        const options = await getMessageOptions(campaign.mediaName, filePath);
+        const options = await getMessageFileOptions(
+          campaign.mediaName,
+          filePath
+        );
         if (Object.keys(options).length) {
           await wbot.sendMessage(chatId, { ...options });
         }

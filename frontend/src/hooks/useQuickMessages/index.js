@@ -3,19 +3,39 @@ import api from "../../services/api";
 const useQuickMessages = () => {
 
     const save = async (data) => {
+        const formData = new FormData();
+        Object.keys(data).forEach(key => {
+          if (data[key]) {
+            formData.append(key, data[key]);
+          }
+        });
+      
         const { data: responseData } = await api.request({
             url: '/quick-messages',
             method: 'POST',
-            data
+            data: formData,
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
         });
         return responseData;
     }
 
     const update = async (data) => {
+        const formData = new FormData();
+        Object.keys(data).forEach(key => {
+          if (data[key]) {
+            formData.append(key, data[key]);
+          }
+        });
+      
         const { data: responseData } = await api.request({
             url: `/quick-messages/${data.id}`,
             method: 'PUT',
-            data
+            data: formData,
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
         });
         return responseData;
     }

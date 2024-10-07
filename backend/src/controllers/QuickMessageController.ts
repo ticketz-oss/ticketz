@@ -1,5 +1,6 @@
 import * as Yup from "yup";
 import { Request, Response } from "express";
+import { head } from "lodash";
 import { getIO } from "../libs/socket";
 
 import ListService from "../services/QuickMessageService/ListService";
@@ -39,9 +40,22 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   return res.json({ records, count, hasMore });
 };
 
+type MediaData = {
+  mediaName?: string;
+  mediaPath?: string;
+};
+
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.user;
   const data = req.body as StoreData;
+  const files = req.files as Express.Multer.File[];
+  const file = head(files);
+  const mediaData: MediaData = {};
+
+  if (file) {
+    mediaData.mediaName = file.originalname;
+    mediaData.mediaPath = file.path;
+  }
 
   const schema = Yup.object().shape({
     shortcode: Yup.string().required(),
@@ -56,6 +70,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   const record = await CreateService({
     ...data,
+    ...mediaData,
     companyId,
     userId: Number.parseInt(req.user.id, 10)
   });
@@ -83,6 +98,14 @@ export const update = async (
 ): Promise<Response> => {
   const data = req.body as StoreData;
   const { companyId } = req.user;
+  const files = req.files as Express.Multer.File[];
+  const file = head(files);
+  const mediaData: MediaData = {};
+
+  if (file) {
+    mediaData.mediaName = file.originalname;
+    mediaData.mediaPath = file.path;
+  }
 
   const schema = Yup.object().shape({
     shortcode: Yup.string().required(),
@@ -99,8 +122,9 @@ export const update = async (
 
   const record = await UpdateService({
     ...data,
+    ...mediaData,
     userId: Number.parseInt(req.user.id, 10),
-    id: Number.parseInt(id, 10),
+    id: Number.parseInt(id, 10)
   });
 
   const io = getIO();
@@ -134,7 +158,10 @@ export const findList = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const records: QuickMessage[] = await FindService({userId: parseInt(req.user.id,10), companyId: req.user.companyId});
+  const records: QuickMessage[] = await FindService({
+    userId: parseInt(req.user.id, 10),
+    companyId: req.user.companyId
+  });
 
   return res.status(200).json(records);
 };

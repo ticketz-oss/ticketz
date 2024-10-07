@@ -11,7 +11,10 @@ import Whatsapp from "../models/Whatsapp";
 import ListMessagesService from "../services/MessageServices/ListMessagesService";
 import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import DeleteWhatsAppMessage from "../services/WbotServices/DeleteWhatsAppMessage";
-import SendWhatsAppMedia from "../services/WbotServices/SendWhatsAppMedia";
+import SendWhatsAppMedia, {
+  getMessageFileOptions,
+  sendWhatsappFile
+} from "../services/WbotServices/SendWhatsAppMedia";
 import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import CheckContactNumber from "../services/WbotServices/CheckNumber";
 import EditWhatsAppMessage from "../services/WbotServices/EditWhatsAppMessage";
@@ -23,10 +26,9 @@ import {
   verifyMediaMessage,
   verifyMessage
 } from "../services/WbotServices/wbotMessageListener";
-import CreateMessageService, {
-  MessageData as CreateMessageData
-} from "../services/MessageServices/CreateMessageService";
 import { CreateInternalMessageService } from "../services/MessageServices/CreateInternalMessageService";
+import QuickMessage from "../models/QuickMessage";
+import formatBody from "../helpers/Mustache";
 
 type IndexQuery = {
   pageNumber: string;
@@ -40,6 +42,7 @@ type MessageData = {
   number?: string;
   internal?: boolean;
   ptt?: boolean;
+  quickMessageMediaId?: number;
 };
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
@@ -75,12 +78,15 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const { ticketId } = req.params;
-  const { body, quotedMsg, internal, ptt }: MessageData = req.body;
+  const { body, quotedMsg, internal, ptt, quickMessageMediaId }: MessageData =
+    req.body;
   const medias = req.files as Express.Multer.File[];
   const { companyId } = req.user;
 
   const ticket = await ShowTicketService(ticketId, companyId);
   const { channel } = ticket;
+  const user = await User.findByPk(Number(req.user.id));
+
   if (channel === "whatsapp") {
     SetTicketMessagesAsRead(ticket);
   }
@@ -96,9 +102,15 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   if (medias) {
     if (channel === "whatsapp") {
+      const caption = formatBody(body, ticket.contact, ticket, user);
       await Promise.all(
         medias.map(async (media: Express.Multer.File) => {
-          const message = await SendWhatsAppMedia({ media, ticket, ptt });
+          const message = await SendWhatsAppMedia({
+            media,
+            ticket,
+            caption,
+            ptt
+          });
           verifyMediaMessage(
             message,
             ticket,
@@ -117,6 +129,31 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
         })
       );
     }
+  } else if (quickMessageMediaId) {
+    const quickMessage = await QuickMessage.findByPk(quickMessageMediaId);
+
+    if (!quickMessage) {
+      throw new AppError("ERR_UNKNOWN", 404);
+    }
+
+    const { mediaPath, mediaName } = quickMessage;
+
+    const fileOptions = await getMessageFileOptions(
+      mediaName || "file",
+      mediaPath
+    );
+
+    const caption = formatBody(body, ticket.contact, ticket, user);
+
+    const msgFileOptions = { ...fileOptions, caption };
+    const message = await sendWhatsappFile(ticket, msgFileOptions);
+    verifyMediaMessage(
+      message,
+      ticket,
+      ticket.contact,
+      null,
+      Number(req.user.id) || null
+    );
   } else {
     if (["facebook", "instagram"].includes(channel)) {
       console.log(
@@ -126,7 +163,12 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     }
 
     if (channel === "whatsapp") {
-      const message = await SendWhatsAppMessage({ body, ticket, quotedMsg });
+      const message = await SendWhatsAppMessage({
+        body,
+        ticket,
+        quotedMsg,
+        user
+      });
       verifyMessage(
         message,
         ticket,

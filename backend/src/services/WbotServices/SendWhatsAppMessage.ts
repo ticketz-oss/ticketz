@@ -6,17 +6,20 @@ import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
 
 import formatBody from "../../helpers/Mustache";
+import User from "../../models/User";
 
 interface Request {
   body: string;
   ticket: Ticket;
   quotedMsg?: Message;
+  user?: User;
 }
 
 const SendWhatsAppMessage = async ({
   body,
   ticket,
-  quotedMsg
+  quotedMsg,
+  user
 }: Request): Promise<WAMessage> => {
   let options = {};
 
@@ -49,7 +52,7 @@ const SendWhatsAppMessage = async ({
   }
 
   try {
-    const formattedBody = formatBody(body, ticket.contact);
+    const formattedBody = formatBody(body, ticket.contact, ticket, user);
     const sentMessage = await wbot.sendMessage(
       number,
       {

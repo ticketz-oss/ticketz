@@ -53,7 +53,7 @@ import User from "../../models/User";
 import Setting from "../../models/Setting";
 import { cacheLayer } from "../../libs/cache";
 import { debounce } from "../../helpers/Debounce";
-import { getMessageOptions } from "./SendWhatsAppMedia";
+import { getMessageFileOptions } from "./SendWhatsAppMedia";
 import { makeRandomId } from "../../helpers/MakeRandomId";
 import CheckSettings, { GetCompanySetting } from "../../helpers/CheckSettings";
 import Whatsapp from "../../models/Whatsapp";
@@ -943,7 +943,7 @@ const sendMenu = async (
     ];
 
     const listMessage = {
-      text: formatBody(`\u200e${message}`, ticket.contact),
+      text: formatBody(`\u200e${message}`, ticket.contact, ticket),
       buttonText: "Escolha uma opção",
       sections
     };
@@ -972,7 +972,7 @@ const sendMenu = async (
     });
 
     const buttonMessage = {
-      text: formatBody(`\u200e${message}`, ticket.contact),
+      text: formatBody(`\u200e${message}`, ticket.contact, ticket),
       buttons,
       headerType: 4
     };
@@ -994,7 +994,7 @@ const sendMenu = async (
     options += "\n*[ # ]* - Voltar Menu Inicial";
 
     const textMessage = {
-      text: formatBody(`\u200e${message}\n\n${options}`, ticket.contact)
+      text: formatBody(`\u200e${message}\n\n${options}`, ticket.contact, ticket)
     };
 
     const sendMsg = await wbot.sendMessage(
@@ -1038,7 +1038,7 @@ const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue) => {
 
   if (queue.mediaPath !== null && queue.mediaPath !== "") {
     const filePath = path.resolve("public", queue.mediaPath);
-    const optionsMsg = await getMessageOptions(queue.mediaName, filePath);
+    const optionsMsg = await getMessageFileOptions(queue.mediaName, filePath);
     const sentMediaMessage = await wbot.sendMessage(
       `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
       { ...optionsMsg }
@@ -1070,7 +1070,8 @@ const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue) => {
         "Estamos fora do horário de expediente";
       const body = formatBody(
         `${outOfHoursMessage}\n\n*[ # ]* - Voltar ao Menu Principal`,
-        ticket.contact
+        ticket.contact,
+        ticket
       );
       const sentMessage = await wbot.sendMessage(
         `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
@@ -1090,7 +1091,8 @@ const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue) => {
     if (queue.greetingMessage?.trim()) {
       const body = formatBody(
         `\u200e${queue.greetingMessage.trim()}`,
-        ticket.contact
+        ticket.contact,
+        ticket
       );
       const sentMessage = await wbot.sendMessage(
         `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
@@ -1151,7 +1153,7 @@ const verifyQueue = async (
     ];
 
     const listMessage = {
-      text: formatBody(`\u200e${greetingMessage}`, contact),
+      text: formatBody(`\u200e${greetingMessage}`, contact, ticket),
       buttonText: "Escolha uma opção",
       sections
     };
@@ -1175,7 +1177,7 @@ const verifyQueue = async (
     });
 
     const buttonMessage = {
-      text: formatBody(`\u200e${greetingMessage}`, contact),
+      text: formatBody(`\u200e${greetingMessage}`, contact, ticket),
       buttons,
       headerType: 4
     };
@@ -1196,7 +1198,11 @@ const verifyQueue = async (
     });
 
     const textMessage = {
-      text: formatBody(`\u200e${greetingMessage}\n\n${options}`, contact)
+      text: formatBody(
+        `\u200e${greetingMessage}\n\n${options}`,
+        contact,
+        ticket
+      )
     };
 
     const sendMsg = await wbot.sendMessage(
@@ -1220,7 +1226,11 @@ const verifyQueue = async (
     await ticket.update({ chatbot: false });
     const whatsapp = await Whatsapp.findByPk(ticket.whatsappId);
     if (whatsapp.transferMessage) {
-      const body = formatBody(`\u200e${whatsapp.transferMessage}`, contact);
+      const body = formatBody(
+        `\u200e${whatsapp.transferMessage}`,
+        contact,
+        ticket
+      );
       await SendWhatsAppMessage({ body, ticket });
     }
   } else {
@@ -1393,7 +1403,11 @@ const handleChartbot = async (
       const whatsapp = await Whatsapp.findByPk(ticket.whatsappId);
       const contact = await Contact.findByPk(ticket.contactId);
       if (whatsapp.transferMessage) {
-        const body = formatBody(`\u200e${whatsapp.transferMessage}`, contact);
+        const body = formatBody(
+          `\u200e${whatsapp.transferMessage}`,
+          contact,
+          ticket
+        );
         await SendWhatsAppMessage({ body, ticket });
       }
     }
@@ -1429,7 +1443,7 @@ const handleChartbot = async (
 
     if (currentOption.mediaPath !== null && currentOption.mediaPath !== "") {
       const filePath = path.resolve("public", currentOption.mediaPath);
-      const optionsMsg = await getMessageOptions(
+      const optionsMsg = await getMessageFileOptions(
         currentOption.mediaName,
         filePath
       );
@@ -1444,7 +1458,11 @@ const handleChartbot = async (
 
     if (currentOption.exitChatbot || currentOption.forwardQueueId) {
       const textMessage = {
-        text: formatBody(`\u200e${currentOption.message}`, ticket.contact)
+        text: formatBody(
+          `\u200e${currentOption.message}`,
+          ticket.contact,
+          ticket
+        )
       };
 
       const sendMsg = await wbot.sendMessage(
