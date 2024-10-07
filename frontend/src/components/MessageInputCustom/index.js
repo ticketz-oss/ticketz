@@ -42,6 +42,8 @@ import { RecordOggOpus } from "../../helpers/recordOggOpus";
 import { makeRandomId } from "../../helpers/makeRandomId";
 
 import AddIcon from '@material-ui/icons/Add';
+import DeleteIcon from '@material-ui/icons/Delete';
+import AttachmentIcon from '@material-ui/icons/Attachment';
 import Popover from '@material-ui/core/Popover';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 
@@ -110,6 +112,9 @@ const useStyles = makeStyles((theme) => ({
     top: "20%",
     left: "50%",
     marginLeft: -12,
+  },
+  
+  attachmentLoading: {
   },
 
   audioLoading: {
@@ -189,6 +194,21 @@ const useStyles = makeStyles((theme) => ({
 
   hideInput: {
     display: "none"
+  },
+  
+  attachmentInfo: {
+    height: 48,
+    paddingTop: 7,
+    width: "100%",
+    textAlign: "right",
+    paddingRight: 72,
+    display: "flex",
+    justifyContent: "flex-end"
+  },  
+
+  verticalMiddle: {
+    marginTop: "auto",
+    marginBottom: "auto",
   }
 
 }));
@@ -287,10 +307,11 @@ const ActionButtons = (props) => {
     handleUploadAudio,
     handleStartRecording,
     disableOption,
-    pastOneSecond
+    pastOneSecond,
+    medias,
   } = props;
   const classes = useStyles();
-  if (inputMessage) {
+  if (inputMessage || medias.length>0) {
     return (
       <IconButton
         aria-label="sendMessage"
@@ -356,6 +377,8 @@ const CustomInput = (props) => {
     handleSendMessage,
     handleInputPaste,
     disableOption,
+    setQuickMessageAttachment,
+    setMedias,
   } = props;
   const classes = useStyles();
   const [quickMessages, setQuickMessages] = useState([]);
@@ -377,6 +400,8 @@ const CustomInput = (props) => {
         return {
           value: m.message,
           label: `/${m.shortcode} - ${truncatedMessage}`,
+          id: m.id,
+          mediaName: m.mediaName,
         };
       });
       setQuickMessages(options);
@@ -450,6 +475,9 @@ const CustomInput = (props) => {
         }}
         onChange={(event, opt) => {
           if (isObject(opt) && has(opt, "value")) {
+            console.log(opt);
+            setQuickMessageAttachment({ id: opt.id, mediaName: opt.mediaName });
+            setMedias([]);
             setInputMessage(opt.value);
             setTimeout(() => {
               inputRef.current.scrollTop = inputRef.current.scrollHeight;
@@ -505,6 +533,7 @@ const MessageInputCustom = (props) => {
 
   const [signMessage, setSignMessage] = useLocalStorage("signOption", true);
   const [annotateMessage, setAnnotateMessage] = useState(false);
+  const [quickMessageAttachment, setQuickMessageAttachment] = useState(null);
 
   const isNarrowScreen = useMediaQuery(theme => theme.breakpoints.down('sm'));
 
@@ -544,6 +573,7 @@ const MessageInputCustom = (props) => {
     return () => {
       setShowEmoji(false);
       setMedias([]);
+      setQuickMessageAttachment(null);
       setReplyingMessage(null);
       setEditingMessage(null);
     };
@@ -568,11 +598,13 @@ const MessageInputCustom = (props) => {
     }
 
     const selectedMedias = Array.from(e.target.files);
+    setQuickMessageAttachment(null);
     setMedias(selectedMedias);
   };
 
   const handleInputPaste = (e) => {
     if (e.clipboardData.files[0]) {
+      setQuickMessageAttachment(null);
       setMedias([e.clipboardData.files[0]]);
     }
   };
@@ -600,8 +632,7 @@ const MessageInputCustom = (props) => {
             //formData.append('file', result, result.name);
 
             formData.append("medias", media);
-            formData.append("body", media.name);
-
+            formData.append("body", inputMessage || media.name);
           },
           error(err) {
             alert('erro')
@@ -611,8 +642,7 @@ const MessageInputCustom = (props) => {
         });
       } else {
         formData.append("medias", media);
-        formData.append("body", media.name);
-
+        formData.append("body", inputMessage || media.name);
       }
 
 
@@ -634,7 +664,12 @@ const MessageInputCustom = (props) => {
         })
           .then((response) => {
             setLoading(false)
-            setMedias([])
+            setInputMessage("");
+            setShowEmoji(false);
+            setReplyingMessage(null);
+            setEditingMessage(null);
+            setMedias([]);
+            setQuickMessageAttachment(null);
             setPercentLoading(0);
             console.log(
               `A imagem á foi enviada para o servidor!`
@@ -656,7 +691,11 @@ const MessageInputCustom = (props) => {
 
   }
 
-  const handleSendMessage = async () => {
+  const handleSendMessage = async (e) => {
+    if (medias.length > 0) {
+      return handleUploadMedia(e);
+    }
+    
     if (inputMessage.trim() === "") return;
     //if (disableOption) return
     setLoading(true);
@@ -669,7 +708,8 @@ const MessageInputCustom = (props) => {
         ? `*${user?.name}:*\n${inputMessage.trim()}`
         : inputMessage.trim(),
       quotedMsg: replyingMessage,
-      internal: annotateMessage
+      internal: annotateMessage,
+      quickMessageMediaId: quickMessageAttachment?.id,
     };
     setAnnotateMessage(false);
     try {
@@ -688,6 +728,8 @@ const MessageInputCustom = (props) => {
     setLoading(false);
     setReplyingMessage(null);
     setEditingMessage(null);
+    setMedias([]);
+    setQuickMessageAttachment(null);
   };
 
   const handleStartRecording = async () => {
@@ -747,7 +789,7 @@ const MessageInputCustom = (props) => {
       toastError(err);
     }
   };
-
+  
   const disableOption = loading || recording || ticketStatus === "closed";
 
   const renderReplyingMessage = (message) => {
@@ -796,7 +838,7 @@ const MessageInputCustom = (props) => {
     );
   };
 
-  if (medias.length > 0)
+  if (medias.length < 0)
     return (
       <Paper elevation={0} square className={classes.viewMediaInputWrapper}>
         <IconButton
@@ -833,6 +875,23 @@ const MessageInputCustom = (props) => {
     return (
       <Paper square elevation={0} className={classes.mainWrapper}>
         {(replyingMessage && renderReplyingMessage(replyingMessage)) || (editingMessage && renderReplyingMessage(editingMessage))}
+        { ( medias.length > 0 || quickMessageAttachment ) &&
+          <div className={classes.attachmentInfo}>
+            <AttachmentIcon className={classes.verticalMiddle} />
+            <div className={classes.verticalMiddle}>{ quickMessageAttachment?.mediaName || medias[0]?.name || "attached file"}</div>
+            {loading ? (
+              <CircularProgress className={classes.attachmentLoading} variant={percentLoading < 5 ? "indeterminate" : "determinate"} value={percentLoading} />
+            ) : (
+              <IconButton
+                aria-label="deleteAttachment"
+                component="span"
+                onClick={() => { setMedias([]); setQuickMessageAttachment(null); }}
+              >
+                <DeleteIcon className={classes.sendMessageIcons} />
+              </IconButton>
+            )}
+          </div>
+        }
         <div className={classes.newMessageBox}>
           <EmojiOptions
             disabled={disableOption}
@@ -913,6 +972,8 @@ const MessageInputCustom = (props) => {
             handleSendMessage={handleSendMessage}
             handleInputPaste={handleInputPaste}
             disableOption={disableOption}
+            setQuickMessageAttachment={setQuickMessageAttachment}
+            setMedias={setMedias}
           />
 
           <ActionButtons
@@ -926,6 +987,7 @@ const MessageInputCustom = (props) => {
             handleUploadAudio={handleUploadAudio}
             handleStartRecording={handleStartRecording}
             pastOneSecond={pastOneSecond}
+            medias={medias}
           />
         </div>
       </Paper>
