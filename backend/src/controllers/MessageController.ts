@@ -85,6 +85,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   const ticket = await ShowTicketService(ticketId, companyId);
   const { channel } = ticket;
+  const user = await User.findByPk(Number(req.user.id));
+
   if (channel === "whatsapp") {
     SetTicketMessagesAsRead(ticket);
   }
@@ -100,12 +102,13 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   if (medias) {
     if (channel === "whatsapp") {
+      const caption = formatBody(body, ticket.contact, ticket, user);
       await Promise.all(
         medias.map(async (media: Express.Multer.File) => {
           const message = await SendWhatsAppMedia({
             media,
             ticket,
-            caption: body,
+            caption,
             ptt
           });
           verifyMediaMessage(
@@ -140,7 +143,6 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
       mediaPath
     );
 
-    const user = await User.findByPk(Number(req.user.id));
     const caption = formatBody(body, ticket.contact, ticket, user);
 
     const msgFileOptions = { ...fileOptions, caption };
@@ -161,7 +163,12 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     }
 
     if (channel === "whatsapp") {
-      const message = await SendWhatsAppMessage({ body, ticket, quotedMsg });
+      const message = await SendWhatsAppMessage({
+        body,
+        ticket,
+        quotedMsg,
+        user
+      });
       verifyMessage(
         message,
         ticket,
