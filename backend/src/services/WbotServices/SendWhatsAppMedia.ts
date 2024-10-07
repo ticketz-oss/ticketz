@@ -70,21 +70,10 @@ export const getMessageFileOptions = async (
         // gifPlayback: true
       };
     } else if (typeMessage === "audio") {
-      const typeAudio = fileName.includes("audio-record-site");
-      const convert = await processAudio(pathMedia);
-      if (typeAudio) {
-        options = {
-          audio: fs.readFileSync(convert),
-          mimetype: typeAudio ? "audio/mp4" : mimeType,
-          ptt: true
-        };
-      } else {
-        options = {
-          audio: fs.readFileSync(convert),
-          mimetype: typeAudio ? "audio/mp4" : mimeType,
-          ptt: true
-        };
-      }
+      options = {
+        audio: fs.readFileSync(pathMedia),
+        mimetype: mimeType
+      };
     } else if (typeMessage === "document") {
       options = {
         document: fs.readFileSync(pathMedia),
@@ -114,18 +103,38 @@ export const getMessageFileOptions = async (
   }
 };
 
-const SendWhatsAppMedia = async ({
+export const sendWhatsappFile = async (
+  ticket: Ticket,
+  options: any
+): Promise<WAMessage> => {
+  try {
+    const wbot = await GetTicketWbot(ticket);
+
+    const sentMessage = await wbot.sendMessage(
+      `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
+      options
+    );
+
+    await ticket.update({ lastMessage: options.filename || "🗎" });
+
+    return sentMessage;
+  } catch (err) {
+    Sentry.captureException(err);
+    console.log(err);
+    throw new AppError("ERR_SENDING_WAPP_MSG");
+  }
+};
+
+export const SendWhatsAppMedia = async ({
   media,
   ticket,
   caption,
   ptt
 }: Request): Promise<WAMessage> => {
+  let options: AnyMessageContent;
   try {
-    const wbot = await GetTicketWbot(ticket);
-
     const pathMedia = media.path;
     const typeMessage = media.mimetype.split("/")[0];
-    let options: AnyMessageContent;
 
     let originalNameUtf8 = "";
     try {
@@ -170,22 +179,12 @@ const SendWhatsAppMedia = async ({
         caption
       };
     }
-
-    const sentMessage = await wbot.sendMessage(
-      `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-      {
-        ...options
-      }
-    );
-
-    await ticket.update({ lastMessage: media.filename });
-
-    return sentMessage;
   } catch (err) {
     Sentry.captureException(err);
     console.log(err);
     throw new AppError("ERR_SENDING_WAPP_MSG");
   }
+  return sendWhatsappFile(ticket, options);
 };
 
 export default SendWhatsAppMedia;
