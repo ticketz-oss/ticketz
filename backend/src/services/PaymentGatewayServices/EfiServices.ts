@@ -54,11 +54,14 @@ import {
 
 const webhookUrl = `${process.env.BACKEND_URL}/subscription/ticketz/webhook`;
 
+const privateFolder = __dirname.endsWith("/dist")
+  ? path.resolve(__dirname, "..", "private")
+  : path.resolve(__dirname, "..", "..", "..", "private");
+
 async function getEfiOptions(): Promise<EfiCredentials> {
-  const cert = path.join(
-    __dirname,
-    `../../../private/${await GetSuperSettingService({ key: "_efiCertFile" })}`
-  );
+  const cert = `${privateFolder}/${await GetSuperSettingService({
+    key: "_efiCertFile"
+  })}`;
 
   return {
     sandbox: false,
