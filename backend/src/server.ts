@@ -9,6 +9,8 @@ import {
   checkOpenInvoices,
   payGatewayInitialize
 } from "./services/PaymentGatewayServices/PaymentGatewayServices";
+import { IntegrationServices } from "./services/IntegrationServices/IntegrationServices";
+import { DummyIntegration } from "./services/IntegrationServices/DummyIntegration";
 
 // Environment Variable Validation
 if (!process.env.PORT) {
@@ -48,6 +50,10 @@ async function startServer() {
     process.exit(1);
   }
 }
+
+// Initialize Integration Services
+const integrationServices = IntegrationServices.getInstance();
+integrationServices.registerIntegration(new DummyIntegration());
 
 // Create and start the server
 const server = app.listen(process.env.PORT, async () => {

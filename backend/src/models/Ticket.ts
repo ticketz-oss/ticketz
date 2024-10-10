@@ -11,7 +11,8 @@ import {
   AutoIncrement,
   Default,
   BeforeCreate,
-  BelongsToMany
+  BelongsToMany,
+  HasOne
 } from "sequelize-typescript";
 import { v4 as uuidv4 } from "uuid";
 
@@ -24,6 +25,7 @@ import Company from "./Company";
 import QueueOption from "./QueueOption";
 import Tag from "./Tag";
 import TicketTag from "./TicketTag";
+import IntegrationSession from "./IntegrationSession";
 
 @Table
 class Ticket extends Model<Ticket> {
@@ -72,7 +74,6 @@ class Ticket extends Model<Ticket> {
   @Column
   whatsappId: number;
 
-
   @BelongsTo(() => Whatsapp)
   whatsapp: Whatsapp;
 
@@ -117,6 +118,13 @@ class Ticket extends Model<Ticket> {
   static setUUID(ticket: Ticket) {
     ticket.uuid = uuidv4();
   }
+
+  @HasOne(() => IntegrationSession, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+    hooks: true
+  })
+  integrationSession: IntegrationSession;
 }
 
 export default Ticket;

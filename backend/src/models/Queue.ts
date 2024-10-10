@@ -13,7 +13,8 @@ import {
   ForeignKey,
   HasMany,
   DataType,
-  Default
+  Default,
+  HasOne
 } from "sequelize-typescript";
 import User from "./User";
 import UserQueue from "./UserQueue";
@@ -22,6 +23,7 @@ import Company from "./Company";
 import Whatsapp from "./Whatsapp";
 import WhatsappQueue from "./WhatsappQueue";
 import QueueOption from "./QueueOption";
+import Integration from "./Integration";
 
 @Table
 class Queue extends Model<Queue> {
@@ -84,6 +86,13 @@ class Queue extends Model<Queue> {
 
   @Column
   mediaName: string;
+
+  @HasOne(() => Integration, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+    hooks: true
+  })
+  integration: Integration;
 }
 
 export default Queue;
