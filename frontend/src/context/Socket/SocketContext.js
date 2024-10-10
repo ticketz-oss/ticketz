@@ -42,7 +42,8 @@
 import { createContext } from "react";
 import openSocket from "socket.io-client";
 import { getBackendSocketURL } from "../../services/config";
-import { isExpired } from "react-jwt";
+import { decodeToken, isExpired } from "react-jwt";
+import api from "../../services/api";
 
 class ManagedSocket {
   constructor(socketManager) {
@@ -117,20 +118,26 @@ const socketManager = {
   currentSocket: null,
   socketReady: false,
 
-  GetSocket: function(companyId) {
-    let userId = null;
-    if (localStorage.getItem("userId")) {
-      userId = localStorage.getItem("userId");
-    }
+  GetSocket: function(_discardCompanyId = null) {
 
-    if (!companyId && !this.currentSocket) {
+    const token = JSON.parse(localStorage.getItem("token"));
+    if (!token) {
       return new DummySocket();
     }
 
-    if (companyId && typeof companyId !== "string") {
-      companyId = `${companyId}`;
-    }
+    if ( isExpired(token) ) {
+      console.debug("Expired token, refreshing token");
 
+      api.get("/auth/me").then((response) => {
+        console.debug("Token refreshed", response);
+        window.location.reload();
+      });
+      
+      return new DummySocket();
+    }
+    
+    const { userId, companyId } = decodeToken(token);
+    
     if (companyId !== this.currentCompanyId || userId !== this.currentUserId) {
       if (this.currentSocket) {
         console.debug("closing old socket - company or user changed");
@@ -139,24 +146,6 @@ const socketManager = {
         this.currentSocket = null;
         this.currentCompanyId = null;
         this.currentUserId = null;
-      }
-
-      let token = JSON.parse(localStorage.getItem("token"));
-      if (!token) {
-        return new DummySocket();
-      }
-      
-      if ( isExpired(token) ) {
-        console.debug("Expired token, waiting for refresh");
-        setTimeout(() => {
-          const currentToken = JSON.parse(localStorage.getItem("token"));
-          if (isExpired(currentToken)) {
-            localStorage.removeItem("token");
-            localStorage.removeItem("companyId");
-          }
-          window.location.reload();
-        },1000);
-        return new DummySocket();
       }
 
       this.currentCompanyId = companyId;
@@ -171,13 +160,13 @@ const socketManager = {
 
       this.currentSocket.io.on("reconnect_attempt", () => {
         this.currentSocket.io.opts.query.r = 1;
-        token = JSON.parse(localStorage.getItem("token"));
-        if ( isExpired(token) ) {
+        const newToken = JSON.parse(localStorage.getItem("token"));
+        if ( isExpired(newToken) ) {
           console.debug("Refreshing");
           window.location.reload();
         } else {
           console.debug("Using new token");
-          this.currentSocket.io.opts.query.token = token;
+          this.currentSocket.io.opts.query.token = newToken;
         }
       });
       
@@ -185,15 +174,15 @@ const socketManager = {
         console.debug(`socket disconnected because: ${reason}`);
         if (reason.startsWith("io server disconnect")) {
           console.debug("tryng to reconnect", this.currentSocket);
-          token = JSON.parse(localStorage.getItem("token"));
+          const newToken = JSON.parse(localStorage.getItem("token"));
           
-          if ( isExpired(token) ) {
+          if ( isExpired(newToken) ) {
             console.debug("Expired token - refreshing");
             window.location.reload();
             return;
           }
           console.debug("Reconnecting using refreshed token");
-          this.currentSocket.io.opts.query.token = token;
+          this.currentSocket.io.opts.query.token = newToken;
           this.currentSocket.io.opts.query.r = 1;
           this.currentSocket.connect();
         }        

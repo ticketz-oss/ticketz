@@ -9,6 +9,8 @@ import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import { SocketContext } from "../../context/Socket/SocketContext";
 import moment from "moment";
+import { decodeToken } from "react-jwt";
+
 const useAuth = () => {
   const history = useHistory();
   const [isAuth, setIsAuth] = useState(false);
@@ -101,8 +103,11 @@ const useAuth = () => {
     try {
       const { data } = await api.post("/auth/login", userData);
       const {
-        user: { companyId, id, company },
+        user: { company },
+        token
       } = data;
+
+      const { companyId, userId } = decodeToken(token);
 
       if (has(company, "settings") && isArray(company.settings)) {
         const setting = company.settings.find(
@@ -124,9 +129,9 @@ const useAuth = () => {
       var dias = moment.duration(diff).asDays();
 
       if (before === true) {
-        localStorage.setItem("token", JSON.stringify(data.token));
+        localStorage.setItem("token", JSON.stringify(token));
         localStorage.setItem("companyId", companyId);
-        localStorage.setItem("userId", id);
+        localStorage.setItem("userId", userId);
         localStorage.setItem("companyDueDate", vencimento);
         api.defaults.headers.Authorization = `Bearer ${data.token}`;
         setUser(data.user);
