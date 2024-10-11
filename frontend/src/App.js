@@ -157,13 +157,13 @@ const App = () => {
       .then((color) => { setPrimaryColorDark(color || "#39ACE7") })
       .catch((error) => { console.log("Error reading setting", error); });
     getPublicSetting("appLogoLight")
-      .then((file) => { setAppLogoLight(file ? (getBackendURL()+"/public/"+file) : defaultLogoLight) }, (_) => { })
+      .then((file) => { setAppLogoLight(file ? (`"${getBackendURL()}/public/${file}"`) : defaultLogoLight) }, (_) => { })
       .catch((error) => { console.log("Error reading setting", error); });
     getPublicSetting("appLogoDark")
-      .then((file) => { setAppLogoDark(file ? (getBackendURL()+"/public/"+file) : defaultLogoDark) })
+      .then((file) => { setAppLogoDark(file ? (`"${getBackendURL()}/public/${file}"`) : defaultLogoDark) })
       .catch((error) => { console.log("Error reading setting", error); });
     getPublicSetting("appLogoFavicon")
-      .then((file) => { setAppLogoFavicon(file ? (getBackendURL()+"/public/"+file) : null) })
+      .then((file) => { setAppLogoFavicon(file ? (`"${getBackendURL()}/public/${file}"`) : null) })
       .catch((error) => { console.log("Error reading setting", error); });
     getPublicSetting("appName").then((name) => { setAppName(name || "ticketz") })
       .catch((error) => { console.log("Error reading setting", error); setAppName("whitelabel chat") });
