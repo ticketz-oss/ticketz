@@ -125,17 +125,6 @@ const socketManager = {
       return new DummySocket();
     }
 
-    if ( isExpired(token) ) {
-      console.debug("Expired token, refreshing token");
-
-      api.get("/auth/me").then((response) => {
-        console.debug("Token refreshed", response);
-        window.location.reload();
-      });
-      
-      return new DummySocket();
-    }
-    
     const { userId, companyId } = decodeToken(token);
     
     if (companyId !== this.currentCompanyId || userId !== this.currentUserId) {
@@ -146,6 +135,17 @@ const socketManager = {
         this.currentSocket = null;
         this.currentCompanyId = null;
         this.currentUserId = null;
+      }
+      
+      if (isExpired(token)) {
+        console.debug("Expired token, refreshing token");
+
+        api.get("/auth/me").then((response) => {
+          console.debug("Token refreshed", response);
+          window.location.reload();
+        });
+
+        return new DummySocket();
       }
 
       this.currentCompanyId = companyId;
