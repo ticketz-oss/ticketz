@@ -33,6 +33,7 @@ import formatBody from "../helpers/Mustache";
 
 type IndexQuery = {
   pageNumber: string;
+  markAsRead: string;
 };
 
 type MessageData = {
@@ -48,7 +49,7 @@ type MessageData = {
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const { ticketId } = req.params;
-  const { pageNumber } = req.query as IndexQuery;
+  const { pageNumber, markAsRead } = req.query as IndexQuery;
   const { companyId, profile } = req.user;
   const queues: number[] = [];
 
@@ -70,7 +71,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     user
   });
 
-  if (ticket.channel === "whatsapp") {
+  if (ticket.channel === "whatsapp" && markAsRead === "true") {
     SetTicketMessagesAsRead(ticket);
   }
 
