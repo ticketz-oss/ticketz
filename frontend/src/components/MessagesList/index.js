@@ -508,7 +508,7 @@ const reducer = (state, action) => {
   }
 };
 
-const MessagesList = ({ ticket, ticketId, isGroup }) => {
+const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
   const classes = useStyles();
 
   const [messagesList, dispatch] = useReducer(reducer, []);
@@ -534,7 +534,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
         if (ticketId === undefined) return;
         try {
           const { data } = await api.get("/messages/" + ticketId, {
-            params: { pageNumber: thisPageNumber },
+            params: { pageNumber: thisPageNumber, markAsRead },
           });
 
           if (currentTicketId.current === ticketId) {

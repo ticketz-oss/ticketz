@@ -168,6 +168,7 @@ const Ticket = () => {
           ticket={ticket}
           ticketId={ticket.id}
           isGroup={ticket.isGroup}
+          markAsRead={true}
         ></MessagesList>
         <MessageInput ticketId={ticket.id} ticketStatus={ticket.status} />
       </>

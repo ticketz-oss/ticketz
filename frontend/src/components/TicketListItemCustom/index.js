@@ -294,7 +294,10 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
           {profile === "admin" && (
             <Tooltip title="Espiar Conversa">
               <VisibilityIcon
-                onClick={() => setOpenTicketMessageDialog(true)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpenTicketMessageDialog(true)
+                }}
                 fontSize="small"
                 style={{
                   padding: 2,
@@ -435,7 +438,10 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
           {profile === "admin" && (
             <Tooltip title="Espiar Conversa">
               <VisibilityIcon
-                onClick={() => setOpenTicketMessageDialog(true)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpenTicketMessageDialog(true)
+                }}
                 fontSize="small"
                 style={{
                   padding: 2,
