@@ -1314,6 +1314,7 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
           include: [{
             model: QueueOption,
             as: "options",
+            where: { parentId: null },
             required: false,
           }]
         },
