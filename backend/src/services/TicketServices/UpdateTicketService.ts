@@ -15,6 +15,7 @@ import GetTicketWbot from "../../helpers/GetTicketWbot";
 import { verifyMessage } from "../WbotServices/wbotMessageListener";
 import sendFaceMessage from "../FacebookServices/sendFacebookMessage";
 import AppError from "../../errors/AppError";
+import { GetCompanySetting } from "../../helpers/CheckSettings";
 
 interface TicketData {
   status?: string;
@@ -180,8 +181,16 @@ const UpdateTicketService = async ({
       ticketTraking.whatsappId = ticket.whatsappId;
       ticketTraking.userId = ticket.userId;
 
-      queueId = null;
-      userId = null;
+      const keepUserAndQueue = await GetCompanySetting(
+        companyId,
+        "keepUserAndQueue",
+        "enabled"
+      );
+
+      if (keepUserAndQueue === "disabled") {
+        queueId = null;
+        userId = null;
+      }
     }
 
     if (queueId !== undefined && queueId !== null) {
