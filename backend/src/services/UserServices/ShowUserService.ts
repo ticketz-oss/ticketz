@@ -13,6 +13,7 @@ const ShowUserService = async (id: string | number, requestUserId: string | numb
       "email",
       "companyId",
       "profile",
+      "hideAdminUI",
       "super",
       "tokenVersion"
     ],

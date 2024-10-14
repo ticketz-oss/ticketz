@@ -12,6 +12,7 @@ interface UserData {
   profile?: string;
   companyId?: number;
   queueIds?: number[];
+  hideAdminUI?: boolean;
 }
 
 interface Request {
@@ -49,13 +50,21 @@ const UpdateUserService = async ({
     name: Yup.string().min(2),
     email: Yup.string().email(),
     profile: Yup.string(),
+    hideAdminUI: Yup.boolean(),
     password: Yup.string()
   });
 
-  const { email, password, profile, name, queueIds = [] } = userData;
+  const {
+    email,
+    password,
+    profile,
+    hideAdminUI,
+    name,
+    queueIds = []
+  } = userData;
 
   try {
-    await schema.validate({ email, password, profile, name });
+    await schema.validate({ email, password, profile, hideAdminUI, name });
   } catch (err: unknown) {
     throw new AppError((err as Error).message);
   }
@@ -65,6 +74,7 @@ const UpdateUserService = async ({
       email,
       password,
       profile,
+      hideAdminUI,
       name
     });
     await user.$set("queues", queueIds);
