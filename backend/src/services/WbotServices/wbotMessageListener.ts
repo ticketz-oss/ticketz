@@ -1523,7 +1523,7 @@ const handleMessage = async (
                   `${ticketTracking.ticket.contact.number}@${ticketTracking.ticket.isGroup ? "g.us" : "s.whatsapp.net"
                   }`,
                   {
-                    text: "\u200e\n*Por favor avalie nosso atendimento com uma nota de 1 a 3*"
+                    text: "\u200e\n*Por favor avalie nosso atendimento com uma nota de 1 a 5*"
                   }
                 );
               },

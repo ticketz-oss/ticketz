@@ -121,10 +121,9 @@ const UpdateTicketService = async ({
         setting?.value === "enabled"
       ) {
         if (ticketTraking.ratingAt == null && !justClose) {
-          const ratingTxt = ratingMessage?.trim() || "";
-          let bodyRatingMessage = `\u200e${ratingTxt}\n\n`;
-          bodyRatingMessage +=
-            "Digite de 1 à 3 para qualificar nosso atendimento:\n*1* - _Insatisfeito_\n*2* - _Satisfeito_\n*3* - _Muito Satisfeito_\n\n";
+          const ratingTxt =
+            ratingMessage?.trim() || "Por favor avalie nosso atendimento";
+          const bodyRatingMessage = `\u200e${ratingTxt}\n\n*Digite uma nota de 1 a 5*\n\nEnvie *\`!\`* para retornar ao atendimento`;
 
           if (ticket.channel === "whatsapp") {
             await SendWhatsAppMessage({ body: bodyRatingMessage, ticket });
