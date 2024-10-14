@@ -115,6 +115,7 @@ export default function Options(props) {
   const [loadingAllowSignup, setLoadingAllowSignup] = useState(false);
   const [loadingChatbotAutoExit, setLoadingChatbotAutoExit] = useState(false);
   const [loadingCheckMsgIsGroup, setCheckMsgIsGroup] = useState(false);
+  const [keepQueueAndUser, setKeepQueueAndUser] = useState("enabled");
   const [loadingApiToken, setLoadingApiToken] = useState(false);
   const [loadingDownloadLimit, setLoadingDownloadLimit] = useState(false);
   const { getCurrentUserInfo } = useAuth();
@@ -163,6 +164,9 @@ export default function Options(props) {
       const quickMessages = settings.find((s) => s.key === "quickMessages");
       setQuickMessages(quickMessages?.value || "individual");
 
+      const keepQueueAndUser = settings.find((s) => s.key === "keepQueueAndUser");
+      setKeepQueueAndUser(keepQueueAndUser?.value || "enabled");
+        
       const apiToken = settings.find((s) => s.key === "apiToken");
       setApiToken(apiToken?.value || "");
 
@@ -488,6 +492,24 @@ export default function Options(props) {
             >
               <MenuItem value={"message"}>{i18n.t("settings.messageVisibility.options.respectMessageQueue")}</MenuItem>
               <MenuItem value={"ticket"}>{i18n.t("settings.messageVisibility.options.respectTicketQueue")}</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+        
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="keep-queue-and-user-label">
+              {i18n.t("settings.keepQueueAndUser.title")}
+            </InputLabel>
+            <Select
+              labelId="keep-queue-and-user-label"
+              value={keepQueueAndUser}
+              onChange={async (e) => {
+                await handleSetting("keepQueueAndUser", e.target.value, setKeepQueueAndUser);
+              }}
+            >
+              <MenuItem value={"enabled"}>{i18n.t("settings.keepQueueAndUser.options.enabled")}</MenuItem>
+              <MenuItem value={"disabled"}>{i18n.t("settings.keepQueueAndUser.options.disabled")}</MenuItem>
             </Select>
           </FormControl>
         </Grid>

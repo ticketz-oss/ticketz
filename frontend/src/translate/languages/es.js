@@ -765,6 +765,13 @@ const messages = {
             "respectTicketQueue": "Respetar fila de tickets"
           }
         },
+        "removeQueueAndUser": {
+          "title": "Mantener fila y usuario en ticket cerrado",
+          "options": {
+            enabled: "Activado",
+            disabled: "Desactivado",
+          }
+        },        
 				WelcomeGreeting: {
 					greetings: "hola",
 					welcome: "bienvenido a",

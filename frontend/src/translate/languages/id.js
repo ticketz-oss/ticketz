@@ -793,6 +793,13 @@ const messages = {
             "respectTicketQueue": "Hormati Antrian Tiket"
           }
         },
+        "keepQueueAndUser": {
+          "title_id": "Simpan antrian dan pengguna pada tiket tertutup", 
+          "options": {
+            enabled: "Diaktifkan",
+            disabled: "Dinonaktifkan",
+          }
+        },
         WelcomeGreeting: {
           greetings: "halo",
           welcome: "selamat datang di",
