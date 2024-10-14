@@ -408,7 +408,7 @@ const UpdateTicketService = async ({
     await ticketTraking.save();
 
     if (!isGroup && !ticket.contact.disableBot && !fromChatbot) {
-      if (oldQueueId && oldQueueId !== ticket.queueId) {
+      if (oldQueueId && ticket.queueId && oldQueueId !== ticket.queueId) {
         const whatsapp = await ShowWhatsAppService(
           ticket.whatsappId,
           companyId
