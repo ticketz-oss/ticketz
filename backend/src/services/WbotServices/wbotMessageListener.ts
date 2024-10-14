@@ -981,7 +981,7 @@ const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue) => {
         !isNil(currentSchedule) &&
         (!currentSchedule || currentSchedule.inActivity === false)
       ) {
-        const outOfHoursMessage = queue.outOfHoursMessage.trim() || "Estamos fora do horário de expediente";
+        const outOfHoursMessage = queue.outOfHoursMessage?.trim() || "Estamos fora do horário de expediente";
         const body = formatBody(`${outOfHoursMessage}\n\n*[ # ]* - Voltar ao Menu Principal`, ticket.contact);
         const sentMessage = await wbot.sendMessage(
           `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, {
