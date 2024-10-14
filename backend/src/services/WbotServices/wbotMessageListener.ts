@@ -1062,7 +1062,7 @@ const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue) => {
       (!currentSchedule || currentSchedule.inActivity === false)
     ) {
       const outOfHoursMessage =
-        queue.outOfHoursMessage.trim() ||
+        queue.outOfHoursMessage?.trim() ||
         "Estamos fora do horário de expediente";
       const body = formatBody(
         `${outOfHoursMessage}\n\n*[ # ]* - Voltar ao Menu Principal`,
