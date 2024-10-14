@@ -1193,11 +1193,18 @@ export const handleRating = async (
       rated: true,
     });
 
+    const keepUserAndQueue =
+      (await GetCompanySetting(
+        ticket.companyId,
+        "keepUserAndQueue",
+        "enabled"
+      )) === "enabled";
+
     await ticket.update({
-      queueId: null,
+      queueId: keepUserAndQueue ? ticket.queueId : null,
       chatbot: null,
       queueOptionId: null,
-      userId: null,
+      userId: keepUserAndQueue ? ticket.userId : null,
       status: "closed",
     });
 
