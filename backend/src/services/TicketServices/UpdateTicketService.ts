@@ -231,6 +231,7 @@ const UpdateTicketService = async ({
       ticketTraking.finishedAt = moment().toDate();
       ticketTraking.whatsappId = ticket.whatsappId;
       ticketTraking.userId = ticket.userId;
+
     }
 
     if (queueId !== undefined && queueId !== null) {

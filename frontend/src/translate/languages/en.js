@@ -765,6 +765,13 @@ const messages = {
             "respectTicketQueue": "Respect queue of ticket"
           }
         },
+        "keepQueueAndUser": {
+          "title": "Keep queue and user on closed ticket",
+          "options": {
+            "enabled": "Enabled",
+            "disabled": "Disabled"
+          }
+        },
 				GracePeriod: {
           title: "Subscription Grace Period (days)",
         },
@@ -994,9 +1001,9 @@ const messages = {
 					paypaltitle: "Credit Card",
 					international: "Donations in USD",
         }
-			},
-		},
-	},
+      },
+    },
+  },
 };
 
 export { messages };

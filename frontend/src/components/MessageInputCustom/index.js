@@ -450,7 +450,6 @@ const CustomInput = (props) => {
 
   const setInputRef = (input) => {
     if (input) {
-      input.focus();
       inputRef.current = input;
     }
   };
@@ -729,6 +728,7 @@ const MessageInputCustom = (props) => {
     setLoading(false);
     setReplyingMessage(null);
     setEditingMessage(null);
+    inputRef.current.focus();
     setMedias([]);
     setQuickMessageAttachment(null);
   };

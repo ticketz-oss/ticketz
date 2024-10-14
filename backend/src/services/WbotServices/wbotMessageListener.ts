@@ -1417,6 +1417,7 @@ const handleChartbot = async (
             {
               model: QueueOption,
               as: "options",
+              where: { parentId: null },
               required: false
             }
           ]

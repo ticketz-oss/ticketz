@@ -771,6 +771,13 @@ const messages = {
             "respectTicketQueue": "Respetar fila de tickets"
           }
         },
+        "removeQueueAndUser": {
+          "title": "Mantener fila y usuario en ticket cerrado",
+          "options": {
+            enabled: "Activado",
+            disabled: "Desactivado",
+          }
+        },        
         GracePeriod: {
           title: "Período de gracia después del vencimiento (días)",
         },

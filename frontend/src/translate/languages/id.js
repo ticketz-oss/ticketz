@@ -770,6 +770,13 @@ const messages = {
             "respectTicketQueue": "Hormati Antrian Tiket"
           }
         },
+        "keepQueueAndUser": {
+          "title_id": "Simpan antrian dan pengguna pada tiket tertutup", 
+          "options": {
+            enabled: "Diaktifkan",
+            disabled: "Dinonaktifkan",
+          }
+        },
         GracePeriod: {
           title: "Periode penundaan langganan berakhir (hari)",
         },
