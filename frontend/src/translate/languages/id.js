@@ -213,6 +213,7 @@ const messages = {
           email: "Email",
           password: "Kata Sandi",
           profile: "Profil",
+          hideAdminUI: "Sembunyikan UI Admin",
         },
         buttons: {
           okAdd: "Tambah",

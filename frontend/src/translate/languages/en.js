@@ -212,6 +212,7 @@ const messages = {
 					email: "Email",
 					password: "Password",
 					profile: "Profile",
+					hideAdminUI: "Hide Admin UI",
 				},
 				buttons: {
 					okAdd: "Add",

@@ -321,7 +321,7 @@ const MainListItems = (props) => {
       />
 
       <Can
-        role={user.profile}
+        role={user.hideAdminUI ? "user" : user.profile}
         perform={"drawer-admin-items:view"}
         yes={()=>(
           <>
@@ -348,7 +348,7 @@ const MainListItems = (props) => {
         )}
       />
       <Can
-        role={user.profile}
+        role={user.hideAdminUI ? "user" : user.profile}
         perform="drawer-admin-items:view"
         yes={() => (
           <>

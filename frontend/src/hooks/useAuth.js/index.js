@@ -139,7 +139,7 @@ const useAuth = () => {
     } else {
       toast.success(i18n.t("auth.toasts.success"));
     }
-    if (data.user.profile === "admin") {
+    if (data.user.profile === "admin" && !data.user.hideAdminUI) {
       history.push("/");
     } else {
       history.push("/tickets");

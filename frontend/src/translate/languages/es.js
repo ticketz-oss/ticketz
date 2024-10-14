@@ -217,6 +217,7 @@ const messages = {
 					email: "Correo electrónico",
 					password: "Contraseña",
 					profile: "Perfil",
+          hideAdminUI: "Ocultar interfaz de administrador",
 				},
 				buttons: {
 					okAdd: "Agregar",
