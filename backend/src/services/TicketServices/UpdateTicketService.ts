@@ -231,6 +231,7 @@ const UpdateTicketService = async ({
       ticketTraking.finishedAt = moment().toDate();
       ticketTraking.whatsappId = ticket.whatsappId;
       ticketTraking.userId = ticket.userId;
+
     }
 
     if (queueId !== undefined && queueId !== null) {
@@ -407,7 +408,7 @@ const UpdateTicketService = async ({
     await ticketTraking.save();
 
     if (!isGroup && !ticket.contact.disableBot && !fromChatbot) {
-      if (oldQueueId && oldQueueId !== ticket.queueId) {
+      if (oldQueueId && ticket.queueId && oldQueueId !== ticket.queueId) {
         const whatsapp = await ShowWhatsAppService(
           ticket.whatsappId,
           companyId

@@ -13,6 +13,7 @@ interface Request {
   queueIds?: number[];
   companyId?: number;
   profile?: string;
+  hideAdminUI?: boolean;
 }
 
 interface Response {
@@ -20,6 +21,7 @@ interface Response {
   name: string;
   id: number;
   profile: string;
+  hideAdminUI: boolean;
 }
 
 const CreateUserService = async ({
@@ -28,7 +30,8 @@ const CreateUserService = async ({
   name,
   queueIds = [],
   companyId,
-  profile = "admin"
+  profile = "admin",
+  hideAdminUI = false
 }: Request): Promise<Response> => {
   if (companyId !== undefined) {
     const company = await Company.findOne({
@@ -84,7 +87,8 @@ const CreateUserService = async ({
       password,
       name,
       companyId,
-      profile
+      profile,
+      hideAdminUI
     },
     { include: ["queues", "company"] }
   );

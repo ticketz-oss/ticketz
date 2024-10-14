@@ -218,6 +218,7 @@ const messages = {
 					email: "Email",
 					password: "Senha",
 					profile: "Perfil",
+          hideAdminUI: "Ocultar interface de administração",
 				},
 				buttons: {
 					okAdd: "Adicionar",
@@ -777,6 +778,13 @@ const messages = {
         "options": {
           "respectMessageQueue": "Respeitar fila da mensagem",
           "respectTicketQueue": "Respeitar fila do ticket"
+        }
+      },
+      "keepQueueAndUser": {
+        "title": "Manter fila e usuário no ticket fechado",
+        "options": {
+          "enabled": "Ativado",
+          "disabled": "Desativado"
         }
       },
       GracePeriod: {

@@ -213,6 +213,7 @@ const messages = {
           email: "Email",
           password: "Kata Sandi",
           profile: "Profil",
+          hideAdminUI: "Sembunyikan UI Admin",
         },
         buttons: {
           okAdd: "Tambah",
@@ -773,6 +774,13 @@ const messages = {
           "options": {
             "respectMessageQueue": "Hormati Antrian Pesan",
             "respectTicketQueue": "Hormati Antrian Tiket"
+          }
+        },
+        "keepQueueAndUser": {
+          "title_id": "Simpan antrian dan pengguna pada tiket tertutup", 
+          "options": {
+            enabled: "Diaktifkan",
+            disabled: "Dinonaktifkan",
           }
         },
         GracePeriod: {
