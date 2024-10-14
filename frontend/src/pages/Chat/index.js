@@ -434,6 +434,7 @@ function Chat(props) {
           <Grid className={classes.gridItemTab} md={12} item>
             {isObject(currentChat) && has(currentChat, "id") && (
               <ChatMessages
+                chat={currentChat}
                 scrollToBottomRef={scrollToBottomRef}
                 pageInfo={messagesPageInfo}
                 messages={messages}
