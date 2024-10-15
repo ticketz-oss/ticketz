@@ -1036,73 +1036,92 @@ const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue) => {
     companyId: ticket.companyId
   });
 
+  let filePath = null;
+  let optionsMsg = null;
+
   if (queue.mediaPath !== null && queue.mediaPath !== "") {
-    const filePath = path.resolve("public", queue.mediaPath);
-    const optionsMsg = await getMessageFileOptions(queue.mediaName, filePath);
-    const sentMediaMessage = await wbot.sendMessage(
-      `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-      { ...optionsMsg }
-    );
-    await verifyMediaMessage(sentMediaMessage, ticket, contact);
+    filePath = path.resolve("public", queue.mediaPath);
+    optionsMsg = await getMessageFileOptions(queue.mediaName, filePath);
   }
 
   /* Tratamento para envio de mensagem quando a fila está fora do expediente */
-  if (queue.options.length === 0) {
-    let currentSchedule: ScheduleResult;
+  let currentSchedule: ScheduleResult;
 
-    const settings = await Setting.findOne({
-      where: {
-        key: "scheduleType",
-        companyId
+  const settings = await Setting.findOne({
+    where: {
+      key: "scheduleType",
+      companyId
+    }
+  });
+  if (settings?.value === "queue") {
+    currentSchedule = await VerifyCurrentSchedule(ticket.companyId, queue.id);
+  }
+
+  if (
+    settings?.value === "queue" &&
+    !isNil(currentSchedule) &&
+    (!currentSchedule || currentSchedule.inActivity === false)
+  ) {
+    const outOfHoursMessage =
+      queue.outOfHoursMessage?.trim() ||
+      "Estamos fora do horário de expediente";
+    const body = formatBody(
+      `${outOfHoursMessage}\n\n*[ # ]* - Voltar ao Menu Principal`,
+      ticket.contact,
+      ticket
+    );
+    const sentMessage = await wbot.sendMessage(
+      `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
+      {
+        text: body
       }
+    );
+    await verifyMessage(sentMessage, ticket, contact);
+    await UpdateTicketService({
+      ticketData: { queueId: null, chatbot },
+      ticketId: ticket.id,
+      companyId: ticket.companyId
     });
-    if (settings?.value === "queue") {
-      currentSchedule = await VerifyCurrentSchedule(ticket.companyId, queue.id);
-    }
+    return;
+  }
 
-    if (
-      settings?.value === "queue" &&
-      !isNil(currentSchedule) &&
-      (!currentSchedule || currentSchedule.inActivity === false)
-    ) {
-      const outOfHoursMessage =
-        queue.outOfHoursMessage?.trim() ||
-        "Estamos fora do horário de expediente";
-      const body = formatBody(
-        `${outOfHoursMessage}\n\n*[ # ]* - Voltar ao Menu Principal`,
-        ticket.contact,
-        ticket
-      );
-      const sentMessage = await wbot.sendMessage(
-        `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-        {
-          text: body
-        }
-      );
-      await verifyMessage(sentMessage, ticket, contact);
-      await UpdateTicketService({
-        ticketData: { queueId: null, chatbot },
-        ticketId: ticket.id,
-        companyId: ticket.companyId
-      });
-      return;
-    }
-
+  if (queue.options.length === 0) {
     if (queue.greetingMessage?.trim()) {
       const body = formatBody(
         `\u200e${queue.greetingMessage.trim()}`,
         ticket.contact,
         ticket
       );
-      const sentMessage = await wbot.sendMessage(
+
+      if (filePath) {
+        optionsMsg.caption = body;
+      } else {
+        const sentMessage = await wbot.sendMessage(
+          `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
+          {
+            text: body
+          }
+        );
+        await verifyMessage(sentMessage, ticket, contact);
+        return;
+      }
+    }
+
+    if (filePath) {
+      const sentMediaMessage = await wbot.sendMessage(
         `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-        {
-          text: body
-        }
+        { ...optionsMsg }
       );
-      await verifyMessage(sentMessage, ticket, contact);
+      await verifyMediaMessage(sentMediaMessage, ticket, contact);
     }
   } else {
+    if (filePath) {
+      const sentMediaMessage = await wbot.sendMessage(
+        `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
+        { ...optionsMsg }
+      );
+      await verifyMediaMessage(sentMediaMessage, ticket, contact);
+    }
     sendMenu(wbot, ticket, queue);
   }
 };
@@ -1442,38 +1461,41 @@ const handleChartbot = async (
       ]
     });
 
+    let filePath = null;
+    let optionsMsg = null;
     if (currentOption.mediaPath !== null && currentOption.mediaPath !== "") {
-      const filePath = path.resolve("public", currentOption.mediaPath);
-      const optionsMsg = await getMessageFileOptions(
+      filePath = path.resolve("public", currentOption.mediaPath);
+      optionsMsg = await getMessageFileOptions(
         currentOption.mediaName,
         filePath
       );
-      const sentMessage = await wbot.sendMessage(
-        `${ticket.contact.number}@${
-          ticket.isGroup ? "g.us" : "s.whatsapp.net"
-        }`,
-        { ...optionsMsg }
-      );
-      await verifyMediaMessage(sentMessage, ticket, ticket.contact);
     }
 
     if (currentOption.exitChatbot || currentOption.forwardQueueId) {
-      const textMessage = {
-        text: formatBody(
-          `\u200e${currentOption.message}`,
-          ticket.contact,
-          ticket
-        )
-      };
-
-      const sendMsg = await wbot.sendMessage(
-        `${ticket.contact.number}@${
-          ticket.isGroup ? "g.us" : "s.whatsapp.net"
-        }`,
-        textMessage
+      const text = formatBody(
+        `\u200e${currentOption.message}`,
+        ticket.contact,
+        ticket
       );
 
-      await verifyMessage(sendMsg, ticket, ticket.contact);
+      if (filePath) {
+        optionsMsg.caption = text;
+        const sentMessage = await wbot.sendMessage(
+          `${ticket.contact.number}@${
+            ticket.isGroup ? "g.us" : "s.whatsapp.net"
+          }`,
+          { ...optionsMsg }
+        );
+        await verifyMediaMessage(sentMessage, ticket, ticket.contact);
+      } else {
+        const sendMsg = await wbot.sendMessage(
+          `${ticket.contact.number}@${
+            ticket.isGroup ? "g.us" : "s.whatsapp.net"
+          }`,
+          { text }
+        );
+        await verifyMessage(sendMsg, ticket, ticket.contact);
+      }
 
       if (currentOption.exitChatbot) {
         await ticket.update({
@@ -1490,6 +1512,16 @@ const handleChartbot = async (
         startQueue(wbot, ticket, currentOption.forwardQueue);
       }
       return;
+    }
+
+    if (filePath) {
+      const sentMessage = await wbot.sendMessage(
+        `${ticket.contact.number}@${
+          ticket.isGroup ? "g.us" : "s.whatsapp.net"
+        }`,
+        { ...optionsMsg }
+      );
+      await verifyMediaMessage(sentMessage, ticket, ticket.contact);
     }
 
     if (currentOption.options.length > -1) {
