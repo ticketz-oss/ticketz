@@ -4,10 +4,16 @@ import Ticket from "../models/Ticket";
 
 const CheckContactOpenTickets = async (
   contactId: number,
-  queueId: number
+  queueId: number,
+  whatsappId: number
 ): Promise<void> => {
   const ticket = await Ticket.findOne({
-    where: { contactId, queueId, status: { [Op.or]: ["open", "pending"] } }
+    where: {
+      contactId,
+      queueId,
+      whatsappId,
+      status: { [Op.or]: ["open", "pending"] }
+    }
   });
 
   if (ticket) {
