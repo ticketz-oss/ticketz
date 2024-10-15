@@ -59,7 +59,7 @@ const CreateTicketService = async ({
     }
   }
 
-  if (queue?.whatsapps?.length) {
+  if (!queueWhatsapp && queue?.whatsapps?.length) {
     queueWhatsapp = queue.whatsapps.find(e => e.status === "CONNECTED");
     if (!queueWhatsapp) {
       if (companyForceQueue) {
@@ -71,7 +71,7 @@ const CreateTicketService = async ({
   const defaultWhatsapp =
     queueWhatsapp || (await GetDefaultWhatsApp(companyId));
 
-  await CheckContactOpenTickets(contactId, queueId);
+  await CheckContactOpenTickets(contactId, queueId, defaultWhatsapp.id);
 
   const { isGroup } = await ShowContactService(contactId, companyId);
 
