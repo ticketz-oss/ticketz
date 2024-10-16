@@ -15,7 +15,7 @@ const countriesRequiringState = [
 
 const loadCountries = async () => {
   try {
-    const response = await fetch("https://raw.githubusercontent.com/dr5hn/countries-states-cities-database/master/countries.json");
+    const response = await fetch("https://raw.githubusercontent.com/dr5hn/countries-states-cities-database/master/json/countries.json");
     const data = await response.json();
 
     const language = localStorage.getItem("language") || "en";
