@@ -497,8 +497,9 @@ const MessageInputCustom = (props) => {
       setMedias([]);
       setReplyingMessage(null);
       setEditingMessage(null);
+      setInputMessage("");
     };
-  }, [ticketId, setReplyingMessage, setEditingMessage]);
+  }, [ticketId]);
 
   // const handleChangeInput = e => {
   // 	if (isObject(e) && has(e, 'value')) {
