@@ -1,7 +1,6 @@
 import * as Sentry from "@sentry/node";
 import makeWASocket, {
   WASocket,
-  Browsers,
   DisconnectReason,
   fetchLatestBaileysVersion,
   makeCacheableSignalKeyStore,
@@ -27,6 +26,8 @@ import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSess
 import DeleteBaileysService from "../services/BaileysServices/DeleteBaileysService";
 import Contact from "../models/Contact";
 import Ticket from "../models/Ticket";
+import { GitInfo } from "../gitinfo";
+import GetPublicSettingService from "../services/SettingServices/GetPublicSettingService";
 
 const loggerBaileys = MAIN_LOGGER.child({});
 loggerBaileys.level = "error";
@@ -135,10 +136,18 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
         const msgRetryCounterCache = new NodeCache();
         const userDevicesCache: CacheStore = new NodeCache();
 
+        const appName =
+          (await GetPublicSettingService({ key: "appName" })) || "Ticketz";
+        const hostName = process.env.BACKEND_URL?.split("/")[2];
+        const appVersion = GitInfo.tagName || GitInfo.commitHash;
+        const clientName = `${appName} ${appVersion}${
+          hostName ? ` - ${hostName}` : ""
+        }`;
+
         wsocket = makeWASocket({
           logger: loggerBaileys,
           printQRInTerminal: false,
-          browser: Browsers.appropriate("Desktop"),
+          browser: [clientName, "Desktop", appVersion],
           auth: {
             creds: state.creds,
             keys: makeCacheableSignalKeyStore(state.keys, loggerBaileys)
