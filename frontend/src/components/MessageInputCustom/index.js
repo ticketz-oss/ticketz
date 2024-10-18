@@ -617,7 +617,12 @@ const MessageInputCustom = (props) => {
     const formData = new FormData();
     formData.append("fromMe", true);
 
-    inputMessage && formData.append("body", inputMessage);
+    inputMessage && formData.append(
+      "body",
+      signMessage
+        ? `*${user?.name}:*\n${inputMessage.trim()}`
+        : inputMessage.trim()
+    );
 
     medias.forEach(async (media, idx) => {
 
