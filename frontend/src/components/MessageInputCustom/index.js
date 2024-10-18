@@ -576,8 +576,9 @@ const MessageInputCustom = (props) => {
       setQuickMessageAttachment(null);
       setReplyingMessage(null);
       setEditingMessage(null);
+      setInputMessage("");
     };
-  }, [ticketId, setReplyingMessage, setEditingMessage]);
+  }, [ticketId]);
 
   // const handleChangeInput = e => {
   // 	if (isObject(e) && has(e, 'value')) {
