@@ -15,7 +15,6 @@ interface Request {
 
 const CreateTicketService = async ({
   contactId,
-  status,
   userId,
   queueId,
   companyId
@@ -26,31 +25,15 @@ const CreateTicketService = async ({
 
   const { isGroup } = await ShowContactService(contactId, companyId);
 
-  const [{ id }] = await Ticket.findOrCreate({
-    where: {
-      contactId,
-      companyId
-    },
-    defaults: {
-      contactId,
-      companyId,
-      whatsappId: defaultWhatsapp.id,
-      status,
-      isGroup,
-      userId
-    }
+  const { id } = await Ticket.create({
+    contactId,
+    companyId,
+    queueId,
+    whatsappId: defaultWhatsapp.id,
+    status: "open",
+    isGroup,
+    userId
   });
-
-  await Ticket.update(
-    {
-      companyId,
-      queueId,
-      userId,
-      whatsappId: defaultWhatsapp.id,
-      status: "open"
-    },
-    { where: { id } }
-  );
 
   const ticket = await Ticket.findByPk(id, {
     include: ["contact", "queue", "whatsapp", "user"]
