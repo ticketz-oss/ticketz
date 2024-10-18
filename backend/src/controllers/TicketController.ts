@@ -11,7 +11,6 @@ import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import UpdateTicketService from "../services/TicketServices/UpdateTicketService";
 import ListTicketsServiceKanban from "../services/TicketServices/ListTicketsServiceKanban";
 
-
 type IndexQuery = {
   searchParam: string;
   pageNumber: string;
@@ -83,7 +82,10 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   return res.status(200).json({ tickets, count, hasMore });
 };
 
-export const kanban = async (req: Request, res: Response): Promise<Response> => {
+export const kanban = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const {
     pageNumber,
     status,
@@ -97,14 +99,12 @@ export const kanban = async (req: Request, res: Response): Promise<Response> => 
     withUnreadMessages
   } = req.query as IndexQuery;
 
-
   const userId = req.user.id;
   const { companyId } = req.user;
 
   let queueIds: number[] = [];
   let tagsIds: number[] = [];
   let usersIds: number[] = [];
-
 
   if (queueIdsStringified) {
     queueIds = JSON.parse(queueIdsStringified);
@@ -117,7 +117,6 @@ export const kanban = async (req: Request, res: Response): Promise<Response> => 
   if (userIdsStringified) {
     usersIds = JSON.parse(userIdsStringified);
   }
-
 
   const { tickets, count, hasMore } = await ListTicketsServiceKanban({
     searchParam,
@@ -132,7 +131,6 @@ export const kanban = async (req: Request, res: Response): Promise<Response> => 
     queueIds,
     withUnreadMessages,
     companyId
-
   });
 
   return res.status(200).json({ tickets, count, hasMore });
@@ -152,11 +150,11 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   const io = getIO();
   io.to(`company-${companyId}-${ticket.status}`)
-	.to(`queue-${ticket.queueId}-${ticket.status}`)
+    .to(`queue-${ticket.queueId}-${ticket.status}`)
     .emit(`company-${companyId}-ticket`, {
-    action: "update",
-    ticket
-  });
+      action: "update",
+      ticket
+    });
 
   return res.status(200).json(ticket);
 };
