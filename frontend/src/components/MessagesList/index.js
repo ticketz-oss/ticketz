@@ -458,6 +458,9 @@ const useStyles = makeStyles((theme) => ({
   },
   previewThumbnail: {
     width: "383px",
+  },
+  audioBottom: {
+    marginBottom: "12px",
   }
 }));
 
@@ -687,7 +690,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
     if (!document && message.mediaType === "audio") {
 
       return (
-        <audio controls>
+        <audio className={classes.audioBottom} controls>
           <source src={message.mediaUrl} type="audio/ogg"></source>
         </audio>
       );
