@@ -576,8 +576,9 @@ const MessageInputCustom = (props) => {
       setQuickMessageAttachment(null);
       setReplyingMessage(null);
       setEditingMessage(null);
+      setInputMessage("");
     };
-  }, [ticketId, setReplyingMessage, setEditingMessage]);
+  }, [ticketId]);
 
   // const handleChangeInput = e => {
   // 	if (isObject(e) && has(e, 'value')) {
@@ -616,7 +617,12 @@ const MessageInputCustom = (props) => {
     const formData = new FormData();
     formData.append("fromMe", true);
 
-    inputMessage && formData.append("body", inputMessage);
+    inputMessage && formData.append(
+      "body",
+      signMessage
+        ? `*${user?.name}:*\n${inputMessage.trim()}`
+        : inputMessage.trim()
+    );
 
     medias.forEach(async (media, idx) => {
 
