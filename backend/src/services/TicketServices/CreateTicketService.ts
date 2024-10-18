@@ -52,7 +52,9 @@ const CreateTicketService = async ({
     { where: { id } }
   );
 
-  const ticket = await Ticket.findByPk(id, { include: ["contact", "queue"] });
+  const ticket = await Ticket.findByPk(id, {
+    include: ["contact", "queue", "whatsapp", "user"]
+  });
 
   if (!ticket) {
     throw new AppError("ERR_CREATING_TICKET");
