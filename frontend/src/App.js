@@ -172,7 +172,7 @@ const App = () => {
 
   return (
     <>
-    <Favicon url={ ((appLogoFavicon) ? getBackendURL()+"/public/" + theme.appLogoFavicon : defaultLogoFavicon ) } />
+    <Favicon url={ ((appLogoFavicon) ? JSON.parse(theme.appLogoFavicon) : defaultLogoFavicon ) } />
     <ColorModeContext.Provider value={{ colorMode }}>
       <ThemeProvider theme={theme}>
         <QueryClientProvider client={queryClient}>
