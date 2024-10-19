@@ -71,7 +71,7 @@ const useStyles = makeStyles(theme => ({
 	logoImg: {
     width: "100%",
     margin: "0 auto",
-    content: "url(" + (theme.mode === "light" ? theme.calculatedLogoLight() : theme.calculatedLogoDark()) + ")"
+    content: `url("${theme.calculatedLogo()}")`
   }
 	
 }));

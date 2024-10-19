@@ -245,7 +245,7 @@ const useStyles = makeStyles((theme) => ({
     width: "192px",
     height: "68px",
     logo: theme.logo,
-    content: "url(" + (theme.mode === "light" ? theme.calculatedLogoLight() : theme.calculatedLogoDark()) + ")"
+    content: `url("${theme.calculatedLogo()}")`
   },
   logoIcon: {
     width: "48px",
