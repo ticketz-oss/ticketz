@@ -224,7 +224,7 @@ const NotificationsPopOver = (props) => {
       <>
         <Favicon
           animated={true}
-          url={ (theme?.appLogoFavicon) ? JSON.parse(theme.appLogoFavicon) : defaultLogoFavicon }
+          url={ (theme?.appLogoFavicon) ? theme.appLogoFavicon : defaultLogoFavicon }
           alertCount={notifications.length}
           iconSize={195}
         />

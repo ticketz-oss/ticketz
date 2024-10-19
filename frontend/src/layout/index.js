@@ -163,7 +163,7 @@ const useStyles = makeStyles((theme) => ({
     width: "192px",
     maxHeight: "72px",
     logo: theme.logo,
-    content: "url(" + (theme.mode === "light" ? theme.calculatedLogoLight() : theme.calculatedLogoDark()) + ")"
+    content: `url("${theme.calculatedLogo()}")`
   },
   hideLogo: {
 	display: "none",
