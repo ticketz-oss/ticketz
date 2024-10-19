@@ -34,6 +34,8 @@ for input_file in "$INPUT_DIR"/*.csv; do
     fi
 done
 
+export PGPASSWORD="${DB_PASS}"
+
 # Loop over each CSV file and generate \COPY command for each
 for input_file in "$INPUT_DIR"/*.csv; do
     # Get the table name from the CSV file name, ignoring the prefix
@@ -56,7 +58,7 @@ for input_file in "$INPUT_DIR"/*.csv; do
 
     # Generate the \COPY command to import the CSV file into the table
     echo "Importing data from '$input_file'"
-    PGPASSWORD="${DB_PASS}" psql -h "${DB_HOST}" -U "${DB_USER}" -d "${DB_NAME}" -c "\COPY \"$table\"(${columnList}) FROM '$input_file' WITH CSV HEADER" &> "${input_file}.log"
+    psql -h "${DB_HOST}" -U "${DB_USER}" -d "${DB_NAME}" -c "\COPY \"$table\"(${columnList}) FROM '$input_file' WITH CSV HEADER" &> "${input_file}.log"
 
     if [ $? -gt 0 ]; then
         echo "Error importing $input_file:"
@@ -73,13 +75,21 @@ for input_file in "$INPUT_DIR"/*.csv; do
 done
 
 echo "Clearing Whatsapp Sessions"
-PGPASSWORD="${DB_PASS}" psql -h "${DB_HOST}" -U "${DB_USER}" -d "${DB_NAME}" -c "UPDATE \"Whatsapps\" SET session='', status='DISCONNECTED'" &> /tmp/clearwhatsapps.log
+psql -h "${DB_HOST}" -U "${DB_USER}" -d "${DB_NAME}" -c "UPDATE \"Whatsapps\" SET session='', status='DISCONNECTED'" &> /tmp/clearwhatsapps.log
 
 if [ $? -gt 0 ]; then
     echo "Error clearing Whatsapp sessions:"
     cat /tmp/clearwhatsapps.log
     exit 100
 fi
-    
+
+echo "Fixing sequences"
+cat ./scripts/fix-sequence.sql | psql -h "${DB_HOST}" -U "${DB_USER}" -d "${DB_NAME}" &> /tmp/fixsequences.log
+
+if [ $? -gt 0 ]; then
+    echo "Error fixing sequences:"
+    cat /tmp/fixsequences.log
+    exit 100
+fi
 
 exit 1
