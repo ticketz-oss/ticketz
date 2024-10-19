@@ -33,9 +33,10 @@ const useStyles = makeStyles(theme => ({
 		},
 	},
   logoImg: {
-    width: "100%",
+    maxWidth: "100%",
+    height: "fit-content",
     margin: "0 auto",
-    content: "url(" + ((theme.appLogoLight || theme.appLogoDark) ? getBackendURL()+"/public/"+  (theme.mode === "light" ? theme.appLogoLight || theme.appLogoDark : theme.appLogoDark || theme.appLogoLight  )   : (theme.mode === "light" ? logo : logoDark)) + ")"
+    content: `url("${theme.calculatedLogo()}")`
   },
   ticketzLogoImg: {
     width: "100%",

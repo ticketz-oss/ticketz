@@ -251,7 +251,7 @@ const useStyles = makeStyles((theme) => ({
     width: "48px",
     height: "48px",
     logo: theme.logo,
-    content: "url(" + theme.calculatedLogoFavicon() + ")"
+    content: `url("${theme.calculatedLogoFavicon()}")`
   },
   version: {
     margin: "auto",
