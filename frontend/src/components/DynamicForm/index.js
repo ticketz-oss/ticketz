@@ -11,6 +11,7 @@ a form field. It is an array on the follwing format:
     name: string;
     title: string;
     description: string;
+    lgWidth: number;     // from 1 to 12, default to 4
     type: "text" | "textarea" | "select" | "checkbox";
     options?: { value: string; label: string }[];
     required: boolean;
@@ -18,7 +19,7 @@ a form field. It is an array on the follwing format:
 */
 
 import React from "react";
-import { Button, Grid, FormControl, InputLabel, TextField, Checkbox, Select, MenuItem, makeStyles, Input } from "@material-ui/core";
+import { Grid, FormControl, InputLabel, Select, MenuItem, makeStyles, Input, Switch, FormControlLabel } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
   maxWidth: {
@@ -40,12 +41,7 @@ export const DynamicForm = ({ schema, data, setData, variant }) => {
     });
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-  };
-
   return (
-    <form onSubmit={handleSubmit}>
       <Grid container>
         {schema.map((field, index) => {
           console.log(`field ${index}`, field);
@@ -54,37 +50,60 @@ export const DynamicForm = ({ schema, data, setData, variant }) => {
           }
 
           return (
-            <Grid key={field.name} item lg={4} xs={12}>
+            <Grid key={field.name} item lg={field.lgWidth || 4} xs={12}>
               <FormControl className={classes.maxWidth}>
-                <InputLabel htmlFor={field.name}>{field.title}</InputLabel>
-                {field.type === "text" || field.type === "textarea" ? (
-                  <Input
-                    name={field.name}
-                    id={field.name}
-                    variant={variant || "standard"}
-                    value={data[field.name]}
-                    onChange={handleChange}
-                  />
+                {field.type === "text" ? (
+                  <>
+                    <InputLabel htmlFor={field.name}>{field.title}</InputLabel>
+                    <Input
+                      name={field.name}
+                      id={field.name}
+                      variant={variant || "standard"}
+                      value={data[field.name]}
+                      onChange={handleChange}
+                    />
+                  </>
+                ) : field.type === "textarea" ? (
+                    <>
+                      <InputLabel htmlFor={field.name}>{field.title}</InputLabel>
+                      <Input
+                        name={field.name}
+                        id={field.name}
+                        variant={variant || "standard"}
+                        value={data[field.name]}
+                        onChange={handleChange}
+                        multiline
+                        rows={4}
+                      />
+                    </>
                 ) : field.type === "select" ? (
-                  <Select
-                    name={field.name}
-                    id={field.name}
-                    variant={variant || "standard"}
-                    value={data[field.name]}
-                    onChange={handleChange}
-                  >
-                    {field.options.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
+                  <>
+                    <InputLabel htmlFor={field.name}>{field.title}</InputLabel>
+                    <Select
+                      name={field.name}
+                      id={field.name}
+                      variant={variant || "standard"}
+                      value={data[field.name] || ""}
+                      onChange={handleChange}
+                    >
+                      {field.options.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </>
                 ) : field.type === "checkbox" ? (
-                  <Checkbox
-                    name={field.name}
-                    id={field.name}
-                    checked={data[field.name]}
-                    onChange={handleChange}
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        name={field.name}
+                        id={field.name}
+                        checked={!!data[field.name]}
+                        onChange={handleChange}
+                      />
+                    }
+                    label={field.title}
                   />
                 ) : null}
               </FormControl>
@@ -92,6 +111,5 @@ export const DynamicForm = ({ schema, data, setData, variant }) => {
           );
         })}
       </Grid>
-    </form>
   );
 };
