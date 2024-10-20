@@ -31,17 +31,11 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
-  const { name, color, greetingMessage, outOfHoursMessage, schedules } =
-    req.body;
   const { companyId } = req.user;
 
   const queue = await CreateQueueService({
-    name,
-    color,
-    greetingMessage,
-    companyId,
-    outOfHoursMessage,
-    schedules
+    ...req.body,
+    companyId
   });
 
   const io = getIO();
