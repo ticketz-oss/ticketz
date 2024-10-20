@@ -133,10 +133,16 @@ const QueueModal = ({ open, onClose, queueId }) => {
   }, []);
   
   useEffect(() => {
+    if (!queueId) {
+      setSelectedIntegration("");
+      setIntegrationConfigData({});
+    }
+  }, [queueId]);
+  
+  useEffect(() => {
     if (selectedIntegration) {
       api.get(`/integrations/${selectedIntegration}`).then(({ data }) => {
         setIntegrationConfigSchema(data.fields);
-        setIntegrationConfigData({});
       });
     }
   }, [selectedIntegration]);
@@ -150,6 +156,13 @@ const QueueModal = ({ open, onClose, queueId }) => {
           return { ...prevState, ...data };
         });
         setSchedules(data.schedules);
+        if (data.integration) {
+          setSelectedIntegration(data.integration.driver);
+          setIntegrationConfigData(data.integration.configuration);
+        } else {
+          setSelectedIntegration("");
+          setIntegrationConfigData({});
+        }
       } catch (err) {
         toastError(err);
       }
@@ -191,15 +204,19 @@ const QueueModal = ({ open, onClose, queueId }) => {
 
   const handleSaveQueue = async (values) => {
     try {
+      const integration = selectedIntegration ? {
+        driver: selectedIntegration,
+        configuration: integrationConfigData,
+      } : null;
       if (queueId) {
-        await api.put(`/queue/${queueId}`, { ...values, schedules });
+        await api.put(`/queue/${queueId}`, { ...values, schedules, integration });
         if (attachment != null) {
           const formData = new FormData();
           formData.append("file", attachment);
           await api.post(`/queue/${queueId}/media-upload`, formData);
         }
       } else {
-        await api.post("/queue", { ...values, schedules });
+        await api.post("/queue", { ...values, schedules, integration });
         if (attachment != null) {
           const formData = new FormData();
           formData.append("file", attachment);
