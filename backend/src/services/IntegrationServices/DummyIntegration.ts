@@ -61,6 +61,7 @@ export class DummyIntegration implements IntegrationDriver {
           name: "dummy_textarea",
           title: "Dummy Textarea",
           description: "This is a dummy textarea",
+          lgWidth: 12,
           type: "textarea",
           required: true
         }

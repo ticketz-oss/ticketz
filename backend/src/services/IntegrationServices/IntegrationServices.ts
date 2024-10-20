@@ -36,6 +36,7 @@ export type IntegrationOptions = {
     name: string;
     title: string;
     description: string;
+    lgWidth?: number;
     type: "text" | "textarea" | "select" | "checkbox";
     options?: { value: string; label: string }[];
     required: boolean;
