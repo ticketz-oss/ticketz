@@ -5,7 +5,7 @@ const ShowQueueService = async (
   queueId: number | string,
   companyId: number
 ): Promise<Queue> => {
-  const queue = await Queue.findByPk(queueId);
+  const queue = await Queue.findByPk(queueId, { include: "integration" });
 
   if (queue?.companyId !== companyId) {
     throw new AppError("Não é possível consultar registros de outra empresa");
