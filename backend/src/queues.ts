@@ -469,7 +469,7 @@ async function handlePrepareContact(job: { data: PrepareContactData }) {
         variables,
         contact
       );
-      campaignShipping.message = `\u200c${message}`;
+      campaignShipping.message = `${message}`;
     }
 
     if (campaign.confirmation) {
@@ -482,7 +482,7 @@ async function handlePrepareContact(job: { data: PrepareContactData }) {
           variables,
           contact
         );
-        campaignShipping.confirmationMessage = `\u200c${message}`;
+        campaignShipping.confirmationMessage = `${message}`;
       }
     }
 

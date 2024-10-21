@@ -123,7 +123,7 @@ const UpdateTicketService = async ({
         if (ticketTraking.ratingAt == null && !justClose) {
           const ratingTxt =
             ratingMessage?.trim() || "Por favor avalie nosso atendimento";
-          const bodyRatingMessage = `\u200e${ratingTxt}\n\n*Digite uma nota de 1 a 5*\n`;
+          const bodyRatingMessage = `${ratingTxt}\n\n*Digite uma nota de 1 a 5*\n`;
 
           if (ticket.channel === "whatsapp") {
             await SendWhatsAppMessage({ body: bodyRatingMessage, ticket });
@@ -160,7 +160,7 @@ const UpdateTicketService = async ({
         !isNil(complationMessage) &&
         complationMessage !== ""
       ) {
-        const body = `\u200e${complationMessage}`;
+        const body = `${complationMessage}`;
 
         if (ticket.channel === "whatsapp" && !ticket.isGroup) {
           const sentMessage = await SendWhatsAppMessage({ body, ticket });
@@ -211,7 +211,7 @@ const UpdateTicketService = async ({
               ticket.isGroup ? "g.us" : "s.whatsapp.net"
             }`,
             {
-              text: `\u200e${transferMessage}`
+              text: `${transferMessage}`
             }
           );
           await verifyMessage(queueChangedMessage, ticket, ticket.contact);
@@ -221,7 +221,7 @@ const UpdateTicketService = async ({
               ticket.isGroup ? "g.us" : "s.whatsapp.net"
             }`,
             {
-              text: "\u200eVocê foi transferido, em breve iremos iniciar seu atendimento."
+              text: "Você foi transferido, em breve iremos iniciar seu atendimento."
             }
           );
           await verifyMessage(queueChangedMessage, ticket, ticket.contact);
@@ -233,7 +233,7 @@ const UpdateTicketService = async ({
           `Checking if ${ticket.contact.number} is a valid ${ticket.channel} contact`
         );
         await sendFaceMessage({
-          body: "\u200eVocê foi transferido, em breve iremos iniciar seu atendimento.",
+          body: "Você foi transferido, em breve iremos iniciar seu atendimento.",
           ticket
         });
       }
