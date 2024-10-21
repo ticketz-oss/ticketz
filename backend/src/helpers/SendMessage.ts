@@ -22,7 +22,7 @@ export const SendMessage = async (
 
     let message: proto.WebMessageInfo;
 
-    const body = `\u200e${messageData.body}`;
+    const body = `${messageData.body}`;
 
     if (messageData.mediaPath) {
       const options = await getMessageFileOptions(body, messageData.mediaPath);
