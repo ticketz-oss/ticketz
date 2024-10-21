@@ -1,4 +1,4 @@
-import { WASocket, WAMessage } from "@whiskeysockets/baileys";
+import { WAMessage } from "@whiskeysockets/baileys";
 import * as Sentry from "@sentry/node";
 import AppError from "../../errors/AppError";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
@@ -6,6 +6,7 @@ import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
 
 import formatBody from "../../helpers/Mustache";
+import { verifyMessage } from "./wbotMessageListener";
 
 interface Request {
   body: string;
@@ -59,9 +60,7 @@ const SendWhatsAppMessage = async ({
         ...options
       }
     );
-
-    await ticket.update({ lastMessage: formattedBody });
-
+    await verifyMessage(sentMessage, ticket, ticket.contact);
     return sentMessage;
   } catch (err) {
     Sentry.captureException(err);

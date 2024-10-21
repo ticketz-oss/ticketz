@@ -511,7 +511,7 @@ const saveMediaToFile = async (media) => {
   }
 }
 
-const verifyMediaMessage = async (
+export const verifyMediaMessage = async (
   msg: proto.IWebMessageInfo,
   ticket: Ticket,
   contact: Contact,

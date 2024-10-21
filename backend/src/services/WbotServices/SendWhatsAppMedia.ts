@@ -5,10 +5,11 @@ import { exec } from "child_process";
 import path from "path";
 import ffmpegPath from "@ffmpeg-installer/ffmpeg";
 import mime from "mime-types";
-import iconv from 'iconv-lite';
+import iconv from "iconv-lite";
 import AppError from "../../errors/AppError";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
 import Ticket from "../../models/Ticket";
+import { verifyMediaMessage } from "./wbotMessageListener";
 
 interface Request {
   media: Express.Multer.File;
@@ -185,9 +186,7 @@ const SendWhatsAppMedia = async ({
         ...options
       }
     );
-
-    await ticket.update({ lastMessage: media.filename });
-
+    await verifyMediaMessage(sentMessage, ticket, ticket.contact);
     return sentMessage;
   } catch (err) {
     Sentry.captureException(err);
