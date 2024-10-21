@@ -2,7 +2,6 @@ import * as Sentry from "@sentry/node";
 import makeWASocket, {
   WASocket,
   DisconnectReason,
-  fetchLatestBaileysVersion,
   makeCacheableSignalKeyStore,
   makeInMemoryStore,
   isJidBroadcast,
@@ -85,6 +84,21 @@ function getGreaterVersion(a, b) {
   return a;
 }
 
+const waVersion = [2, 3000, 1015891883];
+
+const getProjectWAVersion = async () => {
+  try {
+    const res = await fetch(
+      "https://raw.githubusercontent.com/ticketz-oss/ticketz/refs/heads/main/backend/src/waversion.json"
+    );
+    const version = await res.json();
+    return version;
+  } catch (error) {
+    console.warn("Failed to get current WA Version from project repository");
+  }
+  return waVersion;
+};
+
 export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
   return new Promise((resolve, reject) => {
     try {
@@ -99,13 +113,12 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
 
         const { id, name, provider } = whatsappUpdate;
 
-        const { version: autoVersion, isLatest } =
-          await fetchLatestBaileysVersion();
+        const autoVersion = await getProjectWAVersion();
         const isLegacy = provider === "stable";
 
-        const version = getGreaterVersion(autoVersion, [2, 3000, 1015891883]);
+        const version = getGreaterVersion(autoVersion, waVersion);
 
-        logger.info(`using WA v${version.join(".")}, isLatest: ${isLatest}`);
+        logger.info(`using WA v${version.join(".")}`);
         logger.info(`isLegacy: ${isLegacy}`);
         logger.info(`Starting session ${name}`);
         let retriesQrCode = 0;
