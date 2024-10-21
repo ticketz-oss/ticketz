@@ -162,7 +162,7 @@ const UpdateTicketService = async ({
         if (ticketTraking.ratingAt == null && !justClose) {
           const ratingTxt =
             ratingMessage?.trim() || "Por favor avalie nosso atendimento";
-          const bodyRatingMessage = `\u200e${ratingTxt}\n\n*Digite uma nota de 1 a 5*\n\nEnvie *\`!\`* para retornar ao atendimento`;
+          const bodyRatingMessage = `${ratingTxt}\n\n*Digite uma nota de 1 a 5*\n\nEnvie *\`!\`* para retornar ao atendimento`;
 
           if (ticket.channel === "whatsapp") {
             await SendWhatsAppMessage({ body: bodyRatingMessage, ticket });
@@ -216,7 +216,7 @@ const UpdateTicketService = async ({
         !isNil(complationMessage) &&
         complationMessage !== ""
       ) {
-        const body = `\u200e${complationMessage}`;
+        const body = `${complationMessage}`;
 
         if (ticket.channel === "whatsapp" && !isGroup) {
           const sentMessage = await SendWhatsAppMessage({ body, ticket });
@@ -345,7 +345,7 @@ const UpdateTicketService = async ({
           `Checking if ${ticket.contact.number} is a valid ${ticket.channel} contact`
         );
         await sendFaceMessage({
-          body: "\u200eVocê foi transferido, em breve iremos iniciar seu atendimento.",
+          body: "Você foi transferido, em breve iremos iniciar seu atendimento.",
           ticket
         });
       }

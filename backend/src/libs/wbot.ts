@@ -147,6 +147,7 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
         wsocket = makeWASocket({
           logger: loggerBaileys,
           printQRInTerminal: false,
+          emitOwnEvents: false,
           browser: [clientName, "Desktop", appVersion],
           auth: {
             creds: state.creds,
