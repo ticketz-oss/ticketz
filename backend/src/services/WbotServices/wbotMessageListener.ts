@@ -611,7 +611,7 @@ export const verifyMediaMessage = async (
   }
 
   await ticket.update({
-    lastMessage: body || media?.filename
+    lastMessage: body || media?.filename || "🗎"
   });
 
   const newMessage = await CreateMessageService({
@@ -1558,7 +1558,7 @@ const handleMessage = async (
     const unpackedMessage = getUnpackedMessage(msg);
     const messageMedia = getMessageMedia(unpackedMessage);
     if (msg.key.fromMe) {
-      if (bodyMessage?.startsWith("")) return;
+      if (bodyMessage?.startsWith("\u200e")) return;
 
       if (
         !messageMedia &&
