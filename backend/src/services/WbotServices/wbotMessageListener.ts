@@ -10,7 +10,6 @@ import {
   extractMessageContent,
   getContentType,
   jidNormalizedUser,
-  MediaType,
   MessageUpsertType,
   proto,
   WAMessage,
@@ -59,6 +58,13 @@ import CheckSettings, { GetCompanySetting } from "../../helpers/CheckSettings";
 import Whatsapp from "../../models/Whatsapp";
 import { SimpleObjectCache } from "../../helpers/simpleObjectCache";
 import { CreateInternalMessageService } from "../MessageServices/CreateInternalMessageService";
+import {
+  IntegrationMessage,
+  IntegrationMessageTypes,
+  IntegrationServices
+} from "../IntegrationServices/IntegrationServices";
+import Integration from "../../models/Integration";
+import IntegrationSession from "../../models/IntegrationSession";
 
 type Session = WASocket & {
   id?: number;
@@ -82,6 +88,8 @@ const wbotMutex = new Mutex();
 const ackMutex = new Mutex();
 
 const groupContactCache = new SimpleObjectCache(1000 * 30, logger);
+
+const integrationServices = IntegrationServices.getInstance();
 
 const getTypeMessage = (msg: proto.IWebMessageInfo): string => {
   return getContentType(msg.message);
@@ -373,6 +381,19 @@ const downloadThumbnail = async ({
   return media;
 };
 
+export const normalizeMediaType = (
+  mimetype: string
+): "audio" | "video" | "image" | "document" => {
+  const types = ["audio", "video", "image", "document"];
+  const type = mimetype.split("/")[0];
+
+  if (!types.includes(type)) {
+    return "document";
+  }
+
+  return type as "audio" | "video" | "image" | "document";
+};
+
 const downloadMedia = async (
   msg: proto.IWebMessageInfo,
   wbot: Session,
@@ -414,11 +435,7 @@ const downloadMedia = async (
   // eslint-disable-next-line no-nested-ternary
   const messageType = unpackedMessage?.documentMessage
     ? "document"
-    : message.mimetype.split("/")[0].replace("application", "document")
-    ? (message.mimetype
-        .split("/")[0]
-        .replace("application", "document") as MediaType)
-    : (message.mimetype.split("/")[0] as MediaType);
+    : normalizeMediaType(message.mimetype);
 
   let stream: Transform;
   let contDownload = 0;
@@ -593,7 +610,7 @@ export const verifyMediaMessage = async (
     fromMe: msg.key.fromMe,
     read: msg.key.fromMe,
     mediaUrl: media?.filename,
-    mediaType: media?.mimetype.split("/")[0],
+    mediaType: normalizeMediaType(media?.mimetype),
     thumbnailUrl: thumbnailMedia?.filename,
     quotedMsgId: quotedMsg?.id,
     ack: msg.status,
@@ -651,7 +668,7 @@ export const verifyMessage = async (
   ticket: Ticket,
   contact: Contact,
   userId: number = null
-) => {
+): Promise<Message> => {
   const io = getIO();
   const quotedMsg = await verifyQuotedMessage(msg);
   const body = getBodyMessage(msg);
@@ -662,7 +679,7 @@ export const verifyMessage = async (
     contactId: msg.key.fromMe ? undefined : contact.id,
     body,
     fromMe: msg.key.fromMe,
-    mediaType: getTypeMessage(msg),
+    mediaType: null,
     read: msg.key.fromMe,
     quotedMsgId: quotedMsg?.id,
     ack: msg.status,
@@ -680,7 +697,10 @@ export const verifyMessage = async (
     lastMessage: body
   });
 
-  await CreateMessageService({ messageData, companyId: ticket.companyId });
+  const newMesssage = await CreateMessageService({
+    messageData,
+    companyId: ticket.companyId
+  });
 
   if (!msg.key.fromMe && ticket.status === "closed") {
     await ticket.update({ status: "pending" });
@@ -709,13 +729,15 @@ export const verifyMessage = async (
         ticketId: ticket.id
       });
   }
+
+  return newMesssage;
 };
 
 const verifyEditedMessage = async (
   msg: proto.IMessage,
   ticket: Ticket,
   msgId: string
-) => {
+): Promise<Message> => {
   const editedType = getTypeEditedMessage(msg);
 
   let editedText: string;
@@ -743,7 +765,7 @@ const verifyEditedMessage = async (
       break;
     }
     default: {
-      return;
+      return null;
     }
   }
 
@@ -776,7 +798,10 @@ const verifyEditedMessage = async (
     lastMessage: messageData.body
   });
 
-  await CreateMessageService({ messageData, companyId: ticket.companyId });
+  const newMessage = await CreateMessageService({
+    messageData,
+    companyId: ticket.companyId
+  });
 
   const io = getIO();
 
@@ -787,6 +812,8 @@ const verifyEditedMessage = async (
       ticket,
       ticketId: ticket.id
     });
+
+  return newMessage;
 };
 
 const verifyDeleteMessage = async (
@@ -1019,9 +1046,139 @@ const sendMenu = async (
   }
 };
 
-const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue) => {
+const getTicketJid = (ticket: Ticket) => {
+  return `${ticket.contact.number}@${
+    ticket.isGroup ? "g.us" : "s.whatsapp.net"
+  }`;
+};
+
+export const wbotReplyHandler = async (
+  wbot: Session,
+  ticket: Ticket,
+  reply: IntegrationMessage
+) => {
+  if (!reply?.content && !reply?.mediaUrl) {
+    return;
+  }
+
+  if (reply.type === "image" && reply.mediaUrl) {
+    await wbot.sendPresenceUpdate("composing", getTicketJid(ticket));
+    await wbot.sendMessage(getTicketJid(ticket), {
+      image: { url: reply.mediaUrl },
+      caption: reply.content
+    });
+    return;
+  }
+
+  if (reply.type === "audio" && reply.mediaUrl) {
+    await wbot.sendPresenceUpdate("recording", getTicketJid(ticket));
+    await wbot.sendMessage(getTicketJid(ticket), {
+      audio: { url: reply.mediaUrl },
+      ptt: true,
+      caption: reply.content
+    });
+    return;
+  }
+
+  if (reply.type === "video" && reply.mediaUrl) {
+    await wbot.sendPresenceUpdate("composing", getTicketJid(ticket));
+    await wbot.sendMessage(getTicketJid(ticket), {
+      video: { url: reply.mediaUrl },
+      caption: reply.content
+    });
+    return;
+  }
+
+  if (reply.type === "gif" && reply.mediaUrl) {
+    await wbot.sendPresenceUpdate("composing", getTicketJid(ticket));
+    await wbot.sendMessage(getTicketJid(ticket), {
+      video: { url: reply.mediaUrl },
+      gifPlayback: true,
+      caption: reply.content
+    });
+    return;
+  }
+
+  await wbot.sendPresenceUpdate("composing", getTicketJid(ticket));
+  await wbot
+    .sendMessage(getTicketJid(ticket), {
+      text: reply.content
+    })
+    .then(async sentMessage => {
+      await verifyMessage(sentMessage, ticket, ticket.contact);
+    })
+    .catch(error => {
+      logger.error(
+        { error },
+        `Error sending integration reply: ${error.message}`
+      );
+    });
+};
+
+const startQueue = async (
+  wbot: Session,
+  ticket: Ticket,
+  queue: Queue,
+  message: Message = null
+) => {
   const { companyId, contact } = ticket;
   let chatbot = false;
+
+  const integration = await Integration.findOne({
+    where: {
+      queueId: queue.id
+    }
+  });
+
+  if (integration) {
+    let integrationMessage = null;
+
+    if (message) {
+      integrationMessage = { type: "text" };
+      const messagedetails = {
+        id: message.id,
+        body: message.body,
+        mediaType: message.mediaType,
+        messageMedia: message.mediaUrl
+      };
+      logger.debug({ messagedetails }, "Integration message details");
+      integrationMessage.content = message.body;
+      integrationMessage.type =
+        (message.mediaType as IntegrationMessageTypes) || "text";
+
+      if (message.mediaUrl) {
+        integrationMessage.mediaUrl = message.mediaUrl;
+      }
+    }
+
+    await UpdateTicketService({
+      ticketData: { queueId: queue.id, chatbot: true, status: "pending" },
+      ticketId: ticket.id,
+      companyId: ticket.companyId
+    });
+
+    ticket.reload();
+
+    const { message: reply } = await integrationServices.startSession(
+      integration,
+      ticket,
+      integrationMessage,
+      async (t, r) => {
+        await wbotReplyHandler(wbot, t, r);
+      }
+    );
+
+    if (reply?.content) {
+      const sentMessage = await wbot.sendMessage(
+        `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
+        {
+          text: reply.content
+        }
+      );
+      await verifyMessage(sentMessage, ticket, contact);
+    }
+    return;
+  }
 
   if (queue?.options) {
     chatbot = queue.options.length > 0;
@@ -1125,6 +1282,7 @@ const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue) => {
 const verifyQueue = async (
   wbot: Session,
   msg: proto.IWebMessageInfo | null,
+  newMessage: Message,
   ticket: Ticket,
   contact: Contact,
   ignoreMessage = false
@@ -1135,7 +1293,7 @@ const verifyQueue = async (
   );
 
   if (queues.length === 1) {
-    await startQueue(wbot, ticket, head(queues));
+    await startQueue(wbot, ticket, head(queues), newMessage);
     return;
   }
 
@@ -1329,6 +1487,7 @@ const handleRating = async (
 const handleChartbot = async (
   ticket: Ticket,
   msg: WAMessage,
+  newMessage: Message,
   wbot: Session,
   dontReadTheFirstQuestion = false
 ) => {
@@ -1343,12 +1502,54 @@ const handleChartbot = async (
     order: [["options", "option", "ASC"]]
   });
 
+  const integrationSession = await IntegrationSession.findOne({
+    where: {
+      ticketId: ticket.id
+    },
+    include: [
+      {
+        model: Integration,
+        as: "integration"
+      }
+    ]
+  });
+
+  if (integrationSession) {
+    const message: IntegrationMessage = { type: "text" };
+
+    if (msg) {
+      const messagedetails = {
+        id: newMessage.id,
+        body: newMessage.body,
+        mediaType: newMessage.mediaType,
+        messageMedia: newMessage.mediaUrl
+      };
+      logger.debug({ messagedetails }, "Integration message details");
+      message.content = newMessage.body;
+      message.type =
+        (newMessage.mediaType as IntegrationMessageTypes) || "text";
+      if (newMessage.mediaUrl) {
+        message.mediaUrl = newMessage.mediaUrl;
+      }
+    }
+
+    integrationServices.continueSession(
+      integrationSession,
+      message,
+      async (t, r) => {
+        await wbotReplyHandler(wbot, t, r);
+      }
+    );
+
+    return;
+  }
+
   const messageBody = getBodyMessage(msg);
 
   if (messageBody === "#") {
     // voltar para o menu inicial
     await ticket.update({ queueOptionId: null, chatbot: false, queueId: null });
-    await verifyQueue(wbot, msg, ticket, ticket.contact);
+    await verifyQueue(wbot, msg, null, ticket, ticket.contact);
     return;
   }
 
@@ -1731,23 +1932,42 @@ const handleMessage = async (
 
     const isNewTicket = ticketMessages.length === 0;
 
+    const integrationSession = await IntegrationSession.findOne({
+      where: {
+        ticketId: ticket.id
+      }
+    });
+
     // voltar para o menu inicial
 
-    if (bodyMessage === "#" && !isGroup) {
+    if (
+      bodyMessage === "#" &&
+      ticket.chatbot &&
+      !isGroup &&
+      !integrationSession
+    ) {
       await ticket.update({
         queueOptionId: null,
         chatbot: false,
         queueId: null
       });
-      await verifyQueue(wbot, msg, ticket, ticket.contact, true);
+      await verifyQueue(wbot, msg, null, ticket, ticket.contact, true);
       return;
     }
+
+    let newMessage: Message = null;
 
     if (
       messageMedia ||
       msg?.message?.extendedTextMessage?.thumbnailDirectPath
     ) {
-      await verifyMediaMessage(msg, ticket, contact, wbot, messageMedia);
+      newMessage = await verifyMediaMessage(
+        msg,
+        ticket,
+        contact,
+        wbot,
+        messageMedia
+      );
     } else if (
       msg.message?.editedMessage?.message?.protocolMessage?.editedMessage
     ) {
@@ -1767,7 +1987,7 @@ const handleMessage = async (
     } else if (msg.message?.protocolMessage?.type === 0) {
       await verifyDeleteMessage(msg.message.protocolMessage, ticket);
     } else {
-      await verifyMessage(msg, ticket, contact);
+      newMessage = await verifyMessage(msg, ticket, contact);
     }
 
     if (isGroup || contact.disableBot) {
@@ -1869,7 +2089,14 @@ const handleMessage = async (
       !ticket.userId &&
       whatsapp.queues.length >= 1
     ) {
-      await verifyQueue(wbot, msg, ticket, ticket.contact, isNewTicket);
+      await verifyQueue(
+        wbot,
+        msg,
+        newMessage,
+        ticket,
+        ticket.contact,
+        isNewTicket
+      );
     }
 
     const dontReadTheFirstQuestion = isNewTicket || ticket.queue === null;
@@ -1962,7 +2189,13 @@ const handleMessage = async (
     }
 
     if (ticket.chatbot && !msg.key.fromMe) {
-      await handleChartbot(ticket, msg, wbot, dontReadTheFirstQuestion);
+      await handleChartbot(
+        ticket,
+        msg,
+        newMessage,
+        wbot,
+        dontReadTheFirstQuestion
+      );
     }
   } catch (err) {
     console.log(err);
