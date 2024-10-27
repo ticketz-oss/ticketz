@@ -26,10 +26,14 @@
    
  */
 
+import GetTicketWbot from "../../helpers/GetTicketWbot";
 import { makeRandomId } from "../../helpers/MakeRandomId";
+import Integration from "../../models/Integration";
 import IntegrationSession from "../../models/IntegrationSession";
 import Ticket from "../../models/Ticket";
 import { logger } from "../../utils/logger";
+import { wbotReplyHandler } from "../WbotServices/wbotMessageListener";
+import UpdateTicketService from "../TicketServices/UpdateTicketService";
 
 export type IntegrationOptions = {
   fields: {
@@ -43,11 +47,23 @@ export type IntegrationOptions = {
   }[];
 };
 
+export type IntegrationMessageTypes =
+  | "text"
+  | "image"
+  | "video"
+  | "audio"
+  | "gif"
+  | "document";
+
 export type IntegrationMessage = {
-  type: "text" | "image" | "video" | "audio";
+  type: IntegrationMessageTypes;
   content?: string;
   mediaUrl?: string;
 };
+
+export interface ReplyHandler {
+  (ticket: Ticket, reply: IntegrationMessage): Promise<void>;
+}
 
 export interface IntegrationDriver {
   getName(): string;
@@ -57,14 +73,41 @@ export interface IntegrationDriver {
   startSession(
     ticket: Ticket,
     message: IntegrationMessage,
-    options: IntegrationOptions
+    token: string,
+    replyHandler: ReplyHandler,
+    options: any
   ): Promise<{ sessionId: string; message?: IntegrationMessage; data?: any }>;
   continueSession(
     integrationSession: IntegrationSession,
-    message: IntegrationMessage
-  ): Promise<IntegrationMessage>;
+    message: IntegrationMessage,
+    replyHandler: ReplyHandler
+  ): Promise<void>;
   endSession(integrationSession: IntegrationSession): Promise<void>;
 }
+
+const reloadIntegrationSession = async (
+  integrationSession: IntegrationSession
+) => {
+  await integrationSession.reload({
+    include: [
+      {
+        model: Integration,
+        as: "integration"
+      },
+      {
+        model: Ticket,
+        as: "ticket",
+        include: ["contact"]
+      }
+    ]
+  });
+};
+
+const updateTicket = async (ticket: Ticket, ticketData: any) => {
+  const { companyId, id: ticketId } = ticket;
+
+  await UpdateTicketService({ ticketData, ticketId, companyId });
+};
 
 export class IntegrationServices {
   // eslint-disable-next-line no-use-before-define
@@ -112,23 +155,26 @@ export class IntegrationServices {
   }
 
   public async startSession(
-    integrationName: string,
+    integration: Integration,
     ticket: Ticket,
     message: IntegrationMessage,
-    options: IntegrationOptions
+    replyHandler: ReplyHandler
   ): Promise<{ token: string; message?: IntegrationMessage; data?: any }> {
-    const integration = this.integrations[integrationName];
+    const driver = this.integrations[integration.driver];
     if (!integration) {
-      throw new Error(`Integration ${integrationName} not found`);
+      throw new Error(`Integration ${integration.driver} not found`);
     }
 
-    const {
-      sessionId,
-      message: reply,
-      data
-    } = await integration.startSession(ticket, message, options);
+    const token = `is-${makeRandomId(32)}`;
 
-    const token = makeRandomId(32);
+    const { sessionId, data } = await driver.startSession(
+      ticket,
+      message,
+      token,
+      replyHandler,
+      integration.configuration
+    );
+
     await IntegrationSession.create({
       token,
       sessionId,
@@ -137,53 +183,69 @@ export class IntegrationServices {
       integrationId: integration.id
     });
 
-    return { token, message: reply, data };
+    return { token, data };
   }
 
   public async continueSession(
-    token: string,
-    message: IntegrationMessage
-  ): Promise<IntegrationMessage> {
-    const integrationSession = await IntegrationSession.findOne({
-      where: { token },
-      include: ["integration"]
-    });
-
-    if (!integrationSession) {
-      throw new Error("Session not found");
-    }
-
-    const integration =
-      this.integrations[integrationSession.integration.driver];
-    if (!integration) {
+    integrationSession: IntegrationSession,
+    message: IntegrationMessage,
+    replyHandler: ReplyHandler
+  ): Promise<void> {
+    await reloadIntegrationSession(integrationSession);
+    const driver = this.integrations[integrationSession.integration.driver];
+    if (!driver) {
       throw new Error(
         `Integration ${integrationSession.integration.driver} not available`
       );
     }
 
-    return integration.continueSession(integrationSession, message);
+    return driver.continueSession(integrationSession, message, replyHandler);
   }
 
   public async endSession(token: string) {
     const integrationSession = await IntegrationSession.findOne({
       where: { token },
-      include: ["integration"]
+      include: ["integration", "ticket"]
     });
 
     if (!integrationSession) {
       throw new Error("Session not found");
     }
 
-    const integration =
-      this.integrations[integrationSession.integration.driver];
-    if (!integration) {
+    const { ticket } = integrationSession;
+
+    const driver = this.integrations[integrationSession.integration.driver];
+    if (!driver) {
       throw new Error(
         `Integration ${integrationSession.integration.driver} not available`
       );
     }
 
-    await integration.endSession(integrationSession);
+    await driver.endSession(integrationSession);
 
     integrationSession.destroy();
+
+    await updateTicket(ticket, { chatbot: false });
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  public async webhook(integrationSession: IntegrationSession, body: any) {
+    await reloadIntegrationSession(integrationSession);
+    const { action, message, ticketData } = body;
+
+    if (action === "endSession") {
+      await this.endSession(integrationSession.token);
+      return;
+    }
+
+    if (action === "updateTicket" && ticketData) {
+      updateTicket(integrationSession.ticket, ticketData);
+    }
+
+    // this needs modification when the system goes to be multi-channel
+    if (integrationSession.ticket.channel === "whatsapp" && message) {
+      const wbot = await GetTicketWbot(integrationSession.ticket);
+      wbotReplyHandler(wbot, integrationSession.ticket, message);
+    }
   }
 }

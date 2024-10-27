@@ -3,7 +3,8 @@ import Ticket from "../../models/Ticket";
 import {
   IntegrationDriver,
   IntegrationMessage,
-  IntegrationOptions
+  IntegrationOptions,
+  ReplyHandler
 } from "./IntegrationServices";
 import { logger } from "../../utils/logger";
 import IntegrationSession from "../../models/IntegrationSession";
@@ -73,35 +74,83 @@ export class DummyIntegration implements IntegrationDriver {
   async startSession(
     ticket: Ticket,
     message: IntegrationMessage,
+    token: string,
+    replyHandler: ReplyHandler,
     options: IntegrationOptions
   ): Promise<{ sessionId: string; message?: IntegrationMessage; data?: any }> {
     logger.debug(
-      { ticket, message, options },
+      { ticket, message, token, options },
       "Starting dummy integration session"
     );
+
+    const sessionId = makeRandomId(32);
+
+    replyHandler(ticket, {
+      type: "text",
+      content: `Hello, I am a dummy integration.\n\nI've received this parameters: \`\`\`\n${JSON.stringify(
+        { sessionId, token, ticket, message, options },
+        null,
+        2
+      )}\n\`\`\``
+    });
+
     return {
-      sessionId: makeRandomId(32),
-      message: {
-        type: "text",
-        content: "Hello, I am a dummy integration"
-      }
+      sessionId
     };
   }
 
   // eslint-disable-next-line class-methods-use-this
   async continueSession(
     integrationSession: IntegrationSession,
-    message: IntegrationMessage
-  ): Promise<IntegrationMessage> {
+    message: IntegrationMessage,
+    replyHandler: ReplyHandler
+  ): Promise<void> {
     logger.debug(
       { integrationSession, message },
       "Continuing dummy integration session"
     );
 
-    return {
+    await replyHandler(integrationSession.ticket, {
       type: "text",
-      content: "This is a dummy response"
-    };
+      content: `Now i'm received this': \`\`\`\n${JSON.stringify(
+        { message },
+        null,
+        2
+      )}\n\`\`\``
+    });
+
+    if (message.content === "!image") {
+      await replyHandler(integrationSession.ticket, {
+        type: "image",
+        content: "This is an image",
+        mediaUrl: "https://picsum.photos/200"
+      });
+    }
+
+    if (message.content === "!audio") {
+      await replyHandler(integrationSession.ticket, {
+        type: "audio",
+        content: "This is an audio",
+        mediaUrl: "https://static.ww.inf.br/skanews.ogg"
+      });
+    }
+
+    if (message.content === "!video") {
+      await replyHandler(integrationSession.ticket, {
+        type: "video",
+        content: "This is a video",
+        mediaUrl:
+          "https://videos.pexels.com/video-files/6950902/6950902-uhd_2560_1440_25fps.mp4"
+      });
+    }
+
+    if (message.content === "!gif") {
+      await replyHandler(integrationSession.ticket, {
+        type: "gif",
+        content: "This is a gif",
+        mediaUrl: "https://i.giphy.com/cZ7rmKfFYOvYI.mp4"
+      });
+    }
   }
 
   // eslint-disable-next-line class-methods-use-this
