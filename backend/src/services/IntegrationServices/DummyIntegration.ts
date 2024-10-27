@@ -76,7 +76,7 @@ export class DummyIntegration implements IntegrationDriver {
     message: IntegrationMessage,
     token: string,
     replyHandler: ReplyHandler,
-    options: IntegrationOptions
+    options: any
   ): Promise<{ sessionId: string; message?: IntegrationMessage; data?: any }> {
     logger.debug(
       { ticket, message, token, options },
