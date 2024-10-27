@@ -11,6 +11,7 @@ import {
 } from "./services/PaymentGatewayServices/PaymentGatewayServices";
 import { IntegrationServices } from "./services/IntegrationServices/IntegrationServices";
 import { DummyIntegration } from "./services/IntegrationServices/DummyIntegration";
+import { WebhookIntegration } from "./services/IntegrationServices/WebhookIntegration";
 
 // Environment Variable Validation
 if (!process.env.PORT) {
@@ -54,6 +55,7 @@ async function startServer() {
 // Initialize Integration Services
 const integrationServices = IntegrationServices.getInstance();
 integrationServices.registerIntegration(new DummyIntegration());
+integrationServices.registerIntegration(new WebhookIntegration());
 
 // Create and start the server
 const server = app.listen(process.env.PORT, async () => {
