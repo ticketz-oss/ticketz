@@ -4,6 +4,7 @@ import Ticket from "../../models/Ticket";
 import {
   IntegrationDriver,
   IntegrationMessage,
+  IntegrationMessageMetadata,
   IntegrationOptions,
   ReplyHandler
 } from "./IntegrationServices";
@@ -65,24 +66,37 @@ export class WebhookIntegration implements IntegrationDriver {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  async processMessage(ticket, message, replyHandler, options) {
+  async processMessage(
+    ticket,
+    message,
+    metadata,
+    token,
+    replyHandler,
+    options
+  ) {
     const { webhookUrl, webhookMethod, webhookToken } = options;
     try {
       let response;
       if (webhookMethod === "GET") {
         response = await axios.get(webhookUrl, {
           headers: webhookToken
-            ? { Authorization: `Bearer ${webhookToken}` }
-            : {},
+            ? {
+                "x-tz-metadata": JSON.stringify(metadata),
+                Authorization: `Bearer ${webhookToken}`
+              }
+            : { "x-tz-metadata": JSON.stringify(metadata) },
           params: message
         });
       } else if (webhookMethod === "POST") {
-        response = await axios.post(webhookUrl, message, {
-          headers: webhookToken
-            ? { Authorization: `Bearer ${webhookToken}` }
-            : {},
-          params: message
-        });
+        response = await axios.post(
+          webhookUrl,
+          { ...message, token, metadata },
+          {
+            headers: webhookToken
+              ? { Authorization: `Bearer ${webhookToken}` }
+              : {}
+          }
+        );
       }
 
       const responseData = response?.data;
@@ -102,6 +116,7 @@ export class WebhookIntegration implements IntegrationDriver {
   async startSession(
     ticket: Ticket,
     message: IntegrationMessage,
+    metadata: IntegrationMessageMetadata,
     token: string,
     replyHandler: ReplyHandler,
     options: any
@@ -112,7 +127,14 @@ export class WebhookIntegration implements IntegrationDriver {
     );
 
     const sessionId = makeRandomId(32);
-    this.processMessage(ticket, message, replyHandler, options);
+    this.processMessage(
+      ticket,
+      message,
+      metadata,
+      token,
+      replyHandler,
+      options
+    );
 
     return {
       sessionId
@@ -123,11 +145,14 @@ export class WebhookIntegration implements IntegrationDriver {
   async continueSession(
     integrationSession: IntegrationSession,
     message: IntegrationMessage,
+    metadata: IntegrationMessageMetadata,
     replyHandler: ReplyHandler
   ): Promise<void> {
     this.processMessage(
       integrationSession.ticket,
       message,
+      metadata,
+      integrationSession.token,
       replyHandler,
       integrationSession.integration.configuration
     );

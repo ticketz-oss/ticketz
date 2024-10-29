@@ -3,6 +3,7 @@ import Ticket from "../../models/Ticket";
 import {
   IntegrationDriver,
   IntegrationMessage,
+  IntegrationMessageMetadata,
   IntegrationOptions,
   ReplyHandler
 } from "./IntegrationServices";
@@ -74,6 +75,7 @@ export class DummyIntegration implements IntegrationDriver {
   async startSession(
     ticket: Ticket,
     message: IntegrationMessage,
+    metadata: IntegrationMessageMetadata,
     token: string,
     replyHandler: ReplyHandler,
     options: any
@@ -88,7 +90,7 @@ export class DummyIntegration implements IntegrationDriver {
     replyHandler(ticket, {
       type: "text",
       content: `Hello, I am a dummy integration.\n\nI've received this parameters: \`\`\`\n${JSON.stringify(
-        { sessionId, token, ticket, message, options },
+        { sessionId, token, ticket, message, metadata, options },
         null,
         2
       )}\n\`\`\``
@@ -103,6 +105,7 @@ export class DummyIntegration implements IntegrationDriver {
   async continueSession(
     integrationSession: IntegrationSession,
     message: IntegrationMessage,
+    metadata: IntegrationMessageMetadata,
     replyHandler: ReplyHandler
   ): Promise<void> {
     logger.debug(
@@ -113,7 +116,7 @@ export class DummyIntegration implements IntegrationDriver {
     await replyHandler(integrationSession.ticket, {
       type: "text",
       content: `Now i'm received this': \`\`\`\n${JSON.stringify(
-        { message },
+        { message, metadata },
         null,
         2
       )}\n\`\`\``

@@ -60,6 +60,7 @@ import { SimpleObjectCache } from "../../helpers/simpleObjectCache";
 import { CreateInternalMessageService } from "../MessageServices/CreateInternalMessageService";
 import {
   IntegrationMessage,
+  IntegrationMessageMetadata,
   IntegrationMessageTypes,
   IntegrationServices
 } from "../IntegrationServices/IntegrationServices";
@@ -1132,8 +1133,13 @@ const startQueue = async (
 
   if (integration) {
     let integrationMessage = null;
+    const integrationMetadata: IntegrationMessageMetadata = {
+      channel: "whatsapp",
+      from: ticket.contact || (await Contact.findByPk(ticket.contactId))
+    };
 
     if (message) {
+      integrationMetadata.customPayload = JSON.parse(message.dataJson);
       integrationMessage = { type: "text" };
       const messagedetails = {
         id: message.id,
@@ -1163,6 +1169,7 @@ const startQueue = async (
       integration,
       ticket,
       integrationMessage,
+      integrationMetadata,
       async (t, r) => {
         await wbotReplyHandler(wbot, t, r);
       }
@@ -1515,9 +1522,20 @@ const handleChartbot = async (
   });
 
   if (integrationSession) {
-    const message: IntegrationMessage = { type: "text" };
+    if (dontReadTheFirstQuestion) {
+      return;
+    }
+    let message: IntegrationMessage = null;
+    const metadata: IntegrationMessageMetadata = {
+      channel: "whatsapp",
+      from:
+        ticket.contact.toJSON() ||
+        (await Contact.findByPk(ticket.contactId)).toJSON()
+    };
 
-    if (msg) {
+    if (newMessage) {
+      metadata.customPayload = JSON.parse(newMessage.dataJson);
+      message = { type: "text" };
       const messagedetails = {
         id: newMessage.id,
         body: newMessage.body,
@@ -1536,6 +1554,7 @@ const handleChartbot = async (
     integrationServices.continueSession(
       integrationSession,
       message,
+      metadata,
       async (t, r) => {
         await wbotReplyHandler(wbot, t, r);
       }

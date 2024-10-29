@@ -34,6 +34,7 @@ import Ticket from "../../models/Ticket";
 import { logger } from "../../utils/logger";
 import { wbotReplyHandler } from "../WbotServices/wbotMessageListener";
 import UpdateTicketService from "../TicketServices/UpdateTicketService";
+import Contact from "../../models/Contact";
 
 export type IntegrationOptions = {
   fields: {
@@ -61,6 +62,12 @@ export type IntegrationMessage = {
   mediaUrl?: string;
 };
 
+export type IntegrationMessageMetadata = {
+  channel: string;
+  from: Contact;
+  customPayload?: any;
+};
+
 export interface ReplyHandler {
   (ticket: Ticket, reply: IntegrationMessage): Promise<void>;
 }
@@ -73,6 +80,7 @@ export interface IntegrationDriver {
   startSession(
     ticket: Ticket,
     message: IntegrationMessage,
+    metadata: IntegrationMessageMetadata,
     token: string,
     replyHandler: ReplyHandler,
     options: any
@@ -80,6 +88,7 @@ export interface IntegrationDriver {
   continueSession(
     integrationSession: IntegrationSession,
     message: IntegrationMessage,
+    metadata: IntegrationMessageMetadata,
     replyHandler: ReplyHandler
   ): Promise<void>;
   endSession(integrationSession: IntegrationSession): Promise<void>;
@@ -158,6 +167,7 @@ export class IntegrationServices {
     integration: Integration,
     ticket: Ticket,
     message: IntegrationMessage,
+    metadata: IntegrationMessageMetadata,
     replyHandler: ReplyHandler
   ): Promise<{ token: string; message?: IntegrationMessage; data?: any }> {
     const driver = this.integrations[integration.driver];
@@ -170,6 +180,7 @@ export class IntegrationServices {
     const { sessionId, data } = await driver.startSession(
       ticket,
       message,
+      metadata,
       token,
       replyHandler,
       integration.configuration
@@ -189,6 +200,7 @@ export class IntegrationServices {
   public async continueSession(
     integrationSession: IntegrationSession,
     message: IntegrationMessage,
+    metadata: IntegrationMessageMetadata,
     replyHandler: ReplyHandler
   ): Promise<void> {
     await reloadIntegrationSession(integrationSession);
@@ -199,7 +211,12 @@ export class IntegrationServices {
       );
     }
 
-    return driver.continueSession(integrationSession, message, replyHandler);
+    return driver.continueSession(
+      integrationSession,
+      message,
+      metadata,
+      replyHandler
+    );
   }
 
   public async endSession(token: string) {
