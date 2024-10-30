@@ -127,15 +127,6 @@ export class WebhookIntegration implements IntegrationDriver {
     );
 
     const sessionId = makeRandomId(32);
-    this.processMessage(
-      ticket,
-      message,
-      metadata,
-      token,
-      replyHandler,
-      options
-    );
-
     return {
       sessionId
     };

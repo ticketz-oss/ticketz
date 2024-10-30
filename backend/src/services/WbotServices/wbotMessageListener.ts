@@ -1522,9 +1522,6 @@ const handleChartbot = async (
   });
 
   if (integrationSession) {
-    if (dontReadTheFirstQuestion) {
-      return;
-    }
     let message: IntegrationMessage = null;
     const metadata: IntegrationMessageMetadata = {
       channel: "whatsapp",
