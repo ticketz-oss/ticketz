@@ -35,6 +35,7 @@ import { logger } from "../../utils/logger";
 import { wbotReplyHandler } from "../WbotServices/wbotMessageListener";
 import UpdateTicketService from "../TicketServices/UpdateTicketService";
 import Contact from "../../models/Contact";
+import { CreateInternalMessageService } from "../MessageServices/CreateInternalMessageService";
 
 export type IntegrationOptions = {
   fields: {
@@ -63,6 +64,7 @@ export type IntegrationMessage = {
 };
 
 export type IntegrationMessageMetadata = {
+  backendUrl?: string;
   channel: string;
   from: Contact;
   customPayload?: any;
@@ -93,6 +95,12 @@ export interface IntegrationDriver {
   ): Promise<void>;
   endSession(integrationSession: IntegrationSession): Promise<void>;
 }
+
+export type IntegrationWebhookRequest = {
+  action?: "endSession" | "updateTicket" | "note";
+  message?: IntegrationMessage;
+  ticketData?: any;
+};
 
 const reloadIntegrationSession = async (
   integrationSession: IntegrationSession
@@ -176,6 +184,7 @@ export class IntegrationServices {
     }
 
     const token = `is-${makeRandomId(32)}`;
+    metadata.backendUrl = process.env.BACKEND_URL;
 
     const { sessionId, data } = await driver.startSession(
       ticket,
@@ -210,6 +219,8 @@ export class IntegrationServices {
         `Integration ${integrationSession.integration.driver} not available`
       );
     }
+
+    metadata.backendUrl = process.env.BACKEND_URL;
 
     return driver.continueSession(
       integrationSession,
@@ -246,7 +257,10 @@ export class IntegrationServices {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  public async webhook(integrationSession: IntegrationSession, body: any) {
+  public async webhook(
+    integrationSession: IntegrationSession,
+    body: IntegrationWebhookRequest
+  ) {
     await reloadIntegrationSession(integrationSession);
     const { action, message, ticketData } = body;
 
@@ -257,6 +271,14 @@ export class IntegrationServices {
 
     if (action === "updateTicket" && ticketData) {
       updateTicket(integrationSession.ticket, ticketData);
+    }
+
+    if (action === "note" && message?.content) {
+      await CreateInternalMessageService(
+        integrationSession.ticket,
+        message.content
+      );
+      return;
     }
 
     // this needs modification when the system goes to be multi-channel
