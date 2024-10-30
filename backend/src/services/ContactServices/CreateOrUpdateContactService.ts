@@ -16,7 +16,7 @@ interface Request {
   companyId: number;
   extraInfo?: ExtraInfo[];
   channel?: string;
-  disableBot?: boolean
+  disableBot?: boolean;
 }
 
 const CreateOrUpdateContactService = async ({
@@ -46,10 +46,13 @@ const CreateOrUpdateContactService = async ({
   if (contact) {
     contact.update({ profilePicUrl });
 
-    io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-contact`, {
-      action: "update",
-      contact
-    });
+    io.to(`company-${companyId}-mainchannel`).emit(
+      `company-${companyId}-contact`,
+      {
+        action: "update",
+        contact
+      }
+    );
   } else {
     contact = await Contact.create({
       name,
@@ -60,13 +63,16 @@ const CreateOrUpdateContactService = async ({
       extraInfo,
       companyId,
       channel,
-      disableBot,
+      disableBot
     });
 
-    io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-contact`, {
-      action: "create",
-      contact
-    });
+    io.to(`company-${companyId}-mainchannel`).emit(
+      `company-${companyId}-contact`,
+      {
+        action: "create",
+        contact
+      }
+    );
   }
 
   return contact;
