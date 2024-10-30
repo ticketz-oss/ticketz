@@ -14,7 +14,7 @@ interface Request {
   profilePicUrl?: string;
   companyId: number;
   extraInfo?: ExtraInfo[];
-  disableBot?: boolean
+  disableBot?: boolean;
 }
 
 const CreateContactService = async ({
@@ -40,7 +40,7 @@ const CreateContactService = async ({
       email,
       extraInfo,
       companyId,
-      disableBot,
+      disableBot
     },
     {
       include: ["extraInfo"]
