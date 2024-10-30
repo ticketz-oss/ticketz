@@ -94,7 +94,7 @@ const getProjectWAVersion = async () => {
     const version = await res.json();
     return version;
   } catch (error) {
-    console.warn("Failed to get current WA Version from project repository");
+    logger.warn("Failed to get current WA Version from project repository");
   }
   return waVersion;
 };
@@ -216,9 +216,8 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
           "connection.update",
           async ({ connection, lastDisconnect, qr }) => {
             logger.info(
-              `Socket  ${name} Connection Update ${connection || ""} ${
-                lastDisconnect || ""
-              }`
+              { lastDisconnect },
+              `Socket  ${name} Connection Update ${connection || ""}`
             );
 
             if (connection === "close") {
