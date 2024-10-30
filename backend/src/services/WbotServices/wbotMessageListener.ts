@@ -1116,12 +1116,7 @@ export const wbotReplyHandler = async (
     });
 };
 
-const startQueue = async (
-  wbot: Session,
-  ticket: Ticket,
-  queue: Queue,
-  message: Message = null
-) => {
+const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue) => {
   const { companyId, contact } = ticket;
   let chatbot = false;
 
@@ -1132,30 +1127,10 @@ const startQueue = async (
   });
 
   if (integration) {
-    let integrationMessage = null;
     const integrationMetadata: IntegrationMessageMetadata = {
       channel: "whatsapp",
       from: ticket.contact || (await Contact.findByPk(ticket.contactId))
     };
-
-    if (message) {
-      integrationMetadata.customPayload = JSON.parse(message.dataJson);
-      integrationMessage = { type: "text" };
-      const messagedetails = {
-        id: message.id,
-        body: message.body,
-        mediaType: message.mediaType,
-        messageMedia: message.mediaUrl
-      };
-      logger.debug({ messagedetails }, "Integration message details");
-      integrationMessage.content = message.body;
-      integrationMessage.type =
-        (message.mediaType as IntegrationMessageTypes) || "text";
-
-      if (message.mediaUrl) {
-        integrationMessage.mediaUrl = message.mediaUrl;
-      }
-    }
 
     await UpdateTicketService({
       ticketData: { queueId: queue.id, chatbot: true, status: "pending" },
@@ -1168,7 +1143,7 @@ const startQueue = async (
     const { message: reply } = await integrationServices.startSession(
       integration,
       ticket,
-      integrationMessage,
+      null,
       integrationMetadata,
       async (t, r) => {
         await wbotReplyHandler(wbot, t, r);
@@ -1289,7 +1264,6 @@ const startQueue = async (
 const verifyQueue = async (
   wbot: Session,
   msg: proto.IWebMessageInfo | null,
-  newMessage: Message,
   ticket: Ticket,
   contact: Contact,
   ignoreMessage = false
@@ -1300,7 +1274,7 @@ const verifyQueue = async (
   );
 
   if (queues.length === 1) {
-    await startQueue(wbot, ticket, head(queues), newMessage);
+    await startQueue(wbot, ticket, head(queues));
     return;
   }
 
@@ -1565,7 +1539,7 @@ const handleChartbot = async (
   if (messageBody === "#") {
     // voltar para o menu inicial
     await ticket.update({ queueOptionId: null, chatbot: false, queueId: null });
-    await verifyQueue(wbot, msg, null, ticket, ticket.contact);
+    await verifyQueue(wbot, msg, ticket, ticket.contact);
     return;
   }
 
@@ -1967,7 +1941,7 @@ const handleMessage = async (
         chatbot: false,
         queueId: null
       });
-      await verifyQueue(wbot, msg, null, ticket, ticket.contact, true);
+      await verifyQueue(wbot, msg, ticket, ticket.contact, true);
       return;
     }
 
@@ -2105,14 +2079,7 @@ const handleMessage = async (
       !ticket.userId &&
       whatsapp.queues.length >= 1
     ) {
-      await verifyQueue(
-        wbot,
-        msg,
-        newMessage,
-        ticket,
-        ticket.contact,
-        isNewTicket
-      );
+      await verifyQueue(wbot, msg, ticket, ticket.contact, isNewTicket);
     }
 
     const dontReadTheFirstQuestion = isNewTicket || ticket.queue === null;
