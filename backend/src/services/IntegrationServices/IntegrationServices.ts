@@ -230,12 +230,9 @@ export class IntegrationServices {
     );
   }
 
-  public async endSession(token: string) {
-    const integrationSession = await IntegrationSession.findOne({
-      where: { token },
-      include: ["integration", "ticket"]
-    });
-
+  public async endSession(
+    integrationSession: IntegrationSession
+  ): Promise<void> {
     if (!integrationSession) {
       throw new Error("Session not found");
     }
@@ -265,7 +262,7 @@ export class IntegrationServices {
     const { action, message, ticketData } = body;
 
     if (action === "endSession") {
-      await this.endSession(integrationSession.token);
+      await this.endSession(integrationSession);
       return;
     }
 
