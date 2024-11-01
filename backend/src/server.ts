@@ -12,6 +12,7 @@ import {
 import { IntegrationServices } from "./services/IntegrationServices/IntegrationServices";
 import { DummyIntegration } from "./services/IntegrationServices/DummyIntegration";
 import { WebhookIntegration } from "./services/IntegrationServices/WebhookIntegration";
+import { TypebotIntegration } from "./services/IntegrationServices/TypebotIntegration";
 
 // Environment Variable Validation
 if (!process.env.PORT) {
@@ -56,6 +57,7 @@ async function startServer() {
 const integrationServices = IntegrationServices.getInstance();
 integrationServices.registerIntegration(new DummyIntegration());
 integrationServices.registerIntegration(new WebhookIntegration());
+integrationServices.registerIntegration(new TypebotIntegration());
 
 // Create and start the server
 const server = app.listen(process.env.PORT, async () => {
