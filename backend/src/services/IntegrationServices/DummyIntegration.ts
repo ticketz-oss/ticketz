@@ -154,6 +154,14 @@ export class DummyIntegration implements IntegrationDriver {
         mediaUrl: "https://i.giphy.com/cZ7rmKfFYOvYI.mp4"
       });
     }
+
+    if (message.content === "!document") {
+      await replyHandler(integrationSession.ticket, {
+        type: "document",
+        content: "This is a pdf document",
+        mediaUrl: "https://www.sjgames.com/illuminati/img/illuminati_rules.pdf"
+      });
+    }
   }
 
   // eslint-disable-next-line class-methods-use-this
