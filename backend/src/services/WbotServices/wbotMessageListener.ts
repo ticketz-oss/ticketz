@@ -66,6 +66,8 @@ import {
 } from "../IntegrationServices/IntegrationServices";
 import Integration from "../../models/Integration";
 import IntegrationSession from "../../models/IntegrationSession";
+import getFilenameFromUrl from "../../helpers/getFilenameFromUrl";
+import mime from "mime-types";
 
 type Session = WASocket & {
   id?: number;
@@ -1062,41 +1064,111 @@ export const wbotReplyHandler = async (
     return;
   }
 
+  let fileName = null;
+
+  if (reply.mediaUrl) {
+    fileName =
+      (await getFilenameFromUrl(reply.mediaUrl)) ||
+      reply.mediaUrl.split("/").pop() ||
+      "file.unkown";
+  }
+
   if (reply.type === "image" && reply.mediaUrl) {
     await wbot.sendPresenceUpdate("composing", getTicketJid(ticket));
-    await wbot.sendMessage(getTicketJid(ticket), {
-      image: { url: reply.mediaUrl },
-      caption: reply.content
-    });
+    await wbot
+      .sendMessage(getTicketJid(ticket), {
+        image: { url: reply.mediaUrl },
+        caption: reply.content
+      })
+      .then(async sentMessage => {
+        await verifyMediaMessage(sentMessage, ticket, ticket.contact);
+      })
+      .catch(error => {
+        logger.error(
+          { error },
+          `Error sending integration reply: ${error.message}`
+        );
+      });
     return;
   }
 
   if (reply.type === "audio" && reply.mediaUrl) {
     await wbot.sendPresenceUpdate("recording", getTicketJid(ticket));
-    await wbot.sendMessage(getTicketJid(ticket), {
-      audio: { url: reply.mediaUrl },
-      ptt: true,
-      caption: reply.content
-    });
+    await wbot
+      .sendMessage(getTicketJid(ticket), {
+        audio: { url: reply.mediaUrl },
+        ptt: true,
+        caption: reply.content
+      })
+      .then(async sentMessage => {
+        await verifyMediaMessage(sentMessage, ticket, ticket.contact);
+      })
+      .catch(error => {
+        logger.error(
+          { error },
+          `Error sending integration reply: ${error.message}`
+        );
+      });
     return;
   }
 
   if (reply.type === "video" && reply.mediaUrl) {
     await wbot.sendPresenceUpdate("composing", getTicketJid(ticket));
-    await wbot.sendMessage(getTicketJid(ticket), {
-      video: { url: reply.mediaUrl },
-      caption: reply.content
-    });
+    await wbot
+      .sendMessage(getTicketJid(ticket), {
+        video: { url: reply.mediaUrl },
+        caption: reply.content
+      })
+      .then(async sentMessage => {
+        await verifyMediaMessage(sentMessage, ticket, ticket.contact);
+      })
+      .catch(error => {
+        logger.error(
+          { error },
+          `Error sending integration reply: ${error.message}`
+        );
+      });
     return;
   }
 
   if (reply.type === "gif" && reply.mediaUrl) {
     await wbot.sendPresenceUpdate("composing", getTicketJid(ticket));
-    await wbot.sendMessage(getTicketJid(ticket), {
-      video: { url: reply.mediaUrl },
-      gifPlayback: true,
-      caption: reply.content
-    });
+    await wbot
+      .sendMessage(getTicketJid(ticket), {
+        video: { url: reply.mediaUrl },
+        gifPlayback: true,
+        caption: reply.content
+      })
+      .then(async sentMessage => {
+        await verifyMediaMessage(sentMessage, ticket, ticket.contact);
+      })
+      .catch(error => {
+        logger.error(
+          { error },
+          `Error sending integration reply: ${error.message}`
+        );
+      });
+    return;
+  }
+
+  if (reply.type === "document" && reply.mediaUrl) {
+    await wbot.sendPresenceUpdate("composing", getTicketJid(ticket));
+    await wbot
+      .sendMessage(getTicketJid(ticket), {
+        document: { url: reply.mediaUrl },
+        caption: reply.content,
+        fileName,
+        mimetype: mime.lookup(fileName) || "application/octet-stream"
+      })
+      .then(async sentMessage => {
+        await verifyMediaMessage(sentMessage, ticket, ticket.contact);
+      })
+      .catch(error => {
+        logger.error(
+          { error },
+          `Error sending integration reply: ${error.message}`
+        );
+      });
     return;
   }
 
