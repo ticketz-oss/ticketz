@@ -10,6 +10,7 @@ import {
 } from "./IntegrationServices";
 import { logger } from "../../utils/logger";
 import IntegrationSession from "../../models/IntegrationSession";
+import { cacheLayer } from "../../libs/cache";
 
 const integrations = IntegrationServices.getInstance();
 
@@ -69,6 +70,11 @@ const convertTypebotMessage = (msg: any): IntegrationMessage => {
       return {
         type: "text",
         content: msg.content.markdown || formatRichText(msg.content.richText)
+      };
+    case "embed":
+      return {
+        type: "document",
+        mediaUrl: msg.content.url
       };
     case "image":
     case "video":
@@ -208,10 +214,23 @@ export class TypebotIntegration implements IntegrationDriver {
 
       switch (message.type) {
         case "text":
-          typebotMessage = {
-            type: "text",
-            text: message.content
-          };
+          {
+            const optionNumber = Number(message.content);
+            let optionText = null;
+            if (optionNumber) {
+              const items = await cacheLayer.get(`ci-${integrationSession.id}`);
+              if (items) {
+                const parsedItems = JSON.parse(items);
+                if (parsedItems[optionNumber - 1]) {
+                  optionText = parsedItems[optionNumber - 1].content;
+                }
+              }
+            }
+            typebotMessage = {
+              type: "text",
+              text: optionText || message.content
+            };
+          }
           break;
         case "audio":
           typebotMessage = {
@@ -228,6 +247,8 @@ export class TypebotIntegration implements IntegrationDriver {
           };
           break;
       }
+
+      await cacheLayer.del(`ci-${integrationSession.id}`);
 
       const response = await axios.post(
         `${typebotUrl}/api/v1/sessions/${integrationSession.sessionId}/continueChat`,
@@ -248,7 +269,7 @@ export class TypebotIntegration implements IntegrationDriver {
         const reply = convertTypebotMessage(msg);
         let dontReply = false;
 
-        if (reply.content.startsWith("#")) {
+        if (reply.content?.startsWith("#")) {
           let trigger: any = null;
           try {
             trigger = JSON.parse(reply.content.slice(1));
@@ -306,13 +327,22 @@ export class TypebotIntegration implements IntegrationDriver {
       }
 
       if (input && input.type === "choice input") {
-        let content = `*${input.options.buttonLabel}*\n\n`;
+        let content = input.options?.buttonLabel
+          ? `*${input.options.buttonLabel}*\n\n`
+          : "";
         let counter = 1;
 
         input.items.forEach((item: any) => {
           content += `${counter} - ${item.content}\n`;
           counter += 1;
         });
+
+        if (!input.options?.isMultipleChoice) {
+          await cacheLayer.set(
+            `ci-${integrationSession.id}`,
+            JSON.stringify(input.items)
+          );
+        }
 
         await replyHandler(integrationSession.ticket, {
           type: "text",
