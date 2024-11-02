@@ -60,6 +60,15 @@ export class WebhookIntegration implements IntegrationDriver {
           type: "text",
           lgWidth: 8,
           required: false
+        },
+        null,
+        {
+          name: "webhookExtraParams",
+          title: "Extra Parameters (JSON)",
+          description: "Extra parameters formatted in JSON",
+          lgWidth: 4,
+          type: "textarea",
+          required: false
         }
       ]
     };
@@ -74,7 +83,17 @@ export class WebhookIntegration implements IntegrationDriver {
     replyHandler,
     options
   ) {
-    const { webhookUrl, webhookMethod, webhookToken } = options;
+    const { webhookUrl, webhookMethod, webhookToken, webhookExtraParams } =
+      options;
+
+    try {
+      if (webhookExtraParams) {
+        metadata.extraParams = JSON.parse(webhookExtraParams);
+      }
+    } catch (_) {
+      // do nothing
+    }
+
     try {
       let response;
       if (webhookMethod === "GET") {
