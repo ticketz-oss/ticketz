@@ -54,7 +54,7 @@ export const getMessageFileOptions = async (
   fileName: string,
   pathMedia: string
 ): Promise<any> => {
-  const mimeType = mime.lookup(pathMedia);
+  const mimeType = mime.lookup(pathMedia) || "application/octet-stream";
   const typeMessage = mimeType.split("/")[0];
 
   try {
