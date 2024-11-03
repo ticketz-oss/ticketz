@@ -3,6 +3,9 @@ import AppError from "../../errors/AppError";
 import Queue from "../../models/Queue";
 import Company from "../../models/Company";
 import Plan from "../../models/Plan";
+import Integration from "../../models/Integration";
+import sequelize from "../../database";
+import ShowQueueService from "./ShowQueueService";
 
 interface QueueData {
   name: string;
@@ -13,7 +16,21 @@ interface QueueData {
   schedules?: unknown[];
 }
 
-const CreateQueueService = async (queueData: QueueData): Promise<Queue> => {
+interface IntegrationData {
+  driver: string;
+  configuration: any;
+}
+
+interface QueueRequestData extends QueueData {
+  integration?: IntegrationData;
+}
+
+const CreateQueueService = async (
+  requestData: QueueRequestData
+): Promise<Queue> => {
+  const queueData: QueueData = {
+    ...requestData
+  };
   const { color, name, companyId } = queueData;
 
   const company = await Company.findOne({
@@ -83,9 +100,28 @@ const CreateQueueService = async (queueData: QueueData): Promise<Queue> => {
     throw new AppError(err.message);
   }
 
-  const queue = await Queue.create(queueData);
+  const resultQueue = await sequelize.transaction(async t => {
+    const queue = await Queue.create(queueData, { transaction: t });
+    if (requestData.integration) {
+      await Integration.create(
+        {
+          driver: requestData.integration.driver,
+          configuration: requestData.integration.configuration,
+          queueId: queue.id
+        },
+        { transaction: t }
+      );
+    }
 
-  return queue;
+    return queue;
+  });
+
+  const reloadedQueue = await ShowQueueService(
+    resultQueue.id,
+    resultQueue.companyId
+  );
+
+  return reloadedQueue;
 };
 
 export default CreateQueueService;

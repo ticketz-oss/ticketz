@@ -3,6 +3,8 @@ import * as Yup from "yup";
 import AppError from "../../errors/AppError";
 import Queue from "../../models/Queue";
 import ShowQueueService from "./ShowQueueService";
+import Integration from "../../models/Integration";
+import sequelize from "../../database";
 
 interface QueueData {
   name?: string;
@@ -12,11 +14,23 @@ interface QueueData {
   schedules?: any[];
 }
 
+interface IntegrationData {
+  driver: string;
+  configuration: any;
+}
+
+interface QueueRequestData extends QueueData {
+  integration?: IntegrationData;
+}
+
 const UpdateQueueService = async (
   queueId: number | string,
-  queueData: QueueData,
+  requestData: QueueRequestData,
   companyId: number
 ): Promise<Queue> => {
+  const queueData: QueueData = {
+    ...requestData
+  };
   const { color, name } = queueData;
 
   const queueSchema = Yup.object().shape({
@@ -72,9 +86,29 @@ const UpdateQueueService = async (
     throw new AppError("Não é permitido alterar registros de outra empresa");
   }
 
-  await queue.update(queueData);
+  const resultQueue = await sequelize.transaction(async t => {
+    if (requestData.integration) {
+      if (!queue.integration) {
+        await Integration.create(
+          {
+            ...requestData.integration,
+            queueId: queue.id
+          },
+          { transaction: t }
+        );
+      } else {
+        await queue.integration.update(requestData.integration, {
+          transaction: t
+        });
+      }
+    }
 
-  return queue;
+    await queue.update(queueData, { transaction: t });
+    return queue;
+  });
+
+  resultQueue.reload();
+  return resultQueue;
 };
 
 export default UpdateQueueService;

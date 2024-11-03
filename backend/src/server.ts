@@ -9,6 +9,11 @@ import {
   checkOpenInvoices,
   payGatewayInitialize
 } from "./services/PaymentGatewayServices/PaymentGatewayServices";
+import { IntegrationServices } from "./services/IntegrationServices/IntegrationServices";
+import { DummyIntegration } from "./services/IntegrationServices/DummyIntegration";
+import { WebhookIntegration } from "./services/IntegrationServices/WebhookIntegration";
+import { TypebotIntegration } from "./services/IntegrationServices/TypebotIntegration";
+
 import { ticketzPro } from "./ticketzPro/ticketzPro";
 
 // Environment Variable Validation
@@ -54,6 +59,12 @@ async function startServer() {
 ticketzPro(app).then(() => {
   logger.debug("Ticketz PRO services initialized");
 });
+
+// Initialize Integration Services
+const integrationServices = IntegrationServices.getInstance();
+integrationServices.registerIntegration(new DummyIntegration());
+integrationServices.registerIntegration(new WebhookIntegration());
+integrationServices.registerIntegration(new TypebotIntegration());
 
 // Create and start the server
 const server = app.listen(process.env.PORT, async () => {

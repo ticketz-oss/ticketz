@@ -35,6 +35,8 @@ import Invoices from "../models/Invoices";
 import Subscriptions from "../models/Subscriptions";
 import BaileysKeys from "../models/BaileysKeys";
 import UserSocketSession from "../models/UserSocketSession";
+import Integration from "../models/Integration";
+import IntegrationSession from "../models/IntegrationSession";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const dbConfig = require("../config/database");
@@ -77,7 +79,9 @@ const models = [
   ChatUser,
   ChatMessage,
   Invoices,
-  Subscriptions
+  Subscriptions,
+  Integration,
+  IntegrationSession
 ];
 
 sequelize.addModels(models);

@@ -21,10 +21,14 @@ import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import ColorPicker from "../ColorPicker";
 import {
+  FormControl,
   Grid,
   IconButton,
   InputAdornment,
+  InputLabel,
+  MenuItem,
   Paper,
+  Select,
   Tab,
   Tabs,
 } from "@material-ui/core";
@@ -32,6 +36,7 @@ import { AttachFile, Colorize, DeleteOutline } from "@material-ui/icons";
 import { QueueOptions } from "../QueueOptions";
 import SchedulesForm from "../SchedulesForm";
 import ConfirmationModal from "../ConfirmationModal";
+import { DynamicForm } from "../DynamicForm";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -62,6 +67,9 @@ const useStyles = makeStyles((theme) => ({
   colorAdorment: {
     width: 20,
     height: 20,
+  },
+  maxWidth: {
+    width: "100%",
   },
 }));
 
@@ -94,6 +102,10 @@ const QueueModal = ({ open, onClose, queueId }) => {
   const attachmentFile = useRef(null);
   const [queueEditable, setQueueEditable] = useState(true);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [integrations, setIntegrations] = useState([]);
+  const [selectedIntegration, setSelectedIntegration] = useState("");
+  const [integrationConfigData, setIntegrationConfigData] = useState({});
+  const [integrationConfigSchema, setIntegrationConfigSchema] = useState([]);
 
   const [schedules, setSchedules] = useState([
     { weekday: "Segunda-feira",weekdayEn: "monday",startTime: "08:00",endTime: "18:00",},
@@ -114,7 +126,26 @@ const QueueModal = ({ open, onClose, queueId }) => {
         }
       }
     });
+    
+    api.get("/integrations").then(({ data }) => {
+      setIntegrations(data);
+    });
   }, []);
+  
+  useEffect(() => {
+    if (!queueId) {
+      setSelectedIntegration("");
+      setIntegrationConfigData({});
+    }
+  }, [queueId]);
+  
+  useEffect(() => {
+    if (selectedIntegration) {
+      api.get(`/integrations/${selectedIntegration}`).then(({ data }) => {
+        setIntegrationConfigSchema(data.fields);
+      });
+    }
+  }, [selectedIntegration]);
 
   useEffect(() => {
     (async () => {
@@ -125,6 +156,13 @@ const QueueModal = ({ open, onClose, queueId }) => {
           return { ...prevState, ...data };
         });
         setSchedules(data.schedules);
+        if (data.integration) {
+          setSelectedIntegration(data.integration.driver);
+          setIntegrationConfigData(data.integration.configuration);
+        } else {
+          setSelectedIntegration("");
+          setIntegrationConfigData({});
+        }
       } catch (err) {
         toastError(err);
       }
@@ -166,15 +204,19 @@ const QueueModal = ({ open, onClose, queueId }) => {
 
   const handleSaveQueue = async (values) => {
     try {
+      const integration = selectedIntegration ? {
+        driver: selectedIntegration,
+        configuration: integrationConfigData,
+      } : null;
       if (queueId) {
-        await api.put(`/queue/${queueId}`, { ...values, schedules });
+        await api.put(`/queue/${queueId}`, { ...values, schedules, integration });
         if (attachment != null) {
           const formData = new FormData();
           formData.append("file", attachment);
           await api.post(`/queue/${queueId}/media-upload`, formData);
         }
       } else {
-        await api.post("/queue", { ...values, schedules });
+        await api.post("/queue", { ...values, schedules, integration });
         if (attachment != null) {
           const formData = new FormData();
           formData.append("file", attachment);
@@ -346,24 +388,58 @@ const QueueModal = ({ open, onClose, queueId }) => {
                             />
                         )}
                     </div>
-                    <QueueOptions queueId={queueId} />
-                    {(queue.mediaPath || attachment) && (
-                    <Grid xs={12} item>
-                      <Button startIcon={<AttachFile />}>
-                        {attachment != null
-                          ? attachment.name
-                          : queue.mediaName}
-                      </Button>
-                      {queueEditable && (
-                        <IconButton
-                          onClick={() => setConfirmationOpen(true)}
-                          color="secondary"
+                    
+                    <Grid xs={4} item>
+                      <FormControl className={classes.maxWidth}>
+                        <InputLabel>
+                          Integration
+                        </InputLabel>
+                        <Select
+                          value={selectedIntegration}
+                          onChange={(e) => setSelectedIntegration(e.target.value)}
                         >
-                          <DeleteOutline />
-                        </IconButton>
-                      )}
+                          <MenuItem value="">
+                            <em>None</em>
+                          </MenuItem>
+                          {integrations.map((integration) => (
+                            <MenuItem key={integration.name} value={integration.name}>
+                              {integration.description}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
                     </Grid>
-                  )}
+
+                    {selectedIntegration && 
+                      <DynamicForm
+                        schema={integrationConfigSchema}
+                        data={integrationConfigData}
+                        setData={setIntegrationConfigData}
+                      />
+                    }
+
+                    {!selectedIntegration &&
+                      <>
+                        <QueueOptions queueId={queueId} />
+                        {(queue.mediaPath || attachment) && (
+                          <Grid xs={12} item>
+                            <Button startIcon={<AttachFile />}>
+                              {attachment != null
+                                ? attachment.name
+                                : queue.mediaName}
+                            </Button>
+                            {queueEditable && (
+                              <IconButton
+                                onClick={() => setConfirmationOpen(true)}
+                                color="secondary"
+                              >
+                                <DeleteOutline />
+                              </IconButton>
+                            )}
+                          </Grid>
+                        )}
+                      </>
+                    }                    
                   </DialogContent>
                   <DialogActions>
                     {!attachment && !queue.mediaPath && queueEditable && (

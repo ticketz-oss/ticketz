@@ -31,6 +31,7 @@ import ticketTagRoutes from "./ticketTagRoutes";
 import pwaRoutes from "./pwaRoutes";
 import versionRoutes from "./versionRoutes";
 import binlistRoutes from "./binlistRoutes";
+import integrationsRoutes from "./integrationsRoutes";
 
 import ticketzStatusRoutes from "./ticketzStatusRoutes";
 
@@ -68,6 +69,7 @@ routes.use(pwaRoutes);
 routes.use("/webhook/fb", webHookMetaRoutes);
 routes.use(versionRoutes);
 routes.use(binlistRoutes);
+routes.use(integrationsRoutes);
 
 routes.use(ticketzStatusRoutes);
 
