@@ -366,7 +366,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
             //color=
             />
           )}
-          {ticket.status === "pending" && (
+          {ticket.status === "pending" && !ticket.isGroup && (
             <Tooltip title="Fechar Conversa">
               <ClearOutlinedIcon
                 onClick={() => handleCloseTicket(ticket.id)}
@@ -396,7 +396,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
               />
             </Tooltip>
           )}
-          {ticket.status === "open" && (
+          {ticket.status === "open" && !ticket.isGroup && (
             <Tooltip title="Fechar Conversa">
               <ClearOutlinedIcon
                 onClick={() => handleCloseTicket(ticket.id)}
@@ -412,7 +412,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
               />
             </Tooltip>
           )}
-          {ticket.status === "pending" && (
+          {ticket.status === "pending" && !ticket.isGroup && (
             <Tooltip title="Aceitar Conversa">
               <DoneIcon
                 onClick={() => handleAcceptTicket(ticket.id)}
@@ -435,7 +435,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
             </Tooltip>
           )}
 
-          {profile === "admin" && (
+          {profile === "admin" && !ticket.isGroup && (
             <Tooltip title="Espiar Conversa">
               <VisibilityIcon
                 onClick={(e) => {
@@ -477,7 +477,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
         dense
         button
         onClick={(e) => {
-          if (ticket.status === "pending") return;
+          if (!ticket.isGroup && ticket.status === "pending") return;
           handleSelectTicket(ticket);
         }}
         selected={ticketId && +ticketId === ticket.id}
