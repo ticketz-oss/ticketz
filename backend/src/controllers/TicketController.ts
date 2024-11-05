@@ -15,6 +15,7 @@ type IndexQuery = {
   searchParam: string;
   pageNumber: string;
   status: string;
+  groups: string;
   date: string;
   updatedAt?: string;
   showAll: string;
@@ -35,6 +36,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   const {
     pageNumber,
     status,
+    groups,
     date,
     updatedAt,
     searchParam,
@@ -70,6 +72,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     users: usersIds,
     pageNumber,
     status,
+    groups,
     date,
     updatedAt,
     showAll,

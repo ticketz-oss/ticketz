@@ -165,6 +165,7 @@ const reducer = (state, action) => {
 const TicketsListCustom = (props) => {
   const {
     status,
+    groups,
     searchParam,
     tags,
     users,
@@ -193,6 +194,7 @@ const TicketsListCustom = (props) => {
     pageNumber,
     searchParam,
     status,
+    groups,
     showAll,
     tags: JSON.stringify(tags),
     users: JSON.stringify(users),
@@ -263,6 +265,9 @@ const TicketsListCustom = (props) => {
     
     const onCompanyAppMessage = (data) => {
 	  console.debug("appMessage event received", data);
+      if (!!data.ticket?.isGroup !== !!groups) {
+        return;
+      }
 
       const queueIds = queues.map((q) => q.id);
       if (
@@ -273,7 +278,12 @@ const TicketsListCustom = (props) => {
         return;
       }
 
-      if (data.action === "create" && shouldUpdateTicket(data.ticket) && ( status === undefined || data.ticket.status === status)) {
+      if (
+        data.action === "create" &&
+        !!data.ticket?.isGroup === !!groups &&
+        shouldUpdateTicket(data.ticket) &&
+        (status === undefined || data.ticket.status === status)
+      ) {
         dispatch({
           type: "UPDATE_TICKET_UNREAD_MESSAGES",
           payload: data.ticket,

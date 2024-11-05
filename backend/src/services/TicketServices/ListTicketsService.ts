@@ -16,6 +16,7 @@ interface Request {
   searchParam?: string;
   pageNumber?: string;
   status?: string;
+  groups?: string;
   date?: string;
   updatedAt?: string;
   showAll?: string;
@@ -40,6 +41,7 @@ const ListTicketsService = async ({
   tags,
   users,
   status,
+  groups,
   date,
   updatedAt,
   showAll,
@@ -49,6 +51,7 @@ const ListTicketsService = async ({
 }: Request): Promise<Response> => {
   let whereCondition: Filterable["where"] = {
     [Op.or]: [{ userId }, { status: "pending" }],
+    isGroup: groups === "true",
     queueId: { [Op.or]: [queueIds, null] }
   };
   let includeCondition: Includeable[];
@@ -82,7 +85,7 @@ const ListTicketsService = async ({
   ];
 
   if (showAll === "true") {
-    whereCondition = { queueId: { [Op.or]: [queueIds, null] } };
+    whereCondition = { queueId: { [Op.or]: [queueIds, null] }, isGroup: groups === "true" };
   }
 
   if (status) {
@@ -160,6 +163,7 @@ const ListTicketsService = async ({
 
     whereCondition = {
       [Op.or]: [{ userId }, { status: "pending" }],
+      isGroup: groups === "true",
       queueId: { [Op.or]: [userQueueIds, null] },
       unreadMessages: { [Op.gt]: 0 }
     };

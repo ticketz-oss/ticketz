@@ -25,6 +25,8 @@ import TicketsQueueSelect from "../TicketsQueueSelect";
 import { Button } from "@material-ui/core";
 import { TagsFilter } from "../TagsFilter";
 import { UsersFilter } from "../UsersFilter";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPeopleGroup } from '@fortawesome/free-solid-svg-icons';
 
 const useStyles = makeStyles((theme) => ({
   ticketsWrapper: {
@@ -49,8 +51,8 @@ const useStyles = makeStyles((theme) => ({
   },
 
   tab: {
-    minWidth: 120,
-    width: 120,
+    minWidth: 90,
+    width: 90,
   },
 
   ticketOptionsBox: {
@@ -91,6 +93,11 @@ const useStyles = makeStyles((theme) => ({
   },
   hide: {
     display: "none !important",
+  },
+
+  icon24: {
+    width: 24,
+    height: 24,
   },
 }));
 
@@ -195,12 +202,21 @@ const TicketsManagerTabs = () => {
             label={i18n.t("tickets.tabs.open.title")}
             classes={{ root: classes.tab }}
           />
+
           <Tab
             value={"closed"}
             icon={<CheckBoxIcon />}
             label={i18n.t("tickets.tabs.closed.title")}
             classes={{ root: classes.tab }}
           />
+
+          <Tab
+            value={"groups"}
+            icon={<FontAwesomeIcon className={classes.icon24} icon={faPeopleGroup} />}
+            label={i18n.t("tickets.tabs.groups.title")}
+            classes={{ root: classes.tab }}
+          />
+
           <Tab
             value={"search"}
             icon={<SearchIcon />}
@@ -314,6 +330,13 @@ const TicketsManagerTabs = () => {
       <TabPanel value={tab} name="closed" className={classes.ticketsWrapper}>
         <TicketsList
           status="closed"
+          showAll={true}
+          selectedQueueIds={selectedQueueIds}
+        />
+      </TabPanel>
+      <TabPanel value={tab} name="groups" className={classes.ticketsWrapper}>
+        <TicketsList
+          groups={true}
           showAll={true}
           selectedQueueIds={selectedQueueIds}
         />
