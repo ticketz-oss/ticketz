@@ -233,17 +233,13 @@ export class TypebotIntegration implements IntegrationDriver {
           }
           break;
         case "audio":
-          typebotMessage = {
-            type: "audio",
-            url: message.mediaUrl
-          };
-          break;
         case "image":
         case "video":
+        case "document":
         default:
           typebotMessage = {
             type: "text",
-            text: "<unsupported>"
+            text: message.mediaUrl
           };
           break;
       }
