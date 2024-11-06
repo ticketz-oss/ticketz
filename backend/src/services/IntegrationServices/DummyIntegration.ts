@@ -5,10 +5,14 @@ import {
   IntegrationMessage,
   IntegrationMessageMetadata,
   IntegrationOptions,
+  IntegrationServices,
   ReplyHandler
 } from "./IntegrationServices";
 import { logger } from "../../utils/logger";
 import IntegrationSession from "../../models/IntegrationSession";
+import UpdateTicketService from "../TicketServices/UpdateTicketService";
+
+const integrations = IntegrationServices.getInstance();
 
 export class DummyIntegration implements IntegrationDriver {
   private name = "dummy";
@@ -87,7 +91,7 @@ export class DummyIntegration implements IntegrationDriver {
 
     const sessionId = makeRandomId(32);
 
-    replyHandler(ticket, {
+    await replyHandler(ticket, {
       type: "text",
       content: `Hello, I am a dummy integration.\n\nI've received this parameters: \`\`\`\n${JSON.stringify(
         { sessionId, token, ticket, message, metadata, options },
@@ -160,6 +164,18 @@ export class DummyIntegration implements IntegrationDriver {
         type: "document",
         content: "This is a pdf document",
         mediaUrl: "https://www.sjgames.com/illuminati/img/illuminati_rules.pdf"
+      });
+    }
+
+    if (message.content === "!end") {
+      await integrations.endSession(integrationSession);
+    }
+
+    if (message.content === "!close") {
+      await UpdateTicketService({
+        ticketData: { status: "closed" },
+        ticketId: integrationSession.ticketId,
+        companyId: integrationSession.ticket.companyId
       });
     }
   }
