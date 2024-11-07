@@ -120,6 +120,14 @@ export class WebhookIntegration implements IntegrationDriver {
 
       const responseData = response?.data;
 
+      if (Array.isArray(responseData)) {
+        responseData.forEach(data => {
+          if (data?.type && (data?.content || data?.mediaUrl)) {
+            replyHandler(ticket, data);
+          }
+        });
+      }
+
       if (
         responseData?.type &&
         (responseData?.content || responseData?.mediaUrl)
