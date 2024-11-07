@@ -1541,6 +1541,60 @@ const handleRating = async (
     );
 };
 
+const checkIntegration = async (message: Message, wbot: Session) => {
+  const integrationSession = await IntegrationSession.findOne({
+    where: {
+      ticketId: message.ticketId
+    },
+    include: [
+      {
+        model: Integration,
+        as: "integration"
+      }
+    ]
+  });
+
+  if (integrationSession) {
+    let integrationMessage: IntegrationMessage = null;
+    const metadata: IntegrationMessageMetadata = {
+      channel: "whatsapp",
+      from:
+        message.contact.toJSON() ||
+        (await Contact.findByPk(message.contactId)).toJSON()
+    };
+
+    if (message) {
+      metadata.customPayload = JSON.parse(message.dataJson);
+      integrationMessage = { type: "text" };
+      const messagedetails = {
+        id: message.id,
+        body: message.body,
+        mediaType: message.mediaType,
+        messageMedia: message.mediaUrl
+      };
+      logger.debug({ messagedetails }, "Integration message details");
+      integrationMessage.content = message.body;
+      integrationMessage.type =
+        (message.mediaType as IntegrationMessageTypes) || "text";
+      if (message.mediaUrl) {
+        integrationMessage.mediaUrl = message.mediaUrl;
+      }
+    }
+
+    integrationServices.continueSession(
+      integrationSession,
+      integrationMessage,
+      metadata,
+      async (t, r) => {
+        await wbotReplyHandler(wbot, t, r);
+      }
+    );
+
+    return true;
+  }
+  return false;
+};
+
 const handleChartbot = async (
   ticket: Ticket,
   msg: WAMessage,
@@ -1563,54 +1617,7 @@ const handleChartbot = async (
     order: [["options", "option", "ASC"]]
   });
 
-  const integrationSession = await IntegrationSession.findOne({
-    where: {
-      ticketId: ticket.id
-    },
-    include: [
-      {
-        model: Integration,
-        as: "integration"
-      }
-    ]
-  });
-
-  if (integrationSession) {
-    let message: IntegrationMessage = null;
-    const metadata: IntegrationMessageMetadata = {
-      channel: "whatsapp",
-      from:
-        ticket.contact.toJSON() ||
-        (await Contact.findByPk(ticket.contactId)).toJSON()
-    };
-
-    if (newMessage) {
-      metadata.customPayload = JSON.parse(newMessage.dataJson);
-      message = { type: "text" };
-      const messagedetails = {
-        id: newMessage.id,
-        body: newMessage.body,
-        mediaType: newMessage.mediaType,
-        messageMedia: newMessage.mediaUrl
-      };
-      logger.debug({ messagedetails }, "Integration message details");
-      message.content = newMessage.body;
-      message.type =
-        (newMessage.mediaType as IntegrationMessageTypes) || "text";
-      if (newMessage.mediaUrl) {
-        message.mediaUrl = newMessage.mediaUrl;
-      }
-    }
-
-    integrationServices.continueSession(
-      integrationSession,
-      message,
-      metadata,
-      async (t, r) => {
-        await wbotReplyHandler(wbot, t, r);
-      }
-    );
-
+  if (await checkIntegration(newMessage, wbot)) {
     return;
   }
 
@@ -1764,7 +1771,8 @@ const handleChartbot = async (
           queueId: currentOption.forwardQueueId
         });
         await ticket.reload();
-        startQueue(wbot, ticket, currentOption.forwardQueue);
+        await startQueue(wbot, ticket, currentOption.forwardQueue);
+        await checkIntegration(newMessage, wbot);
       }
       return;
     }

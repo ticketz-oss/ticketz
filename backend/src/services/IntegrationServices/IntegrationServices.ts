@@ -281,7 +281,16 @@ export class IntegrationServices {
     // this needs modification when the system goes to be multi-channel
     if (integrationSession.ticket.channel === "whatsapp" && message) {
       const wbot = await GetTicketWbot(integrationSession.ticket);
-      wbotReplyHandler(wbot, integrationSession.ticket, message);
+
+      // test if message is an array
+      if (Array.isArray(message)) {
+        // eslint-disable-next-line no-restricted-syntax
+        for await (const msg of message) {
+          await wbotReplyHandler(wbot, integrationSession.ticket, msg);
+        }
+      } else {
+        await wbotReplyHandler(wbot, integrationSession.ticket, message);
+      }
     }
   }
 }
