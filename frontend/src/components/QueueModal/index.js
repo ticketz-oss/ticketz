@@ -275,21 +275,21 @@ const QueueModal = ({ open, onClose, queueId }) => {
           <Tab label="Dados da Fila" />
           {schedulesEnabled && <Tab label="Horários de Atendimento" />}
         </Tabs>
-        {tab === 0 && (
-          <Paper>
-            <Formik
-              initialValues={queue}
-              enableReinitialize={true}
-              validationSchema={QueueSchema}
-              onSubmit={(values, actions) => {
-                setTimeout(() => {
-                  handleSaveQueue(values);
-                  actions.setSubmitting(false);
-                }, 400);
-              }}
-            >
-              {({ touched, errors, isSubmitting, values }) => (
-                <Form>
+        <Formik
+          initialValues={queue}
+          enableReinitialize={true}
+          validationSchema={QueueSchema}
+          onSubmit={(values, actions) => {
+            setTimeout(() => {
+              handleSaveQueue(values);
+              actions.setSubmitting(false);
+            }, 400);
+          }}
+        >
+          {({ touched, errors, isSubmitting, values }) => (
+            <Form>
+              {tab === 0 && (
+                <Paper>
                   <DialogContent dividers>
                     <Field
                       as={TextField}
@@ -366,29 +366,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
                             variant="outlined"
                             margin="dense"
                           />
-                        {schedulesEnabled && (
-                            <Field
-                              as={TextField}
-                              InputLabelProps={{ shrink: true }}
-                              label={i18n.t("queueModal.form.outOfHoursMessage")}
-                              type="outOfHoursMessage"
-                              multiline
-                              rows={5}
-                              fullWidth
-                              name="outOfHoursMessage"
-                              error={
-                                touched.outOfHoursMessage &&
-                                Boolean(errors.outOfHoursMessage)
-                              }
-                              helperText={
-                                touched.outOfHoursMessage && errors.outOfHoursMessage
-                              }
-                              variant="outlined"
-                              margin="dense"
-                            />
-                        )}
                     </div>
-                    
                     <Grid xs={4} item>
                       <FormControl className={classes.maxWidth}>
                         <InputLabel>
@@ -478,21 +456,40 @@ const QueueModal = ({ open, onClose, queueId }) => {
                       )}
                     </Button>
                   </DialogActions>
-                </Form>
+                </Paper>
               )}
-            </Formik>
-          </Paper>
-        )}
-        {tab === 1 && (
-          <Paper style={{ padding: 20 }}>
-            <SchedulesForm
-              loading={false}
-              onSubmit={handleSaveSchedules}
-              initialValues={schedules}
-              labelSaveButton="Adicionar"
-            />
-          </Paper>
-        )}
+              {tab === 1 && (
+                <Paper style={{ padding: 20 }}>
+                  <Field
+                    as={TextField}
+                    InputLabelProps={{ shrink: true }}
+                    label={i18n.t("queueModal.form.outOfHoursMessage")}
+                    type="outOfHoursMessage"
+                    multiline
+                    rows={5}
+                    fullWidth
+                    name="outOfHoursMessage"
+                    error={
+                      touched.outOfHoursMessage &&
+                      Boolean(errors.outOfHoursMessage)
+                    }
+                    helperText={
+                      touched.outOfHoursMessage && errors.outOfHoursMessage
+                    }
+                    variant="outlined"
+                    margin="dense"
+                  />
+                  <SchedulesForm
+                    loading={false}
+                    onSubmit={handleSaveSchedules}
+                    initialValues={schedules}
+                    labelSaveButton="Adicionar"
+                  />
+                </Paper>
+              )}
+            </Form>
+          )}
+        </Formik>
       </Dialog>
     </div>
   );

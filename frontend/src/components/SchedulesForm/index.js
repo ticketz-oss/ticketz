@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { makeStyles, TextField, Grid } from "@material-ui/core";
+import { makeStyles, TextField, Grid, InputBase } from "@material-ui/core";
 import { Formik, Form, FastField, FieldArray } from "formik";
 import { isArray } from "lodash";
 import NumberFormat from "react-number-format";
@@ -80,11 +80,10 @@ function SchedulesForm(props) {
                       <Grid container>
                         <Grid className={classes.control} xs={12} item>
                           <FastField
-                            as={TextField}
+                            as={InputBase}
                             abel={i18n.t("queueModal.serviceHours.dayWeek")}
                             name={`schedules[${index}].weekday`}
                             disabled
-                            variant="outlined"
                             className={classes.fullWidth}
                             margin="dense"
                           />
