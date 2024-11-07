@@ -1,3 +1,31 @@
+/*
+
+   DO NOT REMOVE / NÃO REMOVER
+
+   VERSÃO EM PORTUGUÊS MAIS ABAIXO
+
+   PROPRIETARY CODE
+
+   Author: Claudemir Todo Bom
+   Email: claudemir@todobom.com
+   
+   If you had access to this code, you are not allowed to
+   share, copy or distribute it. You are not allowed to use
+   it in your projects, create your own projects based on
+   it or use it in any way without a written authorization.
+   
+   CÓDIGO PROPRIETÁRIO
+
+   Autor: Claudemir Todo Bom
+   Email: claudemir@todobom.com
+
+   Se você teve acesso a este código, não está autorizado a
+   compartilhá-lo, copiá-lo ou distribuí-lo. Não está autorizado
+   a utilizá-lo em seus projetos, criar projetos baseados nele
+   ou utilizá-lo de qualquer forma sem autorização por escrito.
+   
+ */
+
 import axios from "axios";
 import { makeRandomId } from "../../helpers/MakeRandomId";
 import Ticket from "../../models/Ticket";
@@ -14,7 +42,7 @@ import IntegrationSession from "../../models/IntegrationSession";
 export class WebhookIntegration implements IntegrationDriver {
   private name = "webhook";
 
-  private description = "Webhook Integration";
+  private description = "Webhook / N8N";
 
   getName(): string {
     return this.name;
