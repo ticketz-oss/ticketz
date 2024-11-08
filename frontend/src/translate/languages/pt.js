@@ -178,6 +178,10 @@ const messages = {
 					edit: "Editar fila",
 				},
 				form: {
+          chatbot: {
+            native: "Chatbot Interno",
+            selectTitle: "Provedor de Chatbot"
+          },
 					name: "Nome",
 					color: "Cor",
 					greetingMessage: "Mensagem de saudação",
