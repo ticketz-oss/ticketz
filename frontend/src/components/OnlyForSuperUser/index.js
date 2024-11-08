@@ -1,4 +1,4 @@
-const OnlyForSuperUser = ({ user, yes, no }) => user.super ? yes() : no();
+const OnlyForSuperUser = ({ user, yes, no }) => user?.super ? yes() : no();
 
 OnlyForSuperUser.defaultProps = {
     user: {},
