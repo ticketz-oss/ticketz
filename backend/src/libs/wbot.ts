@@ -148,6 +148,36 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
 
         const msgRetryCounterCache = new NodeCache();
         const userDevicesCache: CacheStore = new NodeCache();
+        const internalGroupCache = new NodeCache({
+          stdTTL: 5 * 60,
+          useClones: false
+        });
+        const groupCache: CacheStore = {
+          get: <T>(key: string): T => {
+            logger.debug(`groupCache.get ${key}`);
+            const value = internalGroupCache.get(key);
+            if (!value) {
+              logger.debug(`groupCache.get ${key} not found`);
+              wsocket.groupMetadata(key).then(async metadata => {
+                logger.debug({ key, metadata }, `groupCache.get ${key} set`);
+                internalGroupCache.set(key, metadata);
+              });
+            }
+            return value as T;
+          },
+          set: async (key: string, value: any) => {
+            logger.debug({ key, value }, `groupCache.set ${key}`);
+            return internalGroupCache.set(key, value);
+          },
+          del: async (key: string) => {
+            logger.debug(`groupCache.del ${key}`);
+            return internalGroupCache.del(key);
+          },
+          flushAll: async () => {
+            logger.debug("groupCache.flushAll");
+            return internalGroupCache.flushAll();
+          }
+        };
 
         const appName =
           (await GetPublicSettingService({ key: "appName" })) || "Ticketz";
@@ -175,6 +205,7 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
           generateHighQualityLinkPreview: true,
           userDevicesCache,
           getMessage,
+          cachedGroupMetadata: async jid => groupCache.get(jid),
           shouldIgnoreJid: jid =>
             isJidBroadcast(jid) || jid?.endsWith("@newsletter"),
           transactionOpts: { maxCommitRetries: 1, delayBetweenTriesMs: 10 }
@@ -373,6 +404,29 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
             }
           }
         );
+
+        wsocket.ev.on("groups.upsert", groups => {
+          logger.debug("Received new group");
+          groups.forEach(group => {
+            groupCache.set(group.id, group);
+          });
+        });
+
+        wsocket.ev.on("groups.update", async ([event]) => {
+          logger.debug("Received group update");
+          const metadata = await wsocket.groupMetadata(event.id);
+          groupCache.set(event.id, metadata);
+        });
+
+        wsocket.ev.on("group-participants.update", async event => {
+          logger.debug("Received group participants update");
+          try {
+            const metadata = await wsocket.groupMetadata(event.id);
+            groupCache.set(event.id, metadata);
+          } catch (error) {
+            groupCache.del(event.id);
+          }
+        });
 
         store.bind(wsocket.ev);
       })();

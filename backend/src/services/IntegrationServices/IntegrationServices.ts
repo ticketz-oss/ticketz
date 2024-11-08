@@ -267,7 +267,7 @@ export class IntegrationServices {
     }
 
     if (action === "updateTicket" && ticketData) {
-      updateTicket(integrationSession.ticket, ticketData);
+      await updateTicket(integrationSession.ticket, ticketData);
     }
 
     if (action === "note" && message?.content) {
@@ -291,6 +291,40 @@ export class IntegrationServices {
       } else {
         await wbotReplyHandler(wbot, integrationSession.ticket, message);
       }
+    }
+  }
+
+  public async processTrigger(
+    integrationSession: IntegrationSession,
+    trigger: any
+  ) {
+    if (trigger.action) {
+      await this.webhook(integrationSession, trigger);
+    } else if (trigger.stopbot) {
+      await this.endSession(integrationSession);
+    } else if (trigger.closeTicket) {
+      await this.webhook(integrationSession, {
+        action: "updateTicket",
+        ticketData: {
+          status: "closed",
+          justClose: true
+        }
+      });
+    } else if (trigger.userId && trigger.queueId) {
+      await this.webhook(integrationSession, {
+        action: "updateTicket",
+        ticketData: {
+          queueId: trigger.queueId,
+          userId: trigger.userId
+        }
+      });
+    } else if (trigger.queueId) {
+      await this.webhook(integrationSession, {
+        action: "updateTicket",
+        ticketData: {
+          queueId: trigger.queueId
+        }
+      });
     }
   }
 }

@@ -173,6 +173,10 @@ const messages = {
           edit: "Edit Antrian",
         },
         form: {
+          chatbot: {
+            native: "Chatbot Internal",
+            selectTitle: "Penyedia Chatbot"
+          },
           name: "Nama",
           color: "Warna",
           greetingMessage: "Pesan Sambutan",

@@ -1,3 +1,31 @@
+/*
+
+   DO NOT REMOVE / NÃO REMOVER
+
+   VERSÃO EM PORTUGUÊS MAIS ABAIXO
+
+   PROPRIETARY CODE
+
+   Author: Claudemir Todo Bom
+   Email: claudemir@todobom.com
+   
+   If you had access to this code, you are not allowed to
+   share, copy or distribute it. You are not allowed to use
+   it in your projects, create your own projects based on
+   it or use it in any way without a written authorization.
+   
+   CÓDIGO PROPRIETÁRIO
+
+   Autor: Claudemir Todo Bom
+   Email: claudemir@todobom.com
+
+   Se você teve acesso a este código, não está autorizado a
+   compartilhá-lo, copiá-lo ou distribuí-lo. Não está autorizado
+   a utilizá-lo em seus projetos, criar projetos baseados nele
+   ou utilizá-lo de qualquer forma sem autorização por escrito.
+   
+ */
+
 import axios from "axios";
 import { makeRandomId } from "../../helpers/MakeRandomId";
 import Ticket from "../../models/Ticket";
@@ -6,15 +34,18 @@ import {
   IntegrationMessage,
   IntegrationMessageMetadata,
   IntegrationOptions,
+  IntegrationServices,
   ReplyHandler
 } from "./IntegrationServices";
 import { logger } from "../../utils/logger";
 import IntegrationSession from "../../models/IntegrationSession";
 
+const integrations = IntegrationServices.getInstance();
+
 export class WebhookIntegration implements IntegrationDriver {
   private name = "webhook";
 
-  private description = "Webhook Integration";
+  private description = "Webhook / N8N";
 
   getName(): string {
     return this.name;
@@ -75,16 +106,10 @@ export class WebhookIntegration implements IntegrationDriver {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  async processMessage(
-    ticket,
-    message,
-    metadata,
-    token,
-    replyHandler,
-    options
-  ) {
+  async processMessage(integrationSession, message, metadata, replyHandler) {
+    const { ticket, token } = integrationSession;
     const { webhookUrl, webhookMethod, webhookToken, webhookExtraParams } =
-      options;
+      integrationSession.integration.configuration;
 
     try {
       if (webhookExtraParams) {
@@ -121,11 +146,16 @@ export class WebhookIntegration implements IntegrationDriver {
       const responseData = response?.data;
 
       if (Array.isArray(responseData)) {
-        responseData.forEach(data => {
+        // eslint-disable-next-line no-restricted-syntax
+        for await (const data of responseData) {
           if (data?.type && (data?.content || data?.mediaUrl)) {
-            replyHandler(ticket, data);
+            await replyHandler(ticket, data);
           }
-        });
+          if (data.trigger) {
+            await integrations.processTrigger(integrationSession, data.trigger);
+          }
+        }
+        return;
       }
 
       if (
@@ -133,6 +163,12 @@ export class WebhookIntegration implements IntegrationDriver {
         (responseData?.content || responseData?.mediaUrl)
       ) {
         replyHandler(ticket, responseData);
+      }
+      if (responseData.trigger) {
+        await integrations.processTrigger(
+          integrationSession,
+          responseData.trigger
+        );
       }
     } catch (error) {
       logger.error({ error }, "Error calling webhook");
@@ -166,14 +202,7 @@ export class WebhookIntegration implements IntegrationDriver {
     metadata: IntegrationMessageMetadata,
     replyHandler: ReplyHandler
   ): Promise<void> {
-    this.processMessage(
-      integrationSession.ticket,
-      message,
-      metadata,
-      integrationSession.token,
-      replyHandler,
-      integrationSession.integration.configuration
-    );
+    this.processMessage(integrationSession, message, metadata, replyHandler);
   }
 
   // eslint-disable-next-line class-methods-use-this

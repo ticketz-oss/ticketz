@@ -20,7 +20,7 @@ const ShowPrivacyService = async (
     whatsappId = parseInt(whatsappId, 10);
   }
   const wbot = getWbot(whatsappId);
-  const privacy: PrivacyData = await wbot.fetchPrivacySettings(true);
+  const privacy: PrivacyData = await wbot.fetchPrivacySettings();
 
   if (!privacy) {
     throw new AppError("ERR_NO_PRIVACY_FOUND", 404);

@@ -143,6 +143,8 @@ const QueueModal = ({ open, onClose, queueId }) => {
     if (selectedIntegration) {
       api.get(`/integrations/${selectedIntegration}`).then(({ data }) => {
         setIntegrationConfigSchema(data.fields);
+      }).catch(_ => {
+        setSelectedIntegration("");
       });
     }
   }, [selectedIntegration]);
@@ -275,21 +277,21 @@ const QueueModal = ({ open, onClose, queueId }) => {
           <Tab label="Dados da Fila" />
           {schedulesEnabled && <Tab label="Horários de Atendimento" />}
         </Tabs>
-        {tab === 0 && (
-          <Paper>
-            <Formik
-              initialValues={queue}
-              enableReinitialize={true}
-              validationSchema={QueueSchema}
-              onSubmit={(values, actions) => {
-                setTimeout(() => {
-                  handleSaveQueue(values);
-                  actions.setSubmitting(false);
-                }, 400);
-              }}
-            >
-              {({ touched, errors, isSubmitting, values }) => (
-                <Form>
+        <Formik
+          initialValues={queue}
+          enableReinitialize={true}
+          validationSchema={QueueSchema}
+          onSubmit={(values, actions) => {
+            setTimeout(() => {
+              handleSaveQueue(values);
+              actions.setSubmitting(false);
+            }, 400);
+          }}
+        >
+          {({ touched, errors, isSubmitting, values }) => (
+            <Form>
+              {tab === 0 && (
+                <Paper>
                   <DialogContent dividers>
                     <Field
                       as={TextField}
@@ -309,7 +311,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
                       id="color"
                       onFocus={() => {
                         setColorPickerModalOpen(true);
-                        greetingRef.current.focus();
+                        document.activeElement.blur();
                       }}
                       error={touched.color && Boolean(errors.color)}
                       helperText={touched.color && errors.color}
@@ -346,7 +348,30 @@ const QueueModal = ({ open, onClose, queueId }) => {
                         });
                       }}
                     />
-                    <div style={{ marginTop: 5 }}>
+                    
+                    <Grid xs={4} item>
+                      <FormControl className={classes.maxWidth}>
+                        <InputLabel>
+                          {i18n.t("queueModal.form.chatbot.selectTitle")}
+                        </InputLabel>
+                        <Select
+                          value={selectedIntegration}
+                          onChange={(e) => setSelectedIntegration(e.target.value)}
+                        >
+                          <MenuItem value="">
+                            {i18n.t("queuemodal.form.chatbot.native")}
+                          </MenuItem>
+                          {integrations.map((integration) => (
+                            <MenuItem key={integration.name} value={integration.name}>
+                              {integration.description}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+
+                    {!selectedIntegration && 
+                      <div style={{ marginTop: 5 }}>
                           <Field
                             as={TextField}
                             label={i18n.t("queueModal.form.greetingMessage")}
@@ -366,55 +391,15 @@ const QueueModal = ({ open, onClose, queueId }) => {
                             variant="outlined"
                             margin="dense"
                           />
-                        {schedulesEnabled && (
-                            <Field
-                              as={TextField}
-                              InputLabelProps={{ shrink: true }}
-                              label={i18n.t("queueModal.form.outOfHoursMessage")}
-                              type="outOfHoursMessage"
-                              multiline
-                              rows={5}
-                              fullWidth
-                              name="outOfHoursMessage"
-                              error={
-                                touched.outOfHoursMessage &&
-                                Boolean(errors.outOfHoursMessage)
-                              }
-                              helperText={
-                                touched.outOfHoursMessage && errors.outOfHoursMessage
-                              }
-                              variant="outlined"
-                              margin="dense"
-                            />
-                        )}
-                    </div>
-                    
-                    <Grid xs={4} item>
-                      <FormControl className={classes.maxWidth}>
-                        <InputLabel>
-                          Integration
-                        </InputLabel>
-                        <Select
-                          value={selectedIntegration}
-                          onChange={(e) => setSelectedIntegration(e.target.value)}
-                        >
-                          <MenuItem value="">
-                            <em>None</em>
-                          </MenuItem>
-                          {integrations.map((integration) => (
-                            <MenuItem key={integration.name} value={integration.name}>
-                              {integration.description}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    </Grid>
+                      </div>
+                    }
 
                     {selectedIntegration && 
                       <DynamicForm
                         schema={integrationConfigSchema}
                         data={integrationConfigData}
                         setData={setIntegrationConfigData}
+                        variant="outlined"
                       />
                     }
 
@@ -478,21 +463,40 @@ const QueueModal = ({ open, onClose, queueId }) => {
                       )}
                     </Button>
                   </DialogActions>
-                </Form>
+                </Paper>
               )}
-            </Formik>
-          </Paper>
-        )}
-        {tab === 1 && (
-          <Paper style={{ padding: 20 }}>
-            <SchedulesForm
-              loading={false}
-              onSubmit={handleSaveSchedules}
-              initialValues={schedules}
-              labelSaveButton="Adicionar"
-            />
-          </Paper>
-        )}
+              {tab === 1 && (
+                <Paper style={{ padding: 20 }}>
+                  <Field
+                    as={TextField}
+                    InputLabelProps={{ shrink: true }}
+                    label={i18n.t("queueModal.form.outOfHoursMessage")}
+                    type="outOfHoursMessage"
+                    multiline
+                    rows={5}
+                    fullWidth
+                    name="outOfHoursMessage"
+                    error={
+                      touched.outOfHoursMessage &&
+                      Boolean(errors.outOfHoursMessage)
+                    }
+                    helperText={
+                      touched.outOfHoursMessage && errors.outOfHoursMessage
+                    }
+                    variant="outlined"
+                    margin="dense"
+                  />
+                  <SchedulesForm
+                    loading={false}
+                    onSubmit={handleSaveSchedules}
+                    initialValues={schedules}
+                    labelSaveButton="Adicionar"
+                  />
+                </Paper>
+              )}
+            </Form>
+          )}
+        </Formik>
       </Dialog>
     </div>
   );

@@ -172,6 +172,10 @@ const messages = {
 					edit: "Edit Queue",
 				},
 				form: {
+          chatbot: {
+            native: "Internal Chatbot",
+            selectTitle: "Chatbot Provider"
+          },
 					name: "Name",
 					color: "Color",
 					greetingMessage: "Greeting Message",

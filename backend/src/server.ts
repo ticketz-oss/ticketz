@@ -62,7 +62,7 @@ ticketzPro(app).then(() => {
 
 // Initialize Integration Services
 const integrationServices = IntegrationServices.getInstance();
-integrationServices.registerIntegration(new DummyIntegration());
+// integrationServices.registerIntegration(new DummyIntegration());
 integrationServices.registerIntegration(new WebhookIntegration());
 integrationServices.registerIntegration(new TypebotIntegration());
 
