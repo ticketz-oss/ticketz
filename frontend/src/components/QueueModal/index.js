@@ -346,7 +346,30 @@ const QueueModal = ({ open, onClose, queueId }) => {
                         });
                       }}
                     />
-                    <div style={{ marginTop: 5 }}>
+                    
+                    <Grid xs={4} item>
+                      <FormControl className={classes.maxWidth}>
+                        <InputLabel>
+                          {i18n.t("queueModal.form.chatbot.selectTitle")}
+                        </InputLabel>
+                        <Select
+                          value={selectedIntegration}
+                          onChange={(e) => setSelectedIntegration(e.target.value)}
+                        >
+                          <MenuItem value="">
+                            {i18n.t("queuemodal.form.chatbot.native")}
+                          </MenuItem>
+                          {integrations.map((integration) => (
+                            <MenuItem key={integration.name} value={integration.name}>
+                              {integration.description}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+
+                    {!selectedIntegration && 
+                      <div style={{ marginTop: 5 }}>
                           <Field
                             as={TextField}
                             label={i18n.t("queueModal.form.greetingMessage")}
@@ -366,27 +389,8 @@ const QueueModal = ({ open, onClose, queueId }) => {
                             variant="outlined"
                             margin="dense"
                           />
-                    </div>
-                    <Grid xs={4} item>
-                      <FormControl className={classes.maxWidth}>
-                        <InputLabel>
-                          Integration
-                        </InputLabel>
-                        <Select
-                          value={selectedIntegration}
-                          onChange={(e) => setSelectedIntegration(e.target.value)}
-                        >
-                          <MenuItem value="">
-                            <em>None</em>
-                          </MenuItem>
-                          {integrations.map((integration) => (
-                            <MenuItem key={integration.name} value={integration.name}>
-                              {integration.description}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    </Grid>
+                      </div>
+                    }
 
                     {selectedIntegration && 
                       <DynamicForm
