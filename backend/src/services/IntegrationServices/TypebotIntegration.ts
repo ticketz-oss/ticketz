@@ -303,34 +303,7 @@ export class TypebotIntegration implements IntegrationDriver {
           }
 
           if (trigger) {
-            if (trigger.action) {
-              await integrations.webhook(integrationSession, trigger);
-            } else if (trigger.stopbot) {
-              await integrations.endSession(integrationSession);
-            } else if (trigger.closeTicket) {
-              await integrations.webhook(integrationSession, {
-                action: "updateTicket",
-                ticketData: {
-                  status: "closed",
-                  justClose: true
-                }
-              });
-            } else if (trigger.userId && trigger.queueId) {
-              await integrations.webhook(integrationSession, {
-                action: "updateTicket",
-                ticketData: {
-                  queueId: trigger.queueId,
-                  userId: trigger.userId
-                }
-              });
-            } else if (trigger.queueId) {
-              await integrations.webhook(integrationSession, {
-                action: "updateTicket",
-                ticketData: {
-                  queueId: trigger.queueId
-                }
-              });
-            }
+            await integrations.processTrigger(integrationSession, trigger);
           }
         }
 
