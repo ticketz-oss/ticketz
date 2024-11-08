@@ -143,6 +143,8 @@ const QueueModal = ({ open, onClose, queueId }) => {
     if (selectedIntegration) {
       api.get(`/integrations/${selectedIntegration}`).then(({ data }) => {
         setIntegrationConfigSchema(data.fields);
+      }).catch(_ => {
+        setSelectedIntegration("");
       });
     }
   }, [selectedIntegration]);
@@ -309,7 +311,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
                       id="color"
                       onFocus={() => {
                         setColorPickerModalOpen(true);
-                        greetingRef.current.focus();
+                        document.activeElement.blur();
                       }}
                       error={touched.color && Boolean(errors.color)}
                       helperText={touched.color && errors.color}
@@ -397,6 +399,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
                         schema={integrationConfigSchema}
                         data={integrationConfigData}
                         setData={setIntegrationConfigData}
+                        variant="outlined"
                       />
                     }
 
