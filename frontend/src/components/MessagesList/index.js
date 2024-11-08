@@ -928,6 +928,16 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
   const isVCard = (message) => {
     return message.startsWith('{"ticketzvCard":');
   };
+  
+  const stringOrFirstElement = (data) => {
+    if (!data) {
+      return "";
+    }
+    if (Array.isArray(data)) {
+      return data[0];
+    }
+    return data;
+  };
 
   const renderVCard = (vcardJson) => {
     const cardArray = JSON.parse(vcardJson)?.ticketzvCard;
@@ -944,13 +954,13 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
       const parsedVCard = vCard.parse(message);
       console.debug("vCard data:", { message , parsedVCard });
       
-      const name = 
+      const name = stringOrFirstElement(
         parsedVCard['X-WA-BIZ-NAME']?.[0]?.value ||
         parsedVCard.fn?.[0]?.value ||
-        formatVCardN(parsedVCard.n?.[0]?.value);
-      const description =
-        parsedVCard['X-WA-BIZ-DESCRIPTION']?.[0]?.value || ""
-      const number = parsedVCard?.tel?.[0]?.value;
+        formatVCardN(parsedVCard.n?.[0]?.value));
+      const description = stringOrFirstElement(
+        parsedVCard['X-WA-BIZ-DESCRIPTION']?.[0]?.value || "");
+      const number = stringOrFirstElement(parsedVCard?.tel?.[0]?.value);
       const metaNumber = parsedVCard?.tel?.[0]?.meta?.waid?.[0] || number || "unknown";
       
       return (
