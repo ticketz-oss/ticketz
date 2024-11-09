@@ -10,6 +10,7 @@ import {
   TableCell,
   TableHead,
   TableRow,
+  Tooltip,
   Typography,
 } from "@material-ui/core";
 
@@ -216,7 +217,9 @@ const Queues = () => {
             <>
               {queues.map((queue) => (
                 <TableRow key={queue.id}>
-                  <TableCell align="center">{queue.name}</TableCell>
+                  <Tooltip title={`id: ${queue.id}`} placement="right-start" arrow>
+                    <TableCell align="center">{queue.name}</TableCell>
+                  </Tooltip>
                   <TableCell align="center">
                     <div className={classes.customTableCell}>
                       <span

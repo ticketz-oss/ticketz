@@ -29,6 +29,7 @@ import UserModal from "../../components/UserModal";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import toastError from "../../errors/toastError";
 import { SocketContext } from "../../context/Socket/SocketContext";
+import { Tooltip } from "@material-ui/core";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_USERS") {
@@ -257,7 +258,9 @@ const Users = () => {
             <>
               {users.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell align="center">{user.name}</TableCell>
+                  <Tooltip title={`id: ${user.id}`} placement="right-start" arrow>
+                    <TableCell align="center">{user.name}</TableCell>
+                  </Tooltip>
                   <TableCell align="center">{user.email}</TableCell>
                   <TableCell align="center">{user.profile}</TableCell>
                   <TableCell align="center">
