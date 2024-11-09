@@ -117,7 +117,6 @@ const Ticket = () => {
       }
 
       if (data.action === "delete" && data.ticketId === ticket.id) {
-        toast.success("Ticket deleted sucessfully.");
         history.push("/tickets");
       }
     };
