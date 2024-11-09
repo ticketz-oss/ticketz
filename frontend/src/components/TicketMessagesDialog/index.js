@@ -118,12 +118,11 @@ export default function TicketMessagesDialog({ open, handleClose, ticketId }) {
       }
 
       const onCompanyTicketMessagesDialog = (data) => {
-        if (data.action === "update") {
+        if (data.action === "update" && data.ticket.id === ticket.id) {
           setTicket(data.ticket);
         }
 
-        if (data.action === "delete") {
-          toast.success("Ticket deleted sucessfully.");
+        if (data.action === "delete" && data.ticketId === ticket.id) {
           history.push("/tickets");
         }
       }
