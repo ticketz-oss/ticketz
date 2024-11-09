@@ -366,7 +366,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
                           onChange={(e) => setSelectedIntegration(e.target.value)}
                         >
                           <MenuItem value="">
-                            {i18n.t("queuemodal.form.chatbot.native")}
+                            {i18n.t("queueModal.form.chatbot.native")}
                           </MenuItem>
                           {integrations.map((integration) => (
                             <MenuItem key={integration.name} value={integration.name}>
