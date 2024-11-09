@@ -70,6 +70,7 @@ const useStyles = makeStyles((theme) => ({
   },
   maxWidth: {
     width: "100%",
+    paddingRight: theme.spacing(1),
   },
 }));
 
@@ -350,12 +351,18 @@ const QueueModal = ({ open, onClose, queueId }) => {
                     />
                     
                     <Grid xs={4} item>
-                      <FormControl className={classes.maxWidth}>
-                        <InputLabel>
+                      <FormControl
+                        className={classes.maxWidth}
+                        variant="outlined"
+                        margin="dense"
+                      >
+                        <InputLabel id="labelSelectChatbot">
                           {i18n.t("queueModal.form.chatbot.selectTitle")}
                         </InputLabel>
                         <Select
                           value={selectedIntegration}
+                          labelId="labelSelectChatbot"
+                          label={i18n.t("queueModal.form.chatbot.selectTitle")}
                           onChange={(e) => setSelectedIntegration(e.target.value)}
                         >
                           <MenuItem value="">
@@ -399,6 +406,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
                         schema={integrationConfigSchema}
                         data={integrationConfigData}
                         setData={setIntegrationConfigData}
+                        styling={classes.textField}
                         variant="outlined"
                       />
                     }
