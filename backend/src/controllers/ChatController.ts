@@ -157,14 +157,16 @@ export const saveMessage = async (
     ]
   });
 
+  const chatUsersChannels = chat.users.map(user => `user-${user.userId}`);
+
   const io = getIO();
-  io.emit(`company-${companyId}-chat-${chatId}`, {
+  io.to(chatUsersChannels).emit(`company-${companyId}-chat-${chatId}`, {
     action: "new-message",
     newMessage,
     chat
   });
 
-  io.emit(`company-${companyId}-chat`, {
+  io.to(chatUsersChannels).emit(`company-${companyId}-chat`, {
     action: "new-message",
     newMessage,
     chat
@@ -191,13 +193,15 @@ export const checkAsRead = async (
     ]
   });
 
+  const chatUsersChannels = chat.users.map(user => `user-${user.userId}`);
+
   const io = getIO();
-  io.emit(`company-${companyId}-chat-${id}`, {
+  io.to(chatUsersChannels).emit(`company-${companyId}-chat-${id}`, {
     action: "update",
     chat
   });
 
-  io.emit(`company-${companyId}-chat`, {
+  io.to(chatUsersChannels).emit(`company-${companyId}-chat`, {
     action: "update",
     chat
   });
