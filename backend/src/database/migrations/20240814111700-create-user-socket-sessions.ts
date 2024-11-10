@@ -1,6 +1,6 @@
 import { QueryInterface, DataTypes } from "sequelize";
 
-module.exports = {
+export default {
   up: (queryInterface: QueryInterface) => {
     return queryInterface.createTable("UserSocketSessions", {
       id: {
@@ -31,6 +31,6 @@ module.exports = {
   },
 
   down: (queryInterface: QueryInterface) => {
-    return queryInterface.dropTable("UserSocketSessios");
+    return queryInterface.dropTable("UserSocketSessions");
   }
 };

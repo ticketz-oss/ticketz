@@ -497,8 +497,8 @@ const Dashboard = () => {
                       </Typography>
                       <Typography paragraph>
                         Em instantes o Ticketz PRO estará instalado com todos os teus dados,
-                        agora só precisa ir até a página de configurações (⚙️) e fazer a sua
-                        assinatura.
+                        agora só precisa ir até o menu de usuário, clicar em "Assinatura do
+                        Ticketz PRO" e fazer a sua assinatura.
                       </Typography>
                       <Typography paragraph>
                         Se a tua instalação for diferente ou acredita que precisa
