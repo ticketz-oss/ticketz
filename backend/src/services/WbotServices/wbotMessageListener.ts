@@ -2029,6 +2029,11 @@ const handleMessage = async (
         chatbot: false,
         queueId: null
       });
+
+      if (!subscriptionService.getTaskResult) {
+        return;
+      }
+
       await verifyQueue(wbot, msg, ticket, ticket.contact, true);
       return;
     }
@@ -2066,6 +2071,10 @@ const handleMessage = async (
       await verifyDeleteMessage(msg.message.protocolMessage, ticket);
     } else {
       newMessage = await verifyMessage(msg, ticket, contact);
+    }
+
+    if (!subscriptionService.getTaskResult) {
+      return;
     }
 
     if (isGroup || contact.disableBot) {
