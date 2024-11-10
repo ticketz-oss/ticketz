@@ -23,6 +23,7 @@ import { Op } from "sequelize";
 import moment from "moment";
 import { Transform } from "stream";
 import { Throttle } from "stream-throttle";
+import { Sequelize } from "sequelize-typescript";
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
 import Message from "../../models/Message";
@@ -1348,8 +1349,8 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
         }
       ],
       order: [
-        ["forwardQueue", "options", "option", "ASC"],
-        ["options", "option", "ASC"],
+        [Sequelize.cast(Sequelize.col("forwardQueue.options.option"), "INTEGER"), "ASC"],
+        [Sequelize.cast(Sequelize.col("options.option"), "INTEGER"), "ASC"]
       ]
     });
 
