@@ -56,6 +56,7 @@ const ModalImageCors = ({ imageUrl, isDeleted , data }) => {
 			smallSrcSet={fetching ? imageUrl : blobUrl}
 			medium={fetching ? imageUrl : blobUrl}
 			large={fetching ? imageUrl : blobUrl}
+			showRotate={true}
 			imageBackgroundColor="unset"
 			alt="image"
 		/>

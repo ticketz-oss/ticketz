@@ -1,4 +1,5 @@
 import { FindOptions } from "sequelize/types";
+import { Sequelize } from "sequelize-typescript";
 import Whatsapp from "../../models/Whatsapp";
 import AppError from "../../errors/AppError";
 import Queue from "../../models/Queue";
@@ -28,14 +29,14 @@ const ShowWhatsAppService = async (
             model: QueueOption,
             as: "options",
             required: false,
-            where: { parentId: null }
+            where: { parentId: null },
           }
         ]
       }
     ],
     order: [
       ["queues", "name", "ASC"],
-      ["queues", "options", "option", "ASC"]
+      [Sequelize.cast(Sequelize.col("queues.options.option"), "INTEGER"), "ASC"]
     ]
   };
 
