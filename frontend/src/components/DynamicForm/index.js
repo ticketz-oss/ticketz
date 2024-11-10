@@ -19,7 +19,7 @@ a form field. It is an array on the follwing format:
 */
 
 import React from "react";
-import { Grid, FormControl, InputLabel, Select, MenuItem, makeStyles, Input, Switch, FormControlLabel } from "@material-ui/core";
+import { Grid, FormControl, InputLabel, Select, MenuItem, makeStyles, Input, Switch, FormControlLabel, TextField } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
   maxWidth: {
@@ -28,9 +28,13 @@ const useStyles = makeStyles((theme) => ({
   forceNewLine: {
     flexBasis: "100%",
   },
+  textField: {
+    marginRight: theme.spacing(1),
+    flex: 1,
+  },
 }));
 
-export const DynamicForm = ({ schema, data, setData, variant }) => {
+export const DynamicForm = ({ schema, data, setData, margin, variant }) => {
   const classes = useStyles();
 
   // Helper function to handle value changes
@@ -54,35 +58,42 @@ export const DynamicForm = ({ schema, data, setData, variant }) => {
               <FormControl className={classes.maxWidth}>
                 {field.type === "text" ? (
                   <>
-                    <InputLabel htmlFor={field.name}>{field.title}</InputLabel>
-                    <Input
+                    <TextField
                       name={field.name}
+                      label={field.title}
                       id={field.name}
                       variant={variant || "standard"}
+                      margin={margin || "dense"}
                       value={data[field.name]}
                       onChange={handleChange}
+                      className={classes.textField}
                     />
                   </>
                 ) : field.type === "textarea" ? (
                     <>
-                      <InputLabel htmlFor={field.name}>{field.title}</InputLabel>
-                      <Input
+                      <TextField
                         name={field.name}
+                        label={field.title}
                         id={field.name}
                         variant={variant || "standard"}
+                        margin={margin || "dense"}
                         value={data[field.name]}
                         onChange={handleChange}
+                        className={classes.textField}
                         multiline
                         rows={4}
                       />
                     </>
                 ) : field.type === "select" ? (
-                  <>
-                    <InputLabel htmlFor={field.name}>{field.title}</InputLabel>
+                  <FormControl
+                    variant={variant || "standard"}
+                    margin={margin || "dense"}
+                    className={classes.textField}
+                  >
+                    <InputLabel id={`select-${field.name}`}>{field.title}</InputLabel>
                     <Select
-                      name={field.name}
-                      id={field.name}
-                      variant={variant || "standard"}
+                      labelId={`select-${field.name}`}
+                      label={field.title}
                       value={data[field.name] || ""}
                       onChange={handleChange}
                     >
@@ -92,7 +103,7 @@ export const DynamicForm = ({ schema, data, setData, variant }) => {
                         </MenuItem>
                       ))}
                     </Select>
-                  </>
+                  </FormControl>
                 ) : field.type === "checkbox" ? (
                   <FormControlLabel
                     control={
