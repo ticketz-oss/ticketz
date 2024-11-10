@@ -1,23 +1,39 @@
 import { QueryInterface, DataTypes } from "sequelize";
 
-module.exports = {
+export default {
   up: async (queryInterface: QueryInterface) => {
     const transaction = await queryInterface.sequelize.transaction();
     try {
-      await queryInterface.removeConstraint("Messages", "Messages_quotedMsgId_fkey");
-      await queryInterface.removeConstraint("OldMessages", "OldMessages_messageId_fkey");
-      await queryInterface.removeConstraint("Messages", "Messages_pkey");
+      await queryInterface.removeConstraint(
+        "Messages",
+        "Messages_quotedMsgId_fkey",
+        { transaction }
+      );
+      await queryInterface.removeConstraint(
+        "OldMessages",
+        "OldMessages_messageId_fkey",
+        { transaction }
+      );
+      await queryInterface.removeConstraint("Messages", "Messages_pkey", {
+        transaction
+      });
       await queryInterface.addConstraint("Messages", {
         fields: ["id", "ticketId"],
         type: "primary key",
-        name: "Messges_id_ticketId_pk"
+        name: "Messges_id_ticketId_pk",
+        transaction
       });
-      await queryInterface.addColumn("OldMessages", "ticketId", {
-        type: DataTypes.INTEGER,
-        references: { model: "Tickets", key: "id" },
-        onUpdate: "CASCADE",
-        onDelete: "SET NULL"
-      });
+      await queryInterface.addColumn(
+        "OldMessages",
+        "ticketId",
+        {
+          type: DataTypes.INTEGER,
+          references: { model: "Tickets", key: "id" },
+          onUpdate: "CASCADE",
+          onDelete: "SET NULL"
+        },
+        { transaction }
+      );
       await transaction.commit();
     } catch (err) {
       await transaction.rollback();
@@ -28,12 +44,19 @@ module.exports = {
   down: async (queryInterface: QueryInterface) => {
     const transaction = await queryInterface.sequelize.transaction();
     try {
-      await queryInterface.removeColumn("OldMessages", "ticketId");
-      await queryInterface.removeConstraint("Messages", "Messges_id_ticketId_pk");
+      await queryInterface.removeColumn("OldMessages", "ticketId", {
+        transaction
+      });
+      await queryInterface.removeConstraint(
+        "Messages",
+        "Messges_id_ticketId_pk",
+        { transaction }
+      );
       await queryInterface.addConstraint("Messages", {
         fields: ["id"],
         type: "primary key",
-        name: "Messages_pkey"
+        name: "Messages_pkey",
+        transaction
       });
       await queryInterface.addConstraint("OldMessages", {
         fields: ["messageId"],
@@ -44,7 +67,8 @@ module.exports = {
           field: "id"
         },
         onDelete: "CASCADE",
-        onUpdate: "CASCADE"
+        onUpdate: "CASCADE",
+        transaction
       });
       await queryInterface.addConstraint("Messages", {
         fields: ["quotedMsgId"],
@@ -55,7 +79,8 @@ module.exports = {
           field: "id"
         },
         onDelete: "SET NULL",
-        onUpdate: "CASCADE"
+        onUpdate: "CASCADE",
+        transaction
       });
       await transaction.commit();
     } catch (err) {
