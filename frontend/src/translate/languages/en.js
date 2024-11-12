@@ -722,6 +722,13 @@ const messages = {
             disabled: "disabled",
           },
         },
+        groupsTab: {
+          title: "Groups Tab",
+          options: {
+            enabled: "enabled",
+            disabled: "disabled",
+          },
+        },
         VoiceAndVideoCalls: {
           title: "Voice and video calls",
           options: {

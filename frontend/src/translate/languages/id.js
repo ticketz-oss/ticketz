@@ -758,6 +758,13 @@ const messages = {
             disabled: "Dinonaktifkan",
           },
         },
+        groupsTab: {
+          title: "Tab grup",
+          options: {
+            enabled: "Diaktifkan",
+            disabled: "Dinonaktifkan",
+          },
+        },
         VoiceAndVideoCalls: {
           title: "Panggilan suara dan video",
           options: {
