@@ -288,6 +288,7 @@ const messages = {
 				tabs: {
 					open: { title: "Abiertas" },
 					closed: { title: "Resueltos" },
+          groups: { title: "Grupos" },
 					search: { title: "Búsqueda" },
 				},
 				search: {

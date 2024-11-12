@@ -283,6 +283,7 @@ const messages = {
         tabs: {
           open: { title: "Open" },
           closed: { title: "Closed" },
+          groups: { title: "Groups" },
           search: { title: "Search" },
         },
         search: {
