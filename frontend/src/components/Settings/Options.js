@@ -102,6 +102,7 @@ export default function Options(props) {
   const [allowSignup, setAllowSignup] = useState("disabled");
   const [chatbotAutoExit, setChatbotAutoExit] = useState("disabled");
   const [CheckMsgIsGroup, setCheckMsgIsGroupType] = useState("enabled");
+  const [groupsTab, setGroupsTab] = useState("disabled");
   const [apiToken, setApiToken] = useState("");
   const [downloadLimit, setDownloadLimit] = useState("15");
   
@@ -149,6 +150,10 @@ export default function Options(props) {
       if (CheckMsgIsGroup) {
         setCheckMsgIsGroupType(CheckMsgIsGroup.value);
       }
+
+      const groupsTab = settings.find((s) => s.key === "groupsTab");
+      setGroupsTab(groupsTab?.value || "disabled");
+
       const chatbotType = settings.find((s) => s.key === "chatBotType");
       if (chatbotType) {
         setChatbotType(chatbotType.value);
@@ -398,6 +403,26 @@ export default function Options(props) {
             </FormHelperText>
           </FormControl>
         </Grid>
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="groups-tab-label">
+              {i18n.t("settings.groupsTab.title")}
+            </InputLabel>
+            <Select
+              labelId="groups-tab-label"
+              value={groupsTab}
+              disabled={CheckMsgIsGroup === "enabled"}
+              onChange={async (e) => {
+                await handleSetting("groupsTab", e.target.value, setGroupsTab);
+              }}
+            >
+              <MenuItem value={"enabled"}>{i18n.t("settings.groupsTab.options.enabled")}</MenuItem>
+              <MenuItem value={"disabled"}>{i18n.t("settings.groupsTab.options.disabled")}</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="call-type-label">

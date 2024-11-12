@@ -166,6 +166,7 @@ const TicketsListCustom = (props) => {
   const {
     status,
     groups,
+    isSearch,
     searchParam,
     tags,
     users,
@@ -174,6 +175,7 @@ const TicketsListCustom = (props) => {
     updateCount,
     style,
     setTabOpen,
+    groupActionButtons,
   } = props;
   const classes = useStyles();
   const [pageNumber, setPageNumber] = useState(1);
@@ -192,6 +194,7 @@ const TicketsListCustom = (props) => {
 
   const { tickets, hasMore, loading } = useTickets({
     pageNumber,
+    isSearch,
     searchParam,
     status,
     groups,
@@ -368,7 +371,12 @@ const TicketsListCustom = (props) => {
           ) : (
             <>
               {ticketsList.map((ticket) => (
-                <TicketListItem ticket={ticket} setTabOpen={setTabOpen} key={ticket.id} />
+                <TicketListItem
+                  ticket={ticket}
+                  setTabOpen={setTabOpen}
+                  key={ticket.id}
+                  groupActionButtons={groupActionButtons}
+                />
               ))}
             </>
           )}

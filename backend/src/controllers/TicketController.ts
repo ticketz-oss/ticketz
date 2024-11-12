@@ -12,6 +12,7 @@ import UpdateTicketService from "../services/TicketServices/UpdateTicketService"
 import ListTicketsServiceKanban from "../services/TicketServices/ListTicketsServiceKanban";
 
 type IndexQuery = {
+  isSearch?: string;
   searchParam: string;
   pageNumber: string;
   status: string;
@@ -39,6 +40,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     groups,
     date,
     updatedAt,
+    isSearch,
     searchParam,
     showAll,
     queueIds: queueIdsStringified,
@@ -67,6 +69,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   }
 
   const { tickets, count, hasMore } = await ListTicketsService({
+    isSearch: isSearch === "true",
     searchParam,
     tags: tagsIds,
     users: usersIds,
