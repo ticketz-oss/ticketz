@@ -289,6 +289,9 @@ const messages = {
           closed: {
             title: "Tutup"
           },
+          groups: {
+            title: "Grup"
+          },
           search: {
             title: "Cari"
           },
