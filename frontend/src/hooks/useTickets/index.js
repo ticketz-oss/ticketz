@@ -4,6 +4,7 @@ import toastError from "../../errors/toastError";
 import api from "../../services/api";
 
 const useTickets = ({
+  isSearch,
   searchParam,
   tags,
   users,
@@ -27,6 +28,7 @@ const useTickets = ({
         try {
           const { data } = await api.get("/tickets", {
             params: {
+              isSearch,
               searchParam,
               pageNumber,
               tags,

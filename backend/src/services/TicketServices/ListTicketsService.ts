@@ -11,8 +11,10 @@ import Tag from "../../models/Tag";
 import TicketTag from "../../models/TicketTag";
 import { intersection } from "lodash";
 import Whatsapp from "../../models/Whatsapp";
+import { GetCompanySetting } from "../../helpers/CheckSettings";
 
 interface Request {
+  isSearch?: boolean;
   searchParam?: string;
   pageNumber?: string;
   status?: string;
@@ -35,6 +37,7 @@ interface Response {
 }
 
 const ListTicketsService = async ({
+  isSearch = false,
   searchParam = "",
   pageNumber = "1",
   queueIds,
@@ -49,11 +52,16 @@ const ListTicketsService = async ({
   withUnreadMessages,
   companyId
 }: Request): Promise<Response> => {
+  const groupsTab = !isSearch && await GetCompanySetting(companyId, "groupsTab", "disabled") === "enabled";
+
   let whereCondition: Filterable["where"] = {
     [Op.or]: [{ userId }, { status: "pending" }],
-    isGroup: groups === "true",
     queueId: { [Op.or]: [queueIds, null] }
   };
+
+  if (groupsTab) {
+    whereCondition.isGroup = groups === "true";
+  }
   let includeCondition: Includeable[];
 
   includeCondition = [
@@ -85,7 +93,10 @@ const ListTicketsService = async ({
   ];
 
   if (showAll === "true") {
-    whereCondition = { queueId: { [Op.or]: [queueIds, null] }, isGroup: groups === "true" };
+    whereCondition = { queueId: { [Op.or]: [queueIds, null] } };
+    if (groupsTab) {
+      whereCondition.isGroup = groups === "true";
+    }
   }
 
   if (status) {
@@ -163,10 +174,12 @@ const ListTicketsService = async ({
 
     whereCondition = {
       [Op.or]: [{ userId }, { status: "pending" }],
-      isGroup: groups === "true",
       queueId: { [Op.or]: [userQueueIds, null] },
       unreadMessages: { [Op.gt]: 0 }
     };
+    if (groupsTab) {
+      whereCondition.isGroup = groups === "true";
+    }
   }
 
   if (Array.isArray(tags) && tags.length > 0) {
