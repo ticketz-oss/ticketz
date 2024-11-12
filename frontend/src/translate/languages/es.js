@@ -728,6 +728,13 @@ const messages = {
 						disabled: "Desactivado",
 					},
 				},
+				groupsTab: {
+          title: "Pestaña de grupos",
+          options: {
+            enabled: "Activado",
+            disabled: "Desactivado",
+          },
+        },
 				VoiceAndVideoCalls: {
 					title:"Llamadas de voz y vídeo",
 					options: {

@@ -731,6 +731,13 @@ const messages = {
 					disabled: "Desativado",
 				},
 			},
+			groupsTab: {
+        title:"Aba de Grupos",
+        options: {
+          enabled: "Ativado",
+          disabled: "Desativado",
+        },
+      },
 			VoiceAndVideoCalls: {
 				title:"Chamadas de Voz e Vídeo",
 				options: {
