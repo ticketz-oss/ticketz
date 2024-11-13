@@ -244,7 +244,14 @@ const TicketsListCustom = (props) => {
         });
       }
 
-      if (data.action === "update" && shouldUpdateTicket(data.ticket) && data.ticket.status === status) {
+      if (data.action === "update" && data.ticket.status === status && shouldUpdateTicket(data.ticket)) {
+        dispatch({
+          type: "UPDATE_TICKET",
+          payload: data.ticket,
+        });
+      }
+      
+      if (groups && data.action === "update" && data.ticket.isGroup && shouldUpdateTicket(data.ticket)) {
         dispatch({
           type: "UPDATE_TICKET",
           payload: data.ticket,
