@@ -6,7 +6,6 @@ import SetTicketMessagesAsRead from "../../helpers/SetTicketMessagesAsRead";
 import { getIO } from "../../libs/socket";
 import Ticket from "../../models/Ticket";
 import Setting from "../../models/Setting";
-import Queue from "../../models/Queue";
 import ShowTicketService from "./ShowTicketService";
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
 import SendWhatsAppMessage from "../WbotServices/SendWhatsAppMessage";
@@ -61,7 +60,8 @@ const UpdateTicketService = async ({
     if (tokenData) {
       companyId = tokenData.companyId;
     }
-    let { status, justClose } = ticketData;
+    const { justClose } = ticketData;
+    let { status } = ticketData;
     let { queueId, userId } = ticketData;
     let chatbot: boolean | null = ticketData.chatbot || false;
     let queueOptionId: number | null = ticketData.queueOptionId || null;
@@ -197,7 +197,6 @@ const UpdateTicketService = async ({
     }
 
     if (oldQueueId !== queueId && !isNil(oldQueueId) && !isNil(queueId)) {
-      const queue = await Queue.findByPk(queueId);
       if (ticket.channel === "whatsapp") {
         const wbot = await GetTicketWbot(ticket);
         const { transferMessage } = await ShowWhatsAppService(
@@ -328,6 +327,7 @@ const UpdateTicketService = async ({
     return { ticket, oldStatus, oldUserId };
   } catch (err) {
     Sentry.captureException(err);
+    throw new AppError("Error updating ticket", 500, err);
   }
 };
 
