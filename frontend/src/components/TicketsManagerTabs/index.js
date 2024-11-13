@@ -222,13 +222,6 @@ const TicketsManagerTabs = () => {
             classes={{ root: showTabGroups ? classes.tabWithGroups : classes.tab }}
           />
 
-          <Tab
-            value={"closed"}
-            icon={<CheckBoxIcon />}
-            label={i18n.t("tickets.tabs.closed.title")}
-            classes={{ root: showTabGroups ? classes.tabWithGroups : classes.tab }}
-          />
-
           { showTabGroups && (
             <Tab
               value={"groups"}
@@ -237,6 +230,13 @@ const TicketsManagerTabs = () => {
               classes={{ root: classes.tabWithGroups }}
             />
           )}
+
+          <Tab
+            value={"closed"}
+            icon={<CheckBoxIcon />}
+            label={i18n.t("tickets.tabs.closed.title")}
+            classes={{ root: showTabGroups ? classes.tabWithGroups : classes.tab }}
+          />
 
           <Tab
             value={"search"}
