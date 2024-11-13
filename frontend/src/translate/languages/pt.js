@@ -297,6 +297,7 @@ const messages = {
 				tabs: {
 					open: { title: "Abertas" },
 					closed: { title: "Resolvidos" },
+					groups: { title: "Grupos" },
 					search: { title: "Busca" },
 				},
 				search: {
@@ -741,6 +742,13 @@ const messages = {
 					disabled: "Desativado",
 				},
 			},
+			groupsTab: {
+        title:"Aba de Grupos",
+        options: {
+          enabled: "Ativado",
+          disabled: "Desativado",
+        },
+      },
 			VoiceAndVideoCalls: {
 				title:"Chamadas de Voz e Vídeo",
 				options: {

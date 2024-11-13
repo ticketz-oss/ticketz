@@ -519,7 +519,8 @@ const CustomInput = (props) => {
 };
 
 const MessageInputCustom = (props) => {
-  const { ticketStatus, ticketId } = props;
+  const { ticket, showTabGroups } = props;
+  const { status: ticketStatus, id: ticketId } = ticket;
   const classes = useStyles();
 
   const [medias, setMedias] = useState([]);
@@ -802,8 +803,9 @@ const MessageInputCustom = (props) => {
       toastError(err);
     }
   };
-  
-  const disableOption = loading || recording || ticketStatus === "closed";
+
+  const isGroup = showTabGroups && ticket.isGroup;
+  const disableOption = !isGroup && loading || recording || ticketStatus === "closed";
 
   const renderReplyingMessage = (message) => {
     return (
@@ -985,7 +987,7 @@ const MessageInputCustom = (props) => {
             loading={loading}
             recording={recording}
             inputRef={inputRef}
-            ticketStatus={ticketStatus}
+            ticketStatus={(isGroup && "open" ) || ticketStatus}
             inputMessage={inputMessage}
             setInputMessage={setInputMessage}
             // handleChangeInput={handleChangeInput}

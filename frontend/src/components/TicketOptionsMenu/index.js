@@ -13,7 +13,7 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 
 import ScheduleModal from "../ScheduleModal";
 
-const TicketOptionsMenu = ({ ticket, menuOpen, handleClose, anchorEl }) => {
+const TicketOptionsMenu = ({ ticket, menuOpen, handleClose, anchorEl, showTabGroups }) => {
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
 	const [transferTicketModalOpen, setTransferTicketModalOpen] = useState(false);
 	const isMounted = useRef(true);
@@ -84,9 +84,11 @@ const TicketOptionsMenu = ({ ticket, menuOpen, handleClose, anchorEl }) => {
 				<MenuItem onClick={handleOpenScheduleModal}>
 					{i18n.t("ticketOptionsMenu.schedule")}
 				</MenuItem>
-				<MenuItem onClick={handleOpenTransferModal}>
-					{i18n.t("ticketOptionsMenu.transfer")}
-				</MenuItem>
+				{ (!ticket.isGroup || !showTabGroups || user.profile === "admin") &&
+          <MenuItem onClick={handleOpenTransferModal}>
+  					{i18n.t("ticketOptionsMenu.transfer")}
+  				</MenuItem>
+				}
 				<Can
 					role={user.profile}
 					perform="ticket-options:deleteTicket"

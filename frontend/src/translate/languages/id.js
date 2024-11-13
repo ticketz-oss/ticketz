@@ -295,6 +295,9 @@ const messages = {
           closed: {
             title: "Tutup"
           },
+          groups: {
+            title: "Grup"
+          },
           search: {
             title: "Cari"
           },
@@ -732,6 +735,13 @@ const messages = {
         },
         IgnoreGroupMessages: {
           title: "Abaikan pesan grup",
+          options: {
+            enabled: "Diaktifkan",
+            disabled: "Dinonaktifkan",
+          },
+        },
+        groupsTab: {
+          title: "Tab grup",
           options: {
             enabled: "Diaktifkan",
             disabled: "Dinonaktifkan",
