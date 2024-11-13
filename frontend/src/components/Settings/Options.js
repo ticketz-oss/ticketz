@@ -120,6 +120,7 @@ export default function Options(props) {
   const [loadingApiToken, setLoadingApiToken] = useState(false);
   const [loadingDownloadLimit, setLoadingDownloadLimit] = useState(false);
   const { getCurrentUserInfo } = useAuth();
+  const [autoReopenTimeout, setAutoReopenTimeout] = useState(false);
   const [currentUser, setCurrentUser] = useState({});
 
   const downloadLimitInput = useRef(null);
@@ -181,6 +182,8 @@ export default function Options(props) {
       const messageVisibility = settings.find((s) => s.key === "messageVisibility");
       setMessageVisibility(messageVisibility?.value || "message");
 
+      const autoReopenTimeout = settings.find((s) => s.key === "autoReopenTimeout");
+      setAutoReopenTimeout(autoReopenTimeout?.value || "0");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
@@ -285,6 +288,15 @@ export default function Options(props) {
     setLoadingDownloadLimit(false);
   }
 
+  async function handleAutoReopenTimeout(value) {
+    setAutoReopenTimeout(value);
+    await update({
+      key: "autoReopenTimeout",
+      value,
+    });
+    toast.success("Operação atualizada com sucesso.");
+  }
+
   async function handleSetting(key, value, setter = null) {
     if (setter) {
       setter(value);
@@ -362,6 +374,26 @@ export default function Options(props) {
             </FormHelperText>
           </FormControl>
         </Grid>
+        
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <TextField
+              id="autoreopen-timeout-field"
+              label="Timeout para reabertura automática (minutos)"
+              variant="standard"
+              name="autoReopenTimeout"
+              type="number"
+              value={autoReopenTimeout}
+              onChange={(e) => {
+                setAutoReopenTimeout(e.target.value);
+              }}
+              onBlur={async (_) => {
+                await handleAutoReopenTimeout(autoReopenTimeout);
+              }}
+            />
+          </FormControl>
+        </Grid>
+        
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="schedule-type-label">

@@ -1,9 +1,10 @@
-import { subHours } from "date-fns";
+import { subMinutes } from "date-fns";
 import { Op } from "sequelize";
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
 import ShowTicketService from "./ShowTicketService";
 import FindOrCreateATicketTrakingService from "./FindOrCreateATicketTrakingService";
+import { GetCompanySetting } from "../../helpers/CheckSettings";
 import sequelize from "../../database";
 import Whatsapp from "../../models/Whatsapp";
 
@@ -12,7 +13,8 @@ const FindOrCreateTicketService = async (
   whatsappId: number,
   unreadMessages: number,
   companyId: number,
-  groupContact?: Contact
+  groupContact?: Contact,
+  doNotReopen?: boolean
 ): Promise<Ticket> => {
   const result = await sequelize.transaction(async () => {
     let ticket = await Ticket.findOne({
@@ -55,17 +57,26 @@ const FindOrCreateTicketService = async (
       }
     }
 
-    if (!ticket && !groupContact) {
-      ticket = await Ticket.findOne({
-        where: {
-          updatedAt: {
-            [Op.between]: [+subHours(new Date(), 2), +new Date()]
+    if (!doNotReopen && !ticket && !groupContact) {
+      const reopenTimeout = parseInt(
+        await GetCompanySetting(companyId, "autoReopenTimeout", "0"),
+        10
+      );
+      ticket =
+        reopenTimeout &&
+        (await Ticket.findOne({
+          where: {
+            updatedAt: {
+              [Op.between]: [
+                +subMinutes(new Date(), reopenTimeout),
+                +new Date()
+              ]
+            },
+            contactId: contact.id,
+            whatsappId
           },
-          contactId: contact.id,
-          whatsappId
-        },
-        order: [["updatedAt", "DESC"]]
-      });
+          order: [["updatedAt", "DESC"]]
+        }));
 
       if (ticket) {
         await ticket.update({
