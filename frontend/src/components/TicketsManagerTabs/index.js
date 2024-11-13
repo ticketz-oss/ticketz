@@ -267,6 +267,7 @@ const TicketsManagerTabs = () => {
             >
               {i18n.t("ticketsManager.buttons.newTicket")}
             </Button>
+            { tab === "open" && (
             <Can
               role={user.profile}
               perform="tickets-manager:showall"
@@ -288,6 +289,7 @@ const TicketsManagerTabs = () => {
                 />
               )}
             />
+            )}
           </>
         )}
         <TicketsQueueSelect
