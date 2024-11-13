@@ -159,13 +159,21 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
   }
 
   try {
-    const numberToTest = messageData.number;
+    let { number } = messageData;
     const { body } = messageData;
 
-    const { companyId } = whatsapp;
+    if (!number.includes("@")) {
+      const numberToTest = messageData.number;
 
-    const CheckValidNumber = await CheckContactNumber(numberToTest, companyId);
-    const number = CheckValidNumber.jid.replace(/\D/g, "");
+      const { companyId } = whatsapp;
+
+      const CheckValidNumber = await CheckContactNumber(
+        numberToTest,
+        companyId,
+        whatsapp
+      );
+      number = CheckValidNumber.jid.replace(/\D/g, "");
+    }
 
     if (medias) {
       await Promise.all(
