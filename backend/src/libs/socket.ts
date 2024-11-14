@@ -51,8 +51,22 @@ import Ticket from "../models/Ticket";
 import authConfig from "../config/auth";
 import { CounterManager } from "./counter";
 import UserSocketSession from "../models/UserSocketSession";
+import { GetCompanySetting } from "../helpers/CheckSettings";
 
 let io: SocketIO;
+
+const joinTicketChannel = async (
+  socket,
+  ticketId: string,
+  user: User,
+  counters: CounterManager
+) => {
+  const c = counters.incrementCounter(`ticket-${ticketId}`);
+  if (c === 1) {
+    socket.join(ticketId);
+  }
+  logger.debug(`joinChatbox[${c}]: Channel: ${ticketId} by user ${user.id}`);
+};
 
 export const initIO = (httpServer: Server): SocketIO => {
   io = new SocketIO(httpServer, {
@@ -142,19 +156,34 @@ export const initIO = (httpServer: Server): SocketIO => {
         return;
       }
       Ticket.findByPk(ticketId).then(
-        ticket => {
+        async ticket => {
           if (
             ticket &&
             ticket.companyId === user.companyId &&
             (ticket.userId === user.id || user.profile === "admin")
           ) {
-            const c = counters.incrementCounter(`ticket-${ticketId}`);
-            if (c === 1) {
-              socket.join(ticketId);
+            joinTicketChannel(socket, ticketId, user, counters);
+          } else if (
+            ticket.isGroup &&
+            (await GetCompanySetting(
+              user.companyId,
+              "groupsTab",
+              "disabled"
+            )) === "enabled"
+          ) {
+            let queueFound = false;
+            user.queues.forEach(queue => {
+              if (queue.id === ticket.queueId) {
+                queueFound = true;
+              }
+            });
+            if (queueFound) {
+              joinTicketChannel(socket, ticketId, user, counters);
+            } else {
+              logger.info(
+                `Invalid attempt to join channel of ticket ${ticketId} by user ${user.id}`
+              );
             }
-            logger.debug(
-              `joinChatbox[${c}]: Channel: ${ticketId} by user ${user.id}`
-            );
           } else {
             logger.info(
               `Invalid attempt to join channel of ticket ${ticketId} by user ${user.id}`
