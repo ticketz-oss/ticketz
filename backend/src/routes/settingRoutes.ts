@@ -19,6 +19,12 @@ settingRoutes.get(
   SettingController.publicShow
 );
 
+settingRoutes.get(
+  "/company-settings/:settingKey",
+  isAuth,
+  SettingController.companyShow
+);
+
 // change setting key to key in future
 settingRoutes.put(
   "/settings/:settingKey",
