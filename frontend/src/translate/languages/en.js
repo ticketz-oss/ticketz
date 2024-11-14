@@ -290,6 +290,7 @@ const messages = {
 				tabs: {
 					open: { title: "Open" },
 					closed: { title: "Closed" },
+          groups: { title: "Groups" },
 					search: { title: "Search" },
 				},
 				search: {
@@ -737,6 +738,13 @@ const messages = {
 						disabled: "disabled",
 					},
 				},
+        groupsTab: {
+          title: "Groups Tab",
+          options: {
+            enabled: "enabled",
+            disabled: "disabled",
+          },
+        },
 				VoiceAndVideoCalls: {
 					title:"Voice and video calls",
 					options: {

@@ -4,11 +4,13 @@ import toastError from "../../errors/toastError";
 import api from "../../services/api";
 
 const useTickets = ({
+  isSearch,
   searchParam,
   tags,
   users,
   pageNumber,
   status,
+  groups,
   date,
   updatedAt,
   showAll,
@@ -26,11 +28,13 @@ const useTickets = ({
         try {
           const { data } = await api.get("/tickets", {
             params: {
+              isSearch,
               searchParam,
               pageNumber,
               tags,
               users,
               status,
+              groups,
               date,
               updatedAt,
               showAll,
@@ -55,6 +59,7 @@ const useTickets = ({
     users,
     pageNumber,
     status,
+    groups,
     date,
     updatedAt,
     showAll,

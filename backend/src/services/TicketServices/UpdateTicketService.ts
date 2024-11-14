@@ -10,7 +10,11 @@ import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
 import SendWhatsAppMessage from "../WbotServices/SendWhatsAppMessage";
 import FindOrCreateATicketTrakingService from "./FindOrCreateATicketTrakingService";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
-import { verifyMessage } from "../WbotServices/wbotMessageListener";
+import {
+  checkIntegration,
+  startQueue,
+  verifyMessage
+} from "../WbotServices/wbotMessageListener";
 import sendFaceMessage from "../FacebookServices/sendFacebookMessage";
 import AppError from "../../errors/AppError";
 import FindOrCreateTicketService from "./FindOrCreateTicketService";
@@ -20,6 +24,9 @@ import { GetCompanySetting } from "../../helpers/CheckSettings";
 import { CreateInternalMessageService } from "../MessageServices/CreateInternalMessageService";
 import User from "../../models/User";
 import formatBody from "../../helpers/Mustache";
+import { IntegrationServices } from "../IntegrationServices/IntegrationServices";
+
+const integrationServices = IntegrationServices.getInstance();
 
 interface TicketData {
   status?: string;
@@ -46,6 +53,7 @@ interface Request {
         exp: number;
       }
     | undefined;
+  dontRunChatbot?: boolean;
 }
 
 interface Response {
@@ -74,7 +82,8 @@ const UpdateTicketService = async ({
   ticketId,
   tokenData,
   companyId,
-  reqUserId
+  reqUserId,
+  dontRunChatbot
 }: Request): Promise<Response> => {
   // eslint-disable-next-line no-lone-blocks
   {
@@ -235,7 +244,6 @@ const UpdateTicketService = async ({
       ticketTraking.finishedAt = moment().toDate();
       ticketTraking.whatsappId = ticket.whatsappId;
       ticketTraking.userId = ticket.userId;
-
     }
 
     if (queueId !== undefined && queueId !== null) {
@@ -355,6 +363,11 @@ const UpdateTicketService = async ({
       CreateInternalMessageService(ticket, annotation, reqUserId);
     }
 
+    // if accepting a ticket make sure there is no integration session on it
+    if (status === "open" && oldStatus !== status) {
+      await integrationServices.endAllSessions(ticket);
+    }
+
     await ticket.update({
       status,
       queueId,
@@ -411,7 +424,19 @@ const UpdateTicketService = async ({
 
     await ticketTraking.save();
 
-    if (!isGroup && !ticket.contact.disableBot && !fromChatbot) {
+    if (!dontRunChatbot && !ticket.userId && ticket.queueId !== oldQueueId) {
+      const wbot = await GetTicketWbot(ticket);
+      await startQueue(wbot, ticket);
+      await ticket.reload();
+      await checkIntegration(ticket, wbot);
+    }
+
+    if (
+      !isGroup &&
+      !ticket.chatbot &&
+      !ticket.contact.disableBot &&
+      !fromChatbot
+    ) {
       if (oldQueueId && ticket.queueId && oldQueueId !== ticket.queueId) {
         const whatsapp = await ShowWhatsAppService(
           ticket.whatsappId,

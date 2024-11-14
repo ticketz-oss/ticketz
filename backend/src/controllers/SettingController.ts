@@ -7,6 +7,7 @@ import UpdateSettingService from "../services/SettingServices/UpdateSettingServi
 import ListSettingsService from "../services/SettingServices/ListSettingsService";
 import GetPublicSettingService from "../services/SettingServices/GetPublicSettingService";
 import GetSettingService from "../services/SettingServices/GetSettingService";
+import { GetCompanySettingService } from "../services/SettingServices/GetCompanySettingService";
 
 type LogoRequest = {
   mode: string;
@@ -65,6 +66,17 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
   const companyId = Number(req.user.companyId);
 
   const settingValue = await GetSettingService({ key, companyId });
+
+  return res.status(200).json(settingValue);
+};
+
+export const companyShow = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { settingKey: key } = req.params;
+
+  const settingValue = await GetCompanySettingService({ key, user: req.user });
 
   return res.status(200).json(settingValue);
 };

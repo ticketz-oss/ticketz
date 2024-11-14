@@ -57,9 +57,11 @@ export const removeWbot = async (
     const sessionIndex = sessions.findIndex(s => s.id === whatsappId);
     if (sessionIndex !== -1) {
       if (isLogout) {
-        sessions[sessionIndex].logout();
-        sessions[sessionIndex].ws.close();
+        await sessions[sessionIndex].logout();
       }
+
+      sessions[sessionIndex].end(null);
+      await sessions[sessionIndex].ws.close();
 
       sessions.splice(sessionIndex, 1);
     }
@@ -265,11 +267,13 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
                 (lastDisconnect?.error as Boom)?.output?.statusCode !==
                 DisconnectReason.loggedOut
               ) {
-                removeWbot(id, false);
-                setTimeout(
-                  () => StartWhatsAppSession(whatsapp, whatsapp.companyId),
-                  2000
-                );
+                removeWbot(id, false).then(() => {
+                  logger.info(`Reconnecting ${name} in 2 seconds`);
+                  setTimeout(
+                    () => StartWhatsAppSession(whatsapp, whatsapp.companyId),
+                    2000
+                  );
+                });
               } else {
                 await whatsapp.update({ status: "PENDING", session: "" });
                 await DeleteBaileysService(whatsapp.id);
@@ -277,11 +281,13 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
                   action: "update",
                   session: whatsapp
                 });
-                removeWbot(id, false);
-                setTimeout(
-                  () => StartWhatsAppSession(whatsapp, whatsapp.companyId),
-                  2000
-                );
+                removeWbot(id, false).then(() => {
+                  logger.info(`Reconnecting ${name} in 2 seconds`);
+                  setTimeout(
+                    () => StartWhatsAppSession(whatsapp, whatsapp.companyId),
+                    2000
+                  );
+                });
               }
             }
 

@@ -68,8 +68,18 @@ const Ticket = () => {
   const [loading, setLoading] = useState(true);
   const [contact, setContact] = useState({});
   const [ticket, setTicket] = useState({});
+  const [showTabGroups, setShowTabGroups] = useState(false);
 
   const socketManager = useContext(SocketContext);
+
+  useEffect(() => {
+    Promise.all([
+      api.get("/company-settings/CheckMsgIsGroup"),
+      api.get("/company-settings/groupsTab")
+    ]).then(([ignoreGroups, groupsTab]) => {
+      setShowTabGroups(!(ignoreGroups?.data !== "disabled") && groupsTab?.data === "enabled");
+    });
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -159,7 +169,7 @@ const Ticket = () => {
           isGroup={ticket.isGroup}
           markAsRead={true}
         ></MessagesList>
-        <MessageInput ticketId={ticket.id} ticketStatus={ticket.status} />
+        <MessageInput ticket={ticket} showTabGroups />
       </>
     );
   };
@@ -175,7 +185,7 @@ const Ticket = () => {
       >
         <TicketHeader loading={loading}>
           {renderTicketInfo()}
-          <TicketActionButtons ticket={ticket} />
+          <TicketActionButtons ticket={ticket} showTabGroups={showTabGroups} />
         </TicketHeader>
         <Paper>
           <TagsContainer ticket={ticket} />

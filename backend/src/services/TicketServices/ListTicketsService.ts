@@ -13,9 +13,11 @@ import Whatsapp from "../../models/Whatsapp";
 import { GetCompanySetting } from "../../helpers/CheckSettings";
 
 interface Request {
+  isSearch?: boolean;
   searchParam?: string;
   pageNumber?: string;
   status?: string;
+  groups?: string;
   date?: string;
   updatedAt?: string;
   showAll?: string;
@@ -34,12 +36,14 @@ interface Response {
 }
 
 const ListTicketsService = async ({
+  isSearch = false,
   searchParam = "",
   pageNumber = "1",
   queueIds,
   tags,
   users,
   status,
+  groups,
   date,
   updatedAt,
   showAll,
@@ -50,6 +54,10 @@ const ListTicketsService = async ({
   const user = await User.findByPk(userId, {
     include: [{ model: Queue, as: "queues", attributes: ["id"] }]
   });
+
+  const groupsTab =
+    !isSearch &&
+    (await GetCompanySetting(companyId, "groupsTab", "disabled")) === "enabled";
 
   const orCondition = [{ userId }, { status: "pending" }];
 
@@ -79,6 +87,10 @@ const ListTicketsService = async ({
     }
 
     orCondition.push(closedCondition);
+  }
+
+  if (groupsTab) {
+    whereCondition.isGroup = groups === "true";
   }
 
   let includeCondition: Includeable[];
@@ -113,6 +125,9 @@ const ListTicketsService = async ({
 
   if (showAll === "true" && user?.profile === "admin") {
     whereCondition = { queueId: { [Op.or]: [queueIds, null] } };
+    if (groupsTab) {
+      whereCondition.isGroup = groups === "true";
+    }
   }
 
   if (status) {
@@ -192,6 +207,9 @@ const ListTicketsService = async ({
       queueId: { [Op.or]: [userQueueIds, null] },
       unreadMessages: { [Op.gt]: 0 }
     };
+    if (groupsTab) {
+      whereCondition.isGroup = groups === "true";
+    }
   }
 
   if (Array.isArray(tags) && tags.length > 0) {

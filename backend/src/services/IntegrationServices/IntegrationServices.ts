@@ -253,6 +253,21 @@ export class IntegrationServices {
     await updateTicket(ticket, { chatbot: false });
   }
 
+  public async endAllSessions(ticket: Ticket) {
+    const integrationSessions = await IntegrationSession.findAll({
+      where: {
+        ticketId: ticket.id
+      },
+      include: ["integration", "ticket"]
+    });
+
+    await Promise.all(
+      integrationSessions.map(integrationSession =>
+        this.endSession(integrationSession)
+      )
+    );
+  }
+
   // eslint-disable-next-line class-methods-use-this
   public async webhook(
     integrationSession: IntegrationSession,

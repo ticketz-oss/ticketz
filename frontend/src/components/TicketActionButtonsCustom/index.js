@@ -30,7 +30,7 @@ const useStyles = makeStyles(theme => ({
 	},
 }));
 
-const TicketActionButtonsCustom = ({ ticket }) => {
+const TicketActionButtonsCustom = ({ ticket, showTabGroups }) => {
 	const classes = useStyles();
 	const history = useHistory();
 	const [anchorEl, setAnchorEl] = useState(null);
@@ -76,7 +76,7 @@ const TicketActionButtonsCustom = ({ ticket }) => {
 
 	return (
 		<div className={classes.actionButtons}>
-			{ticket.status === "closed" && (
+			{ticket.status === "closed" && (!showTabGroups || !ticket.isGroup) && (
 				<ButtonWithSpinner
 					loading={loading}
 					startIcon={<Replay />}
@@ -86,20 +86,24 @@ const TicketActionButtonsCustom = ({ ticket }) => {
 					{i18n.t("messagesList.header.buttons.reopen")}
 				</ButtonWithSpinner>
 			)}
-			{ticket.status === "open" && (
+			{(ticket.status === "open" || (showTabGroups && ticket.isGroup ) ) && (
 				<>
-					<Tooltip title={i18n.t("messagesList.header.buttons.return")}>
-						<IconButton onClick={e => handleUpdateTicketStatus(e, "pending", null)}>
-							<UndoRoundedIcon />
-						</IconButton>
-					</Tooltip>
-					<ThemeProvider theme={customTheme}>
-						<Tooltip title={i18n.t("messagesList.header.buttons.resolve")}>
-							<IconButton onClick={e => handleUpdateTicketStatus(e, "closed", user?.id)} color="primary">
-								<CheckCircleIcon />
-							</IconButton>
-						</Tooltip>
-					</ThemeProvider>
+          {(!showTabGroups || !ticket.isGroup) &&
+            <>
+              <Tooltip title={i18n.t("messagesList.header.buttons.return")}>
+                <IconButton onClick={e => handleUpdateTicketStatus(e, "pending", null)}>
+                  <UndoRoundedIcon />
+                </IconButton>
+              </Tooltip>
+              <ThemeProvider theme={customTheme}>
+                <Tooltip title={i18n.t("messagesList.header.buttons.resolve")}>
+                  <IconButton onClick={e => handleUpdateTicketStatus(e, "closed", user?.id)} color="primary">
+                    <CheckCircleIcon />
+                  </IconButton>
+                </Tooltip>
+              </ThemeProvider>
+            </>
+          }
 					{/* <ButtonWithSpinner
 						loading={loading}
 						startIcon={<Replay />}
@@ -125,10 +129,11 @@ const TicketActionButtonsCustom = ({ ticket }) => {
 						anchorEl={anchorEl}
 						menuOpen={ticketOptionsMenuOpen}
 						handleClose={handleCloseTicketOptionsMenu}
+						showTabGroups={showTabGroups}
 					/>
 				</>
 			)}
-			{ticket.status === "pending" && (
+			{ticket.status === "pending" && (!showTabGroups || !ticket.isGroup) && (
 				<ButtonWithSpinner
 					loading={loading}
 					size="small"

@@ -93,7 +93,7 @@ const formatRichText = richMessage => {
 };
 
 const convertTypebotMessage = (msg: any): IntegrationMessage => {
-  switch (msg.type) {
+  switch (msg?.type) {
     case "text":
       return {
         type: "text",
@@ -240,7 +240,7 @@ export class TypebotIntegration implements IntegrationDriver {
     try {
       let typebotMessage: { type: string; text?: string; url?: string };
 
-      switch (message.type) {
+      switch (message?.type) {
         case "text":
           {
             const optionNumber = Number(message.content);
@@ -264,10 +264,15 @@ export class TypebotIntegration implements IntegrationDriver {
         case "image":
         case "video":
         case "document":
-        default:
           typebotMessage = {
             type: "text",
             text: message.mediaUrl
+          };
+          break;
+        default:
+          typebotMessage = {
+            type: "text",
+            text: message?.content || ""
           };
           break;
       }
@@ -293,7 +298,7 @@ export class TypebotIntegration implements IntegrationDriver {
         const reply = convertTypebotMessage(msg);
         let dontReply = false;
 
-        if (reply.content?.startsWith("#")) {
+        if (reply?.content?.startsWith("#")) {
           let trigger: any = null;
           try {
             trigger = JSON.parse(reply.content.slice(1));
@@ -347,7 +352,7 @@ export class TypebotIntegration implements IntegrationDriver {
         });
       }
     } catch (error) {
-      logger.error({ error }, "Error calling Typebot");
+      logger.error({ error }, `Error calling Typebot: ${error.message}`);
     }
   }
 

@@ -66,7 +66,20 @@ const ListMessagesService = async ({
   }
 
   if (ticket.status === "pending" && user.profile !== "admin") {
-    throw new AppError("ERR_NO_PERMISSION", 403);
+    const groupsTab = await GetCompanySetting(
+      companyId,
+      "groupsTab",
+      "disabled"
+    );
+
+    if (groupsTab === "enabled") {
+      const userQueues = user.queues.map(queue => queue.id);
+      if (!userQueues.includes(ticket.queueId)) {
+        throw new AppError("ERR_NO_PERMISSION", 403);
+      }
+    } else {
+      throw new AppError("ERR_NO_PERMISSION", 403);
+    }
   }
 
   const limit = 20;

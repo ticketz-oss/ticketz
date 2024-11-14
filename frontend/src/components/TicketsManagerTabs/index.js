@@ -25,6 +25,9 @@ import TicketsQueueSelect from "../TicketsQueueSelect";
 import { Button } from "@material-ui/core";
 import { TagsFilter } from "../TagsFilter";
 import { UsersFilter } from "../UsersFilter";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPeopleGroup } from '@fortawesome/free-solid-svg-icons';
+import api from "../../services/api";
 
 const useStyles = makeStyles((theme) => ({
   ticketsWrapper: {
@@ -46,6 +49,11 @@ const useStyles = makeStyles((theme) => ({
     alignSelf: "center",
     marginLeft: "auto",
     padding: 8,
+  },
+
+  tabWithGroups: {
+    minWidth: 90,
+    width: 90,
   },
 
   tab: {
@@ -92,6 +100,11 @@ const useStyles = makeStyles((theme) => ({
   hide: {
     display: "none !important",
   },
+
+  icon24: {
+    width: 24,
+    height: 24,
+  },
 }));
 
 const TicketsManagerTabs = () => {
@@ -114,6 +127,17 @@ const TicketsManagerTabs = () => {
   const [selectedQueueIds, setSelectedQueueIds] = useState(userQueueIds || []);
   const [selectedTags, setSelectedTags] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
+
+  const [showTabGroups, setShowTabGroups] = useState(false);
+
+  useEffect(() => {
+    Promise.all([
+      api.get("/company-settings/CheckMsgIsGroup"),
+      api.get("/company-settings/groupsTab")
+    ]).then(([ignoreGroups, groupsTab]) => {
+      setShowTabGroups(!(ignoreGroups?.data !== "disabled") && groupsTab?.data === "enabled");
+    });
+  }, []);
 
   useEffect(() => {
     if (user.profile.toUpperCase() === "ADMIN") {
@@ -193,19 +217,30 @@ const TicketsManagerTabs = () => {
             value={"open"}
             icon={<MoveToInboxIcon />}
             label={i18n.t("tickets.tabs.open.title")}
-            classes={{ root: classes.tab }}
+            classes={{ root: showTabGroups ? classes.tabWithGroups : classes.tab }}
           />
+
+          { showTabGroups && (
+            <Tab
+              value={"groups"}
+              icon={<FontAwesomeIcon className={classes.icon24} icon={faPeopleGroup} />}
+              label={i18n.t("tickets.tabs.groups.title")}
+              classes={{ root: classes.tabWithGroups }}
+            />
+          )}
+
           <Tab
             value={"closed"}
             icon={<CheckBoxIcon />}
             label={i18n.t("tickets.tabs.closed.title")}
-            classes={{ root: classes.tab }}
+            classes={{ root: showTabGroups ? classes.tabWithGroups : classes.tab }}
           />
+
           <Tab
             value={"search"}
             icon={<SearchIcon />}
             label={i18n.t("tickets.tabs.search.title")}
-            classes={{ root: classes.tab }}
+            classes={{ root: showTabGroups ? classes.tabWithGroups : classes.tab }}
           />
         </Tabs>
       </Paper>
@@ -230,6 +265,7 @@ const TicketsManagerTabs = () => {
             >
               {i18n.t("ticketsManager.buttons.newTicket")}
             </Button>
+            { tab === "open" && (
             <Can
               role={user.profile}
               perform="tickets-manager:showall"
@@ -251,6 +287,7 @@ const TicketsManagerTabs = () => {
                 />
               )}
             />
+            )}
           </>
         )}
         <TicketsQueueSelect
@@ -301,6 +338,7 @@ const TicketsManagerTabs = () => {
             updateCount={(val) => setOpenCount(val)}
             style={applyPanelStyle("open")}
             setTabOpen={setTabOpen}
+            groupActionButtons={!showTabGroups}
           />
           <TicketsList
             status="pending"
@@ -308,12 +346,21 @@ const TicketsManagerTabs = () => {
             updateCount={(val) => setPendingCount(val)}
             style={applyPanelStyle("pending")}
             setTabOpen={setTabOpen}
+            groupActionButtons={!showTabGroups}
           />
         </Paper>
       </TabPanel>
       <TabPanel value={tab} name="closed" className={classes.ticketsWrapper}>
         <TicketsList
           status="closed"
+          showAll={true}
+          selectedQueueIds={selectedQueueIds}
+          groupActionButtons={!showTabGroups}
+          />
+      </TabPanel>
+      <TabPanel value={tab} name="groups" className={classes.ticketsWrapper}>
+        <TicketsList
+          groups={true}
           showAll={true}
           selectedQueueIds={selectedQueueIds}
         />
@@ -324,11 +371,13 @@ const TicketsManagerTabs = () => {
           <UsersFilter onFiltered={handleSelectedUsers} />
         )}
         <TicketsList
+          isSearch={true}
           searchParam={searchParam}
           showAll={true}
           tags={selectedTags}
           users={selectedUsers}
           selectedQueueIds={selectedQueueIds}
+          groupActionButtons={!showTabGroups}
         />
       </TabPanel>
     </Paper>

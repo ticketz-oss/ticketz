@@ -22,6 +22,7 @@ import moment from "moment";
 import { Transform } from "stream";
 import { Throttle } from "stream-throttle";
 import { Sequelize } from "sequelize-typescript";
+import mime from "mime-types";
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
 import Message from "../../models/Message";
@@ -68,7 +69,6 @@ import {
 import Integration from "../../models/Integration";
 import IntegrationSession from "../../models/IntegrationSession";
 import getFilenameFromUrl from "../../helpers/getFilenameFromUrl";
-import mime from "mime-types";
 
 import { SubscriptionService } from "../../ticketzPro/services/subscriptionService";
 
@@ -1193,7 +1193,24 @@ export const wbotReplyHandler = async (
     });
 };
 
-const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue) => {
+export const startQueue = async (
+  wbot: Session,
+  ticket: Ticket,
+  queue: Queue = null
+) => {
+  if (!queue) {
+    queue = await Queue.findByPk(ticket.queueId, {
+      include: [
+        {
+          model: QueueOption,
+          as: "options",
+          where: { parentId: null },
+          required: false
+        }
+      ]
+    });
+  }
+
   const { companyId, contact } = ticket;
   let chatbot = false;
 
@@ -1212,10 +1229,11 @@ const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue) => {
     await UpdateTicketService({
       ticketData: { queueId: queue.id, chatbot: true, status: "pending" },
       ticketId: ticket.id,
-      companyId: ticket.companyId
+      companyId: ticket.companyId,
+      dontRunChatbot: true
     });
 
-    ticket.reload();
+    await ticket.reload();
 
     const { message: reply } = await integrationServices.startSession(
       integration,
@@ -1245,13 +1263,14 @@ const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue) => {
   await UpdateTicketService({
     ticketData: { queueId: queue.id, chatbot, status: "pending" },
     ticketId: ticket.id,
-    companyId: ticket.companyId
+    companyId: ticket.companyId,
+    dontRunChatbot: true
   });
 
   let filePath = null;
   let optionsMsg = null;
 
-  if (queue.mediaPath !== null && queue.mediaPath !== "") {
+  if (queue.mediaPath) {
     filePath = path.resolve("public", queue.mediaPath);
     optionsMsg = await getMessageFileOptions(queue.mediaName, filePath);
   }
@@ -1542,26 +1561,39 @@ const handleRating = async (
     );
 };
 
-const checkIntegration = async (message: Message, wbot: Session) => {
+export const checkIntegration = async (
+  source: Message | Ticket,
+  wbot: Session
+) => {
+  const message = source instanceof Message ? source : null;
+  const ticket = source instanceof Ticket ? source : null;
+
+  if (!message && !ticket) {
+    throw new Error("checkIntegration: Invalid source");
+  }
+
+  const contactId = message?.contactId || ticket.contactId;
+  const contact =
+    message?.contact || ticket?.contact || (await Contact.findByPk(contactId));
+
   const integrationSession = await IntegrationSession.findOne({
     where: {
-      ticketId: message.ticketId
+      ticketId: message?.ticketId || ticket.id
     },
     include: [
       {
         model: Integration,
         as: "integration"
       }
-    ]
+    ],
+    order: [["id", "DESC"]]
   });
 
   if (integrationSession) {
     let integrationMessage: IntegrationMessage = null;
     const metadata: IntegrationMessageMetadata = {
       channel: "whatsapp",
-      from:
-        message.contact.toJSON() ||
-        (await Contact.findByPk(message.contactId)).toJSON()
+      from: contact.toJSON()
     };
 
     if (message) {
@@ -1582,7 +1614,7 @@ const checkIntegration = async (message: Message, wbot: Session) => {
       }
     }
 
-    integrationServices.continueSession(
+    await integrationServices.continueSession(
       integrationSession,
       integrationMessage,
       metadata,
@@ -1719,7 +1751,13 @@ const handleChartbot = async (
         }
       ],
       order: [
-        [Sequelize.cast(Sequelize.col("forwardQueue.options.option"), "INTEGER"), "ASC"],
+        [
+          Sequelize.cast(
+            Sequelize.col("forwardQueue.options.option"),
+            "INTEGER"
+          ),
+          "ASC"
+        ],
         [Sequelize.cast(Sequelize.col("options.option"), "INTEGER"), "ASC"]
       ]
     });
