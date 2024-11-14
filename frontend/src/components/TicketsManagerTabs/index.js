@@ -131,13 +131,11 @@ const TicketsManagerTabs = () => {
   const [showTabGroups, setShowTabGroups] = useState(false);
 
   useEffect(() => {
-    api.get(`/settings`).then(({ data }) => {
-      if (Array.isArray(data)) {
-        const ignoreGroups = data.find((d) => d.key === "CheckMsgIsGroup");
-        const groupsTab = data.find((d) => d.key === "groupsTab");
-
-        setShowTabGroups(!(ignoreGroups?.value !== "disabled") && groupsTab?.value === "enabled");
-      }
+    Promise.all([
+      api.get("/company-settings/CheckMsgIsGroup"),
+      api.get("/company-settings/groupsTab")
+    ]).then(([ignoreGroups, groupsTab]) => {
+      setShowTabGroups(!(ignoreGroups?.data !== "disabled") && groupsTab?.data === "enabled");
     });
   }, []);
 
