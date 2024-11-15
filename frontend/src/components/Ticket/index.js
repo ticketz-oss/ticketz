@@ -19,6 +19,7 @@ import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { TagsContainer } from "../TagsContainer";
 import { SocketContext } from "../../context/Socket/SocketContext";
+import useSettings from "../../hooks/useSettings";
 
 const drawerWidth = 320;
 
@@ -69,15 +70,16 @@ const Ticket = () => {
   const [contact, setContact] = useState({});
   const [ticket, setTicket] = useState({});
   const [showTabGroups, setShowTabGroups] = useState(false);
+  const { getSetting } = useSettings();
 
   const socketManager = useContext(SocketContext);
 
   useEffect(() => {
     Promise.all([
-      api.get("/company-settings/CheckMsgIsGroup"),
-      api.get("/company-settings/groupsTab")
+      getSetting("CheckMsgIsGroup"),
+      getSetting("groupsTab")
     ]).then(([ignoreGroups, groupsTab]) => {
-      setShowTabGroups(!(ignoreGroups?.data !== "disabled") && groupsTab?.data === "enabled");
+      setShowTabGroups(ignoreGroups === "disabled" && groupsTab === "enabled");
     });
   }, []);
 
