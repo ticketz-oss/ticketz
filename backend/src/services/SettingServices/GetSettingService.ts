@@ -13,10 +13,11 @@ interface Request {
 // with respective default values
 const safeSettingsKeys = {
   groupsTab: "disabled",
-  CheckMsgIsGroup: "disabled"
+  CheckMsgIsGroup: "disabled",
+  soundGroupNotifications: "disabled"
 };
 
-export const GetCompanySettingService = async ({
+export const GetSettingService = async ({
   key,
   user
 }: Request): Promise<string> => {

@@ -6,7 +6,7 @@ import AppError from "../errors/AppError";
 import UpdateSettingService from "../services/SettingServices/UpdateSettingService";
 import ListSettingsService from "../services/SettingServices/ListSettingsService";
 import GetPublicSettingService from "../services/SettingServices/GetPublicSettingService";
-import { GetCompanySettingService } from "../services/SettingServices/GetCompanySettingService";
+import { GetSettingService } from "../services/SettingServices/GetSettingService";
 
 type LogoRequest = {
   mode: string;
@@ -60,13 +60,10 @@ export const publicShow = async (
   return res.status(200).json(settingValue);
 };
 
-export const companyShow = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
+export const show = async (req: Request, res: Response): Promise<Response> => {
   const { settingKey: key } = req.params;
 
-  const settingValue = await GetCompanySettingService({ key, user: req.user });
+  const settingValue = await GetSettingService({ key, user: req.user });
 
   return res.status(200).json(settingValue);
 };
