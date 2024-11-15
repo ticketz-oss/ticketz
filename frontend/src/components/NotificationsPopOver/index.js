@@ -22,6 +22,7 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 import { SocketContext } from "../../context/Socket/SocketContext";
 import Favicon from "react-favicon";
 import { getBackendURL } from "../../services/config";
+import useSettings from "../../hooks/useSettings";
 
 const defaultLogoFavicon = "/vector/favicon.svg";
 
@@ -56,6 +57,8 @@ const NotificationsPopOver = (props) => {
   const anchorEl = useRef();
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [soundGroupNotifications, setSoundGroupNotifications] = useState(false);
+  const [showTabGroups, setShowTabGroups] = useState(false);
   const { profile, queues } = user;
 
   const [, setDesktopNotifications] = useState([]);
@@ -63,10 +66,24 @@ const NotificationsPopOver = (props) => {
   const { tickets } = useTickets({ withUnreadMessages: "true" });
   const [play] = useSound(alertSound, {volume: props.volume});
   const soundAlertRef = useRef();
+  const { getSetting } = useSettings();
 
   const historyRef = useRef(history);
   
   const socketManager = useContext(SocketContext);
+
+  useEffect(() => {
+    getSetting("soundGroupNotifications").then((soundGroupNotifications) => {
+      setSoundGroupNotifications(soundGroupNotifications === "enabled");
+    });
+
+    Promise.all([
+      getSetting("CheckMsgIsGroup"),
+      getSetting("groupsTab")
+    ]).then(([ignoreGroups, groupsTab]) => {
+      setShowTabGroups(ignoreGroups === "disabled" && groupsTab === "enabled");
+    });
+  }, []);
 
 	useEffect(() => {
 		soundAlertRef.current = play;
@@ -141,7 +158,7 @@ const NotificationsPopOver = (props) => {
 					(data.message.ticketId === ticketIdRef.current &&
 						document.visibilityState === "visible") ||
 					(data.ticket.userId && data.ticket.userId !== user?.id) ||
-					data.ticket.isGroup;
+					(data.ticket.isGroup && !soundGroupNotifications);
 
 				if (shouldNotNotificate) return;
 
@@ -156,7 +173,7 @@ const NotificationsPopOver = (props) => {
     return () => {
        socket.disconnect();
     };
-  }, [user, profile, queues, socketManager]);
+  }, [user, profile, queues, soundGroupNotifications, socketManager]);
 
   const handleNotifications = (data) => {
     const { message, contact, ticket } = data;

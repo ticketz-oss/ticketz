@@ -142,6 +142,9 @@ export default function Options(props) {
       if (CheckMsgIsGroup) {
         setCheckMsgIsGroupType(CheckMsgIsGroup.value);
       }
+      
+      const soundGroupNotifications = settings.find((s) => s.key === "soundGroupNotifications");
+      setSoundGroupNotifications(soundGroupNotifications?.value || "disabled");
 
       const groupsTab = settings.find((s) => s.key === "groupsTab");
       setGroupsTab(groupsTab?.value || "disabled");
