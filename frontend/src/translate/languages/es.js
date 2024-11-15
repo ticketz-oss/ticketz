@@ -728,6 +728,13 @@ const messages = {
 						disabled: "Desactivado",
 					},
 				},
+        soundGroupNotifications: {
+          title: "Notificaciones de sonido de grupo",
+          options: {
+            enabled: "Activado",
+            disabled: "Desactivado",
+          },
+        },
 				groupsTab: {
           title: "Pestaña de grupos",
           options: {

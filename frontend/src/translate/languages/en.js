@@ -722,6 +722,13 @@ const messages = {
             disabled: "disabled",
           },
         },
+        soundGroupNotifications: {
+          title: "Sound on Group Notifications",
+          options: {
+            enabled: "enabled",
+            disabled: "disabled",
+          },
+        },
         groupsTab: {
           title: "Groups Tab",
           options: {

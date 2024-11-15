@@ -102,6 +102,7 @@ export default function Options(props) {
   const [allowSignup, setAllowSignup] = useState("disabled");
   const [chatbotAutoExit, setChatbotAutoExit] = useState("disabled");
   const [CheckMsgIsGroup, setCheckMsgIsGroupType] = useState("enabled");
+  const [soundGroupNotifications, setSoundGroupNotifications] = useState("disabled");
   const [groupsTab, setGroupsTab] = useState("disabled");
   const [apiToken, setApiToken] = useState("");
   const [downloadLimit, setDownloadLimit] = useState("15");
@@ -391,6 +392,24 @@ export default function Options(props) {
             >
               <MenuItem value={"disabled"}>{i18n.t("settings.IgnoreGroupMessages.options.disabled")}</MenuItem>
               <MenuItem value={"enabled"}>{i18n.t("settings.IgnoreGroupMessages.options.enabled")}</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+        
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="sound-group-notifications-label">
+              {i18n.t("settings.soundGroupNotifications.title")}
+            </InputLabel>
+            <Select
+              labelId="sound-group-notifications-label"
+              value={soundGroupNotifications}
+              onChange={async (e) => {
+                await handleSetting("soundGroupNotifications", e.target.value, setSoundGroupNotifications);
+              }}
+            >
+              <MenuItem value={"disabled"}>{i18n.t("settings.soundGroupNotifications.options.disabled")}</MenuItem>
+              <MenuItem value={"enabled"}>{i18n.t("settings.soundGroupNotifications.options.enabled")}</MenuItem>
             </Select>
           </FormControl>
         </Grid>
