@@ -108,17 +108,7 @@ export default function Options(props) {
   
   const [messageVisibility, setMessageVisibility] = useState("Respect Message Queue");
 
-  const [loadingUserRating, setLoadingUserRating] = useState(false);
-  const [loadingScheduleType, setLoadingScheduleType] = useState(false);
-  const [loadingCallType, setLoadingCallType] = useState(false);
-  const [loadingChatbotType, setLoadingChatbotType] = useState(false);
-  const [loadingQuickMessages, setLoadingQuickMessages] = useState(false);
-  const [loadingAllowSignup, setLoadingAllowSignup] = useState(false);
-  const [loadingChatbotAutoExit, setLoadingChatbotAutoExit] = useState(false);
-  const [loadingCheckMsgIsGroup, setCheckMsgIsGroup] = useState(false);
   const [keepQueueAndUser, setKeepQueueAndUser] = useState("enabled");
-  const [loadingApiToken, setLoadingApiToken] = useState(false);
-  const [loadingDownloadLimit, setLoadingDownloadLimit] = useState(false);
   const { getCurrentUserInfo } = useAuth();
   const [autoReopenTimeout, setAutoReopenTimeout] = useState(false);
   const [currentUser, setCurrentUser] = useState({});
@@ -190,18 +180,15 @@ export default function Options(props) {
 
   async function handleChangeUserRating(value) {
     setUserRating(value);
-    setLoadingUserRating(true);
     await update({
       key: "userRating",
       value,
     });
     toast.success("Operação atualizada com sucesso.");
-    setLoadingUserRating(false);
   }
 
   async function handleScheduleType(value) {
     setScheduleType(value);
-    setLoadingScheduleType(true);
     await update({
       key: "scheduleType",
       value,
@@ -216,7 +203,6 @@ export default function Options(props) {
       draggable: true,
       theme: "light",
     });
-    setLoadingScheduleType(false);
     if (typeof scheduleTypeChanged === "function") {
       scheduleTypeChanged(value);
     }
@@ -224,68 +210,56 @@ export default function Options(props) {
 
   async function handleCallType(value) {
     setCallType(value);
-    setLoadingCallType(true);
     await update({
       key: "call",
       value,
     });
     toast.success("Operação atualizada com sucesso.");
-    setLoadingCallType(false);
   }
 
   async function handleChatbotType(value) {
     setChatbotType(value);
-    setLoadingChatbotType(true);
     await update({
       key: "chatBotType",
       value,
     });
     toast.success("Operação atualizada com sucesso.");
-    setLoadingChatbotType(false);
   }
 
   async function handleChatbotAutoExit(value) {
     setChatbotAutoExit(value);
-    setLoadingChatbotAutoExit(true);
     await update({
       key: "chatbotAutoExit",
       value,
     });
     toast.success("Operação atualizada com sucesso.");
-    setLoadingChatbotAutoExit(false);
   }
 
   async function handleQuickMessages(value) {
     setQuickMessages(value);
-    setLoadingQuickMessages(true);
     await update({
       key: "quickMessages",
       value,
     });
     toast.success("Operação atualizada com sucesso.");
-    setLoadingQuickMessages(false);
   }
 
   async function handleAllowSignup(value) {
     setAllowSignup(value);
-    setLoadingAllowSignup(true);
     await update({
       key: "allowSignup",
       value,
     });
     toast.success("Operação atualizada com sucesso.");
-    setLoadingAllowSignup(false);
   }
 
   async function handleDownloadLimit(value) {
     setDownloadLimit(value);
-    setLoadingDownloadLimit(true);
     await update({
       key: "downloadLimit",
       value,
     });
     toast.success("Operação atualizada com sucesso.");
-    setLoadingDownloadLimit(false);
   }
 
   async function handleAutoReopenTimeout(value) {
@@ -311,24 +285,20 @@ export default function Options(props) {
   async function generateApiToken() {
     const newToken = generateSecureToken(32);
     setApiToken(newToken);
-    setLoadingApiToken(true);
     await update({
       key: "apiToken",
       value: newToken,
     });
     toast.success("Operação atualizada com sucesso.");
-    setLoadingApiToken(false);
   }
 
   async function deleteApiToken() {
     setApiToken("");
-    setLoadingApiToken(true);
     await update({
       key: "apiToken",
       value: "",
     });
     toast.success("Operação atualizada com sucesso.");
-    setLoadingApiToken(false);
   }
   
   async function copyApiToken() {
@@ -338,13 +308,11 @@ export default function Options(props) {
 
   async function handleGroupType(value) {
     setCheckMsgIsGroupType(value);
-    setCheckMsgIsGroup(true);
     await update({
       key: "CheckMsgIsGroup",
       value,
     });
     toast.success("Operação atualizada com sucesso.");
-    setCheckMsgIsGroup(false);
     /*     if (typeof scheduleTypeChanged === "function") {
           scheduleTypeChanged(value);
         } */
@@ -369,9 +337,6 @@ export default function Options(props) {
               <MenuItem value={"disabled"}>{i18n.t("settings.validations.options.disabled")}</MenuItem>
               <MenuItem value={"enabled"}>{i18n.t("settings.validations.options.enabled")}</MenuItem>
             </Select>
-            <FormHelperText>
-              {loadingUserRating && "Atualizando..."}
-            </FormHelperText>
           </FormControl>
         </Grid>
         
@@ -410,9 +375,6 @@ export default function Options(props) {
               <MenuItem value={"queue"}>{i18n.t("settings.OfficeManagement.options.ManagementByDepartment")}</MenuItem>
               <MenuItem value={"company"}>{i18n.t("settings.OfficeManagement.options.ManagementByCompany")}</MenuItem>
             </Select>
-            <FormHelperText>
-              {loadingScheduleType && "Atualizando..."}
-            </FormHelperText>
           </FormControl>
         </Grid>
         <Grid xs={12} sm={6} md={4} item>
@@ -430,9 +392,6 @@ export default function Options(props) {
               <MenuItem value={"disabled"}>{i18n.t("settings.IgnoreGroupMessages.options.disabled")}</MenuItem>
               <MenuItem value={"enabled"}>{i18n.t("settings.IgnoreGroupMessages.options.enabled")}</MenuItem>
             </Select>
-            <FormHelperText>
-              {loadingScheduleType && "Atualizando..."}
-            </FormHelperText>
           </FormControl>
         </Grid>
 
@@ -470,9 +429,6 @@ export default function Options(props) {
               <MenuItem value={"disabled"}>{i18n.t("settings.VoiceAndVideoCalls.options.disabled")}</MenuItem>
               <MenuItem value={"enabled"}>{i18n.t("settings.VoiceAndVideoCalls.options.enabled")}</MenuItem>
             </Select>
-            <FormHelperText>
-              {loadingCallType && "Atualizando..."}
-            </FormHelperText>
           </FormControl>
         </Grid>
         <Grid xs={12} sm={6} md={4} item>
@@ -489,9 +445,6 @@ export default function Options(props) {
             >
               <MenuItem value={"text"}>Texto</MenuItem>
             </Select>
-            <FormHelperText>
-              {loadingChatbotType && "Atualizando..."}
-            </FormHelperText>
           </FormControl>
         </Grid>
         <Grid xs={12} sm={6} md={4} item>
@@ -509,9 +462,6 @@ export default function Options(props) {
               <MenuItem value={"disabled"}>{i18n.t("settings.AutomaticChatbotOutput.options.disabled")}</MenuItem>
               <MenuItem value={"enabled"}>{i18n.t("settings.AutomaticChatbotOutput.options.enabled")}</MenuItem>
             </Select>
-            <FormHelperText>
-              {loadingChatbotAutoExit && "Atualizando..."}
-            </FormHelperText>
           </FormControl>
         </Grid>
         <Grid xs={12} sm={6} md={4} item>
@@ -529,9 +479,6 @@ export default function Options(props) {
               <MenuItem value={"company"}>{i18n.t("settings.QuickMessages.options.enabled")}</MenuItem>
               <MenuItem value={"individual"}>{i18n.t("settings.QuickMessages.options.disabled")}</MenuItem>
             </Select>
-            <FormHelperText>
-              {loadingQuickMessages && "Atualizando..."}
-            </FormHelperText>
           </FormControl>
         </Grid>
 
@@ -644,9 +591,6 @@ export default function Options(props) {
                     <MenuItem value={"disabled"}>{i18n.t("settings.AllowRegistration.options.disabled")}</MenuItem>
                     <MenuItem value={"enabled"}>{i18n.t("settings.AllowRegistration.options.enabled")}</MenuItem>
                   </Select>
-                  <FormHelperText>
-                    {loadingAllowSignup && "Atualizando..."}
-                  </FormHelperText>
                 </FormControl>
               </Grid>
 
