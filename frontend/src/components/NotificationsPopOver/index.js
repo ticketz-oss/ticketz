@@ -288,7 +288,7 @@ const NotificationsPopOver = (props) => {
           ) : (
             notifications.map((ticket) => (
               <NotificationTicket key={ticket.id}>
-                <TicketListItem ticket={ticket} />
+                <TicketListItem ticket={ticket} groupActionButtons={!showTabGroups} />
               </NotificationTicket>
             ))
           )}
