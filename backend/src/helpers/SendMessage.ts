@@ -1,7 +1,6 @@
+import { proto } from "@whiskeysockets/baileys";
 import Whatsapp from "../models/Whatsapp";
 import GetWhatsappWbot from "./GetWhatsappWbot";
-import fs from "fs";
-
 import { getMessageOptions } from "../services/WbotServices/SendWhatsAppMedia";
 
 export type MessageData = {
@@ -16,9 +15,10 @@ export const SendMessage = async (
 ): Promise<any> => {
   try {
     const wbot = await GetWhatsappWbot(whatsapp);
-    const chatId = `${messageData.number}@s.whatsapp.net`;
+    const number = messageData.number.toString();
+    const chatId = number.includes("@") ? number : `${number}@s.whatsapp.net`;
 
-    let message;
+    let message: proto.WebMessageInfo;
 
     const body = `${messageData.body}`;
 
