@@ -1,4 +1,3 @@
-import fs from "fs";
 import { proto } from "@whiskeysockets/baileys";
 import Whatsapp from "../models/Whatsapp";
 import GetWhatsappWbot from "./GetWhatsappWbot";

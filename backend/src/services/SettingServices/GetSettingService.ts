@@ -1,22 +1,40 @@
+import AppError from "../../errors/AppError";
 import Setting from "../../models/Setting";
 
 interface Request {
   key: string;
-  companyId: number;
+  user: {
+    profile: string;
+    companyId: number;
+  };
 }
 
-const GetSettingService = async ({
+// keys that can be accessed by non-admin users
+// with respective default values
+const safeSettingsKeys = {
+  groupsTab: "disabled",
+  CheckMsgIsGroup: "disabled",
+  soundGroupNotifications: "disabled"
+};
+
+export const GetSettingService = async ({
   key,
-  companyId
-}: Request): Promise<string | undefined> => {
+  user
+}: Request): Promise<string> => {
+  if (user.profile !== "admin" && !(key in safeSettingsKeys)) {
+    throw new AppError("ERR_NO_PERMISSION", 403);
+  }
+
   const setting = await Setting.findOne({
     where: {
-      companyId,
+      companyId: user.companyId,
       key
     }
   });
 
-  return setting?.value;
-};
+  if (!setting && key in safeSettingsKeys) {
+    return safeSettingsKeys[key];
+  }
 
-export default GetSettingService;
+  return setting?.value || "";
+};

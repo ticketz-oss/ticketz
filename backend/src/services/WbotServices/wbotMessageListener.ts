@@ -1066,6 +1066,10 @@ export const wbotReplyHandler = async (
   reply: IntegrationMessage
 ) => {
   if (!reply?.content && !reply?.mediaUrl) {
+    await new Promise(resolve => {
+      setTimeout(resolve, 500);
+    });
+    await wbot.sendPresenceUpdate("composing", getTicketJid(ticket));
     return;
   }
 

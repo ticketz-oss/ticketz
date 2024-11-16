@@ -27,6 +27,7 @@
  */
 
 import axios from "axios";
+import { decode } from "html-entities";
 import Ticket from "../../models/Ticket";
 import {
   IntegrationDriver,
@@ -287,21 +288,36 @@ export class TypebotIntegration implements IntegrationDriver {
         }
       );
 
-      logger.debug({ response }, "Response from Typebot");
+      logger.debug({ data: response?.data }, "Response from Typebot");
 
       const { messages, clientSideActions, input } = response?.data || {
         messages: []
       };
+
+      if (clientSideActions) {
+        const action = clientSideActions.find((a: any) => a.type === "wait");
+        if (action?.type === "wait") {
+          if (!action.lastBubbleBlockId) {
+            replyHandler(integrationSession.ticket, { type: "text" });
+            await new Promise(resolve => {
+              setTimeout(resolve, action.wait.secondsToWaitFor * 1000);
+            });
+          }
+        }
+      }
 
       // eslint-disable-next-line no-restricted-syntax
       for await (const msg of messages) {
         const reply = convertTypebotMessage(msg);
         let dontReply = false;
 
-        if (reply?.content?.startsWith("#")) {
+        if (reply?.content?.startsWith("#{")) {
+          const triggerString = typebotRichText
+            ? reply.content.slice(1)
+            : decode(reply.content.slice(1));
           let trigger: any = null;
           try {
-            trigger = JSON.parse(reply.content.slice(1));
+            trigger = JSON.parse(triggerString);
             dontReply = true;
           } catch (_) {
             // just do nothing
@@ -321,11 +337,16 @@ export class TypebotIntegration implements IntegrationDriver {
             (a: any) => a.lastBubbleBlockId === msg.id
           );
           if (action?.type === "wait") {
+            replyHandler(integrationSession.ticket, { type: "text" });
             await new Promise(resolve => {
               setTimeout(resolve, action.wait.secondsToWaitFor * 1000);
             });
           }
         }
+      }
+
+      if (!input) {
+        await integrations.endSession(integrationSession);
       }
 
       if (input && input.type === "choice input") {

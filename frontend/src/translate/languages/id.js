@@ -745,6 +745,13 @@ const messages = {
             disabled: "Dinonaktifkan",
           },
         },
+        soundGroupNotifications: {
+          title: "Notifikasi grup suara",
+          options: {
+            enabled: "Diaktifkan",
+            disabled: "Dinonaktifkan",
+          },
+        },
         groupsTab: {
           title: "Tab grup",
           options: {
