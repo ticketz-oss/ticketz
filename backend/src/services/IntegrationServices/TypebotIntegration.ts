@@ -306,6 +306,8 @@ export class TypebotIntegration implements IntegrationDriver {
         }
       }
 
+      let autoStop = true;
+
       // eslint-disable-next-line no-restricted-syntax
       for await (const msg of messages) {
         const reply = convertTypebotMessage(msg);
@@ -325,6 +327,9 @@ export class TypebotIntegration implements IntegrationDriver {
 
           if (trigger) {
             await integrations.processTrigger(integrationSession, trigger);
+            if (trigger.queueId) {
+              autoStop = false;
+            }
           }
         }
 
@@ -345,7 +350,7 @@ export class TypebotIntegration implements IntegrationDriver {
         }
       }
 
-      if (!input) {
+      if (!input && autoStop) {
         await integrations.endSession(integrationSession);
       }
 
