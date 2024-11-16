@@ -28,6 +28,7 @@ import { UsersFilter } from "../UsersFilter";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPeopleGroup } from '@fortawesome/free-solid-svg-icons';
 import api from "../../services/api";
+import useSettings from "../../hooks/useSettings";
 
 const useStyles = makeStyles((theme) => ({
   ticketsWrapper: {
@@ -128,14 +129,15 @@ const TicketsManagerTabs = () => {
   const [selectedTags, setSelectedTags] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
 
+  const { getSetting } = useSettings();
   const [showTabGroups, setShowTabGroups] = useState(false);
 
   useEffect(() => {
     Promise.all([
-      api.get("/company-settings/CheckMsgIsGroup"),
-      api.get("/company-settings/groupsTab")
+      getSetting("CheckMsgIsGroup"),
+      getSetting("groupsTab")
     ]).then(([ignoreGroups, groupsTab]) => {
-      setShowTabGroups(!(ignoreGroups?.data !== "disabled") && groupsTab?.data === "enabled");
+      setShowTabGroups(ignoreGroups === "disabled" && groupsTab === "enabled");
     });
   }, []);
 

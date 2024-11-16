@@ -13,6 +13,8 @@ const settingRoutes = Router();
 
 settingRoutes.get("/settings", isAuth, isAdmin, SettingController.index);
 
+settingRoutes.get("/settings/:settingKey", isAuth, SettingController.show);
+
 settingRoutes.get(
   "/settings/:settingKey",
   isAuth,
@@ -24,12 +26,6 @@ settingRoutes.get(
   "/public-settings/:settingKey",
   envTokenAuth,
   SettingController.publicShow
-);
-
-settingRoutes.get(
-  "/company-settings/:settingKey",
-  isAuth,
-  SettingController.companyShow
 );
 
 // change setting key to key in future

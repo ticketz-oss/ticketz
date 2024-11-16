@@ -742,6 +742,13 @@ const messages = {
 					disabled: "Desativado",
 				},
 			},
+      soundGroupNotifications: {
+        title: "Notificações de som de grupo",
+        options: {
+          enabled: "Ativado",
+          disabled: "Desativado",
+        },
+      },
 			groupsTab: {
         title:"Aba de Grupos",
         options: {
