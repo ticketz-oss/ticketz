@@ -2026,16 +2026,18 @@ const handleMessage = async (
       }
     }
 
-    const ticket = await createTicketMutex.runExclusive(async () => {
-      const result = await FindOrCreateTicketService(
-        contact,
-        wbot.id!,
-        unreadMessages,
-        companyId,
-        groupContact
-      );
-      return result;
-    });
+    const { ticket, justCreated } = await createTicketMutex.runExclusive(
+      async () => {
+        const result = await FindOrCreateTicketService(
+          contact,
+          wbot.id!,
+          unreadMessages,
+          companyId,
+          groupContact
+        );
+        return result;
+      }
+    );
 
     const ticketMessages = await Message.findAll({
       where: {
@@ -2257,6 +2259,7 @@ const handleMessage = async (
     }
 
     if (
+      justCreated &&
       !whatsapp?.queues?.length &&
       !ticket.userId &&
       !isGroup &&
