@@ -1571,7 +1571,7 @@ const handleMessage = async (
       }
     }
 
-    const ticket = await createTicketMutex.runExclusive(async () => {
+    const { ticket, justCreated } = await createTicketMutex.runExclusive(async () => {
       const result = await FindOrCreateTicketService(contact, wbot.id!, unreadMessages, companyId, groupContact);
       return result;
     });
@@ -1739,10 +1739,13 @@ const handleMessage = async (
       console.log(e);
     }
 
-
-
-    if (!whatsapp?.queues?.length && !ticket.userId && !isGroup && !msg.key.fromMe) {
-
+    if (
+      justCreated &&
+      !whatsapp?.queues?.length &&
+      !ticket.userId &&
+      !isGroup &&
+      !msg.key.fromMe
+    ) {
       const message = await Message.findOne({
         where: {
           ticketId: ticket.id,
