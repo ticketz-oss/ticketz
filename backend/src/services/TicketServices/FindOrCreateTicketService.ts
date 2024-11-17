@@ -15,7 +15,8 @@ const FindOrCreateTicketService = async (
   companyId: number,
   groupContact?: Contact,
   doNotReopen?: boolean
-): Promise<Ticket> => {
+): Promise<{ ticket: Ticket; justCreated: boolean }> => {
+  let justCreated = false;
   const result = await sequelize.transaction(async () => {
     let ticket = await Ticket.findOne({
       where: {
@@ -117,6 +118,8 @@ const FindOrCreateTicketService = async (
         companyId
       });
 
+      justCreated = true;
+
       await FindOrCreateATicketTrakingService({
         ticketId: ticket.id,
         companyId,
@@ -127,7 +130,7 @@ const FindOrCreateTicketService = async (
 
     ticket = await ShowTicketService(ticket.id, companyId);
 
-    return ticket;
+    return { ticket, justCreated };
   });
 
   return result;

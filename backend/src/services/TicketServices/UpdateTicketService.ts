@@ -311,7 +311,7 @@ const UpdateTicketService = async ({
 
           // oldTicket = ticket;
 
-          const newTicket = await FindOrCreateTicketService(
+          const { ticket: newTicket } = await FindOrCreateTicketService(
             contact,
             newWhatsapp?.id || whatsapp.id,
             1,
