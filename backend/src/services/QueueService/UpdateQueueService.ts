@@ -101,6 +101,8 @@ const UpdateQueueService = async (
           transaction: t
         });
       }
+    } else if (queue.integration) {
+      await queue.integration.destroy({ transaction: t });
     }
 
     await queue.update(queueData, { transaction: t });

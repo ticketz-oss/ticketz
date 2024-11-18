@@ -92,6 +92,7 @@ export const DynamicForm = ({ schema, data, setData, margin, variant }) => {
                   >
                     <InputLabel id={`select-${field.name}`}>{field.title}</InputLabel>
                     <Select
+                      name={field.name}
                       labelId={`select-${field.name}`}
                       label={field.title}
                       value={data[field.name] || ""}
