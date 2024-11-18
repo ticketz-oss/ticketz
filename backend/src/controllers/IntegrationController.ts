@@ -21,5 +21,7 @@ export const webhook = async (
   const integrations = IntegrationServices.getInstance();
   const { integrationSession, body } = req;
 
-  return res.json(await integrations.webhook(integrationSession, body));
+  await integrations.webhook(integrationSession, body);
+
+  return res.json({ executed: true });
 };
