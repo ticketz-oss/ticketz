@@ -208,7 +208,8 @@ export class TypebotIntegration implements IntegrationDriver {
       backendURL: process.env.BACKEND_URL,
       number: metadata.from.number,
       pushName: metadata.from.name,
-      ticketId: ticket.id,
+      firstMessage: metadata.firstMessage,
+      ticketId: metadata.ticketId,
       metadata: JSON.stringify(metadata),
       ...jsonParams
     };

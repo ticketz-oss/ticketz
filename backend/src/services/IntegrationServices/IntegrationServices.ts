@@ -67,7 +67,9 @@ export type IntegrationMessageMetadata = {
   backendUrl?: string;
   channel: string;
   from: Contact;
+  ticketId: number;
   customPayload?: any;
+  firstMessage?: string;
 };
 
 export interface ReplyHandler {
