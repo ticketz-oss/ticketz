@@ -1200,7 +1200,8 @@ export const wbotReplyHandler = async (
 export const startQueue = async (
   wbot: Session,
   ticket: Ticket,
-  queue: Queue = null
+  queue: Queue = null,
+  firstMessage: string = null
 ) => {
   if (!queue) {
     queue = await Queue.findByPk(ticket.queueId, {
@@ -1227,7 +1228,9 @@ export const startQueue = async (
   if (integration) {
     const integrationMetadata: IntegrationMessageMetadata = {
       channel: "whatsapp",
-      from: ticket.contact || (await Contact.findByPk(ticket.contactId))
+      from: ticket.contact || (await Contact.findByPk(ticket.contactId)),
+      ticketId: ticket.id,
+      firstMessage
     };
 
     await UpdateTicketService({
@@ -1373,12 +1376,14 @@ const verifyQueue = async (
     ticket.companyId
   );
 
+  const firstMessage = msg ? getBodyMessage(msg) : null;
+
   if (queues.length === 1) {
-    await startQueue(wbot, ticket, head(queues));
+    await startQueue(wbot, ticket, head(queues), firstMessage);
     return;
   }
 
-  const selectedOption = msg ? getBodyMessage(msg) : null;
+  const selectedOption = Number(firstMessage);
   const choosenQueue = selectedOption ? queues[+selectedOption - 1] : null;
 
   const { companyId } = ticket;
@@ -1597,7 +1602,8 @@ export const checkIntegration = async (
     let integrationMessage: IntegrationMessage = null;
     const metadata: IntegrationMessageMetadata = {
       channel: "whatsapp",
-      from: contact.toJSON()
+      from: contact.toJSON(),
+      ticketId: integrationSession.ticketId
     };
 
     if (message) {
