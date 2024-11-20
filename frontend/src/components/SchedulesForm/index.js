@@ -68,13 +68,13 @@ function SchedulesForm(props) {
         }, 500)
       }
     >
-      {({ values }) => (
+      {(formik) => (
         <Form className={classes.fullWidth}>
           <FieldArray
             name="schedules"
             render={(arrayHelpers) => (
               <Grid spacing={4} container>
-                {values.schedules.map((item, index) => {
+                {formik.values.schedules.map((item, index) => {
                   return (
                     <Grid key={index} xs={12} md={4} item>
                       <Grid container>
@@ -170,9 +170,10 @@ function SchedulesForm(props) {
           <div className={classes.buttonContainer}>
             <ButtonWithSpinner
               loading={loading}
-              type="submit"
+              type="primary"
               color="primary"
               variant="contained"
+              onClick={formik.submitForm}
             >
               {labelSaveButton ?? i18n.t("whatsappModal.buttons.okEdit")}
             </ButtonWithSpinner>
