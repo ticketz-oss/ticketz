@@ -1,6 +1,9 @@
 const messages = {
   id: {
     translations: {
+      date: {
+        yesterday: "Kemarin",
+      },
       signup: {
         title: "Daftar",
         toasts: {
