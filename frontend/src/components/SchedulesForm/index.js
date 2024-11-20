@@ -173,7 +173,10 @@ function SchedulesForm(props) {
               type="primary"
               color="primary"
               variant="contained"
-              onClick={formik.submitForm}
+              onClick={(e) => {
+                e.preventDefault();
+                formik.submitForm();
+              }}
             >
               {labelSaveButton ?? i18n.t("whatsappModal.buttons.okEdit")}
             </ButtonWithSpinner>
