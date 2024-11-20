@@ -51,7 +51,7 @@ export const reloadTicketService = async ticket => {
 
 const ShowTicketService = async (
   id: string | number,
-  companyId: number
+  companyId: number = null
 ): Promise<Ticket> => {
   const ticket = await Ticket.findOne({
     where: {
@@ -60,7 +60,7 @@ const ShowTicketService = async (
     include
   });
 
-  if (ticket?.companyId !== companyId) {
+  if (companyId && ticket?.companyId !== companyId) {
     throw new AppError("ERR_NO_PERMISSION", 403);
   }
 

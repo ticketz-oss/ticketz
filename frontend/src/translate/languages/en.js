@@ -1,6 +1,9 @@
 const messages = {
 	en: {
 		translations: {
+      date: {
+        yesterday: "Yesterday",
+      },
 			signup: {
 				title: "Sign Up",
 				toasts: {

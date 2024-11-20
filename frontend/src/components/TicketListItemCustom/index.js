@@ -34,13 +34,18 @@ import VisibilityIcon from "@material-ui/icons/Visibility";
 import TicketMessagesDialog from "../TicketMessagesDialog";
 import DoneIcon from '@material-ui/icons/Done';
 import ClearOutlinedIcon from '@material-ui/icons/ClearOutlined';
+import PersonIcon from '@material-ui/icons/Person';
+import SyncAltIcon from '@material-ui/icons/SyncAlt';
 import { generateColor } from "../../helpers/colorGenerator";
 import { getInitials } from "../../helpers/getInitials";
+import pastRelativeDate from "../../helpers/pastRelativeDate";
+import TagsLine from "../TagsLine";
 
 const useStyles = makeStyles((theme) => ({
   ticket: {
     position: "relative",
     height: 98,
+    paddingLeft: "20px",
     paddingHorizontal: 10,
     paddingVertical: 0
   },
@@ -73,7 +78,7 @@ const useStyles = makeStyles((theme) => ({
   },
 
   contactNameWrapper: {
-    display: "flex",
+    display: "grid",
     justifyContent: "space-between",
   },
 
@@ -81,7 +86,6 @@ const useStyles = makeStyles((theme) => ({
     justifySelf: "flex-end",
     textAlign: "right",
     position: "relative",
-    top: -23,
     fontSize: 12
   },
 
@@ -117,11 +121,25 @@ const useStyles = makeStyles((theme) => ({
 
   ticketQueueColor: {
     flex: "none",
-    width: "8px",
-    height: "100%",
+    width: "92px",
+    height: "15px",
     position: "absolute",
-    top: "0%",
-    left: "0%",
+    left: "-37px",
+    top: "40px",
+    textAlign: "center",
+    color: "#fff",
+    padding: "0px",
+    fontSize: "10px",
+    fontWeight: "bold",
+    transform: "rotate(-90deg)",
+    borderRadius: "6px",
+    marginTop: "3px",
+    marginBottom: "3px",
+  },
+  
+  avatar: {
+    width: 44,
+    minWidth: "unset",
   },
 
   ticketInfo: {
@@ -218,57 +236,36 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
     if (ticketUser && ticket.status !== "pending") {
       return (
         <>
-          <Badge
-            className={classes.Radiusdot}
-            badgeContent={`${ticketUser}`}
-            //color="primary"
-            style={{
-              backgroundColor: "#3498db",
+          <span style={{
+            height: 18,
+            padding: 5,
+            position: "inherit",
+            borderRadius: 7,
+            fontSize: 12,
+            fontWeight: "bold",
+            top: -6,
+            marginRight: 3
+          }}>
+            <PersonIcon style={{ height: 14, marginBottom: -2, width: 14 }} />
+            {ticketUser}
+          </span>
+
+          {ticket.whatsappId && (
+            <span style={{
               height: 18,
               padding: 5,
               position: "inherit",
               borderRadius: 7,
-              color: '#fff',
+              fontSize: 12,
+              fontWeight: "bold",
               top: -6,
-              marginRight: 3,
-            }}
-          />
-
-          {ticket.whatsappId && (
-            <Badge
-              className={classes.Radiusdot}
-              badgeContent={`${whatsAppName}`}
-              style={{
-                backgroundColor: "#7d79f2",
-                height: 18,
-                padding: 5,
-                position: "inherit",
-                borderRadius: 7,
-                color: "white",
-                top: -6,
-                marginRight: 3
-              }}
-            />
+              marginRight: 3
+            }}>
+              <SyncAltIcon style={{ height: 14, marginBottom: -2, width: 14 }} />
+              {whatsAppName}
+            </span>
           )}
 
-
-          {ticket.queue?.name !== null && (
-            <Badge
-              className={classes.Radiusdot}
-              style={{
-                backgroundColor: ticket.queue?.color || "#7C7C7C",
-                height: 18,
-                padding: 5,
-                position: "inherit",
-                borderRadius: 7,
-                color: "white",
-                top: -6,
-                marginRight: 3
-              }}
-              badgeContent={ticket.queue?.name || "Sem fila"}
-            //color="primary"
-            />
-          )}
           {ticket.status === "open" && (
             <Tooltip title="Fechar Conversa">
               <ClearOutlinedIcon
@@ -331,41 +328,21 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
         <>
 
           {ticket.whatsappId && (
-            <Badge
-              className={classes.Radiusdot}
-              badgeContent={`${whatsAppName}`}
-              style={{
-                backgroundColor: "#7d79f2",
-                height: 18,
-                padding: 5,
-                position: "inherit",
-                borderRadius: 7,
-                color: "white",
-                top: -6,
-                marginRight: 3
-              }}
-            />
+            <span style={{
+              height: 18,
+              padding: 5,
+              position: "inherit",
+              borderRadius: 7,
+              fontSize: 12,
+              fontWeight: "bold",
+              top: -6,
+              marginRight: 3
+            }}>
+              <SyncAltIcon style={{ height: 14, marginBottom: -2, width: 14 }} />
+              {whatsAppName}
+            </span>
           )}
 
-          {ticket.queue?.name !== null && (
-            <Badge
-              className={classes.Radiusdot}
-              style={{
-                backgroundColor: ticket.queue?.color || "#7C7C7C",
-                height: 18,
-                padding: 5,
-                paddingHorizontal: 12,
-                position: "inherit",
-                borderRadius: 7,
-                color: "white",
-                top: -6,
-                marginRight: 2
-
-              }}
-              badgeContent={ticket.queue?.name || "Sem fila"}
-            //color=
-            />
-          )}
           {ticket.status === "pending" && (groupActionButtons || !ticket.isGroup) && (
             <Tooltip title="Fechar Conversa">
               <ClearOutlinedIcon
@@ -493,9 +470,9 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
           <span
             style={{ backgroundColor: ticket.queue?.color || "#7C7C7C" }}
             className={classes.ticketQueueColor}
-          ></span>
+          >{ticket.queue?.name || "Sem fila"}</span>
         </Tooltip>
-        <ListItemAvatar>
+        <ListItemAvatar className={classes.avatar}>
           <Avatar style={{ backgroundColor: generateColor(ticket?.contact?.number), color: "white", fontWeight: "bold" }} src={ticket?.contact?.profilePicUrl}>{ getInitials(ticket?.contact?.name || "") }</Avatar>
         </ListItemAvatar>
         <ListItemText
@@ -509,11 +486,6 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
                 variant="body2"
                 color="textPrimary"
               >
-                {ticket.channel === "whatsapp" && (
-                  <Tooltip title={`Atribuido à ${ticketUser}`}>
-                    <WhatsAppIcon fontSize="inherit" style={{ color: grey[700] }} />
-                  </Tooltip>
-                )}{' '}
                 {ticket.contact.name}
               </Typography>
 
@@ -538,60 +510,62 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
                 </>
               )}
               </Typography>
-              <ListItemSecondaryAction style={{ left: 73 }}>
+              <TagsLine tags={ticket.tags} />
+              <ListItemSecondaryAction style={{ left: 57 }}>
                 <Box className={classes.ticketInfo1}>{renderTicketInfo()}</Box>
               </ListItemSecondaryAction>
             </span>
 
           }
         />
-        <ListItemSecondaryAction style={{}}>
-          {ticket.status === "closed" && (
-            <Badge
-              className={classes.Radiusdot}
-              badgeContent={"FECHADO"}
-              //color="primary"
-              style={{
-                backgroundColor: ticket.queue?.color || "#ff0000",
-                height: 18,
-                padding: 5,
-                paddingHorizontal: 12,
-                borderRadius: 7,
-                color: "white",
-                top: -28,
-                marginRight: 5
-
-              }}
-            />
-          )}
-
+        <ListItemSecondaryAction style={{ pointerEvents: "none", textAlign: 'right', right: 4, height: "100%", display: "block" }}>
           {ticket.lastMessage && (
             <>
-
               <Typography
                 className={classes.lastMessageTime}
                 component="span"
                 variant="body2"
                 color="textSecondary"
               >
-                {isSameDay(parseISO(ticket.updatedAt), new Date()) ? (
-                  <>{format(parseISO(ticket.updatedAt), "HH:mm")}</>
-                ) : (
-                  <>{format(parseISO(ticket.updatedAt), "dd/MM/yyyy")}</>
-                )}
+                {pastRelativeDate(parseISO(ticket.updatedAt))}
               </Typography>
 
+              { !!ticket.unreadMessages && (
+              <>
+              <br />
               <Badge
                 className={classes.newMessagesCount}
-                badgeContent={ticket.unreadMessages ? ticket.unreadMessages : null}
+                badgeContent={ticket.unreadMessages}
                 classes={{
                   badge: classes.badgeStyle,
                 }}
               />
-              <br />
-
+              </>
+              )}
             </>
           )}
+
+          {ticket.status === "closed" && (
+            <>
+            <br />
+            <Badge
+              className={classes.Radiusdot}
+              badgeContent={"FECHADO"}
+              //color="primary"
+              style={{
+                backgroundColor: '#888',
+                height: 18,
+                padding: 5,
+                paddingHorizontal: 12,
+                borderRadius: 7,
+                color: "white",
+                marginRight: 5
+
+              }}
+            />
+            </>
+          )}
+
 
         </ListItemSecondaryAction>
 
