@@ -25,7 +25,7 @@ const TagsLine = ({ tags }) => {
 
   return (
     <div className={classes.root}>
-      {tags.map((tag, index) => (
+      {tags?.map((tag, index) => (
         <Chip
           key={index}
           label={tag.name}
