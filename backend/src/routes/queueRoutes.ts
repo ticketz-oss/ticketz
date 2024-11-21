@@ -5,11 +5,12 @@ import isAdmin from "../middleware/isAdmin";
 
 import * as QueueController from "../controllers/QueueController";
 import uploadConfig from "../config/upload";
+import apiTokenAuth from "../middleware/apiTokenAuth";
 
 const upload = multer(uploadConfig);
 const queueRoutes = Router();
 
-queueRoutes.get("/queue", isAuth, QueueController.index);
+queueRoutes.get("/queue", apiTokenAuth, isAuth, QueueController.index);
 
 queueRoutes.post("/queue", isAuth, isAdmin, QueueController.store);
 
