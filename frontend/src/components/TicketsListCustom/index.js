@@ -175,7 +175,7 @@ const TicketsListCustom = (props) => {
     updateCount,
     style,
     setTabOpen,
-    groupActionButtons,
+    showTabGroups
   } = props;
   const classes = useStyles();
   const [pageNumber, setPageNumber] = useState(1);
@@ -267,7 +267,7 @@ const TicketsListCustom = (props) => {
     
     const onCompanyAppMessage = (data) => {
 	  console.debug("appMessage event received", data);
-      if (!!data.ticket?.isGroup !== !!groups) {
+      if (showTabGroups && !!data.ticket?.isGroup !== !!groups) {
         return;
       }
 
@@ -282,7 +282,7 @@ const TicketsListCustom = (props) => {
 
       if (
         data.action === "create" &&
-        !!data.ticket?.isGroup === !!groups &&
+        (!showTabGroups || !!data.ticket?.isGroup === !!groups) &&
         shouldUpdateTicket(data.ticket) &&
         (status === undefined || data.ticket.status === status)
       ) {
@@ -324,7 +324,7 @@ const TicketsListCustom = (props) => {
       socket.disconnect();
     };
     
-  }, [status, showAll, user, selectedQueueIds, tags, users, profile, queues, socketManager]);
+  }, [status, showAll, groups, showTabGroups, user, selectedQueueIds, tags, users, profile, queues, socketManager]);
 
   useEffect(() => {
     if (typeof updateCount === "function") {
@@ -374,7 +374,7 @@ const TicketsListCustom = (props) => {
                   ticket={ticket}
                   setTabOpen={setTabOpen}
                   key={ticket.id}
-                  groupActionButtons={groupActionButtons}
+                  groupActionButtons={!groups && !showTabGroups}
                 />
               ))}
             </>

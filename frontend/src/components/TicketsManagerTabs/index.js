@@ -340,7 +340,7 @@ const TicketsManagerTabs = () => {
             updateCount={(val) => setOpenCount(val)}
             style={applyPanelStyle("open")}
             setTabOpen={setTabOpen}
-            groupActionButtons={!showTabGroups}
+            showTabGroups={showTabGroups}
           />
           <TicketsList
             status="pending"
@@ -348,7 +348,7 @@ const TicketsManagerTabs = () => {
             updateCount={(val) => setPendingCount(val)}
             style={applyPanelStyle("pending")}
             setTabOpen={setTabOpen}
-            groupActionButtons={!showTabGroups}
+            showTabGroups={showTabGroups}
           />
         </Paper>
       </TabPanel>
@@ -357,7 +357,7 @@ const TicketsManagerTabs = () => {
           status="closed"
           showAll={true}
           selectedQueueIds={selectedQueueIds}
-          groupActionButtons={!showTabGroups}
+          showTabGroups={showTabGroups}
           />
       </TabPanel>
       <TabPanel value={tab} name="groups" className={classes.ticketsWrapper}>
@@ -365,6 +365,7 @@ const TicketsManagerTabs = () => {
           groups={true}
           showAll={true}
           selectedQueueIds={selectedQueueIds}
+          showTabGroups={showTabGroups}
         />
       </TabPanel>
       <TabPanel value={tab} name="search" className={classes.ticketsWrapper}>
@@ -379,7 +380,7 @@ const TicketsManagerTabs = () => {
           tags={selectedTags}
           users={selectedUsers}
           selectedQueueIds={selectedQueueIds}
-          groupActionButtons={!showTabGroups}
+          showTabGroups={showTabGroups}
         />
       </TabPanel>
     </Paper>
