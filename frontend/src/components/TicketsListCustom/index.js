@@ -382,7 +382,7 @@ const TicketsListCustom = (props) => {
                   ticket={ticket}
                   setTabOpen={setTabOpen}
                   key={ticket.id}
-                  groupActionButtons={!!groups && !showTabGroups}
+                  groupActionButtons={!groups && !showTabGroups}
                 />
               ))}
             </>
