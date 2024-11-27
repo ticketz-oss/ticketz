@@ -425,6 +425,7 @@ const UpdateTicketService = async ({
     await ticketTraking.save();
 
     if (!dontRunChatbot && !ticket.userId && ticket.queueId !== oldQueueId) {
+      await integrationServices.endAllSessions(ticket);
       const wbot = await GetTicketWbot(ticket);
       await startQueue(wbot, ticket);
       await ticket.reload();

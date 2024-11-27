@@ -36,6 +36,7 @@ import DoneIcon from '@material-ui/icons/Done';
 import ClearOutlinedIcon from '@material-ui/icons/ClearOutlined';
 import PersonIcon from '@material-ui/icons/Person';
 import SyncAltIcon from '@material-ui/icons/SyncAlt';
+import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import { generateColor } from "../../helpers/colorGenerator";
 import { getInitials } from "../../helpers/getInitials";
 import pastRelativeDate from "../../helpers/pastRelativeDate";
@@ -169,6 +170,22 @@ const useStyles = makeStyles((theme) => ({
   presence: {
     color: theme.mode === 'light' ? "green" : "lightgreen",
     fontWeight: "bold",
+  },
+  
+  ticketActions: {
+    position: "absolute",
+    right: -12,
+    bottom: 0,
+    marginBottom: 6,
+    display: "flex",
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderRadius: 16,
+    padding: 2,
+    minWidth: 23,
+    cursor: "default",
+    transition: "max-width 0.5s ease",
+    overflow: "hidden",
   }
 }));
 
@@ -179,6 +196,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
   const [whatsAppName, setWhatsAppName] = useState(null);
 
   const [openTicketMessageDialog, setOpenTicketMessageDialog] = useState(false);
+  const [showActions, setShowActions] = useState(false);
   const { ticketId } = useParams();
   const isMounted = useRef(true);
   const { setCurrentTicket } = useContext(TicketsContext);
@@ -232,6 +250,117 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
     setCurrentTicket({ id, uuid, code });
   };
 
+
+  const renderTicketActions = () => {
+    return (
+      <div
+        className={classes.ticketActions}
+        style={{ maxWidth: showActions ? "200px" : "28px" }}
+        onMouseOver={() => setShowActions(true)}
+        onMouseLeave={() => setShowActions(false)}
+        onClick={(e) => e.stopPropagation()}
+      >
+        { showActions && (
+          <>
+        {["open","pending"].includes(ticket.status) && (groupActionButtons || !ticket.isGroup) && (
+          <Tooltip title="Fechar Conversa">
+            <ClearOutlinedIcon
+              onClick={() => handleCloseTicket(ticket.id)}
+              fontSize="small"
+              style={{
+                color: '#fff',
+                backgroundColor: red[700],
+                cursor: "pointer",
+                //margin: '0 5 0 5',
+                padding: 2,
+                marginLeft: 3,
+                height: 23,
+                width: 23,
+                fontSize: 12,
+                borderRadius: 50,
+              }}
+            />
+          </Tooltip>
+        )}
+        {profile === "admin" && (
+          <Tooltip title="Espiar Conversa">
+            <VisibilityIcon
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpenTicketMessageDialog(true)
+              }}
+              fontSize="small"
+              style={{
+                padding: 2,
+                marginLeft: 3,
+                height: 23,
+                width: 23,
+                fontSize: 12,
+                color: '#fff',
+                cursor: "pointer",
+                backgroundColor: blue[700],
+                borderRadius: 50,
+              }}
+            />
+          </Tooltip>
+        )}
+        {ticket.status === "pending" && (groupActionButtons || !ticket.isGroup) && (
+          <Tooltip title="Aceitar Conversa">
+            <DoneIcon
+              onClick={() => handleAcceptTicket(ticket.id)}
+              fontSize="small"
+              style={{
+                color: '#fff',
+                backgroundColor: green[700],
+                cursor: "pointer",
+                //margin: '0 5 0 5',
+                padding: 2,
+                marginLeft: 3,
+                height: 23,
+                width: 23,
+                fontSize: 12,
+                borderRadius: 50,
+              }}
+            />
+          </Tooltip>
+        )}
+          <span style={{
+              width: 26,
+            }}></span>
+          <span
+          onClick={(e) => e.stopPropagation()} 
+          style={{
+            position: "absolute",
+            right: 0,
+            bottom: 0,
+            width: 26,
+            height: 28,
+             }}></span>
+        </>
+        )}
+
+        {!showActions &&
+          <Tooltip title="Ações">
+            <MoreHorizIcon
+              onClick={(e) => { e.stopPropagation(); setShowActions(true) } }
+              fontSize="small"
+              style={{
+                color: '#888',
+                cursor: "pointer",
+                //margin: '0 5 0 5',
+                padding: 2,
+                height: 23,
+                width: 23,
+                fontSize: 12,
+                borderRadius: 50,
+              }}
+            />
+          </Tooltip>
+        }
+      </div>
+    );
+  }
+
   const renderTicketInfo = () => {
     if (ticketUser && ticket.status !== "pending") {
       return (
@@ -266,52 +395,6 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
             </span>
           )}
 
-          {ticket.status === "open" && (
-            <Tooltip title="Fechar Conversa">
-              <ClearOutlinedIcon
-                onClick={() => handleCloseTicket(ticket.id)}
-                fontSize="small"
-                style={{
-                  color: '#fff',
-                  backgroundColor: red[700],
-                  cursor: "pointer",
-                  //margin: '0 5 0 5',
-                  padding: 2,
-                  height: 23,
-                  width: 23,
-                  fontSize: 12,
-                  borderRadius: 50,
-                  position: 'absolute',
-                  right: 0,
-                  top: -8
-                }}
-              />
-            </Tooltip>
-          )}
-          {profile === "admin" && (
-            <Tooltip title="Espiar Conversa">
-              <VisibilityIcon
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setOpenTicketMessageDialog(true)
-                }}
-                fontSize="small"
-                style={{
-                  padding: 2,
-                  height: 23,
-                  width: 23,
-                  fontSize: 12,
-                  color: '#fff',
-                  cursor: "pointer",
-                  backgroundColor: blue[700],
-                  borderRadius: 50,
-                  position: 'absolute',
-                  right: 28,
-                  top: -8
-                }}
-              />
-            </Tooltip>
-          )}
           {ticket.chatbot && (
             <Tooltip title="Chatbot">
               <AndroidIcon
@@ -320,6 +403,8 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
               />
             </Tooltip>
           )}
+
+          {renderTicketActions()}
 
         </>
       );
@@ -343,28 +428,6 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
             </span>
           )}
 
-          {ticket.status === "pending" && (groupActionButtons || !ticket.isGroup) && (
-            <Tooltip title="Fechar Conversa">
-              <ClearOutlinedIcon
-                onClick={() => handleCloseTicket(ticket.id)}
-                fontSize="small"
-                style={{
-                  color: '#fff',
-                  backgroundColor: red[700],
-                  cursor: "pointer",
-                  margin: '0 5 0 5',
-                  padding: 2,
-                  right: 48,
-                  height: 23,
-                  width: 23,
-                  fontSize: 12,
-                  borderRadius: 50,
-                  top: -8,
-                  position: 'absolute',
-                }}
-              />
-            </Tooltip>
-          )}
           {ticket.chatbot && (
             <Tooltip title="Chatbot">
               <AndroidIcon
@@ -373,70 +436,8 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
               />
             </Tooltip>
           )}
-          {ticket.status === "open" && (groupActionButtons || !ticket.isGroup) && (
-            <Tooltip title="Fechar Conversa">
-              <ClearOutlinedIcon
-                onClick={() => handleCloseTicket(ticket.id)}
-                fontSize="small"
-                style={{
-                  color: red[700],
-                  cursor: "pointer",
-                  marginRight: 5,
-                  right: 49,
-                  top: -8,
-                  position: 'absolute',
-                }}
-              />
-            </Tooltip>
-          )}
-          {ticket.status === "pending" && (groupActionButtons || !ticket.isGroup) && (
-            <Tooltip title="Aceitar Conversa">
-              <DoneIcon
-                onClick={() => handleAcceptTicket(ticket.id)}
-                fontSize="small"
-                style={{
-                  color: '#fff',
-                  backgroundColor: green[700],
-                  cursor: "pointer",
-                  //margin: '0 5 0 5',
-                  padding: 2,
-                  height: 23,
-                  width: 23,
-                  fontSize: 12,
-                  borderRadius: 50,
-                  right: 25,
-                  top: -8,
-                  position: 'absolute',
-                }}
-              />
-            </Tooltip>
-          )}
-
-          {profile === "admin" && (groupActionButtons || !ticket.isGroup) && (
-            <Tooltip title="Espiar Conversa">
-              <VisibilityIcon
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setOpenTicketMessageDialog(true)
-                }}
-                fontSize="small"
-                style={{
-                  padding: 2,
-                  height: 23,
-                  width: 23,
-                  fontSize: 12,
-                  color: '#fff',
-                  cursor: "pointer",
-                  backgroundColor: blue[700],
-                  borderRadius: 50,
-                  right: 0,
-                  top: -8,
-                  position: 'absolute',
-                }}
-              />
-            </Tooltip>
-          )}
-
+          
+          {renderTicketActions()}
         </>
       );
     }
