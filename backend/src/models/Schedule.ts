@@ -43,6 +43,9 @@ class Schedule extends Model<Schedule> {
   @Column
   userId: number;
 
+  @Column
+  saveMessage: boolean;
+
   @ForeignKey(() => Company)
   @Column
   companyId: number;
