@@ -233,6 +233,7 @@ const messages = {
 					contact: "Contacto",
 					sendAt: "Fecha de Agendamiento",
 					sentAt: "Fecha de Envío",
+          saveMessage: "Guardar mensaje en el ticket",
 				},
 				buttons: {
 					okAdd: "Agregar",

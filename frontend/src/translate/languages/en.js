@@ -228,6 +228,7 @@ const messages = {
           contact: "Contact",
           sendAt: "Scheduled Date",
           sentAt: "Sent Date",
+          saveMessage: "Save Message in Ticket",
         },
         buttons: {
           okAdd: "Add",

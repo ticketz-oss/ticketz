@@ -19,7 +19,7 @@ import { i18n } from "../../translate/i18n";
 
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
-import { FormControl } from "@material-ui/core";
+import { FormControl, FormControlLabel, Switch } from "@material-ui/core";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import moment from "moment"
 import { AuthContext } from "../../context/Auth/AuthContext";
@@ -60,7 +60,8 @@ const ScheduleSchema = Yup.object().shape({
 		.min(5, "Mensagem muito curta")
 		.required("Obrigatório"),
 	contactId: Yup.number().required("Obrigatório"),
-	sendAt: Yup.string().required("Obrigatório")
+	sendAt: Yup.string().required("Obrigatório"),
+	saveMessage: Yup.bool()
 });
 
 const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, reload }) => {
@@ -72,7 +73,8 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 		body: "",
 		contactId: "",
 		sendAt: moment().add(1, 'hour').format('YYYY-MM-DDTHH:mm'),
-		sentAt: ""
+		sentAt: "",
+		saveMessage: false
 	};
 
 	const initialContact = {
@@ -233,6 +235,23 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 										fullWidth
 									/>
 								</div>
+                <div className={classes.multFieldLine}>
+                  <FormControlLabel
+                    label={i18n.t("scheduleModal.form.saveMessage")}
+                    labelPlacement="end"
+                    control={
+                      <Switch
+                        size="small"
+                        checked={values.saveMessage}
+                        onChange={() =>
+                          setSchedule({ ...values, saveMessage: !values.saveMessage })
+                        }
+                        name="saveMessage"
+                        color="primary"
+                      />
+                    }
+                  />
+                </div>
 							</DialogContent>
 							<DialogActions>
 								<Button
