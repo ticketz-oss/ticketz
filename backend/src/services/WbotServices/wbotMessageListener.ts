@@ -1061,6 +1061,7 @@ export const wbotReplyHandler = async (
   ticket: Ticket,
   reply: IntegrationMessage
 ) => {
+  const customTags: [string, string] = ["<<", ">>"];
   if (!reply?.content && !reply?.mediaUrl) {
     await new Promise(resolve => {
       setTimeout(resolve, 500);
@@ -1068,6 +1069,10 @@ export const wbotReplyHandler = async (
     await wbot.sendPresenceUpdate("composing", getTicketJid(ticket));
     return;
   }
+
+  await ticket.reload({
+    include: ["queue", "user", "contact"]
+  });
 
   let fileName = null;
 
@@ -1083,7 +1088,13 @@ export const wbotReplyHandler = async (
     await wbot
       .sendMessage(getTicketJid(ticket), {
         image: { url: reply.mediaUrl },
-        caption: reply.content
+        caption: formatBody(
+          reply.content,
+          ticket.contact,
+          ticket,
+          null,
+          customTags
+        )
       })
       .then(async sentMessage => {
         await verifyMediaMessage(sentMessage, ticket, ticket.contact);
@@ -1103,7 +1114,13 @@ export const wbotReplyHandler = async (
       .sendMessage(getTicketJid(ticket), {
         audio: { url: reply.mediaUrl },
         ptt: true,
-        caption: reply.content
+        caption: formatBody(
+          reply.content,
+          ticket.contact,
+          ticket,
+          null,
+          customTags
+        )
       })
       .then(async sentMessage => {
         await verifyMediaMessage(sentMessage, ticket, ticket.contact);
@@ -1122,7 +1139,13 @@ export const wbotReplyHandler = async (
     await wbot
       .sendMessage(getTicketJid(ticket), {
         video: { url: reply.mediaUrl },
-        caption: reply.content
+        caption: formatBody(
+          reply.content,
+          ticket.contact,
+          ticket,
+          null,
+          customTags
+        )
       })
       .then(async sentMessage => {
         await verifyMediaMessage(sentMessage, ticket, ticket.contact);
@@ -1142,7 +1165,13 @@ export const wbotReplyHandler = async (
       .sendMessage(getTicketJid(ticket), {
         video: { url: reply.mediaUrl },
         gifPlayback: true,
-        caption: reply.content
+        caption: formatBody(
+          reply.content,
+          ticket.contact,
+          ticket,
+          null,
+          customTags
+        )
       })
       .then(async sentMessage => {
         await verifyMediaMessage(sentMessage, ticket, ticket.contact);
@@ -1161,7 +1190,13 @@ export const wbotReplyHandler = async (
     await wbot
       .sendMessage(getTicketJid(ticket), {
         document: { url: reply.mediaUrl },
-        caption: reply.content,
+        caption: formatBody(
+          reply.content,
+          ticket.contact,
+          ticket,
+          null,
+          customTags
+        ),
         fileName,
         mimetype: mime.lookup(fileName) || "application/octet-stream"
       })
@@ -1180,7 +1215,7 @@ export const wbotReplyHandler = async (
   await wbot.sendPresenceUpdate("composing", getTicketJid(ticket));
   await wbot
     .sendMessage(getTicketJid(ticket), {
-      text: reply.content
+      text: formatBody(reply.content, ticket.contact, ticket, null, customTags)
     })
     .then(async sentMessage => {
       await verifyMessage(sentMessage, ticket, ticket.contact);

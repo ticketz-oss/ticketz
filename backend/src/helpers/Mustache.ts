@@ -14,8 +14,13 @@ export function formatBody(
   body: string,
   contact: Contact,
   ticket?: Ticket,
-  user?: User
+  user?: User,
+  customTags: [string, string] = null
 ): string {
+  if (!body && body !== "") {
+    return body;
+  }
+
   let ms = "";
 
   const Hr = new Date();
@@ -67,7 +72,7 @@ export function formatBody(
     queue: ticket?.queue?.name || "{{queue}}",
     ticket: ticket?.id
   };
-  return Mustache.render(body, view);
+  return Mustache.render(body, view, null, customTags);
 }
 
 export default formatBody;
