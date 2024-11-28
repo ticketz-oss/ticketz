@@ -30,16 +30,14 @@ const CreateService = async ({
     throw new AppError(err.message);
   }
 
-  const schedule = await Schedule.create(
-    {
-      body,
-      sendAt,
-      contactId,
-      companyId,
-      userId,
-      status: "PENDENTE"
-    }
-  );
+  const schedule = await Schedule.create({
+    body,
+    sendAt,
+    contactId,
+    companyId,
+    userId,
+    status: "PENDENTE"
+  });
 
   await schedule.reload({
     include: [{ model: Contact, as: "contact" }]

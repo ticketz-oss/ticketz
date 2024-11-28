@@ -13,6 +13,10 @@ scheduleRoutes.put("/schedules/:scheduleId", isAuth, ScheduleController.update);
 
 scheduleRoutes.get("/schedules/:scheduleId", isAuth, ScheduleController.show);
 
-scheduleRoutes.delete("/schedules/:scheduleId", isAuth, ScheduleController.remove);
+scheduleRoutes.delete(
+  "/schedules/:scheduleId",
+  isAuth,
+  ScheduleController.remove
+);
 
 export default scheduleRoutes;
