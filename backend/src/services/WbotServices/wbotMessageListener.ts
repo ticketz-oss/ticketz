@@ -2496,4 +2496,4 @@ const wbotMessageListener = async (
   }
 };
 
-export { wbotMessageListener };
+export { wbotMessageListener, handleMessage };

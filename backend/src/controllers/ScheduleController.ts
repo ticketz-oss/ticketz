@@ -17,7 +17,8 @@ type IndexQuery = {
 };
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
-  const { contactId, userId, pageNumber, searchParam } = req.query as IndexQuery;
+  const { contactId, userId, pageNumber, searchParam } =
+    req.query as IndexQuery;
   const { companyId } = req.user;
 
   const { schedules, count, hasMore } = await ListService({
@@ -32,12 +33,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
-  const {
-    body,
-    sendAt,
-    contactId,
-    userId
-  } = req.body;
+  const { body, sendAt, contactId, userId, saveMessage } = req.body;
   const { companyId } = req.user;
 
   const schedule = await CreateService({
@@ -45,14 +41,18 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     sendAt,
     contactId,
     companyId,
-    userId
+    userId,
+    saveMessage: !!saveMessage
   });
 
   const io = getIO();
-  io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-schedule`, {
-    action: "create",
-    schedule
-  });
+  io.to(`company-${companyId}-mainchannel`).emit(
+    `company-${companyId}-schedule`,
+    {
+      action: "create",
+      schedule
+    }
+  );
 
   return res.status(200).json(schedule);
 };
@@ -78,13 +78,20 @@ export const update = async (
   const scheduleData = req.body;
   const { companyId } = req.user;
 
-  const schedule = await UpdateService({ scheduleData, id: scheduleId, companyId });
+  const schedule = await UpdateService({
+    scheduleData,
+    id: scheduleId,
+    companyId
+  });
 
   const io = getIO();
-  io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-schedule`, {
-    action: "update",
-    schedule
-  });
+  io.to(`company-${companyId}-mainchannel`).emit(
+    `company-${companyId}-schedule`,
+    {
+      action: "update",
+      schedule
+    }
+  );
 
   return res.status(200).json(schedule);
 };
