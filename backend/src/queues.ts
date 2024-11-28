@@ -33,6 +33,7 @@ import QueueModel from "./models/Queue";
 import UpdateTicketService from "./services/TicketServices/UpdateTicketService";
 import Invoice from "./models/Invoices";
 import { checkNewInvoice } from "./services/PaymentGatewayServices/PaymentGatewayServices";
+import { handleMessage } from "./services/WbotServices/wbotMessageListener";
 
 const connection = process.env.REDIS_URI || "";
 const limiterMax = process.env.REDIS_OPT_LIMITER_MAX || 1;
@@ -142,10 +143,18 @@ async function handleSendScheduledMessage(job) {
   try {
     const whatsapp = await GetDefaultWhatsApp(schedule.companyId);
 
-    await SendMessage(whatsapp, {
+    const message = await SendMessage(whatsapp, {
       number: schedule.contact.number,
       body: schedule.body
     });
+
+    if (schedule.saveMessage) {
+      handleMessage(
+        message,
+        await GetWhatsappWbot(whatsapp),
+        schedule.companyId
+      );
+    }
 
     await scheduleRecord?.update({
       sentAt: new Date(),

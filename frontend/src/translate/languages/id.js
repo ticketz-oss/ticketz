@@ -239,6 +239,7 @@ const messages = {
           contact: "Kontak",
           sendAt: "Tanggal Dijadwalkan",
           sentAt: "Tanggal Terkirim",
+          saveMessage: "Simpan Pesan di Tiket", 
         },
         buttons: {
           okAdd: "Tambah",

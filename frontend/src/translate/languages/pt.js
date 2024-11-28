@@ -244,6 +244,7 @@ const messages = {
 					contact: "Contato",
 					sendAt: "Data de Agendamento",
 					sentAt: "Data de Envio",
+					saveMessage: "Salvar Mensagem no Ticket",
 				},
 				buttons: {
 					okAdd: "Adicionar",
