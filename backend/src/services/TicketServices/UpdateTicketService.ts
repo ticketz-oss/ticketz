@@ -157,6 +157,7 @@ const UpdateTicketService = async ({
       if (
         !ticket.contact.isGroup &&
         !ticket.contact.disableBot &&
+        !justClose &&
         !isNil(complationMessage) &&
         complationMessage !== ""
       ) {
