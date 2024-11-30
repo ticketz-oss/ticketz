@@ -25,7 +25,7 @@
     "@sentry/node": "^6.19.7",
     "@socket.io/admin-ui": "^0.5.1",
     "@types/lodash": "^4.17.1",
-    "@whiskeysockets/baileys": "^6.7.6",
+    "@whiskeysockets/baileys": "6.7.8",
     "async-mutex": "^0.4.1",
     "axios": "^1.7.2",
     "bcryptjs": "^2.4.3",
