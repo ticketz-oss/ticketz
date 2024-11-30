@@ -741,6 +741,7 @@ export const verifyDeleteMessage = async (
 
   const message = await Message.findByPk(msg.key.id, {
     include: [
+      "contact",
       {
         model: Ticket,
         include: [
