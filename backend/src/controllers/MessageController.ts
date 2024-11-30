@@ -31,6 +31,7 @@ type MessageData = {
   read: boolean;
   quotedMsg?: Message;
   number?: string;
+  saveOnTicket?: boolean;
 };
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
@@ -161,6 +162,7 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
   try {
     let { number } = messageData;
     const { body } = messageData;
+    const saveOnTicket = !!messageData.saveOnTicket;
 
     if (!number.includes("@")) {
       const numberToTest = messageData.number;
@@ -185,7 +187,8 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
               data: {
                 number,
                 body: media.originalname,
-                mediaPath: media.path
+                mediaPath: media.path,
+                saveOnTicket
               }
             },
             { removeOnComplete: true, attempts: 3 }
@@ -199,7 +202,8 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
           whatsappId,
           data: {
             number,
-            body
+            body,
+            saveOnTicket
           }
         },
 
