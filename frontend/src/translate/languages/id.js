@@ -239,7 +239,7 @@ const messages = {
           contact: "Kontak",
           sendAt: "Tanggal Dijadwalkan",
           sentAt: "Tanggal Terkirim",
-          saveMessage: "Simpan Pesan di Tiket", 
+          saveMessage: "Simpan Pesan di Tiket",
         },
         buttons: {
           okAdd: "Tambah",
@@ -802,7 +802,7 @@ const messages = {
           }
         },
         "keepQueueAndUser": {
-          "title_id": "Simpan antrian dan pengguna pada tiket tertutup", 
+          "title_id": "Simpan antrian dan pengguna pada tiket tertutup",
           "options": {
             enabled: "Diaktifkan",
             disabled: "Dinonaktifkan",
