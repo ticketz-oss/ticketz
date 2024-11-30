@@ -711,9 +711,9 @@ const messages = {
           },
         },
         validations: {
-          title: "validações",
+          title: "Avaliações",
           options: {
-            enabled: "habilitado",
+            enabled: "Habilitado",
             disabled: "Desabilitado",
           },
         },
