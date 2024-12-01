@@ -502,6 +502,8 @@ const verifyContact = async (
   companyId: number
 ): Promise<Contact> => {
   let profilePicUrl: string;
+  let profileHiresPictureUrl = "";
+
   try {
     profilePicUrl = await wbot.profilePictureUrl(msgContact.id);
   } catch (e) {
@@ -509,10 +511,20 @@ const verifyContact = async (
     profilePicUrl = `${process.env.FRONTEND_URL}/nopicture.png`;
   }
 
+  try {
+    profileHiresPictureUrl = await wbot.profilePictureUrl(
+      msgContact.id,
+      "image"
+    );
+  } catch (e) {
+    profileHiresPictureUrl = `${process.env.FRONTEND_URL}/nopicture.png`;
+  }
+
   const contactData = {
     name: msgContact?.name || msgContact.id.replace(/\D/g, ""),
     number: msgContact.id.substring(0, msgContact.id.indexOf("@")),
     profilePicUrl,
+    profileHiresPictureUrl,
     isGroup: msgContact.id.includes("g.us"),
     companyId
   };

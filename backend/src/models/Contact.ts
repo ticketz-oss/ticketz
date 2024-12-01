@@ -42,6 +42,10 @@ class Contact extends Model<Contact> {
   @Column
   profilePicUrl: string;
 
+  @Default("")
+  @Column
+  profileHiresPictureUrl: string;
+
   @Default("whatsapp")
   @Column
   channel: string;
