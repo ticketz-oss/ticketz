@@ -16,6 +16,7 @@ const include = [
       "number",
       "email",
       "profilePicUrl",
+      "profileHiresPictureUrl",
       "presence",
       "disableBot"
     ],
