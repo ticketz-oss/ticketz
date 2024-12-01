@@ -1783,7 +1783,7 @@ const handleMessage = async (
 
     if (whatsapp.queues.length === 1 && ticket.queue) {
       if (ticket.chatbot && !msg.key.fromMe) {
-        await handleChartbot(ticket, msg, wbot);
+        await handleChartbot(ticket, msg, wbot, dontReadTheFirstQuestion);
       }
     }
     if (whatsapp.queues.length > 1 && ticket.queue) {
