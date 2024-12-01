@@ -11,7 +11,6 @@ import GetContactService from "../services/ContactServices/GetContactService";
 
 import CheckContactNumber from "../services/WbotServices/CheckNumber";
 import CheckIsValidContact from "../services/WbotServices/CheckIsValidContact";
-import GetProfilePicUrl from "../services/WbotServices/GetProfilePicUrl";
 import AppError from "../errors/AppError";
 import SimpleListService, {
   SearchContactParams
@@ -103,10 +102,13 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   });
 
   const io = getIO();
-  io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-contact`, {
-    action: "create",
-    contact
-  });
+  io.to(`company-${companyId}-mainchannel`).emit(
+    `company-${companyId}-contact`,
+    {
+      action: "create",
+      contact
+    }
+  );
 
   return res.status(200).json(contact);
 };
@@ -155,10 +157,13 @@ export const update = async (
   });
 
   const io = getIO();
-  io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-contact`, {
-    action: "update",
-    contact
-  });
+  io.to(`company-${companyId}-mainchannel`).emit(
+    `company-${companyId}-contact`,
+    {
+      action: "update",
+      contact
+    }
+  );
 
   return res.status(200).json(contact);
 };
@@ -175,10 +180,13 @@ export const remove = async (
   await DeleteContactService(contactId);
 
   const io = getIO();
-  io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-contact`, {
-    action: "delete",
-    contactId
-  });
+  io.to(`company-${companyId}-mainchannel`).emit(
+    `company-${companyId}-contact`,
+    {
+      action: "delete",
+      contactId
+    }
+  );
 
   return res.status(200).json({ message: "Contact deleted" });
 };
