@@ -5,11 +5,13 @@ import { Avatar, CardHeader } from "@material-ui/core";
 import { i18n } from "../../translate/i18n";
 import { getInitials } from "../../helpers/getInitials";
 import { generateColor } from "../../helpers/colorGenerator";
+import { Lightbox } from "react-modal-image";
 
 const TicketInfo = ({ contact, ticket, onClick }) => {
 	const { user } = ticket
 	const [userName, setUserName] = useState('')
 	const [contactName, setContactName] = useState('')
+	const [avatarOpen, setAvatarOpen] = useState(false);
 
 	useEffect(() => {
 		if (contact) {
@@ -33,15 +35,39 @@ const TicketInfo = ({ contact, ticket, onClick }) => {
 	}, [])
 
 	return (
-		<CardHeader
-			onClick={onClick}
-			style={{ cursor: "pointer" }}
-			titleTypographyProps={{ noWrap: true }}
-			subheaderTypographyProps={{ noWrap: true }}
-			avatar={<Avatar style={{ backgroundColor: generateColor(contact?.number), color: "white", fontWeight: "bold" }} src={contact.profilePicUrl} alt="contact_image">{ getInitials(contact?.name) }</Avatar>}
-			title={`${contactName} #${ticket.id}`}
-			subheader={ticket.user && `${userName}`}
-		/>
+    <>
+      {
+        avatarOpen && (
+          <Lightbox
+            medium={contact.profileHiresPictureUrl || contact.profilePicUrl}
+            large={contact.profileHiresPictureUrl || contact.profilePicUrl}
+            onClose={ () => setAvatarOpen(false) }
+          />
+        )
+      }
+      <CardHeader
+        onClick={onClick}
+        style={{ cursor: "pointer" }}
+        titleTypographyProps={{ noWrap: true }}
+        subheaderTypographyProps={{ noWrap: true }}
+        avatar={
+          <Avatar
+            style={{ backgroundColor: generateColor(contact?.number), color: "white", fontWeight: "bold" }}
+            src={contact.profilePicUrl} alt="contact_image"
+            onClick={
+              (e) => {
+                e.stopPropagation();
+                setAvatarOpen(true);
+              }
+            }
+            >
+            {getInitials(contact?.name)}
+          </Avatar>
+        }
+        title={`${contactName} #${ticket.id}`}
+        subheader={ticket.user && `${userName}`}
+      />
+    </>
 	);
 };
 
