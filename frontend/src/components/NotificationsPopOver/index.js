@@ -178,8 +178,10 @@ const NotificationsPopOver = (props) => {
   const handleNotifications = (data) => {
     const { message, contact, ticket } = data;
 
+    const body = message.body.startsWith('{"ticketzvCard"') ? "🪪" : message.body;
+
     const options = {
-      body: `${message.body} - ${format(new Date(), "HH:mm")}`,
+      body: `${format(new Date(), "HH:mm")}\n${body}`,
       icon: contact.profilePicUrl,
       tag: ticket.id,
       renotify: true,

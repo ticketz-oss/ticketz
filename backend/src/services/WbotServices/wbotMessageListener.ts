@@ -826,6 +826,7 @@ const verifyDeleteMessage = async (
 ) => {
   const message = await Message.findByPk(msg.key.id, {
     include: [
+      "contact",
       {
         model: Ticket,
         include: [
@@ -935,7 +936,8 @@ ${JSON.stringify(msg?.message)}`);
 const sendMenu = async (
   wbot: Session,
   ticket: Ticket,
-  currentOption: Queue | QueueOption
+  currentOption: Queue | QueueOption,
+  sendBackToMain = true
 ) => {
   const { companyId } = ticket;
   const buttonActive = await Setting.findOne({
@@ -959,10 +961,12 @@ const sendMenu = async (
         rowId: `${option.option}`
       });
     });
-    sectionsRows.push({
-      title: "Voltar Menu Inicial",
-      rowId: "#"
-    });
+    if (sendBackToMain) {
+      sectionsRows.push({
+        title: "Voltar Menu Inicial",
+        rowId: "#"
+      });
+    }
     const sections = [
       {
         rows: sectionsRows
@@ -992,12 +996,13 @@ const sendMenu = async (
         type: 4
       });
     });
-    buttons.push({
-      buttonId: "#",
-      buttonText: { displayText: "Voltar Menu Inicial" },
-      type: 4
-    });
-
+    if (sendBackToMain) {
+      buttons.push({
+        buttonId: "#",
+        buttonText: { displayText: "Voltar Menu Inicial" },
+        type: 4
+      });
+    }
     const buttonMessage = {
       text: formatBody(`${message}`, ticket.contact, ticket),
       buttons,
@@ -1018,7 +1023,10 @@ const sendMenu = async (
     currentOption.options.forEach(option => {
       options += `*[ ${option.option} ]* - ${option.title}\n`;
     });
-    options += "\n*[ # ]* - Voltar Menu Inicial";
+
+    if (sendBackToMain) {
+      options += "\n*[ # ]* - Voltar Menu Inicial";
+    }
 
     const textMessage = {
       text: formatBody(`${message}\n\n${options}`, ticket.contact, ticket)
@@ -1232,6 +1240,7 @@ export const startQueue = async (
   wbot: Session,
   ticket: Ticket,
   queue: Queue = null,
+  sendBackToMain = true,
   firstMessage: string = null
 ) => {
   if (!queue) {
@@ -1391,7 +1400,7 @@ export const startQueue = async (
       );
       await verifyMediaMessage(sentMediaMessage, ticket, contact);
     }
-    sendMenu(wbot, ticket, queue);
+    sendMenu(wbot, ticket, queue, sendBackToMain);
   }
 };
 
@@ -1410,7 +1419,7 @@ const verifyQueue = async (
   const firstMessage = msg ? getBodyMessage(msg) : null;
 
   if (queues.length === 1) {
-    await startQueue(wbot, ticket, head(queues), firstMessage);
+    await startQueue(wbot, ticket, head(queues), false, firstMessage);
     return;
   }
 

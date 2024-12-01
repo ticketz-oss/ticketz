@@ -1,13 +1,14 @@
 import { proto } from "@whiskeysockets/baileys";
 import Whatsapp from "../models/Whatsapp";
 import GetWhatsappWbot from "./GetWhatsappWbot";
-
 import { getMessageFileOptions } from "../services/WbotServices/SendWhatsAppMedia";
+import { handleMessage } from "../services/WbotServices/wbotMessageListener";
 
 export type MessageData = {
   number: number | string;
   body: string;
   mediaPath?: string;
+  saveOnTicket?: boolean;
 };
 
 export const SendMessage = async (
@@ -32,6 +33,14 @@ export const SendMessage = async (
       }
     } else {
       message = await wbot.sendMessage(chatId, { text: body });
+    }
+
+    if (messageData.saveOnTicket) {
+      handleMessage(
+        message,
+        await GetWhatsappWbot(whatsapp),
+        whatsapp.companyId
+      );
     }
 
     return message;

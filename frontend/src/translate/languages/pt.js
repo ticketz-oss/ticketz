@@ -727,7 +727,7 @@ const messages = {
         validations: {
           title: "Avaliações",
           options: {
-            enabled: "habilitado",
+            enabled: "Habilitado",
             disabled: "Desabilitado",
           },
         },
