@@ -827,7 +827,8 @@ ${JSON.stringify(msg?.message)}`);
 const sendMenu = async (
   wbot: Session,
   ticket: Ticket,
-  currentOption: Queue | QueueOption
+  currentOption: Queue | QueueOption,
+  sendBackToMain = true
 ) => {
 
   const { companyId } = ticket;
@@ -852,10 +853,12 @@ const sendMenu = async (
         rowId: `${option.option}`
       });
     });
-    sectionsRows.push({
-      title: "Voltar Menu Inicial",
-      rowId: "#"
-    });
+    if (sendBackToMain) {
+      sectionsRows.push({
+        title: "Voltar Menu Inicial",
+        rowId: "#"
+      });
+    }
     const sections = [
       {
         rows: sectionsRows
@@ -885,12 +888,13 @@ const sendMenu = async (
         type: 4
       });
     });
-    buttons.push({
-      buttonId: "#",
-      buttonText: { displayText: "Voltar Menu Inicial" },
-      type: 4
-    });
-
+    if  (sendBackToMain) {
+      buttons.push({
+        buttonId: "#",
+        buttonText: { displayText: "Voltar Menu Inicial" },
+        type: 4
+      });
+    }
     const buttonMessage = {
       text: formatBody(`${message}`, ticket.contact),
       buttons,
@@ -911,7 +915,10 @@ const sendMenu = async (
     currentOption.options.forEach((option) => {
       options += `*[ ${option.option} ]* - ${option.title}\n`;
     });
-    options += "\n*[ # ]* - Voltar Menu Inicial";
+
+    if (sendBackToMain) {
+      options += "\n*[ # ]* - Voltar Menu Inicial";
+    }
 
     const textMessage = {
       text: formatBody(`${message}\n\n${options}`, ticket.contact),
@@ -944,7 +951,7 @@ const sendMenu = async (
   
 }
 
-const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue) => {
+const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue, sendBackToMain = true) => {
     const {companyId, contact} = ticket;
     let chatbot = false;
 
@@ -1025,7 +1032,7 @@ const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue) => {
         const sentMediaMessage = await wbot.sendMessage(`${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, { ...optionsMsg });
         await verifyMediaMessage(sentMediaMessage, ticket, contact);
       }
-      sendMenu(wbot, ticket, queue);
+      sendMenu(wbot, ticket, queue, sendBackToMain);
     }
 };
 
@@ -1041,7 +1048,7 @@ const verifyQueue = async (
   )
 
   if (queues.length === 1) {
-    await startQueue(wbot, ticket, head(queues));
+    await startQueue(wbot, ticket, head(queues), false);
     return;
   }
 
