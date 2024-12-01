@@ -505,10 +505,14 @@ const CustomInput = (props) => {
               className={classes.messageInput}
               maxRows={5}
               onKeyDownCapture={(e) => {
-                if (e.key === 'ArrowUp' ||
-                  e.key === 'ArrowDown'
-                )
+                if (
+                  !popupOpen && (
+                    e.key === 'ArrowUp' ||
+                    e.key === 'ArrowDown'
+                  )
+                ) {
                   e.stopPropagation();
+                }
               }}
             />
           );

@@ -13,6 +13,7 @@ interface Request {
   isGroup: boolean;
   email?: string;
   profilePicUrl?: string;
+  profileHiresPictureUrl?: string;
   companyId: number;
   extraInfo?: ExtraInfo[];
   channel?: string;
@@ -23,6 +24,7 @@ const CreateOrUpdateContactService = async ({
   name,
   number: rawNumber,
   profilePicUrl,
+  profileHiresPictureUrl,
   isGroup,
   email = "",
   companyId,
@@ -40,6 +42,7 @@ const CreateOrUpdateContactService = async ({
       name,
       number,
       profilePicUrl,
+      profileHiresPictureUrl,
       email,
       isGroup,
       extraInfo,
@@ -65,7 +68,7 @@ const CreateOrUpdateContactService = async ({
       });
 
       if (contact) {
-        contact.update({ profilePicUrl });
+        contact.update({ profilePicUrl, profileHiresPictureUrl });
 
         io.to(`company-${companyId}-mainchannel`).emit(
           `company-${companyId}-contact`,
