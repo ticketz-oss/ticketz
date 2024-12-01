@@ -18,16 +18,23 @@ const ListContactsService = async ({
   pageNumber = "1",
   companyId
 }: Request): Promise<Response> => {
+  const normalizedSearchParam = searchParam.toLowerCase().trim();
   const whereCondition = {
     [Op.or]: [
       {
         name: Sequelize.where(
-          Sequelize.fn("LOWER", Sequelize.col("name")),
-          "LIKE",
-          `%${searchParam.toLowerCase().trim()}%`
+          Sequelize.fn(
+            "LOWER",
+            Sequelize.fn("UNACCENT", Sequelize.col("name"))
+          ),
+          {
+            [Op.like]: Sequelize.literal(
+              `'%' || UNACCENT('${normalizedSearchParam}') || '%'`
+            )
+          }
         )
       },
-      { number: { [Op.like]: `%${searchParam.toLowerCase().trim()}%` } }
+      { number: { [Op.like]: `%${normalizedSearchParam}%` } }
     ],
     companyId: {
       [Op.eq]: companyId
