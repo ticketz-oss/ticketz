@@ -360,7 +360,7 @@ const CustomInput = (props) => {
     if (
       isString(inputMessage) &&
       !isEmpty(inputMessage) &&
-      inputMessage.length > 1
+      inputMessage.length
     ) {
       const firstWord = inputMessage.charAt(0);
       setPopupOpen(firstWord.indexOf("/") > -1);
@@ -447,10 +447,14 @@ const CustomInput = (props) => {
               className={classes.messageInput}
               maxRows={5}
               onKeyDownCapture={(e) => {
-                if (e.key === 'ArrowUp' ||
-                  e.key === 'ArrowDown'
-                )
+                if (
+                  !popupOpen && (
+                    e.key === 'ArrowUp' ||
+                    e.key === 'ArrowDown'
+                  )
+                ) {
                   e.stopPropagation();
+                }
               }}
             />
           );
