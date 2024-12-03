@@ -19,14 +19,17 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   SendRefreshToken(res, refreshToken);
 
   const io = getIO();
-  io.to(`user-${serializedUser.id}`).emit(`company-${serializedUser.companyId}-auth`, {
-    action: "update",
-    user: {
-      id: serializedUser.id,
-      email: serializedUser.email,
-      companyId: serializedUser.companyId
+  io.to(`user-${serializedUser.id}`).emit(
+    `company-${serializedUser.companyId}-auth`,
+    {
+      action: "update",
+      user: {
+        id: serializedUser.id,
+        email: serializedUser.email,
+        companyId: serializedUser.companyId
+      }
     }
-  });
+  );
 
   return res.status(200).json({
     token,

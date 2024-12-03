@@ -12,14 +12,13 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 import { isNil, isObject, has, get } from 'lodash';
 
 const MessageSchema = Yup.object().shape({
-	shortcode: Yup.string()
-		.min(3, "Too Short!")
-		.max(50, "Too Long!")
-		.required("Required"),
-    message: Yup.string()
-        .min(3, "Too Short!")
-        .max(500, "Too Long!")
-        .required("Required")
+  shortcode: Yup.string()
+    .min(3, "Too Short!")
+    .max(50, "Too Long!")
+    .required("Required"),
+  message: Yup.string()
+    .min(3, "Too Short!")
+    .required("Required")
 });
 
 const useStyles = makeStyles((theme) => ({

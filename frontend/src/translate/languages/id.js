@@ -230,6 +230,7 @@ const messages = {
           contact: "Kontak",
           sendAt: "Tanggal Dijadwalkan",
           sentAt: "Tanggal Terkirim",
+          saveMessage: "Simpan Pesan di Tiket",
         },
         buttons: {
           okAdd: "Tambah",
@@ -288,6 +289,9 @@ const messages = {
           },
           closed: {
             title: "Tutup"
+          },
+          groups: {
+            title: "Grup"
           },
           search: {
             title: "Cari"
@@ -755,6 +759,20 @@ const messages = {
             disabled: "Dinonaktifkan",
           },
         },
+        soundGroupNotifications: {
+          title: "Notifikasi grup suara",
+          options: {
+            enabled: "Diaktifkan",
+            disabled: "Dinonaktifkan",
+          },
+        },
+        groupsTab: {
+          title: "Tab grup",
+          options: {
+            enabled: "Diaktifkan",
+            disabled: "Dinonaktifkan",
+          },
+        },
         VoiceAndVideoCalls: {
           title: "Panggilan suara dan video",
           options: {
@@ -785,6 +803,20 @@ const messages = {
         },
         FileDownloadLimit: {
           title: "Batas unduhan file (MB)",
+        },
+        "messageVisibility": {
+          "title": "Visibilitas Pesan",
+          "options": {
+            "respectMessageQueue": "Hormati Antrian Pesan",
+            "respectTicketQueue": "Hormati Antrian Tiket"
+          }
+        },
+        "keepQueueAndUser": {
+          "title_id": "Simpan antrian dan pengguna pada tiket tertutup",
+          "options": {
+            enabled: "Diaktifkan",
+            disabled: "Dinonaktifkan",
+          }
         },
         WelcomeGreeting: {
           greetings: "halo",

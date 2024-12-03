@@ -19,6 +19,7 @@ import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { TagsContainer } from "../TagsContainer";
 import { SocketContext } from "../../context/Socket/SocketContext";
+import useSettings from "../../hooks/useSettings";
 
 const drawerWidth = 320;
 
@@ -68,8 +69,19 @@ const Ticket = () => {
   const [loading, setLoading] = useState(true);
   const [contact, setContact] = useState({});
   const [ticket, setTicket] = useState({});
+  const [showTabGroups, setShowTabGroups] = useState(false);
+  const { getSetting } = useSettings();
 
   const socketManager = useContext(SocketContext);
+
+  useEffect(() => {
+    Promise.all([
+      getSetting("CheckMsgIsGroup"),
+      getSetting("groupsTab")
+    ]).then(([ignoreGroups, groupsTab]) => {
+      setShowTabGroups(ignoreGroups === "disabled" && groupsTab === "enabled");
+    });
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -117,7 +129,6 @@ const Ticket = () => {
       }
 
       if (data.action === "delete" && data.ticketId === ticket.id) {
-        toast.success("Ticket deleted sucessfully.");
         history.push("/tickets");
       }
     };
@@ -168,8 +179,9 @@ const Ticket = () => {
           ticket={ticket}
           ticketId={ticket.id}
           isGroup={ticket.isGroup}
+          markAsRead={true}
         ></MessagesList>
-        <MessageInput ticketId={ticket.id} ticketStatus={ticket.status} />
+        <MessageInput ticket={ticket} showTabGroups />
       </>
     );
   };
@@ -185,7 +197,7 @@ const Ticket = () => {
       >
         <TicketHeader loading={loading}>
           {renderTicketInfo()}
-          <TicketActionButtons ticket={ticket} />
+          <TicketActionButtons ticket={ticket} showTabGroups={showTabGroups} />
         </TicketHeader>
         <Paper>
           <TagsContainer ticket={ticket} />

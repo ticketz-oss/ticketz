@@ -1,9 +1,7 @@
 import * as Sentry from "@sentry/node";
 import makeWASocket, {
   WASocket,
-  Browsers,
   DisconnectReason,
-  fetchLatestBaileysVersion,
   makeCacheableSignalKeyStore,
   makeInMemoryStore,
   isJidBroadcast,
@@ -27,6 +25,8 @@ import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSess
 import DeleteBaileysService from "../services/BaileysServices/DeleteBaileysService";
 import Contact from "../models/Contact";
 import Ticket from "../models/Ticket";
+import { GitInfo } from "../gitinfo";
+import GetPublicSettingService from "../services/SettingServices/GetPublicSettingService";
 
 const loggerBaileys = MAIN_LOGGER.child({});
 loggerBaileys.level = "error";
@@ -57,9 +57,11 @@ export const removeWbot = async (
     const sessionIndex = sessions.findIndex(s => s.id === whatsappId);
     if (sessionIndex !== -1) {
       if (isLogout) {
-        sessions[sessionIndex].logout();
-        sessions[sessionIndex].ws.close();
+        await sessions[sessionIndex].logout();
       }
+
+      sessions[sessionIndex].end(null);
+      await sessions[sessionIndex].ws.close();
 
       sessions.splice(sessionIndex, 1);
     }
@@ -84,6 +86,21 @@ function getGreaterVersion(a, b) {
   return a;
 }
 
+const waVersion = [2, 3000, 1017410096];
+
+const getProjectWAVersion = async () => {
+  try {
+    const res = await fetch(
+      "https://raw.githubusercontent.com/ticketz-oss/ticketz/refs/heads/main/backend/src/waversion.json"
+    );
+    const version = await res.json();
+    return version;
+  } catch (error) {
+    logger.warn("Failed to get current WA Version from project repository");
+  }
+  return waVersion;
+};
+
 export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
   return new Promise((resolve, reject) => {
     try {
@@ -98,13 +115,12 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
 
         const { id, name, provider } = whatsappUpdate;
 
-        const { version: autoVersion, isLatest } =
-          await fetchLatestBaileysVersion();
+        const autoVersion = await getProjectWAVersion();
         const isLegacy = provider === "stable";
 
-        const version = getGreaterVersion(autoVersion, [2, 3000, 1015891883]);
+        const version = getGreaterVersion(autoVersion, waVersion);
 
-        logger.info(`using WA v${version.join(".")}, isLatest: ${isLatest}`);
+        logger.info(`using WA v${version.join(".")}`);
         logger.info(`isLegacy: ${isLegacy}`);
         logger.info(`Starting session ${name}`);
         let retriesQrCode = 0;
@@ -134,11 +150,50 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
 
         const msgRetryCounterCache = new NodeCache();
         const userDevicesCache: CacheStore = new NodeCache();
+        const internalGroupCache = new NodeCache({
+          stdTTL: 5 * 60,
+          useClones: false
+        });
+        const groupCache: CacheStore = {
+          get: <T>(key: string): T => {
+            logger.debug(`groupCache.get ${key}`);
+            const value = internalGroupCache.get(key);
+            if (!value) {
+              logger.debug(`groupCache.get ${key} not found`);
+              wsocket.groupMetadata(key).then(async metadata => {
+                logger.debug({ key, metadata }, `groupCache.get ${key} set`);
+                internalGroupCache.set(key, metadata);
+              });
+            }
+            return value as T;
+          },
+          set: async (key: string, value: any) => {
+            logger.debug({ key, value }, `groupCache.set ${key}`);
+            return internalGroupCache.set(key, value);
+          },
+          del: async (key: string) => {
+            logger.debug(`groupCache.del ${key}`);
+            return internalGroupCache.del(key);
+          },
+          flushAll: async () => {
+            logger.debug("groupCache.flushAll");
+            return internalGroupCache.flushAll();
+          }
+        };
+
+        const appName =
+          (await GetPublicSettingService({ key: "appName" })) || "Ticketz";
+        const hostName = process.env.BACKEND_URL?.split("/")[2];
+        const appVersion = GitInfo.tagName || GitInfo.commitHash;
+        const clientName = `${appName} ${appVersion}${
+          hostName ? ` - ${hostName}` : ""
+        }`;
 
         wsocket = makeWASocket({
           logger: loggerBaileys,
           printQRInTerminal: false,
-          browser: Browsers.appropriate("Desktop"),
+          emitOwnEvents: false,
+          browser: [clientName, "Desktop", appVersion],
           auth: {
             creds: state.creds,
             keys: makeCacheableSignalKeyStore(state.keys, loggerBaileys)
@@ -152,6 +207,7 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
           generateHighQualityLinkPreview: true,
           userDevicesCache,
           getMessage,
+          cachedGroupMetadata: async jid => groupCache.get(jid),
           shouldIgnoreJid: jid =>
             isJidBroadcast(jid) || jid?.endsWith("@newsletter"),
           transactionOpts: { maxCommitRetries: 1, delayBetweenTriesMs: 10 }
@@ -193,9 +249,8 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
           "connection.update",
           async ({ connection, lastDisconnect, qr }) => {
             logger.info(
-              `Socket  ${name} Connection Update ${connection || ""} ${
-                lastDisconnect || ""
-              }`
+              { lastDisconnect },
+              `Socket  ${name} Connection Update ${connection || ""}`
             );
 
             if (connection === "close") {
@@ -212,11 +267,13 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
                 (lastDisconnect?.error as Boom)?.output?.statusCode !==
                 DisconnectReason.loggedOut
               ) {
-                removeWbot(id, false);
-                setTimeout(
-                  () => StartWhatsAppSession(whatsapp, whatsapp.companyId),
-                  2000
-                );
+                removeWbot(id, false).then(() => {
+                  logger.info(`Reconnecting ${name} in 2 seconds`);
+                  setTimeout(
+                    () => StartWhatsAppSession(whatsapp, whatsapp.companyId),
+                    2000
+                  );
+                });
               } else {
                 await whatsapp.update({ status: "PENDING", session: "" });
                 await DeleteBaileysService(whatsapp.id);
@@ -224,11 +281,13 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
                   action: "update",
                   session: whatsapp
                 });
-                removeWbot(id, false);
-                setTimeout(
-                  () => StartWhatsAppSession(whatsapp, whatsapp.companyId),
-                  2000
-                );
+                removeWbot(id, false).then(() => {
+                  logger.info(`Reconnecting ${name} in 2 seconds`);
+                  setTimeout(
+                    () => StartWhatsAppSession(whatsapp, whatsapp.companyId),
+                    2000
+                  );
+                });
               }
             }
 
@@ -351,6 +410,29 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
             }
           }
         );
+
+        wsocket.ev.on("groups.upsert", groups => {
+          logger.debug("Received new group");
+          groups.forEach(group => {
+            groupCache.set(group.id, group);
+          });
+        });
+
+        wsocket.ev.on("groups.update", async ([event]) => {
+          logger.debug("Received group update");
+          const metadata = await wsocket.groupMetadata(event.id);
+          groupCache.set(event.id, metadata);
+        });
+
+        wsocket.ev.on("group-participants.update", async event => {
+          logger.debug("Received group participants update");
+          try {
+            const metadata = await wsocket.groupMetadata(event.id);
+            groupCache.set(event.id, metadata);
+          } catch (error) {
+            groupCache.del(event.id);
+          }
+        });
 
         store.bind(wsocket.ev);
       })();

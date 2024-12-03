@@ -52,7 +52,7 @@ import {
   processInvoicePaid
 } from "./PaymentGatewayServices";
 
-const owenBaseURL = "https://pix.owenbrasil.com.br";
+const owenBaseURL = "https://api.apipix.me/v1";
 
 interface OwenConfig {
   user: string;
@@ -120,7 +120,7 @@ export const owenCheckStatus = async (
       owenConfig = await owenLoadConfig();
     }
 
-    const txDetail = await axios.get(`${owenBaseURL}/api/v1/qrstatus`, {
+    const txDetail = await axios.get(`${owenBaseURL}/qrstatus`, {
       params: {
         qrcodeId: invoice.txId,
         ...owenConfig
@@ -205,10 +205,7 @@ export const owenCreateSubscription = async (
     if (!invoice) {
       throw new Error("Invoice not found");
     }
-    const qrResult = await axios.get(
-      `${owenBaseURL}/api/v1/qrdinamico`,
-      qrData
-    );
+    const qrResult = await axios.get(`${owenBaseURL}/qrdinamico`, qrData);
     invoice.update({
       value: price,
       txId: qrResult.data.data.qrcodeId,

@@ -1,3 +1,4 @@
+import { Sequelize } from "sequelize";
 import User from "../../models/User";
 import AppError from "../../errors/AppError";
 import {
@@ -34,7 +35,10 @@ const AuthUserService = async ({
   password
 }: Request): Promise<Response> => {
   const user = await User.findOne({
-    where: { email },
+    where: Sequelize.where(
+      Sequelize.fn("LOWER", Sequelize.col("email")),
+      email.toLowerCase()
+    ),
     include: ["queues", { model: Company, include: [{ model: Setting }] }]
   });
 

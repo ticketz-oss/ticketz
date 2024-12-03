@@ -154,7 +154,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const TicketListItemCustom = ({ ticket, setTabOpen }) => {
+const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
   const classes = useStyles();
   const history = useHistory();
   const [ticketUser, setTicketUser] = useState(null);
@@ -179,8 +179,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
     return () => {
       isMounted.current = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [ticket]);
 
   const handleCloseTicket = async (id) => {
     try {
@@ -295,7 +294,10 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
           {profile === "admin" && (
             <Tooltip title="Espiar Conversa">
               <VisibilityIcon
-                onClick={() => setOpenTicketMessageDialog(true)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpenTicketMessageDialog(true)
+                }}
                 fontSize="small"
                 style={{
                   padding: 2,
@@ -364,7 +366,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
             //color=
             />
           )}
-          {ticket.status === "pending" && (
+          {ticket.status === "pending" && (groupActionButtons || !ticket.isGroup) && (
             <Tooltip title="Fechar Conversa">
               <ClearOutlinedIcon
                 onClick={() => handleCloseTicket(ticket.id)}
@@ -394,7 +396,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
               />
             </Tooltip>
           )}
-          {ticket.status === "open" && (
+          {ticket.status === "open" && (groupActionButtons || !ticket.isGroup) && (
             <Tooltip title="Fechar Conversa">
               <ClearOutlinedIcon
                 onClick={() => handleCloseTicket(ticket.id)}
@@ -410,7 +412,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
               />
             </Tooltip>
           )}
-          {ticket.status === "pending" && (
+          {ticket.status === "pending" && (groupActionButtons || !ticket.isGroup) && (
             <Tooltip title="Aceitar Conversa">
               <DoneIcon
                 onClick={() => handleAcceptTicket(ticket.id)}
@@ -433,10 +435,13 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
             </Tooltip>
           )}
 
-          {profile === "admin" && (
+          {profile === "admin" && (groupActionButtons || !ticket.isGroup) && (
             <Tooltip title="Espiar Conversa">
               <VisibilityIcon
-                onClick={() => setOpenTicketMessageDialog(true)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpenTicketMessageDialog(true)
+                }}
                 fontSize="small"
                 style={{
                   padding: 2,
@@ -472,7 +477,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen }) => {
         dense
         button
         onClick={(e) => {
-          if (ticket.status === "pending") return;
+          if ((groupActionButtons || !ticket.isGroup) && ticket.status === "pending") return;
           handleSelectTicket(ticket);
         }}
         selected={ticketId && +ticketId === ticket.id}

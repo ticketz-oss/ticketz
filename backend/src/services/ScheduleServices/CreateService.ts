@@ -10,6 +10,7 @@ interface Request {
   contactId: number;
   companyId: number;
   userId?: number;
+  saveMessage?: boolean;
 }
 
 const CreateService = async ({
@@ -17,7 +18,8 @@ const CreateService = async ({
   sendAt,
   contactId,
   companyId,
-  userId
+  userId,
+  saveMessage
 }: Request): Promise<Schedule> => {
   const schema = Yup.object().shape({
     body: Yup.string().required().min(5),
@@ -30,16 +32,15 @@ const CreateService = async ({
     throw new AppError(err.message);
   }
 
-  const schedule = await Schedule.create(
-    {
-      body,
-      sendAt,
-      contactId,
-      companyId,
-      userId,
-      status: "PENDENTE"
-    }
-  );
+  const schedule = await Schedule.create({
+    body,
+    sendAt,
+    contactId,
+    companyId,
+    userId,
+    saveMessage,
+    status: "PENDENTE"
+  });
 
   await schedule.reload({
     include: [{ model: Contact, as: "contact" }]

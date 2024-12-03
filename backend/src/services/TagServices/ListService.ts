@@ -1,6 +1,5 @@
-import { Op, literal, fn, col } from "sequelize";
+import { Op, fn, col } from "sequelize";
 import Tag from "../../models/Tag";
-import Ticket from "../../models/Ticket";
 import TicketTag from "../../models/TicketTag";
 
 interface Request {
@@ -30,8 +29,7 @@ const ListService = async ({
     whereCondition = {
       [Op.or]: [
         { name: { [Op.like]: `%${searchParam}%` } },
-        { color: { [Op.like]: `%${searchParam}%` } },
-        { kanban: { [Op.like]: `%${searchParam}%` } }
+        { color: { [Op.like]: `%${searchParam}%` } }
       ]
     };
   }
@@ -42,25 +40,27 @@ const ListService = async ({
     offset,
     order: [["name", "ASC"]],
     subQuery: false,
-    include: [{
-      model: TicketTag,
-      as: 'ticketTags',
-      attributes: [],
-      required: false
-    }],
-    attributes: [
-      'id',
-      'name',
-      'color',
-      'kanban',
-      [fn('count', col('ticketTags.tagId')), 'ticketsCount']
+    include: [
+      {
+        model: TicketTag,
+        as: "ticketTags",
+        attributes: [],
+        required: false
+      }
     ],
-    group: ['Tag.id']
+    attributes: [
+      "id",
+      "name",
+      "color",
+      "kanban",
+      [fn("count", col("ticketTags.tagId")), "ticketsCount"]
+    ],
+    group: ["Tag.id"]
   });
 
   let count = 0;
-  
-  Object.keys(counters).forEach((key)=> {
+
+  Object.keys(counters).forEach(key => {
     count += counters[key].count;
   });
 

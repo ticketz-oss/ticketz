@@ -1,5 +1,6 @@
 import GetDefaultWhatsApp from "../../helpers/GetDefaultWhatsApp";
 import { getWbot } from "../../libs/wbot";
+import Whatsapp from "../../models/Whatsapp";
 
 interface IOnWhatsapp {
   jid: string;
@@ -13,9 +14,10 @@ const checker = async (number: string, wbot: any) => {
 
 const CheckContactNumber = async (
   number: string,
-  companyId: number
+  companyId: number,
+  whatsapp: Whatsapp = null
 ): Promise<IOnWhatsapp> => {
-  const defaultWhatsapp = await GetDefaultWhatsApp(companyId);
+  const defaultWhatsapp = whatsapp || (await GetDefaultWhatsApp(companyId));
 
   const wbot = getWbot(defaultWhatsapp.id);
   const isNumberExit = await checker(number, wbot);

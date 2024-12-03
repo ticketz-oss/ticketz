@@ -160,19 +160,19 @@ const useStyles = makeStyles((theme) => ({
   appLogoLightPreviewImg: {
     width: "100%",
     maxHeight: 72,
-    content: "url(" + theme.calculatedLogoLight() + ")"
+    content: `url("${theme.calculatedLogoLight()}")`
   },
   
   appLogoDarkPreviewImg: {
     width: "100%",
     maxHeight: 72,
-    content: "url(" + theme.calculatedLogoDark() + ")"
+    content: `url("${theme.calculatedLogoDark()}")`
   },
 
   appLogoFaviconPreviewImg: {
     width: "100%",
     maxHeight: 72,
-    content: "url(" + ((theme.appLogoFavicon) ? theme.appLogoFavicon : "/vector/favicon.svg" ) + ")"
+    content: `url("${((theme.appLogoFavicon) ? theme.appLogoFavicon : "/vector/favicon.svg" )}")`
   }
 }));
 

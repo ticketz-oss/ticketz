@@ -102,20 +102,16 @@ export default function Options(props) {
   const [allowSignup, setAllowSignup] = useState("disabled");
   const [chatbotAutoExit, setChatbotAutoExit] = useState("disabled");
   const [CheckMsgIsGroup, setCheckMsgIsGroupType] = useState("enabled");
+  const [soundGroupNotifications, setSoundGroupNotifications] = useState("disabled");
+  const [groupsTab, setGroupsTab] = useState("disabled");
   const [apiToken, setApiToken] = useState("");
   const [downloadLimit, setDownloadLimit] = useState("15");
+  
+  const [messageVisibility, setMessageVisibility] = useState("Respect Message Queue");
 
-  const [loadingUserRating, setLoadingUserRating] = useState(false);
-  const [loadingScheduleType, setLoadingScheduleType] = useState(false);
-  const [loadingCallType, setLoadingCallType] = useState(false);
-  const [loadingChatbotType, setLoadingChatbotType] = useState(false);
-  const [loadingQuickMessages, setLoadingQuickMessages] = useState(false);
-  const [loadingAllowSignup, setLoadingAllowSignup] = useState(false);
-  const [loadingChatbotAutoExit, setLoadingChatbotAutoExit] = useState(false);
-  const [loadingCheckMsgIsGroup, setCheckMsgIsGroup] = useState(false);
-  const [loadingApiToken, setLoadingApiToken] = useState(false);
-  const [loadingDownloadLimit, setLoadingDownloadLimit] = useState(false);
+  const [keepQueueAndUser, setKeepQueueAndUser] = useState("enabled");
   const { getCurrentUserInfo } = useAuth();
+  const [autoReopenTimeout, setAutoReopenTimeout] = useState(false);
   const [currentUser, setCurrentUser] = useState({});
 
   const downloadLimitInput = useRef(null);
@@ -146,6 +142,13 @@ export default function Options(props) {
       if (CheckMsgIsGroup) {
         setCheckMsgIsGroupType(CheckMsgIsGroup.value);
       }
+      
+      const soundGroupNotifications = settings.find((s) => s.key === "soundGroupNotifications");
+      setSoundGroupNotifications(soundGroupNotifications?.value || "disabled");
+
+      const groupsTab = settings.find((s) => s.key === "groupsTab");
+      setGroupsTab(groupsTab?.value || "disabled");
+
       const chatbotType = settings.find((s) => s.key === "chatBotType");
       if (chatbotType) {
         setChatbotType(chatbotType.value);
@@ -161,29 +164,35 @@ export default function Options(props) {
       const quickMessages = settings.find((s) => s.key === "quickMessages");
       setQuickMessages(quickMessages?.value || "individual");
 
+      const keepQueueAndUser = settings.find((s) => s.key === "keepQueueAndUser");
+      setKeepQueueAndUser(keepQueueAndUser?.value || "enabled");
+        
       const apiToken = settings.find((s) => s.key === "apiToken");
       setApiToken(apiToken?.value || "");
 
       const downloadLimit = settings.find((s) => s.key === "downloadLimit");
       setDownloadLimit(downloadLimit?.value || "");
+      
+      const messageVisibility = settings.find((s) => s.key === "messageVisibility");
+      setMessageVisibility(messageVisibility?.value || "message");
+
+      const autoReopenTimeout = settings.find((s) => s.key === "autoReopenTimeout");
+      setAutoReopenTimeout(autoReopenTimeout?.value || "0");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
 
   async function handleChangeUserRating(value) {
     setUserRating(value);
-    setLoadingUserRating(true);
     await update({
       key: "userRating",
       value,
     });
     toast.success("Operação atualizada com sucesso.");
-    setLoadingUserRating(false);
   }
 
   async function handleScheduleType(value) {
     setScheduleType(value);
-    setLoadingScheduleType(true);
     await update({
       key: "scheduleType",
       value,
@@ -198,7 +207,6 @@ export default function Options(props) {
       draggable: true,
       theme: "light",
     });
-    setLoadingScheduleType(false);
     if (typeof scheduleTypeChanged === "function") {
       scheduleTypeChanged(value);
     }
@@ -206,91 +214,95 @@ export default function Options(props) {
 
   async function handleCallType(value) {
     setCallType(value);
-    setLoadingCallType(true);
     await update({
       key: "call",
       value,
     });
     toast.success("Operação atualizada com sucesso.");
-    setLoadingCallType(false);
   }
 
   async function handleChatbotType(value) {
     setChatbotType(value);
-    setLoadingChatbotType(true);
     await update({
       key: "chatBotType",
       value,
     });
     toast.success("Operação atualizada com sucesso.");
-    setLoadingChatbotType(false);
   }
 
   async function handleChatbotAutoExit(value) {
     setChatbotAutoExit(value);
-    setLoadingChatbotAutoExit(true);
     await update({
       key: "chatbotAutoExit",
       value,
     });
     toast.success("Operação atualizada com sucesso.");
-    setLoadingChatbotAutoExit(false);
   }
 
   async function handleQuickMessages(value) {
     setQuickMessages(value);
-    setLoadingQuickMessages(true);
     await update({
       key: "quickMessages",
       value,
     });
     toast.success("Operação atualizada com sucesso.");
-    setLoadingQuickMessages(false);
   }
 
   async function handleAllowSignup(value) {
     setAllowSignup(value);
-    setLoadingAllowSignup(true);
     await update({
       key: "allowSignup",
       value,
     });
     toast.success("Operação atualizada com sucesso.");
-    setLoadingAllowSignup(false);
   }
 
   async function handleDownloadLimit(value) {
     setDownloadLimit(value);
-    setLoadingDownloadLimit(true);
     await update({
       key: "downloadLimit",
       value,
     });
     toast.success("Operação atualizada com sucesso.");
-    setLoadingDownloadLimit(false);
+  }
+
+  async function handleAutoReopenTimeout(value) {
+    setAutoReopenTimeout(value);
+    await update({
+      key: "autoReopenTimeout",
+      value,
+    });
+    toast.success("Operação atualizada com sucesso.");
+  }
+
+  async function handleSetting(key, value, setter = null) {
+    if (setter) {
+      setter(value);
+    }
+    await update({
+      key,
+      value,
+    });
+    toast.success("Operação atualizada com sucesso.");
   }
 
   async function generateApiToken() {
     const newToken = generateSecureToken(32);
     setApiToken(newToken);
-    setLoadingApiToken(true);
     await update({
       key: "apiToken",
       value: newToken,
     });
     toast.success("Operação atualizada com sucesso.");
-    setLoadingApiToken(false);
   }
 
   async function deleteApiToken() {
     setApiToken("");
-    setLoadingApiToken(true);
     await update({
       key: "apiToken",
       value: "",
     });
     toast.success("Operação atualizada com sucesso.");
-    setLoadingApiToken(false);
   }
   
   async function copyApiToken() {
@@ -300,13 +312,11 @@ export default function Options(props) {
 
   async function handleGroupType(value) {
     setCheckMsgIsGroupType(value);
-    setCheckMsgIsGroup(true);
     await update({
       key: "CheckMsgIsGroup",
       value,
     });
     toast.success("Operação atualizada com sucesso.");
-    setCheckMsgIsGroup(false);
     /*     if (typeof scheduleTypeChanged === "function") {
           scheduleTypeChanged(value);
         } */
@@ -331,11 +341,28 @@ export default function Options(props) {
               <MenuItem value={"disabled"}>{i18n.t("settings.validations.options.disabled")}</MenuItem>
               <MenuItem value={"enabled"}>{i18n.t("settings.validations.options.enabled")}</MenuItem>
             </Select>
-            <FormHelperText>
-              {loadingUserRating && "Atualizando..."}
-            </FormHelperText>
           </FormControl>
         </Grid>
+        
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <TextField
+              id="autoreopen-timeout-field"
+              label="Timeout para reabertura automática (minutos)"
+              variant="standard"
+              name="autoReopenTimeout"
+              type="number"
+              value={autoReopenTimeout}
+              onChange={(e) => {
+                setAutoReopenTimeout(e.target.value);
+              }}
+              onBlur={async (_) => {
+                await handleAutoReopenTimeout(autoReopenTimeout);
+              }}
+            />
+          </FormControl>
+        </Grid>
+        
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="schedule-type-label">
@@ -352,9 +379,6 @@ export default function Options(props) {
               <MenuItem value={"queue"}>{i18n.t("settings.OfficeManagement.options.ManagementByDepartment")}</MenuItem>
               <MenuItem value={"company"}>{i18n.t("settings.OfficeManagement.options.ManagementByCompany")}</MenuItem>
             </Select>
-            <FormHelperText>
-              {loadingScheduleType && "Atualizando..."}
-            </FormHelperText>
           </FormControl>
         </Grid>
         <Grid xs={12} sm={6} md={4} item>
@@ -372,11 +396,46 @@ export default function Options(props) {
               <MenuItem value={"disabled"}>{i18n.t("settings.IgnoreGroupMessages.options.disabled")}</MenuItem>
               <MenuItem value={"enabled"}>{i18n.t("settings.IgnoreGroupMessages.options.enabled")}</MenuItem>
             </Select>
-            <FormHelperText>
-              {loadingScheduleType && "Atualizando..."}
-            </FormHelperText>
           </FormControl>
         </Grid>
+        
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="sound-group-notifications-label">
+              {i18n.t("settings.soundGroupNotifications.title")}
+            </InputLabel>
+            <Select
+              labelId="sound-group-notifications-label"
+              value={soundGroupNotifications}
+              onChange={async (e) => {
+                await handleSetting("soundGroupNotifications", e.target.value, setSoundGroupNotifications);
+              }}
+            >
+              <MenuItem value={"disabled"}>{i18n.t("settings.soundGroupNotifications.options.disabled")}</MenuItem>
+              <MenuItem value={"enabled"}>{i18n.t("settings.soundGroupNotifications.options.enabled")}</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="groups-tab-label">
+              {i18n.t("settings.groupsTab.title")}
+            </InputLabel>
+            <Select
+              labelId="groups-tab-label"
+              value={groupsTab}
+              disabled={CheckMsgIsGroup === "enabled"}
+              onChange={async (e) => {
+                await handleSetting("groupsTab", e.target.value, setGroupsTab);
+              }}
+            >
+              <MenuItem value={"enabled"}>{i18n.t("settings.groupsTab.options.enabled")}</MenuItem>
+              <MenuItem value={"disabled"}>{i18n.t("settings.groupsTab.options.disabled")}</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="call-type-label">
@@ -392,9 +451,6 @@ export default function Options(props) {
               <MenuItem value={"disabled"}>{i18n.t("settings.VoiceAndVideoCalls.options.disabled")}</MenuItem>
               <MenuItem value={"enabled"}>{i18n.t("settings.VoiceAndVideoCalls.options.enabled")}</MenuItem>
             </Select>
-            <FormHelperText>
-              {loadingCallType && "Atualizando..."}
-            </FormHelperText>
           </FormControl>
         </Grid>
         <Grid xs={12} sm={6} md={4} item>
@@ -411,9 +467,6 @@ export default function Options(props) {
             >
               <MenuItem value={"text"}>Texto</MenuItem>
             </Select>
-            <FormHelperText>
-              {loadingChatbotType && "Atualizando..."}
-            </FormHelperText>
           </FormControl>
         </Grid>
         <Grid xs={12} sm={6} md={4} item>
@@ -431,9 +484,6 @@ export default function Options(props) {
               <MenuItem value={"disabled"}>{i18n.t("settings.AutomaticChatbotOutput.options.disabled")}</MenuItem>
               <MenuItem value={"enabled"}>{i18n.t("settings.AutomaticChatbotOutput.options.enabled")}</MenuItem>
             </Select>
-            <FormHelperText>
-              {loadingChatbotAutoExit && "Atualizando..."}
-            </FormHelperText>
           </FormControl>
         </Grid>
         <Grid xs={12} sm={6} md={4} item>
@@ -451,12 +501,45 @@ export default function Options(props) {
               <MenuItem value={"company"}>{i18n.t("settings.QuickMessages.options.enabled")}</MenuItem>
               <MenuItem value={"individual"}>{i18n.t("settings.QuickMessages.options.disabled")}</MenuItem>
             </Select>
-            <FormHelperText>
-              {loadingQuickMessages && "Atualizando..."}
-            </FormHelperText>
+          </FormControl>
+        </Grid>
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="message-visibility-label">
+              {i18n.t("settings.messageVisibility.title")}
+            </InputLabel>
+            <Select
+              labelId="message-visibility-label"
+              value={messageVisibility}
+              onChange={async (e) => {
+                await handleSetting("messageVisibility", e.target.value, setMessageVisibility);
+              }}
+            >
+              <MenuItem value={"message"}>{i18n.t("settings.messageVisibility.options.respectMessageQueue")}</MenuItem>
+              <MenuItem value={"ticket"}>{i18n.t("settings.messageVisibility.options.respectTicketQueue")}</MenuItem>
+            </Select>
           </FormControl>
         </Grid>
         
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="keep-queue-and-user-label">
+              {i18n.t("settings.keepQueueAndUser.title")}
+            </InputLabel>
+            <Select
+              labelId="keep-queue-and-user-label"
+              value={keepQueueAndUser}
+              onChange={async (e) => {
+                await handleSetting("keepQueueAndUser", e.target.value, setKeepQueueAndUser);
+              }}
+            >
+              <MenuItem value={"enabled"}>{i18n.t("settings.keepQueueAndUser.options.enabled")}</MenuItem>
+              <MenuItem value={"disabled"}>{i18n.t("settings.keepQueueAndUser.options.disabled")}</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <TextField
@@ -530,9 +613,6 @@ export default function Options(props) {
                     <MenuItem value={"disabled"}>{i18n.t("settings.AllowRegistration.options.disabled")}</MenuItem>
                     <MenuItem value={"enabled"}>{i18n.t("settings.AllowRegistration.options.enabled")}</MenuItem>
                   </Select>
-                  <FormHelperText>
-                    {loadingAllowSignup && "Atualizando..."}
-                  </FormHelperText>
                 </FormControl>
               </Grid>
 

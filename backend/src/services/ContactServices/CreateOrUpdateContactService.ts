@@ -16,7 +16,7 @@ interface Request {
   companyId: number;
   extraInfo?: ExtraInfo[];
   channel?: string;
-  disableBot?: boolean
+  disableBot?: boolean;
 }
 
 const CreateOrUpdateContactService = async ({
@@ -35,22 +35,7 @@ const CreateOrUpdateContactService = async ({
   const io = getIO();
   let contact: Contact | null;
 
-  contact = await Contact.findOne({
-    where: {
-      number,
-      companyId,
-      channel
-    }
-  });
-
-  if (contact) {
-    contact.update({ profilePicUrl });
-
-    io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-contact`, {
-      action: "update",
-      contact
-    });
-  } else {
+  try {
     contact = await Contact.create({
       name,
       number,
@@ -60,13 +45,40 @@ const CreateOrUpdateContactService = async ({
       extraInfo,
       companyId,
       channel,
-      disableBot,
+      disableBot
     });
 
-    io.to(`company-${companyId}-mainchannel`).emit(`company-${companyId}-contact`, {
-      action: "create",
-      contact
-    });
+    io.to(`company-${companyId}-mainchannel`).emit(
+      `company-${companyId}-contact`,
+      {
+        action: "create",
+        contact
+      }
+    );
+  } catch (createError) {
+    if (createError.name === "SequelizeUniqueConstraintError") {
+      contact = await Contact.findOne({
+        where: {
+          number,
+          companyId
+        }
+      });
+
+      if (contact) {
+        contact.update({ profilePicUrl });
+
+        io.to(`company-${companyId}-mainchannel`).emit(
+          `company-${companyId}-contact`,
+          {
+            action: "update",
+            contact
+          }
+        );
+      }
+    } else {
+      console.error("Error creating contact:", createError);
+      throw createError;
+    }
   }
 
   return contact;

@@ -4,6 +4,7 @@ import GetDefaultWhatsApp from "../../helpers/GetDefaultWhatsApp";
 import Ticket from "../../models/Ticket";
 import ShowContactService from "../ContactServices/ShowContactService";
 import { getIO } from "../../libs/socket";
+import FindOrCreateATicketTrakingService from "./FindOrCreateATicketTrakingService";
 
 interface Request {
   contactId: number;
@@ -15,7 +16,6 @@ interface Request {
 
 const CreateTicketService = async ({
   contactId,
-  status,
   userId,
   queueId,
   companyId
@@ -26,31 +26,30 @@ const CreateTicketService = async ({
 
   const { isGroup } = await ShowContactService(contactId, companyId);
 
-  const [{ id }] = await Ticket.findOrCreate({
-    where: {
-      contactId,
-      companyId
-    },
-    defaults: {
-      contactId,
-      companyId,
-      whatsappId: defaultWhatsapp.id,
-      status,
-      isGroup,
-      userId
-    }
+  const { id } = await Ticket.create({
+    contactId,
+    companyId,
+    queueId,
+    whatsappId: defaultWhatsapp.id,
+    status: "open",
+    isGroup,
+    userId
   });
 
-  await Ticket.update(
-    { companyId, queueId, userId, whatsappId: defaultWhatsapp.id, status: "open" },
-    { where: { id } }
-  );
-
-  const ticket = await Ticket.findByPk(id, { include: ["contact", "queue"] });
+  const ticket = await Ticket.findByPk(id, {
+    include: ["contact", "queue", "whatsapp", "user"]
+  });
 
   if (!ticket) {
     throw new AppError("ERR_CREATING_TICKET");
   }
+
+  await FindOrCreateATicketTrakingService({
+    ticketId: ticket.id,
+    companyId: ticket.companyId,
+    whatsappId: ticket.whatsappId,
+    userId: ticket.userId
+  });
 
   const io = getIO();
 

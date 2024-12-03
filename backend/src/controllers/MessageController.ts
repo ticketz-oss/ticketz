@@ -22,6 +22,7 @@ import { logger } from "../utils/logger";
 
 type IndexQuery = {
   pageNumber: string;
+  markAsRead: string;
 };
 
 type MessageData = {
@@ -30,11 +31,12 @@ type MessageData = {
   read: boolean;
   quotedMsg?: Message;
   number?: string;
+  saveOnTicket?: boolean;
 };
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const { ticketId } = req.params;
-  const { pageNumber } = req.query as IndexQuery;
+  const { pageNumber, markAsRead } = req.query as IndexQuery;
   const { companyId, profile } = req.user;
   const queues: number[] = [];
 
@@ -54,7 +56,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     queues
   });
 
-  if (ticket.channel === "whatsapp") {
+  if (ticket.channel === "whatsapp" && markAsRead === "true") {
     SetTicketMessagesAsRead(ticket);
   }
 
@@ -158,13 +160,22 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
   }
 
   try {
-    const numberToTest = messageData.number;
+    let { number } = messageData;
     const { body } = messageData;
+    const saveOnTicket = !!messageData.saveOnTicket;
 
-    const { companyId } = whatsapp;
+    if (!number.includes("@")) {
+      const numberToTest = messageData.number;
 
-    const CheckValidNumber = await CheckContactNumber(numberToTest, companyId);
-    const number = CheckValidNumber.jid.replace(/\D/g, "");
+      const { companyId } = whatsapp;
+
+      const CheckValidNumber = await CheckContactNumber(
+        numberToTest,
+        companyId,
+        whatsapp
+      );
+      number = CheckValidNumber.jid.replace(/\D/g, "");
+    }
 
     if (medias) {
       await Promise.all(
@@ -176,7 +187,8 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
               data: {
                 number,
                 body: media.originalname,
-                mediaPath: media.path
+                mediaPath: media.path,
+                saveOnTicket
               }
             },
             { removeOnComplete: true, attempts: 3 }
@@ -190,7 +202,8 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
           whatsappId,
           data: {
             number,
-            body
+            body,
+            saveOnTicket
           }
         },
 

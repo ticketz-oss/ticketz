@@ -23,6 +23,7 @@ import { Op } from "sequelize";
 import moment from "moment";
 import { Transform } from "stream";
 import { Throttle } from "stream-throttle";
+import { Sequelize } from "sequelize-typescript";
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
 import Message from "../../models/Message";
@@ -368,7 +369,7 @@ const downloadMedia = async (msg: proto.IWebMessageInfo, wbot: Session, ticket: 
   const fileLimit = parseInt(await CheckSettings("downloadLimit", "15"), 10);
   if (wbot && message?.fileLength && +message.fileLength > fileLimit*1024*1024) {
     const fileLimitMessage = {
-      text: `\u200e*Mensagem Automática*:\nNosso sistema aceita apenas arquivos com no máximo ${fileLimit} MiB`
+      text: `*Mensagem Automática*:\nNosso sistema aceita apenas arquivos com no máximo ${fileLimit} MiB`
     };
 
     if (!ticket.isGroup) {
@@ -377,7 +378,7 @@ const downloadMedia = async (msg: proto.IWebMessageInfo, wbot: Session, ticket: 
         fileLimitMessage
       );
 
-      sendMsg.message.extendedTextMessage.text = "\u200e*Mensagem do sistema*:\nArquivo recebido além do limite de tamanho do sistema, se for necessário ele pode ser obtido no aplicativo do whatsapp.";
+      sendMsg.message.extendedTextMessage.text = "*Mensagem do sistema*:\nArquivo recebido além do limite de tamanho do sistema, se for necessário ele pode ser obtido no aplicativo do whatsapp.";
 
       // eslint-disable-next-line no-use-before-define
       await verifyMessage(sendMsg, ticket, ticket.contact);
@@ -511,7 +512,7 @@ const saveMediaToFile = async (media) => {
   }
 }
 
-const verifyMediaMessage = async (
+export const verifyMediaMessage = async (
   msg: proto.IWebMessageInfo,
   ticket: Ticket,
   contact: Contact,
@@ -521,7 +522,8 @@ const verifyMediaMessage = async (
   const io = getIO();
   const quotedMsg = await verifyQuotedMessage(msg);
   
-  const thumbnailMedia = await downloadThumbnail(messageMedia || msg?.message?.extendedTextMessage);
+  const thumbnailMsg = messageMedia || msg?.message?.extendedTextMessage;
+  const thumbnailMedia = thumbnailMsg && await downloadThumbnail(thumbnailMsg);
   const media = await downloadMedia(msg, wbot, ticket);
 
   if (!media && !thumbnailMedia) {
@@ -739,6 +741,7 @@ export const verifyDeleteMessage = async (
 
   const message = await Message.findByPk(msg.key.id, {
     include: [
+      "contact",
       {
         model: Ticket,
         include: [
@@ -824,7 +827,8 @@ ${JSON.stringify(msg?.message)}`);
 const sendMenu = async (
   wbot: Session,
   ticket: Ticket,
-  currentOption: Queue | QueueOption
+  currentOption: Queue | QueueOption,
+  sendBackToMain = true
 ) => {
 
   const { companyId } = ticket;
@@ -849,10 +853,12 @@ const sendMenu = async (
         rowId: `${option.option}`
       });
     });
-    sectionsRows.push({
-      title: "Voltar Menu Inicial",
-      rowId: "#"
-    });
+    if (sendBackToMain) {
+      sectionsRows.push({
+        title: "Voltar Menu Inicial",
+        rowId: "#"
+      });
+    }
     const sections = [
       {
         rows: sectionsRows
@@ -860,7 +866,7 @@ const sendMenu = async (
     ];
 
     const listMessage = {
-      text: formatBody(`\u200e${message}`, ticket.contact),
+      text: formatBody(`${message}`, ticket.contact),
       buttonText: "Escolha uma opção",
       sections
     };
@@ -882,14 +888,15 @@ const sendMenu = async (
         type: 4
       });
     });
-    buttons.push({
-      buttonId: "#",
-      buttonText: { displayText: "Voltar Menu Inicial" },
-      type: 4
-    });
-
+    if  (sendBackToMain) {
+      buttons.push({
+        buttonId: "#",
+        buttonText: { displayText: "Voltar Menu Inicial" },
+        type: 4
+      });
+    }
     const buttonMessage = {
-      text: formatBody(`\u200e${message}`, ticket.contact),
+      text: formatBody(`${message}`, ticket.contact),
       buttons,
       headerType: 4
     };
@@ -908,10 +915,13 @@ const sendMenu = async (
     currentOption.options.forEach((option) => {
       options += `*[ ${option.option} ]* - ${option.title}\n`;
     });
-    options += "\n*[ # ]* - Voltar Menu Inicial";
+
+    if (sendBackToMain) {
+      options += "\n*[ # ]* - Voltar Menu Inicial";
+    }
 
     const textMessage = {
-      text: formatBody(`\u200e${message}\n\n${options}`, ticket.contact),
+      text: formatBody(`${message}\n\n${options}`, ticket.contact),
     };
 
     const sendMsg = await wbot.sendMessage(
@@ -920,13 +930,6 @@ const sendMenu = async (
     );
 
     await verifyMessage(sendMsg, ticket, ticket.contact);
-
-    if (currentOption.mediaPath !== null && currentOption.mediaPath !== "") {
-      const filePath = path.resolve("public", currentOption.mediaPath);
-      const optionsMsg = await getMessageOptions(currentOption.mediaName, filePath);
-      const sentMessage = await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, { ...optionsMsg });
-      await verifyMediaMessage(sentMessage, ticket, ticket.contact);
-    }
   };
 
   switch (buttonActive.value) {
@@ -945,9 +948,10 @@ const sendMenu = async (
       break;
     default:
   }
+  
 }
 
-const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue) => {
+const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue, sendBackToMain = true) => {
     const {companyId, contact} = ticket;
     let chatbot = false;
 
@@ -960,9 +964,15 @@ const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue) => {
       companyId: ticket.companyId,
     });
 
+    let filePath = null;
+    let optionsMsg = null;
+    
+    if (queue.mediaPath !== null && queue.mediaPath !== "") {
+      filePath = path.resolve("public", queue.mediaPath);
+      optionsMsg = await getMessageOptions(queue.mediaName, filePath);
+    }
 
     /* Tratamento para envio de mensagem quando a fila está fora do expediente */
-    if (queue.options.length === 0) {
       let currentSchedule: ScheduleResult;
 
       const settings = await Setting.findOne({
@@ -980,7 +990,7 @@ const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue) => {
         !isNil(currentSchedule) &&
         (!currentSchedule || currentSchedule.inActivity === false)
       ) {
-        const outOfHoursMessage = queue.outOfHoursMessage.trim() || "Estamos fora do horário de expediente";
+        const outOfHoursMessage = queue.outOfHoursMessage?.trim() || "Estamos fora do horário de expediente";
         const body = formatBody(`${outOfHoursMessage}\n\n*[ # ]* - Voltar ao Menu Principal`, ticket.contact);
         const sentMessage = await wbot.sendMessage(
           `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, {
@@ -996,27 +1006,33 @@ const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue) => {
         return;
       }
 
+    if (queue.options.length === 0) {
       if (queue.greetingMessage?.trim()) {
-        const body = formatBody(`\u200e${queue.greetingMessage.trim()}`, ticket.contact);
-        const sentMessage = await wbot.sendMessage(
-          `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, {
-          text: body,
+        const body = formatBody(`${queue.greetingMessage.trim()}`, ticket.contact);
+
+        if (filePath) {
+          optionsMsg.caption = body;
+        } else {
+          const sentMessage = await wbot.sendMessage(
+            `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, {
+            text: body,
+          }
+          );
+          await verifyMessage(sentMessage, ticket, contact);
+          return;
         }
-        );
-        await verifyMessage(sentMessage, ticket, contact);
       }
-
-      if (queue.mediaPath !== null && queue.mediaPath !== "") {
-        const filePath = path.resolve("public", queue.mediaPath);
-
-        const optionsMsg = await getMessageOptions(queue.mediaName, filePath);
-
-        const sentMediaMessage = await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, { ...optionsMsg });
-
+      
+      if (filePath) {
+        const sentMediaMessage = await wbot.sendMessage(`${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, { ...optionsMsg });
         await verifyMediaMessage(sentMediaMessage, ticket, contact);
       }
     } else {
-      sendMenu(wbot, ticket, queue);
+      if (filePath) {
+        const sentMediaMessage = await wbot.sendMessage(`${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, { ...optionsMsg });
+        await verifyMediaMessage(sentMediaMessage, ticket, contact);
+      }
+      sendMenu(wbot, ticket, queue, sendBackToMain);
     }
 };
 
@@ -1032,7 +1048,7 @@ const verifyQueue = async (
   )
 
   if (queues.length === 1) {
-    await startQueue(wbot, ticket, head(queues));
+    await startQueue(wbot, ticket, head(queues), false);
     return;
   }
 
@@ -1066,7 +1082,7 @@ const verifyQueue = async (
     ];
 
     const listMessage = {
-      text: formatBody(`\u200e${greetingMessage}`, contact),
+      text: formatBody(`${greetingMessage}`, contact),
       buttonText: "Escolha uma opção",
       sections
     };
@@ -1090,7 +1106,7 @@ const verifyQueue = async (
     });
 
     const buttonMessage = {
-      text: formatBody(`\u200e${greetingMessage}`, contact),
+      text: formatBody(`${greetingMessage}`, contact),
       buttons,
       headerType: 4
     };
@@ -1112,7 +1128,7 @@ const verifyQueue = async (
 
 
     const textMessage = {
-      text: formatBody(`\u200e${greetingMessage}\n\n${options}`, contact),
+      text: formatBody(`${greetingMessage}\n\n${options}`, contact),
     };
 
     const sendMsg = await wbot.sendMessage(
@@ -1194,7 +1210,7 @@ export const handleRating = async (
     });
 
     const complationMessage = whatsapp.complationMessage.trim() || "Atendimento finalizado";
-    const body = formatBody(`\u200e${complationMessage}`, ticket.contact);
+    const body = formatBody(`${complationMessage}`, ticket.contact);
     await SendWhatsAppMessage({ body, ticket });
 
     await ticketTraking.update({
@@ -1202,11 +1218,18 @@ export const handleRating = async (
       rated: true,
     });
 
+    const keepUserAndQueue =
+      (await GetCompanySetting(
+        ticket.companyId,
+        "keepUserAndQueue",
+        "enabled"
+      )) === "enabled";
+
     await ticket.update({
-      queueId: null,
+      queueId: keepUserAndQueue ? ticket.queueId : null,
       chatbot: null,
       queueOptionId: null,
-      userId: null,
+      userId: keepUserAndQueue ? ticket.userId : null,
       status: "closed",
     });
 
@@ -1297,13 +1320,13 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
     const option = queue?.options.find((o) => o.option === messageBody);
     if (option) {
       await ticket.update({ queueOptionId: option?.id });
-    } else if (await GetCompanySetting(ticket.companyId, "chatbotAutoExit") === "enabled" ) {
+    } else if (await GetCompanySetting(ticket.companyId, "chatbotAutoExit", "disabled") === "enabled" ) {
       // message didn't identified an option and company setting to exit chatbot
       await ticket.update({ chatbot: false });
       const whatsapp = await Whatsapp.findByPk(ticket.whatsappId);
       const contact = await Contact.findByPk(ticket.contactId);
       if (whatsapp.transferMessage) {
-        const body = formatBody(`\u200e${whatsapp.transferMessage}`, contact);
+        const body = formatBody(`${whatsapp.transferMessage}`, contact);
         await SendWhatsAppMessage({ body, ticket });        
       }
     }
@@ -1323,6 +1346,7 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
           include: [{
             model: QueueOption,
             as: "options",
+            where: { parentId: null },
             required: false,
           }]
         },
@@ -1333,23 +1357,32 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
         }
       ],
       order: [
-        ["forwardQueue", "options", "option", "ASC"],
-        ["options", "option", "ASC"],
+        [Sequelize.cast(Sequelize.col("forwardQueue.options.option"), "INTEGER"), "ASC"],
+        [Sequelize.cast(Sequelize.col("options.option"), "INTEGER"), "ASC"]
       ]
     });
 
+    let filePath = null;
+    let optionsMsg = null;
+    if (currentOption.mediaPath !== null && currentOption.mediaPath !== "") {
+      filePath = path.resolve("public", currentOption.mediaPath);
+      optionsMsg = await getMessageOptions(currentOption.mediaName, filePath);
+    }
+
     if (currentOption.exitChatbot || currentOption.forwardQueueId) {
+      const text = formatBody(`${currentOption.message}`, ticket.contact);
 
-      const textMessage = {
-        text: formatBody(`\u200e${currentOption.message}`, ticket.contact),
-      };
-
-      const sendMsg = await wbot.sendMessage(
-        `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-        textMessage
-      );
-
-      await verifyMessage(sendMsg, ticket, ticket.contact);
+      if (filePath) {
+        optionsMsg.caption = text;
+        const sentMessage = await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, { ...optionsMsg });
+        await verifyMediaMessage(sentMessage, ticket, ticket.contact);
+      } else {
+        const sendMsg = await wbot.sendMessage(
+          `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
+          { text }
+        );
+        await verifyMessage(sendMsg, ticket, ticket.contact);
+      }
 
       if (currentOption.exitChatbot) {
         await ticket.update({
@@ -1366,6 +1399,11 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
         startQueue(wbot, ticket, currentOption.forwardQueue);
       }
       return;
+    }
+
+    if (filePath) {
+      const sentMessage = await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, { ...optionsMsg });
+      await verifyMediaMessage(sentMessage, ticket, ticket.contact);
     }
 
     if (currentOption.options.length > -1) {
@@ -1517,7 +1555,7 @@ const handleMessage = async (
                   `${ticketTracking.ticket.contact.number}@${ticketTracking.ticket.isGroup ? "g.us" : "s.whatsapp.net"
                   }`,
                   {
-                    text: "\u200e\n*Por favor avalie nosso atendimento com uma nota de 1 a 5*"
+                    text: "\n*Por favor avalie nosso atendimento com uma nota de 1 a 5*"
                   }
                 );
               },
@@ -1541,7 +1579,7 @@ const handleMessage = async (
       }
     }
 
-    const ticket = await createTicketMutex.runExclusive(async () => {
+    const { ticket, justCreated } = await createTicketMutex.runExclusive(async () => {
       const result = await FindOrCreateTicketService(contact, wbot.id!, unreadMessages, companyId, groupContact);
       return result;
     });
@@ -1607,7 +1645,7 @@ const handleMessage = async (
                 `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"
                 }`,
                 {
-                  text: `\u200e${body}`
+                  text: `${body}`
                 }
               );
             },
@@ -1639,7 +1677,7 @@ const handleMessage = async (
                   `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"
                   }`,
                   {
-                    text: `\u200e${body}`
+                    text: `${body}`
                   }
                 );
               },
@@ -1693,7 +1731,7 @@ const handleMessage = async (
                   `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"
                   }`,
                   {
-                    text: `\u200e${body}`
+                    text: `${body}`
                   }
                 );
               },
@@ -1709,10 +1747,13 @@ const handleMessage = async (
       console.log(e);
     }
 
-
-
-    if (!whatsapp?.queues?.length && !ticket.userId && !isGroup && !msg.key.fromMe) {
-
+    if (
+      justCreated &&
+      !whatsapp?.queues?.length &&
+      !ticket.userId &&
+      !isGroup &&
+      !msg.key.fromMe
+    ) {
       const message = await Message.findOne({
         where: {
           ticketId: ticket.id,
@@ -1733,7 +1774,7 @@ const handleMessage = async (
               `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"
               }`,
               {
-                text: formatBody(`\u200e${whatsapp.greetingMessage}`, contact, ticket)
+                text: formatBody(`${whatsapp.greetingMessage}`, contact, ticket)
               }
             );
           },
@@ -1749,7 +1790,7 @@ const handleMessage = async (
 
     if (whatsapp.queues.length === 1 && ticket.queue) {
       if (ticket.chatbot && !msg.key.fromMe) {
-        await handleChartbot(ticket, msg, wbot);
+        await handleChartbot(ticket, msg, wbot, dontReadTheFirstQuestion);
       }
     }
     if (whatsapp.queues.length > 1 && ticket.queue) {
@@ -1830,42 +1871,11 @@ const verifyRecentCampaign = async (
             delay: parseToMilliseconds(randomValue(0, 10)),
           }
         );
+        return true;
       }
     }
   }
-};
-
-const verifyCampaignMessageAndCloseTicket = async (
-  message: proto.IWebMessageInfo,
-  companyId: number
-) => {
-  const io = getIO();
-  const body = getBodyMessage(message);
-  const isCampaign = /\u200c/.test(body);
-  if (message.key.fromMe && isCampaign) {
-    const messageRecord = await Message.findOne({
-      where: { id: message.key.id!, companyId },
-    });
-    const ticket = await Ticket.findByPk(messageRecord.ticketId);
-    await ticket.update({ status: "closed" });
-
-    io.to(`company-${ticket.companyId}-open`)
-      .to(`queue-${ticket.queueId}-open`)
-      .emit(`company-${ticket.companyId}-ticket`, {
-        action: "delete",
-        ticket,
-        ticketId: ticket.id,
-      });
-
-    io.to(`company-${ticket.companyId}-${ticket.status}`)
-      .to(`queue-${ticket.queueId}-${ticket.status}`)
-      .to(ticket.id.toString())
-      .emit(`company-${ticket.companyId}-ticket`, {
-        action: "update",
-        ticket,
-        ticketId: ticket.id,
-      });
-  }
+  return false;
 };
 
 const filterMessages = (msg: WAMessage): boolean => {
@@ -1964,9 +1974,10 @@ const wbotMessageListener = async (wbot: Session, companyId: number): Promise<vo
 
         if (!messageExists) {
 
+          if (await verifyRecentCampaign(message, companyId)) {
+            return;
+          }
           await handleMessage(message, wbot, companyId);
-          await verifyRecentCampaign(message, companyId);
-          await verifyCampaignMessageAndCloseTicket(message, companyId);
         }
       });
     });

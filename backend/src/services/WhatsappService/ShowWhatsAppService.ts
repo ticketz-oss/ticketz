@@ -1,8 +1,9 @@
+import { FindOptions } from "sequelize/types";
+import { Sequelize } from "sequelize-typescript";
 import Whatsapp from "../../models/Whatsapp";
 import AppError from "../../errors/AppError";
 import Queue from "../../models/Queue";
 import QueueOption from "../../models/QueueOption";
-import { FindOptions, Op } from "sequelize/types";
 
 const ShowWhatsAppService = async (
   id: string | number,
@@ -14,7 +15,15 @@ const ShowWhatsAppService = async (
       {
         model: Queue,
         as: "queues",
-        attributes: ["id", "name", "color", "greetingMessage","mediaPath", "mediaName"],
+        attributes: [
+          "id",
+          "name",
+          "color",
+          "greetingMessage",
+          "outOfHoursMessage",
+          "mediaPath",
+          "mediaName"
+        ],
         include: [
           {
             model: QueueOption,
@@ -27,7 +36,7 @@ const ShowWhatsAppService = async (
     ],
     order: [
       ["queues", "name", "ASC"],
-      ["queues", "options", "option", "ASC"],
+      [Sequelize.cast(Sequelize.col("queues.options.option"), "INTEGER"), "ASC"]
     ]
   };
 

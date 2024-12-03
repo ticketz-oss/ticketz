@@ -11,11 +11,12 @@ import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import UpdateTicketService from "../services/TicketServices/UpdateTicketService";
 import ListTicketsServiceKanban from "../services/TicketServices/ListTicketsServiceKanban";
 
-
 type IndexQuery = {
+  isSearch?: string;
   searchParam: string;
   pageNumber: string;
   status: string;
+  groups: string;
   date: string;
   updatedAt?: string;
   showAll: string;
@@ -36,8 +37,10 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   const {
     pageNumber,
     status,
+    groups,
     date,
     updatedAt,
+    isSearch,
     searchParam,
     showAll,
     queueIds: queueIdsStringified,
@@ -66,11 +69,13 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   }
 
   const { tickets, count, hasMore } = await ListTicketsService({
+    isSearch: isSearch === "true",
     searchParam,
     tags: tagsIds,
     users: usersIds,
     pageNumber,
     status,
+    groups,
     date,
     updatedAt,
     showAll,
@@ -83,7 +88,10 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   return res.status(200).json({ tickets, count, hasMore });
 };
 
-export const kanban = async (req: Request, res: Response): Promise<Response> => {
+export const kanban = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const {
     pageNumber,
     status,
@@ -97,14 +105,12 @@ export const kanban = async (req: Request, res: Response): Promise<Response> => 
     withUnreadMessages
   } = req.query as IndexQuery;
 
-
   const userId = req.user.id;
   const { companyId } = req.user;
 
   let queueIds: number[] = [];
   let tagsIds: number[] = [];
   let usersIds: number[] = [];
-
 
   if (queueIdsStringified) {
     queueIds = JSON.parse(queueIdsStringified);
@@ -117,7 +123,6 @@ export const kanban = async (req: Request, res: Response): Promise<Response> => 
   if (userIdsStringified) {
     usersIds = JSON.parse(userIdsStringified);
   }
-
 
   const { tickets, count, hasMore } = await ListTicketsServiceKanban({
     searchParam,
@@ -132,7 +137,6 @@ export const kanban = async (req: Request, res: Response): Promise<Response> => 
     queueIds,
     withUnreadMessages,
     companyId
-
   });
 
   return res.status(200).json({ tickets, count, hasMore });
@@ -152,11 +156,11 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   const io = getIO();
   io.to(`company-${companyId}-${ticket.status}`)
-	.to(`queue-${ticket.queueId}-${ticket.status}`)
+    .to(`queue-${ticket.queueId}-${ticket.status}`)
     .emit(`company-${companyId}-ticket`, {
-    action: "update",
-    ticket
-  });
+      action: "update",
+      ticket
+    });
 
   return res.status(200).json(ticket);
 };

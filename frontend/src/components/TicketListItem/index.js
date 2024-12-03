@@ -101,7 +101,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const TicketListItem = ({ ticket }) => {
+const TicketListItem = ({ ticket, groupActionButtons }) => {
   const classes = useStyles();
   const history = useHistory();
   const [loading, setLoading] = useState(false);
@@ -142,7 +142,7 @@ const TicketListItem = ({ ticket }) => {
         dense
         button
         onClick={(e) => {
-          if (ticket.status === "pending") return;
+          if (ticket.status === "pending" && (groupActionButtons || !ticket.isGroup)) return;
           handleSelectTicket(ticket);
         }}
         selected={ticketId && +ticketId === ticket.id}
@@ -208,7 +208,11 @@ const TicketListItem = ({ ticket }) => {
                 color="textSecondary"
               >
                 {ticket.lastMessage ? (
-                  <MarkdownWrapper>{ticket.lastMessage}</MarkdownWrapper>
+                  <MarkdownWrapper>
+                    {
+                      ticket.lastMessage.startsWith('{"ticketzvCard"') ? "🪪" : ticket.lastMessage
+                    }
+                  </MarkdownWrapper>
                 ) : (
                   <br />
                 )}
@@ -224,7 +228,7 @@ const TicketListItem = ({ ticket }) => {
             </span>
           }
         />
-        {ticket.status === "pending" && (
+        {ticket.status === "pending" && (groupActionButtons || !ticket.isGroup) && (
           <ButtonWithSpinner
             color="primary"
             variant="contained"

@@ -458,6 +458,9 @@ const useStyles = makeStyles((theme) => ({
   },
   previewThumbnail: {
     width: "383px",
+  },
+  audioBottom: {
+    marginBottom: "12px",
   }
 }));
 
@@ -508,7 +511,7 @@ const reducer = (state, action) => {
   }
 };
 
-const MessagesList = ({ ticket, ticketId, isGroup }) => {
+const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
   const classes = useStyles();
 
   const [messagesList, dispatch] = useReducer(reducer, []);
@@ -534,7 +537,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
         if (ticketId === undefined) return;
         try {
           const { data } = await api.get("/messages/" + ticketId, {
-            params: { pageNumber: thisPageNumber },
+            params: { pageNumber: thisPageNumber, markAsRead },
           });
 
           if (currentTicketId.current === ticketId) {
@@ -687,7 +690,7 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     if (!document && message.mediaType === "audio") {
 
       return (
-        <audio controls>
+        <audio className={classes.audioBottom} controls>
           <source src={message.mediaUrl} type="audio/ogg"></source>
         </audio>
       );
@@ -925,6 +928,16 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
   const isVCard = (message) => {
     return message.startsWith('{"ticketzvCard":');
   };
+  
+  const stringOrFirstElement = (data) => {
+    if (!data) {
+      return "";
+    }
+    if (Array.isArray(data)) {
+      return data[0];
+    }
+    return data;
+  };
 
   const renderVCard = (vcardJson) => {
     const cardArray = JSON.parse(vcardJson)?.ticketzvCard;
@@ -941,13 +954,13 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
       const parsedVCard = vCard.parse(message);
       console.debug("vCard data:", { message , parsedVCard });
       
-      const name = 
+      const name = stringOrFirstElement(
         parsedVCard['X-WA-BIZ-NAME']?.[0]?.value ||
         parsedVCard.fn?.[0]?.value ||
-        formatVCardN(parsedVCard.n?.[0]?.value);
-      const description =
-        parsedVCard['X-WA-BIZ-DESCRIPTION']?.[0]?.value || ""
-      const number = parsedVCard?.tel?.[0]?.value;
+        formatVCardN(parsedVCard.n?.[0]?.value));
+      const description = stringOrFirstElement(
+        parsedVCard['X-WA-BIZ-DESCRIPTION']?.[0]?.value || "");
+      const number = stringOrFirstElement(parsedVCard?.tel?.[0]?.value);
       const metaNumber = parsedVCard?.tel?.[0]?.meta?.waid?.[0] || number || "unknown";
       
       return (

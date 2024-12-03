@@ -165,6 +165,8 @@ const reducer = (state, action) => {
 const TicketsListCustom = (props) => {
   const {
     status,
+    groups,
+    isSearch,
     searchParam,
     tags,
     users,
@@ -173,6 +175,7 @@ const TicketsListCustom = (props) => {
     updateCount,
     style,
     setTabOpen,
+    showTabGroups
   } = props;
   const classes = useStyles();
   const [pageNumber, setPageNumber] = useState(1);
@@ -191,8 +194,10 @@ const TicketsListCustom = (props) => {
 
   const { tickets, hasMore, loading } = useTickets({
     pageNumber,
+    isSearch,
     searchParam,
     status,
+    groups,
     showAll,
     tags: JSON.stringify(tags),
     users: JSON.stringify(users),
@@ -239,7 +244,14 @@ const TicketsListCustom = (props) => {
         });
       }
 
-      if (data.action === "update" && shouldUpdateTicket(data.ticket) && data.ticket.status === status) {
+      if (data.action === "update" && data.ticket.status === status && shouldUpdateTicket(data.ticket)) {
+        dispatch({
+          type: "UPDATE_TICKET",
+          payload: data.ticket,
+        });
+      }
+      
+      if (groups && data.action === "update" && data.ticket.isGroup && shouldUpdateTicket(data.ticket)) {
         dispatch({
           type: "UPDATE_TICKET",
           payload: data.ticket,
@@ -263,6 +275,9 @@ const TicketsListCustom = (props) => {
     
     const onCompanyAppMessage = (data) => {
 	  console.debug("appMessage event received", data);
+      if (showTabGroups && !!data.ticket?.isGroup !== !!groups) {
+        return;
+      }
 
       const queueIds = queues.map((q) => q.id);
       if (
@@ -273,7 +288,12 @@ const TicketsListCustom = (props) => {
         return;
       }
 
-      if (data.action === "create" && shouldUpdateTicket(data.ticket) && ( status === undefined || data.ticket.status === status)) {
+      if (
+        data.action === "create" &&
+        (!showTabGroups || !!data.ticket?.isGroup === !!groups) &&
+        shouldUpdateTicket(data.ticket) &&
+        (status === undefined || data.ticket.status === status)
+      ) {
         dispatch({
           type: "UPDATE_TICKET_UNREAD_MESSAGES",
           payload: data.ticket,
@@ -312,7 +332,7 @@ const TicketsListCustom = (props) => {
       socket.disconnect();
     };
     
-  }, [status, showAll, user, selectedQueueIds, tags, users, profile, queues, socketManager]);
+  }, [status, showAll, groups, showTabGroups, user, selectedQueueIds, tags, users, profile, queues, socketManager]);
 
   useEffect(() => {
     if (typeof updateCount === "function") {
@@ -358,7 +378,12 @@ const TicketsListCustom = (props) => {
           ) : (
             <>
               {ticketsList.map((ticket) => (
-                <TicketListItem ticket={ticket} setTabOpen={setTabOpen} key={ticket.id} />
+                <TicketListItem
+                  ticket={ticket}
+                  setTabOpen={setTabOpen}
+                  key={ticket.id}
+                  groupActionButtons={!groups && !showTabGroups}
+                />
               ))}
             </>
           )}

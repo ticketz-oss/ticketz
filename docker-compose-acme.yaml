@@ -111,3 +111,19 @@ services:
       - redis_data:/data
     networks:
       - ticketz
+
+  sidekick:
+    image: ghcr.io/ticketz-oss/ticketz-sidekick:latest
+    profiles: ["do-not-start"]
+    env_file:
+      - .env-backend-acme
+    restart: unless-stopped
+    volumes:
+      - backend_public:/backend-public
+      - backend_private:/backend-private
+      - ./backups:/backups
+      - ./retrieve:/retrieve
+    depends_on:
+      - postgres
+    networks:
+      - ticketz

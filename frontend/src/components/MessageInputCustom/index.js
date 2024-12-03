@@ -360,7 +360,7 @@ const CustomInput = (props) => {
     if (
       isString(inputMessage) &&
       !isEmpty(inputMessage) &&
-      inputMessage.length > 1
+      inputMessage.length
     ) {
       const firstWord = inputMessage.charAt(0);
       setPopupOpen(firstWord.indexOf("/") > -1);
@@ -397,7 +397,6 @@ const CustomInput = (props) => {
 
   const setInputRef = (input) => {
     if (input) {
-      input.focus();
       inputRef.current = input;
     }
   };
@@ -447,6 +446,16 @@ const CustomInput = (props) => {
               multiline
               className={classes.messageInput}
               maxRows={5}
+              onKeyDownCapture={(e) => {
+                if (
+                  !popupOpen && (
+                    e.key === 'ArrowUp' ||
+                    e.key === 'ArrowDown'
+                  )
+                ) {
+                  e.stopPropagation();
+                }
+              }}
             />
           );
         }}
@@ -456,7 +465,8 @@ const CustomInput = (props) => {
 };
 
 const MessageInputCustom = (props) => {
-  const { ticketStatus, ticketId } = props;
+  const { ticket, showTabGroups } = props;
+  const { status: ticketStatus, id: ticketId } = ticket;
   const classes = useStyles();
 
   const [medias, setMedias] = useState([]);
@@ -498,8 +508,9 @@ const MessageInputCustom = (props) => {
       setMedias([]);
       setReplyingMessage(null);
       setEditingMessage(null);
+      setInputMessage("");
     };
-  }, [ticketId, setReplyingMessage, setEditingMessage]);
+  }, [ticketId]);
 
   // const handleChangeInput = e => {
   // 	if (isObject(e) && has(e, 'value')) {
@@ -638,6 +649,7 @@ const MessageInputCustom = (props) => {
     setLoading(false);
     setReplyingMessage(null);
     setEditingMessage(null);
+    inputRef.current.focus();
   };
 
   const handleStartRecording = async () => {
@@ -688,7 +700,8 @@ const MessageInputCustom = (props) => {
     }
   };
 
-  const disableOption =  loading || recording || ticketStatus === "closed";
+  const isGroup = showTabGroups && ticket.isGroup;
+  const disableOption = !isGroup && loading || recording || ticketStatus === "closed";
 
   const renderReplyingMessage = (message) => {
     return (
@@ -795,7 +808,7 @@ const MessageInputCustom = (props) => {
           <CustomInput
             loading={loading}
             inputRef={inputRef}
-            ticketStatus={ticketStatus}
+            ticketStatus={(isGroup && "open" ) || ticketStatus}
             inputMessage={inputMessage}
             setInputMessage={setInputMessage}
             // handleChangeInput={handleChangeInput}

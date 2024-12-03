@@ -262,11 +262,10 @@ const MessagesAPI = () => {
         <ul>
           <li>Antes de enviar mensagens, é necessário o cadastro do token vinculado à conexão que enviará as mensagens. <br/>Para realizar o cadastro acesse o menu "Conexões", clique no botão editar da conexão e insira o token no devido campo.</li>
           <li>
-            O número para envio não deve ter mascara ou caracteres especiais e deve ser composto por:
+            O campo número aceita dois tipos de informação:
               <ul>
-                <li>Código do país</li>
-                <li>DDD</li>
-                <li>Número</li>
+                <li><b>Número de Whatsapp:</b> Qualquer número de whatsapp completo iniciando pelo código do país (BR=55)</li>
+                <li><b>Whatsapp JID:</b> Qualquer identificador do Whatsapp, para grupos ele é um número extenso seguido de @g.us</li>
               </ul>
           </li>
         </ul>
@@ -280,8 +279,8 @@ const MessagesAPI = () => {
             <p>Seguem abaixo a lista de informações necessárias para envio das mensagens de texto:</p>
             <b>Endpoint: </b> {getEndpoint()} <br />
             <b>Método: </b> POST <br />
-            <b>Headers: </b> X_TOKEN (token cadastrado) e Content-Type (application/json) <br />
-            <b>Body: </b> {"{ \"number\": \"558599999999\", \"body\": \"Sua mensagem\" }"}
+            <b>Headers: </b> Authorization ("Bearer " + token cadastrado) e Content-Type (application/json) <br />
+            <b>Body: </b> {"{ \"number\": \"558599999999\", \"body\": \"Sua mensagem\", \"saveOnTicket\": true }"}
           </Typography>
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -300,7 +299,7 @@ const MessagesAPI = () => {
             <p>Seguem abaixo a lista de informações necessárias para envio das mensagens de texto:</p>
             <b>Endpoint: </b> {getEndpoint()} <br />
             <b>Método: </b> POST <br />
-            <b>Headers: </b> X_TOKEN (token cadastrado) e Content-Type (multipart/form-data) <br />
+            <b>Headers: </b> Authorization ("Bearer " + token cadastrado) e Content-Type (multipart/form-data) <br />
             <b>FormData: </b> <br />
             <ul>
               <li>
@@ -308,6 +307,9 @@ const MessagesAPI = () => {
               </li>
               <li>
                 <b>medias: </b> arquivo
+              </li>
+              <li>
+                <b>saveOnTicket: </b> true
               </li>
             </ul>
           </Typography>

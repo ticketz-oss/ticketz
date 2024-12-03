@@ -3,9 +3,12 @@ class AppError {
 
   public readonly statusCode: number;
 
-  constructor(message: string, statusCode = 400) {
+  public readonly level: string;
+
+  constructor(message: string, statusCode = 400, level = "warn") {
     this.message = message;
     this.statusCode = statusCode;
+    this.level = level;
   }
 }
 

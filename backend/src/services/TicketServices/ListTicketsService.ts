@@ -1,6 +1,7 @@
 import { Op, fn, where, col, Filterable, Includeable } from "sequelize";
 import { startOfDay, endOfDay, parseISO } from "date-fns";
 
+import { intersection } from "lodash";
 import Ticket from "../../models/Ticket";
 import Contact from "../../models/Contact";
 import Message from "../../models/Message";
@@ -9,13 +10,15 @@ import User from "../../models/User";
 import ShowUserService from "../UserServices/ShowUserService";
 import Tag from "../../models/Tag";
 import TicketTag from "../../models/TicketTag";
-import { intersection } from "lodash";
 import Whatsapp from "../../models/Whatsapp";
+import { GetCompanySetting } from "../../helpers/CheckSettings";
 
 interface Request {
+  isSearch?: boolean;
   searchParam?: string;
   pageNumber?: string;
   status?: string;
+  groups?: string;
   date?: string;
   updatedAt?: string;
   showAll?: string;
@@ -34,12 +37,14 @@ interface Response {
 }
 
 const ListTicketsService = async ({
+  isSearch = false,
   searchParam = "",
   pageNumber = "1",
   queueIds,
   tags,
   users,
   status,
+  groups,
   date,
   updatedAt,
   showAll,
@@ -47,10 +52,18 @@ const ListTicketsService = async ({
   withUnreadMessages,
   companyId
 }: Request): Promise<Response> => {
+  const groupsTab =
+    !isSearch &&
+    (await GetCompanySetting(companyId, "groupsTab", "disabled")) === "enabled";
+
   let whereCondition: Filterable["where"] = {
     [Op.or]: [{ userId }, { status: "pending" }],
     queueId: { [Op.or]: [queueIds, null] }
   };
+
+  if (groupsTab) {
+    whereCondition.isGroup = groups === "true";
+  }
   let includeCondition: Includeable[];
 
   includeCondition = [
@@ -77,12 +90,15 @@ const ListTicketsService = async ({
     {
       model: Whatsapp,
       as: "whatsapp",
-      attributes: ["id","name"]
-    },
+      attributes: ["id", "name"]
+    }
   ];
 
   if (showAll === "true") {
     whereCondition = { queueId: { [Op.or]: [queueIds, null] } };
+    if (groupsTab) {
+      whereCondition.isGroup = groups === "true";
+    }
   }
 
   if (status) {
@@ -163,11 +179,15 @@ const ListTicketsService = async ({
       queueId: { [Op.or]: [userQueueIds, null] },
       unreadMessages: { [Op.gt]: 0 }
     };
+    if (groupsTab) {
+      whereCondition.isGroup = groups === "true";
+    }
   }
 
   if (Array.isArray(tags) && tags.length > 0) {
     const ticketsTagFilter: any[] | null = [];
-    for (let tag of tags) {
+    // eslint-disable-next-line no-restricted-syntax
+    for await (const tag of tags) {
       const ticketTags = await TicketTag.findAll({
         where: { tagId: tag }
       });
@@ -188,7 +208,8 @@ const ListTicketsService = async ({
 
   if (Array.isArray(users) && users.length > 0) {
     const ticketsUserFilter: any[] | null = [];
-    for (let user of users) {
+    // eslint-disable-next-line no-restricted-syntax
+    for await (const user of users) {
       const ticketUsers = await Ticket.findAll({
         where: { userId: user }
       });
