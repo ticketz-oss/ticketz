@@ -791,6 +791,13 @@ const messages = {
             "disabled": "Desativado"
           }
         },
+        "defaultMessageTransfer": {
+          "title": "Enviar mensagem padrão de transferência.",
+          "options": {
+            "enabled": "Ativado",
+            "disabled": "Desativado"
+          }
+        },
         WelcomeGreeting: {
           greetings: "Olá",
           welcome: "Seja bem-vindo a",

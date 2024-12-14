@@ -85,7 +85,7 @@ const useStyles = makeStyles((theme) => ({
     width: 20,
     height: 20,
   },
-  
+
   uploadInput: {
     display: "none",
   },
@@ -106,10 +106,11 @@ export default function Options(props) {
   const [groupsTab, setGroupsTab] = useState("disabled");
   const [apiToken, setApiToken] = useState("");
   const [downloadLimit, setDownloadLimit] = useState("15");
-  
+
   const [messageVisibility, setMessageVisibility] = useState("Respect Message Queue");
 
   const [keepQueueAndUser, setKeepQueueAndUser] = useState("enabled");
+  const [defaultMessageTransfer, setDefaultMessageTransfer] = useState("enabled");
   const { getCurrentUserInfo } = useAuth();
   const [autoReopenTimeout, setAutoReopenTimeout] = useState(false);
   const [currentUser, setCurrentUser] = useState({});
@@ -142,7 +143,7 @@ export default function Options(props) {
       if (CheckMsgIsGroup) {
         setCheckMsgIsGroupType(CheckMsgIsGroup.value);
       }
-      
+
       const soundGroupNotifications = settings.find((s) => s.key === "soundGroupNotifications");
       setSoundGroupNotifications(soundGroupNotifications?.value || "disabled");
 
@@ -166,13 +167,16 @@ export default function Options(props) {
 
       const keepQueueAndUser = settings.find((s) => s.key === "keepQueueAndUser");
       setKeepQueueAndUser(keepQueueAndUser?.value || "enabled");
-        
+
+      const defaultMessageTransfer = settings.find((s) => s.key === "defaultMessageTransfer");
+      setDefaultMessageTransfer(defaultMessageTransfer?.value || "enabled");
+
       const apiToken = settings.find((s) => s.key === "apiToken");
       setApiToken(apiToken?.value || "");
 
       const downloadLimit = settings.find((s) => s.key === "downloadLimit");
       setDownloadLimit(downloadLimit?.value || "");
-      
+
       const messageVisibility = settings.find((s) => s.key === "messageVisibility");
       setMessageVisibility(messageVisibility?.value || "message");
 
@@ -304,7 +308,7 @@ export default function Options(props) {
     });
     toast.success("Operação atualizada com sucesso.");
   }
-  
+
   async function copyApiToken() {
     copyToClipboard(apiToken);
     toast.success("Token copied to clipboard");
@@ -343,7 +347,7 @@ export default function Options(props) {
             </Select>
           </FormControl>
         </Grid>
-        
+
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <TextField
@@ -362,11 +366,11 @@ export default function Options(props) {
             />
           </FormControl>
         </Grid>
-        
+
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="schedule-type-label">
-            {i18n.t("settings.OfficeManagement.title")}
+              {i18n.t("settings.OfficeManagement.title")}
             </InputLabel>
             <Select
               labelId="schedule-type-label"
@@ -384,7 +388,7 @@ export default function Options(props) {
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="group-type-label">
-            {i18n.t("settings.IgnoreGroupMessages.title")}
+              {i18n.t("settings.IgnoreGroupMessages.title")}
             </InputLabel>
             <Select
               labelId="group-type-label"
@@ -398,7 +402,7 @@ export default function Options(props) {
             </Select>
           </FormControl>
         </Grid>
-        
+
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="sound-group-notifications-label">
@@ -439,7 +443,7 @@ export default function Options(props) {
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="call-type-label">
-            {i18n.t("settings.VoiceAndVideoCalls.title")}
+              {i18n.t("settings.VoiceAndVideoCalls.title")}
             </InputLabel>
             <Select
               labelId="call-type-label"
@@ -472,7 +476,7 @@ export default function Options(props) {
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="group-type-label">
-            {i18n.t("settings.AutomaticChatbotOutput.title")}
+              {i18n.t("settings.AutomaticChatbotOutput.title")}
             </InputLabel>
             <Select
               labelId="chatbot-autoexit"
@@ -489,7 +493,7 @@ export default function Options(props) {
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="quickmessages-label">
-            {i18n.t("settings.QuickMessages.title")}
+              {i18n.t("settings.QuickMessages.title")}
             </InputLabel>
             <Select
               labelId="quickmessages-label"
@@ -521,7 +525,7 @@ export default function Options(props) {
             </Select>
           </FormControl>
         </Grid>
-        
+
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="keep-queue-and-user-label">
@@ -601,7 +605,7 @@ export default function Options(props) {
               <Grid xs={12} sm={6} md={4} item>
                 <FormControl className={classes.selectContainer}>
                   <InputLabel id="group-type-label">
-                  {i18n.t("settings.AllowRegistration.title")}
+                    {i18n.t("settings.AllowRegistration.title")}
                   </InputLabel>
                   <Select
                     labelId="allow-signup"
@@ -639,6 +643,25 @@ export default function Options(props) {
 
           )}
         />
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="default-message-transfer-label">
+              {i18n.t("settings.defaultMessageTransfer.title")}
+            </InputLabel>
+            <Select
+              labelId="default-message-transfer-label"
+              value={defaultMessageTransfer}
+              onChange={async (e) => {
+                await handleSetting("defaultMessageTransfer", e.target.value, setDefaultMessageTransfer);
+              }}
+            >
+              <MenuItem value={"enabled"}>{i18n.t("settings.defaultMessageTransfer.options.enabled")}</MenuItem>
+              <MenuItem value={"disabled"}>{i18n.t("settings.defaultMessageTransfer.options.disabled")}</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+
       </Grid>
     </>
   );

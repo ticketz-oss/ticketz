@@ -211,6 +211,12 @@ const UpdateTicketService = async ({
 
           transferMessage = transferMessage?.trim();
 
+          const sendMessageTransfer = await GetCompanySetting(
+            companyId,
+            "defaultMessageTransfer",
+            "enabled"
+          );
+
           if (transferMessage) {
             const queueChangedMessage = await wbot.sendMessage(
               `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"
@@ -220,15 +226,19 @@ const UpdateTicketService = async ({
               }
             );
             await verifyMessage(queueChangedMessage, ticket, ticket.contact);
-          } else {
+          }
+
+          if (!transferMessage && sendMessageTransfer === "enabled") {
+
             const queueChangedMessage = await wbot.sendMessage(
               `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"
               }`,
               {
-                text: "Você foi transferido, em breve iremos iniciar seu atendimento."
+                text: `Você foi transferido, em breve iremos iniciar seu atendimento.`
               }
             );
             await verifyMessage(queueChangedMessage, ticket, ticket.contact);
+
           }
         }
 
