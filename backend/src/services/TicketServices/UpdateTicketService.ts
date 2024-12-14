@@ -30,15 +30,15 @@ interface Request {
   ticketId: number;
   companyId?: number | undefined;
   tokenData?:
-    | {
-        id: string;
-        username: string;
-        profile: string;
-        companyId: number;
-        iat: number;
-        exp: number;
-      }
-    | undefined;
+  | {
+    id: string;
+    username: string;
+    profile: string;
+    companyId: number;
+    iat: number;
+    exp: number;
+  }
+  | undefined;
 }
 
 interface Response {
@@ -198,18 +198,22 @@ const UpdateTicketService = async ({
     }
 
     if (oldQueueId !== queueId && !isNil(oldQueueId) && !isNil(queueId)) {
+
       if (ticket.channel === "whatsapp") {
         const wbot = await GetTicketWbot(ticket);
-        const { transferMessage } = await ShowWhatsAppService(
+
+        let { transferMessage } = await ShowWhatsAppService(
           ticket.whatsappId,
           companyId
         );
 
         if (!ticket.isGroup) {
+
+          transferMessage = transferMessage?.trim();
+
           if (transferMessage) {
             const queueChangedMessage = await wbot.sendMessage(
-              `${ticket.contact.number}@${
-                ticket.isGroup ? "g.us" : "s.whatsapp.net"
+              `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"
               }`,
               {
                 text: `${transferMessage}`
@@ -218,8 +222,7 @@ const UpdateTicketService = async ({
             await verifyMessage(queueChangedMessage, ticket, ticket.contact);
           } else {
             const queueChangedMessage = await wbot.sendMessage(
-              `${ticket.contact.number}@${
-                ticket.isGroup ? "g.us" : "s.whatsapp.net"
+              `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"
               }`,
               {
                 text: "Você foi transferido, em breve iremos iniciar seu atendimento."
@@ -228,6 +231,7 @@ const UpdateTicketService = async ({
             await verifyMessage(queueChangedMessage, ticket, ticket.contact);
           }
         }
+
       }
 
       if (["facebook", "instagram"].includes(ticket.channel)) {
