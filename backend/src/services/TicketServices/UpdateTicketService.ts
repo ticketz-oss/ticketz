@@ -216,16 +216,6 @@ const UpdateTicketService = async ({
               }
             );
             await verifyMessage(queueChangedMessage, ticket, ticket.contact);
-          } else {
-            const queueChangedMessage = await wbot.sendMessage(
-              `${ticket.contact.number}@${
-                ticket.isGroup ? "g.us" : "s.whatsapp.net"
-              }`,
-              {
-                text: "Você foi transferido, em breve iremos iniciar seu atendimento."
-              }
-            );
-            await verifyMessage(queueChangedMessage, ticket, ticket.contact);
           }
         }
       }
