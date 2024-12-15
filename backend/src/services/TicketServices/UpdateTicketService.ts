@@ -206,7 +206,7 @@ const UpdateTicketService = async ({
         );
 
         if (!ticket.isGroup) {
-          if (transferMessage) {
+          if (transferMessage?.trim()) {
             const queueChangedMessage = await wbot.sendMessage(
               `${ticket.contact.number}@${
                 ticket.isGroup ? "g.us" : "s.whatsapp.net"
