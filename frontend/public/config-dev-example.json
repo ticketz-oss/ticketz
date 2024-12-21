@@ -1,0 +1,6 @@
+{
+  "BACKEND_PROTOCOL": "http",
+  "BACKEND_HOST": "localhost",
+  "BACKEND_PORT": "8080",
+  "LOG_LEVEL": "debug"
+}

@@ -1,0 +1,13 @@
+{
+    "Servers": {
+        "1": {
+            "Name": "Ticketz Postgres",
+            "Group": "Servers",
+            "Port": 5432,
+            "Username": "ticketz",
+            "Host": "postgres",
+            "SSLMode": "prefer",
+            "MaintenanceDB": "postgres"
+        }
+    }
+}
