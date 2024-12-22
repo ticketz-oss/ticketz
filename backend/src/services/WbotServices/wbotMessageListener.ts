@@ -1808,9 +1808,10 @@ const handleMessage = async (
 
 const handleMsgAck = async (
   msg: WAMessage,
-  chat: number | null | undefined
+  ack: number
 ) => {
-  await new Promise((r) => {setTimeout(r, 500)});
+  if (!ack) return;
+
   const io = getIO();
 
   try {
@@ -1825,9 +1826,9 @@ const handleMsgAck = async (
       ],
     });
 
-    if (!messageToUpdate) return;
+    if (!messageToUpdate || ack <= messageToUpdate.ack ) return;
 
-    await messageToUpdate.update({ ack: chat });
+    await messageToUpdate.update({ ack });
     io.to(messageToUpdate.ticketId.toString()).emit(
       `company-${messageToUpdate.companyId}-appMessage`,
       {
