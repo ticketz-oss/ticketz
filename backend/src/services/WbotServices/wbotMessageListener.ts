@@ -147,6 +147,7 @@ export const getBodyMessage = (msg: proto.IWebMessageInfo): string | null => {
       imageMessage: msg.message?.imageMessage?.caption,
       videoMessage: msg.message?.videoMessage?.caption,
       extendedTextMessage: msg.message?.extendedTextMessage?.text,
+      templateMessage: msg.message?.templateMessage?.hydratedTemplate?.hydratedContentText,
       buttonsResponseMessage: msg.message?.buttonsResponseMessage?.selectedButtonId,
       templateButtonReplyMessage: msg.message?.templateButtonReplyMessage?.selectedId,
       messageContextInfo: msg.message?.buttonsResponseMessage?.selectedButtonId || msg.message?.listResponseMessage?.title,
@@ -806,6 +807,7 @@ const isValidMsg = (msg: proto.IWebMessageInfo): boolean => {
       msgType === "protocolMessage" ||
       msgType === "listResponseMessage" ||
       msgType === "listMessage" ||
+      msgType === "templateMessage" ||
       msgType === "viewOnceMessage" || 
       msgType === "viewOnceMessageV2";
 
