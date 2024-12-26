@@ -627,7 +627,7 @@ export const verifyMediaMessage = async (
     fromMe: msg.key.fromMe,
     read: msg.key.fromMe,
     mediaUrl: media?.filename,
-    mediaType: normalizeMediaType(media?.mimetype),
+    mediaType: media && normalizeMediaType(media.mimetype),
     thumbnailUrl: thumbnailMedia?.filename,
     quotedMsgId: quotedMsg?.id,
     ack: msg.status,
