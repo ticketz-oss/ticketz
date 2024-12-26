@@ -434,6 +434,13 @@ const Dashboard = () => {
     }
   }
 
+  if (currentUser?.profile !== "admin") {
+    return (
+      <div>
+      </div>
+    );
+  }
+      
   return (
     <div>
       <Container maxWidth="lg" className={classes.container}>

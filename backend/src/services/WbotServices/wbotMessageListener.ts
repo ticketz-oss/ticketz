@@ -163,6 +163,7 @@ const getBodyMessage = (msg: proto.IWebMessageInfo): string | null => {
       imageMessage: msg.message?.imageMessage?.caption,
       videoMessage: msg.message?.videoMessage?.caption,
       extendedTextMessage: msg.message?.extendedTextMessage?.text,
+      templateMessage: msg.message?.templateMessage?.hydratedTemplate?.hydratedContentText,
       buttonsResponseMessage:
         msg.message?.buttonsResponseMessage?.selectedButtonId,
       templateButtonReplyMessage:
@@ -927,6 +928,7 @@ const isValidMsg = (msg: proto.IWebMessageInfo): boolean => {
       msgType === "protocolMessage" ||
       msgType === "listResponseMessage" ||
       msgType === "listMessage" ||
+      msgType === "templateMessage" ||
       msgType === "viewOnceMessage" ||
       msgType === "viewOnceMessageV2";
 
@@ -2377,11 +2379,10 @@ const handleMessage = async (
 
 const handleMsgAck = async (
   msg: WAMessage,
-  chat: number | null | undefined
+  ack: number
 ) => {
-  await new Promise(r => {
-    setTimeout(r, 500);
-  });
+  if (!ack) return;
+
   const io = getIO();
 
   try {
@@ -2401,9 +2402,9 @@ const handleMsgAck = async (
       ]
     });
 
-    if (!messageToUpdate) return;
+    if (!messageToUpdate || ack <= messageToUpdate.ack ) return;
 
-    await messageToUpdate.update({ ack: chat });
+    await messageToUpdate.update({ ack });
     io.to(messageToUpdate.ticketId.toString()).emit(
       `company-${messageToUpdate.companyId}-appMessage`,
       {

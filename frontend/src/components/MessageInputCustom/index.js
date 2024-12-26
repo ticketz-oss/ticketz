@@ -729,16 +729,13 @@ const MessageInputCustom = (props) => {
       quickMessageMediaId: quickMessageAttachment?.id,
     };
     setAnnotateMessage(false);
-    try {
-      if (editingMessage !== null) {
-        await api.post(`/messages/edit/${editingMessage.id}`, message);
-      }
-      else {
-        await api.post(`/messages/${ticketId}`, message);
-      }
-    } catch (err) {
+
+    const url = editingMessage !== null ?
+      `/messages/edit/${editingMessage.id}` :
+      `/messages/${ticketId}`;
+    api.post(url, message).catch((err) => {
       toastError(err);
-    }
+    });
 
     setInputMessage("");
     setShowEmoji(false);
