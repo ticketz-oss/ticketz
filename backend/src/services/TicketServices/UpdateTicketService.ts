@@ -95,7 +95,7 @@ const UpdateTicketService = async ({
       whatsappId: ticket.whatsappId
     });
 
-    if (ticket.channel === "whatsapp") {
+    if (ticket.channel === "whatsapp" && status === "open") {
       SetTicketMessagesAsRead(ticket);
     }
 
