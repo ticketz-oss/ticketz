@@ -20,10 +20,14 @@ function loadTextFileAjaxSync(filePath, mimeType)
 }
 
 var loadJSON = function(filePath) {
-  // Load json file;
-  var json = loadTextFileAjaxSync(filePath, "application/json");
-  // Parse json
-  return JSON.parse(json);
+  try {
+	// Load json file;
+	var json = loadTextFileAjaxSync(filePath, "application/json");
+	// Parse json
+	return JSON.parse(json);
+  } catch (e) {
+	return null;
+  }
 }   
 
 export { loadJSON };

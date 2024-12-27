@@ -1,0 +1,37 @@
+volumes:
+  postgres_data:
+  redis_data:
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-ticketz}
+      - POSTGRES_DB=${POSTGRES_DB:-ticketz}
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - TZ=${TZ:-America/Sao_Paulo}
+    ports:
+      - 5432:5432
+    restart: always
+
+  redis:
+    image: redis:alpine
+    command: redis-server --appendonly yes
+    ports:
+      - 6379:6379
+    restart: always
+    volumes:
+      - redis_data:/data
+
+  pgadmin4:
+    image: dpage/pgadmin4:8
+    restart: always
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@ticketz.host
+      - PGADMIN_DEFAULT_PASSWORD=123456
+    ports:
+      - 8081:80
+    volumes:
+      - ./confs/pgadmin4-servers.json:/pgadmin4/servers.json

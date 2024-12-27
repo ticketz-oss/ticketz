@@ -309,9 +309,15 @@ const MessagesAPI = () => {
                 <b>medias: </b> arquivo
               </li>
               <li>
+                <b>body: </b> mensagem
+              </li>
+              <li>
                 <b>saveOnTicket: </b> true
               </li>
             </ul>
+            <p><b>Observações:</b> Os campos <b>medias</b> e <b>body</b> podem ser repetidos
+                para envio de mais de um arquivo e mensagem.
+            </p>
           </Typography>
         </Grid>
         <Grid item xs={12} sm={6}>
