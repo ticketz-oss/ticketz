@@ -431,6 +431,7 @@ const CustomInput = (props) => {
   const onKeyPress = (e) => {
     if (loading || e.shiftKey) return;
     else if (e.key === "Enter") {
+      e.preventDefault();
       handleSendMessage(e);
     }
   };
