@@ -96,6 +96,7 @@ export default function Options(props) {
   const classes = useStyles();
   const [userRating, setUserRating] = useState("disabled");
   const [scheduleType, setScheduleType] = useState("disabled");
+  const [outOfHoursAction, setOutOfHoursAction] = useState("pending");
   const [callType, setCallType] = useState("enabled");
   const [quickMessages, setQuickMessages] = useState("");
   const [allowSignup, setAllowSignup] = useState("disabled");
@@ -133,6 +134,10 @@ export default function Options(props) {
       if (scheduleType) {
         setScheduleType(scheduleType.value);
       }
+      
+      const outOfHoursAction = settings.find((s) => s.key === "outOfHoursAction");
+      setOutOfHoursAction(outOfHoursAction?.value || "pending");
+
       const callType = settings.find((s) => s.key === "call");
       if (callType) {
         setCallType(callType.value);
@@ -367,6 +372,25 @@ export default function Options(props) {
             </Select>
           </FormControl>
         </Grid>
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="out-of-hours-action-label">
+              {i18n.t("settings.outOfHoursAction.title")}
+            </InputLabel>
+            <Select
+              labelId="out-of-hours-action-label"
+              value={outOfHoursAction}
+              onChange={async (e) => {
+                await handleSetting("outOfHoursAction", e.target.value, setOutOfHoursAction);
+              }}
+            >
+              <MenuItem value={"pending"}>{i18n.t("settings.outOfHoursAction.options.pending")}</MenuItem>
+              <MenuItem value={"closed"}>{i18n.t("settings.outOfHoursAction.options.closed")}</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+        
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="group-type-label">

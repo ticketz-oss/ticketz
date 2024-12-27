@@ -725,6 +725,13 @@ const messages = {
             ManagementByCompany: "Gerenciamento Por Empresa",
           },
         },
+        outOfHoursAction: {
+          title: "Ação fora do expediente",
+          options: {
+            pending: "Deixar como pendente",
+            closed: "Fechar ticket",
+          },
+        },
         IgnoreGroupMessages: {
           title: "Ignorar Mensagens de Grupos",
           options: {
