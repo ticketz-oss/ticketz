@@ -97,7 +97,6 @@ export default function Options(props) {
   const [userRating, setUserRating] = useState("disabled");
   const [scheduleType, setScheduleType] = useState("disabled");
   const [callType, setCallType] = useState("enabled");
-  const [chatbotType, setChatbotType] = useState("");
   const [quickMessages, setQuickMessages] = useState("");
   const [allowSignup, setAllowSignup] = useState("disabled");
   const [chatbotAutoExit, setChatbotAutoExit] = useState("disabled");
@@ -149,10 +148,6 @@ export default function Options(props) {
       const groupsTab = settings.find((s) => s.key === "groupsTab");
       setGroupsTab(groupsTab?.value || "disabled");
 
-      const chatbotType = settings.find((s) => s.key === "chatBotType");
-      if (chatbotType) {
-        setChatbotType(chatbotType.value);
-      }
       const chatbotAutoExit = settings.find((s) => s.key === "chatbotAutoExit");
       if (chatbotAutoExit) {
         setChatbotAutoExit(chatbotAutoExit.value);
@@ -216,15 +211,6 @@ export default function Options(props) {
     setCallType(value);
     await update({
       key: "call",
-      value,
-    });
-    toast.success("Operação atualizada com sucesso.");
-  }
-
-  async function handleChatbotType(value) {
-    setChatbotType(value);
-    await update({
-      key: "chatBotType",
       value,
     });
     toast.success("Operação atualizada com sucesso.");
@@ -450,22 +436,6 @@ export default function Options(props) {
             >
               <MenuItem value={"disabled"}>{i18n.t("settings.VoiceAndVideoCalls.options.disabled")}</MenuItem>
               <MenuItem value={"enabled"}>{i18n.t("settings.VoiceAndVideoCalls.options.enabled")}</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid xs={12} sm={6} md={4} item>
-          <FormControl className={classes.selectContainer}>
-            <InputLabel id="chatbot-type-label">
-              Tipo Chatbot
-            </InputLabel>
-            <Select
-              labelId="chatbot-type-label"
-              value={chatbotType}
-              onChange={async (e) => {
-                handleChatbotType(e.target.value);
-              }}
-            >
-              <MenuItem value={"text"}>Texto</MenuItem>
             </Select>
           </FormControl>
         </Grid>
