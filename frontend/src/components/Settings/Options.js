@@ -94,8 +94,8 @@ export default function Options(props) {
   const classes = useStyles();
   const [userRating, setUserRating] = useState("disabled");
   const [scheduleType, setScheduleType] = useState("disabled");
+  const [outOfHoursAction, setOutOfHoursAction] = useState("pending");
   const [callType, setCallType] = useState("enabled");
-  const [chatbotType, setChatbotType] = useState("");
   const [quickMessages, setQuickMessages] = useState("");
   const [allowSignup, setAllowSignup] = useState("disabled");
   const [chatbotAutoExit, setChatbotAutoExit] = useState("disabled");
@@ -159,6 +159,10 @@ export default function Options(props) {
       if (scheduleType) {
         setScheduleType(scheduleType.value);
       }
+      
+      const outOfHoursAction = settings.find((s) => s.key === "outOfHoursAction");
+      setOutOfHoursAction(outOfHoursAction?.value || "pending");
+
       const callType = settings.find((s) => s.key === "call");
       if (callType) {
         setCallType(callType.value);
@@ -174,10 +178,6 @@ export default function Options(props) {
       const groupsTab = settings.find((s) => s.key === "groupsTab");
       setGroupsTab(groupsTab?.value || "disabled");
 
-      const chatbotType = settings.find((s) => s.key === "chatBotType");
-      if (chatbotType) {
-        setChatbotType(chatbotType.value);
-      }
       const chatbotAutoExit = settings.find((s) => s.key === "chatbotAutoExit");
       if (chatbotAutoExit) {
         setChatbotAutoExit(chatbotAutoExit.value);
@@ -288,15 +288,6 @@ export default function Options(props) {
     setCallType(value);
     await update({
       key: "call",
-      value,
-    });
-    toast.success("Operação atualizada com sucesso.");
-  }
-
-  async function handleChatbotType(value) {
-    setChatbotType(value);
-    await update({
-      key: "chatBotType",
       value,
     });
     toast.success("Operação atualizada com sucesso.");
@@ -578,6 +569,25 @@ export default function Options(props) {
             </Select>
           </FormControl>
         </Grid>
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="out-of-hours-action-label">
+              {i18n.t("settings.outOfHoursAction.title")}
+            </InputLabel>
+            <Select
+              labelId="out-of-hours-action-label"
+              value={outOfHoursAction}
+              onChange={async (e) => {
+                await handleSetting("outOfHoursAction", e.target.value, setOutOfHoursAction);
+              }}
+            >
+              <MenuItem value={"pending"}>{i18n.t("settings.outOfHoursAction.options.pending")}</MenuItem>
+              <MenuItem value={"closed"}>{i18n.t("settings.outOfHoursAction.options.closed")}</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+        
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="group-type-label">
@@ -647,22 +657,6 @@ export default function Options(props) {
             >
               <MenuItem value={"disabled"}>{i18n.t("settings.VoiceAndVideoCalls.options.disabled")}</MenuItem>
               <MenuItem value={"enabled"}>{i18n.t("settings.VoiceAndVideoCalls.options.enabled")}</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid xs={12} sm={6} md={4} item>
-          <FormControl className={classes.selectContainer}>
-            <InputLabel id="chatbot-type-label">
-              Tipo Chatbot
-            </InputLabel>
-            <Select
-              labelId="chatbot-type-label"
-              value={chatbotType}
-              onChange={async (e) => {
-                handleChatbotType(e.target.value);
-              }}
-            >
-              <MenuItem value={"text"}>Texto</MenuItem>
             </Select>
           </FormControl>
         </Grid>

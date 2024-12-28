@@ -6,7 +6,7 @@ import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
 
 import formatBody from "../../helpers/Mustache";
-import { verifyMessage } from "./wbotMessageListener";
+import { verifyMediaMessage, verifyMessage } from "./wbotMessageListener";
 import User from "../../models/User";
 
 interface Request {
@@ -63,7 +63,12 @@ const SendWhatsAppMessage = async ({
         ...options
       }
     );
-    await verifyMessage(sentMessage, ticket, ticket.contact);
+
+    if (sentMessage?.message?.extendedTextMessage?.thumbnailDirectPath) {
+      await verifyMediaMessage(sentMessage, ticket, ticket.contact, wbot);
+    } else {
+      await verifyMessage(sentMessage, ticket, ticket.contact);
+    }
     return sentMessage;
   } catch (err) {
     Sentry.captureException(err);

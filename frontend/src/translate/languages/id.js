@@ -189,6 +189,13 @@ const messages = {
           transferMessage: "Pesan Transfer",
           token: "Token",
         },
+        outOfHoursAction: {
+          title: "Tindakan Di Luar Jam Kerja",
+          options: {
+            pending: "Biarkan tertunda",
+            closed: "Tutup tiket",
+          },
+        },
         buttons: {
           okAdd: "Tambah",
           okEdit: "Simpan",
