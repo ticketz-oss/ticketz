@@ -1340,42 +1340,45 @@ export const startQueue = async (
   /* Tratamento para envio de mensagem quando a fila está fora do expediente */
   let currentSchedule: ScheduleResult;
 
-  const settings = await Setting.findOne({
-    where: {
-      key: "scheduleType",
-      companyId
-    }
-  });
-  if (settings?.value === "queue") {
-    currentSchedule = await VerifyCurrentSchedule(ticket.companyId, queue.id);
-  }
+  const scheduleType = await GetCompanySetting(
+    companyId,
+    "scheduleType",
+    "disabled"
+  );
 
-  if (
-    settings?.value === "queue" &&
-    !isNil(currentSchedule) &&
-    (!currentSchedule || currentSchedule.inActivity === false)
-  ) {
-    const outOfHoursMessage =
-      queue.outOfHoursMessage?.trim() ||
-      "Estamos fora do horário de expediente";
-    const body = formatBody(
-      `${outOfHoursMessage}\n\n*[ # ]* - Voltar ao Menu Principal`,
-      ticket.contact,
-      ticket
-    );
-    const sentMessage = await wbot.sendMessage(
-      `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-      {
-        text: body
-      }
-    );
-    await verifyMessage(sentMessage, ticket, contact);
-    await UpdateTicketService({
-      ticketData: { queueId: null, chatbot },
-      ticketId: ticket.id,
-      companyId: ticket.companyId
-    });
-    return;
+  if (scheduleType === "queue") {
+    currentSchedule = await VerifyCurrentSchedule(ticket.companyId, queue.id);
+
+    if (
+      !isNil(currentSchedule) &&
+      (!currentSchedule || currentSchedule.inActivity === false)
+    ) {
+      const outOfHoursMessage =
+        queue.outOfHoursMessage?.trim() ||
+        "Estamos fora do horário de expediente";
+      const sentMessage = await wbot.sendMessage(
+        `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
+        {
+          text: formatBody(outOfHoursMessage, ticket.contact)
+        }
+      );
+      await verifyMessage(sentMessage, ticket, contact);
+      const outOfHoursAction = await GetCompanySetting(
+        companyId,
+        "outOfHoursAction",
+        "pending"
+      );
+      await UpdateTicketService({
+        ticketData: {
+          queueId: queue.id,
+          chatbot: false,
+          status: outOfHoursAction
+        },
+        ticketId: ticket.id,
+        companyId: ticket.companyId
+      });
+      return;
+    }
   }
 
   if (queue.options.length === 0) {
@@ -2174,60 +2177,55 @@ const handleMessage = async (
       return;
     }
 
-    const scheduleType = await Setting.findOne({
-      where: {
-        companyId,
-        key: "scheduleType"
-      }
-    });
+    const scheduleType = await GetCompanySetting(
+      companyId,
+      "scheduleType",
+      "disabled"
+    );
 
     try {
       if (!msg.key.fromMe && scheduleType) {
+        const outOfHoursAction = await GetCompanySetting(
+          companyId,
+          "outOfHoursAction",
+          "pending"
+        );
         let currentSchedule: ScheduleResult = null;
-        if (scheduleType.value === "company") {
+        if (scheduleType === "company") {
           currentSchedule = await VerifyCurrentSchedule(companyId);
         }
-        /**
-         * Tratamento para envio de mensagem quando a empresa está fora do expediente
-         */
+
         if (
-          scheduleType.value === "company" &&
           !isNil(currentSchedule) &&
           (!currentSchedule || currentSchedule.inActivity === false)
         ) {
-          const body = `${
+          const outOfHoursMessage =
             whatsapp.outOfHoursMessage.trim() ||
-            "Estamos fora do horário de expediente"
-          }`;
-
-          const debouncedSentMessage = debounce(
-            async () => {
-              await wbot.sendMessage(
-                `${ticket.contact.number}@${
-                  ticket.isGroup ? "g.us" : "s.whatsapp.net"
-                }`,
-                {
-                  text: `${body}`
-                }
-              );
-            },
-            3000,
-            ticket.id
+            "Estamos fora do horário de expediente";
+          const sentMessage = await wbot.sendMessage(
+            `${ticket.contact.number}@${
+              ticket.isGroup ? "g.us" : "s.whatsapp.net"
+            }`,
+            {
+              text: formatBody(outOfHoursMessage, ticket.contact)
+            }
           );
-          debouncedSentMessage();
+          await verifyMessage(sentMessage, ticket, ticket.contact);
+          if (ticket.status !== "open") {
+            await UpdateTicketService({
+              ticketData: { chatbot: false, status: outOfHoursAction },
+              ticketId: ticket.id,
+              companyId: ticket.companyId
+            });
+          }
           return;
         }
 
-        if (scheduleType.value === "queue" && ticket.queueId !== null) {
-          /**
-           * Tratamento para envio de mensagem quando a fila está fora do expediente
-           */
-          if (scheduleType.value === "queue") {
-            currentSchedule = await VerifyCurrentSchedule(
-              companyId,
-              ticket.queueId
-            );
-          }
+        if (scheduleType === "queue" && ticket.queueId !== null) {
+          currentSchedule = await VerifyCurrentSchedule(
+            companyId,
+            ticket.queueId
+          );
           const queue = await Queue.findByPk(ticket.queueId);
 
           if (
@@ -2237,22 +2235,22 @@ const handleMessage = async (
             const outOfHoursMessage =
               queue.outOfHoursMessage?.trim() ||
               "Estamos fora do horário de expediente";
-            const body = `${outOfHoursMessage}`;
-            const debouncedSentMessage = debounce(
-              async () => {
-                await wbot.sendMessage(
-                  `${ticket.contact.number}@${
-                    ticket.isGroup ? "g.us" : "s.whatsapp.net"
-                  }`,
-                  {
-                    text: `${body}`
-                  }
-                );
-              },
-              3000,
-              ticket.id
+            const sentMessage = await wbot.sendMessage(
+              `${ticket.contact.number}@${
+                ticket.isGroup ? "g.us" : "s.whatsapp.net"
+              }`,
+              {
+                text: formatBody(outOfHoursMessage, ticket.contact)
+              }
             );
-            debouncedSentMessage();
+            await verifyMessage(sentMessage, ticket, ticket.contact);
+            if (ticket.status !== "open") {
+              await UpdateTicketService({
+                ticketData: { chatbot: false, status: outOfHoursAction },
+                ticketId: ticket.id,
+                companyId: ticket.companyId
+              });
+            }
             return;
           }
         }
@@ -2275,53 +2273,6 @@ const handleMessage = async (
     const dontReadTheFirstQuestion = isNewTicket || ticket.queue === null;
 
     await ticket.reload();
-
-    try {
-      // Fluxo fora do expediente
-      if (
-        !msg.key.fromMe &&
-        scheduleType.value === "queue" &&
-        ticket.queueId !== null
-      ) {
-        /**
-         * Tratamento para envio de mensagem quando a fila está fora do expediente
-         */
-        const currentSchedule = await VerifyCurrentSchedule(
-          companyId,
-          ticket.queueId
-        );
-        const queue = await Queue.findByPk(ticket.queueId);
-
-        if (
-          !isNil(currentSchedule) &&
-          (!currentSchedule || currentSchedule.inActivity === false)
-        ) {
-          const outOfHoursMessage =
-            queue.outOfHoursMessage?.trim() ||
-            "Estamos fora do horário de expediente";
-          const body = `${outOfHoursMessage}`;
-          const debouncedSentMessage = debounce(
-            async () => {
-              await wbot.sendMessage(
-                `${ticket.contact.number}@${
-                  ticket.isGroup ? "g.us" : "s.whatsapp.net"
-                }`,
-                {
-                  text: `\u200e${body}`
-                }
-              );
-            },
-            3000,
-            ticket.id
-          );
-          debouncedSentMessage();
-          return;
-        }
-      }
-    } catch (e) {
-      Sentry.captureException(e);
-      console.log(e);
-    }
 
     if (
       justCreated &&

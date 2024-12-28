@@ -144,8 +144,8 @@ const useStyles = makeStyles((theme) => ({
   },
 
   quotedThumbnail: {
-    maxWidth: "74px",
-    maxHeight: "74px",
+    maxWidth: "180px",
+    height: "90px",
   },
 
   messageRight: {
@@ -1259,6 +1259,11 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
               >
                 <ExpandMore />
               </IconButton>
+
+              {message.thumbnailUrl && (
+                <img className={classes.previewThumbnail} src={message.thumbnailUrl} />
+              )}                                
+
               <div
                 className={clsx(classes.textContentItem, {
                   [classes.textContentItemDeleted]: message.isDeleted,
@@ -1272,6 +1277,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
                     className={classes.deletedIcon}
                   />
                 )}
+
                 {message.body.includes('data:image') ? messageLocation(message.body, message.createdAt)
                   :
                   isVCard(message.body) ?
