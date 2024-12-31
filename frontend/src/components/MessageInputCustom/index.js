@@ -212,7 +212,12 @@ const useStyles = makeStyles((theme) => ({
   verticalMiddle: {
     marginTop: "auto",
     marginBottom: "auto",
-  }
+  },
+  
+  receivingDrop: {
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    border: "3px dashed #ccc",
+  },
 
 }));
 
@@ -556,6 +561,7 @@ const MessageInputCustom = (props) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   
   const [pastOneSecond, setPastOneSecond] = useState(false);
+  const [receivingDrop, setReceivingDrop] = useState(false);
   
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -624,6 +630,23 @@ const MessageInputCustom = (props) => {
       setQuickMessageAttachment(null);
       setMedias([e.clipboardData.files[0]]);
     }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    setMedias((prevMedias) => [...prevMedias, ...droppedFiles]);
+    setReceivingDrop(false);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setReceivingDrop(true);
+  };
+  
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setReceivingDrop(false);
   };
 
   const handleUploadMedia = async (e) => {
@@ -894,7 +917,19 @@ const MessageInputCustom = (props) => {
     );
   else {
     return (
-      <Paper square elevation={0} className={classes.mainWrapper}>
+      <Paper 
+        square 
+        elevation={0} 
+        className={
+          clsx(
+            classes.mainWrapper,
+            { [classes.receivingDrop]: receivingDrop }
+          )
+        }
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
         {(replyingMessage && renderReplyingMessage(replyingMessage)) || (editingMessage && renderReplyingMessage(editingMessage))}
         { ( medias.length > 0 || quickMessageAttachment ) &&
           <div className={classes.attachmentLine}>
