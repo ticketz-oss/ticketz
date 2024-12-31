@@ -47,6 +47,8 @@ import AttachmentIcon from '@material-ui/icons/Attachment';
 import Popover from '@material-ui/core/Popover';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 
+import Attachment from "../Attachment";
+
 const oggRecorder = new RecordOggOpus();
 
 const useStyles = makeStyles((theme) => ({
@@ -198,17 +200,24 @@ const useStyles = makeStyles((theme) => ({
   
   attachmentInfo: {
     minHeight: 48,
-    width: "100%",
     textAlign: "right",
-    paddingRight: 72,
     display: "flex",
-    justifyContent: "flex-end"
   },  
+  
+  attachmentLine: {
+    width: "100%",
+    overflowX: "auto",
+  },
 
   verticalMiddle: {
     marginTop: "auto",
     marginBottom: "auto",
-  }
+  },
+  
+  receivingDrop: {
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    border: "3px dashed #ccc",
+  },
 
 }));
 
@@ -552,6 +561,7 @@ const MessageInputCustom = (props) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   
   const [pastOneSecond, setPastOneSecond] = useState(false);
+  const [receivingDrop, setReceivingDrop] = useState(false);
   
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -620,6 +630,23 @@ const MessageInputCustom = (props) => {
       setQuickMessageAttachment(null);
       setMedias([e.clipboardData.files[0]]);
     }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    setMedias((prevMedias) => [...prevMedias, ...droppedFiles]);
+    setReceivingDrop(false);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setReceivingDrop(true);
+  };
+  
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setReceivingDrop(false);
   };
 
   const handleUploadMedia = async (e) => {
@@ -890,13 +917,26 @@ const MessageInputCustom = (props) => {
     );
   else {
     return (
-      <Paper square elevation={0} className={classes.mainWrapper}>
+      <Paper 
+        square 
+        elevation={0} 
+        className={
+          clsx(
+            classes.mainWrapper,
+            { [classes.receivingDrop]: receivingDrop }
+          )
+        }
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
         {(replyingMessage && renderReplyingMessage(replyingMessage)) || (editingMessage && renderReplyingMessage(editingMessage))}
         { ( medias.length > 0 || quickMessageAttachment ) &&
+          <div className={classes.attachmentLine}>
           <div className={classes.attachmentInfo}>
             {
               medias.map((media) => {
-                return <div className={classes.verticalMiddle}><AttachmentIcon />{ media.name || "attached file"}</div>
+                return <Attachment media={media} onDelete={() => false}></Attachment>
               })
             }
             {
@@ -914,6 +954,7 @@ const MessageInputCustom = (props) => {
                 <DeleteIcon className={classes.sendMessageIcons} />
               </IconButton>
             )}
+          </div>
           </div>
         }
         <div className={classes.newMessageBox}>
