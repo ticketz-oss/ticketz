@@ -47,6 +47,8 @@ import AttachmentIcon from '@material-ui/icons/Attachment';
 import Popover from '@material-ui/core/Popover';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 
+import Attachment from "../Attachment";
+
 const oggRecorder = new RecordOggOpus();
 
 const useStyles = makeStyles((theme) => ({
@@ -198,12 +200,14 @@ const useStyles = makeStyles((theme) => ({
   
   attachmentInfo: {
     minHeight: 48,
-    width: "100%",
     textAlign: "right",
-    paddingRight: 72,
     display: "flex",
-    justifyContent: "flex-end"
   },  
+  
+  attachmentLine: {
+    width: "100%",
+    overflowX: "auto",
+  },
 
   verticalMiddle: {
     marginTop: "auto",
@@ -893,10 +897,11 @@ const MessageInputCustom = (props) => {
       <Paper square elevation={0} className={classes.mainWrapper}>
         {(replyingMessage && renderReplyingMessage(replyingMessage)) || (editingMessage && renderReplyingMessage(editingMessage))}
         { ( medias.length > 0 || quickMessageAttachment ) &&
+          <div className={classes.attachmentLine}>
           <div className={classes.attachmentInfo}>
             {
               medias.map((media) => {
-                return <div className={classes.verticalMiddle}><AttachmentIcon />{ media.name || "attached file"}</div>
+                return <Attachment media={media} onDelete={() => false}></Attachment>
               })
             }
             {
@@ -914,6 +919,7 @@ const MessageInputCustom = (props) => {
                 <DeleteIcon className={classes.sendMessageIcons} />
               </IconButton>
             )}
+          </div>
           </div>
         }
         <div className={classes.newMessageBox}>
