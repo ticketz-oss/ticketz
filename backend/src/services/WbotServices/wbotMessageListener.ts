@@ -491,7 +491,7 @@ const verifyQuotedMessage = async (
   return quotedMsg;
 };
 
-const saveMediaToFile = async (media) => {
+const saveMediaToFile = async (media, ticket: Ticket): Promise<string> => {
   if (!media.filename) {
     const ext = media.mimetype.split("/")[1].split(";")[0];
     media.filename = `${new Date().getTime()}.${ext}`;
@@ -501,9 +501,14 @@ const saveMediaToFile = async (media) => {
     ? path.resolve(__dirname, "..", "public")
     : path.resolve(__dirname, "..", "..", "..", "public");
 
+  const relativePath = `media/${ticket.companyId}/${ticket.contactId}/${ticket.id}`;
+
   try {
+    // create folders inside filepath if not exists
+    await fs.promises.mkdir(join(filePath, relativePath), { recursive: true });
+    
     await writeFileAsync(
-      join(filePath, media.filename),
+      join(filePath, relativePath, media.filename),
       media.data,
       "base64"
     );
@@ -511,6 +516,8 @@ const saveMediaToFile = async (media) => {
     Sentry.captureException(err);
     logger.error(err);
   }
+
+  return `${relativePath}/${media.filename}`;
 }
 
 export const verifyMediaMessage = async (
@@ -531,12 +538,14 @@ export const verifyMediaMessage = async (
     throw new Error("ERR_WAPP_DOWNLOAD_MEDIA");
   }
 
+  let mediaUrl = null;
   if (media) {
-    await saveMediaToFile(media);
+    mediaUrl = await saveMediaToFile(media, ticket);
   }
-  
+
+  let thumbnailUrl = null;  
   if (thumbnailMedia) {
-    await saveMediaToFile(thumbnailMedia);
+    thumbnailUrl = await saveMediaToFile(thumbnailMedia, ticket);
   }
 
   const body = getBodyMessage(msg);
@@ -548,9 +557,9 @@ export const verifyMediaMessage = async (
     body: body || media?.filename,
     fromMe: msg.key.fromMe,
     read: msg.key.fromMe,
-    mediaUrl: media?.filename,
+    mediaUrl,
     mediaType: media?.mimetype.split("/")[0],
-    thumbnailUrl: thumbnailMedia?.filename,
+    thumbnailUrl,
     quotedMsgId: quotedMsg?.id,
     ack: msg.status,
     remoteJid: msg.key.remoteJid,
