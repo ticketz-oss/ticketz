@@ -1,10 +1,8 @@
 import { Request, Response } from "express";
-import { isArray } from "lodash";
 import AppError from "../errors/AppError";
 
 import SetTicketMessagesAsRead from "../helpers/SetTicketMessagesAsRead";
 import { getIO } from "../libs/socket";
-import Message from "../models/Message";
 import Queue from "../models/Queue";
 import User from "../models/User";
 import Whatsapp from "../models/Whatsapp";
@@ -23,6 +21,8 @@ import EditWhatsAppMessage from "../services/WbotServices/EditWhatsAppMessage";
 import { sendFacebookMessageMedia } from "../services/FacebookServices/sendFacebookMessageMedia";
 import sendFaceMessage from "../services/FacebookServices/sendFacebookMessage";
 import { logger } from "../utils/logger";
+import { MessageData } from "../helpers/SendMessage";
+
 import {
   verifyMediaMessage,
   verifyMessage
@@ -34,18 +34,6 @@ import formatBody from "../helpers/Mustache";
 type IndexQuery = {
   pageNumber: string;
   markAsRead: string;
-};
-
-type MessageData = {
-  body: string;
-  fromMe: boolean;
-  read: boolean;
-  quotedMsg?: Message;
-  number?: string;
-  internal?: boolean;
-  ptt?: boolean;
-  quickMessageMediaId?: number;
-  saveOnTicket?: boolean;
 };
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
@@ -243,7 +231,7 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
 
   try {
     let { number } = messageData;
-    const { body } = messageData;
+    const { body, linkPreview } = messageData;
     const saveOnTicket = !!messageData.saveOnTicket;
 
     if (!number.includes("@")) {
@@ -286,6 +274,7 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
           data: {
             number,
             body,
+            linkPreview,
             saveOnTicket
           }
         },

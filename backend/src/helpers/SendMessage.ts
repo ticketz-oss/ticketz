@@ -3,12 +3,20 @@ import Whatsapp from "../models/Whatsapp";
 import GetWhatsappWbot from "./GetWhatsappWbot";
 import { getMessageFileOptions } from "../services/WbotServices/SendWhatsAppMedia";
 import { handleMessage } from "../services/WbotServices/wbotMessageListener";
+import Message from "../models/Message";
 
 export type MessageData = {
-  number: number | string;
+  number: string;
   body: string;
   mediaPath?: string;
+  internal?: boolean;
+  ptt?: boolean;
+  quickMessageMediaId?: number;
   saveOnTicket?: boolean;
+  fromMe?: boolean;
+  read?: boolean;
+  quotedMsg?: Message;
+  linkPreview?: any;
 };
 
 export const SendMessage = async (
@@ -32,7 +40,13 @@ export const SendMessage = async (
         });
       }
     } else {
-      message = await wbot.sendMessage(chatId, { text: body });
+      message = await wbot.sendMessage(chatId, {
+        text: body,
+        linkPreview:
+          messageData.linkPreview === true
+            ? undefined
+            : messageData.linkPreview || false
+      });
     }
 
     if (messageData.saveOnTicket) {

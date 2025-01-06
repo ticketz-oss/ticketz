@@ -280,7 +280,7 @@ const MessagesAPI = () => {
             <b>Endpoint: </b> {getEndpoint()} <br />
             <b>Método: </b> POST <br />
             <b>Headers: </b> Authorization ("Bearer " + token cadastrado) e Content-Type (application/json) <br />
-            <b>Body: </b> {"{ \"number\": \"558599999999\", \"body\": \"Sua mensagem\", \"saveOnTicket\": true }"}
+            <b>Body: </b> {"{ \"number\": \"558599999999\", \"body\": \"Sua mensagem\", \"saveOnTicket\": true, \"linkPreview\": true }"}
           </Typography>
         </Grid>
         <Grid item xs={12} sm={6}>
