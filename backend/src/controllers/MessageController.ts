@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import fs from "fs";
 import AppError from "../errors/AppError";
 
 import SetTicketMessagesAsRead from "../helpers/SetTicketMessagesAsRead";
@@ -71,6 +72,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
       await Promise.all(
         medias.map(async (media: Express.Multer.File) => {
           await SendWhatsAppMedia({ media, ticket });
+          fs.unlinkSync(media.path);
         })
       );
     }
