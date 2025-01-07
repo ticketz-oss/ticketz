@@ -1,6 +1,6 @@
 import path, { join } from "path";
 import { promisify } from "util";
-import { writeFile } from "fs";
+import fs, { writeFile } from "fs";
 import * as Sentry from "@sentry/node";
 import { isNil, head } from "lodash";
 
@@ -59,6 +59,8 @@ import { makeRandomId } from "../../helpers/MakeRandomId";
 import CheckSettings, { GetCompanySetting } from "../../helpers/CheckSettings";
 import Whatsapp from "../../models/Whatsapp";
 import { SimpleObjectCache } from "../../helpers/simpleObjectCache";
+import { getPublicPath } from "../../helpers/GetPublicPath";
+
 import { CreateInternalMessageService } from "../MessageServices/CreateInternalMessageService";
 import {
   IntegrationMessage,
@@ -553,26 +555,38 @@ const verifyQuotedMessage = async (
   return quotedMsg;
 };
 
-const saveMediaToFile = async (media: {
-  data: Buffer;
-  mimetype: string;
-  filename: string;
-}) => {
+const saveMediaToFile = async (
+  media: {
+    data: Buffer;
+    mimetype: string;
+    filename: string;
+  },
+  ticket: Ticket
+): Promise<string> => {
   if (!media.filename) {
     const ext = media.mimetype.split("/")[1].split(";")[0];
     media.filename = `${new Date().getTime()}.${ext}`;
   }
 
-  const filePath = __dirname.endsWith("/dist")
-    ? path.resolve(__dirname, "..", "public")
-    : path.resolve(__dirname, "..", "..", "..", "public");
+  const filePath = getPublicPath();
+
+  const relativePath = `media/${ticket.companyId}/${ticket.contactId}/${ticket.id}`;
 
   try {
-    await writeFileAsync(join(filePath, media.filename), media.data, "base64");
+    // create folders inside filepath if not exists
+    await fs.promises.mkdir(join(filePath, relativePath), { recursive: true });
+
+    await writeFileAsync(
+      join(filePath, relativePath, media.filename),
+      media.data,
+      "base64"
+    );
   } catch (err) {
     Sentry.captureException(err);
     logger.error(err);
   }
+
+  return `${relativePath}/${media.filename}`;
 };
 
 export const verifyMediaMessage = async (
@@ -610,12 +624,14 @@ export const verifyMediaMessage = async (
     throw new Error("ERR_WAPP_DOWNLOAD_MEDIA");
   }
 
+  let mediaUrl = null;
   if (media) {
-    await saveMediaToFile(media);
+    mediaUrl = await saveMediaToFile(media, ticket);
   }
 
+  let thumbnailUrl = null;
   if (thumbnailMedia) {
-    await saveMediaToFile(thumbnailMedia);
+    thumbnailUrl = await saveMediaToFile(thumbnailMedia, ticket);
   }
 
   const body = getBodyMessage(msg);
@@ -627,9 +643,9 @@ export const verifyMediaMessage = async (
     body: body || media?.filename,
     fromMe: msg.key.fromMe,
     read: msg.key.fromMe,
-    mediaUrl: media?.filename,
+    mediaUrl,
     mediaType: media && normalizeMediaType(media.mimetype),
-    thumbnailUrl: thumbnailMedia?.filename,
+    thumbnailUrl,
     quotedMsgId: quotedMsg?.id,
     ack: msg.status,
     remoteJid: msg.key.remoteJid,

@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import fs from "fs";
 import AppError from "../errors/AppError";
 
 import SetTicketMessagesAsRead from "../helpers/SetTicketMessagesAsRead";
@@ -106,6 +107,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
             caption,
             ptt
           });
+          fs.unlinkSync(media.path);
           verifyMediaMessage(
             message,
             ticket,
