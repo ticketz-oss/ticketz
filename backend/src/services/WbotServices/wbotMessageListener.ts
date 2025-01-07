@@ -56,6 +56,7 @@ import { makeRandomId } from "../../helpers/MakeRandomId";
 import CheckSettings, { GetCompanySetting } from "../../helpers/CheckSettings";
 import Whatsapp from "../../models/Whatsapp";
 import { SimpleObjectCache } from "../../helpers/simpleObjectCache";
+import { getPublicPath } from "../../helpers/GetPublicPath";
 
 type Session = WASocket & {
   id?: number;
@@ -497,9 +498,7 @@ const saveMediaToFile = async (media, ticket: Ticket): Promise<string> => {
     media.filename = `${new Date().getTime()}.${ext}`;
   }
 
-  const filePath = __dirname.endsWith("/dist")
-    ? path.resolve(__dirname, "..", "public")
-    : path.resolve(__dirname, "..", "..", "..", "public");
+  const filePath = getPublicPath();
 
   const relativePath = `media/${ticket.companyId}/${ticket.contactId}/${ticket.id}`;
 
