@@ -108,7 +108,7 @@ export default function Options(props) {
   const [apiToken, setApiToken] = useState("");
   const [downloadLimit, setDownloadLimit] = useState("15");
   
-  const [messageVisibility, setMessageVisibility] = useState("Respect Message Queue");
+  const [messageVisibility, setMessageVisibility] = useState("message");
 
   const [transferToNewTicket, setTransferToNewTicket] = useState("connection");
   const [restrictTransferConnection, setRestrictTransferConnection] = useState("connection");
