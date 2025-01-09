@@ -53,10 +53,11 @@ class Message extends Model {
 
   @Column(DataType.STRING)
   get mediaUrl(): string | null {
-    if (this.getDataValue("mediaUrl")) {
-      return `${process.env.BACKEND_URL}/public/${this.getDataValue(
-        "mediaUrl"
-      )}`;
+    const value = this.getDataValue("mediaUrl");
+    if (value) {
+      return value.startsWith("http")
+        ? value
+        : `${process.env.BACKEND_URL}/public/${value}`;
     }
     return null;
   }
@@ -65,7 +66,9 @@ class Message extends Model {
   get thumbnailUrl(): string | null {
     const value = this.getDataValue("thumbnailUrl");
     if (value) {
-      return `${process.env.BACKEND_URL}/public/${value}`;
+      return value.startsWith("http")
+        ? value
+        : `${process.env.BACKEND_URL}/public/${value}`;
     }
     return null;
   }
