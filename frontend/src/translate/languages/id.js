@@ -839,6 +839,9 @@ const messages = {
         "mustacheVariables": {
           "title": "Variabel yang tersedia:"
         },
+        "storageOptions": {
+          "title": "Konfigurasi Penyimpanan Objek",
+        },
         WelcomeGreeting: {
           greetings: "halo",
           welcome: "selamat datang di",

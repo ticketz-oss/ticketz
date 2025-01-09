@@ -832,6 +832,9 @@ const messages = {
         "mustacheVariables": {
           "title": "Available variables:",
         },
+        "storageOptions": {
+          "title": "Object Storage Configuration",
+        },
         WelcomeGreeting: {
           greetings: "Hello",
           welcome: "Welcome to",
