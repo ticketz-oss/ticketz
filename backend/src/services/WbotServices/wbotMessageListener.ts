@@ -71,6 +71,7 @@ import {
 import Integration from "../../models/Integration";
 import IntegrationSession from "../../models/IntegrationSession";
 import getFilenameFromUrl from "../../helpers/getFilenameFromUrl";
+import { S3Storage } from "../../helpers/S3Storage";
 
 type Session = WASocket & {
   id?: number;
@@ -96,6 +97,7 @@ const ackMutex = new Mutex();
 const groupContactCache = new SimpleObjectCache(1000 * 30, logger);
 
 const integrationServices = IntegrationServices.getInstance();
+const fileStorage = S3Storage.getInstance();
 
 const getTypeMessage = (msg: proto.IWebMessageInfo): string => {
   return getContentType(msg.message);
@@ -571,6 +573,24 @@ const saveMediaToFile = async (
   const filePath = getPublicPath();
 
   const relativePath = `media/${ticket.companyId}/${ticket.contactId}/${ticket.id}`;
+
+  await fileStorage.prepare();
+
+  if (fileStorage.storage) {
+    try {
+      await fileStorage.storage.write(
+        `${relativePath}/${media.filename}`,
+        media.data
+      );
+
+      return fileStorage.storage.publicUrl(`${relativePath}/${media.filename}`);
+    } catch (error) {
+      logger.error(
+        { error },
+        "Error saving media to file storage - falling back to local"
+      );
+    }
+  }
 
   try {
     // create folders inside filepath if not exists
