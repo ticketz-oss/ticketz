@@ -22,6 +22,9 @@ import { copyToClipboard } from "../../helpers/copyToClipboard";
 import useQueues from "../../hooks/useQueues";
 import { i18n } from "../../translate/i18n.js";
 
+import { DynamicForm } from "../DynamicForm";
+import { s3FormSchema } from "./s3options.js";
+
 const useStyles = makeStyles((theme) => ({
   container: {
     paddingTop: theme.spacing(4),
@@ -105,7 +108,7 @@ export default function Options(props) {
   const [apiToken, setApiToken] = useState("");
   const [downloadLimit, setDownloadLimit] = useState("15");
   
-  const [messageVisibility, setMessageVisibility] = useState("Respect Message Queue");
+  const [messageVisibility, setMessageVisibility] = useState("message");
 
   const [transferToNewTicket, setTransferToNewTicket] = useState("connection");
   const [restrictTransferConnection, setRestrictTransferConnection] = useState("connection");
@@ -124,6 +127,8 @@ export default function Options(props) {
   const [closedTicketVisibility, setClosedTicketVisibility] = useState("User");
   const [ticketAcceptedMessage, setTicketAcceptedMessage] = useState("");
   const [transferMessage, setTransferMessage] = useState("");
+  
+  const [s3ConfigData, setS3ConfigData] = useState({});
 
   const ticketAcceptedMessageRef = useRef(null);
   const transferMessageRef = useRef(null);
@@ -239,6 +244,14 @@ export default function Options(props) {
 
       const transferMessage = settings.find((s) => s.key === "transferMessage");
       setTransferMessage(transferMessage?.value || "");
+      
+      const s3ConfigData = settings.find((s) => s.key === "s3ConfigData");
+      try {
+        const parsedS3ConfigData = s3ConfigData?.value ? JSON.parse(s3ConfigData.value) : {};
+        setS3ConfigData(parsedS3ConfigData);
+      } catch (e) {
+        setS3ConfigData({});
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
@@ -918,7 +931,6 @@ export default function Options(props) {
                   />
                 </FormControl>
               </Grid>
-
             </>
 
           )}
@@ -971,6 +983,24 @@ export default function Options(props) {
         </Grid>
 
       </Grid>
+      
+      <OnlyForSuperUser
+        user={currentUser}
+        yes={() => (
+          <Grid item>
+            <DynamicForm
+              title={i18n.t("settings.storageOptions.title")}
+              schema={s3FormSchema}
+              data={s3ConfigData}
+              setData={setS3ConfigData}
+              onBlur={async (_) => {
+                await handleSetting("s3ConfigData", JSON.stringify(s3ConfigData));
+              }}
+              styling={classes.textField}
+            />
+          </Grid>
+        )} />
+
     </>
   );
 }

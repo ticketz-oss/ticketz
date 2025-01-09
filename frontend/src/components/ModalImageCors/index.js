@@ -29,23 +29,6 @@ const useStyles = makeStyles(theme => ({
 
 const ModalImageCors = ({ imageUrl, isDeleted , data }) => {
 	const classes = useStyles();
-	const [fetching, setFetching] = useState(true);
-	const [blobUrl, setBlobUrl] = useState("");
-
-	useEffect(() => {
-		if (!imageUrl) return;
-		const fetchImage = async () => {
-			const { data, headers } = await api.get(imageUrl, {
-				responseType: "blob",
-			});
-			const url = window.URL.createObjectURL(
-				new Blob([data], { type: headers["content-type"] })
-			);
-			setBlobUrl(url);
-			setFetching(false);
-		};
-		fetchImage();
-	}, [imageUrl]);
 
 	return (
 		<ModalImage
@@ -53,9 +36,9 @@ const ModalImageCors = ({ imageUrl, isDeleted , data }) => {
         [classes.messageMediaDeleted] : isDeleted,
         [classes.messageMediaSticker] : data && ("stickerMessage" in data.message)
       })]}
-			smallSrcSet={fetching ? imageUrl : blobUrl}
-			medium={fetching ? imageUrl : blobUrl}
-			large={fetching ? imageUrl : blobUrl}
+			smallSrcSet={imageUrl}
+			medium={imageUrl}
+			large={imageUrl}
 			showRotate={true}
 			imageBackgroundColor="unset"
 			alt="image"

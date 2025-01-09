@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const DynamicForm = ({ schema, data, setData, margin, variant }) => {
+export const DynamicForm = ({ title, schema, data, setData, onBlur, margin, variant }) => {
   const classes = useStyles();
 
   // Helper function to handle value changes
@@ -47,6 +47,11 @@ export const DynamicForm = ({ schema, data, setData, margin, variant }) => {
 
   return (
       <Grid container>
+        {title && (
+          <Grid item xs={12}>
+            <h2>{title}</h2>
+          </Grid>
+        ) }
         {schema.map((field, index) => {
           console.log(`field ${index}`, field);
           if (!field) {
@@ -54,7 +59,11 @@ export const DynamicForm = ({ schema, data, setData, margin, variant }) => {
           }
 
           return (
-            <Grid key={field.name} item lg={field.lgWidth || 4} xs={12}>
+            <Grid key={field.name} item
+              md={field.mdWidth || field.lgWidth || 4}
+              sm={field.smWidth || field.mdWidth || field.lgWidth || 6}
+              xs={field.xsWidth || 12}
+            >
               <FormControl className={classes.maxWidth}>
                 {field.type === "text" ? (
                   <>
@@ -64,8 +73,9 @@ export const DynamicForm = ({ schema, data, setData, margin, variant }) => {
                       id={field.name}
                       variant={variant || "standard"}
                       margin={margin || "dense"}
-                      value={data[field.name]}
+                      value={data[field.name] || ""}
                       onChange={handleChange}
+                      onBlur={onBlur}
                       className={classes.textField}
                     />
                   </>
@@ -77,8 +87,9 @@ export const DynamicForm = ({ schema, data, setData, margin, variant }) => {
                         id={field.name}
                         variant={variant || "standard"}
                         margin={margin || "dense"}
-                        value={data[field.name]}
+                        value={data[field.name] || ""}
                         onChange={handleChange}
+                        onBlur={onBlur}
                         className={classes.textField}
                         multiline
                         rows={4}
@@ -97,6 +108,7 @@ export const DynamicForm = ({ schema, data, setData, margin, variant }) => {
                       label={field.title}
                       value={data[field.name] || ""}
                       onChange={handleChange}
+                      onBlur={onBlur}
                     >
                       {field.options.map((option) => (
                         <MenuItem key={option.value} value={option.value}>
@@ -113,6 +125,7 @@ export const DynamicForm = ({ schema, data, setData, margin, variant }) => {
                         id={field.name}
                         checked={!!data[field.name]}
                         onChange={handleChange}
+                        onBlur={onBlur}
                       />
                     }
                     label={field.title}

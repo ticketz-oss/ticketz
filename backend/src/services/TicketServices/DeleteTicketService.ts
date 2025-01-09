@@ -1,7 +1,13 @@
+import { join } from "path";
+import fs from "fs";
 import Ticket from "../../models/Ticket";
 import AppError from "../../errors/AppError";
 import TicketTraking from "../../models/TicketTraking";
 import { logger } from "../../utils/logger";
+import { getPublicPath } from "../../helpers/GetPublicPath";
+import { S3Storage } from "../../helpers/S3Storage";
+
+const fileStorage = S3Storage.getInstance();
 
 const DeleteTicketService = async (id: string): Promise<Ticket> => {
   const ticket = await Ticket.findOne({
@@ -23,7 +29,19 @@ const DeleteTicketService = async (id: string): Promise<Ticket> => {
     });
   }
 
+  const relativePath = `media/${ticket.companyId}/${ticket.contactId}/${ticket.id}`;
+
+  const ticketPath = join(getPublicPath(), relativePath);
+
   await ticket.destroy();
+
+  // recursively remove ticket media folder
+  fs.rmSync(ticketPath, { recursive: true, force: true });
+
+  await fileStorage.prepare();
+  if (fileStorage.storage) {
+    await fileStorage.storage.deleteDirectory(relativePath);
+  }
 
   return ticket;
 };
