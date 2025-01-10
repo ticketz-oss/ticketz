@@ -37,8 +37,8 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 app.use(Sentry.Handlers.requestHandler());
-app.get("/public/:filename", (req, res) => {
-  const filePath = path.join(uploadConfig.directory, req.params.filename);
+app.get("/public/*", (req, res) => {
+  const filePath = path.join(uploadConfig.directory, req.params[0]);
   res.download(filePath, (err: SystemError) => {
     if (err) {
       if (err.code === "ENOENT") {
@@ -46,7 +46,7 @@ app.get("/public/:filename", (req, res) => {
       } else {
         logger.debug(
           { err },
-          `Error downloading file ${req.params.filename}: ${err.message}`
+          `Error downloading file ${req.params[0]}: ${err.message}`
         );
         res.status(500).end();
       }
