@@ -34,6 +34,7 @@ import UpdateTicketService from "./services/TicketServices/UpdateTicketService";
 import Invoice from "./models/Invoices";
 import { checkNewInvoice } from "./services/PaymentGatewayServices/PaymentGatewayServices";
 import { handleMessage } from "./services/WbotServices/wbotMessageListener";
+import ShowService from "./services/CampaignService/ShowService";
 
 const connection = process.env.REDIS_URI || "";
 const limiterMax = process.env.REDIS_OPT_LIMITER_MAX || 1;
@@ -42,13 +43,6 @@ const limiterDuration = process.env.REDIS_OPT_LIMITER_DURATION || 3000;
 interface ProcessCampaignData {
   id: number;
   delay: number;
-}
-
-interface PrepareContactData {
-  contactId: number;
-  campaignId: number;
-  delay: number;
-  variables: any[];
 }
 
 interface DispatchCampaignData {
@@ -245,12 +239,6 @@ async function getCampaign(id: number) {
   });
 }
 
-async function getContact(id) {
-  return ContactListItem.findByPk(id, {
-    attributes: ["id", "name", "number", "email"]
-  });
-}
-
 async function getSettings(campaign) {
   const settings = await CampaignSetting.findAll({
     where: { companyId: campaign.companyId },
@@ -401,27 +389,84 @@ export function randomValue(min, max) {
   return Math.floor(Math.random() * max) + min;
 }
 
-async function verifyAndFinalizeCampaign(campaign) {
-  const { contacts } = campaign.contactList;
+async function verifyAndFinalizeCampaign(campaign: Campaign) {
+  const data = await ShowService(campaign.id);
 
-  const count1 = contacts.length;
-  const count2 = await CampaignShipping.count({
-    where: {
-      campaignId: campaign.id,
-      deliveredAt: {
-        [Op.not]: null
-      }
-    }
-  });
-
-  if (count1 === count2) {
+  if (data.valids === data.delivered) {
     await campaign.update({ status: "FINALIZADA", completedAt: moment() });
   }
 
   const io = getIO();
-  io.emit(`company-${campaign.companyId}-campaign`, {
-    record: campaign
+  io.emit(`company-${campaign.companyId}-campaign`, data);
+}
+
+async function prepareContact(
+  campaign: Campaign,
+  variables: any[],
+  contact: ContactListItem,
+  delay: number,
+  messages: string | any[],
+  confirmationMessages: string | any[]
+) {
+  const campaignShipping: any = {};
+  campaignShipping.number = contact.number;
+  campaignShipping.contactId = contact.id;
+  campaignShipping.campaignId = campaign.id;
+
+  if (messages.length) {
+    const radomIndex = randomValue(0, messages.length);
+    const message = getProcessedMessage(
+      messages[radomIndex],
+      variables,
+      contact
+    );
+    campaignShipping.message = `${message}`;
+  }
+
+  if (campaign.confirmation) {
+    if (confirmationMessages.length) {
+      const radomIndex = randomValue(0, confirmationMessages.length);
+      const message = getProcessedMessage(
+        confirmationMessages[radomIndex],
+        variables,
+        contact
+      );
+      campaignShipping.confirmationMessage = `${message}`;
+    }
+  }
+
+  const [record, created] = await CampaignShipping.findOrCreate({
+    where: {
+      campaignId: campaignShipping.campaignId,
+      contactId: campaignShipping.contactId
+    },
+    defaults: campaignShipping
   });
+
+  if (
+    !created &&
+    record.deliveredAt === null &&
+    record.confirmationRequestedAt === null
+  ) {
+    record.set(campaignShipping);
+    await record.save();
+  }
+
+  if (record.deliveredAt === null && record.confirmationRequestedAt === null) {
+    const nextJob = await campaignQueue.add(
+      "DispatchCampaign",
+      {
+        campaignId: campaign.id,
+        campaignShippingId: record.id,
+        contactListItemId: contact.id
+      },
+      {
+        delay
+      }
+    );
+
+    await record.update({ jobId: `${nextJob.id}` });
+  }
 }
 
 async function handleProcessCampaign(job) {
@@ -432,25 +477,26 @@ async function handleProcessCampaign(job) {
     const settings = await getSettings(campaign);
     if (campaign) {
       const { contacts } = campaign.contactList;
+      const messages = getCampaignValidMessages(campaign);
+      const confirmationMessages = campaign.confirmation
+        ? getCampaignValidConfirmationMessages(campaign)
+        : null;
       if (isArray(contacts)) {
         let index = 0;
         contacts.forEach(contact => {
-          campaignQueue.add(
-            "PrepareContact",
-            {
-              contactId: contact.id,
-              campaignId: campaign.id,
-              variables: settings.variables,
-              delay: delay || 0
-            },
-            {
-              removeOnComplete: true
-            }
-          );
+          prepareContact(
+            campaign,
+            settings.variables,
+            contact,
+            delay,
+            messages,
+            confirmationMessages
+          ).then(() => {
+            logger.info(
+              `Registro enviado pra fila de disparo: Campanha=${campaign.id};Contato=${contact.name};Delay=${delay}`
+            );
+          });
 
-          logger.info(
-            `Registro enviado pra fila de disparo: Campanha=${campaign.id};Contato=${contact.name};delay=${delay}`
-          );
           index += 1;
           if (index % settings.longerIntervalAfter === 0) {
             // intervalo maior após intervalo configurado de mensagens
@@ -469,92 +515,19 @@ async function handleProcessCampaign(job) {
   }
 }
 
-async function handlePrepareContact(job: { data: PrepareContactData }) {
-  try {
-    const { contactId, campaignId, delay, variables } = job.data;
-    const campaign = await getCampaign(campaignId);
-    const contact = await getContact(contactId);
-
-    const campaignShipping: any = {};
-    campaignShipping.number = contact.number;
-    campaignShipping.contactId = contactId;
-    campaignShipping.campaignId = campaignId;
-
-    const messages = getCampaignValidMessages(campaign);
-    if (messages.length) {
-      const radomIndex = randomValue(0, messages.length);
-      const message = getProcessedMessage(
-        messages[radomIndex],
-        variables,
-        contact
-      );
-      campaignShipping.message = `${message}`;
-    }
-
-    if (campaign.confirmation) {
-      const confirmationMessages =
-        getCampaignValidConfirmationMessages(campaign);
-      if (confirmationMessages.length) {
-        const radomIndex = randomValue(0, confirmationMessages.length);
-        const message = getProcessedMessage(
-          confirmationMessages[radomIndex],
-          variables,
-          contact
-        );
-        campaignShipping.confirmationMessage = `${message}`;
-      }
-    }
-
-    const [record, created] = await CampaignShipping.findOrCreate({
-      where: {
-        campaignId: campaignShipping.campaignId,
-        contactId: campaignShipping.contactId
-      },
-      defaults: campaignShipping
-    });
-
-    if (
-      !created &&
-      record.deliveredAt === null &&
-      record.confirmationRequestedAt === null
-    ) {
-      record.set(campaignShipping);
-      await record.save();
-    }
-
-    if (
-      record.deliveredAt === null &&
-      record.confirmationRequestedAt === null
-    ) {
-      const nextJob = await campaignQueue.add(
-        "DispatchCampaign",
-        {
-          campaignId: campaign.id,
-          campaignShippingId: record.id,
-          contactListItemId: contactId
-        },
-        {
-          delay
-        }
-      );
-
-      await record.update({ jobId: `${nextJob.id}` });
-    }
-
-    await verifyAndFinalizeCampaign(campaign);
-  } catch (err: unknown) {
-    Sentry.captureException(err);
-    logger.error(
-      `campaignQueue -> PrepareContact -> error: ${(err as Error).message}`
-    );
-  }
-}
-
 async function handleDispatchCampaign(job) {
   try {
     const { data } = job;
     const { campaignShippingId, campaignId }: DispatchCampaignData = data;
-    const campaign = await getCampaign(campaignId);
+    const campaign = await Campaign.findByPk(campaignId, {
+      include: [{ model: Whatsapp, as: "whatsapp" }]
+    });
+
+    if (!campaign) {
+      logger.error({ data }, "Campaign not found");
+      return;
+    }
+
     const wbot = await GetWhatsappWbot(campaign.whatsapp);
 
     logger.info(
@@ -846,9 +819,9 @@ export async function startQueueProcess() {
 
   campaignQueue.process("ProcessCampaign", handleProcessCampaign);
 
-  campaignQueue.process("PrepareContact", handlePrepareContact);
-
   campaignQueue.process("DispatchCampaign", handleDispatchCampaign);
+
+  campaignQueue.process("DispatchConfirmedCampaign", handleDispatchCampaign);
 
   userMonitor.process("EveryMinute", handleEveryMinute);
 
