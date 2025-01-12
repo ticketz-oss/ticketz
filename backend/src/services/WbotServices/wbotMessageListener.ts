@@ -2424,7 +2424,7 @@ const verifyRecentCampaign = async (
           confirmation: true
         });
         await campaignQueue.add(
-          "DispatchCampaign",
+          "DispatchConfirmedCampaign",
           {
             campaignShippingId: campaignShipping.id,
             campaignId: campaignShipping.campaignId
