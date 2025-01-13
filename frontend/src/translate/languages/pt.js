@@ -699,6 +699,15 @@ const messages = {
         },
       },
       settings: {
+        group: {
+          general: "Geral",
+          timeouts: "Tempos de espera",
+          officeHours: "Horário de expediente",
+          groups: "Grupos",
+          confidenciality: "Confidencialidade",
+          api: "API",
+          serveradmin: "Administração do servidor",
+        },
         success: "Configurações salvas com sucesso.",
         title: "Configurações",
         settings: {
