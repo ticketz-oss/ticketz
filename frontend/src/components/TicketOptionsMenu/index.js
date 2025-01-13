@@ -100,9 +100,9 @@ const TicketOptionsMenu = ({ ticket, menuOpen, handleClose, anchorEl, showTabGro
 				/>
 			</Menu>
 			<ConfirmationModal
-				title={`${i18n.t("ticketOptionsMenu.confirmationModal.title")}${
+				title={`${i18n.t("ticketOptionsMenu.confirmationModal.title")} #${
 					ticket.id
-				} ${i18n.t("ticketOptionsMenu.confirmationModal.titleFrom")} ${
+				} ${
 					ticket.contact.name
 				}?`}
 				open={confirmationOpen}
