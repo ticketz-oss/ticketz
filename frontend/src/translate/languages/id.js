@@ -718,6 +718,15 @@ const messages = {
         },
       },
       settings: {
+        group: {
+          general: "Umum",
+          timeouts: "Waktu habis",
+          officeHours: "Jam kantor",
+          groups: "Grup",
+          confidenciality: "Kerahasiaan",
+          api: "API",
+          serveradmin: "Administrasi Server",
+        },
         success: "Pengaturan berhasil disimpan.",
         title: "Pengaturan",
         settings: {

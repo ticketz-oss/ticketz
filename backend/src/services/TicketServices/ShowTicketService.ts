@@ -5,6 +5,7 @@ import User from "../../models/User";
 import Queue from "../../models/Queue";
 import Tag from "../../models/Tag";
 import Whatsapp from "../../models/Whatsapp";
+import UserSocketSession from "../../models/UserSocketSession";
 
 const include = [
   {
@@ -25,7 +26,15 @@ const include = [
   {
     model: User,
     as: "user",
-    attributes: ["id", "name"]
+    attributes: ["id", "name"],
+    include: [
+      {
+        model: UserSocketSession,
+        as: "socketSessions",
+        where: { active: true },
+        required: false
+      }
+    ]
   },
   {
     model: Queue,

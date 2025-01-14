@@ -2227,7 +2227,11 @@ const handleMessage = async (
           "pending"
         );
         let currentSchedule: ScheduleResult = null;
-        if (scheduleType === "company") {
+
+        const isOpenOnline =
+          ticket.status === "open" && ticket.user.socketSessions.length > 0;
+
+        if (scheduleType === "company" && !isOpenOnline) {
           currentSchedule = await VerifyCurrentSchedule(companyId);
         }
 
@@ -2257,7 +2261,11 @@ const handleMessage = async (
           return;
         }
 
-        if (scheduleType === "queue" && ticket.queueId !== null) {
+        if (
+          scheduleType === "queue" &&
+          ticket.queueId !== null &&
+          !isOpenOnline
+        ) {
           currentSchedule = await VerifyCurrentSchedule(
             companyId,
             ticket.queueId

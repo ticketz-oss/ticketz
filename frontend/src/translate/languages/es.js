@@ -710,6 +710,14 @@ const messages = {
         },
       },
       settings: {
+        group: {
+          general: "General",
+          timeouts: "Tiempos de espera",
+          officeHours: "Horas de oficina",
+          groups: "Grupos",
+          confidenciality: "Confidencialidad",
+          serveradmin: "Administración del servidor",
+        },
         success: "Configuraciones guardadas exitosamente.",
         title: "Configuraciones",
         settings: {
