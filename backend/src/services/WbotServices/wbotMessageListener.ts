@@ -1303,7 +1303,8 @@ export const startQueue = async (
           where: { parentId: null },
           required: false
         }
-      ]
+      ],
+      order: [["options", "option", "ASC"]]
     });
   }
 
