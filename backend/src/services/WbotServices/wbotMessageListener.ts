@@ -1626,7 +1626,10 @@ const handleMessage = async (
       if (!msg.key.fromMe && scheduleType) {
         const outOfHoursAction = await GetCompanySetting(companyId, "outOfHoursAction", "pending");
         let currentSchedule: ScheduleResult = null;
-        if (scheduleType === "company") {
+        
+        const isOpenOnline = ticket.status === "open" && ticket.user.socketSessions.length > 0;
+        
+        if (scheduleType === "company" && !isOpenOnline) {
           currentSchedule = await VerifyCurrentSchedule(companyId);
 
           if (
@@ -1651,7 +1654,7 @@ const handleMessage = async (
           }
         }
 
-        if (scheduleType === "queue" && ticket.queueId !== null) {
+        if (scheduleType === "queue" && ticket.queueId !== null && !isOpenOnline) {
           currentSchedule = await VerifyCurrentSchedule(companyId, ticket.queueId);
           const queue = await Queue.findByPk(ticket.queueId);
 
