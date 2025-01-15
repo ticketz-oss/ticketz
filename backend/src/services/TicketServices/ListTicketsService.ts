@@ -23,6 +23,7 @@ interface Request {
   showAll?: string;
   userId: string;
   withUnreadMessages?: string;
+  all?: boolean;
   queueIds: number[];
   tags: number[];
   users: number[];
@@ -49,6 +50,7 @@ const ListTicketsService = async ({
   showAll,
   userId,
   withUnreadMessages,
+  all,
   companyId
 }: Request): Promise<Response> => {
   const user = await User.findByPk(userId, {
@@ -256,8 +258,8 @@ const ListTicketsService = async ({
     };
   }
 
-  const limit = 40;
-  const offset = limit * (+pageNumber - 1);
+  const limit = all ? undefined : 40;
+  const offset = all ? undefined : limit * (+pageNumber - 1);
 
   whereCondition = {
     ...whereCondition,
