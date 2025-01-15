@@ -20,7 +20,7 @@ const Chart = () => {
 	const theme = useTheme();
 
 	const date = useRef(new Date().toISOString());
-	const { tickets } = useTickets({ date: date.current });
+	const { tickets } = useTickets({ date: date.current, all: true });
 
 	const [chartData, setChartData] = useState([
 		{ time: "01:00", amount: 0 },
