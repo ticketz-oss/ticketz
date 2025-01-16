@@ -3,22 +3,31 @@ import { QueryInterface } from "sequelize";
 export default {
   up: async (queryInterface: QueryInterface) => {
     await queryInterface.sequelize.transaction(async transaction => {
+      // Remove invalid constraints
+      try {
+        await queryInterface.removeConstraint(
+          "WhatsappQueues",
+          "fk_whatsappqueues_queueid"
+        );
+      } catch (error) {
+        // ignore error
+      }
+
       // Remove invalid references
       await queryInterface.sequelize.query(
         `
           DELETE FROM "WhatsappQueues"
-          WHERE "whatsappId" NOT IN (SELECT "id" FROM "Whatsapps")
+          WHERE "queueId" NOT IN (SELECT "id" FROM "Queues")
         `,
         { transaction }
       );
 
-      // Add constraints
       await queryInterface.addConstraint("WhatsappQueues", {
-        fields: ["whatsappId"],
+        fields: ["queueId"],
         type: "foreign key",
-        name: "fk_whatsappqueues_whatsappid",
+        name: "fk_whatsappqueues_queueid",
         references: {
-          table: "Whatsapps",
+          table: "Queues",
           field: "id"
         },
         onUpdate: "CASCADE",
@@ -31,7 +40,7 @@ export default {
   down: (queryInterface: QueryInterface) => {
     return queryInterface.removeConstraint(
       "WhatsappQueues",
-      "fk_whatsappqueues_whatsappid"
+      "fk_whatsappqueues_queueid"
     );
   }
 };
