@@ -451,6 +451,11 @@ const downloadMedia = async (
   let stream: Transform;
   let contDownload = 0;
 
+  logger.debug(
+    { messageType, id: msg?.key?.id, msg },
+    "downloading message media"
+  );
+
   while (contDownload < 10 && !stream) {
     try {
       const tmpMessage = { ...message };
@@ -476,7 +481,17 @@ const downloadMedia = async (
     throw new Error("Failed to get stream");
   }
 
-  const buffer = await downloadStream(stream);
+  console.debug({ id: msg?.key?.id }, "downloadMedia stream received");
+
+  let buffer = null;
+  try {
+    buffer = await downloadStream(stream);
+  } catch (error) {
+    logger.error(
+      { error },
+      `Error downloading media: ${error.message} - ${msg?.key?.id}`
+    );
+  }
 
   if (!buffer) {
     Sentry.setExtra("ERR_WAPP_DOWNLOAD_MEDIA", { msg });
@@ -626,6 +641,10 @@ export const verifyMediaMessage = async (
   let thumbnailMedia: MediaInfo = null;
   let media: MediaInfo = null;
 
+  if (thumbnailMsg) {
+    logger.debug({ id: msg?.key?.id, msg }, "downloading thumbnail media");
+  }
+
   try {
     thumbnailMedia = thumbnailMsg && (await downloadThumbnail(thumbnailMsg));
   } catch (error) {
@@ -646,13 +665,22 @@ export const verifyMediaMessage = async (
   }
 
   let mediaUrl = null;
-  if (media) {
+  try {
     mediaUrl = await saveMediaToFile(media, ticket);
+  } catch (error) {
+    logger.error({ media, ticketId: ticket.id }, "Error saving media to file");
   }
 
   let thumbnailUrl = null;
   if (thumbnailMedia) {
-    thumbnailUrl = await saveMediaToFile(thumbnailMedia, ticket);
+    try {
+      thumbnailUrl = await saveMediaToFile(thumbnailMedia, ticket);
+    } catch (error) {
+      logger.error(
+        { thumbnailMedia, ticketId: ticket.id },
+        "Error saving thumbnail to file"
+      );
+    }
   }
 
   const body = getBodyMessage(msg);
