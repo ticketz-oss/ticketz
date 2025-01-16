@@ -93,6 +93,13 @@ class Queue extends Model<Queue> {
     hooks: true
   })
   integration: Integration;
+
+  @ForeignKey(() => Whatsapp)
+  @Column
+  whatsappId: number;
+
+  @BelongsTo(() => Whatsapp)
+  whatsapp: Whatsapp;
 }
 
 export default Queue;
