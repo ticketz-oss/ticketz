@@ -184,6 +184,9 @@ const messages = {
             native: "Chatbot Interno",
             selectTitle: "Provedor de Chatbot"
           },
+          whatsapp: {
+            selectTitle: "Conexión de WhatsApp",
+          },
           name: "Nombre",
           color: "Color",
           greetingMessage: "Mensaje de bienvenida",

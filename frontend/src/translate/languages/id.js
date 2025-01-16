@@ -180,6 +180,9 @@ const messages = {
             native: "Chatbot Internal",
             selectTitle: "Penyedia Chatbot"
           },
+          whatsapp: {
+            selectTitle: "Koneksi WhatsApp", 
+          },
           name: "Nama",
           color: "Warna",
           greetingMessage: "Pesan Sambutan",
