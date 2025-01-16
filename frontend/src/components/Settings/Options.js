@@ -767,10 +767,6 @@ export default function Options(props) {
           </FormControl>
         </Grid>
 
-        <Grid item xs={12}>
-          <h2 className={classes.groupTitle}>{i18n.t("settings.group.api")}</h2>
-        </Grid>
-
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="connrestricttoqueues-label">
@@ -842,6 +838,10 @@ export default function Options(props) {
               <MenuItem value={"User"}>{i18n.t("settings.closedTicketVisibility.options.user")}</MenuItem>
             </Select>
           </FormControl>
+        </Grid>
+
+        <Grid item xs={12}>
+          <h2 className={classes.groupTitle}>{i18n.t("settings.group.api")}</h2>
         </Grid>
 
         <Grid xs={12} sm={6} md={4} item>
