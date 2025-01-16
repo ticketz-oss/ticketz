@@ -97,6 +97,7 @@ const wbotMutex = new Mutex();
 const ackMutex = new Mutex();
 
 const groupContactCache = new SimpleObjectCache(1000 * 30, logger);
+const outOfHoursCache = new SimpleObjectCache(1000 * 60 * 5, logger);
 
 const integrationServices = IntegrationServices.getInstance();
 const fileStorage = S3Storage.getInstance();
@@ -454,6 +455,11 @@ const downloadMedia = async (
   let stream: Transform;
   let contDownload = 0;
 
+  logger.debug(
+    { messageType, id: msg?.key?.id, msg },
+    "downloading message media"
+  );
+
   while (contDownload < 10 && !stream) {
     try {
       const tmpMessage = { ...message };
@@ -479,7 +485,17 @@ const downloadMedia = async (
     throw new Error("Failed to get stream");
   }
 
-  const buffer = await downloadStream(stream);
+  console.debug({ id: msg?.key?.id }, "downloadMedia stream received");
+
+  let buffer = null;
+  try {
+    buffer = await downloadStream(stream);
+  } catch (error) {
+    logger.error(
+      { error },
+      `Error downloading media: ${error.message} - ${msg?.key?.id}`
+    );
+  }
 
   if (!buffer) {
     Sentry.setExtra("ERR_WAPP_DOWNLOAD_MEDIA", { msg });
@@ -629,6 +645,10 @@ export const verifyMediaMessage = async (
   let thumbnailMedia: MediaInfo = null;
   let media: MediaInfo = null;
 
+  if (thumbnailMsg) {
+    logger.debug({ id: msg?.key?.id, msg }, "downloading thumbnail media");
+  }
+
   try {
     thumbnailMedia = thumbnailMsg && (await downloadThumbnail(thumbnailMsg));
   } catch (error) {
@@ -649,13 +669,22 @@ export const verifyMediaMessage = async (
   }
 
   let mediaUrl = null;
-  if (media) {
+  try {
     mediaUrl = await saveMediaToFile(media, ticket);
+  } catch (error) {
+    logger.error({ media, ticketId: ticket.id }, "Error saving media to file");
   }
 
   let thumbnailUrl = null;
   if (thumbnailMedia) {
-    thumbnailUrl = await saveMediaToFile(thumbnailMedia, ticket);
+    try {
+      thumbnailUrl = await saveMediaToFile(thumbnailMedia, ticket);
+    } catch (error) {
+      logger.error(
+        { thumbnailMedia, ticketId: ticket.id },
+        "Error saving thumbnail to file"
+      );
+    }
   }
 
   const body = getBodyMessage(msg);
@@ -1307,7 +1336,8 @@ export const startQueue = async (
           where: { parentId: null },
           required: false
         }
-      ]
+      ],
+      order: [["options", "option", "ASC"]]
     });
   }
 
@@ -1393,6 +1423,7 @@ export const startQueue = async (
       !isNil(currentSchedule) &&
       (!currentSchedule || currentSchedule.inActivity === false)
     ) {
+      outOfHoursCache.set(`ticket-${ticket.id}`, true);
       const outOfHoursMessage =
         queue.outOfHoursMessage?.trim() ||
         "Estamos fora do horário de expediente";
@@ -2244,7 +2275,14 @@ const handleMessage = async (
           "pending"
         );
         let currentSchedule: ScheduleResult = null;
-        if (scheduleType === "company") {
+
+        const isOpenOnline =
+          ticket.status === "open" && ticket.user.socketSessions.length > 0;
+
+        const avoidResend =
+          !isOpenOnline && outOfHoursCache.get(`ticket-${ticket.id}`);
+
+        if (scheduleType === "company" && !isOpenOnline) {
           currentSchedule = await VerifyCurrentSchedule(companyId);
         }
 
@@ -2252,41 +2290,10 @@ const handleMessage = async (
           !isNil(currentSchedule) &&
           (!currentSchedule || currentSchedule.inActivity === false)
         ) {
-          const outOfHoursMessage =
-            whatsapp.outOfHoursMessage.trim() ||
-            "Estamos fora do horário de expediente";
-          const sentMessage = await wbot.sendMessage(
-            `${ticket.contact.number}@${
-              ticket.isGroup ? "g.us" : "s.whatsapp.net"
-            }`,
-            {
-              text: formatBody(outOfHoursMessage, ticket.contact)
-            }
-          );
-          await verifyMessage(sentMessage, ticket, ticket.contact);
-          if (ticket.status !== "open") {
-            await UpdateTicketService({
-              ticketData: { chatbot: false, status: outOfHoursAction },
-              ticketId: ticket.id,
-              companyId: ticket.companyId
-            });
-          }
-          return;
-        }
-
-        if (scheduleType === "queue" && ticket.queueId !== null) {
-          currentSchedule = await VerifyCurrentSchedule(
-            companyId,
-            ticket.queueId
-          );
-          const queue = await Queue.findByPk(ticket.queueId);
-
-          if (
-            !isNil(currentSchedule) &&
-            (!currentSchedule || currentSchedule.inActivity === false)
-          ) {
+          if (!avoidResend) {
+            outOfHoursCache.set(`ticket-${ticket.id}`, true);
             const outOfHoursMessage =
-              queue.outOfHoursMessage?.trim() ||
+              whatsapp.outOfHoursMessage.trim() ||
               "Estamos fora do horário de expediente";
             const sentMessage = await wbot.sendMessage(
               `${ticket.contact.number}@${
@@ -2297,6 +2304,47 @@ const handleMessage = async (
               }
             );
             await verifyMessage(sentMessage, ticket, ticket.contact);
+          }
+          if (ticket.status !== "open") {
+            await UpdateTicketService({
+              ticketData: { chatbot: false, status: outOfHoursAction },
+              ticketId: ticket.id,
+              companyId: ticket.companyId
+            });
+          }
+          return;
+        }
+
+        if (
+          scheduleType === "queue" &&
+          ticket.queueId !== null &&
+          !isOpenOnline
+        ) {
+          currentSchedule = await VerifyCurrentSchedule(
+            companyId,
+            ticket.queueId
+          );
+          const queue = await Queue.findByPk(ticket.queueId);
+
+          if (
+            !isNil(currentSchedule) &&
+            (!currentSchedule || currentSchedule.inActivity === false)
+          ) {
+            if (!avoidResend) {
+              outOfHoursCache.set(`ticket-${ticket.id}`, true);
+              const outOfHoursMessage =
+                queue.outOfHoursMessage?.trim() ||
+                "Estamos fora do horário de expediente";
+              const sentMessage = await wbot.sendMessage(
+                `${ticket.contact.number}@${
+                  ticket.isGroup ? "g.us" : "s.whatsapp.net"
+                }`,
+                {
+                  text: formatBody(outOfHoursMessage, ticket.contact)
+                }
+              );
+              await verifyMessage(sentMessage, ticket, ticket.contact);
+            }
             if (ticket.status !== "open") {
               await UpdateTicketService({
                 ticketData: { chatbot: false, status: outOfHoursAction },

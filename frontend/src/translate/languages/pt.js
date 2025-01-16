@@ -185,6 +185,9 @@ const messages = {
             native: "Chatbot Interno",
             selectTitle: "Provedor de Chatbot"
           },
+          whatsapp: {
+            selectTitle: "Conexão do Whatsapp",
+          },
           name: "Nome",
           color: "Cor",
           greetingMessage: "Mensagem de saudação",
@@ -718,6 +721,15 @@ const messages = {
         },
       },
       settings: {
+        group: {
+          general: "Geral",
+          timeouts: "Tempos de espera",
+          officeHours: "Horário de expediente",
+          groups: "Grupos",
+          confidenciality: "Confidencialidade",
+          api: "API",
+          serveradmin: "Administração do servidor",
+        },
         success: "Configurações salvas com sucesso.",
         title: "Configurações",
         settings: {

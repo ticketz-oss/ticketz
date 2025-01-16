@@ -22,6 +22,7 @@ import toastError from "../../errors/toastError";
 import ColorPicker from "../ColorPicker";
 import {
   FormControl,
+  FormControlLabel,
   Grid,
   IconButton,
   InputAdornment,
@@ -46,6 +47,7 @@ const useStyles = makeStyles((theme) => ({
   textField: {
     marginRight: theme.spacing(1),
     flex: 1,
+    width: "100%",
   },
 
   btnWrapper: {
@@ -72,6 +74,10 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
     paddingRight: theme.spacing(1),
   },
+  selectContainer: {
+    width: "100%",
+    textAlign: "left",
+  },  
 }));
 
 const QueueSchema = Yup.object().shape({
@@ -91,7 +97,6 @@ const QueueModal = ({ open, onClose, queueId }) => {
     color: "",
     greetingMessage: "",
     outOfHoursMessage: "",
-
   };
 
   const [colorPickerModalOpen, setColorPickerModalOpen] = useState(false);
@@ -103,6 +108,8 @@ const QueueModal = ({ open, onClose, queueId }) => {
   const attachmentFile = useRef(null);
   const [queueEditable, setQueueEditable] = useState(true);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [connections, setConnections] = useState([]);
+  const [whatsappId, setWhatsappId] = useState(0);
   const [integrations, setIntegrations] = useState([]);
   const [selectedIntegration, setSelectedIntegration] = useState("");
   const [integrationConfigData, setIntegrationConfigData] = useState({});
@@ -131,7 +138,12 @@ const QueueModal = ({ open, onClose, queueId }) => {
     api.get("/integrations").then(({ data }) => {
       setIntegrations(data);
     });
-  }, []);
+
+  
+    api.get('/whatsapp').then(({ data }) => {
+      setConnections(data);
+    });
+  }, [open]);
   
   useEffect(() => {
     if (!queueId) {
@@ -166,6 +178,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
           setSelectedIntegration("");
           setIntegrationConfigData({});
         }
+        setWhatsappId(data.whatsappId);
       } catch (err) {
         toastError(err);
       }
@@ -177,6 +190,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
         color: "",
         greetingMessage: "",
       });
+      setWhatsappId(0);
     };
   }, [queueId, open]);
 
@@ -212,14 +226,14 @@ const QueueModal = ({ open, onClose, queueId }) => {
         configuration: integrationConfigData,
       } : null;
       if (queueId) {
-        await api.put(`/queue/${queueId}`, { ...values, schedules, integration });
+        await api.put(`/queue/${queueId}`, { ...values, whatsappId, schedules, integration });
         if (attachment != null) {
           const formData = new FormData();
           formData.append("file", attachment);
           await api.post(`/queue/${queueId}/media-upload`, formData);
         }
       } else {
-        await api.post("/queue", { ...values, schedules, integration });
+        await api.post("/queue", { ...values, whatsappId, schedules, integration });
         if (attachment != null) {
           const formData = new FormData();
           formData.append("file", attachment);
@@ -294,87 +308,121 @@ const QueueModal = ({ open, onClose, queueId }) => {
               {tab === 0 && (
                 <Paper>
                   <DialogContent dividers>
-                    <Field
-                      as={TextField}
-                      label={i18n.t("queueModal.form.name")}
-                      autoFocus
-                      name="name"
-                      error={touched.name && Boolean(errors.name)}
-                      helperText={touched.name && errors.name}
-                      variant="outlined"
-                      margin="dense"
-                      className={classes.textField}
-                    />
-                    <Field
-                      as={TextField}
-                      label={i18n.t("queueModal.form.color")}
-                      name="color"
-                      id="color"
-                      onFocus={() => {
-                        setColorPickerModalOpen(true);
-                        document.activeElement.blur();
-                      }}
-                      error={touched.color && Boolean(errors.color)}
-                      helperText={touched.color && errors.color}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <div
-                              style={{ backgroundColor: values.color }}
-                              className={classes.colorAdorment}
-                            ></div>
-                          </InputAdornment>
-                        ),
-                        endAdornment: (
-                          <IconButton
-                            size="small"
-                            color="default"
-                            onClick={() => setColorPickerModalOpen(true)}
-                          >
-                            <Colorize />
-                          </IconButton>
-                        ),
-                      }}
-                      variant="outlined"
-                      margin="dense"
-                      className={classes.textField}
-                    />
-                    <ColorPicker
-                      open={colorPickerModalOpen}
-                      handleClose={() => setColorPickerModalOpen(false)}
-                      onChange={(color) => {
-                        values.color = color;
-                        setQueue(() => {
-                          return { ...values, color };
-                        });
-                      }}
-                    />
-                    
-                    <Grid xs={4} item>
-                      <FormControl
-                        className={classes.maxWidth}
-                        variant="outlined"
-                        margin="dense"
-                      >
-                        <InputLabel id="labelSelectChatbot">
-                          {i18n.t("queueModal.form.chatbot.selectTitle")}
-                        </InputLabel>
-                        <Select
-                          value={selectedIntegration}
-                          labelId="labelSelectChatbot"
-                          label={i18n.t("queueModal.form.chatbot.selectTitle")}
-                          onChange={(e) => setSelectedIntegration(e.target.value)}
+                    <Grid container spacing={2}>
+                      <Grid xs={12} sm={6} md={4} item>
+                        <Field
+                          as={TextField}
+                          label={i18n.t("queueModal.form.name")}
+                          autoFocus
+                          name="name"
+                          error={touched.name && Boolean(errors.name)}
+                          helperText={touched.name && errors.name}
+                          variant="outlined"
+                          margin="dense"
+                          className={classes.textField}
+                        />
+                      </Grid>
+                      <Grid xs={12} sm={6} md={4} item>
+                        <Field
+                          as={TextField}
+                          label={i18n.t("queueModal.form.color")}
+                          name="color"
+                          id="color"
+                          onFocus={() => {
+                            setColorPickerModalOpen(true);
+                            document.activeElement.blur();
+                          }}
+                          error={touched.color && Boolean(errors.color)}
+                          helperText={touched.color && errors.color}
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <div
+                                  style={{ backgroundColor: values.color }}
+                                  className={classes.colorAdorment}
+                                ></div>
+                              </InputAdornment>
+                            ),
+                            endAdornment: (
+                              <IconButton
+                                size="small"
+                                color="default"
+                                onClick={() => setColorPickerModalOpen(true)}
+                              >
+                                <Colorize />
+                              </IconButton>
+                            ),
+                          }}
+                          variant="outlined"
+                          margin="dense"
+                          className={classes.textField}
+                        />
+                        <ColorPicker
+                          open={colorPickerModalOpen}
+                          handleClose={() => setColorPickerModalOpen(false)}
+                          onChange={(color) => {
+                            values.color = color;
+                            setQueue(() => {
+                              return { ...values, color };
+                            });
+                          }}
+                        />
+                      </Grid>
+
+                      <Grid xs={12} sm={6} md={4} item>
+                        <FormControl
+                          className={classes.selectContainer}
+                          variant="outlined"
+                          margin="dense"
                         >
-                          <MenuItem value="">
-                            {i18n.t("queueModal.form.chatbot.native")}
-                          </MenuItem>
-                          {integrations.map((integration) => (
-                            <MenuItem key={integration.name} value={integration.name}>
-                              {integration.description}
+                          <InputLabel id="labelSelectWhatsapp">
+                            {i18n.t("queueModal.form.whatsapp.selectTitle")}
+                          </InputLabel>
+                          <Select
+                            labelId="labelSelectWhatsapp"
+                            label={i18n.t("queueModal.form.whatsapp.selectTitle")}
+                            name="whatsappId"
+                            value={whatsappId || ""}
+                            onChange={(e) => setWhatsappId(e.target.value)}
+                          >
+                            <MenuItem value="">&nbsp;</MenuItem>
+                            {connections.map((connection) => (
+                              <MenuItem key={connection.id} value={connection.id}>
+                                {connection.name}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                    </Grid>
+
+                    <Grid container spacing={2}>
+                      <Grid xs={4} item>
+                        <FormControl
+                          className={classes.maxWidth}
+                          variant="outlined"
+                          margin="dense"
+                        >
+                          <InputLabel id="labelSelectChatbot">
+                            {i18n.t("queueModal.form.chatbot.selectTitle")}
+                          </InputLabel>
+                          <Select
+                            value={selectedIntegration}
+                            labelId="labelSelectChatbot"
+                            label={i18n.t("queueModal.form.chatbot.selectTitle")}
+                            onChange={(e) => setSelectedIntegration(e.target.value)}
+                          >
+                            <MenuItem value="">
+                              {i18n.t("queueModal.form.chatbot.native")}
                             </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
+                            {integrations.map((integration) => (
+                              <MenuItem key={integration.name} value={integration.name}>
+                                {integration.description}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Grid>
                     </Grid>
 
                     {!selectedIntegration && 

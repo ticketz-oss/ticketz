@@ -21,6 +21,7 @@ type IndexQuery = {
   updatedAt?: string;
   showAll: string;
   withUnreadMessages: string;
+  all: string;
   queueIds: string;
   tags: string;
   users: string;
@@ -47,7 +48,8 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     queueIds: queueIdsStringified,
     tags: tagIdsStringified,
     users: userIdsStringified,
-    withUnreadMessages
+    withUnreadMessages,
+    all
   } = req.query as IndexQuery;
 
   const userId = req.user.id;
@@ -83,6 +85,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     userId,
     queueIds,
     withUnreadMessages,
+    all: !!all,
     companyId
   });
 

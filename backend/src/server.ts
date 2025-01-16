@@ -10,6 +10,7 @@ import {
   payGatewayInitialize
 } from "./services/PaymentGatewayServices/PaymentGatewayServices";
 import { IntegrationServices } from "./services/IntegrationServices/IntegrationServices";
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 import { DummyIntegration } from "./services/IntegrationServices/DummyIntegration";
 import { WebhookIntegration } from "./services/IntegrationServices/WebhookIntegration";
 import { TypebotIntegration } from "./services/IntegrationServices/TypebotIntegration";

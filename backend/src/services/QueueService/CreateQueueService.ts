@@ -14,6 +14,7 @@ interface QueueData {
   greetingMessage?: string;
   outOfHoursMessage?: string;
   schedules?: unknown[];
+  whatsappId?: number;
 }
 
 interface IntegrationData {

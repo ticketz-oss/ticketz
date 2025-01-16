@@ -38,6 +38,12 @@ const ListWhatsAppsService = async ({
       ]
     });
 
+    if (queue.whatsappId) {
+      return [
+        await Whatsapp.findByPk(queue.whatsappId, { include: options.include })
+      ];
+    }
+
     const restrictTransferConnection =
       (await GetCompanySetting(companyId, "restrictTransferConnection", "")) ===
       "enabled";
@@ -51,7 +57,7 @@ const ListWhatsAppsService = async ({
     }
   }
 
-  if (session !== undefined && session == 0) {
+  if (session !== undefined && session === 0) {
     options.attributes = { exclude: ["session"] };
   }
 

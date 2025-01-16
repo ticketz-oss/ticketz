@@ -86,6 +86,10 @@ const useStyles = makeStyles((theme) => ({
     height: 20,
   },
   
+  groupTitle: {
+    marginBottom: 0,
+  },  
+  
   uploadInput: {
     display: "none",
   },
@@ -428,9 +432,10 @@ export default function Options(props) {
   return (
     <>
       <Grid spacing={3} container>
-        {/* <Grid xs={12} item>
-                    <Title>Configurações Gerais</Title>
-                </Grid> */}
+        <Grid item xs={12}>
+          <h2 className={classes.groupTitle}>{i18n.t("settings.group.general")}</h2>
+        </Grid>
+
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="ratings-label">{i18n.t("settings.validations.title")}</InputLabel>
@@ -447,6 +452,63 @@ export default function Options(props) {
           </FormControl>
         </Grid>
 
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="call-type-label">
+            {i18n.t("settings.VoiceAndVideoCalls.title")}
+            </InputLabel>
+            <Select
+              labelId="call-type-label"
+              value={callType}
+              onChange={async (e) => {
+                handleCallType(e.target.value);
+              }}
+            >
+              <MenuItem value={"disabled"}>{i18n.t("settings.VoiceAndVideoCalls.options.disabled")}</MenuItem>
+              <MenuItem value={"enabled"}>{i18n.t("settings.VoiceAndVideoCalls.options.enabled")}</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="group-type-label">
+            {i18n.t("settings.AutomaticChatbotOutput.title")}
+            </InputLabel>
+            <Select
+              labelId="chatbot-autoexit"
+              value={chatbotAutoExit}
+              onChange={async (e) => {
+                handleChatbotAutoExit(e.target.value);
+              }}
+            >
+              <MenuItem value={"disabled"}>{i18n.t("settings.AutomaticChatbotOutput.options.disabled")}</MenuItem>
+              <MenuItem value={"enabled"}>{i18n.t("settings.AutomaticChatbotOutput.options.enabled")}</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="quickmessages-label">
+            {i18n.t("settings.QuickMessages.title")}
+            </InputLabel>
+            <Select
+              labelId="quickmessages-label"
+              value={quickMessages}
+              onChange={async (e) => {
+                handleQuickMessages(e.target.value);
+              }}
+            >
+              <MenuItem value={"company"}>{i18n.t("settings.QuickMessages.options.enabled")}</MenuItem>
+              <MenuItem value={"individual"}>{i18n.t("settings.QuickMessages.options.disabled")}</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+
+        <Grid item xs={12}>
+          <h2 className={classes.groupTitle}>{i18n.t("settings.group.timeouts")}</h2>
+        </Grid>
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <TextField
@@ -564,6 +626,9 @@ export default function Options(props) {
           </FormControl>
         </Grid>
 
+        <Grid item xs={12}>
+          <h2 className={classes.groupTitle}>{i18n.t("settings.group.officeHours")}</h2>
+        </Grid>
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="schedule-type-label">
@@ -601,6 +666,9 @@ export default function Options(props) {
           </FormControl>
         </Grid>
         
+        <Grid item xs={12}>
+          <h2 className={classes.groupTitle}>{i18n.t("settings.group.groups")}</h2>
+        </Grid>
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="group-type-label">
@@ -656,56 +724,8 @@ export default function Options(props) {
           </FormControl>
         </Grid>
 
-        <Grid xs={12} sm={6} md={4} item>
-          <FormControl className={classes.selectContainer}>
-            <InputLabel id="call-type-label">
-            {i18n.t("settings.VoiceAndVideoCalls.title")}
-            </InputLabel>
-            <Select
-              labelId="call-type-label"
-              value={callType}
-              onChange={async (e) => {
-                handleCallType(e.target.value);
-              }}
-            >
-              <MenuItem value={"disabled"}>{i18n.t("settings.VoiceAndVideoCalls.options.disabled")}</MenuItem>
-              <MenuItem value={"enabled"}>{i18n.t("settings.VoiceAndVideoCalls.options.enabled")}</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid xs={12} sm={6} md={4} item>
-          <FormControl className={classes.selectContainer}>
-            <InputLabel id="group-type-label">
-            {i18n.t("settings.AutomaticChatbotOutput.title")}
-            </InputLabel>
-            <Select
-              labelId="chatbot-autoexit"
-              value={chatbotAutoExit}
-              onChange={async (e) => {
-                handleChatbotAutoExit(e.target.value);
-              }}
-            >
-              <MenuItem value={"disabled"}>{i18n.t("settings.AutomaticChatbotOutput.options.disabled")}</MenuItem>
-              <MenuItem value={"enabled"}>{i18n.t("settings.AutomaticChatbotOutput.options.enabled")}</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid xs={12} sm={6} md={4} item>
-          <FormControl className={classes.selectContainer}>
-            <InputLabel id="quickmessages-label">
-            {i18n.t("settings.QuickMessages.title")}
-            </InputLabel>
-            <Select
-              labelId="quickmessages-label"
-              value={quickMessages}
-              onChange={async (e) => {
-                handleQuickMessages(e.target.value);
-              }}
-            >
-              <MenuItem value={"company"}>{i18n.t("settings.QuickMessages.options.enabled")}</MenuItem>
-              <MenuItem value={"individual"}>{i18n.t("settings.QuickMessages.options.disabled")}</MenuItem>
-            </Select>
-          </FormControl>
+        <Grid item xs={12}>
+          <h2 className={classes.groupTitle}>{i18n.t("settings.group.confidenciality")}</h2>
         </Grid>
 
         <Grid xs={12} sm={6} md={4} item>
@@ -817,6 +837,10 @@ export default function Options(props) {
           </FormControl>
         </Grid>
 
+        <Grid item xs={12}>
+          <h2 className={classes.groupTitle}>{i18n.t("settings.group.api")}</h2>
+        </Grid>
+
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <TextField
@@ -875,6 +899,9 @@ export default function Options(props) {
           user={currentUser}
           yes={() => (
             <>
+              <Grid item xs={12}>
+                <h2 className={classes.groupTitle}>{i18n.t("settings.group.serveradmin")}</h2>
+              </Grid>
               <Grid xs={12} sm={6} md={4} item>
                 <FormControl className={classes.selectContainer}>
                   <InputLabel id="group-type-label">
@@ -892,7 +919,6 @@ export default function Options(props) {
                   </Select>
                 </FormControl>
               </Grid>
-
 
               <Grid xs={12} sm={6} md={4} item>
                 <FormControl className={classes.selectContainer}>

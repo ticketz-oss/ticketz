@@ -179,6 +179,9 @@ const messages = {
             native: "Internal Chatbot",
             selectTitle: "Chatbot Provider"
           },
+          whatsapp: {
+            selectTitle: "WhatsApp Connection",
+          },
           name: "Name",
           color: "Color",
           greetingMessage: "Greeting Message",
@@ -709,6 +712,15 @@ const messages = {
         },
       },
       settings: {
+        group: {
+          general: "General",
+          timeouts: "Timeouts",
+          officeHours: "Office Hours",
+          groups: "Groups",
+          confidenciality: "Confidentiality",
+          api: "API",
+          serveradmin: "Server Administration",
+        },
         success: "Settings saved successfully.",
         title: "Settings",
         settings: {
