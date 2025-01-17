@@ -281,13 +281,18 @@ const UpdateTicketService = async ({
         // let oldTicket: Ticket = null;
         let newWhatsapp: Whatsapp = null;
 
-        if (restrictTransferConnection && queue.whatsapps.length) {
-          const isSameConnection = queue.whatsapps.find(
-            e => e.id === whatsapp.id
-          );
+        if (
+          restrictTransferConnection &&
+          (queue.whatsappId || queue.whatsapps.length)
+        ) {
+          const isSameConnection =
+            queue.whatsappId === whatsapp.id ||
+            queue.whatsapps.find(e => e.id === whatsapp.id);
 
           if (!isSameConnection) {
-            newWhatsapp = queue.whatsapps.find(e => e.status === "CONNECTED");
+            newWhatsapp =
+              (await queue.$get("whatsapp")) ||
+              queue.whatsapps.find(e => e.status === "CONNECTED");
 
             if (!newWhatsapp) {
               throw new AppError("ERR_WAPP_NOT_FOUND", 404);
