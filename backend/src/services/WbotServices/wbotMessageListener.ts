@@ -1426,7 +1426,7 @@ export const startQueue = async (
       const sentMessage = await wbot.sendMessage(
         `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
         {
-          text: formatBody(outOfHoursMessage, ticket.contact)
+          text: formatBody(outOfHoursMessage, ticket)
         }
       );
       await verifyMessage(sentMessage, ticket, contact);
@@ -1850,7 +1850,6 @@ const handleChartbot = async (
       // message didn't identified an option and company setting to exit chatbot
       await ticket.update({ chatbot: false });
       const whatsapp = await Whatsapp.findByPk(ticket.whatsappId);
-      const contact = await Contact.findByPk(ticket.contactId);
       if (whatsapp.transferMessage) {
         const body = formatBody(`${whatsapp.transferMessage}`, contact, ticket);
         await SendWhatsAppMessage({ body, ticket });
@@ -2048,8 +2047,10 @@ const handleMessage = async (
     const lastMessage = await Message.findOne({
       where: {
         contactId: contact.id,
-        companyId
+        companyId,
+        "$ticket.whatsappId$": whatsapp.id
       },
+      include: ["ticket"],
       order: [["createdAt", "DESC"]]
     });
 
@@ -2057,9 +2058,10 @@ const handleMessage = async (
       whatsapp.complationMessage.trim() || "Atendimento finalizado";
 
     if (
+      lastMessage &&
       unreadMessages === 0 &&
       complationMessage &&
-      formatBody(complationMessage, contact).trim().toLowerCase() ===
+      formatBody(complationMessage, lastMessage.ticket).trim().toLowerCase() ===
         lastMessage?.body.trim().toLowerCase()
     ) {
       return;
@@ -2323,7 +2325,7 @@ const handleMessage = async (
                   ticket.isGroup ? "g.us" : "s.whatsapp.net"
                 }`,
                 {
-                  text: formatBody(outOfHoursMessage, ticket.contact)
+                  text: formatBody(outOfHoursMessage, ticket)
                 }
               );
               await verifyMessage(sentMessage, ticket, ticket.contact);
@@ -2385,7 +2387,7 @@ const handleMessage = async (
                 ticket.isGroup ? "g.us" : "s.whatsapp.net"
               }`,
               {
-                text: formatBody(`${whatsapp.greetingMessage}`, contact, ticket)
+                text: formatBody(`${whatsapp.greetingMessage}`, ticket)
               }
             );
           },

@@ -177,13 +177,6 @@ const UpdateTicketService = async ({
             await SendWhatsAppMessage({ body: bodyRatingMessage, ticket });
           }
 
-          if (["facebook", "instagram"].includes(ticket.channel)) {
-            console.log(
-              `Checking if ${ticket.contact.number} is a valid ${ticket.channel} contact`
-            );
-            await sendFaceMessage({ body: bodyRatingMessage, ticket });
-          }
-
           await ticketTraking.update({
             ratingAt: moment().toDate()
           });
@@ -232,13 +225,6 @@ const UpdateTicketService = async ({
           const sentMessage = await SendWhatsAppMessage({ body, ticket });
 
           await verifyMessage(sentMessage, ticket, ticket.contact);
-        }
-
-        if (["facebook", "instagram"].includes(ticket.channel)) {
-          console.log(
-            `Checking if ${ticket.contact.number} is a valid ${ticket.channel} contact`
-          );
-          await sendFaceMessage({ body, ticket });
         }
       }
 
@@ -352,16 +338,6 @@ const UpdateTicketService = async ({
           });
           await ticket.reload();
         }
-      }
-
-      if (["facebook", "instagram"].includes(ticket.channel)) {
-        console.log(
-          `Checking if ${ticket.contact.number} is a valid ${ticket.channel} contact`
-        );
-        await sendFaceMessage({
-          body: "Você foi transferido, em breve iremos iniciar seu atendimento.",
-          ticket
-        });
       }
     }
 

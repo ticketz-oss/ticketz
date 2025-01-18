@@ -1,5 +1,4 @@
 import Mustache from "mustache";
-import Contact from "../models/Contact";
 import Ticket from "../models/Ticket";
 import User from "../models/User";
 
@@ -12,12 +11,11 @@ export const greeting = (): string => {
 
 export function formatBody(
   body: string,
-  contact: Contact,
   ticket?: Ticket,
   user?: User,
   customTags: [string, string] = null
 ): string {
-  if (!body && body !== "") {
+  if (!body || (!ticket && !user)) {
     return body;
   }
 
@@ -55,14 +53,13 @@ export function formatBody(
       ? ""
       : ticket.user.name;
 
-  const unique = Ticket ? ticket.id : `c-${contact.id}`;
-  const protocol = `${yy}${mm}${dd}-${unique}`;
+  const protocol = `${yy}${mm}${dd}-${ticket.id}`;
 
   const hora = `${hh}:${min}:${ss}`;
 
   const view = {
-    name: contact?.name.trim() || "",
-    firstname: contact?.name.trim().split(" ")[0] || "",
+    name: ticket.contact?.name.trim() || "",
+    firstname: ticket.contact?.name.trim().split(" ")[0] || "",
     gretting: greeting(),
     ms,
     protocol,
