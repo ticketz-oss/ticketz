@@ -95,9 +95,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
       let first = body && true;
       await Promise.all(
         medias.map(async (media: Express.Multer.File) => {
-          const caption = first
-            ? formatBody(body, ticket.contact, ticket, user)
-            : null;
+          const caption = first ? formatBody(body, ticket, user) : null;
           first = false;
           const message = await SendWhatsAppMedia({
             media,
@@ -130,7 +128,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
       mediaPath
     );
 
-    const caption = formatBody(body, ticket.contact, ticket, user);
+    const caption = formatBody(body, ticket, user);
 
     const msgFileOptions = { ...fileOptions, caption };
     const message = await sendWhatsappFile(ticket, msgFileOptions);

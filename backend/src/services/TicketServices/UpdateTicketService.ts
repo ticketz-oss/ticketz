@@ -15,7 +15,6 @@ import {
   startQueue,
   verifyMessage
 } from "../WbotServices/wbotMessageListener";
-import sendFaceMessage from "../FacebookServices/sendFacebookMessage";
 import AppError from "../../errors/AppError";
 import FindOrCreateTicketService from "./FindOrCreateTicketService";
 import { logger } from "../../utils/logger";
@@ -71,7 +70,7 @@ const sendFormattedMessage = async (
   const queueChangedMessage = await wbot.sendMessage(
     `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
     {
-      text: `\u200e${formatBody(message, ticket.contact, ticket, user)}`
+      text: `\u200e${formatBody(message, ticket, user)}`
     }
   );
   await verifyMessage(queueChangedMessage, ticket, ticket.contact);

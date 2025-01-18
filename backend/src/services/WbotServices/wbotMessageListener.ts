@@ -1054,7 +1054,7 @@ const sendMenu = async (
     ];
 
     const listMessage = {
-      text: formatBody(`${message}`, ticket.contact, ticket),
+      text: formatBody(`${message}`, ticket),
       buttonText: "Escolha uma opção",
       sections
     };
@@ -1084,7 +1084,7 @@ const sendMenu = async (
       });
     }
     const buttonMessage = {
-      text: formatBody(`${message}`, ticket.contact, ticket),
+      text: formatBody(`${message}`, ticket),
       buttons,
       headerType: 4
     };
@@ -1109,7 +1109,7 @@ const sendMenu = async (
     }
 
     const textMessage = {
-      text: formatBody(`${message}\n\n${options}`, ticket.contact, ticket)
+      text: formatBody(`${message}\n\n${options}`, ticket)
     };
 
     const sendMsg = await wbot.sendMessage(
@@ -1176,13 +1176,7 @@ export const wbotReplyHandler = async (
     await wbot
       .sendMessage(getTicketJid(ticket), {
         image: { url: reply.mediaUrl },
-        caption: formatBody(
-          reply.content,
-          ticket.contact,
-          ticket,
-          null,
-          customTags
-        )
+        caption: formatBody(reply.content, ticket, null, customTags)
       })
       .then(async sentMessage => {
         await verifyMediaMessage(sentMessage, ticket, ticket.contact);
@@ -1202,13 +1196,7 @@ export const wbotReplyHandler = async (
       .sendMessage(getTicketJid(ticket), {
         audio: { url: reply.mediaUrl },
         ptt: true,
-        caption: formatBody(
-          reply.content,
-          ticket.contact,
-          ticket,
-          null,
-          customTags
-        )
+        caption: formatBody(reply.content, ticket, null, customTags)
       })
       .then(async sentMessage => {
         await verifyMediaMessage(sentMessage, ticket, ticket.contact);
@@ -1227,13 +1215,7 @@ export const wbotReplyHandler = async (
     await wbot
       .sendMessage(getTicketJid(ticket), {
         video: { url: reply.mediaUrl },
-        caption: formatBody(
-          reply.content,
-          ticket.contact,
-          ticket,
-          null,
-          customTags
-        )
+        caption: formatBody(reply.content, ticket, null, customTags)
       })
       .then(async sentMessage => {
         await verifyMediaMessage(sentMessage, ticket, ticket.contact);
@@ -1253,13 +1235,7 @@ export const wbotReplyHandler = async (
       .sendMessage(getTicketJid(ticket), {
         video: { url: reply.mediaUrl },
         gifPlayback: true,
-        caption: formatBody(
-          reply.content,
-          ticket.contact,
-          ticket,
-          null,
-          customTags
-        )
+        caption: formatBody(reply.content, ticket, null, customTags)
       })
       .then(async sentMessage => {
         await verifyMediaMessage(sentMessage, ticket, ticket.contact);
@@ -1278,13 +1254,7 @@ export const wbotReplyHandler = async (
     await wbot
       .sendMessage(getTicketJid(ticket), {
         document: { url: reply.mediaUrl },
-        caption: formatBody(
-          reply.content,
-          ticket.contact,
-          ticket,
-          null,
-          customTags
-        ),
+        caption: formatBody(reply.content, ticket, null, customTags),
         fileName,
         mimetype: mime.lookup(fileName) || "application/octet-stream"
       })
@@ -1303,7 +1273,7 @@ export const wbotReplyHandler = async (
   await wbot.sendPresenceUpdate("composing", getTicketJid(ticket));
   await wbot
     .sendMessage(getTicketJid(ticket), {
-      text: formatBody(reply.content, ticket.contact, ticket, null, customTags)
+      text: formatBody(reply.content, ticket, null, customTags)
     })
     .then(async sentMessage => {
       await verifyMessage(sentMessage, ticket, ticket.contact);
@@ -1450,11 +1420,7 @@ export const startQueue = async (
 
   if (queue.options.length === 0) {
     if (queue.greetingMessage?.trim()) {
-      const body = formatBody(
-        `\u200e${queue.greetingMessage.trim()}`,
-        ticket.contact,
-        ticket
-      );
+      const body = formatBody(`\u200e${queue.greetingMessage.trim()}`, ticket);
 
       if (filePath) {
         optionsMsg.caption = body;
@@ -1537,7 +1503,7 @@ const verifyQueue = async (
     ];
 
     const listMessage = {
-      text: formatBody(`${greetingMessage}`, contact, ticket),
+      text: formatBody(`${greetingMessage}`, ticket),
       buttonText: "Escolha uma opção",
       sections
     };
@@ -1561,7 +1527,7 @@ const verifyQueue = async (
     });
 
     const buttonMessage = {
-      text: formatBody(`${greetingMessage}`, contact, ticket),
+      text: formatBody(`${greetingMessage}`, ticket),
       buttons,
       headerType: 4
     };
@@ -1582,7 +1548,7 @@ const verifyQueue = async (
     });
 
     const textMessage = {
-      text: formatBody(`${greetingMessage}\n\n${options}`, contact, ticket)
+      text: formatBody(`${greetingMessage}\n\n${options}`, ticket)
     };
 
     const sendMsg = await wbot.sendMessage(
@@ -1606,11 +1572,7 @@ const verifyQueue = async (
     await ticket.update({ chatbot: false });
     const whatsapp = await Whatsapp.findByPk(ticket.whatsappId);
     if (whatsapp.transferMessage) {
-      const body = formatBody(
-        `\u200e${whatsapp.transferMessage}`,
-        contact,
-        ticket
-      );
+      const body = formatBody(`\u200e${whatsapp.transferMessage}`, ticket);
       await SendWhatsAppMessage({ body, ticket });
     }
   } else {
@@ -1675,7 +1637,7 @@ const handleRating = async (
   const complationMessage =
     whatsapp.complationMessage.trim() || "Atendimento finalizado";
 
-  const text = formatBody(`\u200e${complationMessage}`, ticket.contact, ticket);
+  const text = formatBody(`\u200e${complationMessage}`, ticket);
   const jid = `${ticket.contact.number}@${
     ticket.isGroup ? "g.us" : "s.whatsapp.net"
   }`;
@@ -1851,7 +1813,7 @@ const handleChartbot = async (
       await ticket.update({ chatbot: false });
       const whatsapp = await Whatsapp.findByPk(ticket.whatsappId);
       if (whatsapp.transferMessage) {
-        const body = formatBody(`${whatsapp.transferMessage}`, contact, ticket);
+        const body = formatBody(`${whatsapp.transferMessage}`, ticket);
         await SendWhatsAppMessage({ body, ticket });
       }
     }
@@ -1903,11 +1865,7 @@ const handleChartbot = async (
     }
 
     if (currentOption.exitChatbot || currentOption.forwardQueueId) {
-      const text = formatBody(
-        `${currentOption.message}`,
-        ticket.contact,
-        ticket
-      );
+      const text = formatBody(`${currentOption.message}`, ticket);
 
       if (filePath) {
         optionsMsg.caption = text;
@@ -2285,7 +2243,7 @@ const handleMessage = async (
                 ticket.isGroup ? "g.us" : "s.whatsapp.net"
               }`,
               {
-                text: formatBody(outOfHoursMessage, ticket.contact)
+                text: formatBody(outOfHoursMessage, ticket)
               }
             );
             await verifyMessage(sentMessage, ticket, ticket.contact);
