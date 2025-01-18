@@ -1601,8 +1601,8 @@ const handleMessage = async (
     const lastMessage = await Message.findOne({
       where: {
         contactId: contact.id,
-        whatsapId: whatsapp.id,
-        companyId
+        companyId,
+        "$ticket.whatsappId$": whatsapp.id
       },
       include: ["ticket"],
       order: [["createdAt", "DESC"]]
