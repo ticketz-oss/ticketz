@@ -9,13 +9,6 @@ const whatsappRoutes = express.Router();
 
 whatsappRoutes.get("/whatsapp/", isAuth, WhatsAppController.index);
 
-whatsappRoutes.post(
-  "/facebook/",
-  isAuth,
-  isAdmin,
-  WhatsAppController.storeFacebook
-);
-
 whatsappRoutes.post("/whatsapp/", isAuth, isAdmin, WhatsAppController.store);
 
 whatsappRoutes.get(

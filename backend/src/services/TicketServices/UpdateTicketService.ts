@@ -12,7 +12,6 @@ import SendWhatsAppMessage from "../WbotServices/SendWhatsAppMessage";
 import FindOrCreateATicketTrakingService from "./FindOrCreateATicketTrakingService";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
 import { verifyMessage } from "../WbotServices/wbotMessageListener";
-import sendFaceMessage from "../FacebookServices/sendFacebookMessage";
 import AppError from "../../errors/AppError";
 import { GetCompanySetting } from "../../helpers/CheckSettings";
 
@@ -129,13 +128,6 @@ const UpdateTicketService = async ({
             await SendWhatsAppMessage({ body: bodyRatingMessage, ticket });
           }
 
-          if (["facebook", "instagram"].includes(ticket.channel)) {
-            console.log(
-              `Checking if ${ticket.contact.number} is a valid ${ticket.channel} contact`
-            );
-            await sendFaceMessage({ body: bodyRatingMessage, ticket });
-          }
-
           await ticketTraking.update({
             ratingAt: moment().toDate()
           });
@@ -167,13 +159,6 @@ const UpdateTicketService = async ({
           const sentMessage = await SendWhatsAppMessage({ body, ticket });
 
           await verifyMessage(sentMessage, ticket, ticket.contact);
-        }
-
-        if (["facebook", "instagram"].includes(ticket.channel)) {
-          console.log(
-            `Checking if ${ticket.contact.number} is a valid ${ticket.channel} contact`
-          );
-          await sendFaceMessage({ body, ticket });
         }
       }
 
@@ -218,16 +203,6 @@ const UpdateTicketService = async ({
             await verifyMessage(queueChangedMessage, ticket, ticket.contact);
           }
         }
-      }
-
-      if (["facebook", "instagram"].includes(ticket.channel)) {
-        console.log(
-          `Checking if ${ticket.contact.number} is a valid ${ticket.channel} contact`
-        );
-        await sendFaceMessage({
-          body: "Você foi transferido, em breve iremos iniciar seu atendimento.",
-          ticket
-        });
       }
     }
 

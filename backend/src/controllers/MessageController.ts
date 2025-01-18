@@ -16,8 +16,6 @@ import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import CheckContactNumber from "../services/WbotServices/CheckNumber";
 import EditWhatsAppMessage from "../services/WbotServices/EditWhatsAppMessage";
 
-import { sendFacebookMessageMedia } from "../services/FacebookServices/sendFacebookMessageMedia";
-import sendFaceMessage from "../services/FacebookServices/sendFacebookMessage";
 import { logger } from "../utils/logger";
 import { MessageData } from "../helpers/SendMessage";
 
@@ -76,25 +74,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
         })
       );
     }
-
-    if (["facebook", "instagram"].includes(channel)) {
-      await Promise.all(
-        medias.map(async (media: Express.Multer.File) => {
-          await sendFacebookMessageMedia({ media, ticket });
-        })
-      );
-    }
-  } else {
-    if (["facebook", "instagram"].includes(channel)) {
-      console.log(
-        `Checking if ${ticket.contact.number} is a valid ${channel} contact`
-      );
-      await sendFaceMessage({ body, ticket, quotedMsg });
-    }
-
-    if (channel === "whatsapp") {
-      await SendWhatsAppMessage({ body, ticket, quotedMsg });
-    }
+  } else if (channel === "whatsapp") {
+    await SendWhatsAppMessage({ body, ticket, quotedMsg });
   }
 
   return res.send();

@@ -4,7 +4,6 @@ import { getIO } from "../libs/socket";
 import { getWbot, removeWbot } from "../libs/wbot";
 import Whatsapp from "../models/Whatsapp";
 import DeleteBaileysService from "../services/BaileysServices/DeleteBaileysService";
-import { getAccessTokenFromPage, getPageProfile, subscribeApp } from "../services/FacebookServices/graphAPI";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
 
 import CreateWhatsAppService from "../services/WhatsappService/CreateWhatsAppService";
@@ -103,131 +102,6 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   return res.status(200).json(whatsapp);
 };
-
-export const storeFacebook = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
-  const {
-    facebookUserId,
-    facebookUserToken,
-    addInstagram
-  }: {
-    facebookUserId: string;
-    facebookUserToken: string;
-    addInstagram: boolean;
-  } = req.body;
-  const { companyId } = req.user;
-
-  const { data } = await getPageProfile(facebookUserId, facebookUserToken);
-
-  if (data.length === 0) {
-    return res.status(400).json({
-      error: "Facebook page not found"
-    });
-  }
-  const io = getIO();
-
-  const pages = [];
-  for await (const page of data) {
-    const { name, access_token, id, instagram_business_account } = page;
-
-
-    const acessTokenPage = await getAccessTokenFromPage(access_token);
-
-    if (instagram_business_account && addInstagram) {
-      const {
-        id: instagramId,
-        username,
-        name: instagramName
-      } = instagram_business_account;
-      pages.push({
-        name: `Insta ${username || instagramName}`,
-        facebookUserId: facebookUserId,
-        facebookPageUserId: instagramId,
-        facebookUserToken: acessTokenPage,
-        tokenMeta: facebookUserToken,
-        isDefault: false,
-        channel: "instagram",
-        status: "CONNECTED",
-        greetingMessage: "",
-        farewellMessage: "",
-        queueIds: [],
-        isMultidevice: false,
-        companyId
-      });
-
-      // await subscribeApp(instagramId, acessTokenPage);
-
-
-      pages.push({
-        name,
-        facebookUserId: facebookUserId,
-        facebookPageUserId: id,
-        facebookUserToken: acessTokenPage,
-        tokenMeta: facebookUserToken,
-        isDefault: false,
-        channel: "facebook",
-        status: "CONNECTED",
-        greetingMessage: "",
-        farewellMessage: "",
-        queueIds: [],
-        isMultidevice: false,
-        companyId
-      });
-
-      await subscribeApp(id, acessTokenPage);
-
-    }
-
-    if (!instagram_business_account) {
-      pages.push({
-        name,
-        facebookUserId: facebookUserId,
-        facebookPageUserId: id,
-        facebookUserToken: acessTokenPage,
-        tokenMeta: facebookUserToken,
-        isDefault: false,
-        channel: "facebook",
-        status: "CONNECTED",
-        greetingMessage: "",
-        farewellMessage: "",
-        queueIds: [],
-        isMultidevice: false,
-        companyId
-      });
-
-      await subscribeApp(page.id, acessTokenPage);
-    }
-  }
-
-
-  for await (const pageConection of pages) {
-    const exist = await Whatsapp.findOne({
-      where: {
-        facebookPageUserId: pageConection.facebookPageUserId
-      }
-    });
-
-    if (exist) {
-      await exist.update({
-        ...pageConection
-      });
-    }
-
-    if (!exist) {
-      const { whatsapp } = await CreateWhatsAppService(pageConection);
-
-      io.emit(`company-${companyId}-whatsapp`, {
-        action: "update",
-        whatsapp
-      });
-    }
-  }
-  return res.status(200);
-};
-
-
 
 export const show = async (req: Request, res: Response): Promise<Response> => {
   const { whatsappId } = req.params;
