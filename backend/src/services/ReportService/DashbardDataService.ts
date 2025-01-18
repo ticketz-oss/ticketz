@@ -3,6 +3,7 @@
 import { QueryTypes } from "sequelize";
 import * as _ from "lodash";
 import sequelize from "../../database";
+import { GetCompanySetting } from "../../helpers/CheckSettings";
 
 export interface DashboardData {
   counters: any;
@@ -19,6 +20,20 @@ export default async function DashboardDataService(
   companyId: string | number,
   params: Params
 ): Promise<DashboardData> {
+  const groupsTab =
+    (await GetCompanySetting(Number(companyId), "groupsTab", "disabled")) ===
+    "enabled";
+
+  // the logic is inverted because the setting is "ignore groups"
+  const groupsDisabled =
+    (await GetCompanySetting(
+      Number(companyId),
+      "CheckMsgIsGroup",
+      "enabled"
+    )) === "enabled";
+
+  const groupsWhere = groupsDisabled || groupsTab ? 'AND NOT "isGroup"' : "";
+
   const query = `
     with
     traking as (
@@ -66,6 +81,7 @@ export default async function DashboardDataService(
           select count(distinct "id")
           from "Tickets"
           where status like 'pending' and "companyId" = ?
+          ${groupsWhere}
         ) "supportPending",
         (select count(id) from traking where finished) "supportFinished",
         (
@@ -128,17 +144,17 @@ export default async function DashboardDataService(
   const replacements: any[] = [companyId];
 
   if (_.has(params, "days")) {
-    where += ` and tt."createdAt" >= (now() - '? days'::interval)`;
+    where += " and tt.\"createdAt\" >= (now() - '? days'::interval)";
     replacements.push(parseInt(`${params.days}`.replace(/\D/g, ""), 10));
   }
 
   if (_.has(params, "date_from")) {
-    where += ` and tt."createdAt" >= ?`;
+    where += ' and tt."createdAt" >= ?';
     replacements.push(`${params.date_from} 00:00:00`);
   }
 
   if (_.has(params, "date_to")) {
-    where += ` and tt."createdAt" <= ?`;
+    where += ' and tt."createdAt" <= ?';
     replacements.push(`${params.date_to} 23:59:59`);
   }
 
