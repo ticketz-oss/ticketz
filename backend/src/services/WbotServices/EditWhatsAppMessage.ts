@@ -40,7 +40,7 @@ const EditWhatsAppMessage = async ({
   const wbot = await GetTicketWbot(ticket);
 
   const msg = JSON.parse(message.dataJson);
-  const formattedBody = formatBody(body, ticket.contact);
+  const formattedBody = formatBody(body, ticket);
 
   try {
     await wbot.sendMessage(

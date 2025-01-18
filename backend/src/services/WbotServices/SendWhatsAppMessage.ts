@@ -50,7 +50,7 @@ const SendWhatsAppMessage = async ({
   }
 
   try {
-    const formattedBody = formatBody(body, ticket.contact);
+    const formattedBody = formatBody(body, ticket);
     const sentMessage = await wbot.sendMessage(
       number,
       {

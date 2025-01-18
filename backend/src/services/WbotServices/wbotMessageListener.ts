@@ -918,7 +918,7 @@ const sendMenu = async (
     ];
 
     const listMessage = {
-      text: formatBody(`${message}`, ticket.contact),
+      text: formatBody(`${message}`, ticket),
       buttonText: "Escolha uma opção",
       sections
     };
@@ -948,7 +948,7 @@ const sendMenu = async (
       });
     }
     const buttonMessage = {
-      text: formatBody(`${message}`, ticket.contact),
+      text: formatBody(`${message}`, ticket),
       buttons,
       headerType: 4
     };
@@ -973,7 +973,7 @@ const sendMenu = async (
     }
 
     const textMessage = {
-      text: formatBody(`${message}\n\n${options}`, ticket.contact)
+      text: formatBody(`${message}\n\n${options}`, ticket)
     };
 
     const sendMsg = await wbot.sendMessage(
@@ -1051,7 +1051,7 @@ const startQueue = async (
       const sentMessage = await wbot.sendMessage(
         `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
         {
-          text: formatBody(outOfHoursMessage, ticket.contact)
+          text: formatBody(outOfHoursMessage, ticket)
         }
       );
       await verifyMessage(sentMessage, ticket, contact);
@@ -1075,10 +1075,7 @@ const startQueue = async (
 
   if (queue.options.length === 0) {
     if (queue.greetingMessage?.trim()) {
-      const body = formatBody(
-        `${queue.greetingMessage.trim()}`,
-        ticket.contact
-      );
+      const body = formatBody(`${queue.greetingMessage.trim()}`, ticket);
 
       if (filePath) {
         optionsMsg.caption = body;
@@ -1158,7 +1155,7 @@ const verifyQueue = async (
     ];
 
     const listMessage = {
-      text: formatBody(`${greetingMessage}`, contact),
+      text: formatBody(`${greetingMessage}`, ticket),
       buttonText: "Escolha uma opção",
       sections
     };
@@ -1182,7 +1179,7 @@ const verifyQueue = async (
     });
 
     const buttonMessage = {
-      text: formatBody(`${greetingMessage}`, contact),
+      text: formatBody(`${greetingMessage}`, ticket),
       buttons,
       headerType: 4
     };
@@ -1203,7 +1200,7 @@ const verifyQueue = async (
     });
 
     const textMessage = {
-      text: formatBody(`${greetingMessage}\n\n${options}`, contact)
+      text: formatBody(`${greetingMessage}\n\n${options}`, ticket)
     };
 
     const sendMsg = await wbot.sendMessage(
@@ -1288,7 +1285,7 @@ export const handleRating = async (
 
     const complationMessage =
       whatsapp.complationMessage.trim() || "Atendimento finalizado";
-    const body = formatBody(`${complationMessage}`, ticket.contact);
+    const body = formatBody(`${complationMessage}`, ticket);
     await SendWhatsAppMessage({ body, ticket });
 
     await ticketTraking.update({
@@ -1412,9 +1409,8 @@ const handleChartbot = async (
       // message didn't identified an option and company setting to exit chatbot
       await ticket.update({ chatbot: false });
       const whatsapp = await Whatsapp.findByPk(ticket.whatsappId);
-      const contact = await Contact.findByPk(ticket.contactId);
       if (whatsapp.transferMessage) {
-        const body = formatBody(`${whatsapp.transferMessage}`, contact);
+        const body = formatBody(`${whatsapp.transferMessage}`, ticket);
         await SendWhatsAppMessage({ body, ticket });
       }
     }
@@ -1466,7 +1462,7 @@ const handleChartbot = async (
     }
 
     if (currentOption.exitChatbot || currentOption.forwardQueueId) {
-      const text = formatBody(`${currentOption.message}`, ticket.contact);
+      const text = formatBody(`${currentOption.message}`, ticket);
 
       if (filePath) {
         optionsMsg.caption = text;
@@ -1605,8 +1601,10 @@ const handleMessage = async (
     const lastMessage = await Message.findOne({
       where: {
         contactId: contact.id,
+        whatsapId: whatsapp.id,
         companyId
       },
+      include: ["ticket"],
       order: [["createdAt", "DESC"]]
     });
 
@@ -1614,9 +1612,10 @@ const handleMessage = async (
       whatsapp.complationMessage.trim() || "Atendimento finalizado";
 
     if (
+      lastMessage &&
       unreadMessages === 0 &&
       complationMessage &&
-      formatBody(complationMessage, contact).trim().toLowerCase() ===
+      formatBody(complationMessage, lastMessage.ticket).trim().toLowerCase() ===
         lastMessage?.body.trim().toLowerCase()
     ) {
       return;
@@ -1791,7 +1790,7 @@ const handleMessage = async (
                   ticket.isGroup ? "g.us" : "s.whatsapp.net"
                 }`,
                 {
-                  text: formatBody(outOfHoursMessage, ticket.contact)
+                  text: formatBody(outOfHoursMessage, ticket)
                 }
               );
               await verifyMessage(sentMessage, ticket, ticket.contact);
@@ -1832,7 +1831,7 @@ const handleMessage = async (
                   ticket.isGroup ? "g.us" : "s.whatsapp.net"
                 }`,
                 {
-                  text: formatBody(outOfHoursMessage, ticket.contact)
+                  text: formatBody(outOfHoursMessage, ticket)
                 }
               );
               await verifyMessage(sentMessage, ticket, ticket.contact);
@@ -1894,7 +1893,7 @@ const handleMessage = async (
                 ticket.isGroup ? "g.us" : "s.whatsapp.net"
               }`,
               {
-                text: formatBody(`${whatsapp.greetingMessage}`, contact, ticket)
+                text: formatBody(`${whatsapp.greetingMessage}`, ticket)
               }
             );
           },
@@ -2038,7 +2037,7 @@ export const sendMessageImage = async (
     sentMessage = await wbot.sendMessage(
       `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
       {
-        text: formatBody("Não consegui enviar o PDF, tente novamente!", contact)
+        text: formatBody("Não consegui enviar o PDF, tente novamente!", ticket)
       }
     );
   }
@@ -2069,7 +2068,7 @@ export const sendMessageLink = async (
     sentMessage = await wbot.sendMessage(
       `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
       {
-        text: formatBody("Não consegui enviar o PDF, tente novamente!", contact)
+        text: formatBody("Não consegui enviar o PDF, tente novamente!", ticket)
       }
     );
   }
