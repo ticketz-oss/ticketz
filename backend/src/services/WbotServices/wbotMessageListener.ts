@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import path, { join } from "path";
 import { promisify } from "util";
 import fs, { writeFile } from "fs";
@@ -16,7 +15,7 @@ import {
   proto,
   WAMessage,
   WAMessageStubType,
-  WAMessageUpdate,
+  WAMessageUpdate
 } from "@whiskeysockets/baileys";
 import { Mutex } from "async-mutex";
 import { Op } from "sequelize";
@@ -43,7 +42,9 @@ import UserRating from "../../models/UserRating";
 import SendWhatsAppMessage from "./SendWhatsAppMessage";
 import Queue from "../../models/Queue";
 import QueueOption from "../../models/QueueOption";
-import VerifyCurrentSchedule, { ScheduleResult } from "../CompanyService/VerifyCurrentSchedule";
+import VerifyCurrentSchedule, {
+  ScheduleResult
+} from "../CompanyService/VerifyCurrentSchedule";
 import Campaign from "../../models/Campaign";
 import CampaignShipping from "../../models/CampaignShipping";
 import { campaignQueue, parseToMilliseconds, randomValue } from "../../queues";
@@ -92,31 +93,39 @@ const getTypeEditedMessage = (msg: proto.IMessage): string => {
 
 export function makeid(length: number) {
   let result = "";
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   const charactersLength = characters.length;
-  for (let i = 0; i < length; i+=1) {
+  for (let i = 0; i < length; i += 1) {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
   return result;
 }
 
 const getBodyButton = (msg: proto.IWebMessageInfo): string => {
-  if (msg.key.fromMe && msg?.message?.viewOnceMessage?.message?.buttonsMessage?.contentText) {
+  if (
+    msg.key.fromMe &&
+    msg?.message?.viewOnceMessage?.message?.buttonsMessage?.contentText
+  ) {
     let bodyMessage = `*${msg?.message?.viewOnceMessage?.message?.buttonsMessage?.contentText}*`;
 
-    msg.message?.viewOnceMessage?.message?.buttonsMessage?.buttons.forEach((button) => {
-      bodyMessage += `\n\n${button.buttonText?.displayText}`;
-    });
+    msg.message?.viewOnceMessage?.message?.buttonsMessage?.buttons.forEach(
+      button => {
+        bodyMessage += `\n\n${button.buttonText?.displayText}`;
+      }
+    );
     return bodyMessage;
   }
 
   if (msg.key.fromMe && msg?.message?.viewOnceMessage?.message?.listMessage) {
     let bodyMessage = `*${msg?.message?.viewOnceMessage?.message?.listMessage?.description}*`;
-    msg.message?.viewOnceMessage?.message?.listMessage?.sections.forEach((button) => {
-      button.rows.forEach((rows) => {
-        bodyMessage += `\n\n${rows.title}`;
-      });
-    });
+    msg.message?.viewOnceMessage?.message?.listMessage?.sections.forEach(
+      button => {
+        button.rows.forEach(rows => {
+          bodyMessage += `\n\n${rows.title}`;
+        });
+      }
+    );
 
     return bodyMessage;
   }
@@ -125,10 +134,13 @@ const getBodyButton = (msg: proto.IWebMessageInfo): string => {
 };
 
 const msgLocation = (
-    image: Uint8Array | ArrayBuffer | { valueOf(): ArrayBuffer | SharedArrayBuffer; },
-    latitude: number,
-    longitude: number
-  ) => {
+  image:
+    | Uint8Array
+    | ArrayBuffer
+    | { valueOf(): ArrayBuffer | SharedArrayBuffer },
+  latitude: number,
+  longitude: number
+) => {
   if (image) {
     const b64 = Buffer.from(image).toString("base64");
 
@@ -139,40 +151,50 @@ const msgLocation = (
 };
 
 export const getBodyMessage = (msg: proto.IWebMessageInfo): string | null => {
-
   try {
     const type = getTypeMessage(msg);
 
     const types = {
       conversation: msg?.message?.conversation,
-      editedMessage: msg?.message?.editedMessage?.message?.protocolMessage?.editedMessage?.conversation,
+      editedMessage:
+        msg?.message?.editedMessage?.message?.protocolMessage?.editedMessage
+          ?.conversation,
       imageMessage: msg.message?.imageMessage?.caption,
       videoMessage: msg.message?.videoMessage?.caption,
       extendedTextMessage: msg.message?.extendedTextMessage?.text,
-      templateMessage: msg.message?.templateMessage?.hydratedTemplate?.hydratedContentText,
-      buttonsResponseMessage: msg.message?.buttonsResponseMessage?.selectedButtonId,
-      templateButtonReplyMessage: msg.message?.templateButtonReplyMessage?.selectedId,
-      messageContextInfo: msg.message?.buttonsResponseMessage?.selectedButtonId || msg.message?.listResponseMessage?.title,
-      buttonsMessage: getBodyButton(msg) || msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId,
-      viewOnceMessage: getBodyButton(msg) || msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId,
-      viewOnceMessageV2: msg.message?.viewOnceMessageV2?.message?.imageMessage?.caption || "",
+      templateMessage:
+        msg.message?.templateMessage?.hydratedTemplate?.hydratedContentText,
+      buttonsResponseMessage:
+        msg.message?.buttonsResponseMessage?.selectedButtonId,
+      templateButtonReplyMessage:
+        msg.message?.templateButtonReplyMessage?.selectedId,
+      messageContextInfo:
+        msg.message?.buttonsResponseMessage?.selectedButtonId ||
+        msg.message?.listResponseMessage?.title,
+      buttonsMessage:
+        getBodyButton(msg) ||
+        msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId,
+      viewOnceMessage:
+        getBodyButton(msg) ||
+        msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId,
+      viewOnceMessageV2:
+        msg.message?.viewOnceMessageV2?.message?.imageMessage?.caption || "",
       stickerMessage: "sticker",
-      contactMessage: 
+      contactMessage:
         msg.message?.contactMessage?.vcard &&
-        JSON.stringify(
-          {
-            ticketzvCard: [
-              {
-                displayName: msg.message.contactMessage.displayName,
-                vcard: msg.message.contactMessage.vcard
-              }
-            ]
-          }),
-      contactsArrayMessage: msg.message?.contactsArrayMessage &&
-        JSON.stringify(
-          {
-            ticketzvCard: msg.message.contactsArrayMessage.contacts
-          }),
+        JSON.stringify({
+          ticketzvCard: [
+            {
+              displayName: msg.message.contactMessage.displayName,
+              vcard: msg.message.contactMessage.vcard
+            }
+          ]
+        }),
+      contactsArrayMessage:
+        msg.message?.contactsArrayMessage &&
+        JSON.stringify({
+          ticketzvCard: msg.message.contactsArrayMessage.contacts
+        }),
       // locationMessage: `Latitude: ${msg.message.locationMessage?.degreesLatitude} - Longitude: ${msg.message.locationMessage?.degreesLongitude}`,
       locationMessage: msgLocation(
         msg.message?.locationMessage?.jpegThumbnail,
@@ -181,17 +203,23 @@ export const getBodyMessage = (msg: proto.IWebMessageInfo): string | null => {
       ),
       liveLocationMessage: `Latitude: ${msg.message?.liveLocationMessage?.degreesLatitude} - Longitude: ${msg.message?.liveLocationMessage?.degreesLongitude}`,
       documentMessage: msg.message?.documentMessage?.title,
-      documentWithCaptionMessage: msg.message?.documentWithCaptionMessage?.message?.documentMessage?.caption,
+      documentWithCaptionMessage:
+        msg.message?.documentWithCaptionMessage?.message?.documentMessage
+          ?.caption,
       audioMessage: "Áudio",
-      listMessage: getBodyButton(msg) || msg.message?.listResponseMessage?.title,
-      listResponseMessage: msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId,
-      reactionMessage: msg.message?.reactionMessage?.text || "reaction",
+      listMessage:
+        getBodyButton(msg) || msg.message?.listResponseMessage?.title,
+      listResponseMessage:
+        msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId,
+      reactionMessage: msg.message?.reactionMessage?.text || "reaction"
     };
 
     const objKey = Object.keys(types).find(key => key === type);
 
     if (!objKey) {
-      logger.warn(`#### Nao achou o type 152: ${type} \n ${JSON.stringify(msg)}`);
+      logger.warn(
+        `#### Nao achou o type 152: ${type} \n ${JSON.stringify(msg)}`
+      );
       Sentry.setExtra("Mensagem", { BodyMsg: msg.message, msg, type });
       Sentry.captureException(
         new Error("Novo Tipo de Mensagem em getTypeMessage")
@@ -201,11 +229,10 @@ export const getBodyMessage = (msg: proto.IWebMessageInfo): string | null => {
   } catch (error) {
     Sentry.setExtra("Error getTypeMessage", { msg, BodyMsg: msg.message });
     Sentry.captureException(error);
-    logger.error({error, msg}, `getBodyMessage: error: ${error?.message}`);
+    logger.error({ error, msg }, `getBodyMessage: error: ${error?.message}`);
     return null;
   }
 };
-
 
 export const getQuotedMessage = (msg: proto.IWebMessageInfo) => {
   const body =
@@ -236,7 +263,6 @@ export const getQuotedMessageId = (msg: proto.IWebMessageInfo) => {
 };
 
 const getMeSocket = (wbot: Session): IMe => {
-
   return {
     id: jidNormalizedUser((wbot as WASocket).user.id),
     name: (wbot as WASocket).user.name
@@ -250,26 +276,25 @@ const getSenderMessage = (
   const me = getMeSocket(wbot);
   if (msg.key.fromMe) return me.id;
 
-  const senderId = msg.participant || msg.key.participant || msg.key.remoteJid || undefined;
+  const senderId =
+    msg.participant || msg.key.participant || msg.key.remoteJid || undefined;
 
   return senderId && jidNormalizedUser(senderId);
 };
 
 const getContactMessage = async (msg: proto.IWebMessageInfo, wbot: Session) => {
-
   const isGroup = msg.key.remoteJid.includes("g.us");
   const rawNumber = msg.key.remoteJid.replace(/\D/g, "");
   return isGroup
     ? {
-      id: getSenderMessage(msg, wbot),
-      name: msg.pushName
-    }
+        id: getSenderMessage(msg, wbot),
+        name: msg.pushName
+      }
     : {
-      id: msg.key.remoteJid,
-      name: msg.key.fromMe ? rawNumber : msg.pushName
-    };
+        id: msg.key.remoteJid,
+        name: msg.key.fromMe ? rawNumber : msg.pushName
+      };
 };
-
 
 const getUnpackedMessage = (msg: proto.IWebMessageInfo) => {
   return (
@@ -284,22 +309,23 @@ const getUnpackedMessage = (msg: proto.IWebMessageInfo) => {
     msg.message?.interactiveMessage?.header ||
     msg.message?.highlyStructuredMessage?.hydratedHsm?.hydratedTemplate ||
     msg.message
-  )
-}
+  );
+};
 
 const getMessageMedia = (message: proto.IMessage) => {
-  return ( 
-      message?.imageMessage ||
-      message?.audioMessage ||
-      message?.videoMessage ||
-      message?.stickerMessage ||
-      message?.documentMessage || null
+  return (
+    message?.imageMessage ||
+    message?.audioMessage ||
+    message?.videoMessage ||
+    message?.stickerMessage ||
+    message?.documentMessage ||
+    null
   );
-}
+};
 
 const downloadStream = async (stream: Transform): Promise<Buffer> => {
-  const MAX_SPEED = 5 * 1024 * 1024 / 8; // 5Mbps
-  const THROTTLE_SPEED = 1024 * 1024 / 8; // 1Mbps
+  const MAX_SPEED = (5 * 1024 * 1024) / 8; // 5Mbps
+  const THROTTLE_SPEED = (1024 * 1024) / 8; // 1Mbps
   const LARGE_FILE_SIZE = 1024 * 1024; // 1 MiB
 
   const throttle = new Throttle({ rate: MAX_SPEED });
@@ -322,20 +348,24 @@ const downloadStream = async (stream: Transform): Promise<Buffer> => {
     throw new Error("ERR_WAPP_DOWNLOAD_MEDIA");
   }
 
-  return buffer;  
-}
-
-type ThumbnailMessage = {
-    mediaKey?: Uint8Array | null;
-    thumbnailDirectPath?: string | null;
-    mimetype?: string;
+  return buffer;
 };
 
-const downloadThumbnail = async ({ thumbnailDirectPath: directPath, mediaKey, mimetype }: ThumbnailMessage) => {
+type ThumbnailMessage = {
+  mediaKey?: Uint8Array | null;
+  thumbnailDirectPath?: string | null;
+  mimetype?: string;
+};
+
+const downloadThumbnail = async ({
+  thumbnailDirectPath: directPath,
+  mediaKey,
+  mimetype
+}: ThumbnailMessage) => {
   if (!directPath || !mediaKey) {
     return null;
   }
-  
+
   const stream = await downloadContentFromMessage(
     { mediaKey, directPath },
     mimetype ? "thumbnail-document" : "thumbnail-link"
@@ -359,18 +389,26 @@ const downloadThumbnail = async ({ thumbnailDirectPath: directPath, mediaKey, mi
     filename
   };
   return media;
-}
+};
 
-const downloadMedia = async (msg: proto.IWebMessageInfo, wbot: Session, ticket: Ticket) => {
+const downloadMedia = async (
+  msg: proto.IWebMessageInfo,
+  wbot: Session,
+  ticket: Ticket
+) => {
   const unpackedMessage = getUnpackedMessage(msg);
   const message = getMessageMedia(unpackedMessage);
-  
+
   if (!message) {
     return null;
   }
 
   const fileLimit = parseInt(await CheckSettings("downloadLimit", "15"), 10);
-  if (wbot && message?.fileLength && +message.fileLength > fileLimit*1024*1024) {
+  if (
+    wbot &&
+    message?.fileLength &&
+    +message.fileLength > fileLimit * 1024 * 1024
+  ) {
     const fileLimitMessage = {
       text: `*Mensagem Automática*:\nNosso sistema aceita apenas arquivos com no máximo ${fileLimit} MiB`
     };
@@ -381,7 +419,8 @@ const downloadMedia = async (msg: proto.IWebMessageInfo, wbot: Session, ticket: 
         fileLimitMessage
       );
 
-      sendMsg.message.extendedTextMessage.text = "*Mensagem do sistema*:\nArquivo recebido além do limite de tamanho do sistema, se for necessário ele pode ser obtido no aplicativo do whatsapp.";
+      sendMsg.message.extendedTextMessage.text =
+        "*Mensagem do sistema*:\nArquivo recebido além do limite de tamanho do sistema, se for necessário ele pode ser obtido no aplicativo do whatsapp.";
 
       // eslint-disable-next-line no-use-before-define
       await verifyMessage(sendMsg, ticket, ticket.contact);
@@ -390,21 +429,20 @@ const downloadMedia = async (msg: proto.IWebMessageInfo, wbot: Session, ticket: 
   }
 
   // eslint-disable-next-line no-nested-ternary
-  const messageType = unpackedMessage?.documentMessage 
+  const messageType = unpackedMessage?.documentMessage
     ? "document"
     : message.mimetype.split("/")[0].replace("application", "document")
-      ? (message.mimetype
+    ? (message.mimetype
         .split("/")[0]
         .replace("application", "document") as MediaType)
-      : (message.mimetype.split("/")[0] as MediaType);
+    : (message.mimetype.split("/")[0] as MediaType);
 
   let stream: Transform;
   let contDownload = 0;
 
   while (contDownload < 10 && !stream) {
     try {
-
-      const tmpMessage = { ...message }; 
+      const tmpMessage = { ...message };
       if (tmpMessage?.directPath) {
         tmpMessage.url = "";
       }
@@ -414,8 +452,12 @@ const downloadMedia = async (msg: proto.IWebMessageInfo, wbot: Session, ticket: 
     } catch (error) {
       contDownload += 1;
       // eslint-disable-next-line no-await-in-loop, no-loop-func
-      await new Promise(resolve => {setTimeout(resolve, 1000 * contDownload * 2)});
-      logger.warn(`>>>> erro ${contDownload} de baixar o arquivo ${msg?.key?.id}`);
+      await new Promise(resolve => {
+        setTimeout(resolve, 1000 * contDownload * 2);
+      });
+      logger.warn(
+        `>>>> erro ${contDownload} de baixar o arquivo ${msg?.key?.id}`
+      );
     }
   }
 
@@ -437,7 +479,9 @@ const downloadMedia = async (msg: proto.IWebMessageInfo, wbot: Session, ticket: 
     const ext = message.mimetype.split("/")[1].split(";")[0];
     filename = `${makeRandomId(5)}-${new Date().getTime()}.${ext}`;
   } else {
-    filename = `${filename.split(".").slice(0, -1).join(".")}.${makeRandomId(5)}.${filename.split(".").slice(-1)}`;
+    filename = `${filename.split(".").slice(0, -1).join(".")}.${makeRandomId(
+      5
+    )}.${filename.split(".").slice(-1)}`;
   }
 
   const media = {
@@ -466,10 +510,8 @@ const verifyContact = async (
     number: msgContact.id.substring(0, msgContact.id.indexOf("@")),
     profilePicUrl,
     isGroup: msgContact.id.includes("g.us"),
-    companyId,
+    companyId
   };
-
-
 
   const contact = CreateOrUpdateContactService(contactData);
 
@@ -485,7 +527,7 @@ const verifyQuotedMessage = async (
   if (!quoted) return null;
 
   const quotedMsg = await Message.findOne({
-    where: { id: quoted },
+    where: { id: quoted }
   });
 
   if (!quotedMsg) return null;
@@ -506,7 +548,7 @@ const saveMediaToFile = async (media, ticket: Ticket): Promise<string> => {
   try {
     // create folders inside filepath if not exists
     await fs.promises.mkdir(join(filePath, relativePath), { recursive: true });
-    
+
     await writeFileAsync(
       join(filePath, relativePath, media.filename),
       media.data,
@@ -518,20 +560,21 @@ const saveMediaToFile = async (media, ticket: Ticket): Promise<string> => {
   }
 
   return `${relativePath}/${media.filename}`;
-}
+};
 
 export const verifyMediaMessage = async (
   msg: proto.IWebMessageInfo,
   ticket: Ticket,
   contact: Contact,
   wbot: Session = null,
-  messageMedia = null,
+  messageMedia = null
 ): Promise<Message> => {
   const io = getIO();
   const quotedMsg = await verifyQuotedMessage(msg);
-  
+
   const thumbnailMsg = messageMedia || msg?.message?.extendedTextMessage;
-  const thumbnailMedia = thumbnailMsg && await downloadThumbnail(thumbnailMsg);
+  const thumbnailMedia =
+    thumbnailMsg && (await downloadThumbnail(thumbnailMsg));
   const media = await downloadMedia(msg, wbot, ticket);
 
   if (!media && !thumbnailMedia) {
@@ -543,7 +586,7 @@ export const verifyMediaMessage = async (
     mediaUrl = await saveMediaToFile(media, ticket);
   }
 
-  let thumbnailUrl = null;  
+  let thumbnailUrl = null;
   if (thumbnailMedia) {
     thumbnailUrl = await saveMediaToFile(thumbnailMedia, ticket);
   }
@@ -564,16 +607,16 @@ export const verifyMediaMessage = async (
     ack: msg.status,
     remoteJid: msg.key.remoteJid,
     participant: msg.key.participant,
-    dataJson: JSON.stringify(msg),
+    dataJson: JSON.stringify(msg)
   };
 
   await ticket.update({
-    lastMessage: body || media?.filename,
+    lastMessage: body || media?.filename
   });
 
   const newMessage = await CreateMessageService({
     messageData,
-    companyId: ticket.companyId,
+    companyId: ticket.companyId
   });
 
   if (!msg.key.fromMe && ticket.status === "closed") {
@@ -582,8 +625,8 @@ export const verifyMediaMessage = async (
       include: [
         { model: Queue, as: "queue" },
         { model: User, as: "user" },
-        { model: Contact, as: "contact" },
-      ],
+        { model: Contact, as: "contact" }
+      ]
     });
 
     io.to(`company-${ticket.companyId}-closed`)
@@ -591,7 +634,7 @@ export const verifyMediaMessage = async (
       .emit(`company-${ticket.companyId}-ticket`, {
         action: "delete",
         ticket,
-        ticketId: ticket.id,
+        ticketId: ticket.id
       });
 
     io.to(`company-${ticket.companyId}-${ticket.status}`)
@@ -600,7 +643,7 @@ export const verifyMediaMessage = async (
       .emit(`company-${ticket.companyId}-ticket`, {
         action: "update",
         ticket,
-        ticketId: ticket.id,
+        ticketId: ticket.id
       });
   }
 
@@ -629,7 +672,7 @@ export const verifyMessage = async (
     remoteJid: msg.key.remoteJid,
     participant: msg.key.participant,
     dataJson: JSON.stringify(msg),
-    isEdited: false,
+    isEdited: false
   };
 
   await ticket.update({
@@ -670,7 +713,7 @@ export const verifyMessage = async (
 export const verifyEditedMessage = async (
   msg: proto.IMessage,
   ticket: Ticket,
-  msgId: string,
+  msgId: string
 ) => {
   const editedType = getTypeEditedMessage(msg);
 
@@ -678,7 +721,7 @@ export const verifyEditedMessage = async (
 
   switch (editedType) {
     case "conversation": {
-      editedText = msg.conversation
+      editedText = msg.conversation;
       break;
     }
     case "extendedTextMessage": {
@@ -694,7 +737,8 @@ export const verifyEditedMessage = async (
       break;
     }
     case "documentWithCaptionMessage": {
-      editedText = msg.documentWithCaptionMessage.message.documentMessage.caption;
+      editedText =
+        msg.documentWithCaptionMessage.message.documentMessage.caption;
       break;
     }
     default: {
@@ -716,14 +760,14 @@ export const verifyEditedMessage = async (
     remoteJid: editedMsg.remoteJid,
     participant: editedMsg.participant,
     dataJson: editedMsg.dataJson,
-    isEdited: true,
+    isEdited: true
   };
 
   const oldMessage = {
     messageId: messageData.id,
     body: editedMsg.body,
     ticketId: editedMsg.ticketId
-  }
+  };
 
   await OldMessage.upsert(oldMessage);
 
@@ -742,13 +786,12 @@ export const verifyEditedMessage = async (
       ticket,
       ticketId: ticket.id
     });
-}
+};
 
 export const verifyDeleteMessage = async (
   msg: proto.Message.IProtocolMessage,
   ticket: Ticket
 ) => {
-
   const message = await Message.findByPk(msg.key.id, {
     include: [
       "contact",
@@ -762,7 +805,7 @@ export const verifyDeleteMessage = async (
       }
     ]
   });
-  
+
   if (!message) {
     return;
   }
@@ -781,8 +824,7 @@ export const verifyDeleteMessage = async (
       ticket: message.ticket,
       contact: message.ticket.contact
     });
-
-}
+};
 
 const isValidMsg = (msg: proto.IWebMessageInfo): boolean => {
   if (msg.key.remoteJid === "status@broadcast") return false;
@@ -817,7 +859,7 @@ const isValidMsg = (msg: proto.IWebMessageInfo): boolean => {
       msgType === "listResponseMessage" ||
       msgType === "listMessage" ||
       msgType === "templateMessage" ||
-      msgType === "viewOnceMessage" || 
+      msgType === "viewOnceMessage" ||
       msgType === "viewOnceMessageV2";
 
     if (!ifType) {
@@ -841,7 +883,6 @@ const sendMenu = async (
   currentOption: Queue | QueueOption,
   sendBackToMain = true
 ) => {
-
   const { companyId } = ticket;
   const buttonActive = await Setting.findOne({
     where: {
@@ -858,7 +899,7 @@ const sendMenu = async (
   const botList = async () => {
     const sectionsRows = [];
 
-    currentOption.options.forEach((option) => {
+    currentOption.options.forEach(option => {
       sectionsRows.push({
         title: option.title,
         rowId: `${option.option}`
@@ -888,18 +929,18 @@ const sendMenu = async (
     );
 
     await verifyMessage(sendMsg, ticket, ticket.contact);
-  }
+  };
 
   const botButton = async () => {
     const buttons = [];
-    currentOption.options.forEach((option) => {
+    currentOption.options.forEach(option => {
       buttons.push({
         buttonId: `${option.option}`,
         buttonText: { displayText: option.title },
         type: 4
       });
     });
-    if  (sendBackToMain) {
+    if (sendBackToMain) {
       buttons.push({
         buttonId: "#",
         buttonText: { displayText: "Voltar Menu Inicial" },
@@ -918,12 +959,12 @@ const sendMenu = async (
     );
 
     await verifyMessage(sendMsg, ticket, ticket.contact);
-  }
+  };
 
   const botText = async () => {
     let options = "";
 
-    currentOption.options.forEach((option) => {
+    currentOption.options.forEach(option => {
       options += `*[ ${option.option} ]* - ${option.title}\n`;
     });
 
@@ -932,7 +973,7 @@ const sendMenu = async (
     }
 
     const textMessage = {
-      text: formatBody(`${message}\n\n${options}`, ticket.contact),
+      text: formatBody(`${message}\n\n${options}`, ticket.contact)
     };
 
     const sendMsg = await wbot.sendMessage(
@@ -959,88 +1000,117 @@ const sendMenu = async (
       break;
     default:
   }
-  
-}
+};
 
-const startQueue = async (wbot: Session, ticket: Ticket, queue: Queue, sendBackToMain = true) => {
-    const {companyId, contact} = ticket;
-    let chatbot = false;
+const startQueue = async (
+  wbot: Session,
+  ticket: Ticket,
+  queue: Queue,
+  sendBackToMain = true
+) => {
+  const { companyId, contact } = ticket;
+  let chatbot = false;
 
-    if (queue?.options) {
-      chatbot = queue.options.length > 0;
-    }
-    await UpdateTicketService({
-      ticketData: { queueId: queue.id, chatbot, status: "pending" },
-      ticketId: ticket.id,
-      companyId: ticket.companyId,
-    });
+  if (queue?.options) {
+    chatbot = queue.options.length > 0;
+  }
+  await UpdateTicketService({
+    ticketData: { queueId: queue.id, chatbot, status: "pending" },
+    ticketId: ticket.id,
+    companyId: ticket.companyId
+  });
 
-    let filePath = null;
-    let optionsMsg = null;
-    
-    if (queue.mediaPath !== null && queue.mediaPath !== "") {
-      filePath = path.resolve("public", queue.mediaPath);
-      optionsMsg = await getMessageOptions(queue.mediaName, filePath);
-    }
+  let filePath = null;
+  let optionsMsg = null;
 
-    /* Tratamento para envio de mensagem quando a fila está fora do expediente */
-    let currentSchedule: ScheduleResult;
+  if (queue.mediaPath !== null && queue.mediaPath !== "") {
+    filePath = path.resolve("public", queue.mediaPath);
+    optionsMsg = await getMessageOptions(queue.mediaName, filePath);
+  }
 
-    const scheduleType = await GetCompanySetting(companyId, "scheduleType", "disabled");
-      
-    if (scheduleType === "queue") {
-      currentSchedule = await VerifyCurrentSchedule(ticket.companyId, queue.id);
+  /* Tratamento para envio de mensagem quando a fila está fora do expediente */
+  let currentSchedule: ScheduleResult;
 
-      if (
-        !isNil(currentSchedule) &&
-        (!currentSchedule || currentSchedule.inActivity === false)
-      ) {
-        outOfHoursCache.set(`ticket-${ticket.id}`, true);
-        const outOfHoursMessage = queue.outOfHoursMessage?.trim() || "Estamos fora do horário de expediente";
-        const sentMessage = await wbot.sendMessage(
-          `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, {
-          text: formatBody(outOfHoursMessage, ticket.contact),
+  const scheduleType = await GetCompanySetting(
+    companyId,
+    "scheduleType",
+    "disabled"
+  );
+
+  if (scheduleType === "queue") {
+    currentSchedule = await VerifyCurrentSchedule(ticket.companyId, queue.id);
+
+    if (
+      !isNil(currentSchedule) &&
+      (!currentSchedule || currentSchedule.inActivity === false)
+    ) {
+      outOfHoursCache.set(`ticket-${ticket.id}`, true);
+      const outOfHoursMessage =
+        queue.outOfHoursMessage?.trim() ||
+        "Estamos fora do horário de expediente";
+      const sentMessage = await wbot.sendMessage(
+        `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
+        {
+          text: formatBody(outOfHoursMessage, ticket.contact)
         }
+      );
+      await verifyMessage(sentMessage, ticket, contact);
+      const outOfHoursAction = await GetCompanySetting(
+        companyId,
+        "outOfHoursAction",
+        "pending"
+      );
+      await UpdateTicketService({
+        ticketData: {
+          queueId: queue.id,
+          chatbot: false,
+          status: outOfHoursAction
+        },
+        ticketId: ticket.id,
+        companyId: ticket.companyId
+      });
+      return;
+    }
+  }
+
+  if (queue.options.length === 0) {
+    if (queue.greetingMessage?.trim()) {
+      const body = formatBody(
+        `${queue.greetingMessage.trim()}`,
+        ticket.contact
+      );
+
+      if (filePath) {
+        optionsMsg.caption = body;
+      } else {
+        const sentMessage = await wbot.sendMessage(
+          `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
+          {
+            text: body
+          }
         );
         await verifyMessage(sentMessage, ticket, contact);
-        const outOfHoursAction = await GetCompanySetting(companyId, "outOfHoursAction", "pending");
-        await UpdateTicketService({
-          ticketData: { queueId: queue.id, chatbot: false, status: outOfHoursAction },
-          ticketId: ticket.id,
-          companyId: ticket.companyId,
-        });
         return;
       }
     }
 
-    if (queue.options.length === 0) {
-      if (queue.greetingMessage?.trim()) {
-        const body = formatBody(`${queue.greetingMessage.trim()}`, ticket.contact);
-
-        if (filePath) {
-          optionsMsg.caption = body;
-        } else {
-          const sentMessage = await wbot.sendMessage(
-            `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, {
-            text: body,
-          }
-          );
-          await verifyMessage(sentMessage, ticket, contact);
-          return;
-        }
-      }
-      
-      if (filePath) {
-        const sentMediaMessage = await wbot.sendMessage(`${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, { ...optionsMsg });
-        await verifyMediaMessage(sentMediaMessage, ticket, contact);
-      }
-    } else {
-      if (filePath) {
-        const sentMediaMessage = await wbot.sendMessage(`${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, { ...optionsMsg });
-        await verifyMediaMessage(sentMediaMessage, ticket, contact);
-      }
-      sendMenu(wbot, ticket, queue, sendBackToMain);
+    if (filePath) {
+      const sentMediaMessage = await wbot.sendMessage(
+        `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
+        { ...optionsMsg }
+      );
+      await verifyMediaMessage(sentMediaMessage, ticket, contact);
     }
+  } else {
+    if (filePath) {
+      const sentMediaMessage = await wbot.sendMessage(
+        `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
+        { ...optionsMsg }
+      );
+      await verifyMediaMessage(sentMediaMessage, ticket, contact);
+    }
+    sendMenu(wbot, ticket, queue, sendBackToMain);
+  }
 };
 
 const verifyQueue = async (
@@ -1052,7 +1122,7 @@ const verifyQueue = async (
   const { queues, greetingMessage } = await ShowWhatsAppService(
     wbot.id!,
     ticket.companyId
-  )
+  );
 
   if (queues.length === 1) {
     await startQueue(wbot, ticket, head(queues), false);
@@ -1062,7 +1132,7 @@ const verifyQueue = async (
   const selectedOption = msg ? getBodyMessage(msg) : null;
   const choosenQueue = selectedOption ? queues[+selectedOption - 1] : null;
 
-  const {companyId} = ticket;
+  const { companyId } = ticket;
 
   const buttonActive = await Setting.findOne({
     where: {
@@ -1070,7 +1140,6 @@ const verifyQueue = async (
       companyId
     }
   });
-
 
   const botList = async () => {
     const sectionsRows = [];
@@ -1100,7 +1169,7 @@ const verifyQueue = async (
     );
 
     await verifyMessage(sendMsg, ticket, ticket.contact);
-  }
+  };
 
   const botButton = async () => {
     const buttons = [];
@@ -1124,7 +1193,7 @@ const verifyQueue = async (
     );
 
     await verifyMessage(sendMsg, ticket, ticket.contact);
-  }
+  };
 
   const botText = async () => {
     let options = "";
@@ -1133,9 +1202,8 @@ const verifyQueue = async (
       options += `*[ ${index + 1} ]* - ${queue.name}\n`;
     });
 
-
     const textMessage = {
-      text: formatBody(`${greetingMessage}\n\n${options}`, contact),
+      text: formatBody(`${greetingMessage}\n\n${options}`, contact)
     };
 
     const sendMsg = await wbot.sendMessage(
@@ -1166,9 +1234,7 @@ const verifyQueue = async (
       default:
     }
   }
-
 };
-
 
 export const verifyRating = (ticketTraking: TicketTraking) => {
   if (
@@ -1191,7 +1257,11 @@ export const handleRating = async (
   let rate: number | null = null;
 
   if (msg?.message?.conversation || msg?.message?.extendedTextMessage) {
-    rate = parseInt(msg.message.conversation || msg.message.extendedTextMessage.text , 10) || null;
+    rate =
+      parseInt(
+        msg.message.conversation || msg.message.extendedTextMessage.text,
+        10
+      ) || null;
   }
 
   if (!Number.isNaN(rate) && Number.isInteger(rate) && !isNull(rate)) {
@@ -1213,16 +1283,17 @@ export const handleRating = async (
       ticketId: ticketTraking.ticketId,
       companyId: ticketTraking.companyId,
       userId: ticketTraking.userId,
-      rate: finalRate,
+      rate: finalRate
     });
 
-    const complationMessage = whatsapp.complationMessage.trim() || "Atendimento finalizado";
+    const complationMessage =
+      whatsapp.complationMessage.trim() || "Atendimento finalizado";
     const body = formatBody(`${complationMessage}`, ticket.contact);
     await SendWhatsAppMessage({ body, ticket });
 
     await ticketTraking.update({
       finishedAt: moment().toDate(),
-      rated: true,
+      rated: true
     });
 
     const keepUserAndQueue =
@@ -1237,7 +1308,7 @@ export const handleRating = async (
       chatbot: null,
       queueOptionId: null,
       userId: keepUserAndQueue ? ticket.userId : null,
-      status: "closed",
+      status: "closed"
     });
 
     io.to(`company-${ticket.companyId}-open`)
@@ -1245,7 +1316,7 @@ export const handleRating = async (
       .emit(`company-${ticket.companyId}-ticket`, {
         action: "delete",
         ticket,
-        ticketId: ticket.id,
+        ticketId: ticket.id
       });
 
     io.to(`company-${ticket.companyId}-${ticket.status}`)
@@ -1254,25 +1325,26 @@ export const handleRating = async (
       .emit(`company-${ticket.companyId}-ticket`, {
         action: "update",
         ticket,
-        ticketId: ticket.id,
+        ticketId: ticket.id
       });
-
   }
-
 };
 
-const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, dontReadTheFirstQuestion = false) => {
+const handleChartbot = async (
+  ticket: Ticket,
+  msg: WAMessage,
+  wbot: Session,
+  dontReadTheFirstQuestion = false
+) => {
   const queue = await Queue.findByPk(ticket.queueId, {
     include: [
       {
         model: QueueOption,
         as: "options",
-        where: { parentId: null },
-      },
+        where: { parentId: null }
+      }
     ],
-    order: [
-      ["options", "option", "ASC"],
-    ]
+    order: [["options", "option", "ASC"]]
   });
 
   const messageBody = getBodyMessage(msg);
@@ -1292,19 +1364,19 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
     // escolheu uma opção
   } else if (!isNil(queue) && !isNil(ticket.queueOptionId)) {
     const count = await QueueOption.count({
-      where: { parentId: ticket.queueOptionId },
+      where: { parentId: ticket.queueOptionId }
     });
     let option: QueueOption = null;
     if (count === 1) {
       option = await QueueOption.findOne({
-        where: { parentId: ticket.queueOptionId },
+        where: { parentId: ticket.queueOptionId }
       });
     } else {
       option = await QueueOption.findOne({
         where: {
           option: messageBody || "",
-          parentId: ticket.queueOptionId,
-        },
+          parentId: ticket.queueOptionId
+        }
       });
     }
     if (option) {
@@ -1312,7 +1384,6 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
       // if (option.mediaPath !== null && option.mediaPath !== "")  {
 
       //   const filePath = path.resolve("public", option.mediaPath);
-
 
       //   const optionsMsg = await getMessageOptions(option.mediaName, filePath);
 
@@ -1323,18 +1394,28 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
     }
 
     // não linha a primeira pergunta
-  } else if (!isNil(queue) && isNil(ticket.queueOptionId) && !dontReadTheFirstQuestion) {
-    const option = queue?.options.find((o) => o.option === messageBody);
+  } else if (
+    !isNil(queue) &&
+    isNil(ticket.queueOptionId) &&
+    !dontReadTheFirstQuestion
+  ) {
+    const option = queue?.options.find(o => o.option === messageBody);
     if (option) {
       await ticket.update({ queueOptionId: option?.id });
-    } else if (await GetCompanySetting(ticket.companyId, "chatbotAutoExit", "disabled") === "enabled" ) {
+    } else if (
+      (await GetCompanySetting(
+        ticket.companyId,
+        "chatbotAutoExit",
+        "disabled"
+      )) === "enabled"
+    ) {
       // message didn't identified an option and company setting to exit chatbot
       await ticket.update({ chatbot: false });
       const whatsapp = await Whatsapp.findByPk(ticket.whatsappId);
       const contact = await Contact.findByPk(ticket.contactId);
       if (whatsapp.transferMessage) {
         const body = formatBody(`${whatsapp.transferMessage}`, contact);
-        await SendWhatsAppMessage({ body, ticket });        
+        await SendWhatsAppMessage({ body, ticket });
       }
     }
   }
@@ -1350,21 +1431,29 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
         {
           model: Queue,
           as: "forwardQueue",
-          include: [{
-            model: QueueOption,
-            as: "options",
-            where: { parentId: null },
-            required: false,
-          }]
+          include: [
+            {
+              model: QueueOption,
+              as: "options",
+              where: { parentId: null },
+              required: false
+            }
+          ]
         },
         {
           model: QueueOption,
           as: "options",
-          required: false,
+          required: false
         }
       ],
       order: [
-        [Sequelize.cast(Sequelize.col("forwardQueue.options.option"), "INTEGER"), "ASC"],
+        [
+          Sequelize.cast(
+            Sequelize.col("forwardQueue.options.option"),
+            "INTEGER"
+          ),
+          "ASC"
+        ],
         [Sequelize.cast(Sequelize.col("options.option"), "INTEGER"), "ASC"]
       ]
     });
@@ -1381,11 +1470,18 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
 
       if (filePath) {
         optionsMsg.caption = text;
-        const sentMessage = await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, { ...optionsMsg });
+        const sentMessage = await wbot.sendMessage(
+          `${ticket.contact.number}@${
+            ticket.isGroup ? "g.us" : "s.whatsapp.net"
+          }`,
+          { ...optionsMsg }
+        );
         await verifyMediaMessage(sentMessage, ticket, ticket.contact);
       } else {
         const sendMsg = await wbot.sendMessage(
-          `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
+          `${ticket.contact.number}@${
+            ticket.isGroup ? "g.us" : "s.whatsapp.net"
+          }`,
           { text }
         );
         await verifyMessage(sendMsg, ticket, ticket.contact);
@@ -1394,13 +1490,13 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
       if (currentOption.exitChatbot) {
         await ticket.update({
           chatbot: false,
-          queueOptionId: null,
+          queueOptionId: null
         });
       } else if (currentOption.forwardQueueId) {
         await ticket.update({
           queueOptionId: null,
           chatbot: false,
-          queueId: currentOption.forwardQueueId,
+          queueId: currentOption.forwardQueueId
         });
         await ticket.reload();
         startQueue(wbot, ticket, currentOption.forwardQueue);
@@ -1409,7 +1505,12 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
     }
 
     if (filePath) {
-      const sentMessage = await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, { ...optionsMsg });
+      const sentMessage = await wbot.sendMessage(
+        `${ticket.contact.number}@${
+          ticket.isGroup ? "g.us" : "s.whatsapp.net"
+        }`,
+        { ...optionsMsg }
+      );
       await verifyMediaMessage(sentMessage, ticket, ticket.contact);
     }
 
@@ -1417,7 +1518,7 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
       sendMenu(wbot, ticket, currentOption);
     }
   }
-}
+};
 
 const handleMessage = async (
   msg: proto.IWebMessageInfo,
@@ -1440,11 +1541,11 @@ const handleMessage = async (
       const msgIsGroupBlock = await Setting.findOne({
         where: {
           companyId,
-          key: "CheckMsgIsGroup",
-        },
+          key: "CheckMsgIsGroup"
+        }
       });
-      
-      if ( !msgIsGroupBlock || msgIsGroupBlock.value === "enabled") {
+
+      if (!msgIsGroupBlock || msgIsGroupBlock.value === "enabled") {
         return;
       }
     }
@@ -1476,20 +1577,19 @@ const handleMessage = async (
           const groupMetadata = await wbot.groupMetadata(msg.key.remoteJid);
           const msgGroupContact = {
             id: groupMetadata.id,
-            name: groupMetadata.subject,
-          }
+            name: groupMetadata.subject
+          };
           result = await verifyContact(msgGroupContact, wbot, companyId);
           groupContactCache.set(msg.key.remoteJid, result);
         }
         return result;
-      });      
+      });
     }
 
     const whatsapp = await ShowWhatsAppService(wbot.id!, companyId);
     const contact = await verifyContact(msgContact, wbot, companyId);
 
     let unreadMessages = 0;
-
 
     if (msg.key.fromMe) {
       await cacheLayer.set(`contacts:${contact.id}:unreads`, "0");
@@ -1505,46 +1605,57 @@ const handleMessage = async (
     const lastMessage = await Message.findOne({
       where: {
         contactId: contact.id,
-        companyId,
+        companyId
       },
-      order: [["createdAt", "DESC"]],
+      order: [["createdAt", "DESC"]]
     });
 
-    const complationMessage = whatsapp.complationMessage.trim() || "Atendimento finalizado";
+    const complationMessage =
+      whatsapp.complationMessage.trim() || "Atendimento finalizado";
 
-    if (unreadMessages === 0 && complationMessage && formatBody(complationMessage, contact).trim().toLowerCase() === lastMessage?.body.trim().toLowerCase()) {
+    if (
+      unreadMessages === 0 &&
+      complationMessage &&
+      formatBody(complationMessage, contact).trim().toLowerCase() ===
+        lastMessage?.body.trim().toLowerCase()
+    ) {
       return;
     }
 
     if (!msg.key.fromMe && !contact.isGroup) {
-      const userRatingEnabled = await GetCompanySetting(companyId, "userRating", "") === "enabled"
+      const userRatingEnabled =
+        (await GetCompanySetting(companyId, "userRating", "")) === "enabled";
 
-      const ticketTracking = userRatingEnabled && await TicketTraking.findOne({
-        where: {
-          whatsappId: whatsapp.id,
-          rated: false,
-          ratingAt: { [Op.not]: null },
-          finishedAt: null
-        },
-        include: [{
-          model: Ticket,
+      const ticketTracking =
+        userRatingEnabled &&
+        (await TicketTraking.findOne({
           where: {
-            status: "open",
-            contactId: contact.id,
+            whatsappId: whatsapp.id,
+            rated: false,
+            ratingAt: { [Op.not]: null },
+            finishedAt: null
           },
           include: [
             {
-              model: Contact
-            },
-            {
-              model: User
-            },
-            {
-              model: Queue
+              model: Ticket,
+              where: {
+                status: "open",
+                contactId: contact.id
+              },
+              include: [
+                {
+                  model: Contact
+                },
+                {
+                  model: User
+                },
+                {
+                  model: Queue
+                }
+              ]
             }
           ]
-        }]
-      });
+        }));
 
       if (ticketTracking) {
         try {
@@ -1559,7 +1670,8 @@ const handleMessage = async (
             const debouncedSentMessage = debounce(
               async () => {
                 await wbot.sendMessage(
-                  `${ticketTracking.ticket.contact.number}@${ticketTracking.ticket.isGroup ? "g.us" : "s.whatsapp.net"
+                  `${ticketTracking.ticket.contact.number}@${
+                    ticketTracking.ticket.isGroup ? "g.us" : "s.whatsapp.net"
                   }`,
                   {
                     text: "\n*Por favor avalie nosso atendimento com uma nota de 1 a 5*"
@@ -1582,14 +1694,21 @@ const handleMessage = async (
           Sentry.captureException(e);
           console.log(e);
         }
-
       }
     }
 
-    const { ticket, justCreated } = await createTicketMutex.runExclusive(async () => {
-      const result = await FindOrCreateTicketService(contact, wbot.id!, unreadMessages, companyId, groupContact);
-      return result;
-    });
+    const { ticket, justCreated } = await createTicketMutex.runExclusive(
+      async () => {
+        const result = await FindOrCreateTicketService(
+          contact,
+          wbot.id!,
+          unreadMessages,
+          companyId,
+          groupContact
+        );
+        return result;
+      }
+    );
 
     // voltar para o menu inicial
 
@@ -1597,73 +1716,66 @@ const handleMessage = async (
       await ticket.update({
         queueOptionId: null,
         chatbot: false,
-        queueId: null,
+        queueId: null
       });
       await verifyQueue(wbot, msg, ticket, ticket.contact);
       return;
     }
 
-
-    if (messageMedia || msg?.message?.extendedTextMessage?.thumbnailDirectPath) {
+    if (
+      messageMedia ||
+      msg?.message?.extendedTextMessage?.thumbnailDirectPath
+    ) {
       await verifyMediaMessage(msg, ticket, contact, wbot, messageMedia);
-    } else if (msg.message?.editedMessage?.message?.protocolMessage?.editedMessage) {
+    } else if (
+      msg.message?.editedMessage?.message?.protocolMessage?.editedMessage
+    ) {
       // message edited by Whatsapp App
-      await verifyEditedMessage(msg.message.editedMessage.message.protocolMessage.editedMessage, ticket, msg.message.editedMessage.message.protocolMessage.key.id);
+      await verifyEditedMessage(
+        msg.message.editedMessage.message.protocolMessage.editedMessage,
+        ticket,
+        msg.message.editedMessage.message.protocolMessage.key.id
+      );
     } else if (msg.message?.protocolMessage?.editedMessage) {
       // message edited by Whatsapp Web
-      await verifyEditedMessage(msg.message.protocolMessage.editedMessage, ticket, msg.message.protocolMessage.key.id);
+      await verifyEditedMessage(
+        msg.message.protocolMessage.editedMessage,
+        ticket,
+        msg.message.protocolMessage.key.id
+      );
     } else if (msg.message?.protocolMessage?.type === 0) {
       await verifyDeleteMessage(msg.message.protocolMessage, ticket);
     } else {
       await verifyMessage(msg, ticket, contact);
     }
-    
+
     if (isGroup || contact.disableBot) {
       return;
     }
 
-    const scheduleType = await GetCompanySetting(companyId, "scheduleType", "disabled"); 
+    const scheduleType = await GetCompanySetting(
+      companyId,
+      "scheduleType",
+      "disabled"
+    );
 
     try {
       if (!msg.key.fromMe && scheduleType) {
-        const outOfHoursAction = await GetCompanySetting(companyId, "outOfHoursAction", "pending");
+        const outOfHoursAction = await GetCompanySetting(
+          companyId,
+          "outOfHoursAction",
+          "pending"
+        );
         let currentSchedule: ScheduleResult = null;
-        
-        const isOpenOnline = ticket.status === "open" && ticket.user.socketSessions.length > 0;
-        
-        const avoidResend = !isOpenOnline && outOfHoursCache.get(`ticket-${ticket.id}`);
-        
+
+        const isOpenOnline =
+          ticket.status === "open" && ticket.user.socketSessions.length > 0;
+
+        const avoidResend =
+          !isOpenOnline && outOfHoursCache.get(`ticket-${ticket.id}`);
+
         if (scheduleType === "company" && !isOpenOnline) {
           currentSchedule = await VerifyCurrentSchedule(companyId);
-          
-          if (
-            !isNil(currentSchedule) &&
-            (!currentSchedule || currentSchedule.inActivity === false)
-          ) {
-            if (!avoidResend) {
-              outOfHoursCache.set(`ticket-${ticket.id}`, true);
-              const outOfHoursMessage = whatsapp.outOfHoursMessage.trim() || "Estamos fora do horário de expediente";
-              const sentMessage = await wbot.sendMessage(
-                `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, {
-                text: formatBody(outOfHoursMessage, ticket.contact),
-              }
-              );
-              await verifyMessage(sentMessage, ticket, ticket.contact);
-            }
-            if (ticket.status !== "open") {
-              await UpdateTicketService({
-                ticketData: { chatbot: false, status: outOfHoursAction },
-                ticketId: ticket.id,
-                companyId: ticket.companyId,
-              });
-            }
-            return;
-          }
-        }
-
-        if (scheduleType === "queue" && ticket.queueId !== null && !isOpenOnline) {
-          currentSchedule = await VerifyCurrentSchedule(companyId, ticket.queueId);
-          const queue = await Queue.findByPk(ticket.queueId);
 
           if (
             !isNil(currentSchedule) &&
@@ -1671,11 +1783,15 @@ const handleMessage = async (
           ) {
             if (!avoidResend) {
               outOfHoursCache.set(`ticket-${ticket.id}`, true);
-              const outOfHoursMessage = queue.outOfHoursMessage?.trim() || "Estamos fora do horário de expediente";
+              const outOfHoursMessage =
+                whatsapp.outOfHoursMessage.trim() ||
+                "Estamos fora do horário de expediente";
               const sentMessage = await wbot.sendMessage(
-                `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
+                `${ticket.contact.number}@${
+                  ticket.isGroup ? "g.us" : "s.whatsapp.net"
+                }`,
                 {
-                  text: formatBody(outOfHoursMessage, ticket.contact),
+                  text: formatBody(outOfHoursMessage, ticket.contact)
                 }
               );
               await verifyMessage(sentMessage, ticket, ticket.contact);
@@ -1684,13 +1800,53 @@ const handleMessage = async (
               await UpdateTicketService({
                 ticketData: { chatbot: false, status: outOfHoursAction },
                 ticketId: ticket.id,
-                companyId: ticket.companyId,
+                companyId: ticket.companyId
               });
             }
             return;
           }
         }
 
+        if (
+          scheduleType === "queue" &&
+          ticket.queueId !== null &&
+          !isOpenOnline
+        ) {
+          currentSchedule = await VerifyCurrentSchedule(
+            companyId,
+            ticket.queueId
+          );
+          const queue = await Queue.findByPk(ticket.queueId);
+
+          if (
+            !isNil(currentSchedule) &&
+            (!currentSchedule || currentSchedule.inActivity === false)
+          ) {
+            if (!avoidResend) {
+              outOfHoursCache.set(`ticket-${ticket.id}`, true);
+              const outOfHoursMessage =
+                queue.outOfHoursMessage?.trim() ||
+                "Estamos fora do horário de expediente";
+              const sentMessage = await wbot.sendMessage(
+                `${ticket.contact.number}@${
+                  ticket.isGroup ? "g.us" : "s.whatsapp.net"
+                }`,
+                {
+                  text: formatBody(outOfHoursMessage, ticket.contact)
+                }
+              );
+              await verifyMessage(sentMessage, ticket, ticket.contact);
+            }
+            if (ticket.status !== "open") {
+              await UpdateTicketService({
+                ticketData: { chatbot: false, status: outOfHoursAction },
+                ticketId: ticket.id,
+                companyId: ticket.companyId
+              });
+            }
+            return;
+          }
+        }
       }
     } catch (e) {
       Sentry.captureException(e);
@@ -1705,7 +1861,6 @@ const handleMessage = async (
       whatsapp.queues.length >= 1
     ) {
       await verifyQueue(wbot, msg, ticket, ticket.contact);
-
     }
 
     const dontReadTheFirstQuestion = ticket.queue === null;
@@ -1732,11 +1887,11 @@ const handleMessage = async (
       }
 
       if (whatsapp.greetingMessage) {
-
         const debouncedSentMessage = debounce(
           async () => {
             await wbot.sendMessage(
-              `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"
+              `${ticket.contact.number}@${
+                ticket.isGroup ? "g.us" : "s.whatsapp.net"
               }`,
               {
                 text: formatBody(`${whatsapp.greetingMessage}`, contact, ticket)
@@ -1749,9 +1904,7 @@ const handleMessage = async (
         debouncedSentMessage();
         return;
       }
-
     }
-
 
     if (whatsapp.queues.length === 1 && ticket.queue) {
       if (ticket.chatbot && !msg.key.fromMe) {
@@ -1763,18 +1916,14 @@ const handleMessage = async (
         await handleChartbot(ticket, msg, wbot, dontReadTheFirstQuestion);
       }
     }
-
   } catch (err) {
-    console.log(err)
+    console.log(err);
     Sentry.captureException(err);
     logger.error(`Error handling whatsapp message: Err: ${err}`);
   }
 };
 
-const handleMsgAck = async (
-  msg: WAMessage,
-  ack: number
-) => {
+const handleMsgAck = async (msg: WAMessage, ack: number) => {
   if (!ack) return;
 
   const io = getIO();
@@ -1786,19 +1935,19 @@ const handleMsgAck = async (
         {
           model: Message,
           as: "quotedMsg",
-          include: ["contact"],
-        },
-      ],
+          include: ["contact"]
+        }
+      ]
     });
 
-    if (!messageToUpdate || ack <= messageToUpdate.ack ) return;
+    if (!messageToUpdate || ack <= messageToUpdate.ack) return;
 
     await messageToUpdate.update({ ack });
     io.to(messageToUpdate.ticketId.toString()).emit(
       `company-${messageToUpdate.companyId}-appMessage`,
       {
         action: "update",
-        message: messageToUpdate,
+        message: messageToUpdate
       }
     );
   } catch (err) {
@@ -1814,27 +1963,27 @@ const verifyRecentCampaign = async (
   if (!message.key.fromMe) {
     const number = message.key.remoteJid.replace(/\D/g, "");
     const campaigns = await Campaign.findAll({
-      where: { companyId, status: "EM_ANDAMENTO", confirmation: true },
+      where: { companyId, status: "EM_ANDAMENTO", confirmation: true }
     });
     if (campaigns) {
-      const ids = campaigns.map((c) => c.id);
+      const ids = campaigns.map(c => c.id);
       const campaignShipping = await CampaignShipping.findOne({
-        where: { campaignId: { [Op.in]: ids }, number, confirmation: null },
+        where: { campaignId: { [Op.in]: ids }, number, confirmation: null }
       });
 
       if (campaignShipping) {
         await campaignShipping.update({
           confirmedAt: moment(),
-          confirmation: true,
+          confirmation: true
         });
         await campaignQueue.add(
           "DispatchCampaign",
           {
             campaignShippingId: campaignShipping.id,
-            campaignId: campaignShipping.campaignId,
+            campaignId: campaignShipping.campaignId
           },
           {
-            delay: parseToMilliseconds(randomValue(0, 10)),
+            delay: parseToMilliseconds(randomValue(0, 10))
           }
         );
         return true;
@@ -1872,13 +2021,14 @@ export const sendMessageImage = async (
   url: string,
   caption: string
 ) => {
-
-  let sentMessage: proto.IWebMessageInfo
+  let sentMessage: proto.IWebMessageInfo;
   try {
     sentMessage = await wbot.sendMessage(
       `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
       {
-        image: url ? { url } : fs.readFileSync(`public/temp/${caption}-${makeid(10)}`),
+        image: url
+          ? { url }
+          : fs.readFileSync(`public/temp/${caption}-${makeid(10)}`),
         fileName: caption,
         caption,
         mimetype: "image/jpeg"
@@ -1902,28 +2052,34 @@ export const sendMessageLink = async (
   url: string,
   caption: string
 ) => {
-
-  let sentMessage: proto.IWebMessageInfo
+  let sentMessage: proto.IWebMessageInfo;
   try {
     sentMessage = await wbot.sendMessage(
-      `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, {
-      document: url ? { url } : fs.readFileSync(`public/temp/${caption}-${makeid(10)}`),
-      fileName: caption,
-      caption,
-      mimetype: "application/pdf"
-    }
+      `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
+      {
+        document: url
+          ? { url }
+          : fs.readFileSync(`public/temp/${caption}-${makeid(10)}`),
+        fileName: caption,
+        caption,
+        mimetype: "application/pdf"
+      }
     );
   } catch (error) {
     sentMessage = await wbot.sendMessage(
-      `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, {
-      text: formatBody("Não consegui enviar o PDF, tente novamente!", contact)
-    }
+      `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
+      {
+        text: formatBody("Não consegui enviar o PDF, tente novamente!", contact)
+      }
     );
   }
   verifyMessage(sentMessage, ticket, contact);
 };
 
-const wbotMessageListener = async (wbot: Session, companyId: number): Promise<void> => {
+const wbotMessageListener = async (
+  wbot: Session,
+  companyId: number
+): Promise<void> => {
   try {
     wbot.ev.on("messages.upsert", async (messageUpsert: ImessageUpsert) => {
       const messages = messageUpsert.messages
@@ -1937,9 +2093,7 @@ const wbotMessageListener = async (wbot: Session, companyId: number): Promise<vo
           where: { id: message.key.id!, companyId }
         });
 
-
         if (!messageExists) {
-
           if (await verifyRecentCampaign(message, companyId)) {
             return;
           }
@@ -1949,17 +2103,15 @@ const wbotMessageListener = async (wbot: Session, companyId: number): Promise<vo
     });
 
     wbot.ev.on("messages.update", (messageUpdate: WAMessageUpdate[]) => {
-
       if (messageUpdate.length === 0) return;
       messageUpdate.forEach(async (message: WAMessageUpdate) => {
-        (wbot as WASocket)!.readMessages([message.key])
+        (wbot as WASocket)!.readMessages([message.key]);
 
         await ackMutex.runExclusive(async () => {
           handleMsgAck(message, message.update.status);
         });
       });
     });
-
   } catch (error) {
     Sentry.captureException(error);
     logger.error(`Error handling wbot message listener. Err: ${error}`);
