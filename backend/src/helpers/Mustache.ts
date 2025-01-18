@@ -55,7 +55,8 @@ export function formatBody(
       ? ""
       : ticket.user.name;
 
-  const protocol = yy + mm + dd + String(hh) + min + ss;
+  const unique = Ticket ? ticket.id : `c-${contact.id}`;
+  const protocol = `${yy}${mm}${dd}-${unique}`;
 
   const hora = `${hh}:${min}:${ss}`;
 
