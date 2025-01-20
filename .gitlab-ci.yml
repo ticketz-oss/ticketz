@@ -61,6 +61,7 @@ build-backend-amd64:
       docker buildx build --platform linux/amd64 --push \
         --cache-from=type=local,src=.buildx-cache \
         --cache-to=type=local,dest=.buildx-cache \
+        --build-arg TICKETZ_REGISTRY_URL="$TICKETZ_REGISTRY_URL" \
         -t $REGISTRY/$IMAGE_BACKEND:amd64-$CI_COMMIT_SHORT_SHA backend
 
 build-backend-arm64:
@@ -92,6 +93,7 @@ build-backend-arm64:
       docker buildx build --platform linux/arm64 --push \
         --cache-from=type=local,src=.buildx-cache \
         --cache-to=type=local,dest=.buildx-cache \
+        --build-arg TICKETZ_REGISTRY_URL="$TICKETZ_REGISTRY_URL" \
         -t $REGISTRY/$IMAGE_BACKEND:arm64-$CI_COMMIT_SHORT_SHA backend
 
 build-frontend-amd64:
