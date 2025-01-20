@@ -29,6 +29,7 @@ import subscriptionRoutes from "./subScriptionRoutes";
 import ticketTagRoutes from "./ticketTagRoutes";
 import pwaRoutes from "./pwaRoutes";
 import versionRoutes from "./versionRoutes";
+import ticketzOSSRoutes from "./ticketzOSSRoutes";
 import binlistRoutes from "./binlistRoutes";
 import integrationsRoutes from "./integrationsRoutes";
 

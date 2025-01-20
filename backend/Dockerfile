@@ -12,6 +12,8 @@ RUN --mount=type=cache,target=/root/.npm \
 # Stage 2: Create the final image without source files
 FROM ghcr.io/ticketz-oss/node
 
+ARG TICKETZ_REGISTRY_URL
+
 WORKDIR /usr/src/app
 
 # Copy only the necessary build artifacts from the build stage
@@ -24,6 +26,7 @@ COPY --from=build --parents \
 
 ENV NODE_ENV=production
 ENV PORT=3000
+ENV TICKETZ_REGISTRY_URL=${TICKETZ_REGISTRY_URL}
 
 EXPOSE 3000
 

@@ -1060,6 +1060,14 @@ const messages = {
           markSubscriptionStart: "usado para marcar a posição do início das strings exclusivas de assinatura",
           markSubscriptionEnd: "usado para marcar a posição do fim das strings exclusivas de assinatura"
         },
+        registration: {
+          header: "Cadastre-se na base de usuários do Ticketz",
+          description: "Preencha os campos abaixo para se cadastrar na base de usuários do Ticketz e receber novidades sobre o projeto.",
+          name: "Nome",
+          country: "País",
+          phoneNumber: "Número de Whatsapp",
+          submit: "Cadastrar",
+        },
         support: {
           title: "Apoie o projeto Ticketz Open Source",
           mercadopagotitle: "Cartão de Crédito",

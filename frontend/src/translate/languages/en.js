@@ -1040,6 +1040,14 @@ const messages = {
           markSubscriptionStart: "used to mark position of the start of subscription exclusive strings",
           markSubscriptionEnd: "used to mark position of the end of subscription exclusive strings",
         },
+        registration: {
+          header: "Register in the Ticketz user base",
+          description: "Fill in the fields below to register in the Ticketz user base and receive news about the project.",
+          name: "Name",
+          country: "Country",
+          phoneNumber: "Whatsapp Number",
+          submit: "Register",
+        },        
         support: {
           title: "Support Ticketz project",
           mercadopagotitle: "Credit Card",

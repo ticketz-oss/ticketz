@@ -1045,6 +1045,14 @@ const messages = {
           markSubscriptionStart: "digunakan untuk menandai posisi awal string eksklusif langganan",
           markSubscriptionEnd: "digunakan untuk menandai posisi akhir string eksklusif langganan"
         },
+        registration: {
+          header: "Daftar di basis pengguna Ticketz",
+          description: "Isi kolom di bawah ini untuk mendaftar di basis pengguna Ticketz dan menerima berita tentang proyek.",
+          name: "Nama",
+          country: "Negara",
+          phoneNumber: "Nomor Telepon",
+          submit: "Daftar",
+        },
         support: {
           title: "Dukung proyek Ticketz",
           mercadopagotitle: "Kartu Kredit",
