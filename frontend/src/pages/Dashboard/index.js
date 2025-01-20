@@ -52,6 +52,10 @@ import useAuth from "../../hooks/useAuth.js";
 import clsx from "clsx";
 import { loadJSON } from "../../helpers/loadJSON";
 
+import TicketzRegistry from "../../components/TicketzRegistry";
+import config from "../../services/config";
+import api from "../../services/api.js";
+
 const gitinfo = loadJSON('/gitinfo.json');
 
 const useStyles = makeStyles((theme) => ({
@@ -215,6 +219,19 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.ticketzproad.contrastText,
     ...theme.scrollbarStyles,
   },
+  ticketzRegistryPaper: {
+    padding: theme.spacing(2),
+    display: "flex",
+    flexDirection: "column",
+    overflowY: "auto",
+    backgroundColor: theme.palette.background.main,
+    color: theme.palette.background.contrastText,
+    borderColor: theme.palette.primary.main,
+    borderWidth: "3px",
+    borderStyle: "solid",
+    marginBottom: "1em",
+    ...theme.scrollbarStyles,
+  },
   ticketzProBox: {
     textAlign: "center",
     alignContent: "center"
@@ -257,6 +274,7 @@ const Dashboard = () => {
   const { getCurrentUserInfo } = useAuth();
     
   const [supportBoxOpen, setSupportBoxOpen] = useState(false);
+  const [registered, setRegistered] = useState(false);
   const [proInstructionsOpen, setProInstructionsOpen] = useState(false);
   
   async function showProInstructions() {
@@ -276,7 +294,13 @@ const Dashboard = () => {
     );
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  
+
+  useEffect(async () => {
+    const registry = await api.get("/ticketz/registry");
+
+    setRegistered( registry?.data?.disabled || !!(registry?.data?.whatsapp ) );
+  }, []);
+    
   useEffect(() => {
     async function firstLoad() {
       await fetchData();
@@ -450,6 +474,11 @@ const Dashboard = () => {
             user={currentUser}
             yes={() => (
               <Grid item xs={12}>
+                {!registered &&
+                  <Paper className={classes.ticketzRegistryPaper}>
+                    <TicketzRegistry onRegister={setRegistered} />
+                  </Paper>
+                }
                 <Paper className={clsx(classes.ticketzProPaper, {
                   [classes.clickpointer]: !proInstructionsOpen,
                 })} onClick={() => showProInstructions()}>
