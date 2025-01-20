@@ -19,8 +19,6 @@ import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import CheckContactNumber from "../services/WbotServices/CheckNumber";
 import EditWhatsAppMessage from "../services/WbotServices/EditWhatsAppMessage";
 
-import { sendFacebookMessageMedia } from "../services/FacebookServices/sendFacebookMessageMedia";
-import sendFaceMessage from "../services/FacebookServices/sendFacebookMessage";
 import { logger } from "../utils/logger";
 import { MessageData } from "../helpers/SendMessage";
 
@@ -97,9 +95,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
       let first = body && true;
       await Promise.all(
         medias.map(async (media: Express.Multer.File) => {
-          const caption = first
-            ? formatBody(body, ticket.contact, ticket, user)
-            : null;
+          const caption = first ? formatBody(body, ticket, user) : null;
           first = false;
           const message = await SendWhatsAppMedia({
             media,
@@ -118,14 +114,6 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
         })
       );
     }
-
-    if (["facebook", "instagram"].includes(channel)) {
-      await Promise.all(
-        medias.map(async (media: Express.Multer.File) => {
-          await sendFacebookMessageMedia({ media, ticket });
-        })
-      );
-    }
   } else if (quickMessageMediaId) {
     const quickMessage = await QuickMessage.findByPk(quickMessageMediaId);
 
@@ -140,7 +128,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
       mediaPath
     );
 
-    const caption = formatBody(body, ticket.contact, ticket, user);
+    const caption = formatBody(body, ticket, user);
 
     const msgFileOptions = { ...fileOptions, caption };
     const message = await sendWhatsappFile(ticket, msgFileOptions);
@@ -151,28 +139,14 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
       null,
       Number(req.user.id) || null
     );
-  } else {
-    if (["facebook", "instagram"].includes(channel)) {
-      console.log(
-        `Checking if ${ticket.contact.number} is a valid ${channel} contact`
-      );
-      await sendFaceMessage({ body, ticket, quotedMsg });
-    }
-
-    if (channel === "whatsapp") {
-      const message = await SendWhatsAppMessage({
-        body,
-        ticket,
-        quotedMsg,
-        user
-      });
-      verifyMessage(
-        message,
-        ticket,
-        ticket.contact,
-        Number(req.user.id) || null
-      );
-    }
+  } else if (channel === "whatsapp") {
+    const message = await SendWhatsAppMessage({
+      body,
+      ticket,
+      quotedMsg,
+      user
+    });
+    verifyMessage(message, ticket, ticket.contact, Number(req.user.id) || null);
   }
 
   return res.send();

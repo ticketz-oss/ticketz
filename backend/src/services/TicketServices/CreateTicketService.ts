@@ -40,7 +40,9 @@ const CreateTicketService = async ({
     "enabled";
 
   if (whatsappId) {
-    queueWhatsapp = queue?.whatsapps.find(e => e.id === whatsappId);
+    queueWhatsapp =
+      (await queue?.$get("whatsapp")) ||
+      queue?.whatsapps.find(e => e.id === whatsappId);
 
     if (!queueWhatsapp) {
       const selectedWhatsapp = await Whatsapp.findByPk(whatsappId, {

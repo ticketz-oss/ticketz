@@ -34,6 +34,8 @@ const UpdateQueueService = async (
   };
   const { color, name } = queueData;
 
+  queueData.whatsappId = queueData.whatsappId || null;
+
   const queueSchema = Yup.object().shape({
     name: Yup.string()
       .min(2, "ERR_QUEUE_INVALID_NAME")

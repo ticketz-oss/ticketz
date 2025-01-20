@@ -15,7 +15,6 @@ import {
   startQueue,
   verifyMessage
 } from "../WbotServices/wbotMessageListener";
-import sendFaceMessage from "../FacebookServices/sendFacebookMessage";
 import AppError from "../../errors/AppError";
 import FindOrCreateTicketService from "./FindOrCreateTicketService";
 import { logger } from "../../utils/logger";
@@ -71,7 +70,7 @@ const sendFormattedMessage = async (
   const queueChangedMessage = await wbot.sendMessage(
     `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
     {
-      text: `\u200e${formatBody(message, ticket.contact, ticket, user)}`
+      text: `\u200e${formatBody(message, ticket, user)}`
     }
   );
   await verifyMessage(queueChangedMessage, ticket, ticket.contact);
@@ -177,13 +176,6 @@ const UpdateTicketService = async ({
             await SendWhatsAppMessage({ body: bodyRatingMessage, ticket });
           }
 
-          if (["facebook", "instagram"].includes(ticket.channel)) {
-            console.log(
-              `Checking if ${ticket.contact.number} is a valid ${ticket.channel} contact`
-            );
-            await sendFaceMessage({ body: bodyRatingMessage, ticket });
-          }
-
           await ticketTraking.update({
             ratingAt: moment().toDate()
           });
@@ -233,13 +225,6 @@ const UpdateTicketService = async ({
 
           await verifyMessage(sentMessage, ticket, ticket.contact);
         }
-
-        if (["facebook", "instagram"].includes(ticket.channel)) {
-          console.log(
-            `Checking if ${ticket.contact.number} is a valid ${ticket.channel} contact`
-          );
-          await sendFaceMessage({ body, ticket });
-        }
       }
 
       ticketTraking.finishedAt = moment().toDate();
@@ -281,13 +266,18 @@ const UpdateTicketService = async ({
         // let oldTicket: Ticket = null;
         let newWhatsapp: Whatsapp = null;
 
-        if (restrictTransferConnection && queue.whatsapps.length) {
-          const isSameConnection = queue.whatsapps.find(
-            e => e.id === whatsapp.id
-          );
+        if (
+          restrictTransferConnection &&
+          (queue.whatsappId || queue.whatsapps.length)
+        ) {
+          const isSameConnection =
+            queue.whatsappId === whatsapp.id ||
+            queue.whatsapps.find(e => e.id === whatsapp.id);
 
           if (!isSameConnection) {
-            newWhatsapp = queue.whatsapps.find(e => e.status === "CONNECTED");
+            newWhatsapp =
+              (await queue.$get("whatsapp")) ||
+              queue.whatsapps.find(e => e.status === "CONNECTED");
 
             if (!newWhatsapp) {
               throw new AppError("ERR_WAPP_NOT_FOUND", 404);
@@ -347,16 +337,6 @@ const UpdateTicketService = async ({
           });
           await ticket.reload();
         }
-      }
-
-      if (["facebook", "instagram"].includes(ticket.channel)) {
-        console.log(
-          `Checking if ${ticket.contact.number} is a valid ${ticket.channel} contact`
-        );
-        await sendFaceMessage({
-          body: "Você foi transferido, em breve iremos iniciar seu atendimento.",
-          ticket
-        });
       }
     }
 

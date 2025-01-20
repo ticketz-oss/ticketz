@@ -34,6 +34,8 @@ const CreateQueueService = async (
   };
   const { color, name, companyId } = queueData;
 
+  queueData.whatsappId = queueData.whatsappId || null;
+
   const company = await Company.findOne({
     where: {
       id: companyId
