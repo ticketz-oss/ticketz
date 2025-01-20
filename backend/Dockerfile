@@ -1,5 +1,7 @@
 # syntax=docker/dockerfile:1.7-labs
 
+ARG TICKETZ_REGISTRY_URL
+
 # Stage 1: Build the application
 FROM node:20 AS build
 
@@ -24,6 +26,7 @@ COPY --from=build --parents \
 
 ENV NODE_ENV=production
 ENV PORT=3000
+ENV TICKETZ_REGISTRY_URL=${TICKETZ_REGISTRY_URL}
 
 EXPOSE 3000
 

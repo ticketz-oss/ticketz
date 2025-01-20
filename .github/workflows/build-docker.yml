@@ -98,6 +98,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.metabackend.outputs.tags }}
           labels: ${{ steps.metabackend.outputs.labels }}
+          build-args: TICKETZ_REGISTRY_URL=${{secrets.TICKETZ_REGISTRY_URL}}
 
       - name: Build and push frontend Docker image
         id: frontend
