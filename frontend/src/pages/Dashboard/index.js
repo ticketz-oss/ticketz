@@ -475,7 +475,16 @@ const Dashboard = () => {
           <OnlyForSuperUser
             user={currentUser}
             yes={() => (
-              <TicketzProStatus />
+              <>
+                <TicketzProStatus />
+                {!registered &&
+                  <Grid item xs={12}>
+                    <Paper className={classes.ticketzRegistryPaper}>
+                      <TicketzRegistry onRegister={setRegistered} />
+                    </Paper>
+                  </Grid>
+                }
+              </>
             )} />
 
           <OnlyForSuperUser
