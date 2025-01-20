@@ -959,6 +959,14 @@ const messages = {
         ERR_WAPP_GREETING_REQUIRED: "Greeting message is mandatory when there is more than one queue.",
       },
       ticketz: {
+        registration: {
+          header: "Register in the Ticketz user base",
+          description: "Fill in the fields below to register in the Ticketz user base and receive news about the project.",
+          name: "Name",
+          country: "Country",
+          phoneNumber: "Whatsapp Number",
+          submit: "Register",
+        },        
         support: {
           title: "Support Ticketz project",
           mercadopagotitle: "Credit Card",

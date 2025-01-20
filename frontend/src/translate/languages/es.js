@@ -975,6 +975,14 @@ const messages = {
           "El mensaje de saludo es obligatorio cuando hay más de una cola.",
       },
       ticketz: {
+        registration: {
+          header: "Regístrate en la base de usuarios de Ticketz",
+          description: "Complete los campos a continuación para registrarse en la base de usuarios de Ticketz y recibir noticias sobre el proyecto.",
+          name: "Nombre",
+          country: "País",
+          phoneNumber: "Whatsapp Teléfono",
+          submit: "Registrar",
+        },
         support: {
           title: "Apoyar el proyecto Ticketz",
           mercadopagotitle: "Tarjeta de crédito",

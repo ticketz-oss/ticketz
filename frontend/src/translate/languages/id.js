@@ -993,6 +993,14 @@ const messages = {
         ERR_WAPP_GREETING_REQUIRED: "Pesan sambutan wajib jika ada lebih dari satu antrian.",
       },
       ticketz: {
+        registration: {
+          header: "Daftar di basis pengguna Ticketz",
+          description: "Isi kolom di bawah ini untuk mendaftar di basis pengguna Ticketz dan menerima berita tentang proyek.",
+          name: "Nama",
+          country: "Negara",
+          phoneNumber: "Nomor Telepon",
+          submit: "Daftar",
+        },
         support: {
           title: "Dukung proyek Ticketz",
           mercadopagotitle: "Kartu Kredit",
