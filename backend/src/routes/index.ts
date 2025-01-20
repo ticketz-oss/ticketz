@@ -67,6 +67,8 @@ routes.use(invoiceRoutes);
 routes.use(ticketTagRoutes);
 routes.use(pwaRoutes);
 routes.use(versionRoutes);
+routes.use(ticketzOSSRoutes);
+
 routes.use(binlistRoutes);
 routes.use(integrationsRoutes);
 
