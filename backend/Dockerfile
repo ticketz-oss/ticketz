@@ -1,7 +1,5 @@
 # syntax=docker/dockerfile:1.7-labs
 
-ARG TICKETZ_REGISTRY_URL
-
 # Stage 1: Build the application
 FROM node:20 AS build
 
@@ -13,6 +11,8 @@ RUN --mount=type=cache,target=/root/.npm \
 
 # Stage 2: Create the final image without source files
 FROM ghcr.io/ticketz-oss/node
+
+ARG TICKETZ_REGISTRY_URL
 
 WORKDIR /usr/src/app
 
