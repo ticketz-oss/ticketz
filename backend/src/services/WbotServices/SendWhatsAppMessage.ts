@@ -14,15 +14,13 @@ interface Request {
   ticket: Ticket;
   userId?: number;
   quotedMsg?: Message;
-  user?: User;
 }
 
 const SendWhatsAppMessage = async ({
   body,
   ticket,
   userId,
-  quotedMsg,
-  user
+  quotedMsg
 }: Request): Promise<WAMessage> => {
   let options = {};
 
