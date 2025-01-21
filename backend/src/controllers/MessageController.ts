@@ -58,6 +58,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   const { body, quotedMsg }: MessageData = req.body;
   const medias = req.files as Express.Multer.File[];
   const { companyId } = req.user;
+  const userId = Number(req.user.id) || null;
 
   const ticket = await ShowTicketService(ticketId, companyId);
   const { channel } = ticket;
@@ -75,7 +76,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
       );
     }
   } else if (channel === "whatsapp") {
-    await SendWhatsAppMessage({ body, ticket, quotedMsg });
+    await SendWhatsAppMessage({ body, ticket, userId, quotedMsg });
   }
 
   return res.send();
@@ -84,11 +85,13 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 export const edit = async (req: Request, res: Response): Promise<Response> => {
   const { messageId } = req.params;
   const { companyId } = req.user;
+  const userId = Number(req.user.id) || null;
   const { body }: MessageData = req.body;
 
   const { ticketId, message } = await EditWhatsAppMessage({
     messageId,
     companyId,
+    userId,
     body
   });
 

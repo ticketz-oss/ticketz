@@ -7,16 +7,19 @@ import Ticket from "../../models/Ticket";
 
 import formatBody from "../../helpers/Mustache";
 import { verifyMediaMessage, verifyMessage } from "./wbotMessageListener";
+import User from "../../models/User";
 
 interface Request {
   body: string;
   ticket: Ticket;
+  userId?: number;
   quotedMsg?: Message;
 }
 
 const SendWhatsAppMessage = async ({
   body,
   ticket,
+  userId,
   quotedMsg
 }: Request): Promise<WAMessage> => {
   let options = {};
@@ -50,7 +53,8 @@ const SendWhatsAppMessage = async ({
   }
 
   try {
-    const formattedBody = formatBody(body, ticket);
+    const user = userId && (await User.findByPk(userId));
+    const formattedBody = formatBody(body, ticket, user);
     const sentMessage = await wbot.sendMessage(
       number,
       {

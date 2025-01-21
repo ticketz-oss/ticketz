@@ -5,16 +5,19 @@ import OldMessage from "../../models/OldMessage";
 import Ticket from "../../models/Ticket";
 
 import formatBody from "../../helpers/Mustache";
+import User from "../../models/User";
 
 interface Request {
   messageId: string;
   companyId: number;
+  userId?: number;
   body: string;
 }
 
 const EditWhatsAppMessage = async ({
   messageId,
   companyId,
+  userId,
   body
 }: Request): Promise<{ ticketId: number; message: Message }> => {
   const message = await Message.findOne({
@@ -26,10 +29,12 @@ const EditWhatsAppMessage = async ({
       {
         model: Ticket,
         as: "ticket",
-        include: ["contact"]
+        include: ["contact", "queue", "user"]
       }
     ]
   });
+
+  const user = userId && (await User.findByPk(userId));
 
   if (!message) {
     throw new AppError("No message found with this ID.");
@@ -40,7 +45,7 @@ const EditWhatsAppMessage = async ({
   const wbot = await GetTicketWbot(ticket);
 
   const msg = JSON.parse(message.dataJson);
-  const formattedBody = formatBody(body, ticket);
+  const formattedBody = formatBody(body, ticket, user);
 
   try {
     await wbot.sendMessage(
