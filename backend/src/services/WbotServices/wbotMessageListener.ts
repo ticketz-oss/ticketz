@@ -150,6 +150,16 @@ const msgLocation = (
   return "";
 };
 
+export const getBodyFromTemplateMessage = (
+  templateMessage: proto.Message.ITemplateMessage
+) => {
+  return (
+    templateMessage.hydratedTemplate?.hydratedContentText ||
+    templateMessage.interactiveMessageTemplate?.body ||
+    "unsupported templateMessage"
+  );
+};
+
 export const getBodyMessage = (msg: proto.IWebMessageInfo): string | null => {
   try {
     const type = getTypeMessage(msg);
@@ -163,7 +173,8 @@ export const getBodyMessage = (msg: proto.IWebMessageInfo): string | null => {
       videoMessage: msg.message?.videoMessage?.caption,
       extendedTextMessage: msg.message?.extendedTextMessage?.text,
       templateMessage:
-        msg.message?.templateMessage?.hydratedTemplate?.hydratedContentText,
+        msg.message?.templateMessage &&
+        getBodyFromTemplateMessage(msg.message.templateMessage),
       buttonsResponseMessage:
         msg.message?.buttonsResponseMessage?.selectedButtonId,
       templateButtonReplyMessage:
@@ -217,15 +228,10 @@ export const getBodyMessage = (msg: proto.IWebMessageInfo): string | null => {
     const objKey = Object.keys(types).find(key => key === type);
 
     if (!objKey) {
-      logger.warn(
-        `#### Nao achou o type 152: ${type} \n ${JSON.stringify(msg)}`
-      );
-      Sentry.setExtra("Mensagem", { BodyMsg: msg.message, msg, type });
-      Sentry.captureException(
-        new Error("Novo Tipo de Mensagem em getTypeMessage")
-      );
+      logger.warn({ type, msg }, "received unsupported message");
+      return `unsupported message: ${type}`;
     }
-    return types[type];
+    return types[type] || `unable to load body. type: ${type}`;
   } catch (error) {
     Sentry.setExtra("Error getTypeMessage", { msg, BodyMsg: msg.message });
     Sentry.captureException(error);
