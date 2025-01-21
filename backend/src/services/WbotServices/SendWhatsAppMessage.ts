@@ -12,6 +12,7 @@ import User from "../../models/User";
 interface Request {
   body: string;
   ticket: Ticket;
+  userId?: number;
   quotedMsg?: Message;
   user?: User;
 }
@@ -19,6 +20,7 @@ interface Request {
 const SendWhatsAppMessage = async ({
   body,
   ticket,
+  userId,
   quotedMsg,
   user
 }: Request): Promise<WAMessage> => {
@@ -53,6 +55,7 @@ const SendWhatsAppMessage = async ({
   }
 
   try {
+    const user = userId && (await User.findByPk(userId));
     const formattedBody = formatBody(body, ticket, user);
     const sentMessage = await wbot.sendMessage(
       number,
