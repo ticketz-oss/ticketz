@@ -43,10 +43,7 @@ export function formatBody(
     ms = "Boa madrugada";
   }
 
-  const setor =
-    ticket?.queueId === undefined || ticket.queueId === null
-      ? ""
-      : ticket.queue.name;
+  const setor = ticket?.queue?.name || "";
 
   const usuario =
     ticket?.userId === undefined || ticket.userId === null
