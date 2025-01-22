@@ -363,6 +363,19 @@ type MediaInfo = {
   filename: string;
 };
 
+export const normalizeThumbnailMediaType = (
+  mimetype: string
+): "thumbnail-video" | "thumbnail-image" | "thumbnail-document" => {
+  const types = ["thumbnail-video", "thumbnail-image", "thumbnail-document"];
+  const type = mimetype.split("/")[0];
+
+  if (!types.includes(`thumbnail-${type}`)) {
+    return "thumbnail-document";
+  }
+
+  return type as "thumbnail-video" | "thumbnail-image" | "thumbnail-document";
+};
+
 const downloadThumbnail = async ({
   thumbnailDirectPath: directPath,
   mediaKey,
@@ -372,19 +385,10 @@ const downloadThumbnail = async ({
     return null;
   }
 
-  let stream: Transform;
-  try {
-    stream = await downloadContentFromMessage(
-      { mediaKey, directPath },
-      mimetype ? "thumbnail-document" : "thumbnail-link"
-    );
-  } catch (error) {
-    logger.debug(
-      { directPath, mediaKey, mimetype },
-      `Error downloading thumbnail: ${error.message}`
-    );
-    throw new Error("ERR_WAPP_DOWNLOAD_MEDIA");
-  }
+  const stream = await downloadContentFromMessage(
+    { mediaKey, directPath },
+    mimetype ? normalizeThumbnailMediaType(mimetype) : "thumbnail-link"
+  );
 
   if (!stream) {
     throw new Error("Failed to get stream");
@@ -457,7 +461,6 @@ const downloadMedia = async (
     throw new Error("ERR_FILESIZE_OVER_LIMIT");
   }
 
-  // eslint-disable-next-line no-nested-ternary
   const messageType = unpackedMessage?.documentMessage
     ? "document"
     : normalizeMediaType(message.mimetype);
