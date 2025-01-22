@@ -10,7 +10,6 @@ import {
   extractMessageContent,
   getContentType,
   jidNormalizedUser,
-  MediaType,
   MessageUpsertType,
   proto,
   WAMessage,
@@ -367,6 +366,19 @@ type ThumbnailMessage = {
   mimetype?: string;
 };
 
+export const normalizeThumbnailMediaType = (
+  mimetype: string
+): "thumbnail-video" | "thumbnail-image" | "thumbnail-document" => {
+  const types = ["thumbnail-video", "thumbnail-image", "thumbnail-document"];
+  const type = mimetype.split("/")[0];
+
+  if (!types.includes(`thumbnail-${type}`)) {
+    return "thumbnail-document";
+  }
+
+  return type as "thumbnail-video" | "thumbnail-image" | "thumbnail-document";
+};
+
 const downloadThumbnail = async ({
   thumbnailDirectPath: directPath,
   mediaKey,
@@ -378,7 +390,7 @@ const downloadThumbnail = async ({
 
   const stream = await downloadContentFromMessage(
     { mediaKey, directPath },
-    mimetype ? "thumbnail-document" : "thumbnail-link"
+    mimetype ? normalizeThumbnailMediaType(mimetype) : "thumbnail-link"
   );
 
   if (!stream) {
@@ -399,6 +411,19 @@ const downloadThumbnail = async ({
     filename
   };
   return media;
+};
+
+export const normalizeMediaType = (
+  mimetype: string
+): "audio" | "video" | "image" | "document" => {
+  const types = ["audio", "video", "image", "document"];
+  const type = mimetype.split("/")[0];
+
+  if (!types.includes(type)) {
+    return "document";
+  }
+
+  return type as "audio" | "video" | "image" | "document";
 };
 
 const downloadMedia = async (
@@ -438,14 +463,9 @@ const downloadMedia = async (
     throw new Error("ERR_FILESIZE_OVER_LIMIT");
   }
 
-  // eslint-disable-next-line no-nested-ternary
   const messageType = unpackedMessage?.documentMessage
     ? "document"
-    : message.mimetype.split("/")[0].replace("application", "document")
-    ? (message.mimetype
-        .split("/")[0]
-        .replace("application", "document") as MediaType)
-    : (message.mimetype.split("/")[0] as MediaType);
+    : normalizeMediaType(message.mimetype);
 
   let stream: Transform;
   let contDownload = 0;
