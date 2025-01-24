@@ -28,13 +28,19 @@ export const RefreshTokenService = async (
 ): Promise<Response> => {
   try {
     const decoded = verify(token, authConfig.refreshSecret);
-    const { id, tokenVersion, companyId } = decoded as RefreshTokenPayload;
+    const { id, tokenVersion } = decoded as RefreshTokenPayload;
 
     const user = await ShowUserService(id);
 
     if (user.tokenVersion !== tokenVersion) {
       res.clearCookie("jrt");
       throw new AppError("ERR_SESSION_EXPIRED", 401);
+    }
+
+    const dueDate = new Date(user.company.dueDate);
+
+    if (new Date() > dueDate) {
+      throw new AppError("ERR_SUBSCRIPTION_EXPIRED", 401);
     }
 
     const newToken = createAccessToken(user);
