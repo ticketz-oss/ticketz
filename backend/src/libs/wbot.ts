@@ -86,7 +86,7 @@ function getGreaterVersion(a, b) {
   return a;
 }
 
-const waVersion = [2, 3000, 1018550826];
+const waVersion = [2, 3000, 1019512750];
 
 const getProjectWAVersion = async () => {
   try {
