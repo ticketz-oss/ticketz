@@ -27,6 +27,8 @@ interface WhatsappData {
   status?: string;
   isDefault?: boolean;
   token?: string;
+  channel?: string;
+  session?: any;
 }
 
 interface QueryParams {
@@ -58,7 +60,9 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     ratingMessage,
     transferMessage,
     queueIds,
-    token
+    token,
+    channel,
+    session
   }: WhatsappData = req.body;
   const { companyId } = req.user;
 
@@ -73,10 +77,14 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     transferMessage,
     queueIds,
     companyId,
-    token
+    token,
+    channel,
+    session: JSON.stringify(session)
   });
 
-  StartWhatsAppSession(whatsapp, companyId);
+  if (whatsapp.channel === "whatsapp") {
+    StartWhatsAppSession(whatsapp, companyId);
+  }
 
   const io = getIO();
   io.emit(`company-${companyId}-whatsapp`, {
