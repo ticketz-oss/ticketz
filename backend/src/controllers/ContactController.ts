@@ -10,7 +10,6 @@ import DeleteContactService from "../services/ContactServices/DeleteContactServi
 import GetContactService from "../services/ContactServices/GetContactService";
 
 import CheckContactNumber from "../services/WbotServices/CheckNumber";
-import CheckIsValidContact from "../services/WbotServices/CheckIsValidContact";
 import AppError from "../errors/AppError";
 import SimpleListService, {
   SearchContactParams
@@ -35,6 +34,7 @@ interface ContactData {
   name: string;
   number: string;
   email?: string;
+  isGroup?: boolean;
   extraInfo?: ExtraInfo[];
 }
 
@@ -85,10 +85,11 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     throw new AppError(err.message);
   }
 
-  await CheckIsValidContact(newContact.number, companyId);
-  const validNumber = await CheckContactNumber(newContact.number, companyId);
-  const number = validNumber.jid.replace(/\D/g, "");
-  newContact.number = number;
+  if (!newContact.isGroup) {
+    const validNumber = await CheckContactNumber(newContact.number, companyId);
+    const number = validNumber.jid.replace(/\D/g, "");
+    newContact.number = number;
+  }
 
   /**
    * Código desabilitado por demora no retorno
@@ -143,10 +144,11 @@ export const update = async (
     throw new AppError(err.message);
   }
 
-  await CheckIsValidContact(contactData.number, companyId);
-  const validNumber = await CheckContactNumber(contactData.number, companyId);
-  const number = validNumber.jid.replace(/\D/g, "");
-  contactData.number = number;
+  if (!contactData.isGroup) {
+    const validNumber = await CheckContactNumber(contactData.number, companyId);
+    const number = validNumber.jid.replace(/\D/g, "");
+    contactData.number = number;
+  }
 
   const { contactId } = req.params;
 
