@@ -32,6 +32,7 @@ import versionRoutes from "./versionRoutes";
 import ticketzOSSRoutes from "./ticketzOSSRoutes";
 import binlistRoutes from "./binlistRoutes";
 import integrationsRoutes from "./integrationsRoutes";
+import notificameHubRoutes from "./notificameHubRoutes";
 
 const routes = Router();
 
@@ -69,5 +70,6 @@ routes.use(ticketzOSSRoutes);
 
 routes.use(binlistRoutes);
 routes.use(integrationsRoutes);
+routes.use(notificameHubRoutes);
 
 export default routes;
