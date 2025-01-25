@@ -1,3 +1,4 @@
+import { initializeWebhook } from "../../helpers/NotificameHub";
 import ListWhatsAppsService from "../WhatsappService/ListWhatsAppsService";
 import { StartWhatsAppSession } from "./StartWhatsAppSession";
 import * as Sentry from "@sentry/node";
@@ -11,6 +12,11 @@ export const StartAllWhatsAppsSessions = async (
       whatsapps.forEach(whatsapp => {
         if(whatsapp.channel === 'whatsapp') {
           StartWhatsAppSession(whatsapp, companyId);
+        }
+        if (whatsapp.channel === "notificamehub") {
+          initializeWebhook(whatsapp).catch(e => {
+            Sentry.captureException(e);
+          });
         }
       });
     }
