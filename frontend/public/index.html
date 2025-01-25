@@ -23,6 +23,10 @@
         --primary: #fff;
       }
 
+      *, *::before, *::after {
+        box-sizing: border-box;
+      }
+
       #app-logo-div {
         width: 100%;
         margin-bottom: 20px;
@@ -178,7 +182,7 @@
 		  }
 		}, 1000);
     window.finishProgress=() => {
-      progress = 100;
+      // progress = 100;
     }
 	</script>	  
 	</body>
