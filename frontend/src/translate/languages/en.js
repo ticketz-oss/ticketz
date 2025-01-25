@@ -66,7 +66,7 @@ const messages = {
           disconnectMessage: "Are you sure? You will need to scan the QR Code again.",
         },
         buttons: {
-          add: "Add WhatsApp",
+          add: "Add Connection",
           disconnect: "Disconnect",
           tryAgain: "Try Again",
           qrcode: "QR CODE",
@@ -104,8 +104,8 @@ const messages = {
       },
       whatsappModal: {
         title: {
-          add: "Add WhatsApp",
-          edit: "Edit WhatsApp",
+          add: "Add Connection",
+          edit: "Edit Connection",
         },
         form: {
           name: "Name",

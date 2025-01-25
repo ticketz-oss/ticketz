@@ -79,6 +79,8 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
     provider: "beta",
     restrictToQueues: false,
     transferToNewTicket: false,
+    hubToken: "",
+    hubChannel: "",
   };
   const [whatsApp, setWhatsApp] = useState(initialState);
   const [settings, setSettings] = useState({});
@@ -115,10 +117,21 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
   }, [whatsAppId]);
 
   const handleSaveWhatsApp = async (values) => {
+    const { hubToken, hubChannel } = values;
     const whatsappData = { ...values, queueIds: selectedQueueIds };
     delete whatsappData["queues"];
     delete whatsappData["session"];
-
+    delete whatsappData["hubToken"];
+    delete whatsappData["hubChannel"];
+    
+    if (hubToken || hubChannel) {
+      whatsappData.session = {
+        hubToken,
+        hubChannel,
+      }
+      whatsappData.channel = "notificamehub";
+    }
+      
     try {
       if (whatsAppId) {
         await api.put(`/whatsapp/${whatsAppId}`, whatsappData);
@@ -343,6 +356,28 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                     />
                   </div>
                 }
+                <div>
+                  <Field
+                    as={TextField}
+                    label={i18n.t("whatsappModal.form.hubToken")}
+                    type="hubToken"
+                    fullWidth
+                    name="hubToken"
+                    variant="outlined"
+                    margin="dense"
+                  />
+                </div>
+                <div>
+                  <Field
+                    as={TextField}
+                    label={i18n.t("whatsappModal.form.hubChannel")}
+                    type="hubChannel"
+                    fullWidth
+                    name="hubChannel"
+                    variant="outlined"
+                    margin="dense"
+                  />
+                </div>
               </DialogContent>
               <DialogActions>
                 <Button
