@@ -16,6 +16,8 @@ import { DummyIntegration } from "./services/IntegrationServices/DummyIntegratio
 import { WebhookIntegration } from "./services/IntegrationServices/WebhookIntegration";
 import { TypebotIntegration } from "./services/IntegrationServices/TypebotIntegration";
 import { NgrokInstance } from "./helpers/NgrokInstance";
+import { OmniServices } from "./services/OmniServices/OmniServices";
+import { NotificamehubDriver } from "./services/OmniServices/NotificamehubDriver";
 
 // Environment Variable Validation
 if (!process.env.PORT) {
@@ -61,6 +63,10 @@ const integrationServices = IntegrationServices.getInstance();
 // integrationServices.registerIntegration(new DummyIntegration());
 integrationServices.registerIntegration(new WebhookIntegration());
 integrationServices.registerIntegration(new TypebotIntegration());
+
+// Initialize Omni Services
+const omniServices = OmniServices.getInstance();
+omniServices.registerOmniDriver(new NotificamehubDriver());
 
 // Create and start the server
 const server = app.listen(process.env.PORT, async () => {
