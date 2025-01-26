@@ -39,6 +39,10 @@
    
  */
 
+import Contact from "../../models/Contact";
+import Message from "../../models/Message";
+import Ticket from "../../models/Ticket";
+import Whatsapp from "../../models/Whatsapp";
 import { logger } from "../../utils/logger";
 import { IntegrationOptions } from "../IntegrationServices/IntegrationServices";
 
@@ -47,6 +51,14 @@ export interface OmniDriver {
   getDescription(): string;
   initialize(): void;
   getOptions(): IntegrationOptions;
+  getConnection(data: any): Promise<Whatsapp>;
+  findOrCreateContact(connection: Whatsapp, data: any): Promise<Contact>;
+  findOrCreateTicket(contact: Contact, connection: Whatsapp): Promise<Ticket>;
+  createMessage(
+    contact: Contact,
+    connection: Whatsapp,
+    data: any
+  ): Promise<Message>;
 }
 
 export class OmniServices {
@@ -72,5 +84,36 @@ export class OmniServices {
     const name = driver.getName();
     this.drivers[name] = driver;
     logger.info(`OmniDriver ${name} registered`);
+  }
+
+  public async messageHandler(channel: string, data: any) {
+    const driver = this.drivers[channel];
+    if (!driver) {
+      throw new Error(`OmniDriver ${channel} not found`);
+    }
+
+    const connection = await driver.getConnection(data);
+
+    if (!connection) {
+      throw new Error("Connection not found");
+    }
+
+    const contact = await driver.findOrCreateContact(connection, data);
+
+    if (!contact) {
+      throw new Error("Contact not found or created");
+    }
+
+    const ticket = await driver.findOrCreateTicket(contact, connection);
+
+    if (!ticket) {
+      throw new Error("Ticket not found or created");
+    }
+
+    const message = await driver.createMessage(contact, connection, data);
+
+    if (!message) {
+      throw new Error("Message not created");
+    }
   }
 }

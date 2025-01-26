@@ -1,10 +1,13 @@
 import express from "express";
-import { logger } from "../utils/logger";
+import { OmniServices } from "../services/OmniServices/OmniServices";
 
 const notificameHubRoutes = express.Router();
 
 notificameHubRoutes.post("/notificamehub/webhook/:channelId", (req, res) => {
-  logger.debug({ body: req.body }, "Webhook received");
+  const omniServices = OmniServices.getInstance();
+
+  omniServices.messageHandler("notificamehub", req);
+
   res.send("OK");
 });
 

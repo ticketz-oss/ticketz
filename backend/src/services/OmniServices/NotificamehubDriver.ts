@@ -39,11 +39,50 @@
    
  */
 
+import { Op } from "sequelize";
+import Contact from "../../models/Contact";
+import Message from "../../models/Message";
+import Ticket from "../../models/Ticket";
+import Whatsapp from "../../models/Whatsapp";
+import { logger } from "../../utils/logger";
 import { IntegrationOptions } from "../IntegrationServices/IntegrationServices";
 import { OmniDriver } from "./OmniServices";
 
+export type NotificamehubVisitor = {
+  name: string;
+  firstName: string;
+  lastName: string;
+  picture: string;
+};
+
+export type NotificamehubGroup = {
+  id: string;
+  name: string;
+};
+
+export type NotificamehubContent = {
+  type: "text" | "photo";
+  text?: string;
+  fileUrl?: string;
+  fileMimeType?: string;
+  fileName?: string;
+};
+
+export type NotificamehubMessage = {
+  id: string;
+  from: string;
+  to: string;
+  direction: "IN" | "OUT";
+  channel: string;
+  visitor: NotificamehubVisitor;
+  group: NotificamehubGroup;
+  isGroup: boolean;
+  contents: NotificamehubContent[];
+  timestamp: string;
+};
+
 export class NotificamehubDriver implements OmniDriver {
-  private name = "Notificamehub";
+  private name = "notificamehub";
 
   private description = "Notificamehub";
 
@@ -80,5 +119,65 @@ export class NotificamehubDriver implements OmniDriver {
         }
       ]
     };
+  }
+
+  private static normalizeMessage(data: any): NotificamehubMessage {
+    const message = data?.message || data?.body?.message;
+
+    if (!message) {
+      logger.error({ data }, "Invalid notificamehub data");
+      throw new Error("Invalid notificamehub data");
+    }
+
+    return message;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  async getConnection(data: any): Promise<Whatsapp> {
+    const message = NotificamehubDriver.normalizeMessage(data);
+
+    const whatsapp = await Whatsapp.findOne({
+      where: {
+        session: {
+          [Op.like]: `%${message.to}%`
+        }
+      }
+    });
+
+    return whatsapp;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  async findOrCreateContact(connection: Whatsapp, data: any): Promise<Contact> {
+    const message = NotificamehubDriver.normalizeMessage(data);
+
+    const contact = await Contact.findOne({
+      where: {
+        companyId: connection.companyId,
+        channel: message.channel,
+        number: message.from
+      }
+    });
+
+    if (contact) {
+      return contact;
+    }
+
+    return Contact.create({
+      companyId: connection.companyId,
+      name: message.visitor.name || message.from,
+      channel: message.channel,
+      number: message.from
+    });
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  async findOrCreateTicket(contact: Contact, connection: Whatsapp): Promise<Ticket> {
+    return null;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  async createMessage(contact: Contact, connection: Whatsapp, data: any): Promise<Message> {
+    return null;
   }
 }
