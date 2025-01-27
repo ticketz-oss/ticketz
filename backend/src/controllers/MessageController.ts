@@ -29,6 +29,7 @@ import {
 import { CreateInternalMessageService } from "../services/MessageServices/CreateInternalMessageService";
 import QuickMessage from "../models/QuickMessage";
 import formatBody from "../helpers/Mustache";
+import { OmniServices } from "../services/OmniServices/OmniServices";
 
 type IndexQuery = {
   pageNumber: string;
@@ -78,7 +79,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   const { channel } = ticket;
   const user = await User.findByPk(Number(req.user.id));
 
-  if (channel === "whatsapp") {
+  if (ticket.whatsapp.channel === "whatsapp") {
     SetTicketMessagesAsRead(ticket);
   }
 
@@ -89,6 +90,11 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
       Number(req.user.id) || null
     );
     return res.send();
+  }
+
+  if (ticket.whatsapp.channel !== "whatsapp") {
+    const omniServices = OmniServices.getInstance();
+    return omniServices.sendMessageFromRequest(ticket, req, res);
   }
 
   if (medias) {
