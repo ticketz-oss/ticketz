@@ -52,6 +52,8 @@ import FindOrCreateTicketService from "../TicketServices/FindOrCreateTicketServi
 import CreateMessageService from "../MessageServices/CreateMessageService";
 import { NgrokInstance } from "../../helpers/NgrokInstance";
 import User from "../../models/User";
+import downloadFile from "../../helpers/downloadFile";
+import saveMediaToFile from "../../helpers/saveMediaFile";
 
 const contactMutex = new Mutex();
 const ticketMutex = new Mutex();
@@ -70,7 +72,7 @@ export type NotificamehubGroup = {
 };
 
 export type NotificamehubContent = {
-  type: "text" | "photo";
+  type: "text" | "photo" | "voice" | "document";
   text?: string;
   fileUrl?: string;
   fileMimeType?: string;
@@ -103,6 +105,13 @@ export type NotificamehubStatusMessage = {
   channel: string;
   timestamp: string;
   messageStatus: NotificamehubMessageStatus;
+};
+
+const filetypemap = {
+  photo: "image",
+  image: "image",
+  voice: "audio",
+  document: "document"
 };
 
 async function initializeWebhook(whatsapp: Whatsapp): Promise<Client> {
@@ -273,21 +282,42 @@ export class NotificamehubDriver implements OmniDriver {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  async createMessage(ticket: Ticket, data: any): Promise<Message> {
+  async createMessages(ticket: Ticket, data: any): Promise<Message[]> {
     logger.debug("notificamehub:createMessage");
 
     const message = NotificamehubDriver.normalizeMessage(data);
 
-    return CreateMessageService({
-      messageData: {
-        id: message.id,
-        contactId: ticket.contactId,
-        ticketId: ticket.id,
-        body: message.contents[0]?.text || "empty message",
-        channel: ticket.contact.channel
-      },
-      companyId: ticket.companyId
+    const newMessages = message.contents.map(async content => {
+      // download file
+      const file = content.fileUrl ? await downloadFile(content.fileUrl) : null;
+
+      let mediaUrl;
+      if (file) {
+        mediaUrl = await saveMediaToFile(
+          {
+            data: file,
+            mimetype: content.fileMimeType,
+            filename: content.fileName
+          },
+          ticket
+        );
+      }
+
+      return CreateMessageService({
+        messageData: {
+          id: message.id,
+          contactId: ticket.contactId,
+          ticketId: ticket.id,
+          body: content.text || "",
+          channel: ticket.contact.channel,
+          mediaType: filetypemap[content.type] || undefined,
+          mediaUrl
+        },
+        companyId: ticket.companyId
+      });
     });
+
+    return Promise.all(newMessages);
   }
 
   async sendMessage(ticket: Ticket, message: OmniMessage): Promise<Message> {

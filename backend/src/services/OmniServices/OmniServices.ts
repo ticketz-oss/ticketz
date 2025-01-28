@@ -69,7 +69,7 @@ export interface OmniDriver {
     contact: Contact,
     connection: Whatsapp
   ): Promise<{ ticket: Ticket; justCreated: boolean }>;
-  createMessage(ticket: Ticket, data: any): Promise<Message>;
+  createMessages(ticket: Ticket, data: any): Promise<Message[]>;
   sendMessage(ticket: Ticket, message: OmniMessage): Promise<Message>;
   processStatus(data: any): Promise<Message>;
 }
@@ -160,11 +160,7 @@ export class OmniServices {
       throw new Error("Ticket not found or not created");
     }
 
-    const message = await driver.createMessage(ticket, data);
-
-    if (!message) {
-      throw new Error("Message not created");
-    }
+    await driver.createMessages(ticket, data);
   }
 
   public async sendMessageFromRequest(
