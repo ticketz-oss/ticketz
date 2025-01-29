@@ -29,7 +29,7 @@ import { GitInfo } from "../gitinfo";
 import GetPublicSettingService from "../services/SettingServices/GetPublicSettingService";
 
 const loggerBaileys = MAIN_LOGGER.child({});
-loggerBaileys.level = "error";
+loggerBaileys.level = process.env.BAILEYS_LOG_LEVEL || "error";
 
 type Session = WASocket & {
   id?: number;
