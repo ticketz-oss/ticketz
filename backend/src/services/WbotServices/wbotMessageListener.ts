@@ -1966,8 +1966,9 @@ const handleMessage = async (
     const bodyMessage = getBodyMessage(msg);
     const msgType = getTypeMessage(msg);
 
-    const unpackedMessage = getUnpackedMessage(msg);
-    const messageMedia = getMessageMedia(unpackedMessage);
+    const unpackedMessage =
+      msgType !== "templateMessage" && getUnpackedMessage(msg);
+    const messageMedia = unpackedMessage && getMessageMedia(unpackedMessage);
     if (msg.key.fromMe) {
       if (bodyMessage?.startsWith("\u200e")) return;
 
