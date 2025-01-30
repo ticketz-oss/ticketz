@@ -4,7 +4,7 @@ export default {
   up: async (queryInterface: QueryInterface) => {
     await queryInterface.createTable("NotificamehubIdMappings", {
       id: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false,
         primaryKey: true
       },
