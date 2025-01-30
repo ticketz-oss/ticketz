@@ -144,7 +144,8 @@ const typeMappings = {
     document: "file"
   },
   facebook: defaultTypeMapping,
-  instagram: defaultTypeMapping
+  instagram: defaultTypeMapping,
+  webchat: defaultTypeMapping
 };
 
 async function initializeWebhook(whatsapp: Whatsapp): Promise<Client> {
@@ -343,8 +344,11 @@ export class NotificamehubDriver implements OmniDriver {
           ticketId: ticket.id,
           body: content.text || "",
           channel: ticket.contact.channel,
-          mediaType: filetypemap[content.type] || undefined,
-          mediaUrl
+          mediaType: file
+            ? content.fileMimeType.split("/")[0] || "document"
+            : "",
+          mediaUrl,
+          dataJson: JSON.stringify(content)
         },
         companyId: ticket.companyId
       });
@@ -385,7 +389,8 @@ export class NotificamehubDriver implements OmniDriver {
               ticketId: ticket.id,
               body: message.body,
               fromMe: true,
-              channel: ticket.contact.channel
+              channel: ticket.contact.channel,
+              dataJson: JSON.stringify(message)
             },
             companyId: ticket.companyId
           });
@@ -417,8 +422,9 @@ export class NotificamehubDriver implements OmniDriver {
               body: "",
               fromMe: true,
               channel: ticket.contact.channel,
-              mediaType: message.mimetype,
-              mediaUrl: message.mediaUrl
+              mediaType: message.mimetype.split("/")[0],
+              mediaUrl: message.mediaUrl,
+              dataJson: JSON.stringify(message)
             },
             companyId: ticket.companyId
           });
