@@ -40,6 +40,8 @@
  */
 
 import { Request, Response } from "express";
+import { Mutex } from "async-mutex";
+import fs from "fs";
 import Contact from "../../models/Contact";
 import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
@@ -49,10 +51,12 @@ import { IntegrationOptions } from "../IntegrationServices/IntegrationServices";
 import formatBody from "../../helpers/Mustache";
 import User from "../../models/User";
 import { getIO } from "../../libs/socket";
+import saveMediaToFile from "../../helpers/saveMediaFile";
 
 export type OmniMessage = {
   type: "text" | "image" | "video" | "audio" | "document";
   body?: string;
+  fileName?: string;
   mediaUrl?: string;
   mimetype?: string;
 };
@@ -70,9 +74,11 @@ export interface OmniDriver {
     connection: Whatsapp
   ): Promise<{ ticket: Ticket; justCreated: boolean }>;
   createMessages(ticket: Ticket, data: any): Promise<Message[]>;
-  sendMessage(ticket: Ticket, message: OmniMessage): Promise<Message>;
+  sendMessage(ticket: Ticket, message: OmniMessage): Promise<Message[]>;
   processStatus(data: any): Promise<Message>;
 }
+
+const firstBodyMutex = new Mutex();
 
 export class OmniServices {
   // eslint-disable-next-line no-use-before-define
@@ -119,7 +125,7 @@ export class OmniServices {
     const message = await driver.processStatus(data);
 
     if (!message) {
-      throw new Error("Message not found");
+      return;
     }
 
     const io = getIO();
@@ -178,17 +184,65 @@ export class OmniServices {
 
     const user = await User.findByPk(Number(req.user.id));
 
-    const body = formatBody(req.body.body || "", ticket, user);
+    let messageBody = req.body.body
+      ? formatBody(req.body.body || "", ticket, user)
+      : null;
 
-    const messageData: OmniMessage = {
-      type: "text",
-      body
-    };
+    const medias = req.files as Express.Multer.File[];
+    if (medias) {
+      await Promise.all(
+        medias.map(async media => {
+          const body = await firstBodyMutex.runExclusive(async () => {
+            if (messageBody) {
+              const tmpBody = messageBody;
+              messageBody = null;
+              return tmpBody;
+            }
+            return null;
+          });
 
-    const message = await driver.sendMessage(ticket, messageData);
+          const mediaUrl = await saveMediaToFile(
+            {
+              data: fs.createReadStream(media.path),
+              mimetype: media.mimetype,
+              filename: media.originalname
+            },
+            ticket
+          );
 
-    if (!message) {
-      throw new Error("Message not created");
+          let type = media.mimetype.split("/")[0] as
+            | "image"
+            | "video"
+            | "audio"
+            | "document";
+
+          if (!["image", "video", "audio", "document"].includes(type)) {
+            type = "document";
+          }
+
+          const messageData: OmniMessage = {
+            type,
+            mediaUrl,
+            mimetype: media.mimetype,
+            fileName: media.originalname,
+            body
+          };
+
+          await driver.sendMessage(ticket, messageData);
+        })
+      );
+    }
+
+    if (messageBody) {
+      const messageData: OmniMessage = {
+        type: "text",
+        body: messageBody
+      };
+      const message = await driver.sendMessage(ticket, messageData);
+
+      if (!message) {
+        throw new Error("Message not created");
+      }
     }
 
     return res.send();

@@ -71,7 +71,6 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   const { ticketId } = req.params;
   const { body, quotedMsg, internal, ptt, quickMessageMediaId }: MessageData =
     req.body;
-  const medias = req.files as Express.Multer.File[];
   const { companyId } = req.user;
   const userId = Number(req.user.id) || null;
 
@@ -97,6 +96,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     return omniServices.sendMessageFromRequest(ticket, req, res);
   }
 
+  const medias = req.files as Express.Multer.File[];
   if (medias) {
     if (channel === "whatsapp") {
       let first = body && true;
