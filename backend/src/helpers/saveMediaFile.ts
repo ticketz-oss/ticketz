@@ -1,16 +1,14 @@
-import { promisify } from "util";
-import fs, { writeFile } from "fs";
-import { join } from "path";
+import { FileContents, FileStorage } from "@flystorage/file-storage";
+import { LocalStorageAdapter } from "@flystorage/local-fs";
 import Ticket from "../models/Ticket";
 import { getPublicPath } from "./GetPublicPath";
 import { logger } from "../utils/logger";
 import { S3Storage } from "./S3Storage";
-
-const writeFileAsync = promisify(writeFile);
+import { makeRandomId } from "./MakeRandomId";
 
 export default async function saveMediaToFile(
   media: {
-    data: Buffer;
+    data: FileContents;
     mimetype: string;
     filename: string;
   },
@@ -21,41 +19,23 @@ export default async function saveMediaToFile(
     media.filename = `${new Date().getTime()}.${ext}`;
   }
 
-  const relativePath = `media/${ticket.companyId}/${ticket.contactId}/${ticket.id}`;
+  const randomId = makeRandomId(10);
+  const relativePath = `media/${ticket.companyId}/${ticket.contactId}/${randomId}`;
 
   const fileStorage = S3Storage.getInstance();
   await fileStorage.prepare();
 
-  if (fileStorage.storage) {
-    try {
-      await fileStorage.storage.write(
-        `${relativePath}/${media.filename}`,
-        media.data
-      );
+  const storage =
+    fileStorage.storage ||
+    new FileStorage(new LocalStorageAdapter(getPublicPath()));
 
-      return fileStorage.storage.publicUrl(`${relativePath}/${media.filename}`);
-    } catch (error) {
-      logger.error(
-        { error },
-        "Error saving media to file storage - falling back to local"
-      );
-    }
-  }
+  const mediaPath = `${relativePath}/${media.filename}`;
 
   try {
-    const filePath = getPublicPath();
-
-    // create folders inside filepath if not exists
-    await fs.promises.mkdir(join(filePath, relativePath), { recursive: true });
-
-    await writeFileAsync(
-      join(filePath, relativePath, media.filename),
-      media.data,
-      "base64"
-    );
-  } catch (err) {
-    logger.error(err);
+    await storage.write(mediaPath, media.data);
+  } catch (error) {
+    logger.error({ error }, "Error saving media file");
   }
 
-  return `${relativePath}/${media.filename}`;
+  return fileStorage.storage?.publicUrl(mediaPath) || mediaPath;
 }
