@@ -40,7 +40,13 @@
  */
 
 import { Mutex } from "async-mutex";
-import { Client, MessageSubscription, TextContent } from "notificamehubsdk";
+import {
+  Client,
+  MessageSubscription,
+  TextContent,
+  FileContent
+} from "notificamehubsdk";
+import { Op } from "sequelize";
 import Contact from "../../models/Contact";
 import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
@@ -54,6 +60,7 @@ import { NgrokInstance } from "../../helpers/NgrokInstance";
 import User from "../../models/User";
 import downloadFile from "../../helpers/downloadFile";
 import saveMediaToFile from "../../helpers/saveMediaFile";
+import NotificamehubIdMapping from "../../models/NotificamehubIdMapping";
 
 const contactMutex = new Mutex();
 const ticketMutex = new Mutex();
@@ -96,6 +103,7 @@ export type NotificamehubMessageStatus = {
   timestamp: string;
   code: "SENT";
   description: string;
+  providerMessageId?: string;
 };
 
 export type NotificamehubStatusMessage = {
@@ -112,6 +120,31 @@ const filetypemap = {
   image: "image",
   voice: "audio",
   document: "document"
+};
+
+const statusAck = {
+  PENDING: 0,
+  SENT: 1,
+  DELIVERED: 2,
+  READ: 3
+};
+
+const defaultTypeMapping = {
+  image: "image",
+  audio: "audio",
+  video: "video",
+  document: "file"
+};
+
+const typeMappings = {
+  telegram: {
+    image: "photo",
+    audio: "audio",
+    video: "video",
+    document: "file"
+  },
+  facebook: defaultTypeMapping,
+  instagram: defaultTypeMapping
 };
 
 async function initializeWebhook(whatsapp: Whatsapp): Promise<Client> {
@@ -320,43 +353,81 @@ export class NotificamehubDriver implements OmniDriver {
     return Promise.all(newMessages);
   }
 
-  async sendMessage(ticket: Ticket, message: OmniMessage): Promise<Message> {
+  async sendMessage(ticket: Ticket, message: OmniMessage): Promise<Message[]> {
     logger.debug("notificamehub:sendMessage");
 
     const connection = await Whatsapp.findByPk(ticket.whatsappId);
     const client = this.sessions[connection.id];
 
-    let messageContent: TextContent;
+    let textContent: TextContent;
+    const promises = [];
+
     if (message.type === "text") {
-      messageContent = new TextContent(message.body);
+      textContent = new TextContent(message.body);
     }
 
     const channel = client.setChannel(ticket.contact.channel);
 
-    if (!messageContent) {
-      throw new Error("Invalid message data");
+    if (textContent)
+      promises.push(
+        messageMutex.runExclusive(async () => {
+          const result = await channel.sendMessage(
+            connection.qrcode,
+            ticket.contact.number,
+            textContent
+          );
+          logger.debug({ result }, "Message body sent");
+
+          const sentMessage = await CreateMessageService({
+            messageData: {
+              id: result.id,
+              contactId: ticket.contactId,
+              ticketId: ticket.id,
+              body: message.body,
+              fromMe: true,
+              channel: ticket.contact.channel
+            },
+            companyId: ticket.companyId
+          });
+          return sentMessage;
+        })
+      );
+
+    if (["image", "audio", "video", "document"].includes(message.type)) {
+      const fileContent = new FileContent(
+        message.mediaUrl,
+        typeMappings[ticket.contact.channel][message.type] || "file",
+        message.fileName,
+        message.fileName
+      );
+      promises.push(
+        messageMutex.runExclusive(async () => {
+          const result = await channel.sendMessage(
+            connection.qrcode,
+            ticket.contact.number,
+            fileContent
+          );
+          logger.debug({ result }, "Message media sent");
+
+          const sentMessage = await CreateMessageService({
+            messageData: {
+              id: result.id,
+              contactId: ticket.contactId,
+              ticketId: ticket.id,
+              body: "",
+              fromMe: true,
+              channel: ticket.contact.channel,
+              mediaType: message.mimetype,
+              mediaUrl: message.mediaUrl
+            },
+            companyId: ticket.companyId
+          });
+          return sentMessage;
+        })
+      );
     }
 
-    return messageMutex.runExclusive(async () => {
-      const result = await channel.sendMessage(
-        connection.qrcode,
-        ticket.contact.number,
-        messageContent
-      );
-      logger.debug({ result }, "Message sent");
-
-      return CreateMessageService({
-        messageData: {
-          id: result.id,
-          contactId: ticket.contactId,
-          ticketId: ticket.id,
-          body: message.body,
-          fromMe: true,
-          channel: ticket.contact.channel
-        },
-        companyId: ticket.companyId
-      });
-    });
+    return Promise.all(promises);
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -364,47 +435,92 @@ export class NotificamehubDriver implements OmniDriver {
     logger.debug("notificamehub:processStatus");
     logger.debug({ data }, "Status received");
 
-    const connection = await Whatsapp.findOne({
-      where: {
-        qrcode: data.subscriptionId
+    const messageInclude = [
+      "contact",
+      {
+        model: User,
+        attributes: { exclude: ["passwordHash"] },
+        required: false
+      },
+      {
+        model: Message,
+        as: "quotedMsg",
+        include: ["contact"]
+      },
+      {
+        model: Ticket,
+        as: "ticket",
+        required: true,
+        include: [
+          {
+            model: Whatsapp,
+            as: "whatsapp",
+            required: true,
+            where: {
+              qrcode: data.subscriptionId
+            }
+          }
+        ]
+      }
+    ];
+
+    let message: Message;
+    await messageMutex.runExclusive(async () => {
+      if (data?.messageStatus?.providerMessageId) {
+        const notificamehubIdMapping = await NotificamehubIdMapping.findByPk(
+          `${data.subscriptionId}:${data.messageStatus.providerMessageId}`,
+          {
+            include: [
+              {
+                model: Message,
+                as: "message",
+                include: messageInclude,
+                where: {
+                  ticketId: {
+                    [Op.col]: "NotificamehubIdMapping.ticketId"
+                  }
+                }
+              }
+            ]
+          }
+        );
+        if (notificamehubIdMapping) {
+          message = notificamehubIdMapping.message;
+        } else {
+          message = await Message.findByPk(data.messageId, {
+            include: messageInclude
+          });
+
+          if (message) {
+            await NotificamehubIdMapping.create({
+              id: `${data.subscriptionId}:${data.messageStatus.providerMessageId}`,
+              messageId: message.id,
+              ticketId: message.ticketId
+            });
+          }
+        }
+      } else {
+        message = await Message.findByPk(data.messageId, {
+          include: messageInclude
+        });
       }
     });
 
-    if (!connection) {
-      throw new Error("ERR_INVALID_SESSION");
+    if (!message) {
+      return null;
     }
 
-    await messageMutex.runExclusive(async () => {
-      // just wait other mutexes
-    });
-
-    const message = await Message.findOne({
-      where: {
-        id: data.messageId
+    const ack = statusAck[data.messageStatus.code] || 1;
+    return message.update(
+      {
+        ack
       },
-      include: [
-        "contact",
-        {
-          model: User,
-          attributes: { exclude: ["passwordHash"] },
-          required: false
-        },
-        {
-          model: Message,
-          as: "quotedMsg",
-          include: ["contact"]
-        },
-        {
-          model: Ticket,
-          as: "ticket",
-          required: true,
-          where: {
-            whatsappId: connection.id
-          }
+      {
+        where: {
+          id: message.id,
+          ack: { [Op.lt]: ack }
         }
-      ]
-    });
-    message.ack = 2;
-    return message.save();
+      }
+    );
   }
 }
