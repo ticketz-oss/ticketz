@@ -139,7 +139,7 @@ export class OmniServices {
   }
 
   public async messageHandler(channel: string, data: any) {
-    logger.debug("OmniServices:messageHandler");
+    logger.debug({ data }, "OmniServices:messageHandler");
     const driver = this.drivers[channel];
     if (!driver) {
       throw new Error(`OmniDriver ${channel} not found`);
