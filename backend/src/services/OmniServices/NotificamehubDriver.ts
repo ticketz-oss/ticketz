@@ -79,7 +79,7 @@ export type NotificamehubGroup = {
 };
 
 export type NotificamehubContent = {
-  type: "text" | "photo" | "voice" | "document";
+  type: "text" | "photo" | "image" | "video" | "voice" | "document";
   text?: string;
   fileUrl?: string;
   fileMimeType?: string;
@@ -113,13 +113,6 @@ export type NotificamehubStatusMessage = {
   channel: string;
   timestamp: string;
   messageStatus: NotificamehubMessageStatus;
-};
-
-const filetypemap = {
-  photo: "image",
-  image: "image",
-  voice: "audio",
-  document: "document"
 };
 
 const statusAck = {
@@ -290,7 +283,10 @@ export class NotificamehubDriver implements OmniDriver {
         })) ||
         Contact.create({
           companyId: connection.companyId,
-          name: message.visitor.name || message.from,
+          name:
+            `${message.visitor.firstName} ${message.visitor.lastName}`.trim() ||
+            message.visitor.name ||
+            message.from,
           channel: message.channel,
           number: message.from
         })
@@ -326,12 +322,46 @@ export class NotificamehubDriver implements OmniDriver {
       const file = content.fileUrl ? await downloadFile(content.fileUrl) : null;
 
       let mediaUrl;
+      const finalContent = JSON.parse(JSON.stringify(content));
+
       if (file) {
+        let overrideMimeType: string;
+        let overrideFilename: string;
+
+        if (
+          message.channel === "instagram" &&
+          content.fileName === "ig_messaging_cdn"
+        ) {
+          switch (content.type) {
+            case "image":
+            case "photo":
+              overrideMimeType = "image/jpeg";
+              overrideFilename = "instagram.jpg";
+              break;
+            case "voice":
+              overrideMimeType = "audio/mp3";
+              overrideFilename = "instagram.mp3";
+              break;
+            case "video":
+              overrideMimeType = "video/mp4";
+              overrideFilename = "instagram.mp4";
+              break;
+            default:
+              break;
+          }
+        }
+
+        const mimetype = overrideMimeType || content.fileMimeType;
+        const filename = overrideFilename || content.fileName;
+
+        finalContent.fileMimeType = mimetype;
+        finalContent.fileName = filename;
+
         mediaUrl = await saveMediaToFile(
           {
             data: file,
-            mimetype: content.fileMimeType,
-            filename: content.fileName
+            mimetype,
+            filename
           },
           ticket
         );
@@ -345,7 +375,7 @@ export class NotificamehubDriver implements OmniDriver {
           body: content.text || "",
           channel: ticket.contact.channel,
           mediaType: file
-            ? content.fileMimeType.split("/")[0] || "document"
+            ? finalContent.fileMimeType.split("/")[0] || "document"
             : "",
           mediaUrl,
           dataJson: JSON.stringify(content)
