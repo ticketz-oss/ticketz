@@ -16,6 +16,12 @@ const GetTicketWbot = async (ticket: Ticket): Promise<Session> => {
     await ticket.$set("whatsapp", defaultWhatsapp);
   }
 
+  const whatsapp = ticket.whatsapp || (await ticket.$get("whatsapp"));
+
+  if (whatsapp.channel !== "whatsapp") {
+    return null;
+  }
+
   const wbot = getWbot(ticket.whatsappId);
 
   return wbot;

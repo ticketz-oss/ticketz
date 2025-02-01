@@ -67,7 +67,7 @@ const messages = {
             "Tem certeza? Você precisará ler o QR Code novamente.",
         },
         buttons: {
-          add: "Adicionar WhatsApp",
+          add: "Adicionar Conexão",
           disconnect: "desconectar",
           tryAgain: "Tentar novamente",
           qrcode: "QR CODE",
@@ -109,8 +109,8 @@ const messages = {
       },
       whatsappModal: {
         title: {
-          add: "Adicionar WhatsApp",
-          edit: "Editar WhatsApp",
+          add: "Adicionar Conexão",
+          edit: "Editar Conexão",
         },
         form: {
           name: "Nome",
@@ -147,7 +147,8 @@ const messages = {
         },
         table: {
           name: "Nome",
-          whatsapp: "WhatsApp",
+          service: "Serviço",
+          whatsapp: "Id",
           email: "Email",
           actions: "Ações",
         },

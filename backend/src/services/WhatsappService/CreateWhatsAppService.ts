@@ -23,6 +23,7 @@ interface Request {
   facebookUserToken?: string;
   tokenMeta?: string;
   channel?: string;
+  session?: string;
   facebookPageUserId?: string;
 }
 
@@ -48,7 +49,8 @@ const CreateWhatsAppService = async ({
   facebookUserToken,
   facebookPageUserId,
   tokenMeta,
-  channel = "whatsapp"
+  channel = "whatsapp",
+  session
 }: Request): Promise<Response> => {
   const company = await Company.findOne({
     where: {
@@ -60,8 +62,7 @@ const CreateWhatsAppService = async ({
   if (company !== null) {
     const whatsappCount = await Whatsapp.count({
       where: {
-        companyId,
-        channel
+        companyId
       }
     });
 
@@ -154,6 +155,7 @@ const CreateWhatsAppService = async ({
       token,
       provider,
       channel,
+      session,
       facebookUserId,
       facebookUserToken,
       facebookPageUserId,

@@ -1,6 +1,4 @@
-import path, { join } from "path";
-import { promisify } from "util";
-import fs, { writeFile } from "fs";
+import path from "path";
 import * as Sentry from "@sentry/node";
 import { isNil, head } from "lodash";
 
@@ -59,7 +57,6 @@ import { makeRandomId } from "../../helpers/MakeRandomId";
 import CheckSettings, { GetCompanySetting } from "../../helpers/CheckSettings";
 import Whatsapp from "../../models/Whatsapp";
 import { SimpleObjectCache } from "../../helpers/simpleObjectCache";
-import { getPublicPath } from "../../helpers/GetPublicPath";
 
 import { CreateInternalMessageService } from "../MessageServices/CreateInternalMessageService";
 import {
@@ -71,7 +68,7 @@ import {
 import Integration from "../../models/Integration";
 import IntegrationSession from "../../models/IntegrationSession";
 import getFilenameFromUrl from "../../helpers/getFilenameFromUrl";
-import { S3Storage } from "../../helpers/S3Storage";
+import saveMediaFile from "../../helpers/saveMediaFile";
 
 import { SubscriptionService } from "../../ticketzPro/services/subscriptionService";
 
@@ -90,8 +87,6 @@ interface IMe {
   id: string;
 }
 
-const writeFileAsync = promisify(writeFile);
-
 const createTicketMutex = new Mutex();
 const wbotMutex = new Mutex();
 const ackMutex = new Mutex();
@@ -100,7 +95,6 @@ const groupContactCache = new SimpleObjectCache(1000 * 30, logger);
 const outOfHoursCache = new SimpleObjectCache(1000 * 60 * 5, logger);
 
 const integrationServices = IntegrationServices.getInstance();
-const fileStorage = S3Storage.getInstance();
 
 const getTypeMessage = (msg: proto.IWebMessageInfo): string => {
   return getContentType(msg.message);
@@ -590,58 +584,6 @@ const verifyQuotedMessage = async (
   return quotedMsg;
 };
 
-const saveMediaToFile = async (
-  media: {
-    data: Buffer;
-    mimetype: string;
-    filename: string;
-  },
-  ticket: Ticket
-): Promise<string> => {
-  if (!media.filename) {
-    const ext = media.mimetype.split("/")[1].split(";")[0];
-    media.filename = `${new Date().getTime()}.${ext}`;
-  }
-
-  const filePath = getPublicPath();
-
-  const relativePath = `media/${ticket.companyId}/${ticket.contactId}/${ticket.id}`;
-
-  await fileStorage.prepare();
-
-  if (fileStorage.storage) {
-    try {
-      await fileStorage.storage.write(
-        `${relativePath}/${media.filename}`,
-        media.data
-      );
-
-      return fileStorage.storage.publicUrl(`${relativePath}/${media.filename}`);
-    } catch (error) {
-      logger.error(
-        { error },
-        "Error saving media to file storage - falling back to local"
-      );
-    }
-  }
-
-  try {
-    // create folders inside filepath if not exists
-    await fs.promises.mkdir(join(filePath, relativePath), { recursive: true });
-
-    await writeFileAsync(
-      join(filePath, relativePath, media.filename),
-      media.data,
-      "base64"
-    );
-  } catch (err) {
-    Sentry.captureException(err);
-    logger.error(err);
-  }
-
-  return `${relativePath}/${media.filename}`;
-};
-
 export const verifyMediaMessage = async (
   msg: proto.IWebMessageInfo,
   ticket: Ticket,
@@ -683,7 +625,7 @@ export const verifyMediaMessage = async (
 
   let mediaUrl = null;
   try {
-    mediaUrl = await saveMediaToFile(media, ticket);
+    mediaUrl = await saveMediaFile(media, ticket);
   } catch (error) {
     logger.error({ media, ticketId: ticket.id }, "Error saving media to file");
   }
@@ -691,7 +633,7 @@ export const verifyMediaMessage = async (
   let thumbnailUrl = null;
   if (thumbnailMedia) {
     try {
-      thumbnailUrl = await saveMediaToFile(thumbnailMedia, ticket);
+      thumbnailUrl = await saveMediaFile(thumbnailMedia, ticket);
     } catch (error) {
       logger.error(
         { thumbnailMedia, ticketId: ticket.id },

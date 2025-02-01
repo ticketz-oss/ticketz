@@ -66,7 +66,7 @@ const messages = {
           disconnectMessage: "Are you sure? You will need to scan the QR Code again.",
         },
         buttons: {
-          add: "Add WhatsApp",
+          add: "Add Connection",
           disconnect: "Disconnect",
           tryAgain: "Try Again",
           qrcode: "QR CODE",
@@ -92,6 +92,7 @@ const messages = {
         },
         table: {
           name: "Name",
+          channel: "Channel",
           status: "Status",
           lastUpdate: "Last Update",
           default: "Default",
@@ -104,14 +105,16 @@ const messages = {
       },
       whatsappModal: {
         title: {
-          add: "Add WhatsApp",
-          edit: "Edit WhatsApp",
+          add: "Add Connection",
+          edit: "Edit Connection",
         },
         form: {
           name: "Name",
           default: "Default",
           restrictToQueues: "Restritct to associated queues or queues without association",
-          transferToNewTicket: "Force transfer to new ticket"
+          transferToNewTicket: "Force transfer to new ticket",
+          hubToken: "Hub Token",
+          hubChannel: "Hub Channel",
         },
         buttons: {
           okAdd: "Add",
@@ -141,7 +144,8 @@ const messages = {
         },
         table: {
           name: "Name",
-          whatsapp: "WhatsApp",
+          service: "Service",
+          whatsapp: "Id",
           email: "Email",
           actions: "Actions",
         },

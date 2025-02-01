@@ -66,7 +66,7 @@ const messages = {
           disconnectMessage: "Apakah Anda yakin? Anda perlu memindai Kode QR lagi.",
         },
         buttons: {
-          add: "Tambah WhatsApp",
+          add: "Tambah Koneksi",
           disconnect: "Putuskan",
           tryAgain: "Coba Lagi",
           qrcode: "KODE QR",
@@ -105,8 +105,8 @@ const messages = {
       },
       whatsappModal: {
         title: {
-          add: "Tambah WhatsApp",
-          edit: "Edit WhatsApp",
+          add: "Tambah Koneksi",
+          edit: "Edit Koneksi",
         },
         form: {
           name: "Nama",
@@ -142,7 +142,8 @@ const messages = {
         },
         table: {
           name: "Nama",
-          whatsapp: "WhatsApp",
+          service: "Layanan",
+          whatsapp: "Id",
           email: "Email",
           actions: "Aksi",
         },

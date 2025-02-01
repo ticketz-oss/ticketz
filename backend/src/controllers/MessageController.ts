@@ -29,6 +29,7 @@ import {
 import { CreateInternalMessageService } from "../services/MessageServices/CreateInternalMessageService";
 import QuickMessage from "../models/QuickMessage";
 import formatBody from "../helpers/Mustache";
+import { OmniServices } from "../services/OmniServices/OmniServices";
 
 type IndexQuery = {
   pageNumber: string;
@@ -70,7 +71,6 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   const { ticketId } = req.params;
   const { body, quotedMsg, internal, ptt, quickMessageMediaId }: MessageData =
     req.body;
-  const medias = req.files as Express.Multer.File[];
   const { companyId } = req.user;
   const userId = Number(req.user.id) || null;
 
@@ -78,7 +78,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   const { channel } = ticket;
   const user = await User.findByPk(Number(req.user.id));
 
-  if (channel === "whatsapp") {
+  if (ticket.whatsapp.channel === "whatsapp") {
     SetTicketMessagesAsRead(ticket);
   }
 
@@ -91,6 +91,12 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     return res.send();
   }
 
+  if (ticket.whatsapp.channel !== "whatsapp") {
+    const omniServices = OmniServices.getInstance();
+    return omniServices.sendMessageFromRequest(ticket, req, res);
+  }
+
+  const medias = req.files as Express.Multer.File[];
   if (medias) {
     if (channel === "whatsapp") {
       let first = body && true;

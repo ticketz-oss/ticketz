@@ -67,7 +67,7 @@ const messages = {
             "¿Estás seguro? Tendrás que escanear el código QR nuevamente.",
         },
         buttons: {
-          add: "Agregar WhatsApp",
+          add: "Agregar Conexión",
           disconnect: "Desconectar",
           tryAgain: "Intentar nuevamente",
           qrcode: "CÓDIGO QR",
@@ -108,8 +108,8 @@ const messages = {
       },
       whatsappModal: {
         title: {
-          add: "Agregar WhatsApp",
-          edit: "Editar WhatsApp",
+          add: "Agregar Conexión",
+          edit: "Editar Conexión",
         },
         form: {
           name: "Nombre",
@@ -146,7 +146,8 @@ const messages = {
         },
         table: {
           name: "Nombre",
-          whatsapp: "WhatsApp",
+          service: "Servicio",
+          whatsapp: "Id",
           email: "Correo electrónico",
           actions: "Acciones",
         },

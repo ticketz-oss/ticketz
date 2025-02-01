@@ -32,6 +32,7 @@ import versionRoutes from "./versionRoutes";
 import ticketzOSSRoutes from "./ticketzOSSRoutes";
 import binlistRoutes from "./binlistRoutes";
 import integrationsRoutes from "./integrationsRoutes";
+import notificameHubRoutes from "./notificameHubRoutes";
 
 import ticketzStatusRoutes from "./ticketzStatusRoutes";
 
@@ -71,6 +72,7 @@ routes.use(ticketzOSSRoutes);
 
 routes.use(binlistRoutes);
 routes.use(integrationsRoutes);
+routes.use(notificameHubRoutes);
 
 routes.use(ticketzStatusRoutes);
 

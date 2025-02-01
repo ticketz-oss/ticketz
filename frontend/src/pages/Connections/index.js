@@ -324,11 +324,13 @@ const Connections = () => {
 				onClose={handleCloseWhatsAppModal}
 				whatsAppId={!qrModalOpen && !privacyModalOpen && selectedWhatsApp?.id}
 			/>
-			<PrivacyModal
-				open={privacyModalOpen}
-				onClose={handleClosePrivacyWhatsAppModal}
-				whatsAppId={!qrModalOpen && !whatsAppModalOpen && selectedWhatsApp?.id}
-			/>
+			{ selectedWhatsApp?.channel === "whatsapp" &&
+        <PrivacyModal
+  				open={privacyModalOpen}
+  				onClose={handleClosePrivacyWhatsAppModal}
+  				whatsAppId={!qrModalOpen && !whatsAppModalOpen && selectedWhatsApp.id}
+  			/>
+      }
 			<MainHeader>
 				<Title>{i18n.t("connections.title")}</Title>
 				<MainHeaderButtonsWrapper>
@@ -348,6 +350,9 @@ const Connections = () => {
 							<TableCell align="center">
 								{i18n.t("connections.table.name")}
 							</TableCell>
+              <TableCell align="center">
+                {i18n.t("connections.table.channel")}
+              </TableCell>
 							<TableCell align="center">
 								{i18n.t("connections.table.status")}
 							</TableCell>
@@ -374,6 +379,7 @@ const Connections = () => {
 									whatsApps.map(whatsApp => (
 										<TableRow key={whatsApp.id}>
 											<TableCell align="center">{whatsApp.name}</TableCell>
+                      <TableCell align="center">{whatsApp.channel}</TableCell>
 											<TableCell align="center">
 												{renderStatusToolTips(whatsApp)}
 											</TableCell>
@@ -398,7 +404,7 @@ const Connections = () => {
 													<Edit />
 												</IconButton>
 
-												{whatsApp.status === "CONNECTED" && (
+												{whatsApp.status === "CONNECTED" && whatsApp.channel === "whatsapp" && (
 													<IconButton
 														size="small"
 														onClick={() => handleOpenPrivacyWhatsApp(whatsApp)}

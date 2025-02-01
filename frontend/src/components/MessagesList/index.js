@@ -17,6 +17,7 @@ import {
 import {
   AccessTime,
   Block,
+  ErrorOutline,
   Done,
   DoneAll,
   ExpandMore,
@@ -763,7 +764,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
       );
     }
 
-    if (!document || message.mediaType === "video") {
+    if (!document && message.mediaType === "video") {
       return (
         <video
           className={classes.messageVideo}
@@ -783,7 +784,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
               target="_blank"
               href={message.mediaUrl.replace(/%/g, '%25')}
             >
-             { document?.fileName || message.body}
+             { document?.fileName || data?.fileName || message.body}
             </Button>
           </div>
           {message.body !== document?.fileName &&
@@ -792,7 +793,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
                 [classes.textContentItemDeleted]: message.isDeleted,
               }),]}>
                 <MarkdownWrapper>
-                  { message.body }
+                  { message.body || data?.caption }
                 </MarkdownWrapper>
               </div>
             </>
@@ -803,6 +804,9 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
   };
 
   const renderMessageAck = (message) => {
+    if (message.ack === -1) {
+      return <ErrorOutline fontSize="small" className={classes.ackIcons} />;
+    }
     if (message.ack === 0) {
       return <AccessTime fontSize="small" className={classes.ackIcons} />;
     }

@@ -14,6 +14,7 @@ const include = [
     attributes: [
       "id",
       "name",
+      "channel",
       "number",
       "email",
       "profilePicUrl",
@@ -44,7 +45,7 @@ const include = [
   {
     model: Whatsapp,
     as: "whatsapp",
-    attributes: ["name", "facebookUserToken", "facebookUserId"]
+    attributes: ["id", "name", "channel"]
   },
   {
     model: Tag,

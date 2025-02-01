@@ -1,4 +1,5 @@
 import gracefulShutdown from "http-graceful-shutdown";
+import ngrok from "ngrok";
 import app from "./app";
 import { initIO } from "./libs/socket";
 import { logger } from "./utils/logger";
@@ -14,6 +15,9 @@ import { IntegrationServices } from "./services/IntegrationServices/IntegrationS
 import { DummyIntegration } from "./services/IntegrationServices/DummyIntegration";
 import { WebhookIntegration } from "./services/IntegrationServices/WebhookIntegration";
 import { TypebotIntegration } from "./services/IntegrationServices/TypebotIntegration";
+import { NgrokInstance } from "./helpers/NgrokInstance";
+import { OmniServices } from "./services/OmniServices/OmniServices";
+import { NotificamehubDriver } from "./services/OmniServices/NotificamehubDriver";
 
 import { ticketzPro } from "./ticketzPro/ticketzPro";
 
@@ -67,8 +71,27 @@ const integrationServices = IntegrationServices.getInstance();
 integrationServices.registerIntegration(new WebhookIntegration());
 integrationServices.registerIntegration(new TypebotIntegration());
 
+// Initialize Omni Services
+const omniServices = OmniServices.getInstance();
+omniServices.registerOmniDriver(new NotificamehubDriver());
+
 // Create and start the server
 const server = app.listen(process.env.PORT, async () => {
+  if (process.env.NGROK_AUTH_TOKEN) {
+    logger.info("initializing ngrok...");
+    try {
+      const url = await ngrok.connect({
+        authtoken: process.env.NGROK_AUTH_TOKEN,
+        addr: process.env.PORT
+      });
+      if (url) {
+        NgrokInstance.getInstance().setUrl(url);
+      }
+      logger.info(`Server is publicly accessible at: ${url}`);
+    } catch (error) {
+      logger.error(`Error initializing ngrok: ${error.message}`);
+    }
+  }
   logger.info(`Server is listening on port: ${process.env.PORT}`);
   await startServer();
 });

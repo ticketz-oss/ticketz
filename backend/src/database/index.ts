@@ -37,6 +37,7 @@ import BaileysKeys from "../models/BaileysKeys";
 import UserSocketSession from "../models/UserSocketSession";
 import Integration from "../models/Integration";
 import IntegrationSession from "../models/IntegrationSession";
+import NotificamehubIdMapping from "../models/NotificamehubIdMapping";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const dbConfig = require("../config/database");
@@ -81,7 +82,8 @@ const models = [
   Invoices,
   Subscriptions,
   Integration,
-  IntegrationSession
+  IntegrationSession,
+  NotificamehubIdMapping
 ];
 
 sequelize.addModels(models);
