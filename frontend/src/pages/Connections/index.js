@@ -324,11 +324,13 @@ const Connections = () => {
 				onClose={handleCloseWhatsAppModal}
 				whatsAppId={!qrModalOpen && !privacyModalOpen && selectedWhatsApp?.id}
 			/>
-			<PrivacyModal
-				open={privacyModalOpen}
-				onClose={handleClosePrivacyWhatsAppModal}
-				whatsAppId={!qrModalOpen && !whatsAppModalOpen && selectedWhatsApp?.id}
-			/>
+			{ selectedWhatsApp?.channel === "whatsapp" &&
+        <PrivacyModal
+  				open={privacyModalOpen}
+  				onClose={handleClosePrivacyWhatsAppModal}
+  				whatsAppId={!qrModalOpen && !whatsAppModalOpen && selectedWhatsApp.id}
+  			/>
+      }
 			<MainHeader>
 				<Title>{i18n.t("connections.title")}</Title>
 				<MainHeaderButtonsWrapper>
@@ -402,7 +404,7 @@ const Connections = () => {
 													<Edit />
 												</IconButton>
 
-												{whatsApp.status === "CONNECTED" && (
+												{whatsApp.status === "CONNECTED" && whatsApp.channel === "whatsapp" && (
 													<IconButton
 														size="small"
 														onClick={() => handleOpenPrivacyWhatsApp(whatsApp)}
