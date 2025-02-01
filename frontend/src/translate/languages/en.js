@@ -111,7 +111,9 @@ const messages = {
           name: "Name",
           default: "Default",
           restrictToQueues: "Restritct to associated queues or queues without association",
-          transferToNewTicket: "Force transfer to new ticket"
+          transferToNewTicket: "Force transfer to new ticket",
+          hubToken: "Hub Token",
+          hubChannel: "Hub Channel",
         },
         buttons: {
           okAdd: "Add",
