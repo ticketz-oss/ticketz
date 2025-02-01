@@ -3,7 +3,6 @@ import { Op } from "sequelize";
 import { cacheLayer } from "../libs/cache";
 import { getIO } from "../libs/socket";
 import { removeWbot } from "../libs/wbot";
-import Whatsapp from "../models/Whatsapp";
 import DeleteBaileysService from "../services/BaileysServices/DeleteBaileysService";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
 
@@ -14,6 +13,7 @@ import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService
 import UpdateWhatsAppService from "../services/WhatsappService/UpdateWhatsAppService";
 import AppError from "../errors/AppError";
 import Ticket from "../models/Ticket";
+import { OmniServices } from "../services/OmniServices/OmniServices";
 
 interface WhatsappData {
   name: string;
@@ -82,21 +82,28 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     session: JSON.stringify(session)
   });
 
-  if (whatsapp.channel === "whatsapp") {
-    StartWhatsAppSession(whatsapp, companyId);
-  }
+  const sendEvent = async () => {
+    const io = getIO();
+    await whatsapp.reload();
 
-  const io = getIO();
-  io.emit(`company-${companyId}-whatsapp`, {
-    action: "update",
-    whatsapp
-  });
-
-  if (oldDefaultWhatsapp) {
     io.emit(`company-${companyId}-whatsapp`, {
       action: "update",
-      whatsapp: oldDefaultWhatsapp
+      whatsapp
     });
+
+    if (oldDefaultWhatsapp) {
+      io.emit(`company-${companyId}-whatsapp`, {
+        action: "update",
+        whatsapp: oldDefaultWhatsapp
+      });
+    }
+  };
+
+  if (whatsapp.channel === "whatsapp") {
+    StartWhatsAppSession(whatsapp, companyId).then(sendEvent);
+  } else {
+    const omniService = OmniServices.getInstance();
+    omniService.startService(whatsapp).then(sendEvent);
   }
 
   return res.status(200).json(whatsapp);
@@ -119,6 +126,11 @@ export const update = async (
   const { whatsappId } = req.params;
   const whatsappData = req.body;
   const { companyId } = req.user;
+
+  whatsappData.session = whatsappData.session
+    ? JSON.stringify(whatsappData.session)
+    : null;
+
   const { whatsapp, oldDefaultWhatsapp } = await UpdateWhatsAppService({
     whatsappData,
     whatsappId,
@@ -151,52 +163,30 @@ export const remove = async (
 
   const whatsapp = await ShowWhatsAppService(whatsappId, companyId);
 
-  if (whatsapp.channel === "whatsapp") {
-    const openTickets: Ticket[] = await whatsapp.$get("tickets", {
-      where: {
-        status: { [Op.or]: ["open", "pending"] }
-      }
-    });
-
-    if (openTickets.length > 0) {
-      throw new AppError(
-        "Não é possível remover conexão que contém tickets não resolvidos"
-      );
+  const openTickets: Ticket[] = await whatsapp.$get("tickets", {
+    where: {
+      status: { [Op.or]: ["open", "pending"] }
     }
+  });
 
+  if (openTickets.length > 0) {
+    throw new AppError(
+      "Não é possível remover conexão que contém tickets não resolvidos"
+    );
+  }
+
+  if (whatsapp.channel === "whatsapp") {
     await DeleteBaileysService(whatsappId);
-    await DeleteWhatsAppService(whatsappId);
     await cacheLayer.delFromPattern(`sessions:${whatsappId}:*`);
     removeWbot(+whatsappId);
-
-    io.emit(`company-${companyId}-whatsapp`, {
-      action: "delete",
-      whatsappId: +whatsappId
-    });
   }
 
-  if (whatsapp.channel === "facebook" || whatsapp.channel === "instagram") {
-    const { facebookUserToken } = whatsapp;
+  await DeleteWhatsAppService(whatsappId);
 
-    const getAllSameToken = await Whatsapp.findAll({
-      where: {
-        facebookUserToken
-      }
-    });
-
-    await Whatsapp.destroy({
-      where: {
-        facebookUserToken
-      }
-    });
-
-    getAllSameToken.forEach(w => {
-      io.emit(`company-${companyId}-whatsapp`, {
-        action: "delete",
-        whatsappId: w.id
-      });
-    });
-  }
+  io.emit(`company-${companyId}-whatsapp`, {
+    action: "delete",
+    whatsappId: +whatsappId
+  });
 
   return res.status(200).json({ message: "Session disconnected." });
 };
