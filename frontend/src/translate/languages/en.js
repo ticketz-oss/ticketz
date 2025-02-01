@@ -92,6 +92,7 @@ const messages = {
         },
         table: {
           name: "Name",
+          channel: "Channel",
           status: "Status",
           lastUpdate: "Last Update",
           default: "Default",
@@ -143,7 +144,8 @@ const messages = {
         },
         table: {
           name: "Name",
-          whatsapp: "WhatsApp",
+          service: "Service",
+          whatsapp: "Id",
           email: "Email",
           actions: "Actions",
         },

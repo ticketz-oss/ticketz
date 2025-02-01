@@ -146,7 +146,8 @@ const messages = {
         },
         table: {
           name: "Nombre",
-          whatsapp: "WhatsApp",
+          service: "Servicio",
+          whatsapp: "Id",
           email: "Correo electrónico",
           actions: "Acciones",
         },

@@ -311,6 +311,9 @@ const Contacts = () => {
               <TableCell padding="checkbox" />
               <TableCell>{i18n.t("contacts.table.name")}</TableCell>
               <TableCell align="center">
+                {i18n.t("contacts.table.service")}
+              </TableCell>
+              <TableCell align="center">
                 {i18n.t("contacts.table.whatsapp")}
               </TableCell>
               <TableCell align="center">
@@ -329,6 +332,7 @@ const Contacts = () => {
                     {<Avatar style={{ backgroundColor: generateColor(contact?.number), fontWeight: "bold", color: "white" }} src={contact.profilePicUrl}>{getInitials(contact?.name)}</Avatar>}
                   </TableCell>
                   <TableCell>{contact.name}</TableCell>
+                  <TableCell align="center">{contact.channel}</TableCell>
                   <TableCell align="center">{contact.number}</TableCell>
                   <TableCell align="center">{contact.email}</TableCell>
                   <TableCell align="center">

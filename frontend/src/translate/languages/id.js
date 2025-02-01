@@ -142,7 +142,8 @@ const messages = {
         },
         table: {
           name: "Nama",
-          whatsapp: "WhatsApp",
+          service: "Layanan",
+          whatsapp: "Id",
           email: "Email",
           actions: "Aksi",
         },
