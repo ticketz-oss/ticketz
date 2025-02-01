@@ -47,6 +47,7 @@ import {
   FileContent
 } from "notificamehubsdk";
 import { Op } from "sequelize";
+import { getLinkPreview } from "link-preview-js";
 import Contact from "../../models/Contact";
 import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
@@ -84,6 +85,7 @@ export type NotificamehubContent = {
   fileUrl?: string;
   fileMimeType?: string;
   fileName?: string;
+  item?: string;
 };
 
 export type NotificamehubMessage = {
@@ -331,6 +333,7 @@ export class NotificamehubDriver implements OmniDriver {
       const file = content.fileUrl ? await downloadFile(content.fileUrl) : null;
 
       let mediaUrl;
+      let thumbnailUrl;
       const finalContent = JSON.parse(JSON.stringify(content));
 
       if (file) {
@@ -376,6 +379,23 @@ export class NotificamehubDriver implements OmniDriver {
         );
       }
 
+      if (content.type === "text" && content.item) {
+        finalContent.itemPreview = await getLinkPreview(content.item);
+
+        if (finalContent.itemPreview?.images?.length > 0) {
+          thumbnailUrl = await saveMediaToFile(
+            {
+              data: await downloadFile(finalContent.itemPreview.images[0]),
+              mimetype: "image/jpeg",
+              filename:
+                finalContent.itemPreview.images[0].split("/")?.pop() ||
+                "image.jpeg"
+            },
+            ticket
+          );
+        }
+      }
+
       return CreateMessageService({
         messageData: {
           id: message.id,
@@ -387,7 +407,8 @@ export class NotificamehubDriver implements OmniDriver {
             ? finalContent.fileMimeType.split("/")[0] || "document"
             : "",
           mediaUrl,
-          dataJson: JSON.stringify(content)
+          thumbnailUrl,
+          dataJson: JSON.stringify(finalContent)
         },
         companyId: ticket.companyId
       });
