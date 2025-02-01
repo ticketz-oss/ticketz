@@ -92,6 +92,13 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 
       try {
         const { data } = await api.get(`whatsapp/${whatsAppId}?session=0`);
+        if (data.session) {
+          const session = JSON.parse(data.session);
+          if (session.hubToken) {
+            data.hubToken = session.hubToken;
+            data.hubChannel = session.hubChannel;
+          }
+        }
         setWhatsApp(data);
 
         const whatsQueueIds = data.queues?.map((queue) => queue.id);
