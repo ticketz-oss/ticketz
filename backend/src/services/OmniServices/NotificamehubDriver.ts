@@ -116,6 +116,7 @@ export type NotificamehubStatusMessage = {
 };
 
 const statusAck = {
+  REJECTED: -1,
   PENDING: 0,
   SENT: 1,
   DELIVERED: 2,
@@ -192,6 +193,13 @@ async function initializeWebhook(whatsapp: Whatsapp): Promise<Client> {
   );
 
   return client;
+}
+
+function normalizeChannel(channel: string): string {
+  if (channel.startsWith("whatsapp")) {
+    return "whatsapp";
+  }
+  return channel.toLowerCase();
 }
 
 export class NotificamehubDriver implements OmniDriver {
@@ -271,14 +279,15 @@ export class NotificamehubDriver implements OmniDriver {
     logger.debug("notificamehub:findOrCreateContact");
 
     const message = NotificamehubDriver.normalizeMessage(data);
+    const channel = normalizeChannel(message.channel);
 
     return contactMutex.runExclusive(async () => {
       return (
         (await Contact.findOne({
           where: {
             companyId: connection.companyId,
-            channel: message.channel,
-            number: message.from
+            channel,
+            number: String(message.from)
           }
         })) ||
         Contact.create({
@@ -286,8 +295,8 @@ export class NotificamehubDriver implements OmniDriver {
           name:
             `${message.visitor.firstName} ${message.visitor.lastName}`.trim() ||
             message.visitor.name ||
-            message.from,
-          channel: message.channel,
+            String(message.from),
+          channel,
           number: message.from
         })
       );

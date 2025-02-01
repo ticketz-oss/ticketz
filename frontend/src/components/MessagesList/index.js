@@ -17,6 +17,7 @@ import {
 import {
   AccessTime,
   Block,
+  ErrorOutline,
   Done,
   DoneAll,
   ExpandMore,
@@ -805,6 +806,9 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
   };
 
   const renderMessageAck = (message) => {
+    if (message.ack === -1) {
+      return <ErrorOutline fontSize="small" className={classes.ackIcons} />;
+    }
     if (message.ack === 0) {
       return <AccessTime fontSize="small" className={classes.ackIcons} />;
     }
