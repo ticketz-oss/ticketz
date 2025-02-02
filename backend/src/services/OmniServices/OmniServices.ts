@@ -52,6 +52,7 @@ import formatBody from "../../helpers/Mustache";
 import User from "../../models/User";
 import { getIO } from "../../libs/socket";
 import saveMediaToFile from "../../helpers/saveMediaFile";
+import { DebugException } from "../../helpers/DebugException";
 
 export type OmniMessage = {
   type: "text" | "image" | "video" | "audio" | "document";
@@ -142,31 +143,41 @@ export class OmniServices {
     logger.debug({ data }, "OmniServices:messageHandler");
     const driver = this.drivers[channel];
     if (!driver) {
-      throw new Error(`OmniDriver ${channel} not found`);
+      return Promise.reject(new Error(`OmniDriver ${channel} not found`));
     }
 
-    const connection = await driver.getConnection(data);
-
-    if (!connection) {
-      throw new Error("Connection not found");
-    }
-
-    const contact = await driver.findOrCreateContact(connection, data);
-
-    if (!contact) {
-      throw new Error("Contact not found or created");
-    }
-
-    const { ticket, justCreated } = await driver.findOrCreateTicket(
-      contact,
-      connection
-    );
-
-    if (!ticket) {
-      throw new Error("Ticket not found or not created");
-    }
-
-    await driver.createMessages(ticket, data);
+    return driver
+      .getConnection(data)
+      .then(connection => {
+        if (!connection) {
+          throw new Error("Connection not found");
+        }
+        driver
+          .findOrCreateContact(connection, data)
+          .then(contact => {
+            if (!contact) {
+              throw new Error("Contact not found or created");
+            }
+            driver
+              .findOrCreateTicket(contact, connection)
+              .then(({ ticket, justCreated }) => {
+                if (!ticket) {
+                  throw new Error("Ticket not found or not created");
+                }
+                driver.createMessages(ticket, data);
+              });
+          })
+          .catch(error => {
+            if (error instanceof DebugException) {
+              logger.debug(error.message);
+              return;
+            }
+            throw error;
+          });
+      })
+      .catch(error => {
+        throw error;
+      });
   }
 
   public async sendMessageFromRequest(
