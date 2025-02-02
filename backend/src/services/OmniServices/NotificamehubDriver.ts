@@ -62,6 +62,8 @@ import User from "../../models/User";
 import downloadFile from "../../helpers/downloadFile";
 import saveMediaToFile from "../../helpers/saveMediaFile";
 import NotificamehubIdMapping from "../../models/NotificamehubIdMapping";
+import { DebugException } from "../../helpers/DebugException";
+import { makeRandomId } from "../../helpers/MakeRandomId";
 
 const contactMutex = new Mutex();
 const ticketMutex = new Mutex();
@@ -280,6 +282,12 @@ export class NotificamehubDriver implements OmniDriver {
   async findOrCreateContact(connection: Whatsapp, data: any): Promise<Contact> {
     logger.debug("notificamehub:findOrCreateContact");
 
+    if (data.direction === "OUT") {
+      throw new DebugException(
+        "notificamehub:findOrCreateContact: Invalid direction"
+      );
+    }
+
     const message = NotificamehubDriver.normalizeMessage(data);
     const channel = normalizeChannel(message.channel);
 
@@ -299,7 +307,19 @@ export class NotificamehubDriver implements OmniDriver {
             message.visitor.name ||
             String(message.from),
           channel,
-          number: message.from
+          number: message.from,
+          profilePicUrl: message.visitor.picture
+            ? await saveMediaToFile(
+                {
+                  data: await downloadFile(message.visitor.picture),
+                  mimetype: "image/jpeg",
+                  filename: `${message.from || makeRandomId(10)}-profile.jpeg`
+                },
+                null,
+                null,
+                connection.companyId
+              )
+            : null
         })
       );
     });
