@@ -6,7 +6,6 @@ import { logger } from "../utils/logger";
 import { S3Storage } from "./S3Storage";
 import { makeRandomId } from "./MakeRandomId";
 import Contact from "../models/Contact";
-import Company from "../models/Company";
 
 export default async function saveMediaToFile(
   media: {
