@@ -728,6 +728,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
       data?.message?.documentMessage
       || data?.message?.documentWithCaptionMessage?.message?.documentMessage;
     if (!document && message.mediaType === "image") {
+      const caption = data?.message?.imageMessage?.caption || message.body;
       return (
         <>
           { <ModalImageCors imageUrl={message.mediaUrl} isDeleted={message.isDeleted} /> }
@@ -736,10 +737,10 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
               [classes.textContentItemDeleted]: message.isDeleted,
               [classes.textContentItem]: !message.isDeleted,
             }),]}>
-              {data?.message?.imageMessage?.caption &&
+              {caption &&
                 <>
                   <MarkdownWrapper>
-                    {data.message.imageMessage.caption}
+                    {caption}
                   </MarkdownWrapper>
                 </>
               }
@@ -773,6 +774,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
         />
       );
     } else {
+      const caption = message.body || data.caption;
       return (
         <>
           <div className={classes.downloadMedia}>
@@ -787,13 +789,13 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
              { document?.fileName || data?.fileName || message.body}
             </Button>
           </div>
-          {message.body !== document?.fileName &&
+          {caption &&
             <>
               <div className={[clsx({
                 [classes.textContentItemDeleted]: message.isDeleted,
               }),]}>
                 <MarkdownWrapper>
-                  { message.body || data?.caption }
+                  { caption }
                 </MarkdownWrapper>
               </div>
             </>

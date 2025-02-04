@@ -648,7 +648,7 @@ export const verifyMediaMessage = async (
     id: msg.key.id,
     ticketId: ticket.id,
     contactId: msg.key.fromMe ? undefined : contact.id,
-    body: body || media?.filename,
+    body: body || "",
     fromMe: msg.key.fromMe,
     read: msg.key.fromMe,
     mediaUrl,

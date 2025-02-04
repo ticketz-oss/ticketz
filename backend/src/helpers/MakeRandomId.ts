@@ -1,5 +1,5 @@
 // generate random id string for file names, function got from: https://stackoverflow.com/a/1349426/1851801
-export function makeRandomId(length: number) {
+export function makeRandomId(length: number): string {
   let result = "";
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

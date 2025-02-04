@@ -48,6 +48,7 @@ import {
 } from "notificamehubsdk";
 import { Op } from "sequelize";
 import { getLinkPreview } from "link-preview-js";
+import { Readable } from "stream";
 import Contact from "../../models/Contact";
 import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
@@ -62,6 +63,8 @@ import User from "../../models/User";
 import downloadFile from "../../helpers/downloadFile";
 import saveMediaToFile from "../../helpers/saveMediaFile";
 import NotificamehubIdMapping from "../../models/NotificamehubIdMapping";
+import { DebugException } from "../../helpers/DebugException";
+import { makeRandomId } from "../../helpers/MakeRandomId";
 
 const contactMutex = new Mutex();
 const ticketMutex = new Mutex();
@@ -85,6 +88,7 @@ export type NotificamehubContent = {
   fileUrl?: string;
   fileMimeType?: string;
   fileName?: string;
+  caption?: string;
   item?: string;
 };
 
@@ -141,10 +145,18 @@ const typeMappings = {
   },
   facebook: defaultTypeMapping,
   instagram: defaultTypeMapping,
+  whatsapp: defaultTypeMapping,
   webchat: defaultTypeMapping
 };
 
-async function initializeWebhook(whatsapp: Whatsapp): Promise<Client> {
+export type NotificamehubSession = {
+  client: Client;
+  hubChannel: string;
+};
+
+async function initializeWebhook(
+  whatsapp: Whatsapp
+): Promise<NotificamehubSession> {
   let session: { hubToken: string; hubChannel: string };
   try {
     session = JSON.parse(whatsapp.session);
@@ -152,8 +164,8 @@ async function initializeWebhook(whatsapp: Whatsapp): Promise<Client> {
     throw new Error("ERR_INVALID_SESSION");
   }
 
-  const { hubToken, hubChannel: channel } = session;
-  if (!hubToken || !channel) {
+  const { hubToken, hubChannel } = session;
+  if (!hubToken || !hubChannel) {
     throw new Error("ERR_INVALID_SESSION");
   }
 
@@ -162,14 +174,14 @@ async function initializeWebhook(whatsapp: Whatsapp): Promise<Client> {
   const backendUrl =
     NgrokInstance.getInstance().getUrl() || process.env.BACKEND_URL;
 
-  const url = `${backendUrl}/notificamehub/webhook/${channel}`;
+  const url = `${backendUrl}/notificamehub/webhook/${hubChannel}`;
 
   const subscription = new MessageSubscription(
     {
       url
     },
     {
-      channel
+      channel: hubChannel
     }
   );
 
@@ -185,7 +197,7 @@ async function initializeWebhook(whatsapp: Whatsapp): Promise<Client> {
   await Whatsapp.update(
     {
       status: "CONNECTED",
-      qrcode: channel
+      qrcode: hubChannel
     },
     {
       where: {
@@ -194,7 +206,7 @@ async function initializeWebhook(whatsapp: Whatsapp): Promise<Client> {
     }
   );
 
-  return client;
+  return { client, hubChannel };
 }
 
 function normalizeChannel(channel: string): string {
@@ -271,14 +283,20 @@ export class NotificamehubDriver implements OmniDriver {
   }
 
   async startService(connection: Whatsapp): Promise<void> {
-    const client = await initializeWebhook(connection);
+    const session = await initializeWebhook(connection);
 
-    this.sessions[connection.id] = client;
+    this.sessions[connection.id] = session;
   }
 
   // eslint-disable-next-line class-methods-use-this
   async findOrCreateContact(connection: Whatsapp, data: any): Promise<Contact> {
     logger.debug("notificamehub:findOrCreateContact");
+
+    if (data.direction === "OUT") {
+      throw new DebugException(
+        "notificamehub:findOrCreateContact: Invalid direction"
+      );
+    }
 
     const message = NotificamehubDriver.normalizeMessage(data);
     const channel = normalizeChannel(message.channel);
@@ -299,7 +317,19 @@ export class NotificamehubDriver implements OmniDriver {
             message.visitor.name ||
             String(message.from),
           channel,
-          number: message.from
+          number: message.from,
+          profilePicUrl: message.visitor.picture
+            ? await saveMediaToFile(
+                {
+                  data: await downloadFile(message.visitor.picture),
+                  mimetype: "image/jpeg",
+                  filename: `${message.from || makeRandomId(10)}-profile.jpeg`
+                },
+                null,
+                null,
+                connection.companyId
+              )
+            : null
         })
       );
     });
@@ -330,10 +360,29 @@ export class NotificamehubDriver implements OmniDriver {
 
     const newMessages = message.contents.map(async content => {
       // download file
-      const file = content.fileUrl ? await downloadFile(content.fileUrl) : null;
+      let file: Buffer | Readable;
+      if (content.fileUrl) {
+        if (message.channel === "whatsapp_business_account") {
+          const { client, hubChannel } = this.sessions[ticket.whatsappId];
+          const fileContent = new FileContent(
+            content.fileUrl,
+            content.fileMimeType.split("/").pop() || "binary"
+          );
+          const channel = await client.setChannel("whatsapp");
+          const fileData = await channel.downloadMedia(
+            hubChannel,
+            "whatsapp",
+            fileContent
+          );
 
-      let mediaUrl;
-      let thumbnailUrl;
+          file = Buffer.from(fileData, "binary");
+        } else {
+          file = await downloadFile(content.fileUrl);
+        }
+      }
+
+      let mediaUrl: string;
+      let thumbnailUrl: string;
       const finalContent = JSON.parse(JSON.stringify(content));
 
       if (file) {
@@ -401,7 +450,7 @@ export class NotificamehubDriver implements OmniDriver {
           id: message.id,
           contactId: ticket.contactId,
           ticketId: ticket.id,
-          body: content.text || "",
+          body: content.text || content.caption || "",
           channel: ticket.contact.channel,
           mediaType: file
             ? finalContent.fileMimeType.split("/")[0] || "document"
@@ -421,7 +470,6 @@ export class NotificamehubDriver implements OmniDriver {
     logger.debug("notificamehub:sendMessage");
 
     const connection = await Whatsapp.findByPk(ticket.whatsappId);
-    const client = this.sessions[connection.id];
 
     let textContent: TextContent;
     const promises = [];
@@ -430,6 +478,7 @@ export class NotificamehubDriver implements OmniDriver {
       textContent = new TextContent(message.body);
     }
 
+    const { client } = this.sessions[connection.id];
     const channel = client.setChannel(ticket.contact.channel);
 
     if (textContent)
@@ -462,7 +511,7 @@ export class NotificamehubDriver implements OmniDriver {
       const fileContent = new FileContent(
         message.mediaUrl,
         typeMappings[ticket.contact.channel][message.type] || "file",
-        message.fileName,
+        message.body || "",
         message.fileName
       );
       promises.push(
@@ -479,7 +528,7 @@ export class NotificamehubDriver implements OmniDriver {
               id: result.id,
               contactId: ticket.contactId,
               ticketId: ticket.id,
-              body: "",
+              body: message.body || "",
               fromMe: true,
               channel: ticket.contact.channel,
               mediaType: message.mimetype.split("/")[0],
