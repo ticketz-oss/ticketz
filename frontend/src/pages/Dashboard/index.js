@@ -495,7 +495,8 @@ const Dashboard = () => {
                       </Typography>
                       <Typography component="h3" variant="h7" gutterBottom>
                       <ul className={classes.ticketzProFeatures}>
-                        <li>Funcionalidades exclusivas</li>
+                        <li>Whatsapp Oficial - Instagram - Messenger e outros</li>
+                        <li>Features exclusivas</li>
                         <li>Suporte Avançado</li>
                         <li>Migração Facilitada</li>
                       </ul>
