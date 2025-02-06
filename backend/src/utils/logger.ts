@@ -29,7 +29,7 @@ export const logger = pino({
   }
 });
 
-export const loggerBaileys: any = pino({
+export const loggerBaileys = pino({
   timestamp: () => {
     return `,"time":"${new Date().toJSON()}"`;
   },
