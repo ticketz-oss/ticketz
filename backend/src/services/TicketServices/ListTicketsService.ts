@@ -58,9 +58,13 @@ const ListTicketsService = async ({
     !isSearch &&
     (await GetCompanySetting(companyId, "groupsTab", "disabled")) === "enabled";
 
+  const user = await ShowUserService(userId);
+
   let whereCondition: Filterable["where"] = {
     [Op.or]: [{ userId }, { status: "pending" }],
-    queueId: { [Op.or]: [queueIds, null] }
+    queueId: {
+      [Op.or]: user.profile === "admin" ? [queueIds, null] : [queueIds]
+    }
   };
 
   if (groupsTab) {
@@ -96,8 +100,10 @@ const ListTicketsService = async ({
     }
   ];
 
-  if (showAll === "true") {
-    whereCondition = { queueId: { [Op.or]: [queueIds, null] } };
+  if (showAll === "true" && user.profile === "admin") {
+    whereCondition = {
+      queueId: { [Op.or]: [queueIds, null] }
+    };
     if (groupsTab) {
       whereCondition.isGroup = groups === "true";
     }
@@ -173,12 +179,14 @@ const ListTicketsService = async ({
   }
 
   if (withUnreadMessages === "true") {
-    const user = await ShowUserService(userId);
     const userQueueIds = user.queues.map(queue => queue.id);
 
     whereCondition = {
       [Op.or]: [{ userId }, { status: "pending" }],
-      queueId: { [Op.or]: [userQueueIds, null] },
+      queueId: {
+        [Op.or]:
+          user.profile === "admin" ? [userQueueIds, null] : [userQueueIds]
+      },
       unreadMessages: { [Op.gt]: 0 }
     };
     if (groupsTab) {
@@ -211,9 +219,9 @@ const ListTicketsService = async ({
   if (Array.isArray(users) && users.length > 0) {
     const ticketsUserFilter: any[] | null = [];
     // eslint-disable-next-line no-restricted-syntax
-    for await (const user of users) {
+    for await (const u of users) {
       const ticketUsers = await Ticket.findAll({
-        where: { userId: user }
+        where: { userId: u }
       });
       if (ticketUsers) {
         ticketsUserFilter.push(ticketUsers.map(t => t.id));
