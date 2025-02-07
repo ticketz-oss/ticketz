@@ -241,6 +241,7 @@ const CampaignModal = ({
         as={TextField}
         id={identifier}
         name={identifier}
+        spellCheck={true}
         fullWidth
         rows={5}
         label={i18n.t(`campaigns.dialog.form.${identifier}`)}
@@ -259,6 +260,7 @@ const CampaignModal = ({
         as={TextField}
         id={identifier}
         name={identifier}
+        spellCheck={true}
         fullWidth
         rows={5}
         label={i18n.t(`campaigns.dialog.form.${identifier}`)}

@@ -19,7 +19,7 @@ import ClearIcon from "@material-ui/icons/Clear";
 import MicIcon from "@material-ui/icons/Mic";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
-import { FormControlLabel, Switch } from "@material-ui/core";
+import { FormControlLabel, Input, Switch, TextField } from "@material-ui/core";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { isString, isEmpty, isObject, has } from "lodash";
 
@@ -399,6 +399,7 @@ const CustomInput = (props) => {
   const setInputRef = (input) => {
     if (input) {
       inputRef.current = input;
+      inputRef.current.spellcheck = true;
     }
   };
 

@@ -314,6 +314,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
                             rows={5}
                             fullWidth
                             name="greetingMessage"
+                            spellCheck={true}
                             error={
                               touched.greetingMessage &&
                               Boolean(errors.greetingMessage)
@@ -334,6 +335,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
                               rows={5}
                               fullWidth
                               name="outOfHoursMessage"
+                              spellCheck={true}
                               error={
                                 touched.outOfHoursMessage &&
                                 Boolean(errors.outOfHoursMessage)

@@ -234,6 +234,7 @@ export function QueueOptionStepper({ queueId, options, updateOptions }) {
               
           <TextField
             value={option.title}
+            spellCheck={true}
             onChange={(event) => handleOptionChangeTitle(event, index)}
             size="small"
             className={classes.input}
@@ -324,6 +325,7 @@ export function QueueOptionStepper({ queueId, options, updateOptions }) {
             style={{ width: "100%" }}
             multiline
             value={option.message}
+            spellCheck={true}
             onChange={(event) => handleOptionChangeMessage(event, index)}
             size="small"
             className={classes.input}

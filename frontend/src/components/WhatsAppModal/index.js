@@ -188,6 +188,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                     rows={4}
                     fullWidth
                     name="greetingMessage"
+                    spellCheck={true}
                     error={
                       touched.greetingMessage && Boolean(errors.greetingMessage)
                     }
@@ -214,6 +215,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                     rows={4}
                     fullWidth
                     name="complationMessage"
+                    spellCheck={true}
                     error={
                       touched.complationMessage &&
                       Boolean(errors.complationMessage)
@@ -234,6 +236,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                     rows={4}
                     fullWidth
                     name="transferMessage"
+                    spellCheck={true}
                     error={
                       touched.transferMessage &&
                       Boolean(errors.transferMessage)
@@ -254,6 +257,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                     rows={4}
                     fullWidth
                     name="outOfHoursMessage"
+                    spellCheck={true}
                     error={
                       touched.outOfHoursMessage &&
                       Boolean(errors.outOfHoursMessage)
@@ -274,6 +278,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                     rows={4}
                     fullWidth
                     name="ratingMessage"
+                    spellCheck={true}
                     error={
                       touched.ratingMessage && Boolean(errors.ratingMessage)
                     }
