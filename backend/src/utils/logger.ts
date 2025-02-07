@@ -48,4 +48,4 @@ export const loggerBaileys = pino({
       method.apply(this, inputArgs);
     }
   }
-}).child({});
+});
