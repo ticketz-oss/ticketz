@@ -822,15 +822,15 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
   };
 
   const getQuotedMessageText = (quotedMsg) => {
-    if (quotedMsg.mediaUrl?.endsWith(quotedMsg.body)) {
-      return "";
+    if (!quotedMsg?.body && quotedMsg?.mediaUrl) {
+      return "📎 " + quotedMsg.mediaUrl.split("/").pop();
     }
 
-    if (isVCard(quotedMsg.body)) {
+    if (isVCard(quotedMsg?.body)) {
       return "🪪";
     }
     
-    return quotedMsg.body;
+    return quotedMsg?.body;
   }
     
 
@@ -838,7 +838,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
     const data = JSON.parse(message.quotedMsg.dataJson);
     
     const thumbnail = data?.message?.imageMessage?.jpegThumbnail;
-    const mediaUrl = message.quotedMsg?.mediaUrl;
+    const mediaUrl = message.quotedMsg?.mediaType === "image" ? message.quotedMsg.mediaUrl : null;
     const imageUrl = thumbnail ? "data:image/png;base64, " + thumbnail : mediaUrl;
     return (
       <div

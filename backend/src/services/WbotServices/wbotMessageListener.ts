@@ -627,7 +627,7 @@ export const verifyMediaMessage = async (
     id: msg.key.id,
     ticketId: ticket.id,
     contactId: msg.key.fromMe ? undefined : contact.id,
-    body: body || media?.filename,
+    body: body || "",
     fromMe: msg.key.fromMe,
     read: msg.key.fromMe,
     mediaUrl,
@@ -641,7 +641,7 @@ export const verifyMediaMessage = async (
   };
 
   await ticket.update({
-    lastMessage: body || media?.filename
+    lastMessage: body || media?.filename ? `📎 ${media?.filename}` : ""
   });
 
   const newMessage = await CreateMessageService({
