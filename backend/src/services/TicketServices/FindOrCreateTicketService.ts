@@ -1,5 +1,6 @@
 import { subMinutes } from "date-fns";
 import { Op } from "sequelize";
+import { Mutex } from "async-mutex";
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
 import ShowTicketService from "./ShowTicketService";
@@ -7,14 +8,18 @@ import FindOrCreateATicketTrakingService from "./FindOrCreateATicketTrakingServi
 import { GetCompanySetting } from "../../helpers/CheckSettings";
 import sequelize from "../../database";
 import Whatsapp from "../../models/Whatsapp";
+import Queue from "../../models/Queue";
 
-const FindOrCreateTicketService = async (
+const createTicketMutex = new Mutex();
+
+const internalFindOrCreateTicketService = async (
   contact: Contact,
   whatsappId: number,
   unreadMessages: number,
   companyId: number,
   groupContact?: Contact,
-  doNotReopen?: boolean
+  doNotReopen?: boolean,
+  queue?: Queue
 ): Promise<{ ticket: Ticket; justCreated: boolean }> => {
   let justCreated = false;
   const result = await sequelize.transaction(async () => {
@@ -95,7 +100,7 @@ const FindOrCreateTicketService = async (
       }
     }
 
-    let queueId = null;
+    let queueId = queue?.id || null;
 
     if (groupContact) {
       const whatsapp = await Whatsapp.findByPk(whatsappId, {
@@ -134,6 +139,32 @@ const FindOrCreateTicketService = async (
   });
 
   return result;
+};
+
+const FindOrCreateTicketService = async (
+  contact: Contact,
+  whatsappId: number,
+  unreadMessages: number,
+  companyId: number,
+  groupContact?: Contact,
+  doNotReopen?: boolean,
+  queue?: Queue
+): Promise<{ ticket: Ticket; justCreated: boolean }> => {
+  const release = await createTicketMutex.acquire();
+
+  try {
+    return await internalFindOrCreateTicketService(
+      contact,
+      whatsappId,
+      unreadMessages,
+      companyId,
+      groupContact,
+      doNotReopen,
+      queue
+    );
+  } finally {
+    release();
+  }
 };
 
 export default FindOrCreateTicketService;
