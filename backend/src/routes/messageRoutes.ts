@@ -10,6 +10,8 @@ const messageRoutes = Router();
 
 const upload = multer(uploadConfig);
 
+messageRoutes.post("/messages/forward", isAuth, MessageController.forward);
+
 messageRoutes.get("/messages/:ticketId", isAuth, MessageController.index);
 
 messageRoutes.post(

@@ -18,10 +18,21 @@ import EditWhatsAppMessage from "../services/WbotServices/EditWhatsAppMessage";
 
 import { logger } from "../utils/logger";
 import { MessageData } from "../helpers/SendMessage";
+import Message from "../models/Message";
+import Contact from "../models/Contact";
+import Ticket from "../models/Ticket";
+import ForwardMessageService from "../services/MessageServices/ForwardMessageService";
 
 type IndexQuery = {
   pageNumber: string;
   markAsRead: string;
+};
+
+type ForwardData = {
+  contactId: number;
+  ticketId: number;
+  messageId: string;
+  queueId: number;
 };
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
@@ -118,6 +129,73 @@ export const remove = async (
     action: "update",
     message
   });
+
+  return res.send();
+};
+
+export const forward = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { contactId, ticketId, messageId, queueId }: ForwardData = req.body;
+  const { companyId } = req.user;
+
+  const user = await User.findByPk(req.user.id, {
+    include: [{ model: Queue, as: "queues" }]
+  });
+
+  if (user.profile !== "admin" && !user.queues.find(q => q.id === queueId)) {
+    throw new AppError("ERR_FORBIDDEN", 403);
+  }
+
+  const message = await Message.findOne({
+    where: {
+      id: messageId,
+      ticketId
+    },
+    include: [
+      {
+        model: Ticket,
+        as: "ticket",
+        include: [
+          {
+            model: Whatsapp,
+            as: "whatsapp"
+          }
+        ]
+      },
+      {
+        model: Contact,
+        as: "contact"
+      }
+    ]
+  });
+
+  if (!message) {
+    throw new AppError("ERR_MESSAGE_NOT_FOUND", 404);
+  }
+
+  const contact = await Contact.findByPk(contactId);
+
+  if (!contact) {
+    throw new AppError("ERR_CONTACT_NOT_FOUND", 404);
+  }
+
+  const queue = await Queue.findByPk(queueId);
+
+  if (!queue) {
+    throw new AppError("ERR_QUEUE_NOT_FOUND", 404);
+  }
+
+  if (
+    message.companyId !== companyId ||
+    contact.companyId !== companyId ||
+    queue.companyId !== companyId
+  ) {
+    throw new AppError("ERR_ACCESS_DENIED", 403);
+  }
+
+  await ForwardMessageService(user, message, contact, queue);
 
   return res.send();
 };
