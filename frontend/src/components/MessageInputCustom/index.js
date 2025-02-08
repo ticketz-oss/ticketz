@@ -461,6 +461,7 @@ const CustomInput = (props) => {
   const setInputRef = (input) => {
     if (input) {
       inputRef.current = input;
+      inputRef.current.spellcheck = true;
     }
   };
 

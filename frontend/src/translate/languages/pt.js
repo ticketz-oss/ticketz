@@ -905,7 +905,8 @@ const messages = {
         editing: "Editando",
       },
       message: {
-        edited: "Editada"
+        edited: "Editada",
+        forwarded: "Encaminhada",
       },
 
       contactDrawer: {
@@ -944,6 +945,7 @@ const messages = {
       messageOptionsMenu: {
         delete: "Deletar",
         edit: "Editar",
+        forward: "Encaminhar",
         history: "Histórico",
         reply: "Responder",
         confirmationModal: {

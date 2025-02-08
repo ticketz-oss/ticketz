@@ -643,6 +643,7 @@ export const verifyMediaMessage = async (
   const messageData: MessageData = {
     id: msg.key.id,
     ticketId: ticket.id,
+    userId,
     contactId: msg.key.fromMe ? undefined : contact.id,
     body: body || "",
     fromMe: msg.key.fromMe,
@@ -662,7 +663,7 @@ export const verifyMediaMessage = async (
   }
 
   await ticket.update({
-    lastMessage: body || media?.filename || "🗎"
+    lastMessage: body || media?.filename ? `📎 ${media?.filename}` : ""
   });
 
   const newMessage = await CreateMessageService({
@@ -714,6 +715,7 @@ export const verifyMessage = async (
   const messageData: MessageData = {
     id: msg.key.id,
     ticketId: ticket.id,
+    userId,
     contactId: msg.key.fromMe ? undefined : contact.id,
     body,
     fromMe: msg.key.fromMe,
@@ -2077,17 +2079,12 @@ const handleMessage = async (
       }
     }
 
-    const { ticket, justCreated } = await createTicketMutex.runExclusive(
-      async () => {
-        const result = await FindOrCreateTicketService(
-          contact,
-          wbot.id!,
-          unreadMessages,
-          companyId,
-          groupContact
-        );
-        return result;
-      }
+    const { ticket, justCreated } = await FindOrCreateTicketService(
+      contact,
+      wbot.id!,
+      unreadMessages,
+      companyId,
+      groupContact
     );
 
     const ticketMessages = await Message.findAll({

@@ -7,7 +7,7 @@ import { logger } from "../utils/logger";
 import GetTicketWbot from "./GetTicketWbot";
 
 const SetTicketMessagesAsRead = async (ticket: Ticket): Promise<void> => {
-  await ticket.update({ unreadMessages: 0 });
+  await ticket.update({ unreadMessages: 0 }, { silent: true });
   await cacheLayer.set(`contacts:${ticket.contactId}:unreads`, "0");
   let companyId: number;
 

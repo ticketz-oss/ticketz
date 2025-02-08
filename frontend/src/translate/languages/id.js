@@ -902,7 +902,8 @@ const messages = {
         editing: "Mengedit",
       },
       message: {
-        edited: "Diedit"
+        edited: "Diedit",
+        forwarded: "Diteruskan",
       },
 
       contactDrawer: {
@@ -940,6 +941,7 @@ const messages = {
       messageOptionsMenu: {
         delete: "Hapus",
         edit: "Edit",
+        forward: "Teruskan",
         history: "Riwayat",
         reply: "Balas",
         confirmationModal: {

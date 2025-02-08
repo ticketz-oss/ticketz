@@ -901,7 +901,8 @@ const messages = {
         editing: "Editando",
       },
       message: {
-        edited: "Editada"
+        edited: "Editada",
+        forwarded: "Reenviado",
       },
       contactDrawer: {
         header: "Datos de contacto",
@@ -939,6 +940,7 @@ const messages = {
       messageOptionsMenu: {
         delete: "Eliminar",
         edit: "Editar",
+        forward: "Reenviar",
         history: "Historial",
         reply: "Responder",
         confirmationModal: {
