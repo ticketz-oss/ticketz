@@ -845,7 +845,8 @@ const messages = {
         editing: "Editing",
       },
       message: {
-        edited: "Edited"
+        edited: "Edited",
+        forwarded: "Forwarded",
       },
 
       contactDrawer: {
@@ -884,6 +885,7 @@ const messages = {
       messageOptionsMenu: {
         delete: "Delete",
         edit: "Edit",
+        forward: "Forward",
         history: "History",
         reply: "Reply",
         confirmationModal: {
