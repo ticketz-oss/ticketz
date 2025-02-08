@@ -24,6 +24,7 @@ import {
   Facebook,
   Instagram,
   Description,
+  Forward
 } from "@material-ui/icons";
 
 import MarkdownWrapper from "../MarkdownWrapper";
@@ -210,6 +211,20 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     color: "#6bcbef",
     fontWeight: 500,
+  },
+  
+  forwardedMessage: {
+    display: "flex",
+    color: theme.mode === 'light' ? "#999" : "#d0d0d0",
+    fontSize: 11,
+    fontWeight: 'bold'
+  },
+
+  forwardedIcon: {
+    color: theme.mode === 'light' ? "#999" : "#d0d0d0",
+    fontSize: 15,
+    verticalAlign: "middle",
+    marginLeft: 4,
   },
 
   textContentItem: {
@@ -1046,10 +1061,35 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
     )
   };
 
+  const getDataContextInfo = (data) => {
+    if (!data) {
+      return null;
+    }
 
+    return data.message?.extendedTextMessage?.contextInfo ||
+      data.message?.imageMessage?.contextInfo ||
+      data.message?.videoMessage?.contextInfo ||
+      data.message?.audioMessage?.contextInfo ||
+      data.message?.documentMessage?.contextInfo ||
+      data.message?.stickerMessage?.contextInfo ||
+      data.message?.productMessage?.contextInfo ||
+      data.message?.locationMessage?.contextInfo ||
+      data.message?.liveLocationMessage?.contextInfo ||
+      data.message?.contactMessage?.contextInfo ||
+      data.message?.listMessage?.contextInfo ||
+      data.message?.buttonsResponseMessage?.contextInfo ||
+      data.message?.paymentMessage?.contextInfo ||
+      data.message?.orderMessage?.contextInfo ||
+      data.message?.productCatalogMessage?.contextInfo ||
+      data.message?.templateButtonReplyMessage?.contextInfo ||
+      data.message?.templateMessage?.contextInfo ||
+      data.message?.documentWithCaptionMessage?.contextInfo || null;
+  };
+        
   const renderMessages = () => {
     const viewMessagesList = messagesList.map((message, index) => {
       const data = JSON.parse(message.dataJson);
+      const dataContext = getDataContextInfo(data);
       const isSticker = data?.message && ("stickerMessage" in data.message);
       if (!message.fromMe) {
         return (
@@ -1072,6 +1112,11 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
               >
                 <ExpandMore />
               </IconButton>
+              { dataContext?.isForwarded && (
+                <span className={classes.forwardedMessage}>
+                  <Forward fontSize="small" className={classes.forwardedIcon}/> {i18n.t("message.forwarded")}
+                </span>
+              )}
               {isGroup && (
                 <span className={classes.messageContactName}>
                   {message.contact?.name}
@@ -1150,6 +1195,12 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
               >
                 <ExpandMore />
               </IconButton>
+
+              { dataContext?.isForwarded && (
+                <span className={classes.forwardedMessage}>
+                   <Forward fontSize="small" className={classes.forwardedIcon}/> {i18n.t("message.forwarded")}
+                </span>
+              )}
 
               {message.thumbnailUrl && (
                 <img className={classes.previewThumbnail} src={message.thumbnailUrl} />
