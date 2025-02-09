@@ -84,8 +84,7 @@ const UpdateTicketService = async ({
   reqUserId,
   dontRunChatbot
 }: Request): Promise<Response> => {
-  // eslint-disable-next-line no-lone-blocks
-  {
+  try {
     if (!companyId && !tokenData) {
       throw new Error("Need companyId or tokenData");
     }
@@ -146,11 +145,7 @@ const UpdateTicketService = async ({
     }
 
     if (oldStatus === "closed") {
-      await CheckContactOpenTickets(
-        ticket.contact.id,
-        ticket.queueId,
-        ticket.whatsappId
-      );
+      await CheckContactOpenTickets(ticket.contactId, ticket.whatsappId);
       chatbot = null;
       queueOptionId = null;
     }
@@ -488,6 +483,11 @@ const UpdateTicketService = async ({
       });
 
     return { ticket, oldStatus, oldUserId };
+  } catch (err) {
+    if (err instanceof AppError) {
+      throw err;
+    }
+    throw new AppError("Error updating ticket", 500, err);
   }
 };
 

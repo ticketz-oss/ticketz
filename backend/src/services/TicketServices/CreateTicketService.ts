@@ -11,7 +11,6 @@ import Whatsapp from "../../models/Whatsapp";
 
 interface Request {
   contactId: number;
-  status: string;
   userId: number;
   companyId: number;
   queueId?: number;
@@ -74,7 +73,7 @@ const CreateTicketService = async ({
   const defaultWhatsapp =
     queueWhatsapp || (await GetDefaultWhatsApp(companyId));
 
-  await CheckContactOpenTickets(contactId, queueId, defaultWhatsapp.id);
+  await CheckContactOpenTickets(contactId, defaultWhatsapp.id);
 
   const { isGroup } = await ShowContactService(contactId, companyId);
 
