@@ -103,7 +103,7 @@ const UpdateTicketService = async ({
     const oldQueueId = ticket.queueId;
 
     if (oldStatus === "closed") {
-      await CheckContactOpenTickets(ticket.contact.id);
+      await CheckContactOpenTickets(ticket.contactId, ticket.whatsappId);
       chatbot = null;
       queueOptionId = null;
     }
@@ -294,7 +294,9 @@ const UpdateTicketService = async ({
 
     return { ticket, oldStatus, oldUserId };
   } catch (err) {
-    Sentry.captureException(err);
+    if (err instanceof AppError) {
+      throw err;
+    }
     throw new AppError("Error updating ticket", 500, err);
   }
 };

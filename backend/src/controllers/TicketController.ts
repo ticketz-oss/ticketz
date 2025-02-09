@@ -34,6 +34,8 @@ interface TicketData {
   userId: number;
 }
 
+const updateMutex = new Mutex();
+
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const {
     pageNumber,
@@ -194,8 +196,7 @@ export const update = async (
 ): Promise<Response> => {
   const { ticketId } = req.params;
 
-  const mutex = new Mutex();
-  const { ticket } = await mutex.runExclusive(async () => {
+  const { ticket } = await updateMutex.runExclusive(async () => {
     const result = await UpdateTicketService({
       ticketData: req.body,
       ticketId: Number.parseInt(ticketId, 10),
