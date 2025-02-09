@@ -71,8 +71,8 @@ const useStyles = makeStyles((theme) => ({
   },
   toolbar: {
     paddingRight: 24, // keep right padding when drawer closed
-    color: theme.palette.dark.main,
-    background: theme.palette.barraSuperior,
+    color: localStorage.getItem("impersonated") === "true" ? theme.palette.secondary.contrastText : theme.palette.primary.contrastText,
+    background: localStorage.getItem("impersonated") === "true" ? theme.palette.secondary.main : theme.palette.primary.main,
   },
   toolbarIcon: {
     display: "flex",
@@ -275,7 +275,8 @@ const LoggedInLayout = ({ children, themeToggle }) => {
     const socket = socketManager.GetSocket(companyId);
 
     const onCompanyAuthLayout = (data) => {
-      if (data.user.id === +userId) {
+      const impersonated = localStorage.getItem("impersonated") === "true";
+      if (!impersonated && !data.user.impersonated && data.user.id === +userId) {
         toastError("Sua conta foi acessada em outro computador.");
         setTimeout(() => {
           localStorage.clear();

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   makeStyles,
   Paper,
@@ -30,6 +30,8 @@ import { head, isArray, has } from "lodash";
 import { useDate } from "../../hooks/useDate";
 
 import moment from "moment";
+
+import { AuthContext } from "../../context/Auth/AuthContext";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -69,7 +71,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export function CompanyForm(props) {
-  const { onSubmit, onDelete, onCancel, initialValue, loading } = props;
+  const { onSubmit, onDelete, onImpersonate, onCancel, initialValue, loading } = props;
   const classes = useStyles();
   const [plans, setPlans] = useState([]);
   const [modalUser, setModalUser] = useState(false);
@@ -334,7 +336,19 @@ export function CompanyForm(props) {
                   </Grid>
                   {record.id !== undefined ? (
                     <>
-                      <Grid xs={6} md={1} item>
+                    <Grid xs={6} md={2} item>
+                      <ButtonWithSpinner
+                        style={{ marginTop: 7 }}
+                        className={classes.fullWidth}
+                        loading={loading}
+                        onClick={() => onImpersonate(record)}
+                        variant="outlined"
+                        color="primary"
+                      >
+                        Acessar como
+                      </ButtonWithSpinner>
+                    </Grid>
+                    <Grid xs={6} md={1} item>
                         <ButtonWithSpinner
                           style={{ marginTop: 7 }}
                           className={classes.fullWidth}
@@ -493,7 +507,8 @@ export default function CompaniesManager() {
   const classes = useStyles();
   const { list, save, update, remove } = useCompanies();
 
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showConfirmDeleteDialog, setShowConfirmDeleteDialog] = useState(false);
+  const [showConfirmImpersonateDialog, setShowConfirmImpersonateDialog] = useState(false);
   const [loading, setLoading] = useState(false);
   const [records, setRecords] = useState([]);
   const [record, setRecord] = useState({
@@ -506,6 +521,8 @@ export default function CompaniesManager() {
     dueDate: "",
     recurrence: "",
   });
+
+  const { handleImpersonate } = useContext(AuthContext);
 
   useEffect(() => {
     loadPlans();
@@ -555,8 +572,16 @@ export default function CompaniesManager() {
     setLoading(false);
   };
 
+  const onImpersonate = async () => {
+    handleImpersonate(record.id);
+  };
+
   const handleOpenDeleteDialog = () => {
-    setShowConfirmDialog(true);
+    setShowConfirmDeleteDialog(true);
+  };
+
+  const handleOpenImpersonateDialog = () => {
+    setShowConfirmImpersonateDialog(true);
   };
 
   const handleCancel = () => {
@@ -605,6 +630,7 @@ export default function CompaniesManager() {
           <CompanyForm
             initialValue={record}
             onDelete={handleOpenDeleteDialog}
+            onImpersonate={handleOpenImpersonateDialog}
             onSubmit={handleSubmit}
             onCancel={handleCancel}
             loading={loading}
@@ -616,11 +642,19 @@ export default function CompaniesManager() {
       </Grid>
       <ConfirmationModal
         title="Exclusão de Registro"
-        open={showConfirmDialog}
-        onClose={() => setShowConfirmDialog(false)}
+        open={showConfirmDeleteDialog}
+        onClose={() => setShowConfirmDeleteDialog(false)}
         onConfirm={() => handleDelete()}
       >
         Deseja realmente excluir esse registro?
+      </ConfirmationModal>
+      <ConfirmationModal
+        title="Acessar como"
+        open={showConfirmImpersonateDialog}
+        onClose={() => setShowConfirmImpersonateDialog(false)}
+        onConfirm={() => onImpersonate()}
+      >
+        Deseja acessar o sistema como esta empresa?
       </ConfirmationModal>
     </Paper>
   );
