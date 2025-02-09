@@ -1,10 +1,8 @@
 import { Router } from "express";
 import * as SessionController from "../controllers/SessionController";
-import * as UserController from "../controllers/UserController";
 import isAuth from "../middleware/isAuth";
-import envTokenAuth from "../middleware/envTokenAuth";
-import preLogin from "../middleware/preLogin";
 import isSuper from "../middleware/isAdmin";
+import preLogin from "../middleware/preLogin";
 
 const authRoutes = Router();
 
