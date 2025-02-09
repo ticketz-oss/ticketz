@@ -162,6 +162,10 @@ export const remove = async (
 ): Promise<Response> => {
   const { id } = req.params;
 
+  if (Number(id) === 1) {
+    throw new AppError("ERR_FORBIDDEN", 403);
+  }
+
   const company = await DeleteCompanyService(id);
 
   return res.status(200).json(company);
