@@ -1,6 +1,5 @@
 import Message from "../../models/Message";
 import { logger } from "../../utils/logger";
-import FindOrCreateTicketService from "../TicketServices/FindOrCreateTicketService";
 import Contact from "../../models/Contact";
 import Queue from "../../models/Queue";
 import GetDefaultWhatsApp from "../../helpers/GetDefaultWhatsApp";
@@ -11,6 +10,8 @@ import {
   verifyMessage
 } from "../WbotServices/wbotMessageListener";
 import User from "../../models/User";
+import CheckContactOpenTickets from "../../helpers/CheckContactOpenTickets";
+import CreateTicketService from "../TicketServices/CreateTicketService";
 
 const ForwardMessageService = async (
   user: User,
@@ -29,23 +30,28 @@ const ForwardMessageService = async (
     throw new AppError("ERR_INVALID_CHANNEL", 400);
   }
 
-  const { ticket } = await FindOrCreateTicketService(
-    contact,
-    whatsapp.id,
-    0,
-    contact.companyId,
-    undefined,
-    true,
-    queue
-  );
+  let ticket = await CheckContactOpenTickets(contact.id, whatsapp.id, true);
+
+  if (ticket && ticket.userId !== user.id) {
+    throw new AppError("ERR_OTHER_OPEN_TICKET", 400);
+  }
 
   if (!ticket) {
-    throw new Error("ERR_CREATING_TICKET");
+    ticket = await CreateTicketService({
+      contactId: contact.id,
+      userId: user.id,
+      companyId: contact.companyId,
+      queueId: queue?.id
+    });
+  }
+
+  if (!ticket) {
+    throw new AppError("ERR_CREATING_TICKET", 500);
   }
 
   if (whatsapp.channel === "whatsapp") {
     try {
-      const wbot = await getWbot(whatsapp.id);
+      const wbot = getWbot(whatsapp.id);
       const msg = JSON.parse(message.dataJson);
       const number = contact.isGroup
         ? `${contact.number}@g.us`
