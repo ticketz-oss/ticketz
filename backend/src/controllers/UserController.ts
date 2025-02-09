@@ -121,6 +121,10 @@ export const remove = async (
     throw new AppError("ERR_NO_PERMISSION", 403);
   }
 
+  if (Number(userId) === 1) {
+    throw new AppError("ERR_FORBIDDEN", 403);
+  }
+
   await DeleteUserService(userId, req.user.id);
 
   const io = getIO();
