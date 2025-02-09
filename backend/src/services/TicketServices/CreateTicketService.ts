@@ -8,7 +8,6 @@ import FindOrCreateATicketTrakingService from "./FindOrCreateATicketTrakingServi
 
 interface Request {
   contactId: number;
-  status: string;
   userId: number;
   companyId: number;
   queueId?: number;

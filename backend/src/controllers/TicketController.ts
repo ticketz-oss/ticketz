@@ -148,12 +148,11 @@ export const kanban = async (
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
-  const { contactId, status, userId, queueId }: TicketData = req.body;
+  const { contactId, userId, queueId }: TicketData = req.body;
   const { companyId } = req.user;
 
   const ticket = await CreateTicketService({
     contactId,
-    status,
     userId,
     companyId,
     queueId
