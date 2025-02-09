@@ -940,6 +940,7 @@ const messages = {
         },
       },
       backendErrors: {
+        ERR_FORBIDDEN: "No tienes permisos para acceder a este recurso.",
         ERR_NO_OTHER_WHATSAPP: "Debe haber al menos un WhatsApp predeterminado.",
         ERR_NO_DEF_WAPP_FOUND:
           "No se encontró ningún WhatsApp predeterminado. Verifique la página de conexiones.",
