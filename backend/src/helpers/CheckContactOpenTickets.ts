@@ -4,7 +4,8 @@ import Ticket from "../models/Ticket";
 
 const CheckContactOpenTickets = async (
   contactId: number,
-  whatsappId?: number
+  whatsappId?: number,
+  returnTicket = false
 ): Promise<Ticket> => {
   const where: WhereOptions<Ticket> = {
     contactId,
@@ -19,7 +20,7 @@ const CheckContactOpenTickets = async (
     where
   });
 
-  if (ticket) {
+  if (ticket && !returnTicket) {
     throw new AppError("ERR_OTHER_OPEN_TICKET");
   }
 
