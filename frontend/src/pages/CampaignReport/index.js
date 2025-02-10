@@ -69,31 +69,6 @@ const CampaignReport = () => {
   }, []);
 
   useEffect(() => {
-    if (mounted.current && has(campaign, "shipping")) {
-      if (has(campaign, "contactList")) {
-        const contactList = get(campaign, "contactList");
-        const valids = contactList.contacts.filter((c) => c.isWhatsappValid);
-        setValidContacts(valids.length);
-      }
-
-      if (has(campaign, "shipping")) {
-        const contacts = get(campaign, "shipping");
-        const delivered = contacts.filter((c) => !isNull(c.deliveredAt));
-        const confirmationRequested = contacts.filter(
-          (c) => !isNull(c.confirmationRequestedAt)
-        );
-        const confirmed = contacts.filter(
-          (c) => !isNull(c.deliveredAt) && !isNull(c.confirmationRequestedAt)
-        );
-        setDelivered(delivered.length);
-        setConfirmationRequested(confirmationRequested.length);
-        setConfirmed(confirmed.length);
-        setDelivered(delivered.length);
-      }
-    }
-  }, [campaign]);
-
-  useEffect(() => {
     setPercent((delivered / validContacts) * 100);
   }, [delivered, validContacts]);
 
@@ -102,11 +77,14 @@ const CampaignReport = () => {
     const socket = socketManager.GetSocket(companyId);
 
     const onCampaign = (data) => {
-  
-      if (data.record.id === +campaignId) {
-        setCampaign(data.record);
+      if (data.campaign?.id === +campaignId) {
+        setCampaign(data.campaign);
+        setValidContacts(data.valids);
+        setConfirmationRequested(data.confirmationRequested);
+        setConfirmed(data.confirmed);
+        setDelivered(data.delivered);
 
-        if (data.record.status === "FINALIZADA") {
+        if (data.campaign.status === "FINALIZADA") {
           setTimeout(() => {
             findCampaign();
           }, 5000);
@@ -125,7 +103,11 @@ const CampaignReport = () => {
   const findCampaign = async () => {
     setLoading(true);
     const { data } = await api.get(`/campaigns/${campaignId}`);
-    setCampaign(data);
+    setCampaign(data.campaign);
+    setValidContacts(data.valids);
+    setConfirmationRequested(data.confirmationRequested);
+    setConfirmed(data.confirmed);
+    setDelivered(data.delivered);
     setLoading(false);
   };
 
