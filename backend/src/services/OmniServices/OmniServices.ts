@@ -163,6 +163,10 @@ export class OmniServices {
           });
       })
       .catch(error => {
+        if (error instanceof DebugException) {
+          logger.debug(error.message);
+          return;
+        }
         throw error;
       });
   }

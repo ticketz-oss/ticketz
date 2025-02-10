@@ -70,7 +70,7 @@ export type NotificamehubGroup = {
 };
 
 export type NotificamehubContent = {
-  type: "text" | "photo" | "image" | "video" | "voice" | "document";
+  type: "text" | "photo" | "image" | "video" | "voice" | "document" | "comment";
   text?: string;
   fileUrl?: string;
   fileMimeType?: string;
@@ -90,6 +90,16 @@ export type NotificamehubMessage = {
   isGroup: boolean;
   contents: NotificamehubContent[];
   timestamp: string;
+};
+
+export type NotificamehubPayload = {
+  type: string;
+  id: string;
+  timestamp: string;
+  subscriptionId: string;
+  channel: string;
+  direction: "IN" | "OUT";
+  message: NotificamehubMessage;
 };
 
 export type NotificamehubMessageStatus = {
@@ -203,6 +213,15 @@ function normalizeChannel(channel: string): string {
   return channel.toLowerCase();
 }
 
+function checkSupportedPayload(data: NotificamehubPayload): void {
+  if (
+    ["facebook", "instagram"].includes(data.channel) &&
+    data.message.contents[0].type === "comment"
+  ) {
+    throw new DebugException("notificamehub: Unsupported payload");
+  }
+}
+
 export class NotificamehubDriver implements OmniDriver {
   private name = "notificamehub";
 
@@ -245,11 +264,13 @@ export class NotificamehubDriver implements OmniDriver {
     };
   }
 
-  private static normalizeMessage(data: any): NotificamehubMessage {
-    const message = data?.message || data?.body?.message;
+  private static normalizeMessage(
+    data: NotificamehubPayload
+  ): NotificamehubMessage {
+    const message = data?.message;
 
     if (!message) {
-      logger.error({ body: data?.body || data }, "Invalid notificamehub data");
+      logger.error({ data }, "Invalid notificamehub data");
       throw new Error("Invalid notificamehub data");
     }
 
@@ -257,8 +278,10 @@ export class NotificamehubDriver implements OmniDriver {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  async getConnection(data: any): Promise<Whatsapp> {
+  async getConnection(data: NotificamehubPayload): Promise<Whatsapp> {
     const message = NotificamehubDriver.normalizeMessage(data);
+
+    checkSupportedPayload(data);
 
     const whatsapp = await Whatsapp.findOne({
       where: {
