@@ -213,7 +213,7 @@ const UpdateTicketService = async ({
         !isNil(complationMessage) &&
         complationMessage !== ""
       ) {
-        const body = `${complationMessage}`;
+        const body = formatBody(`${complationMessage}`, ticket);
 
         if (ticket.channel === "whatsapp" && !isGroup) {
           const sentMessage = await SendWhatsAppMessage({ body, ticket });
