@@ -434,6 +434,8 @@ export class NotificamehubDriver implements OmniDriver {
   async createMessages(ticket: Ticket, data: any): Promise<Message[]> {
     logger.debug("notificamehub:createMessage");
 
+    let posterContactId: number;
+
     if (
       ticket.contact.number.startsWith("post:") &&
       ticket.contact.channel === "instagram"
@@ -449,6 +451,7 @@ export class NotificamehubDriver implements OmniDriver {
           "notificamehub:createMessage: Ignoring Instagram reply from post owner"
         );
       }
+      posterContactId = posterContact.id;
     }
 
     const message = NotificamehubDriver.normalizeMessage(data);
@@ -552,7 +555,7 @@ export class NotificamehubDriver implements OmniDriver {
       return CreateMessageService({
         messageData: {
           id: message.id,
-          contactId: ticket.contactId,
+          contactId: posterContactId || ticket.contactId,
           ticketId: ticket.id,
           body: content.text || content.caption || "",
           channel: ticket.contact.channel,
