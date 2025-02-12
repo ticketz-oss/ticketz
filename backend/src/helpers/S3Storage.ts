@@ -1,9 +1,14 @@
-import { S3Client, HeadBucketCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  HeadBucketCommand,
+  S3ClientConfig
+} from "@aws-sdk/client-s3";
 import {
   AwsS3StorageAdapter,
   DefaultAwsPublicUrlGenerator
 } from "@flystorage/aws-s3";
 import { FileStorage } from "@flystorage/file-storage";
+import { createHash } from "crypto";
 import { logger } from "../utils/logger";
 import { GetCompanySetting } from "./CheckSettings";
 import { S3PublicUrlGenerator } from "./S3PublicUrlGenerator";
@@ -16,7 +21,7 @@ export class S3Storage {
 
   public failed: boolean;
 
-  private s3Config: any;
+  private s3Config: S3ClientConfig;
 
   private bucket: string;
 
@@ -85,6 +90,23 @@ export class S3Storage {
           ? new S3PublicUrlGenerator(s3ConfigData.endpoint)
           : new DefaultAwsPublicUrlGenerator()
       );
+
+      // Middleware to compute and add Content-MD5 automatically
+      client.middlewareStack.add(
+        (next, _context) => async (args: any) => {
+          if (args.input.Delete && args.input.Delete.Objects) {
+            // add Content-MD5 header for delete requests
+            const md5Hash = createHash("md5")
+              .update(args.request.body)
+              .digest("base64");
+            args.request.headers["Content-MD5"] = md5Hash;
+          }
+
+          return next(args);
+        },
+        { step: "build" }
+      );
+
       this.storage = new FileStorage(adapter);
     } catch (error) {
       this.failed = true;
