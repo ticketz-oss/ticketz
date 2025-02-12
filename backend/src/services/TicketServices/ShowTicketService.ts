@@ -13,6 +13,7 @@ const include = [
     as: "contact",
     attributes: [
       "id",
+      "companyId",
       "name",
       "channel",
       "number",
@@ -45,7 +46,7 @@ const include = [
   {
     model: Whatsapp,
     as: "whatsapp",
-    attributes: ["id", "name", "channel"]
+    attributes: ["id", "name", "channel", "companyId"]
   },
   {
     model: Tag,
