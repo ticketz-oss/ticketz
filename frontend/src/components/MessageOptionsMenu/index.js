@@ -11,6 +11,7 @@ import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessa
 import { EditMessageContext } from "../../context/EditingMessage/EditingMessageContext";
 import toastError from "../../errors/toastError";
 import MessageHistoryModal from "../MessageHistoryModal";
+import MessageForwardModal from "../MessageForwardModal";
 
 const MessageOptionsMenu = ({ message, data, menuOpen, handleClose, anchorEl }) => {
 	const { setReplyingMessage } = useContext(ReplyMessageContext);
@@ -18,6 +19,7 @@ const MessageOptionsMenu = ({ message, data, menuOpen, handleClose, anchorEl }) 
  	const setEditingMessage = editingContext ? editingContext.setEditingMessage : null;
  	
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [forwardModalOpen, setForwardModalOpen] = useState(false);
 	const [messageHistoryOpen, setMessageHistoryOpen] = useState(false);
 
 	const handleDeleteMessage = async () => {
@@ -47,6 +49,11 @@ const MessageOptionsMenu = ({ message, data, menuOpen, handleClose, anchorEl }) 
 		setMessageHistoryOpen(true);
 		handleClose();
 	}
+  
+  const handleOpenForwardModal = (e) => {
+    setForwardModalOpen(true);
+    handleClose();
+  }
 
   const handleDownload = () => {
     const link = document.createElement('a');
@@ -73,12 +80,18 @@ const MessageOptionsMenu = ({ message, data, menuOpen, handleClose, anchorEl }) 
 			>
 				{i18n.t("messageOptionsMenu.confirmationModal.message")}
 			</ConfirmationModal>
-			<MessageHistoryModal
-                open={messageHistoryOpen}
-                onClose={setMessageHistoryOpen}
-                oldMessages={message.oldMessages}
-            >
-            </MessageHistoryModal>
+      <MessageHistoryModal
+        open={messageHistoryOpen}
+        onClose={setMessageHistoryOpen}
+        oldMessages={message.oldMessages}
+      >
+      </MessageHistoryModal>
+      <MessageForwardModal
+        modalOpen={forwardModalOpen}
+        onClose={setForwardModalOpen}
+        ticketId={message.ticketId}
+        messageId={message.id}
+      />
 			<Menu
 				anchorEl={anchorEl}
 				getContentAnchorEl={null}
@@ -103,9 +116,9 @@ const MessageOptionsMenu = ({ message, data, menuOpen, handleClose, anchorEl }) 
 						{i18n.t("messageOptionsMenu.delete")}
 					</MenuItem>,
           !isSticker && (
-					  <MenuItem key="edit" onClick={handleEditMessage}>
-			            {i18n.t("messageOptionsMenu.edit")}
-         		</MenuItem>
+            <MenuItem key="edit" onClick={handleEditMessage}>
+              {i18n.t("messageOptionsMenu.edit")}
+            </MenuItem>
 			    )]}
 				{!isSticker && message.oldMessages?.length > 0 && (
 					<MenuItem key="history" onClick={handleOpenMessageHistoryModal}>
@@ -115,7 +128,10 @@ const MessageOptionsMenu = ({ message, data, menuOpen, handleClose, anchorEl }) 
 				<MenuItem onClick={handleReplyMessage}>
 					{i18n.t("messageOptionsMenu.reply")}
 				</MenuItem>
-			</Menu>
+        <MenuItem key="forward" onClick={handleOpenForwardModal}>
+          {i18n.t("messageOptionsMenu.forward")}
+        </MenuItem>
+        </Menu>
 		</>
 	);
 };

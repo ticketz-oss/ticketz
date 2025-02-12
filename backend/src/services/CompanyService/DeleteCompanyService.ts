@@ -4,6 +4,7 @@ import Company from "../../models/Company";
 import AppError from "../../errors/AppError";
 import { getPublicPath } from "../../helpers/GetPublicPath";
 import { S3Storage } from "../../helpers/S3Storage";
+import { logger } from "../../utils/logger";
 
 const fileStorage = S3Storage.getInstance();
 
@@ -21,11 +22,27 @@ const DeleteCompanyService = async (id: string): Promise<void> => {
   const companyMediaPath = join(getPublicPath(), "media", id);
 
   // recursively remove company media folder
-  fs.rmSync(companyMediaPath, { recursive: true });
+  (async () => {
+    try {
+      if (fs.existsSync(companyMediaPath)) {
+        fs.rmSync(companyMediaPath, { recursive: true });
+      }
+    } catch (error) {
+      logger.error(
+        { path: companyMediaPath, error },
+        `Error on remove company media folder: ${error.message}`
+      );
+    }
+  })();
 
   await fileStorage.prepare();
   if (fileStorage.storage) {
-    await fileStorage.storage.deleteDirectory(`media/${id}`);
+    fileStorage.storage.deleteDirectory(`media/${id}`).catch(error => {
+      logger.error(
+        { path: `media/${id}`, error },
+        `S3 Error on delete company media folder: ${error.message}`
+      );
+    });
   }
 };
 

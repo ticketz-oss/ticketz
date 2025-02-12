@@ -159,6 +159,7 @@ function QuickMessageDialog(props) {
                                         rows={6}
                                         label={i18n.t("quickMessages.dialog.message")}
                                         multiline={true}
+                                        spellCheck={true}
                                         error={touched.message && Boolean(errors.message)}
                                         helperText={touched.message && errors.message}
                                         variant="outlined"

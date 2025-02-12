@@ -4,38 +4,25 @@
 
    VERSÃO EM PORTUGUÊS MAIS ABAIXO
 
-   
-   BASIC LICENSE INFORMATION:
+   PROPRIETARY CODE
 
    Author: Claudemir Todo Bom
    Email: claudemir@todobom.com
    
-   Licensed under the AGPLv3 as stated on LICENSE.md file
+   If you had access to this code, you are not allowed to
+   share, copy or distribute it. You are not allowed to use
+   it in your projects, create your own projects based on
+   it or use it in any way without a written authorization.
    
-   Any work that uses code from this file is obligated to 
-   give access to its source code to all of its users (not only
-   the system's owner running it)
-   
-   EXCLUSIVE LICENSE to use on closed source derived work can be
-   purchased from the author and put at the root of the source
-   code tree as proof-of-purchase.
-
-
-
-   INFORMAÇÕES BÁSICAS DE LICENÇA
+   CÓDIGO PROPRIETÁRIO
 
    Autor: Claudemir Todo Bom
    Email: claudemir@todobom.com
 
-   Licenciado sob a licença AGPLv3 conforme arquivo LICENSE.md
-    
-   Qualquer sistema que inclua este código deve ter o seu código
-   fonte fornecido a todos os usuários do sistema (não apenas ao
-   proprietário da infraestrutura que o executa)
-   
-   LICENÇA EXCLUSIVA para uso em produto derivado em código fechado
-   pode ser adquirida com o autor e colocada na raiz do projeto
-   como prova de compra. 
+   Se você teve acesso a este código, não está autorizado a
+   compartilhá-lo, copiá-lo ou distribuí-lo. Não está autorizado
+   a utilizá-lo em seus projetos, criar projetos baseados nele
+   ou utilizá-lo de qualquer forma sem autorização por escrito.
    
  */
 
@@ -53,6 +40,7 @@ import User from "../../models/User";
 import { getIO } from "../../libs/socket";
 import saveMediaToFile from "../../helpers/saveMediaFile";
 import { DebugException } from "../../helpers/DebugException";
+import AppError from "../../errors/AppError";
 
 export type OmniMessage = {
   type: "text" | "image" | "video" | "audio" | "document";
@@ -60,6 +48,7 @@ export type OmniMessage = {
   fileName?: string;
   mediaUrl?: string;
   mimetype?: string;
+  quotedMsg?: Message;
 };
 
 export interface OmniDriver {
@@ -139,6 +128,16 @@ export class OmniServices {
     );
   }
 
+  private static async automationHandler(
+    messages: Message[],
+    driver: OmniDriver
+  ) {
+    logger.debug("OmniServices:automationHandler");
+    messages.forEach(message => {
+      // do nothing
+    });
+  }
+
   public async messageHandler(channel: string, data: any) {
     logger.debug({ data }, "OmniServices:messageHandler");
     const driver = this.drivers[channel];
@@ -164,7 +163,25 @@ export class OmniServices {
                 if (!ticket) {
                   throw new Error("Ticket not found or not created");
                 }
-                driver.createMessages(ticket, data);
+                driver
+                  .createMessages(ticket, data)
+                  .then(messages => {
+                    OmniServices.automationHandler(messages, driver);
+                  })
+                  .catch(error => {
+                    if (error instanceof DebugException) {
+                      logger.debug(error.message);
+                      return;
+                    }
+                    throw error;
+                  });
+              })
+              .catch(error => {
+                if (error instanceof DebugException) {
+                  logger.debug(error.message);
+                  return;
+                }
+                throw error;
               });
           })
           .catch(error => {
@@ -176,6 +193,10 @@ export class OmniServices {
           });
       })
       .catch(error => {
+        if (error instanceof DebugException) {
+          logger.debug(error.message);
+          return;
+        }
         throw error;
       });
   }
@@ -198,6 +219,15 @@ export class OmniServices {
     let messageBody = req.body.body
       ? formatBody(req.body.body || "", ticket, user)
       : null;
+
+    const quotedMsg = req.body.quotedMsg
+      ? await Message.findOne({
+          where: {
+            id: req.body.quotedMsg.id,
+            ticketId: req.body.quotedMsg.ticketId
+          }
+        })
+      : undefined;
 
     const medias = req.files as Express.Multer.File[];
     if (medias) {
@@ -236,7 +266,8 @@ export class OmniServices {
             mediaUrl,
             mimetype: media.mimetype,
             fileName: media.originalname,
-            body
+            body,
+            quotedMsg
           };
 
           await driver.sendMessage(ticket, messageData);
@@ -247,12 +278,20 @@ export class OmniServices {
     if (messageBody) {
       const messageData: OmniMessage = {
         type: "text",
-        body: messageBody
+        body: messageBody,
+        quotedMsg
       };
-      const message = await driver.sendMessage(ticket, messageData);
-
-      if (!message) {
-        throw new Error("Message not created");
+      try {
+        await driver.sendMessage(ticket, messageData);
+      } catch (error) {
+        if (error instanceof AppError) {
+          throw error;
+        }
+        if (error instanceof DebugException) {
+          logger.debug(error.message);
+          throw new AppError("Error sending message", 500);
+        }
+        throw error;
       }
     }
 

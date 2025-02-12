@@ -12,11 +12,11 @@ import makeWASocket, {
 } from "@whiskeysockets/baileys";
 
 import { Boom } from "@hapi/boom";
-import MAIN_LOGGER from "@whiskeysockets/baileys/lib/Utils/logger";
+// import MAIN_LOGGER from "@whiskeysockets/baileys/lib/Utils/logger";
 import NodeCache from "node-cache";
 import { Op } from "sequelize";
 import Whatsapp from "../models/Whatsapp";
-import { logger } from "../utils/logger";
+import { logger, loggerBaileys } from "../utils/logger";
 import authState from "../helpers/authState";
 import AppError from "../errors/AppError";
 import { getIO } from "./socket";
@@ -28,8 +28,8 @@ import Ticket from "../models/Ticket";
 import { GitInfo } from "../gitinfo";
 import GetPublicSettingService from "../services/SettingServices/GetPublicSettingService";
 
-const loggerBaileys = MAIN_LOGGER.child({});
-loggerBaileys.level = process.env.BAILEYS_LOG_LEVEL || "error";
+// const loggerBaileys = MAIN_LOGGER.child({});
+// loggerBaileys.level = process.env.BAILEYS_LOG_LEVEL || "error";
 
 type Session = WASocket & {
   id?: number;
@@ -86,7 +86,7 @@ function getGreaterVersion(a, b) {
   return a;
 }
 
-const waVersion = [2, 3000, 1019512750];
+const waVersion = [2, 3000, 1019954024];
 
 const getProjectWAVersion = async () => {
   try {

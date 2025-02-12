@@ -1,5 +1,6 @@
 import axios from "axios";
 import { Readable } from "stream";
+import { logger } from "../utils/logger";
 
 export default async function downloadFile(url: string): Promise<Readable> {
   try {
@@ -10,6 +11,7 @@ export default async function downloadFile(url: string): Promise<Readable> {
     });
     return response.data;
   } catch (error) {
-    throw new Error(`Failed to download file: ${error.message}`);
+    logger.info({ url, error }, `Failed to download file: ${error.message}`);
   }
+  return null;
 }

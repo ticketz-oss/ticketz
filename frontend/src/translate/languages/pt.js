@@ -910,7 +910,8 @@ const messages = {
         editing: "Editando",
       },
       message: {
-        edited: "Editada"
+        edited: "Editada",
+        forwarded: "Encaminhada",
       },
 
       contactDrawer: {
@@ -949,6 +950,7 @@ const messages = {
       messageOptionsMenu: {
         delete: "Deletar",
         edit: "Editar",
+        forward: "Encaminhar",
         history: "Histórico",
         reply: "Responder",
         confirmationModal: {
@@ -998,6 +1000,7 @@ const messages = {
         },
       },
       backendErrors: {
+        ERR_FORBIDDEN: "Você não tem permissão para acessar este recurso.",
         ERR_NO_OTHER_WHATSAPP: "Deve haver pelo menos um WhatsApp padrão.",
         ERR_NO_DEF_WAPP_FOUND:
           "Nenhum WhatsApp padrão encontrado. Verifique a página de conexões.",

@@ -4,38 +4,25 @@
 
    VERSÃO EM PORTUGUÊS MAIS ABAIXO
 
-   
-   BASIC LICENSE INFORMATION:
+   PROPRIETARY CODE
 
    Author: Claudemir Todo Bom
    Email: claudemir@todobom.com
    
-   Licensed under the AGPLv3 as stated on LICENSE.md file
+   If you had access to this code, you are not allowed to
+   share, copy or distribute it. You are not allowed to use
+   it in your projects, create your own projects based on
+   it or use it in any way without a written authorization.
    
-   Any work that uses code from this file is obligated to 
-   give access to its source code to all of its users (not only
-   the system's owner running it)
-   
-   EXCLUSIVE LICENSE to use on closed source derived work can be
-   purchased from the author and put at the root of the source
-   code tree as proof-of-purchase.
-
-
-
-   INFORMAÇÕES BÁSICAS DE LICENÇA
+   CÓDIGO PROPRIETÁRIO
 
    Autor: Claudemir Todo Bom
    Email: claudemir@todobom.com
 
-   Licenciado sob a licença AGPLv3 conforme arquivo LICENSE.md
-    
-   Qualquer sistema que inclua este código deve ter o seu código
-   fonte fornecido a todos os usuários do sistema (não apenas ao
-   proprietário da infraestrutura que o executa)
-   
-   LICENÇA EXCLUSIVA para uso em produto derivado em código fechado
-   pode ser adquirida com o autor e colocada na raiz do projeto
-   como prova de compra. 
+   Se você teve acesso a este código, não está autorizado a
+   compartilhá-lo, copiá-lo ou distribuí-lo. Não está autorizado
+   a utilizá-lo em seus projetos, criar projetos baseados nele
+   ou utilizá-lo de qualquer forma sem autorização por escrito.
    
  */
 
@@ -44,6 +31,7 @@ import {
   Client,
   MessageSubscription,
   TextContent,
+  ReplyContent,
   FileContent
 } from "notificamehubsdk";
 import { Op } from "sequelize";
@@ -65,6 +53,7 @@ import saveMediaToFile from "../../helpers/saveMediaFile";
 import NotificamehubIdMapping from "../../models/NotificamehubIdMapping";
 import { DebugException } from "../../helpers/DebugException";
 import { makeRandomId } from "../../helpers/MakeRandomId";
+import { getMimeByExtension } from "../../helpers/getMimeByExtension";
 
 const contactMutex = new Mutex();
 const ticketMutex = new Mutex();
@@ -82,9 +71,16 @@ export type NotificamehubGroup = {
   name: string;
 };
 
+export type NotificamehubContentMedia = {
+  id: string;
+  link: string;
+};
+
 export type NotificamehubContent = {
-  type: "text" | "photo" | "image" | "video" | "voice" | "document";
+  type: "text" | "photo" | "image" | "video" | "voice" | "document" | "comment";
+  id?: string;
   text?: string;
+  media?: NotificamehubContentMedia;
   fileUrl?: string;
   fileMimeType?: string;
   fileName?: string;
@@ -103,6 +99,16 @@ export type NotificamehubMessage = {
   isGroup: boolean;
   contents: NotificamehubContent[];
   timestamp: string;
+};
+
+export type NotificamehubPayload = {
+  type: string;
+  id: string;
+  timestamp: string;
+  subscriptionId: string;
+  channel: string;
+  direction: "IN" | "OUT";
+  message: NotificamehubMessage;
 };
 
 export type NotificamehubMessageStatus = {
@@ -216,6 +222,58 @@ function normalizeChannel(channel: string): string {
   return channel.toLowerCase();
 }
 
+function checkSupportedPayload(data: NotificamehubPayload): void {
+  if (
+    ["facebook"].includes(data.channel) &&
+    data.message.contents[0].type === "comment"
+  ) {
+    throw new DebugException("notificamehub: Unsupported payload");
+  }
+}
+
+async function downloadAndSaveMedia(url: string, companyId: number) {
+  const parsedUrl = new URL(url);
+  const filename = parsedUrl.pathname.split("/").pop().split("?").shift();
+  const mimetype = getMimeByExtension(filename.split(".").pop());
+  const data = await downloadFile(url);
+
+  if (!data) {
+    return null;
+  }
+
+  return saveMediaToFile(
+    {
+      data,
+      mimetype,
+      filename
+    },
+    null,
+    null,
+    companyId
+  );
+}
+
+async function downloadProfileImage(
+  message: NotificamehubMessage,
+  companyId: number
+) {
+  const mediaFile = await downloadFile(message.visitor.picture);
+
+  if (!mediaFile) {
+    return null;
+  }
+  return saveMediaToFile(
+    {
+      data: mediaFile,
+      mimetype: "image/jpeg",
+      filename: `${message.from || makeRandomId(10)}-profile.jpeg`
+    },
+    null,
+    null,
+    companyId
+  );
+}
+
 export class NotificamehubDriver implements OmniDriver {
   private name = "notificamehub";
 
@@ -258,11 +316,13 @@ export class NotificamehubDriver implements OmniDriver {
     };
   }
 
-  private static normalizeMessage(data: any): NotificamehubMessage {
-    const message = data?.message || data?.body?.message;
+  private static normalizeMessage(
+    data: NotificamehubPayload
+  ): NotificamehubMessage {
+    const message = data?.message;
 
     if (!message) {
-      logger.error({ body: data?.body || data }, "Invalid notificamehub data");
+      logger.error({ data }, "Invalid notificamehub data");
       throw new Error("Invalid notificamehub data");
     }
 
@@ -270,8 +330,10 @@ export class NotificamehubDriver implements OmniDriver {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  async getConnection(data: any): Promise<Whatsapp> {
+  async getConnection(data: NotificamehubPayload): Promise<Whatsapp> {
     const message = NotificamehubDriver.normalizeMessage(data);
+
+    checkSupportedPayload(data);
 
     const whatsapp = await Whatsapp.findOne({
       where: {
@@ -289,7 +351,11 @@ export class NotificamehubDriver implements OmniDriver {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  async findOrCreateContact(connection: Whatsapp, data: any): Promise<Contact> {
+  async findOrCreateContact(
+    connection: Whatsapp,
+    data: NotificamehubPayload,
+    forcePoster = false
+  ): Promise<Contact> {
     logger.debug("notificamehub:findOrCreateContact");
 
     if (data.direction === "OUT") {
@@ -301,35 +367,47 @@ export class NotificamehubDriver implements OmniDriver {
     const message = NotificamehubDriver.normalizeMessage(data);
     const channel = normalizeChannel(message.channel);
 
+    let contactAddress = String(message.from);
+    let contactImageUrl: string;
+    const fullName =
+      `${message.visitor.firstName} ${message.visitor.lastName}`.trim();
+    let name = fullName || message.visitor.name || String(message.from);
+    let email: string;
+
+    if (
+      !forcePoster &&
+      message.channel === "instagram" &&
+      message.contents[0]?.type === "comment"
+    ) {
+      const postId = message.contents[0].media.id;
+      const mediaLink = message.contents[0].media.link;
+      contactAddress = `post:${postId}`;
+      const postPreview: any = await getLinkPreview(mediaLink);
+      contactImageUrl = postPreview?.images?.[0];
+      name =
+        postPreview?.title || `Instagram Post id: ${postId} at ${mediaLink}`;
+    } else {
+      email = `@${message.visitor.name}` || undefined;
+    }
+
     return contactMutex.runExclusive(async () => {
       return (
         (await Contact.findOne({
           where: {
             companyId: connection.companyId,
             channel,
-            number: String(message.from)
+            number: contactAddress
           }
         })) ||
         Contact.create({
           companyId: connection.companyId,
-          name:
-            `${message.visitor.firstName} ${message.visitor.lastName}`.trim() ||
-            message.visitor.name ||
-            String(message.from),
+          name,
           channel,
-          number: message.from,
-          profilePicUrl: message.visitor.picture
-            ? await saveMediaToFile(
-                {
-                  data: await downloadFile(message.visitor.picture),
-                  mimetype: "image/jpeg",
-                  filename: `${message.from || makeRandomId(10)}-profile.jpeg`
-                },
-                null,
-                null,
-                connection.companyId
-              )
-            : null
+          number: contactAddress,
+          email,
+          profilePicUrl: contactImageUrl
+            ? await downloadAndSaveMedia(contactImageUrl, connection.companyId)
+            : await downloadProfileImage(message, connection.companyId)
         })
       );
     });
@@ -355,6 +433,26 @@ export class NotificamehubDriver implements OmniDriver {
   // eslint-disable-next-line class-methods-use-this
   async createMessages(ticket: Ticket, data: any): Promise<Message[]> {
     logger.debug("notificamehub:createMessage");
+
+    let posterContactId: number;
+
+    if (
+      ticket.contact.number.startsWith("post:") &&
+      ticket.contact.channel === "instagram"
+    ) {
+      const posterContact = await this.findOrCreateContact(
+        ticket.whatsapp,
+        data,
+        true
+      );
+      const ticketUsername = ticket.contact.name.split(" ")[0];
+      if (posterContact.email === ticketUsername) {
+        throw new DebugException(
+          "notificamehub:createMessage: Ignoring Instagram reply from post owner"
+        );
+      }
+      posterContactId = posterContact.id;
+    }
 
     const message = NotificamehubDriver.normalizeMessage(data);
 
@@ -428,17 +526,26 @@ export class NotificamehubDriver implements OmniDriver {
         );
       }
 
-      if (content.type === "text" && content.item) {
-        finalContent.itemPreview = await getLinkPreview(content.item);
+      const contentLinkPreviewURL =
+        (content.type === "text" && content.item) || content.media?.link;
+
+      if (contentLinkPreviewURL?.startsWith("https")) {
+        finalContent.itemPreview = await getLinkPreview(contentLinkPreviewURL);
 
         if (finalContent.itemPreview?.images?.length > 0) {
+          const filename =
+            finalContent.itemPreview.images[0]
+              .split("/")
+              ?.pop()
+              .split("?")
+              ?.shift() || "image.jpeg";
+          const fileExtension = filename.split(".").pop();
+
           thumbnailUrl = await saveMediaToFile(
             {
               data: await downloadFile(finalContent.itemPreview.images[0]),
-              mimetype: "image/jpeg",
-              filename:
-                finalContent.itemPreview.images[0].split("/")?.pop() ||
-                "image.jpeg"
+              mimetype: getMimeByExtension(fileExtension),
+              filename
             },
             ticket
           );
@@ -448,15 +555,15 @@ export class NotificamehubDriver implements OmniDriver {
       return CreateMessageService({
         messageData: {
           id: message.id,
-          contactId: ticket.contactId,
+          contactId: posterContactId || ticket.contactId,
           ticketId: ticket.id,
           body: content.text || content.caption || "",
           channel: ticket.contact.channel,
-          mediaType: file
-            ? finalContent.fileMimeType.split("/")[0] || "document"
-            : "",
+          // mediaType: file
+          //   ? finalContent.fileMimeType.split("/")[0] || "document"
+          //  : "",
           mediaUrl,
-          thumbnailUrl,
+          // thumbnailUrl,
           dataJson: JSON.stringify(finalContent)
         },
         companyId: ticket.companyId
@@ -471,23 +578,43 @@ export class NotificamehubDriver implements OmniDriver {
 
     const connection = await Whatsapp.findByPk(ticket.whatsappId);
 
-    let textContent: TextContent;
+    let content: TextContent | ReplyContent;
     const promises = [];
 
-    if (message.type === "text") {
-      textContent = new TextContent(message.body);
+    let { number } = ticket.contact;
+    if (
+      ticket.contact.channel === "instagram" &&
+      ticket.contact.number.startsWith("post:")
+    ) {
+      if (!message.quotedMsg) {
+        throw new DebugException(
+          "notificamehub:sendMessage: Instagram post without quoted message"
+        );
+      }
+      const quotedData = JSON.parse(message.quotedMsg.dataJson);
+      if (!quotedData.id) {
+        throw new DebugException(
+          "notificamehub:sendMessage: Instagram post without quoted message id"
+        );
+      }
+      number = quotedData.id;
+      content = new ReplyContent(number, message.body);
+    }
+
+    if (!content && message.type === "text") {
+      content = new TextContent(message.body);
     }
 
     const { client } = this.sessions[connection.id];
     const channel = client.setChannel(ticket.contact.channel);
 
-    if (textContent)
+    if (content)
       promises.push(
         messageMutex.runExclusive(async () => {
           const result = await channel.sendMessage(
             connection.qrcode,
-            ticket.contact.number,
-            textContent
+            number,
+            content
           );
           logger.debug({ result }, "Message body sent");
 
@@ -497,6 +624,7 @@ export class NotificamehubDriver implements OmniDriver {
               contactId: ticket.contactId,
               ticketId: ticket.id,
               body: message.body,
+              quotedMsgId: message.quotedMsg?.id || undefined,
               fromMe: true,
               channel: ticket.contact.channel,
               dataJson: JSON.stringify(message)
@@ -529,6 +657,7 @@ export class NotificamehubDriver implements OmniDriver {
               contactId: ticket.contactId,
               ticketId: ticket.id,
               body: message.body || "",
+              quotedMsgId: message.quotedMsg?.id || undefined,
               fromMe: true,
               channel: ticket.contact.channel,
               mediaType: message.mimetype.split("/")[0],

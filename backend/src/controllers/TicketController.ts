@@ -35,6 +35,8 @@ interface TicketData {
   userId: number;
 }
 
+const updateMutex = new Mutex();
+
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const {
     pageNumber,
@@ -147,13 +149,12 @@ export const kanban = async (
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
-  const { contactId, status, userId, queueId, whatsappId }: TicketData =
+  const { contactId, userId, queueId, whatsappId }: TicketData =
     req.body;
   const { companyId } = req.user;
 
   const ticket = await CreateTicketService({
     contactId,
-    status,
     userId,
     companyId,
     queueId,
@@ -197,8 +198,7 @@ export const update = async (
 ): Promise<Response> => {
   const { ticketId } = req.params;
 
-  const mutex = new Mutex();
-  const { ticket } = await mutex.runExclusive(async () => {
+  const { ticket } = await updateMutex.runExclusive(async () => {
     const result = await UpdateTicketService({
       ticketData: req.body,
       ticketId: Number.parseInt(ticketId, 10),

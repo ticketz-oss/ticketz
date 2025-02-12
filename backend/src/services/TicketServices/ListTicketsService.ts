@@ -206,7 +206,10 @@ const ListTicketsService = async ({
 
     whereCondition = {
       [Op.or]: [{ userId }, { status: "pending" }],
-      queueId: { [Op.or]: [userQueueIds, null] },
+      queueId: {
+        [Op.or]:
+          user.profile === "admin" ? [userQueueIds, null] : [userQueueIds]
+      },
       unreadMessages: { [Op.gt]: 0 }
     };
     if (groupsTab) {
@@ -239,9 +242,9 @@ const ListTicketsService = async ({
   if (Array.isArray(users) && users.length > 0) {
     const ticketsUserFilter: any[] | null = [];
     // eslint-disable-next-line no-restricted-syntax
-    for await (const uid of users) {
+    for await (const u of users) {
       const ticketUsers = await Ticket.findAll({
-        where: { userId: uid }
+        where: { userId: u }
       });
       if (ticketUsers) {
         ticketsUserFilter.push(ticketUsers.map(t => t.id));
