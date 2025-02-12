@@ -978,9 +978,9 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
   const renderLinkPreview = (message) => {
     const data = JSON.parse(message.dataJson);
     
-    const title = data?.message?.extendedTextMessage?.title;
-    const description = data?.message?.extendedTextMessage?.description;
-    const canonicalUrl = data?.message?.extendedTextMessage?.canonicalUrl;
+    const title = data?.itemPreview?.title || data?.message?.extendedTextMessage?.title;
+    const description = data?.itemPreview?.description || data?.message?.extendedTextMessage?.description;
+    const canonicalUrl = data?.itemPreview?.url || data?.message?.extendedTextMessage?.canonicalUrl;
     const url = canonicalUrl?.startsWith("http") && new URL(
       canonicalUrl,
     );
@@ -1232,7 +1232,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
                   <Forward fontSize="small" className={classes.forwardedIcon}/> {i18n.t("message.forwarded")}
                 </span>
               )}
-              {isGroup && (
+              {message.contact?.id && message.contact.id !== ticket.contactId && (
                 <span className={classes.messageContactName}>
                   {message.contact?.name}
                 </span>
