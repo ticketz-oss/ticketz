@@ -4,6 +4,7 @@ import Contact from "../../models/Contact";
 import AppError from "../../errors/AppError";
 import { getPublicPath } from "../../helpers/GetPublicPath";
 import { S3Storage } from "../../helpers/S3Storage";
+import { logger } from "../../utils/logger";
 
 const fileStorage = S3Storage.getInstance();
 
@@ -18,17 +19,33 @@ const DeleteContactService = async (id: string): Promise<void> => {
 
   const relativePath = `media/${contact.companyId}/${contact.id}`;
 
+  await contact.destroy();
+
   const contactMediaPath = join(getPublicPath(), relativePath);
 
   // recursively remove contact media folder
-  fs.rmSync(contactMediaPath, { recursive: true, force: true });
+  (async () => {
+    try {
+      if (fs.existsSync(contactMediaPath)) {
+        fs.rmSync(contactMediaPath, { recursive: true });
+      }
+    } catch (error) {
+      logger.error(
+        { path: contactMediaPath, error },
+        `Error on remove contact media folder: ${error.message}`
+      );
+    }
+  })();
 
   await fileStorage.prepare();
   if (fileStorage.storage) {
-    await fileStorage.storage.deleteDirectory(relativePath);
+    fileStorage.storage.deleteDirectory(relativePath).catch(error => {
+      logger.error(
+        { path: relativePath, error },
+        `S3 Error on delete contact media folder: ${error.message}`
+      );
+    });
   }
-
-  await contact.destroy();
 };
 
 export default DeleteContactService;

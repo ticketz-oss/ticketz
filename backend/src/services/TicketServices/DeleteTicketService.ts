@@ -36,11 +36,27 @@ const DeleteTicketService = async (id: string): Promise<Ticket> => {
   await ticket.destroy();
 
   // recursively remove ticket media folder
-  fs.rmSync(ticketPath, { recursive: true, force: true });
+  (async () => {
+    try {
+      if (fs.existsSync(ticketPath)) {
+        fs.rmSync(ticketPath, { recursive: true });
+      }
+    } catch (error) {
+      logger.error(
+        { path: ticketPath, error },
+        `Error on remove ticket media folder: ${error.message}`
+      );
+    }
+  })();
 
   await fileStorage.prepare();
   if (fileStorage.storage) {
-    await fileStorage.storage.deleteDirectory(relativePath);
+    fileStorage.storage.deleteDirectory(relativePath).catch(error => {
+      logger.error(
+        { path: relativePath, error },
+        `S3 Error on delete ticket media folder: ${error.message}`
+      );
+    });
   }
 
   return ticket;
