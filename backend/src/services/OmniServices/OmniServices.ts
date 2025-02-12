@@ -40,6 +40,7 @@ import User from "../../models/User";
 import { getIO } from "../../libs/socket";
 import saveMediaToFile from "../../helpers/saveMediaFile";
 import { DebugException } from "../../helpers/DebugException";
+import AppError from "../../errors/AppError";
 
 export type OmniMessage = {
   type: "text" | "image" | "video" | "audio" | "document";
@@ -47,6 +48,7 @@ export type OmniMessage = {
   fileName?: string;
   mediaUrl?: string;
   mimetype?: string;
+  quotedMsg?: Message;
 };
 
 export interface OmniDriver {
@@ -126,6 +128,16 @@ export class OmniServices {
     );
   }
 
+  private static async automationHandler(
+    messages: Message[],
+    driver: OmniDriver
+  ) {
+    logger.debug("OmniServices:automationHandler");
+    messages.forEach(message => {
+      // do nothing
+    });
+  }
+
   public async messageHandler(channel: string, data: any) {
     logger.debug({ data }, "OmniServices:messageHandler");
     const driver = this.drivers[channel];
@@ -151,7 +163,25 @@ export class OmniServices {
                 if (!ticket) {
                   throw new Error("Ticket not found or not created");
                 }
-                driver.createMessages(ticket, data);
+                driver
+                  .createMessages(ticket, data)
+                  .then(messages => {
+                    OmniServices.automationHandler(messages, driver);
+                  })
+                  .catch(error => {
+                    if (error instanceof DebugException) {
+                      logger.debug(error.message);
+                      return;
+                    }
+                    throw error;
+                  });
+              })
+              .catch(error => {
+                if (error instanceof DebugException) {
+                  logger.debug(error.message);
+                  return;
+                }
+                throw error;
               });
           })
           .catch(error => {
@@ -190,6 +220,15 @@ export class OmniServices {
       ? formatBody(req.body.body || "", ticket, user)
       : null;
 
+    const quotedMsg = req.body.quotedMsg
+      ? await Message.findOne({
+          where: {
+            id: req.body.quotedMsg.id,
+            ticketId: req.body.quotedMsg.ticketId
+          }
+        })
+      : undefined;
+
     const medias = req.files as Express.Multer.File[];
     if (medias) {
       await Promise.all(
@@ -227,7 +266,8 @@ export class OmniServices {
             mediaUrl,
             mimetype: media.mimetype,
             fileName: media.originalname,
-            body
+            body,
+            quotedMsg
           };
 
           await driver.sendMessage(ticket, messageData);
@@ -238,12 +278,20 @@ export class OmniServices {
     if (messageBody) {
       const messageData: OmniMessage = {
         type: "text",
-        body: messageBody
+        body: messageBody,
+        quotedMsg
       };
-      const message = await driver.sendMessage(ticket, messageData);
-
-      if (!message) {
-        throw new Error("Message not created");
+      try {
+        await driver.sendMessage(ticket, messageData);
+      } catch (error) {
+        if (error instanceof AppError) {
+          throw error;
+        }
+        if (error instanceof DebugException) {
+          logger.debug(error.message);
+          throw new AppError("Error sending message", 500);
+        }
+        throw error;
       }
     }
 
