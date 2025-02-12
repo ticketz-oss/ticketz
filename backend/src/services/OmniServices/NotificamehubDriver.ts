@@ -559,11 +559,11 @@ export class NotificamehubDriver implements OmniDriver {
           ticketId: ticket.id,
           body: content.text || content.caption || "",
           channel: ticket.contact.channel,
-          mediaType: file
-            ? finalContent.fileMimeType.split("/")[0] || "document"
-            : "",
+          // mediaType: file
+          //   ? finalContent.fileMimeType.split("/")[0] || "document"
+          //  : "",
           mediaUrl,
-          thumbnailUrl,
+          // thumbnailUrl,
           dataJson: JSON.stringify(finalContent)
         },
         companyId: ticket.companyId
@@ -624,6 +624,7 @@ export class NotificamehubDriver implements OmniDriver {
               contactId: ticket.contactId,
               ticketId: ticket.id,
               body: message.body,
+              quotedMsgId: message.quotedMsg?.id || undefined,
               fromMe: true,
               channel: ticket.contact.channel,
               dataJson: JSON.stringify(message)
@@ -656,6 +657,7 @@ export class NotificamehubDriver implements OmniDriver {
               contactId: ticket.contactId,
               ticketId: ticket.id,
               body: message.body || "",
+              quotedMsgId: message.quotedMsg?.id || undefined,
               fromMe: true,
               channel: ticket.contact.channel,
               mediaType: message.mimetype.split("/")[0],
