@@ -25,7 +25,8 @@ messageRoutes.post("/messages/edit/:messageId", isAuth, MessageController.edit);
 
 messageRoutes.delete("/messages/:messageId", isAuth, MessageController.remove);
 
-messageRoutes.post("/api/messages/send",
+messageRoutes.post(
+  "/api/messages/send",
   tokenAuth,
   upload.array("medias"),
   MessageController.send
