@@ -9,7 +9,9 @@ import iconv from "iconv-lite";
 import AppError from "../../errors/AppError";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
 import Ticket from "../../models/Ticket";
-import { verifyMediaMessage } from "./wbotMessageListener";
+import { verifyMediaMessage, verifyMessage } from "./wbotMessageListener";
+import CheckSettings from "../../helpers/CheckSettings";
+import saveMediaToFile from "../../helpers/saveMediaFile";
 
 interface Request {
   media: Express.Multer.File;
@@ -106,7 +108,7 @@ export const getMessageFileOptions = async (
 
 export const sendWhatsappFile = async (
   ticket: Ticket,
-  options: any
+  options: AnyMessageContent
 ): Promise<WAMessage> => {
   try {
     const wbot = await GetTicketWbot(ticket);
@@ -117,6 +119,28 @@ export const sendWhatsappFile = async (
     );
 
     await verifyMediaMessage(sentMessage, ticket, ticket.contact);
+
+    return sentMessage;
+  } catch (err) {
+    Sentry.captureException(err);
+    console.log(err);
+    throw new AppError("ERR_SENDING_WAPP_MSG");
+  }
+};
+
+export const SendWhatsAppMessage = async (
+  ticket: Ticket,
+  options: AnyMessageContent
+): Promise<WAMessage> => {
+  try {
+    const wbot = await GetTicketWbot(ticket);
+
+    const sentMessage = await wbot.sendMessage(
+      `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
+      options
+    );
+
+    await verifyMessage(sentMessage, ticket, ticket.contact);
 
     return sentMessage;
   } catch (err) {
@@ -147,6 +171,29 @@ export const SendWhatsAppMedia = async ({
       console.error("Error converting filename to UTF-8:", error);
     }
 
+    const fileLimit = parseInt(await CheckSettings("downloadLimit", "15"), 10);
+
+    if (media.size > fileLimit * 1024 * 1024) {
+      // convert multer file to Readable
+      const readableFile = fs.createReadStream(pathMedia);
+      let fileUrl = encodeURI(
+        await saveMediaToFile(
+          {
+            data: readableFile,
+            mimetype: media.mimetype,
+            filename: media.originalname
+          },
+          ticket
+        )
+      );
+      if (!fileUrl.startsWith("http")) {
+        fileUrl = `${process.env.BACKEND_URL}/public/${fileUrl}`;
+      }
+      readableFile.close();
+      return SendWhatsAppMessage(ticket, {
+        text: `📎 *${originalNameUtf8}*\n\n🔗 ${fileUrl}`
+      });
+    }
     if (typeMessage === "video") {
       options = {
         video: fs.readFileSync(pathMedia),
