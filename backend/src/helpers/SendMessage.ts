@@ -1,9 +1,14 @@
-import { proto } from "@whiskeysockets/baileys";
+import { AnyMessageContent, proto } from "@whiskeysockets/baileys";
+import fs from "fs";
+import mime from "mime-types";
+import iconv from "iconv-lite";
 import Whatsapp from "../models/Whatsapp";
 import GetWhatsappWbot from "./GetWhatsappWbot";
 import { getMessageFileOptions } from "../services/WbotServices/SendWhatsAppMedia";
 import { handleMessage } from "../services/WbotServices/wbotMessageListener";
 import Message from "../models/Message";
+import CheckSettings from "./CheckSettings";
+import saveMediaToFile from "./saveMediaFile";
 
 import { SubscriptionService } from "../ticketzPro/services/subscriptionService";
 
@@ -41,7 +46,48 @@ export const SendMessage = async (
     const body = `${messageData.body}`;
 
     if (messageData.mediaPath) {
-      const options = await getMessageFileOptions(body, messageData.mediaPath);
+      // get filesize
+      const filesize = fs.statSync(messageData.mediaPath).size;
+      const fileLimit = parseInt(
+        await CheckSettings("downloadLimit", "15"),
+        10
+      );
+
+      let options: AnyMessageContent;
+
+      if (filesize > fileLimit * 1024 * 1024) {
+        const filename = messageData.mediaPath.split("/").pop();
+        let originalFilename = "";
+        try {
+          originalFilename = iconv.decode(
+            Buffer.from(filename, "binary"),
+            "utf8"
+          );
+        } catch (error) {
+          console.error("Error converting filename to UTF-8:", error);
+        }
+        let fileUrl = encodeURI(
+          await saveMediaToFile(
+            {
+              data: fs.readFileSync(messageData.mediaPath),
+              mimetype:
+                mime.lookup(originalFilename) || "application/octet-stream",
+              filename: messageData.mediaPath.split("/").pop() || "file.bin"
+            },
+            undefined,
+            undefined,
+            whatsapp.companyId
+          )
+        );
+        if (!fileUrl.startsWith("http")) {
+          fileUrl = `${process.env.BACKEND_URL}/public/${fileUrl}`;
+        }
+        options = {
+          text: `${body}\n\n📎 *${originalFilename}*\n\n🔗 ${fileUrl}`
+        };
+      } else {
+        options = await getMessageFileOptions(body, messageData.mediaPath);
+      }
       if (options) {
         message = await wbot.sendMessage(chatId, {
           ...options

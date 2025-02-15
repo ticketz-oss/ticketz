@@ -7,7 +7,9 @@ const publicFolder = __dirname.endsWith("/dist")
 
 export default {
   directory: publicFolder,
-
+  limits: {
+    fileSize: 500 * 1024 * 1024
+  },
   storage: multer.diskStorage({
     destination: publicFolder,
     filename(req, file, cb) {
