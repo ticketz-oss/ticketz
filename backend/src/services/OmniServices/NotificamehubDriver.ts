@@ -77,7 +77,15 @@ export type NotificamehubContentMedia = {
 };
 
 export type NotificamehubContent = {
-  type: "text" | "photo" | "image" | "video" | "voice" | "document" | "comment";
+  type:
+    | "text"
+    | "photo"
+    | "image"
+    | "video"
+    | "voice"
+    | "document"
+    | "comment"
+    | "reaction";
   id?: string;
   text?: string;
   media?: NotificamehubContentMedia;
@@ -373,6 +381,12 @@ export class NotificamehubDriver implements OmniDriver {
       `${message.visitor.firstName} ${message.visitor.lastName}`.trim();
     let name = fullName || message.visitor.name || String(message.from);
     let email: string;
+
+    if (message.contents[0]?.type === "reaction") {
+      throw new DebugException(
+        "notificamehub:findOrCreateContact: Ignoring reaction message"
+      );
+    }
 
     if (
       !forcePoster &&
