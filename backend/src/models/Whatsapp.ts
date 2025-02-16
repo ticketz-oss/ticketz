@@ -131,6 +131,9 @@ class Whatsapp extends Model<Whatsapp> {
   @AllowNull
   @Column
   transferToNewTicket: boolean;
+
+  @Column(DataType.JSONB)
+  proxyConfig: unknown;
 }
 
 export default Whatsapp;

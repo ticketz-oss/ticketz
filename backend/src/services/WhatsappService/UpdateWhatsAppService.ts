@@ -21,6 +21,7 @@ export interface WhatsappData {
   token?: string;
   restrictToQueues?: boolean;
   transferToNewTicket?: boolean;
+  proxyConfig?: object;
 }
 
 interface Request {
@@ -58,7 +59,8 @@ const UpdateWhatsAppService = async ({
     queueIds = [],
     token,
     restrictToQueues,
-    transferToNewTicket
+    transferToNewTicket,
+    proxyConfig
   } = whatsappData;
 
   try {
@@ -102,7 +104,8 @@ const UpdateWhatsAppService = async ({
     token,
     transferMessage,
     restrictToQueues,
-    transferToNewTicket
+    transferToNewTicket,
+    proxyConfig
   });
 
   await AssociateWhatsappQueue(whatsapp, queueIds);
