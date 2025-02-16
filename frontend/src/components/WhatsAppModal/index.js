@@ -33,6 +33,9 @@ import toastError from "../../errors/toastError";
 import QueueSelect from "../QueueSelect";
 import HelpOutlineOutlinedIcon from "@material-ui/icons/HelpOutlineOutlined";
 
+import { DynamicForm } from "../DynamicForm";
+import proxyConfigSchema from "./proxyConfigSchema";
+
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
@@ -88,6 +91,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
   const [settings, setSettings] = useState({});
   const [selectedQueueIds, setSelectedQueueIds] = useState([]);
   const [tabIndex, setTabIndex] = useState(0);
+  const [proxyConfigData, setProxyConfigData] = useState({});
 
   useEffect(() => {
     setTabIndex(0);
@@ -105,6 +109,12 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
             data.hubToken = session.hubToken;
             data.hubChannel = session.hubChannel;
           }
+        }
+        
+        if (data.proxyConfig) {
+          setProxyConfigData(data.proxyConfig);
+        } else {
+          setProxyConfigData({});
         }
         setWhatsApp(data);
 
@@ -137,6 +147,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
     delete whatsappData["session"];
     delete whatsappData["hubToken"];
     delete whatsappData["hubChannel"];
+    delete whatsappData["proxyConfig"];
     
     if (hubToken || hubChannel) {
       whatsappData.session = {
@@ -145,6 +156,8 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
       }
       whatsappData.channel = "notificamehub";
     }
+    
+    whatsappData.proxyConfig = proxyConfigData;
       
     try {
       if (whatsAppId) {
@@ -410,6 +423,12 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                     margin="dense"
                   />
                 </div>
+                <DynamicForm
+                  title="Proxy Configuration"
+                  schema={proxyConfigSchema}
+                  data={proxyConfigData}
+                  setData={setProxyConfigData}
+                />
               </>
               )}
               </DialogContent>
