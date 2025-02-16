@@ -23,6 +23,8 @@ import {
   Paper,
   Grid,
   Checkbox,
+  Tabs,
+  Tab,
 } from "@material-ui/core";
 
 import api from "../../services/api";
@@ -85,6 +87,11 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
   const [whatsApp, setWhatsApp] = useState(initialState);
   const [settings, setSettings] = useState({});
   const [selectedQueueIds, setSelectedQueueIds] = useState([]);
+  const [tabIndex, setTabIndex] = useState(0);
+
+  useEffect(() => {
+    setTabIndex(0);
+  }, [open]);
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -185,36 +192,80 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
           {({ values, touched, errors, isSubmitting }) => (
             <Form>
               <DialogContent dividers>
-                <div className={classes.multFieldLine}>
-                  <Grid spacing={2} container>
-                    <Grid item>
-                      <Field
-                        as={TextField}
-                        label={i18n.t("whatsappModal.form.name")}
-                        autoFocus
-                        name="name"
-                        error={touched.name && Boolean(errors.name)}
-                        helperText={touched.name && errors.name}
-                        variant="outlined"
-                        margin="dense"
-                        className={classes.textField}
-                      />
-                    </Grid>
-                    <Grid style={{ paddingTop: 15 }} item>
-                      <FormControlLabel
-                        control={
-                          <Field
-                            as={Switch}
-                            color="primary"
-                            name="isDefault"
-                            checked={values.isDefault}
-                          />
-                        }
-                        label={i18n.t("whatsappModal.form.default")}
-                      />
-                    </Grid>
+              <div className={classes.multFieldLine}>
+                <Grid spacing={2} container>
+                  <Grid item>
+                    <Field
+                      as={TextField}
+                      label={i18n.t("whatsappModal.form.name")}
+                      autoFocus
+                      name="name"
+                      error={touched.name && Boolean(errors.name)}
+                      helperText={touched.name && errors.name}
+                      variant="outlined"
+                      margin="dense"
+                      className={classes.textField}
+                    />
                   </Grid>
+                  <Grid style={{ paddingTop: 15 }} item>
+                    <FormControlLabel
+                      control={
+                        <Field
+                          as={Switch}
+                          color="primary"
+                          name="isDefault"
+                          checked={values.isDefault}
+                        />
+                      }
+                      label={i18n.t("whatsappModal.form.default")}
+                    />
+                  </Grid>
+                </Grid>
+              </div>
+              <Tabs value={tabIndex} onChange={(e, tab) => {setTabIndex(tab);}}>
+                <Tab label={i18n.t("whatsappModal.tab.general")} />
+                <Tab label={i18n.t("whatsappModal.tab.messages")} />
+                <Tab label={i18n.t("whatsappModal.tab.advanced")} />
+              </Tabs>
+              {tabIndex === 0 && (
+              <>
+              <QueueSelect
+                selectedQueueIds={selectedQueueIds}
+                onChange={(selectedIds) => setSelectedQueueIds(selectedIds)}
+              />
+              {(settings.restrictTransferConnection || "connection") === "connection" &&
+                <div>
+                  <FormControlLabel
+                    control={
+                      <Field
+                        as={Switch}
+                        color="primary"
+                        name="restrictToQueues"
+                        checked={values.restrictToQueues}
+                      />
+                    }
+                    label={i18n.t("whatsappModal.form.restrictToQueues")}
+                  />
                 </div>
+              }
+              {(settings.transferToNewTicket || "connection") === "connection" &&
+                <div>
+                  <FormControlLabel
+                    control={
+                      <Field
+                        as={Switch}
+                        color="primary"
+                        name="transferToNewTicket"
+                        checked={values.transferToNewTicket}
+                      />
+                    }
+                    label={i18n.t("whatsappModal.form.transferToNewTicket")}
+                  />
+                </div>
+              }
+              </>)}
+              {tabIndex === 1 && (
+              <>
                 <div>
                   <Field
                     as={TextField}
@@ -323,6 +374,9 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                     margin="dense"
                   />
                 </div>
+                </>)}
+                {tabIndex === 2 && (
+                <>
                 <div>
                   <Field
                     as={TextField}
@@ -334,40 +388,6 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                     margin="dense"
                   />
                 </div>
-                <QueueSelect
-                  selectedQueueIds={selectedQueueIds}
-                  onChange={(selectedIds) => setSelectedQueueIds(selectedIds)}
-                />
-                {(settings.restrictTransferConnection || "connection") === "connection" &&
-                  <div>
-                    <FormControlLabel
-                      control={
-                        <Field
-                          as={Switch}
-                          color="primary"
-                          name="restrictToQueues"
-                          checked={values.restrictToQueues}
-                        />
-                      }
-                      label={i18n.t("whatsappModal.form.restrictToQueues")}
-                    />
-                  </div>
-                }
-                {(settings.transferToNewTicket || "connection") === "connection" &&
-                  <div>
-                    <FormControlLabel
-                      control={
-                        <Field
-                          as={Switch}
-                          color="primary"
-                          name="transferToNewTicket"
-                          checked={values.transferToNewTicket}
-                        />
-                      }
-                      label={i18n.t("whatsappModal.form.transferToNewTicket")}
-                    />
-                  </div>
-                }
                 <div>
                   <Field
                     as={TextField}
@@ -390,6 +410,8 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                     margin="dense"
                   />
                 </div>
+              </>
+              )}
               </DialogContent>
               <DialogActions>
                 <Button

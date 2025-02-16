@@ -116,6 +116,11 @@ const messages = {
           hubToken: "Hub Token",
           hubChannel: "Hub Channel",
         },
+        tab: {
+          general: "General",
+          messages: "Messages",
+          advanced: "Advanced",
+        },
         buttons: {
           okAdd: "Add",
           okEdit: "Save",

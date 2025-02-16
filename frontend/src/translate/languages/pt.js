@@ -118,6 +118,11 @@ const messages = {
           restrictToQueues: "Restringir às filas associadas ou sem associação",
           transferToNewTicket: "Força transferência para novo ticket"
         },
+        tab: {
+          general: "Geral",
+          messages: "Mensagens",
+          advanced: "Avançado",
+        },
         buttons: {
           okAdd: "Adicionar",
           okEdit: "Salvar",
