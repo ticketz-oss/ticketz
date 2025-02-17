@@ -90,6 +90,11 @@ const messages = {
             content:
               "Asegúrate de que tu teléfono esté conectado a internet y WhatsApp esté abierto, o haz clic en 'Desconectar' para obtener un nuevo código QR.",
           },
+          refresh: "Actualizar",
+          disconnect: "Desconectar",
+          scan: "Escanear",
+          newQr: "Nuevo Código QR",
+          retry: "Intentar nuevamente",
         },
         table: {
           name: "Nombre",

@@ -86,6 +86,11 @@ const messages = {
             title: "Connection to the phone has been lost",
             content: "Make sure your phone is connected to the internet and WhatsApp is open, or click 'Disconnect' to get a new QR Code.",
           },
+          refresh: "Refresh",
+          disconnect: "Disconnect",
+          scan: "Scan QR Code",
+          newQr: "Request new QR Code",
+          retry: "Try Again",
         },
         table: {
           name: "Name",

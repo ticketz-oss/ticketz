@@ -86,6 +86,11 @@ const messages = {
             title: "Koneksi ke ponsel telah terputus",
             content: "Pastikan ponsel Anda terhubung ke internet dan WhatsApp terbuka, atau klik 'Putuskan' untuk mendapatkan Kode QR baru.",
           },
+          refresh: "Muat ulang",
+          disconnect: "Putuskan",
+          scan: "Pindai",
+          newQr: "Kode QR Baru",
+          retry: "Coba Lagi",
         },
         table: {
           name: "Nama",

@@ -25,8 +25,13 @@ import {
 	SignalCellular4Bar,
 	CropFree,
 	DeleteOutline,
-	Lock
+	Lock,
+  Refresh,
+  Replay
 } from "@material-ui/icons";
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPhoneSlash, faQrcode, faWandMagicSparkles } from '@fortawesome/free-solid-svg-icons';
 
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
@@ -206,54 +211,83 @@ const Connections = () => {
 
 		setConfirmModalInfo(confirmationModalInitialState);
 	};
+  
+  const refreshWhatsApp = async whatsApp => {
+    try {
+      await api.get(`/whatsappsession/refresh/${whatsApp.id}`);
+    } catch (err) {
+      toastError(err);
+    }
+  };
 
 	const renderActionButtons = whatsApp => {
 		return (
 			<>
 				{whatsApp.status === "qrcode" && (
-					<Button
-						size="small"
-						variant="contained"
-						color="primary"
-						onClick={() => handleOpenQrModal(whatsApp)}
-					>
-						{i18n.t("connections.buttons.qrcode")}
-					</Button>
+          <Tooltip
+            title={i18n.t("connections.toolTips.scan")}
+          >
+            <IconButton
+              size="small"
+              onClick={() => handleOpenQrModal(whatsApp)}
+            >
+              <FontAwesomeIcon icon={faQrcode} />
+            </IconButton>
+          </Tooltip>
 				)}
 				{whatsApp.status === "DISCONNECTED" && (
 					<>
-						<Button
-							size="small"
-							variant="outlined"
-							color="primary"
-							onClick={() => handleStartWhatsAppSession(whatsApp.id)}
-						>
-							{i18n.t("connections.buttons.tryAgain")}
-						</Button>{" "}
-						<Button
-							size="small"
-							variant="outlined"
-							color="secondary"
-							onClick={() => handleRequestNewQrCode(whatsApp.id)}
-						>
-							{i18n.t("connections.buttons.newQr")}
-						</Button>
+            <Tooltip
+              title={i18n.t("connections.toolTips.retry")}
+            >
+              <IconButton
+                size="small"
+                onClick={() => handleStartWhatsAppSession(whatsApp.id)}
+              >
+                <Replay />
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip
+              title={i18n.t("connections.toolTips.newQr")}
+            >
+              <IconButton
+                size="small"
+                onClick={() => handleRequestNewQrCode(whatsApp.id)}
+              >
+                <FontAwesomeIcon icon={faWandMagicSparkles} />
+              </IconButton>
+            </Tooltip>
 					</>
 				)}
 				{(whatsApp.status === "CONNECTED" ||
 					whatsApp.status === "PAIRING" ||
 					whatsApp.status === "TIMEOUT") && (
-					<Button
-						size="small"
-						variant="outlined"
-						color="secondary"
-						onClick={() => {
-							handleOpenConfirmationModal("disconnect", whatsApp.id);
-						}}
-					>
-						{i18n.t("connections.buttons.disconnect")}
-					</Button>
+          <Tooltip
+            title={i18n.t("connections.toolTips.disconnect")}
+          >
+            <IconButton
+              size="small"
+              onClick={() => {
+                handleOpenConfirmationModal("disconnect", whatsApp.id);
+              }}
+            >
+              <FontAwesomeIcon icon={faPhoneSlash} />
+            </IconButton>
+          </Tooltip>
 				)}
+        {(whatsApp.status === "CONNECTED" && whatsApp.channel === "whatsapp") && (
+          <Tooltip
+            title={i18n.t("connections.toolTips.refresh")}
+          >
+            <IconButton
+              size="small"
+              onClick={() => refreshWhatsApp(whatsApp)}
+            >
+              <Refresh />
+            </IconButton>
+          </Tooltip>
+        )}
 				{whatsApp.status === "OPENING" && (
 					<Button size="small" variant="outlined" disabled color="default">
 						{i18n.t("connections.buttons.connecting")}
