@@ -5,6 +5,7 @@ import { getIO } from "../../libs/socket";
 import wbotMonitor from "./wbotMonitor";
 import { logger } from "../../utils/logger";
 import * as Sentry from "@sentry/node";
+import { createProxyAgent } from "../../helpers/createProxyAgent";
 
 export const StartWhatsAppSession = async (
   whatsapp: Whatsapp,
@@ -19,7 +20,11 @@ export const StartWhatsAppSession = async (
   });
 
   try {
-    const wbot = await initWASocket(whatsapp);
+    let proxy = null;
+    if (whatsapp.proxyConfig?.enabled) {
+      proxy = createProxyAgent(whatsapp.proxyConfig);
+    }
+    const wbot = await initWASocket(whatsapp, proxy);
     wbotMessageListener(wbot, companyId);
     wbotMonitor(wbot, whatsapp, companyId);
   } catch (err) {
