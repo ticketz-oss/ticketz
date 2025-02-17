@@ -6,6 +6,7 @@ import Whatsapp from "../../models/Whatsapp";
 import ShowWhatsAppService from "./ShowWhatsAppService";
 import AssociateWhatsappQueue from "./AssociateWhatsappQueue";
 import { ProxyConfig } from "../../helpers/createProxyAgent";
+import { getWbot } from "../../libs/wbot";
 
 export interface WhatsappData {
   name?: string;
@@ -92,6 +93,9 @@ const UpdateWhatsAppService = async ({
   const whatsapp = await ShowWhatsAppService(whatsappId, companyId);
   // console.log(transferMessage)
   console.log(whatsapp);
+
+  const oldProxyConfig = whatsapp.proxyConfig;
+
   await whatsapp.update({
     name,
     status,
@@ -110,6 +114,19 @@ const UpdateWhatsAppService = async ({
   });
 
   await AssociateWhatsappQueue(whatsapp, queueIds);
+
+  if (
+    whatsapp.channel === "whatsapp" &&
+    whatsapp.status === "CONNECTED" &&
+    JSON.stringify(oldProxyConfig) !== JSON.stringify(proxyConfig)
+  ) {
+    if (whatsapp.channel === "whatsapp") {
+      const wbot = getWbot(whatsapp.id);
+      if (wbot) {
+        await wbot.ws.close();
+      }
+    }
+  }
 
   return { whatsapp, oldDefaultWhatsapp };
 };
