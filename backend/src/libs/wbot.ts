@@ -275,10 +275,10 @@ export const initWASocket = async (
               ) {
                 removeWbot(id, false).then(() => {
                   logger.info(`Reconnecting ${name} in 2 seconds`);
-                  setTimeout(
-                    () => StartWhatsAppSession(whatsapp, whatsapp.companyId),
-                    2000
-                  );
+                  setTimeout(() => {
+                    whatsapp.reload();
+                    StartWhatsAppSession(whatsapp, whatsapp.companyId);
+                  }, 2000);
                 });
               } else {
                 await whatsapp.update({ status: "PENDING", session: "" });
@@ -289,10 +289,10 @@ export const initWASocket = async (
                 });
                 removeWbot(id, false).then(() => {
                   logger.info(`Reconnecting ${name} in 2 seconds`);
-                  setTimeout(
-                    () => StartWhatsAppSession(whatsapp, whatsapp.companyId),
-                    2000
-                  );
+                  setTimeout(() => {
+                    whatsapp.reload();
+                    StartWhatsAppSession(whatsapp, whatsapp.companyId);
+                  }, 2000);
                 });
               }
             }
