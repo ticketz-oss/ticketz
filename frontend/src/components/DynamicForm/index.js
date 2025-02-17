@@ -53,7 +53,6 @@ export const DynamicForm = ({ title, schema, data, setData, onBlur, margin, vari
           </Grid>
         ) }
         {schema.map((field, index) => {
-          console.log(`field ${index}`, field);
           if (!field) {
             return <div key={index} className={classes.forceNewLine} />;
           }

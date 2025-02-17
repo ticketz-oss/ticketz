@@ -114,6 +114,11 @@ const messages = {
           restrictToQueues: "Batasi ke antrian terkait atau antrian tanpa asosiasi",
           transferToNewTicket: "Paksa transfer ke tiket baru"
         },
+        tab: {
+          general: "Umum",
+          messages: "Pesan",
+          advanced: "Lanjutan",
+        },
         buttons: {
           okAdd: "Tambah",
           okEdit: "Simpan",

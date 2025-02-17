@@ -18,7 +18,8 @@ import ClearIcon from "@material-ui/icons/Clear";
 import MicIcon from "@material-ui/icons/Mic";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
-import { FormControlLabel, Switch, Tooltip } from "@material-ui/core";
+import CameraAltIcon from "@material-ui/icons/CameraAlt";
+import { FormControlLabel, Switch, Tooltip, InputAdornment } from "@material-ui/core";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { isString, isEmpty, isObject, has } from "lodash";
 
@@ -80,6 +81,10 @@ const useStyles = makeStyles((theme) => ({
     paddingLeft: 10,
     flex: 1,
     border: "none",
+  },
+
+  cameraIcon: {
+    color: "grey",
   },
 
   sendMessageIcons: {
@@ -384,6 +389,7 @@ const CustomInput = (props) => {
     setInputMessage,
     handleSendMessage,
     handleInputPaste,
+    handleChangeMedias,
     disableOption,
     setQuickMessageAttachment,
     setMedias,
@@ -515,6 +521,28 @@ const CustomInput = (props) => {
               multiline
               className={classes.messageInput}
               maxRows={5}
+              endAdornment={
+                /Mobi|Android|iPhone/i.test(navigator.userAgent) &&
+                <InputAdornment position="end">
+                  <input
+                    type="file"
+                    id="camera-button"
+                    accept="image/*"
+                    capture="camera"
+                    className={classes.uploadInput}
+                    onChange={handleChangeMedias}
+                  />
+                  <label htmlFor="camera-button">
+                    <IconButton
+                      aria-label="camera-upload"
+                      component="span"
+                      disabled={disableOption}
+                    >
+                      <CameraAltIcon className={classes.cameraIcon} />
+                    </IconButton>
+                  </label>
+                </InputAdornment>
+              }              
               onKeyDownCapture={(e) => {
                 if (
                   !popupOpen && (
@@ -1037,6 +1065,7 @@ const MessageInputCustom = (props) => {
             // handleChangeInput={handleChangeInput}
             handleSendMessage={handleSendMessage}
             handleInputPaste={handleInputPaste}
+            handleChangeMedias={handleChangeMedias}
             disableOption={disableOption}
             setQuickMessageAttachment={setQuickMessageAttachment}
             setMedias={setMedias}

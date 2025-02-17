@@ -5,6 +5,7 @@ import AppError from "../../errors/AppError";
 import Whatsapp from "../../models/Whatsapp";
 import ShowWhatsAppService from "./ShowWhatsAppService";
 import AssociateWhatsappQueue from "./AssociateWhatsappQueue";
+import { ProxyConfig } from "../../helpers/createProxyAgent";
 
 export interface WhatsappData {
   name?: string;
@@ -21,6 +22,7 @@ export interface WhatsappData {
   token?: string;
   restrictToQueues?: boolean;
   transferToNewTicket?: boolean;
+  proxyConfig?: ProxyConfig;
 }
 
 interface Request {
@@ -58,7 +60,8 @@ const UpdateWhatsAppService = async ({
     queueIds = [],
     token,
     restrictToQueues,
-    transferToNewTicket
+    transferToNewTicket,
+    proxyConfig
   } = whatsappData;
 
   try {
@@ -102,7 +105,8 @@ const UpdateWhatsAppService = async ({
     token,
     transferMessage,
     restrictToQueues,
-    transferToNewTicket
+    transferToNewTicket,
+    proxyConfig
   });
 
   await AssociateWhatsappQueue(whatsapp, queueIds);

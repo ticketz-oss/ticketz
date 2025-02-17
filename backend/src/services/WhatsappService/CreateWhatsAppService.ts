@@ -5,6 +5,7 @@ import Whatsapp from "../../models/Whatsapp";
 import Company from "../../models/Company";
 import Plan from "../../models/Plan";
 import AssociateWhatsappQueue from "./AssociateWhatsappQueue";
+import { ProxyConfig } from "../../helpers/createProxyAgent";
 
 interface Request {
   name: string;
@@ -25,6 +26,7 @@ interface Request {
   channel?: string;
   session?: string;
   facebookPageUserId?: string;
+  proxyConfig?: ProxyConfig;
 }
 
 interface Response {
@@ -50,7 +52,8 @@ const CreateWhatsAppService = async ({
   facebookPageUserId,
   tokenMeta,
   channel = "whatsapp",
-  session
+  session,
+  proxyConfig
 }: Request): Promise<Response> => {
   const company = await Company.findOne({
     where: {
@@ -159,7 +162,8 @@ const CreateWhatsAppService = async ({
       facebookUserId,
       facebookUserToken,
       facebookPageUserId,
-      tokenMeta
+      tokenMeta,
+      proxyConfig
     },
     { include: ["queues"] }
   );
