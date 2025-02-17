@@ -5,6 +5,7 @@ import Whatsapp from "../../models/Whatsapp";
 import Company from "../../models/Company";
 import Plan from "../../models/Plan";
 import AssociateWhatsappQueue from "./AssociateWhatsappQueue";
+import { ProxyConfig } from "../../helpers/createProxyAgent";
 
 interface Request {
   name: string;
@@ -25,7 +26,7 @@ interface Request {
   channel?: string;
   session?: string;
   facebookPageUserId?: string;
-  proxyConfig?: object;
+  proxyConfig?: ProxyConfig;
 }
 
 interface Response {

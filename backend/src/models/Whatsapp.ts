@@ -19,6 +19,7 @@ import Queue from "./Queue";
 import Ticket from "./Ticket";
 import WhatsappQueue from "./WhatsappQueue";
 import Company from "./Company";
+import { ProxyConfig } from "../helpers/createProxyAgent";
 
 @Table
 class Whatsapp extends Model<Whatsapp> {
@@ -133,7 +134,7 @@ class Whatsapp extends Model<Whatsapp> {
   transferToNewTicket: boolean;
 
   @Column(DataType.JSONB)
-  proxyConfig: unknown;
+  proxyConfig: ProxyConfig;
 }
 
 export default Whatsapp;
