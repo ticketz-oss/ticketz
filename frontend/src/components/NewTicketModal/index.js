@@ -43,7 +43,7 @@ const NewTicketModal = ({ modalOpen, onClose, initialContact }) => {
 	const [newContact, setNewContact] = useState({});
 	const [contactModalOpen, setContactModalOpen] = useState(false);
 	const { user } = useContext(AuthContext);
-
+  
   const [connections, setConnections] = useState([]);
   const [selectedConnection, setSelectedConnection] = useState("");
 
@@ -163,7 +163,8 @@ const NewTicketModal = ({ modalOpen, onClose, initialContact }) => {
 	};
 
 	const handleAddNewContactTicket = contact => {
-		handleSaveTicket(contact.id);
+    setOptions([contact]);
+    setSelectedContact(contact);
 	};
 
 	const createAddContactOption = (filterOptions, params) => {
