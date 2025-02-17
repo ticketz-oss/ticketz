@@ -63,11 +63,6 @@ const refresh = async (req: Request, res: Response): Promise<Response> => {
       return res.status(404).json({ message: "Session not found." });
     }
     await wbot.ws.close();
-
-    await sleep(2);
-
-    await StartWhatsAppSession(whatsapp, companyId);
-
     return res.status(200).json({ message: "Session refreshed." });
   }
 
