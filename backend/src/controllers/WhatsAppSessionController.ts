@@ -3,6 +3,7 @@ import { getWbot } from "../libs/wbot";
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
 import UpdateWhatsAppService from "../services/WhatsappService/UpdateWhatsAppService";
+import { sleep } from "../queues";
 
 const store = async (req: Request, res: Response): Promise<Response> => {
   const { whatsappId } = req.params;
@@ -50,4 +51,27 @@ const remove = async (req: Request, res: Response): Promise<Response> => {
   return res.status(200).json({ message: "Session disconnected." });
 };
 
-export default { store, remove, update };
+const refresh = async (req: Request, res: Response): Promise<Response> => {
+  const { whatsappId } = req.params;
+  const { companyId } = req.user;
+
+  const whatsapp = await ShowWhatsAppService(whatsappId, companyId);
+
+  if (whatsapp.channel === "whatsapp") {
+    const wbot = getWbot(whatsapp.id);
+    if (!wbot) {
+      return res.status(404).json({ message: "Session not found." });
+    }
+    await wbot.ws.close();
+
+    await sleep(2);
+
+    await StartWhatsAppSession(whatsapp, companyId);
+
+    return res.status(200).json({ message: "Session refreshed." });
+  }
+
+  return res.status(400).json({ message: "Session not supported." });
+};
+
+export default { store, remove, update, refresh };

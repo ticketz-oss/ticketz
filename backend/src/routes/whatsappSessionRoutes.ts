@@ -26,4 +26,11 @@ whatsappSessionRoutes.delete(
   WhatsAppSessionController.remove
 );
 
+whatsappSessionRoutes.get(
+  "/whatsappsession/refresh/:whatsappId",
+  isAuth,
+  isAdmin,
+  WhatsAppSessionController.refresh
+);
+
 export default whatsappSessionRoutes;
