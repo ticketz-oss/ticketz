@@ -15,6 +15,7 @@ import { Boom } from "@hapi/boom";
 // import MAIN_LOGGER from "@whiskeysockets/baileys/lib/Utils/logger";
 import NodeCache from "node-cache";
 import { Op } from "sequelize";
+import { Agent } from "https";
 import Whatsapp from "../models/Whatsapp";
 import { logger, loggerBaileys } from "../utils/logger";
 import authState from "../helpers/authState";
@@ -101,7 +102,10 @@ const getProjectWAVersion = async () => {
   return waVersion;
 };
 
-export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
+export const initWASocket = async (
+  whatsapp: Whatsapp,
+  proxy?: Agent
+): Promise<Session> => {
   return new Promise((resolve, reject) => {
     try {
       (async () => {
@@ -207,6 +211,8 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
           generateHighQualityLinkPreview: true,
           userDevicesCache,
           getMessage,
+          agent: proxy,
+          fetchAgent: proxy,
           cachedGroupMetadata: async jid => groupCache.get(jid),
           shouldIgnoreJid: jid =>
             isJidBroadcast(jid) || jid?.endsWith("@newsletter"),
