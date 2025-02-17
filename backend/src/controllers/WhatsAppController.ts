@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
+import { Op } from "sequelize";
 import { cacheLayer } from "../libs/cache";
 import { getIO } from "../libs/socket";
-import { getWbot, removeWbot } from "../libs/wbot";
+import { removeWbot } from "../libs/wbot";
 import Whatsapp from "../models/Whatsapp";
 import DeleteBaileysService from "../services/BaileysServices/DeleteBaileysService";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
@@ -13,7 +14,6 @@ import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService
 import UpdateWhatsAppService from "../services/WhatsappService/UpdateWhatsAppService";
 import AppError from "../errors/AppError";
 import Ticket from "../models/Ticket";
-import { Op } from "sequelize";
 
 interface WhatsappData {
   name: string;
@@ -31,21 +31,6 @@ interface WhatsappData {
 
 interface QueryParams {
   session?: number | string;
-}
-
-interface InstagramBusinessAccount {
-  id: string;
-  username: string;
-  name: string;
-}
-
-interface Root {
-  name: string;
-  // eslint-disable-next-line camelcase
-  access_token: string;
-  // eslint-disable-next-line camelcase
-  instagram_business_account: InstagramBusinessAccount;
-  id: string;
 }
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
@@ -153,16 +138,18 @@ export const remove = async (
   const whatsapp = await ShowWhatsAppService(whatsappId, companyId);
 
   if (whatsapp.channel === "whatsapp") {
-    const openTickets: Ticket[] = await whatsapp.$get('tickets', {
+    const openTickets: Ticket[] = await whatsapp.$get("tickets", {
       where: {
-        status: { [Op.or]: [ "open" , "pending" ] }
+        status: { [Op.or]: ["open", "pending"] }
       }
     });
-   
-    if (openTickets.length>0) {
-      throw new AppError("Não é possível remover conexão que contém tickets não resolvidos");
+
+    if (openTickets.length > 0) {
+      throw new AppError(
+        "Não é possível remover conexão que contém tickets não resolvidos"
+      );
     }
-   
+
     await DeleteBaileysService(whatsappId);
     await DeleteWhatsAppService(whatsappId);
     await cacheLayer.delFromPattern(`sessions:${whatsappId}:*`);
@@ -172,14 +159,12 @@ export const remove = async (
       action: "delete",
       whatsappId: +whatsappId
     });
-
   }
 
   if (whatsapp.channel === "facebook" || whatsapp.channel === "instagram") {
     const { facebookUserToken } = whatsapp;
 
     const getAllSameToken = await Whatsapp.findAll({
-
       where: {
         facebookUserToken
       }
@@ -191,13 +176,12 @@ export const remove = async (
       }
     });
 
-    getAllSameToken.forEach( (w) => {
+    getAllSameToken.forEach(w => {
       io.emit(`company-${companyId}-whatsapp`, {
         action: "delete",
         whatsappId: w.id
       });
     });
-
   }
 
   return res.status(200).json({ message: "Session disconnected." });
