@@ -116,6 +116,8 @@ const UpdateWhatsAppService = async ({
   await AssociateWhatsappQueue(whatsapp, queueIds);
 
   if (
+    proxyConfig &&
+    oldProxyConfig &&
     whatsapp.channel === "whatsapp" &&
     whatsapp.status === "CONNECTED" &&
     JSON.stringify(oldProxyConfig) !== JSON.stringify(proxyConfig)
