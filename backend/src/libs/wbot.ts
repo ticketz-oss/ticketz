@@ -28,6 +28,7 @@ import Contact from "../models/Contact";
 import Ticket from "../models/Ticket";
 import { GitInfo } from "../gitinfo";
 import GetPublicSettingService from "../services/SettingServices/GetPublicSettingService";
+import waVersion from "../waversion.json";
 
 // const loggerBaileys = MAIN_LOGGER.child({});
 // loggerBaileys.level = process.env.BAILEYS_LOG_LEVEL || "error";
@@ -61,7 +62,16 @@ export const removeWbot = async (
         await sessions[sessionIndex].logout();
       }
 
+      sessions[sessionIndex].ev.removeAllListeners("connection.update");
+      sessions[sessionIndex].ev.removeAllListeners("creds.update");
+      sessions[sessionIndex].ev.removeAllListeners("presence.update");
+      sessions[sessionIndex].ev.removeAllListeners("groups.upsert");
+      sessions[sessionIndex].ev.removeAllListeners("groups.update");
+      sessions[sessionIndex].ev.removeAllListeners("group-participants.update");
+      sessions[sessionIndex].ev.removeAllListeners("contacts.upsert");
       sessions[sessionIndex].end(null);
+
+      sessions[sessionIndex].ws.removeAllListeners();
       await sessions[sessionIndex].ws.close();
 
       sessions.splice(sessionIndex, 1);
@@ -86,8 +96,6 @@ function getGreaterVersion(a, b) {
 
   return a;
 }
-
-const waVersion = [2, 3000, 1019954024];
 
 const getProjectWAVersion = async () => {
   try {
@@ -273,11 +281,16 @@ export const initWASocket = async (
                 (lastDisconnect?.error as Boom)?.output?.statusCode !==
                 DisconnectReason.loggedOut
               ) {
+                await whatsapp.update({ status: "PENDING" });
+                io.emit(`company-${whatsapp.companyId}-whatsappSession`, {
+                  action: "update",
+                  session: whatsapp
+                });
                 removeWbot(id, false).then(() => {
                   logger.info(`Reconnecting ${name} in 2 seconds`);
-                  setTimeout(() => {
-                    whatsapp.reload();
-                    StartWhatsAppSession(whatsapp, whatsapp.companyId);
+                  setTimeout(async () => {
+                    await whatsapp.reload();
+                    await StartWhatsAppSession(whatsapp, whatsapp.companyId);
                   }, 2000);
                 });
               } else {
@@ -289,9 +302,9 @@ export const initWASocket = async (
                 });
                 removeWbot(id, false).then(() => {
                   logger.info(`Reconnecting ${name} in 2 seconds`);
-                  setTimeout(() => {
-                    whatsapp.reload();
-                    StartWhatsAppSession(whatsapp, whatsapp.companyId);
+                  setTimeout(async () => {
+                    await whatsapp.reload();
+                    await StartWhatsAppSession(whatsapp, whatsapp.companyId);
                   }, 2000);
                 });
               }

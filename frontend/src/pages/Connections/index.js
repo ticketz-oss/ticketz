@@ -288,11 +288,6 @@ const Connections = () => {
             </IconButton>
           </Tooltip>
         )}
-				{whatsApp.status === "OPENING" && (
-					<Button size="small" variant="outlined" disabled color="default">
-						{i18n.t("connections.buttons.connecting")}
-					</Button>
-				)}
 			</>
 		);
 	};
