@@ -100,7 +100,7 @@ const UpdateWhatsAppService = async ({
   await whatsapp.update({
     name,
     status,
-    session,
+    session: session || undefined,
     greetingMessage,
     complationMessage,
     outOfHoursMessage,
@@ -122,12 +122,10 @@ const UpdateWhatsAppService = async ({
     whatsapp.status === "CONNECTED" &&
     JSON.stringify(oldProxyConfig) !== JSON.stringify(proxyConfig)
   ) {
-    if (whatsapp.channel === "whatsapp") {
-      logger.info(`Refreshing session ${whatsapp.id}`);
-      const wbot = getWbot(whatsapp.id);
-      if (wbot) {
-        await wbot.ws.close();
-      }
+    logger.info(`Refreshing session ${whatsapp.id}`);
+    const wbot = getWbot(whatsapp.id);
+    if (wbot) {
+      await wbot.ws.close();
     }
   }
 
