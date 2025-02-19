@@ -7,6 +7,7 @@ import ShowWhatsAppService from "./ShowWhatsAppService";
 import AssociateWhatsappQueue from "./AssociateWhatsappQueue";
 import { ProxyConfig } from "../../helpers/createProxyAgent";
 import { getWbot } from "../../libs/wbot";
+import { logger } from "../../utils/logger";
 
 export interface WhatsappData {
   name?: string;
@@ -117,12 +118,12 @@ const UpdateWhatsAppService = async ({
 
   if (
     proxyConfig &&
-    oldProxyConfig &&
     whatsapp.channel === "whatsapp" &&
     whatsapp.status === "CONNECTED" &&
     JSON.stringify(oldProxyConfig) !== JSON.stringify(proxyConfig)
   ) {
     if (whatsapp.channel === "whatsapp") {
+      logger.info(`Refreshing session ${whatsapp.id}`);
       const wbot = getWbot(whatsapp.id);
       if (wbot) {
         await wbot.ws.close();
