@@ -15,6 +15,7 @@ import { Boom } from "@hapi/boom";
 // import MAIN_LOGGER from "@whiskeysockets/baileys/lib/Utils/logger";
 import NodeCache from "node-cache";
 import { Op } from "sequelize";
+import { Agent } from "https";
 import Whatsapp from "../models/Whatsapp";
 import { logger, loggerBaileys } from "../utils/logger";
 import authState from "../helpers/authState";
@@ -27,6 +28,7 @@ import Contact from "../models/Contact";
 import Ticket from "../models/Ticket";
 import { GitInfo } from "../gitinfo";
 import GetPublicSettingService from "../services/SettingServices/GetPublicSettingService";
+import waVersion from "../waversion.json";
 
 // const loggerBaileys = MAIN_LOGGER.child({});
 // loggerBaileys.level = process.env.BAILEYS_LOG_LEVEL || "error";
@@ -60,7 +62,16 @@ export const removeWbot = async (
         await sessions[sessionIndex].logout();
       }
 
+      sessions[sessionIndex].ev.removeAllListeners("connection.update");
+      sessions[sessionIndex].ev.removeAllListeners("creds.update");
+      sessions[sessionIndex].ev.removeAllListeners("presence.update");
+      sessions[sessionIndex].ev.removeAllListeners("groups.upsert");
+      sessions[sessionIndex].ev.removeAllListeners("groups.update");
+      sessions[sessionIndex].ev.removeAllListeners("group-participants.update");
+      sessions[sessionIndex].ev.removeAllListeners("contacts.upsert");
       sessions[sessionIndex].end(null);
+
+      sessions[sessionIndex].ws.removeAllListeners();
       await sessions[sessionIndex].ws.close();
 
       sessions.splice(sessionIndex, 1);
@@ -86,8 +97,6 @@ function getGreaterVersion(a, b) {
   return a;
 }
 
-const waVersion = [2, 3000, 1019954024];
-
 const getProjectWAVersion = async () => {
   try {
     const res = await fetch(
@@ -101,7 +110,10 @@ const getProjectWAVersion = async () => {
   return waVersion;
 };
 
-export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
+export const initWASocket = async (
+  whatsapp: Whatsapp,
+  proxy?: Agent
+): Promise<Session> => {
   return new Promise((resolve, reject) => {
     try {
       (async () => {
@@ -207,6 +219,8 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
           generateHighQualityLinkPreview: true,
           userDevicesCache,
           getMessage,
+          agent: proxy,
+          fetchAgent: proxy,
           cachedGroupMetadata: async jid => groupCache.get(jid),
           shouldIgnoreJid: jid =>
             isJidBroadcast(jid) || jid?.endsWith("@newsletter"),
@@ -267,12 +281,17 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
                 (lastDisconnect?.error as Boom)?.output?.statusCode !==
                 DisconnectReason.loggedOut
               ) {
+                await whatsapp.update({ status: "PENDING" });
+                io.emit(`company-${whatsapp.companyId}-whatsappSession`, {
+                  action: "update",
+                  session: whatsapp
+                });
                 removeWbot(id, false).then(() => {
                   logger.info(`Reconnecting ${name} in 2 seconds`);
-                  setTimeout(
-                    () => StartWhatsAppSession(whatsapp, whatsapp.companyId),
-                    2000
-                  );
+                  setTimeout(async () => {
+                    await whatsapp.reload();
+                    await StartWhatsAppSession(whatsapp, whatsapp.companyId);
+                  }, 2000);
                 });
               } else {
                 await whatsapp.update({ status: "PENDING", session: "" });
@@ -283,10 +302,10 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
                 });
                 removeWbot(id, false).then(() => {
                   logger.info(`Reconnecting ${name} in 2 seconds`);
-                  setTimeout(
-                    () => StartWhatsAppSession(whatsapp, whatsapp.companyId),
-                    2000
-                  );
+                  setTimeout(async () => {
+                    await whatsapp.reload();
+                    await StartWhatsAppSession(whatsapp, whatsapp.companyId);
+                  }, 2000);
                 });
               }
             }
