@@ -6,12 +6,20 @@ import tokenAuth from "../middleware/tokenAuth";
 
 import * as MessageController from "../controllers/MessageController";
 import gammuAuth from "../middleware/gammuAuth";
+import isAdmin from "../middleware/isAdmin";
 
 const messageRoutes = Router();
 
 const upload = multer(uploadConfig);
 
 messageRoutes.post("/messages/forward", isAuth, MessageController.forward);
+
+messageRoutes.get(
+  "/messages/history/:contactId/:whatsappId",
+  isAuth,
+  isAdmin,
+  MessageController.history
+);
 
 messageRoutes.get("/messages/:ticketId", isAuth, MessageController.index);
 
