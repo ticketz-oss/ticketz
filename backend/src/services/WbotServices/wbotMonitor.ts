@@ -5,8 +5,6 @@ import {
 } from "@whiskeysockets/baileys";
 import * as Sentry from "@sentry/node";
 
-import { Op } from "sequelize";
-// import { getIO } from "../../libs/socket";
 import { Mutex } from "async-mutex";
 import { Store } from "../../libs/store";
 import Contact from "../../models/Contact";
@@ -24,9 +22,11 @@ type Session = WASocket & {
   store?: Store;
 };
 
+/* 
 interface IContact {
   contacts: BContact[];
 }
+/* */
 
 const wbotMonitor = async (
   wbot: Session,
@@ -37,10 +37,12 @@ const wbotMonitor = async (
     wbot.ws.on("CB:call", async (node: BinaryNode) => {
       const content = node.content[0] as any;
 
+      /*
       if (content.tag === "offer") {
         const { from, id } = node.attrs;
         // console.log(`${from} is calling you with id ${id}`);
       }
+      /* */
 
       if (content.tag === "terminate") {
         const sendMsgCall = await Setting.findOne({
@@ -96,7 +98,7 @@ const wbotMonitor = async (
             });
           }
 
-          return CreateMessageService({ messageData, companyId });
+          CreateMessageService({ messageData, companyId });
         }
       }
     });
