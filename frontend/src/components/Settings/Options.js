@@ -401,7 +401,7 @@ export default function Options(props) {
   }
 
   async function generateApiToken() {
-    const newToken = generateSecureToken(32);
+    const newToken = generateSecureToken(33);
     setApiToken(newToken);
     await update({
       key: "apiToken",
