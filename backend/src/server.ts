@@ -112,5 +112,12 @@ process.on("uncaughtException", err => {
 // Global Exception Handlers for logging only
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 process.on("unhandledRejection", (reason: any, promise) => {
+  if (reason instanceof TypeError) {
+    logger.error(
+      { message: reason.message, stack: reason.stack.split("\n") },
+      "Unhandled Rejection"
+    );
+    return;
+  }
   logger.debug({ promise, reason }, "Unhandled Rejection");
 });
