@@ -41,7 +41,7 @@ const CreateMessageService = async ({
   const message = await Message.findOne({
     where: {
       id: messageData.id,
-      companyId
+      ticketId: messageData.ticketId
     },
     include: [
       "contact",
