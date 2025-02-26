@@ -114,6 +114,7 @@ export default function Options(props) {
   const [groupsTab, setGroupsTab] = useState("disabled");
   const [apiToken, setApiToken] = useState("");
   const [downloadLimit, setDownloadLimit] = useState("15");
+  const [fetchHistoryLimitDays, setFetchHistoryLimitDays] = useState("365");
   
   const [messageVisibility, setMessageVisibility] = useState("message");
 
@@ -209,6 +210,9 @@ export default function Options(props) {
 
       const downloadLimit = settings.find((s) => s.key === "downloadLimit");
       setDownloadLimit(downloadLimit?.value || "");
+      
+      const fetchHistoryLimitDays = settings.find((s) => s.key === "fetchHistoryLimitDays");
+      setFetchHistoryLimitDays(fetchHistoryLimitDays?.value || "365");
       
       const messageVisibility = settings.find((s) => s.key === "messageVisibility");
       setMessageVisibility(messageVisibility?.value || "message");
@@ -937,6 +941,24 @@ export default function Options(props) {
                     }}
                     onBlur={async (_) => {
                       await handleDownloadLimit(downloadLimit);
+                    }}
+                  />
+                </FormControl>
+              </Grid>
+              
+              <Grid xs={12} sm={6} md={4} item>
+                <FormControl className={classes.selectContainer}>
+                  <TextField
+                    id="fetch-history-limit-days-field"
+                    label={i18n.t("settings.FetchHistoryLimitDays.title")}
+                    variant="standard"
+                    name="fetchHistoryLimitDays"
+                    value={fetchHistoryLimitDays}
+                    onChange={(e) => {
+                      setFetchHistoryLimitDays(e.target.value);
+                    }}
+                    onBlur={async (_) => {
+                      await handleSetting("fetchHistoryLimitDays", fetchHistoryLimitDays);
                     }}
                   />
                 </FormControl>

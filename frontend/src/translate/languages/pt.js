@@ -821,6 +821,9 @@ const messages = {
         FileDownloadLimit: {
           title: "Limite de Download de arquivos (MB)",
         },
+        FetchHistoryLimitDays: {
+          title: "Limite de histórico de mensagens (dias)",
+        },
         "messageVisibility": {
           "title": "Visibilidade da mensagem",
           "options": {
@@ -930,6 +933,7 @@ const messages = {
         schedule: "Agendamento",
         delete: "Deletar",
         transfer: "Transferir",
+        downloadHistory: "Carregar histórico",
         registerAppointment: "Observações do Contato",
         appointmentsModal: {
           title: "Observações do Contato",

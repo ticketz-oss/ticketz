@@ -819,6 +819,9 @@ const messages = {
         FileDownloadLimit: {
           title: "Batas unduhan file (MB)",
         },
+        FetchHistoryLimitDays: {
+          title: "Batas hari riwayat",
+        },
         "messageVisibility": {
           "title": "Visibilitas Pesan",
           "options": {
@@ -927,6 +930,7 @@ const messages = {
         schedule: "Jadwal",
         delete: "Hapus",
         transfer: "Transfer",
+        downloadHistory: "Unduh Riwayat",
         registerAppointment: "Catatan Kontak",
         appointmentsModal: {
           title: "Catatan Kontak",

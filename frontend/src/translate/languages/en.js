@@ -815,6 +815,9 @@ const messages = {
         FileDownloadLimit: {
           title: "File Download Limit (MB)",
         },
+        FetchHistoryLimitDays: {
+          title: "Fetch History Limit (days)",
+        },
         "messageVisibility": {
           "title": "Message Visibility",
           "options": {
@@ -924,6 +927,7 @@ const messages = {
         schedule: "Schedule",
         delete: "Delete",
         transfer: "Transfer",
+        downloadHistory: "Load history",
         registerAppointment: "Contact Notes",
         appointmentsModal: {
           title: "Contact Notes",
