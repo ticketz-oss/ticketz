@@ -42,6 +42,7 @@ const TicketOptionsMenu = ({ ticket, menuOpen, handleClose, anchorEl, showTabGro
     } catch (err) {
       toastError(err);
     }
+    handleClose();
   };
 
 	const handleOpenConfirmationModal = e => {
