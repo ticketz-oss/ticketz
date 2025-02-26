@@ -453,10 +453,6 @@ export const initWASocket = async (
           }
         });
 
-        wsocket.ev.on("messaging-history.set", async history => {
-          logger.debug({ history }, "Received messaging history");
-        });
-
         store.bind(wsocket.ev);
       })();
     } catch (error) {
