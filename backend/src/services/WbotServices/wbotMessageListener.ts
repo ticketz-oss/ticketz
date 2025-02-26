@@ -18,7 +18,6 @@ import {
 } from "@whiskeysockets/baileys";
 import { Mutex } from "async-mutex";
 import { Op } from "sequelize";
-import moment from "moment";
 import { Transform } from "stream";
 import { Throttle } from "stream-throttle";
 import { Sequelize } from "sequelize-typescript";
@@ -674,7 +673,7 @@ export const verifyMediaMessage = async (
     participant: msg.key.participant,
     dataJson: JSON.stringify(msg),
     createdAt: msg.messageTimestamp
-      ? moment.unix(Number(msg.messageTimestamp)).toDate()
+      ? new Date(Number(msg.messageTimestamp) * 1000)
       : undefined
   };
 
@@ -755,7 +754,7 @@ export const verifyMessage = async (
     dataJson: JSON.stringify(msg),
     isEdited: false,
     createdAt: msg.messageTimestamp
-      ? moment.unix(Number(msg.messageTimestamp)).toDate()
+      ? new Date(Number(msg.messageTimestamp) * 1000)
       : undefined
   };
 
@@ -1642,7 +1641,7 @@ const handleRating = async (
     .then(
       () => {
         ticketTraking.update({
-          finishedAt: moment().toDate(),
+          finishedAt: new Date(),
           rated: true
         });
       },
@@ -2417,7 +2416,7 @@ const verifyRecentCampaign = async (
 
       if (campaignShipping) {
         await campaignShipping.update({
-          confirmedAt: moment(),
+          confirmedAt: new Date(),
           confirmation: true
         });
         await campaignQueue.add(
@@ -2583,6 +2582,26 @@ const wbotMessageListener = async (
       }, Promise.resolve());
 
       if (!history.isLatest && oldestMessage) {
+        const limitDays = parseInt(
+          await CheckSettings("fetchHistoryLimitDays", "365"),
+          10
+        );
+
+        // avoid using moment
+        const now = new Date();
+        const limitDate = new Date(now.setDate(now.getDate() - limitDays));
+        const oldestDate = new Date(
+          Number(oldestMessage.messageTimestamp) * 1000
+        );
+
+        if (oldestDate < limitDate) {
+          logger.debug(
+            { oldestDate, limitDate, oldestMessage },
+            "History limit reached"
+          );
+          return;
+        }
+
         const result = await wbot.fetchMessageHistory(
           50,
           oldestMessage.key,
