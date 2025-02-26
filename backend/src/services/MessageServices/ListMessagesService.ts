@@ -100,7 +100,7 @@ const ListMessagesService = async ({
       "User"
     );
 
-    if (closedTicketVisibility === "User") {
+    if (user.profile === "user" && closedTicketVisibility === "User") {
       // add ticketId <= ticketId condition
       prevTicketCondition = {
         [Op.or]: [
@@ -115,7 +115,7 @@ const ListMessagesService = async ({
           }
         ]
       };
-    } else if (closedTicketVisibility === "Queue") {
+    } else if (user.profile === "user" && closedTicketVisibility === "Queue") {
       const userQueueIds = user?.queues.map(queue => queue.id) || [];
       prevTicketCondition = {
         [Op.or]: [
@@ -131,7 +131,7 @@ const ListMessagesService = async ({
         ]
       };
     } else {
-      // "Company"
+      // "Company" or "Admin"
       prevTicketCondition = {
         [Op.or]: [
           { id: ticketId },
