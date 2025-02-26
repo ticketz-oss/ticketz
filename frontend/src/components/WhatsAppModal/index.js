@@ -25,6 +25,7 @@ import {
   Checkbox,
   Tabs,
   Tab,
+  IconButton,
 } from "@material-ui/core";
 
 import api from "../../services/api";
@@ -35,6 +36,12 @@ import HelpOutlineOutlinedIcon from "@material-ui/icons/HelpOutlineOutlined";
 
 import { DynamicForm } from "../DynamicForm";
 import proxyConfigSchema from "./proxyConfigSchema";
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCopy, faGears } from '@fortawesome/free-solid-svg-icons';
+import { Delete } from "@material-ui/icons";
+import { generateSecureToken } from "../../helpers/generateSecureToken";
+import { copyToClipboard } from "../../helpers/copyToClipboard";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -177,6 +184,11 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
     setWhatsApp(initialState);
   };
 
+  async function handleCopy(value) {
+    copyToClipboard(value);
+    toast.success("Value copied to clipboard");
+  }
+
   return (
     <div className={classes.root}>
       <Dialog
@@ -202,7 +214,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
             }, 400);
           }}
         >
-          {({ values, touched, errors, isSubmitting }) => (
+          {({ values, setFieldValue, touched, errors, isSubmitting }) => (
             <Form>
               <DialogContent dividers>
               <div className={classes.multFieldLine}>
@@ -399,6 +411,49 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                     name="token"
                     variant="outlined"
                     margin="dense"
+                    InputProps={{
+                      endAdornment: (
+                        <>
+                          {values.token &&
+                            <>
+                              <IconButton
+                                size="small"
+                                color="default"
+                                onClick={() => {
+                                  handleCopy(values.token);
+                                }
+                                }
+                              >
+                                <FontAwesomeIcon icon={faCopy} />
+                              </IconButton>
+                              <IconButton
+                                size="small"
+                                color="default"
+                                onClick={() => {
+                                  setFieldValue("token", "");
+                                }
+                                }
+                              >
+                                <Delete />
+                              </IconButton>
+                            </>
+                          }
+                          {
+                            !values.token &&
+                            <IconButton
+                              size="small"
+                              color="default"
+                              onClick={() => {
+                                setFieldValue("token", generateSecureToken(33));
+                              }
+                              }
+                            >
+                              <FontAwesomeIcon icon={faGears} />
+                            </IconButton>
+                          }
+                        </>
+                      ),
+                    }}
                   />
                 </div>
                 <div>
