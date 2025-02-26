@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 
+import { WhereOptions } from "sequelize";
 import AppError from "../errors/AppError";
 import User from "../models/User";
 import Setting from "../models/Setting";
@@ -27,18 +28,34 @@ const apiTokenAuth = async (
       return next();
     }
 
-    const user = await User.findOne({
-      where: {
-        profile: "admin",
-        companyId: setting.companyId
+    const where: WhereOptions<User> = {};
+
+    if (Number(setting.companyId) === 1) {
+      if (req.headers["x-user-id"]) {
+        where.id = Number(req.headers["x-user-id"]);
+      } else {
+        where.profile = "admin";
+        if (req.headers["x-company-id"]) {
+          where.companyId = Number(req.headers["x-company-id"]);
+        } else {
+          where.companyId = Number(setting.companyId);
+          where.super = true;
+        }
       }
+    } else {
+      where.profile = "admin";
+      where.companyId = Number(setting.companyId);
+    }
+
+    const user = await User.findOne({
+      where
     });
 
     if (user) {
       req.user = {
         id: `${user.id}`,
         profile: user.profile,
-        isSuper: false,
+        isSuper: user.super,
         companyId: setting.companyId
       };
     }
