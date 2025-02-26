@@ -32,7 +32,6 @@ import { CreateInternalMessageService } from "../services/MessageServices/Create
 import QuickMessage from "../models/QuickMessage";
 import formatBody from "../helpers/Mustache";
 import { OmniServices } from "../services/OmniServices/OmniServices";
-import ShowContactService from "../services/ContactServices/ShowContactService";
 import { getWbot } from "../libs/wbot";
 
 type IndexQuery = {
@@ -360,13 +359,6 @@ export const history = async (
 ): Promise<Response> => {
   const contactId = Number(req.params.contactId);
   const whatsappId = Number(req.params.whatsappId);
-  const { companyId } = req.user;
-
-  const contact = await ShowContactService(contactId, companyId);
-
-  if (contact.isGroup) {
-    throw new AppError("This contact is a group");
-  }
 
   // get oldest message from contact
   const oldMessage = await Message.findOne({
