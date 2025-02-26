@@ -58,6 +58,8 @@ export class SimpleObjectCache {
       return null;
     }
 
+    data.timer.refresh();
+
     this.logger?.debug(`Cache key ${key} was accessed`);
     return data.value;
   }
