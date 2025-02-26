@@ -1,6 +1,7 @@
 import { subMinutes } from "date-fns";
-import { Op } from "sequelize";
+import { Op, WhereOptions } from "sequelize";
 import { Mutex } from "async-mutex";
+import moment from "moment";
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
 import ShowTicketService from "./ShowTicketService";
@@ -19,20 +20,53 @@ const internalFindOrCreateTicketService = async (
   companyId: number,
   groupContact?: Contact,
   doNotReopen?: boolean,
-  queue?: Queue
+  queue?: Queue,
+  history?: boolean,
+  timestamp?: number
 ): Promise<{ ticket: Ticket; justCreated: boolean }> => {
   let justCreated = false;
   const result = await sequelize.transaction(async () => {
-    let ticket = await Ticket.findOne({
-      where: {
-        status: {
-          [Op.or]: ["open", "pending"]
-        },
-        contactId: groupContact ? groupContact.id : contact.id,
-        whatsappId
+    const where: WhereOptions<Ticket> = {
+      status: {
+        [Op.or]: ["open", "pending"]
       },
+      contactId: groupContact ? groupContact.id : contact.id,
+      whatsappId
+    };
+
+    if (history) {
+      where.id = { [Op.lt]: 0 };
+      where.status = "closed";
+    }
+
+    let ticket = await Ticket.findOne({
+      where,
       order: [["id", "DESC"]]
     });
+
+    if (history) {
+      if (!ticket) {
+        const minTicketId = Number(await Ticket.min("id")) || 0;
+
+        ticket = await Ticket.create({
+          id: minTicketId - 1,
+          contactId: groupContact ? groupContact.id : contact.id,
+          status: "closed",
+          isGroup: !!groupContact,
+          unreadMessages,
+          whatsappId,
+          companyId,
+          createdAt: timestamp ? moment.unix(timestamp).toDate() : undefined,
+          updatedAt: timestamp ? moment.unix(timestamp).toDate() : undefined
+        });
+
+        justCreated = true;
+      }
+
+      ticket = await ShowTicketService(ticket.id, companyId);
+
+      return { ticket, justCreated };
+    }
 
     if (ticket) {
       await ticket.update({ unreadMessages });
@@ -141,14 +175,26 @@ const internalFindOrCreateTicketService = async (
   return result;
 };
 
+type FindOrCreateTicketOptions = {
+  groupContact?: Contact;
+  doNotReopen?: boolean;
+  queue?: Queue;
+  history?: boolean;
+  timestamp?: number;
+};
+
 const FindOrCreateTicketService = async (
   contact: Contact,
   whatsappId: number,
   unreadMessages: number,
   companyId: number,
-  groupContact?: Contact,
-  doNotReopen?: boolean,
-  queue?: Queue
+  {
+    groupContact,
+    doNotReopen,
+    queue,
+    history,
+    timestamp
+  }: FindOrCreateTicketOptions = {}
 ): Promise<{ ticket: Ticket; justCreated: boolean }> => {
   const release = await createTicketMutex.acquire();
 
@@ -160,7 +206,9 @@ const FindOrCreateTicketService = async (
       companyId,
       groupContact,
       doNotReopen,
-      queue
+      queue,
+      history,
+      timestamp
     );
   } finally {
     release();
