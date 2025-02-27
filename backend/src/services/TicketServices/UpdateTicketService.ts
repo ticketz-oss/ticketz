@@ -302,8 +302,7 @@ const UpdateTicketService = async ({
             newWhatsapp?.id || whatsapp.id,
             1,
             companyId,
-            null,
-            true
+            { doNotReopen: true }
           );
 
           if (!newTicket) {

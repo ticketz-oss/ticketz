@@ -338,6 +338,8 @@ const messages = {
         },
       },
       ticketsList: {
+        showOnlyUnread: "Mostrar apenas não lidos",
+        showFromAllUsers: "Mostrar de todos os usuários",
         pendingHeader: "Aguardando",
         assignedHeader: "Atendendo",
         noTicketsTitle: "Nada aqui!",
@@ -826,6 +828,9 @@ const messages = {
         FileDownloadLimit: {
           title: "Limite de Download de arquivos (MB)",
         },
+        FetchHistoryLimitDays: {
+          title: "Limite de histórico de mensagens (dias)",
+        },
         "messageVisibility": {
           "title": "Visibilidade da mensagem",
           "options": {
@@ -935,6 +940,7 @@ const messages = {
         schedule: "Agendamento",
         delete: "Deletar",
         transfer: "Transferir",
+        downloadHistory: "Carregar histórico",
         registerAppointment: "Observações do Contato",
         appointmentsModal: {
           title: "Observações do Contato",
@@ -1011,6 +1017,7 @@ const messages = {
       },
       backendErrors: {
         ERR_FORBIDDEN: "Você não tem permissão para acessar este recurso.",
+        ERR_CHECK_NUMBER: "Verifique o número e tente novamente.",
         ERR_NO_OTHER_WHATSAPP: "Deve haver pelo menos um WhatsApp padrão.",
         ERR_NO_DEF_WAPP_FOUND:
           "Nenhum WhatsApp padrão encontrado. Verifique a página de conexões.",

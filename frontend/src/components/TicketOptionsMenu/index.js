@@ -35,6 +35,15 @@ const TicketOptionsMenu = ({ ticket, menuOpen, handleClose, anchorEl, showTabGro
 			toastError(err);
 		}
 	};
+  
+  const handleGetHistory = async () => {
+    try {
+      await api.get(`/messages/history/${ticket.contactId}/${ticket.whatsappId}`);
+    } catch (err) {
+      toastError(err);
+    }
+    handleClose();
+  };
 
 	const handleOpenConfirmationModal = e => {
 		setConfirmationOpen(true);
@@ -89,6 +98,11 @@ const TicketOptionsMenu = ({ ticket, menuOpen, handleClose, anchorEl, showTabGro
   					{i18n.t("ticketOptionsMenu.transfer")}
   				</MenuItem>
 				}
+        {user.profile === "admin" &&
+          <MenuItem onClick={handleGetHistory}>
+            {i18n.t("ticketOptionsMenu.downloadHistory")}
+          </MenuItem>
+        }
 				<Can
 					role={user.profile}
 					perform="ticket-options:deleteTicket"

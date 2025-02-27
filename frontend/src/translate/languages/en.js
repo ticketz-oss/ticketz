@@ -334,6 +334,8 @@ const messages = {
         },
       },
       ticketsList: {
+        showOnlyUnread: "Show only unread",
+        showFromAllUsers: "Show from all users",
         pendingHeader: "Pending",
         assignedHeader: "Assigned",
         noTicketsTitle: "Nothing here!",
@@ -820,6 +822,9 @@ const messages = {
         FileDownloadLimit: {
           title: "File Download Limit (MB)",
         },
+        FetchHistoryLimitDays: {
+          title: "Fetch History Limit (days)",
+        },
         "messageVisibility": {
           "title": "Message Visibility",
           "options": {
@@ -929,6 +934,7 @@ const messages = {
         schedule: "Schedule",
         delete: "Delete",
         transfer: "Transfer",
+        downloadHistory: "Load history",
         registerAppointment: "Contact Notes",
         appointmentsModal: {
           title: "Contact Notes",
@@ -1005,6 +1011,7 @@ const messages = {
       },
       backendErrors: {
         ERR_FORBIDDEN: "You do not have permission to access this resource.",
+        ERR_CHECK_NUMBER: "Check the number and try again.",
         ERR_NO_OTHER_WHATSAPP: "There must be at least one default WhatsApp.",
         ERR_NO_DEF_WAPP_FOUND: "No default WhatsApp found. Check the connections page.",
         ERR_WAPP_NOT_INITIALIZED: "This WhatsApp session has not been initialized. Check the connections page.",

@@ -1,3 +1,4 @@
+import AppError from "../../errors/AppError";
 import GetDefaultWhatsApp from "../../helpers/GetDefaultWhatsApp";
 import { getWbot } from "../../libs/wbot";
 import Whatsapp from "../../models/Whatsapp";
@@ -23,7 +24,7 @@ const CheckContactNumber = async (
   const isNumberExit = await checker(number, wbot);
 
   if (!isNumberExit?.exists) {
-    throw new Error("ERR_CHECK_NUMBER");
+    throw new AppError("ERR_CHECK_NUMBER", 404);
   }
   return isNumberExit;
 };

@@ -1,11 +1,10 @@
-const copyToClipboard = (text) => {
-  console.log('text', text)
-  var textField = document.createElement('textarea')
-  textField.innerText = text
-  document.body.appendChild(textField)
-  textField.select()
-  document.execCommand('copy')
-  textField.remove()
-}
+const copyToClipboard = async (text) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    console.debug('Text copied to clipboard');
+  } catch (err) {
+    console.error('Failed to copy text: ', err);
+  }
+};
 
 export { copyToClipboard };

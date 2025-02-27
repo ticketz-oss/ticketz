@@ -30,6 +30,10 @@ import { faPeopleGroup } from '@fortawesome/free-solid-svg-icons';
 import api from "../../services/api";
 import useSettings from "../../hooks/useSettings";
 
+import NotificationImportantIcon from '@material-ui/icons/NotificationImportant';
+import AllInboxIcon from '@material-ui/icons/AllInbox';
+import IconSwitch from "../IconSwitch";
+
 const useStyles = makeStyles((theme) => ({
   ticketsWrapper: {
     position: "relative",
@@ -117,6 +121,7 @@ const TicketsManagerTabs = () => {
   const [tabOpen, setTabOpen] = useState("open");
   const [newTicketModalOpen, setNewTicketModalOpen] = useState(false);
   const [showAllTickets, setShowAllTickets] = useState(false);
+  const [showOnlyUnread, setShowOnlyUnread] = useState(false);
   const searchInputRef = useRef();
   const { user } = useContext(AuthContext);
   const { profile } = user;
@@ -167,10 +172,12 @@ const TicketsManagerTabs = () => {
   };
 
   const handleChangeTab = (e, newValue) => {
+    setShowOnlyUnread(false);
     setTab(newValue);
   };
 
   const handleChangeTabOpen = (e, newValue) => {
+    setShowOnlyUnread(false);
     setTabOpen(newValue);
   };
 
@@ -267,24 +274,24 @@ const TicketsManagerTabs = () => {
             >
               {i18n.t("ticketsManager.buttons.newTicket")}
             </Button>
+              <IconSwitch
+                setter={setShowOnlyUnread}
+                value={showOnlyUnread}
+                tooltip={i18n.t("ticketsList.showOnlyUnread")}
+                icon={
+                  <NotificationImportantIcon />
+                } />
             { tab === "open" && (
             <Can
               role={user.profile}
               perform="tickets-manager:showall"
               yes={() => (
-                <FormControlLabel
-                  label={i18n.t("tickets.buttons.showAll")}
-                  labelPlacement="start"
-                  control={
-                    <Switch
-                      size="small"
-                      checked={showAllTickets}
-                      onChange={() =>
-                        setShowAllTickets((prevState) => !prevState)
-                      }
-                      name="showAllTickets"
-                      color="primary"
-                    />
+                <IconSwitch
+                  setter={setShowAllTickets}
+                  value={showAllTickets}
+                  tooltip={i18n.t("ticketsList.showFromAllUsers")}
+                  icon={
+                    <AllInboxIcon />
                   }
                 />
               )}
@@ -336,6 +343,7 @@ const TicketsManagerTabs = () => {
           <TicketsList
             status="open"
             showAll={showAllTickets}
+            showOnlyUnread={showOnlyUnread}
             selectedQueueIds={selectedQueueIds}
             updateCount={(val) => setOpenCount(val)}
             style={applyPanelStyle("open")}
@@ -344,6 +352,7 @@ const TicketsManagerTabs = () => {
           />
           <TicketsList
             status="pending"
+            showOnlyUnread={showOnlyUnread}
             selectedQueueIds={selectedQueueIds}
             updateCount={(val) => setPendingCount(val)}
             style={applyPanelStyle("pending")}

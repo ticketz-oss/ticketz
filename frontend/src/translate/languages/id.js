@@ -347,6 +347,8 @@ const messages = {
         },
       },
       ticketsList: {
+        showOnlyUnread: "Hanya tampilkan yang belum dibaca",
+        showFromAllUsers: "Tampilkan dari semua pengguna",
         pendingHeader: "Tertunda",
         assignedHeader: "Ditugaskan",
         noTicketsTitle: "Tidak ada apa-apa di sini!",
@@ -824,6 +826,9 @@ const messages = {
         FileDownloadLimit: {
           title: "Batas unduhan file (MB)",
         },
+        FetchHistoryLimitDays: {
+          title: "Batas hari riwayat",
+        },
         "messageVisibility": {
           "title": "Visibilitas Pesan",
           "options": {
@@ -932,6 +937,7 @@ const messages = {
         schedule: "Jadwal",
         delete: "Hapus",
         transfer: "Transfer",
+        downloadHistory: "Unduh Riwayat",
         registerAppointment: "Catatan Kontak",
         appointmentsModal: {
           title: "Catatan Kontak",
@@ -1007,6 +1013,7 @@ const messages = {
       },
       backendErrors: {
         ERR_FORBIDDEN: "Akses ditolak. Periksa izin Anda.",
+        ERR_CHECK_NUMBER: "Nomor ini tidak terdaftar di WhatsApp.",
         ERR_NO_OTHER_WHATSAPP: "Harus ada setidaknya satu WhatsApp default.",
         ERR_NO_DEF_WAPP_FOUND: "Tidak ada WhatsApp default yang ditemukan. Periksa halaman koneksi.",
         ERR_WAPP_NOT_INITIALIZED: "Sesi WhatsApp ini belum diinisialisasi. Periksa halaman koneksi.",

@@ -12,11 +12,12 @@ import {
   proto,
   WAMessage,
   WAMessageStubType,
-  WAMessageUpdate
+  WAMessageUpdate,
+  Chat,
+  Contact as WAContact
 } from "@whiskeysockets/baileys";
 import { Mutex } from "async-mutex";
 import { Op } from "sequelize";
-import moment from "moment";
 import { Transform } from "stream";
 import { Throttle } from "stream-throttle";
 import { Sequelize } from "sequelize-typescript";
@@ -87,11 +88,21 @@ interface IMe {
   id: string;
 }
 
-const createTicketMutex = new Mutex();
+type MessageHistorySet = {
+  chats: Chat[];
+  contacts: WAContact[];
+  messages: proto.IWebMessageInfo[];
+  isLatest?: boolean;
+  progress?: number | null;
+  syncType?: proto.HistorySync.HistorySyncType;
+  peerDataRequestSessionId?: string;
+};
+
 const wbotMutex = new Mutex();
 const ackMutex = new Mutex();
 
 const groupContactCache = new SimpleObjectCache(1000 * 30, logger);
+const contactCache = new SimpleObjectCache(1000 * 30, logger);
 const outOfHoursCache = new SimpleObjectCache(1000 * 60 * 5, logger);
 
 const integrationServices = IntegrationServices.getInstance();
@@ -379,16 +390,41 @@ const downloadThumbnail = async ({
     return null;
   }
 
-  const stream = await downloadContentFromMessage(
-    { mediaKey, directPath },
-    mimetype ? normalizeThumbnailMediaType(mimetype) : "thumbnail-link"
-  );
+  logger.debug({ directPath, mediaKey, mimetype }, "downloading thumbnail");
+
+  const mediaType = mimetype
+    ? normalizeThumbnailMediaType(mimetype)
+    : "thumbnail-link";
+
+  let stream: Transform;
+
+  try {
+    stream = await downloadContentFromMessage(
+      { mediaKey, directPath },
+      mediaType
+    );
+  } catch (error) {
+    logger.error(
+      { directPath, mediaKey, mimetype },
+      `Error downloading thumbnail ${error.message}`
+    );
+  }
+
+  logger.debug({ stream }, "downloading thumbnail stream received");
 
   if (!stream) {
     throw new Error("Failed to get stream");
   }
 
-  const buffer = await downloadStream(stream);
+  let buffer = null;
+  try {
+    buffer = await downloadStream(stream);
+  } catch (error) {
+    logger.error(
+      { error },
+      `Error downloading thumbnail: ${error.message} - ${directPath}`
+    );
+  }
 
   if (!buffer) {
     throw new Error("ERR_WAPP_DOWNLOAD_MEDIA");
@@ -435,22 +471,24 @@ const downloadMedia = async (
     message?.fileLength &&
     +message.fileLength > fileLimit * 1024 * 1024
   ) {
-    const fileLimitMessage = {
-      text: `*Mensagem Automática*:\nNosso sistema aceita apenas arquivos com no máximo ${fileLimit} MiB`
-    };
+    if (ticket.id > 0) {
+      const fileLimitMessage = {
+        text: `*Mensagem Automática*:\nNosso sistema aceita apenas arquivos com no máximo ${fileLimit} MiB`
+      };
 
-    if (!ticket.isGroup && !msg.key?.fromMe) {
-      await wbot.sendMessage(
-        `${ticket.contact.number}@s.whatsapp.net`,
-        fileLimitMessage
+      if (!ticket.isGroup && !msg.key?.fromMe) {
+        await wbot.sendMessage(
+          `${ticket.contact.number}@s.whatsapp.net`,
+          fileLimitMessage
+        );
+      }
+
+      await CreateInternalMessageService(
+        ticket,
+        "*Mensagem do sistema*:\nArquivo recebido além do limite de tamanho do sistema, se for necessário ele pode ser obtido no aplicativo do whatsapp.",
+        null
       );
     }
-
-    await CreateInternalMessageService(
-      ticket,
-      "*Mensagem do sistema*:\nArquivo recebido além do limite de tamanho do sistema, se for necessário ele pode ser obtido no aplicativo do whatsapp.",
-      null
-    );
 
     throw new Error("ERR_FILESIZE_OVER_LIMIT");
   }
@@ -477,14 +515,18 @@ const downloadMedia = async (
       // eslint-disable-next-line no-await-in-loop
       stream = await downloadContentFromMessage(tmpMessage, messageType);
     } catch (error) {
-      contDownload += 1;
-      // eslint-disable-next-line no-await-in-loop, no-loop-func
-      await new Promise(resolve => {
-        setTimeout(resolve, 1000 * contDownload * 2);
-      });
-      logger.warn(
-        `>>>> erro ${contDownload} de baixar o arquivo ${msg?.key?.id}`
-      );
+      if (ticket.id > 0) {
+        contDownload += 1;
+        // eslint-disable-next-line no-await-in-loop, no-loop-func
+        await new Promise(resolve => {
+          setTimeout(resolve, 1000 * contDownload * 2);
+        });
+        logger.warn(
+          `>>>> erro ${contDownload} de baixar o arquivo ${msg?.key?.id}`
+        );
+      } else {
+        contDownload = 10;
+      }
     }
   }
 
@@ -570,7 +612,7 @@ const verifyContact = async (
 const verifyQuotedMessage = async (
   msg: proto.IWebMessageInfo
 ): Promise<Message | null> => {
-  if (!msg) return null;
+  if (!msg?.message) return null;
   const quoted = getQuotedMessageId(msg);
 
   if (!quoted) return null;
@@ -592,7 +634,6 @@ export const verifyMediaMessage = async (
   messageMedia = null,
   userId: number = null
 ): Promise<Message> => {
-  const io = getIO();
   const quotedMsg = await verifyQuotedMessage(msg);
 
   const thumbnailMsg = messageMedia || msg?.message?.extendedTextMessage;
@@ -601,7 +642,10 @@ export const verifyMediaMessage = async (
   let media: MediaInfo = null;
 
   if (thumbnailMsg) {
-    logger.debug({ id: msg?.key?.id, msg }, "downloading thumbnail media");
+    logger.debug(
+      { id: msg?.key?.id, thumbnailMsg },
+      "downloading thumbnail media"
+    );
   }
 
   try {
@@ -651,7 +695,7 @@ export const verifyMediaMessage = async (
     contactId: msg.key.fromMe ? undefined : contact.id,
     body: body || "",
     fromMe: msg.key.fromMe,
-    read: msg.key.fromMe,
+    read: msg.key.fromMe || ticket.id < 0,
     mediaUrl,
     mediaType: media && normalizeMediaType(media.mimetype),
     thumbnailUrl,
@@ -659,21 +703,30 @@ export const verifyMediaMessage = async (
     ack: msg.status,
     remoteJid: msg.key.remoteJid,
     participant: msg.key.participant,
-    dataJson: JSON.stringify(msg)
+    dataJson: JSON.stringify(msg),
+    createdAt: msg.messageTimestamp
+      ? new Date(Number(msg.messageTimestamp) * 1000)
+      : undefined
   };
 
   if (userId) {
     messageData.userId = userId;
   }
 
-  await ticket.update({
-    lastMessage: body || media?.filename ? `📎 ${media?.filename}` : ""
-  });
+  if (ticket.id > 0) {
+    await ticket.update({
+      lastMessage: body || media?.filename ? `📎 ${media?.filename}` : ""
+    });
+  }
 
   const newMessage = await CreateMessageService({
     messageData,
     companyId: ticket.companyId
   });
+
+  if (ticket.id < 0) {
+    return newMessage;
+  }
 
   if (!msg.key.fromMe && ticket.status === "closed") {
     await ticket.update({ status: "pending" });
@@ -684,6 +737,8 @@ export const verifyMediaMessage = async (
         { model: Contact, as: "contact" }
       ]
     });
+
+    const io = getIO();
 
     io.to(`company-${ticket.companyId}-closed`)
       .to(`queue-${ticket.queueId}-closed`)
@@ -712,7 +767,6 @@ export const verifyMessage = async (
   contact: Contact,
   userId: number = null
 ): Promise<Message> => {
-  const io = getIO();
   const quotedMsg = await verifyQuotedMessage(msg);
   const body = getBodyMessage(msg);
 
@@ -724,13 +778,16 @@ export const verifyMessage = async (
     body,
     fromMe: msg.key.fromMe,
     mediaType: null,
-    read: msg.key.fromMe,
+    read: msg.key.fromMe || ticket.id < 0,
     quotedMsgId: quotedMsg?.id,
     ack: msg.status,
     remoteJid: msg.key.remoteJid,
     participant: msg.key.participant,
     dataJson: JSON.stringify(msg),
-    isEdited: false
+    isEdited: false,
+    createdAt: msg.messageTimestamp
+      ? new Date(Number(msg.messageTimestamp) * 1000)
+      : undefined
   };
 
   if (userId) {
@@ -746,6 +803,10 @@ export const verifyMessage = async (
     companyId: ticket.companyId
   });
 
+  if (ticket.id < 0) {
+    return newMesssage;
+  }
+
   if (!msg.key.fromMe && ticket.status === "closed") {
     await ticket.update({ status: "pending" });
     await ticket.reload({
@@ -755,6 +816,8 @@ export const verifyMessage = async (
         { model: Contact, as: "contact" }
       ]
     });
+
+    const io = getIO();
 
     io.to(`company-${ticket.companyId}-closed`)
       .to(`queue-${ticket.queueId}-closed`)
@@ -1610,7 +1673,7 @@ const handleRating = async (
     .then(
       () => {
         ticketTraking.update({
-          finishedAt: moment().toDate(),
+          finishedAt: new Date(),
           rated: true
         });
       },
@@ -2092,7 +2155,7 @@ const handleMessage = async (
       wbot.id!,
       unreadMessages,
       companyId,
-      groupContact
+      { groupContact }
     );
 
     const ticketMessages = await Message.findAll({
@@ -2398,7 +2461,7 @@ const verifyRecentCampaign = async (
 
       if (campaignShipping) {
         await campaignShipping.update({
-          confirmedAt: moment(),
+          confirmedAt: new Date(),
           confirmation: true
         });
         await campaignQueue.add(
@@ -2474,6 +2537,124 @@ const wbotMessageListener = async (
           handleMsgAck(message, message.update.status);
         });
       });
+    });
+
+    wbot.ev.on("messaging-history.set", async (history: MessageHistorySet) => {
+      if (history.syncType !== proto.HistorySync.HistorySyncType.ON_DEMAND) {
+        return;
+      }
+
+      const tickets = {};
+
+      let oldestMessage: proto.IWebMessageInfo = null;
+
+      const processHistoryMessage = async (msg: proto.IWebMessageInfo) => {
+        if (!msg?.message) return;
+
+        if (
+          !oldestMessage ||
+          msg.messageTimestamp < oldestMessage.messageTimestamp
+        ) {
+          oldestMessage = msg;
+        }
+
+        if (!tickets[msg.key.remoteJid]) {
+          logger.debug(
+            { contacts: history.contacts, remoteJid: msg.key.remoteJid },
+            "checking contacts"
+          );
+          const chat = history.contacts.find(c => c?.id === msg.key.remoteJid);
+          const chatContact: IMe = {
+            id: chat?.id || msg.key.remoteJid,
+            name: chat?.name || ""
+          };
+          const contact = await wbotMutex.runExclusive(async () => {
+            let result: Contact = contactCache.get(chatContact.id);
+            if (!result) {
+              result = await verifyContact(chatContact, wbot, companyId);
+              contactCache.set(chatContact.id, result);
+            }
+            return result;
+          });
+          const whatsapp = await ShowWhatsAppService(wbot.id!, companyId);
+          const { ticket } = await FindOrCreateTicketService(
+            contact,
+            whatsapp.id,
+            0,
+            companyId,
+            { history: true, timestamp: Number(msg.messageTimestamp) }
+          );
+          tickets[msg.key.remoteJid] = ticket;
+        }
+        const ticket = tickets[msg.key.remoteJid];
+
+        const contact = await wbotMutex.runExclusive(async () => {
+          const msgContact = await getContactMessage(msg, wbot);
+          let result: Contact = contactCache.get(msgContact.id);
+          if (!result) {
+            result = await verifyContact(msgContact, wbot, companyId);
+            contactCache.set(msgContact.id, result);
+          }
+          return result;
+        });
+
+        const msgType = getTypeMessage(msg);
+
+        const unpackedMessage =
+          msgType !== "templateMessage" && getUnpackedMessage(msg);
+        const messageMedia =
+          unpackedMessage && getMessageMedia(unpackedMessage);
+
+        if (
+          messageMedia ||
+          msg?.message?.extendedTextMessage?.thumbnailDirectPath
+        ) {
+          verifyMediaMessage(msg, ticket, contact, wbot, messageMedia).catch(
+            err => {
+              logger.error({ msg, err }, "Error handling media message");
+            }
+          );
+        } else {
+          verifyMessage(msg, ticket, contact).catch(err => {
+            logger.error({ msg, err }, "Error handling message");
+          });
+        }
+      };
+
+      await history.messages.reduce(async (prevPromise, item) => {
+        await prevPromise;
+        return processHistoryMessage(item);
+      }, Promise.resolve());
+
+      if (!history.isLatest && oldestMessage) {
+        const limitDays = parseInt(
+          await CheckSettings("fetchHistoryLimitDays", "365"),
+          10
+        );
+
+        // avoid using moment
+        const now = new Date();
+        const limitDate = new Date(now.setDate(now.getDate() - limitDays));
+        const oldestDate = new Date(
+          Number(oldestMessage.messageTimestamp) * 1000
+        );
+
+        if (oldestDate < limitDate) {
+          logger.debug(
+            { oldestDate, limitDate, oldestMessage },
+            "History limit reached"
+          );
+          return;
+        }
+
+        const result = await wbot.fetchMessageHistory(
+          50,
+          oldestMessage.key,
+          oldestMessage.messageTimestamp
+        );
+
+        logger.debug({ result }, "Requested more message history");
+      }
     });
   } catch (error) {
     Sentry.captureException(error);

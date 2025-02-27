@@ -1,4 +1,4 @@
-import { Op, fn, where, col, Filterable, Includeable } from "sequelize";
+import { Op, fn, where, col, Includeable, WhereOptions } from "sequelize";
 import { startOfDay, endOfDay, parseISO } from "date-fns";
 
 import { intersection } from "lodash";
@@ -63,7 +63,7 @@ const ListTicketsService = async ({
 
   const orCondition = [{ userId }, { status: "pending" }];
 
-  let whereCondition: Filterable["where"] = {
+  let whereCondition: WhereOptions<Ticket> = {
     [Op.or]: orCondition,
     queueId:
       user?.profile === "admin" ? { [Op.or]: [queueIds, null] } : queueIds
@@ -92,7 +92,10 @@ const ListTicketsService = async ({
   }
 
   if (groupsTab) {
-    whereCondition.isGroup = groups === "true";
+    whereCondition = {
+      ...whereCondition,
+      isGroup: groups === "true"
+    };
   }
 
   let includeCondition: Includeable[];
@@ -202,19 +205,10 @@ const ListTicketsService = async ({
   }
 
   if (withUnreadMessages === "true") {
-    const userQueueIds = user.queues.map(queue => queue.id);
-
     whereCondition = {
-      [Op.or]: [{ userId }, { status: "pending" }],
-      queueId: {
-        [Op.or]:
-          user.profile === "admin" ? [userQueueIds, null] : [userQueueIds]
-      },
+      ...whereCondition,
       unreadMessages: { [Op.gt]: 0 }
     };
-    if (groupsTab) {
-      whereCondition.isGroup = groups === "true";
-    }
   }
 
   if (Array.isArray(tags) && tags.length > 0) {

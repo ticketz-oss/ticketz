@@ -113,11 +113,22 @@ gracefulShutdown(server, {
 // Global Exception Handlers
 process.on("uncaughtException", err => {
   logger.error({ err }, `Uncaught Exception: ${err.message}`);
+  // eslint-disable-next-line dot-notation
+  if (err["code"] === "ERR_OSSL_BAD_DECRYPT") {
+    return;
+  }
   process.exit(1);
 });
 
 // Global Exception Handlers for logging only
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 process.on("unhandledRejection", (reason: any, promise) => {
+  if (reason instanceof TypeError) {
+    logger.error(
+      { message: reason.message, stack: reason.stack.split("\n") },
+      "Unhandled Rejection"
+    );
+    return;
+  }
   logger.debug({ promise, reason }, "Unhandled Rejection");
 });

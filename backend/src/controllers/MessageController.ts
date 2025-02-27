@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import fs from "fs";
+import { WAMessage } from "@whiskeysockets/baileys";
 import AppError from "../errors/AppError";
 
 import SetTicketMessagesAsRead from "../helpers/SetTicketMessagesAsRead";
@@ -26,14 +27,12 @@ import Contact from "../models/Contact";
 import Ticket from "../models/Ticket";
 import ForwardMessageService from "../services/MessageServices/ForwardMessageService";
 
-import {
-  verifyMediaMessage,
-  verifyMessage
-} from "../services/WbotServices/wbotMessageListener";
+import { verifyMediaMessage } from "../services/WbotServices/wbotMessageListener";
 import { CreateInternalMessageService } from "../services/MessageServices/CreateInternalMessageService";
 import QuickMessage from "../models/QuickMessage";
 import formatBody from "../helpers/Mustache";
 import { OmniServices } from "../services/OmniServices/OmniServices";
+import { getWbot } from "../libs/wbot";
 
 type IndexQuery = {
   pageNumber: string;
@@ -352,4 +351,38 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
     }
     throw new AppError("ERR_INTERNAL_ERROR", 500);
   }
+};
+
+export const history = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const contactId = Number(req.params.contactId);
+  const whatsappId = Number(req.params.whatsappId);
+
+  // get oldest message from contact
+  const oldMessage = await Message.findOne({
+    include: [
+      {
+        model: Ticket,
+        as: "ticket",
+        where: {
+          contactId,
+          whatsappId
+        }
+      }
+    ],
+    order: [["createdAt", "ASC"]]
+  });
+
+  const msg: WAMessage = JSON.parse(oldMessage?.dataJson);
+
+  const wbot = getWbot(whatsappId);
+  const result = await wbot.fetchMessageHistory(
+    50,
+    msg.key,
+    msg.messageTimestamp
+  );
+
+  return res.status(200).json(result);
 };

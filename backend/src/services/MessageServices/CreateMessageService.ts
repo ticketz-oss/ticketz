@@ -25,6 +25,7 @@ export interface MessageData {
   queueId?: number;
   channel?: string;
   userId?: number;
+  createdAt?: Date;
 }
 interface Request {
   messageData: MessageData;
@@ -40,7 +41,7 @@ const CreateMessageService = async ({
   const message = await Message.findOne({
     where: {
       id: messageData.id,
-      companyId
+      ticketId: messageData.ticketId
     },
     include: [
       "contact",
@@ -89,15 +90,20 @@ const CreateMessageService = async ({
     ]
   });
 
+  if (!message) {
+    throw new Error("ERR_CREATING_MESSAGE");
+  }
+
+  // if is an history ticket, just return the message
+  if (messageData.ticketId < 0) {
+    return message;
+  }
+
   await message.ticket.contact.update({ presence: "available" });
   await message.ticket.contact.reload();
 
   if (message.ticket.queueId !== null && message.queueId === null) {
     await message.update({ queueId: message.ticket.queueId });
-  }
-
-  if (!message) {
-    throw new Error("ERR_CREATING_MESSAGE");
   }
 
   const io = getIO();

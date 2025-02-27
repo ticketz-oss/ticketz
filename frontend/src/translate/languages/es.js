@@ -336,6 +336,8 @@ const messages = {
         },
       },
       ticketsList: {
+        showOnlyUnread: "Mostrar solo no leídos",
+        showFromAllUsers: "Mostrar de todos los usuarios",
         pendingHeader: "Esperando",
         assignedHeader: "Atendiendo",
         noTicketsTitle: "¡Nada aquí!",
@@ -822,6 +824,9 @@ const messages = {
         FileDownloadLimit: {
           title: "Límite de descarga de archivos (MB)",
         },
+        FetchHistoryLimitDays: {
+          title: "Límite de días de historial",
+        },
         "messageVisibility": {
           "title": "Visibilidad del mensaje",
           "options": {
@@ -930,6 +935,7 @@ const messages = {
         schedule: "Agendamiento",
         delete: "Eliminar",
         transfer: "Transferir",
+        downloadHistory: "Descargar historial",
         registerAppointment: "Observaciones del Contacto",
         appointmentsModal: {
           title: "Observaciones del Contacto",
@@ -1008,6 +1014,7 @@ const messages = {
       },
       backendErrors: {
         ERR_FORBIDDEN: "No tienes permisos para acceder a este recurso.",
+        ERR_CHECK_NUMBER: "No se pudo verificar el número de WhatsApp.",
         ERR_NO_OTHER_WHATSAPP: "Debe haber al menos un WhatsApp predeterminado.",
         ERR_NO_DEF_WAPP_FOUND:
           "No se encontró ningún WhatsApp predeterminado. Verifique la página de conexiones.",
