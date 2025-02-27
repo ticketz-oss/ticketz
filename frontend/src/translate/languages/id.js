@@ -347,6 +347,8 @@ const messages = {
         },
       },
       ticketsList: {
+        showOnlyUnread: "Hanya tampilkan yang belum dibaca",
+        showFromAllUsers: "Tampilkan dari semua pengguna",
         pendingHeader: "Tertunda",
         assignedHeader: "Ditugaskan",
         noTicketsTitle: "Tidak ada apa-apa di sini!",

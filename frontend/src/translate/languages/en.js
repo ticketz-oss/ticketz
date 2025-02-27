@@ -334,6 +334,8 @@ const messages = {
         },
       },
       ticketsList: {
+        showOnlyUnread: "Show only unread",
+        showFromAllUsers: "Show from all users",
         pendingHeader: "Pending",
         assignedHeader: "Assigned",
         noTicketsTitle: "Nothing here!",

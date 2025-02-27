@@ -338,6 +338,8 @@ const messages = {
         },
       },
       ticketsList: {
+        showOnlyUnread: "Mostrar apenas não lidos",
+        showFromAllUsers: "Mostrar de todos os usuários",
         pendingHeader: "Aguardando",
         assignedHeader: "Atendendo",
         noTicketsTitle: "Nada aqui!",

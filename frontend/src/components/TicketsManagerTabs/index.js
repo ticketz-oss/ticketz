@@ -277,7 +277,7 @@ const TicketsManagerTabs = () => {
               <IconSwitch
                 setter={setShowOnlyUnread}
                 value={showOnlyUnread}
-                tooltip="Show only unread tickets"
+                tooltip={i18n.t("ticketsList.showOnlyUnread")}
                 icon={
                   <NotificationImportantIcon />
                 } />
@@ -289,7 +289,7 @@ const TicketsManagerTabs = () => {
                 <IconSwitch
                   setter={setShowAllTickets}
                   value={showAllTickets}
-                  tooltip="Show tickets of all users"
+                  tooltip={i18n.t("ticketsList.showFromAllUsers")}
                   icon={
                     <AllInboxIcon />
                   }
