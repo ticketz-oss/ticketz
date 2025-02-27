@@ -171,6 +171,7 @@ const TicketsListCustom = (props) => {
     tags,
     users,
     showAll,
+    showOnlyUnread,
     selectedQueueIds,
     updateCount,
     style,
@@ -190,7 +191,7 @@ const TicketsListCustom = (props) => {
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
-  }, [status, searchParam, dispatch, showAll, tags, users, selectedQueueIds]);
+  }, [status, searchParam, dispatch, showAll, showOnlyUnread, tags, users, selectedQueueIds]);
 
   const { tickets, hasMore, loading } = useTickets({
     pageNumber,
@@ -199,6 +200,7 @@ const TicketsListCustom = (props) => {
     status,
     groups,
     showAll,
+    withUnreadMessages: showOnlyUnread || undefined,
     tags: JSON.stringify(tags),
     users: JSON.stringify(users),
     queueIds: JSON.stringify(selectedQueueIds),
