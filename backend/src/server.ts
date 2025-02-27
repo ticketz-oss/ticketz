@@ -72,6 +72,10 @@ gracefulShutdown(server, {
 // Global Exception Handlers
 process.on("uncaughtException", err => {
   logger.error({ err }, `Uncaught Exception: ${err.message}`);
+  // eslint-disable-next-line dot-notation
+  if (err["code"] === "ERR_OSSL_BAD_DECRYPT") {
+    return;
+  }
   process.exit(1);
 });
 
