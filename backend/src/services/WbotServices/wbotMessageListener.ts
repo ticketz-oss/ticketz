@@ -386,16 +386,41 @@ const downloadThumbnail = async ({
     return null;
   }
 
-  const stream = await downloadContentFromMessage(
-    { mediaKey, directPath },
-    mimetype ? normalizeThumbnailMediaType(mimetype) : "thumbnail-link"
-  );
+  logger.debug({ directPath, mediaKey, mimetype }, "downloading thumbnail");
+
+  const mediaType = mimetype
+    ? normalizeThumbnailMediaType(mimetype)
+    : "thumbnail-link";
+
+  let stream: Transform;
+
+  try {
+    stream = await downloadContentFromMessage(
+      { mediaKey, directPath },
+      mediaType
+    );
+  } catch (error) {
+    logger.error(
+      { directPath, mediaKey, mimetype },
+      `Error downloading thumbnail ${error.message}`
+    );
+  }
+
+  logger.debug({ stream }, "downloading thumbnail stream received");
 
   if (!stream) {
     throw new Error("Failed to get stream");
   }
 
-  const buffer = await downloadStream(stream);
+  let buffer = null;
+  try {
+    buffer = await downloadStream(stream);
+  } catch (error) {
+    logger.error(
+      { error },
+      `Error downloading thumbnail: ${error.message} - ${directPath}`
+    );
+  }
 
   if (!buffer) {
     throw new Error("ERR_WAPP_DOWNLOAD_MEDIA");
@@ -613,7 +638,10 @@ export const verifyMediaMessage = async (
   let media: MediaInfo = null;
 
   if (thumbnailMsg) {
-    logger.debug({ id: msg?.key?.id, msg }, "downloading thumbnail media");
+    logger.debug(
+      { id: msg?.key?.id, thumbnailMsg },
+      "downloading thumbnail media"
+    );
   }
 
   try {
