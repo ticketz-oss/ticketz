@@ -110,60 +110,60 @@ const NotificationsPopOver = (props) => {
     const queueIds = queues.map((q) => q.id);
 
     const onConnectNotificationsPopover = () => {
-		socket.emit("joinNotification");
-	}
+      socket.emit("joinNotification");
+    }
 
-	const onCompanyTicketNotificationsPopover = (data) => {
+    const onCompanyTicketNotificationsPopover = (data) => {
       if (data.action === "updateUnread" || data.action === "delete") {
-				setNotifications(prevState => {
-					const ticketIndex = prevState.findIndex(t => t.id === data.ticketId);
-					if (ticketIndex !== -1) {
-						prevState.splice(ticketIndex, 1);
-						return [...prevState];
-					}
-					return prevState;
-				});
+        setNotifications(prevState => {
+          const ticketIndex = prevState.findIndex(t => t.id === data.ticketId);
+          if (ticketIndex !== -1) {
+            prevState.splice(ticketIndex, 1);
+            return [...prevState];
+          }
+          return prevState;
+        });
 
-				setDesktopNotifications(prevState => {
-					const notfiticationIndex = prevState.findIndex(
-						n => n.tag === String(data.ticketId)
-					);
-					if (notfiticationIndex !== -1) {
-						prevState[notfiticationIndex].close();
-						prevState.splice(notfiticationIndex, 1);
-						return [...prevState];
-					}
-					return prevState;
-				});
+        setDesktopNotifications(prevState => {
+          const notfiticationIndex = prevState.findIndex(
+            n => n.tag === String(data.ticketId)
+          );
+          if (notfiticationIndex !== -1) {
+            prevState[notfiticationIndex].close();
+            prevState.splice(notfiticationIndex, 1);
+            return [...prevState];
+          }
+          return prevState;
+        });
       }
     };
-    
+
     const onCompanyAppMessageNotificationsPopover = (data) => {
-      
-			if (
-				data.action === "create" &&
-				!data.message.read &&
-				(data.ticket.userId === user?.id || !data.ticket.userId)
-			) {
-				setNotifications(prevState => {
-					const ticketIndex = prevState.findIndex(t => t.id === data.ticket.id);
-					if (ticketIndex !== -1) {
-						prevState[ticketIndex] = data.ticket;
-						return [...prevState];
-					}
-					return [data.ticket, ...prevState];
-				});
 
-				const shouldNotNotificate =
-					(data.message.ticketId === ticketIdRef.current &&
-						document.visibilityState === "visible") ||
-					(data.ticket.userId && data.ticket.userId !== user?.id) ||
-					(data.ticket.isGroup && !soundGroupNotifications);
+      if (
+        data.action === "create" &&
+        !data.message.read &&
+        (data.ticket.userId === user?.id || !data.ticket.userId)
+      ) {
+        setNotifications(prevState => {
+          const ticketIndex = prevState.findIndex(t => t.id === data.ticket.id);
+          if (ticketIndex !== -1) {
+            prevState[ticketIndex] = data.ticket;
+            return [...prevState];
+          }
+          return [data.ticket, ...prevState];
+        });
 
-				if (shouldNotNotificate) return;
+        const shouldNotNotificate =
+          (data.message.ticketId === ticketIdRef.current &&
+            document.visibilityState === "visible") ||
+          (data.ticket.userId && data.ticket.userId !== user?.id) ||
+          (data.ticket.isGroup && !soundGroupNotifications);
 
-				handleNotifications(data);
-			}
+        if (shouldNotNotificate) return;
+
+        handleNotifications(data);
+      }
     }
 
     socketManager.onConnect(onConnectNotificationsPopover);
@@ -171,7 +171,7 @@ const NotificationsPopOver = (props) => {
     socket.on(`company-${companyId}-appMessage`, onCompanyAppMessageNotificationsPopover);
 
     return () => {
-       socket.disconnect();
+      socket.disconnect();
     };
   }, [user, profile, queues, soundGroupNotifications, socketManager]);
 
