@@ -160,9 +160,10 @@ const useStyles = makeStyles((theme) => ({
     // color: theme.barraSuperior.secondary.main,
   },
   logo: {
-    width: "192px",
+    maxWidth: "192px",
     maxHeight: "72px",
     logo: theme.logo,
+    margin: "auto",
     content: `url("${theme.calculatedLogo()}")`
   },
   hideLogo: {
