@@ -332,7 +332,7 @@ export default function Options(props) {
       key: "transferToNewTicket",
       value,
     });
-    toast.success("Operação atualizada com sucesso.");
+    i18nToast.success("settings.success");
   }
 
   async function handleRestrictTransferConnection(value) {
@@ -341,7 +341,7 @@ export default function Options(props) {
       key: "restrictTransferConnection",
       value,
     });
-    toast.success("Operação atualizada com sucesso.");
+    i18nToast.success("settings.success");
   }
 
   async function handleAllowSignup(value) {
@@ -368,7 +368,7 @@ export default function Options(props) {
       key: "ratingsTimeout",
       value,
     });
-    toast.success("Operação atualizada com sucesso.");
+    i18nToast.success("settings.success");
   }
 
   async function handleAutoReopenTimeout(value) {
