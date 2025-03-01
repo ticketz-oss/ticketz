@@ -137,13 +137,7 @@ const App = () => {
         if (mode === "light") {
           return calculatedLogoLight();
         }
-        return appLogoDark;
-      },
-      calculatedLogoLight: () => {
-        if (appLogoDark !== defaultLogoDark && appLogoLight === defaultLogoLight) {
-          return appLogoDark;
-        }
-        return appLogoLight;
+        return calculatedLogoDark();
       },
       calculatedLogoFavicon: () => {
         return appLogoFavicon || defaultLogoFavicon;
