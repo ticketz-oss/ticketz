@@ -703,6 +703,16 @@ const messages = {
           deleted: "Tag excluído com sucesso.",
         },
       },
+      whitelabel: {
+        primaryColorLight: "Cor primária clara",
+        primaryColorDark: "Cor primária escura",
+        lightLogo: "Logo do app claro",
+        darkLogo: "Logo do app escuro",
+        favicon: "Favicon do app",
+        appname: "Nome do app",
+        logoHint: "Prefira SVG e aspecto de 28:10",
+        faviconHint: "Prefira imagem SVG quadrada ou PNG 512x512",
+      },
       settings: {
         group: {
           general: "Geral",
@@ -714,6 +724,7 @@ const messages = {
           serveradmin: "Administração do servidor",
         },
         success: "Configurações salvas com sucesso.",
+        copiedToClipboard: "Copiado para a área de transferência",
         title: "Configurações",
         settings: {
           userCreation: {

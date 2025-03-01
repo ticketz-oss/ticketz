@@ -694,6 +694,16 @@ const messages = {
           deleted: "Tag deleted successfully.",
         },
       },
+      whitelabel: {
+        primaryColorLight: "Primary color light",
+        primaryColorDark: "Primary color dark",
+        lightLogo: "App logo light",
+        darkLogo: "App logo dark",
+        favicon: "App logo favicon",
+        appname: "App name",
+        logoHint: "Prefer SVG and aspect of 28:10",
+        faviconHint: "Prefer square SVG image or 512x512 PNG",
+      },
       settings: {
         group: {
           general: "General",
@@ -704,7 +714,8 @@ const messages = {
           api: "API",
           serveradmin: "Server Administration",
         },
-        success: "Settings saved successfully.",
+        success: "Setting saved successfully.",
+        copiedToClipboard: "Copied to clipboard",
         title: "Settings",
         settings: {
           userCreation: {

@@ -737,6 +737,16 @@ const messages = {
           deleted: "Tag berhasil dihapus.",
         },
       },
+      whitelabel: {
+        primaryColorLight: "Warna Utama Terang",
+        primaryColorDark: "Warna Utama Gelap",
+        lightLogo: "Logo aplikasi terang",
+        darkLogo: "Logo aplikasi gelap",
+        favicon: "Favicon logo aplikasi",
+        appname: "Nama aplikasi",
+        logoHint: "Prefer SVG dan aspek 28:10",
+        faviconHint: "Prefer gambar SVG persegi atau PNG 512x512",
+      },
       settings: {
         group: {
           general: "Umum",
@@ -748,6 +758,7 @@ const messages = {
           serveradmin: "Administrasi Server",
         },
         success: "Pengaturan berhasil disimpan.",
+        copiedToClipboard: "Disalin ke clipboard",
         title: "Pengaturan",
         settings: {
           userCreation: {
