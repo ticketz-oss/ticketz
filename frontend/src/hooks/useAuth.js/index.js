@@ -39,7 +39,11 @@ const useAuth = () => {
     },
     async (error) => {
       const originalRequest = error.config;
-      if (error?.response?.status === 403 && !originalRequest._retry) {
+      if (
+        error?.response?.status === 403 &&
+        !originalRequest._retry &&
+        localStorage.getItem("userId")
+      ) {
         originalRequest._retry = true;
 
         const { data } = await api.post("/auth/refresh_token");
