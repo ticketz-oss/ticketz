@@ -7,7 +7,7 @@ import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import useSettings from "../../hooks/useSettings";
-import { toast } from 'react-toastify';
+import { i18nToast } from "../../helpers/i18nToast";
 import { makeStyles } from "@material-ui/core/styles";
 import { grey, blue } from "@material-ui/core/colors";
 import OnlyForSuperUser from "../OnlyForSuperUser";
@@ -192,7 +192,7 @@ export default function Options(props) {
       key: "userRating",
       value,
     });
-    toast.success("Operação atualizada com sucesso.");
+    i18nToast.success("settings.success");
   }
 
   async function handleScheduleType(value) {
@@ -201,16 +201,7 @@ export default function Options(props) {
       key: "scheduleType",
       value,
     });
-    //toast.success("Oraçãpeo atualizada com sucesso.");
-    toast.success('Operação atualizada com sucesso.', {
-      position: "top-right",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: false,
-      draggable: true,
-      theme: "light",
-    });
+    i18nToast.success("settings.success");
     if (typeof scheduleTypeChanged === "function") {
       scheduleTypeChanged(value);
     }
@@ -222,7 +213,7 @@ export default function Options(props) {
       key: "call",
       value,
     });
-    toast.success("Operação atualizada com sucesso.");
+    i18nToast.success("settings.success");
   }
 
   async function handleChatbotAutoExit(value) {
@@ -231,7 +222,7 @@ export default function Options(props) {
       key: "chatbotAutoExit",
       value,
     });
-    toast.success("Operação atualizada com sucesso.");
+    i18nToast.success("settings.success");
   }
 
   async function handleQuickMessages(value) {
@@ -240,7 +231,7 @@ export default function Options(props) {
       key: "quickMessages",
       value,
     });
-    toast.success("Operação atualizada com sucesso.");
+    i18nToast.success("settings.success");
   }
 
   async function handleAllowSignup(value) {
@@ -249,7 +240,7 @@ export default function Options(props) {
       key: "allowSignup",
       value,
     });
-    toast.success("Operação atualizada com sucesso.");
+    i18nToast.success("settings.success");
   }
 
   async function handleDownloadLimit(value) {
@@ -258,7 +249,7 @@ export default function Options(props) {
       key: "downloadLimit",
       value,
     });
-    toast.success("Operação atualizada com sucesso.");
+    i18nToast.success("settings.success");
   }
 
   async function handleAutoReopenTimeout(value) {
@@ -267,7 +258,7 @@ export default function Options(props) {
       key: "autoReopenTimeout",
       value,
     });
-    toast.success("Operação atualizada com sucesso.");
+    i18nToast.success("settings.success");
   }
 
   async function handleSetting(key, value, setter = null) {
@@ -278,7 +269,7 @@ export default function Options(props) {
       key,
       value,
     });
-    toast.success("Operação atualizada com sucesso.");
+    i18nToast.success("settings.success");
   }
 
   async function generateApiToken() {
@@ -288,7 +279,7 @@ export default function Options(props) {
       key: "apiToken",
       value: newToken,
     });
-    toast.success("Operação atualizada com sucesso.");
+    i18nToast.success("settings.success");
   }
 
   async function deleteApiToken() {
@@ -297,12 +288,12 @@ export default function Options(props) {
       key: "apiToken",
       value: "",
     });
-    toast.success("Operação atualizada com sucesso.");
+    i18nToast.success("settings.success");
   }
   
   async function copyApiToken() {
     copyToClipboard(apiToken);
-    toast.success("Token copied to clipboard");
+    i18nToast.success("settings.copiedToClipboard");
   }
 
   async function handleGroupType(value) {
@@ -311,7 +302,7 @@ export default function Options(props) {
       key: "CheckMsgIsGroup",
       value,
     });
-    toast.success("Operação atualizada com sucesso.");
+    i18nToast.success("settings.success");
     /*     if (typeof scheduleTypeChanged === "function") {
           scheduleTypeChanged(value);
         } */
