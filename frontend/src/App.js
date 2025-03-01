@@ -22,7 +22,7 @@ const defaultLogoFavicon = "/vector/favicon.svg";
 const App = () => {
   const [locale, setLocale] = useState();
 
-  const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
+  const prefersDarkMode = !!(window.matchMedia('(prefers-color-scheme: dark)').matches);
   const preferredTheme = window.localStorage.getItem("preferredTheme");
   const [mode, setMode] = useState(preferredTheme ? preferredTheme : prefersDarkMode ? "dark" : "light");
   const [primaryColorLight, setPrimaryColorLight] = useState("#888");
