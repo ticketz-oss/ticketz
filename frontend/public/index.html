@@ -23,6 +23,22 @@
         --primary: #fff;
       }
 
+      @media (prefers-color-scheme: light) {
+        :root {
+          --background: #fff;
+          --splash: #fff;
+          --primary: #000;
+        }
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --background: #333;
+          --splash: #424242;
+          --primary: #fff;
+        }
+      }
+
       *, *::before, *::after {
         box-sizing: border-box;
       }
@@ -131,7 +147,8 @@
 		}
 		
 		// Set the theme
-		const theme = localStorage.getItem('preferredTheme');
+    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+		const theme = localStorage.getItem('preferredTheme') || systemTheme;
 		
 		if (theme) {
 			const root = document.documentElement;
