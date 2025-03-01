@@ -100,7 +100,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   };
 
   if (whatsapp.channel === "whatsapp") {
-    StartWhatsAppSession(whatsapp, companyId).then(sendEvent);
+    StartWhatsAppSession(whatsapp, companyId);
+    sendEvent();
   } else {
     const omniService = OmniServices.getInstance();
     omniService.startService(whatsapp).then(sendEvent);

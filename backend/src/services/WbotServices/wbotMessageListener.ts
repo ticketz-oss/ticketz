@@ -2541,6 +2541,17 @@ const wbotMessageListener = async (
 
     wbot.ev.on("messaging-history.set", async (history: MessageHistorySet) => {
       if (history.syncType !== proto.HistorySync.HistorySyncType.ON_DEMAND) {
+        const resumeCounters = {
+          chats: history.chats.length,
+          contacts: history.contacts.length,
+          messages: history.messages.length,
+          isLatest: history.isLatest,
+          syncType: history.syncType
+        };
+        logger.debug(
+          { resumeCounters },
+          "ignoring not  ON_DEMAND history sync"
+        );
         return;
       }
 

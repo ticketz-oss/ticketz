@@ -45,7 +45,6 @@ import Grid from "@material-ui/core/Grid";
 import FormControl from "@material-ui/core/FormControl";
 import TextField from "@material-ui/core/TextField";
 import useSettings from "../../hooks/useSettings";
-import { toast } from 'react-toastify';
 import { makeStyles } from "@material-ui/core/styles";
 import { grey, blue } from "@material-ui/core/colors";
 import OnlyForSuperUser from "../OnlyForSuperUser";
@@ -54,6 +53,7 @@ import useAuth from "../../hooks/useAuth.js";
 import {
   IconButton,
   InputAdornment,
+  Typography,
 } from "@material-ui/core";
 
 import { Colorize, AttachFile, Delete } from "@material-ui/icons";
@@ -61,6 +61,8 @@ import ColorPicker from "../ColorPicker";
 import ColorModeContext from "../../layout/themeContext";
 import api from "../../services/api";
 import { getBackendURL } from "../../services/config";
+import { i18nToast } from "../../helpers/i18nToast";
+import { i18n } from "../../translate/i18n.js";
 
 const defaultLogoLight = "/vector/logo.svg";
 const defaultLogoDark = "/vector/logo-dark.svg";
@@ -231,7 +233,7 @@ export default function Whitelabel(props) {
       value,
     });
     updateSettingsLoaded(key, value);
-    toast.success("Operação atualizada com sucesso.");
+    i18nToast.success("settings.success");
   }
 
   const uploadLogo = async (e, mode) => {
@@ -279,7 +281,7 @@ export default function Whitelabel(props) {
                 <FormControl className={classes.selectContainer}>
                   <TextField
                     id="primary-color-light-field"
-                    label="Cor Primária Modo Claro"
+                    label={i18n.t("whitelabel.primaryColorLight")}
                     variant="standard"
                     value={settingsLoaded.primaryColorLight || ""}
                     onClick={() => setPrimaryColorLightModalOpen(true)}
@@ -318,7 +320,7 @@ export default function Whitelabel(props) {
                 <FormControl className={classes.selectContainer}>
                   <TextField
                     id="primary-color-dark-field"
-                    label="Cor Primária Modo Escuro"
+                    label={i18n.t("whitelabel.primaryColorDark")}
                     variant="standard"
                     value={settingsLoaded.primaryColorDark || ""}
                     onClick={() => setPrimaryColorDarkModalOpen(true)}
@@ -357,7 +359,7 @@ export default function Whitelabel(props) {
                 <FormControl className={classes.selectContainer}>
                   <TextField
                     id="appname-field"
-                    label="Nome do sistema"
+                    label={i18n.t("whitelabel.appname")}
                     variant="standard"
                     name="appName"
                     value={appName}
@@ -376,7 +378,7 @@ export default function Whitelabel(props) {
                 <FormControl className={classes.selectContainer}>
                   <TextField
                     id="logo-light-upload-field"
-                    label="Logotipo claro"
+                    label={i18n.t("whitelabel.lightLogo")}
                     variant="standard"
                     value={settingsLoaded.appLogoLight || ""}
                     InputProps={{
@@ -420,12 +422,17 @@ export default function Whitelabel(props) {
                     }}
                   />
                 </FormControl>
+                <div>
+                 <Typography style={{fontSize: "11px"}}>
+                  {i18n.t("whitelabel.logoHint")}
+                 </Typography>
+                </div>
               </Grid>
               <Grid xs={12} sm={6} md={4} item>
                 <FormControl className={classes.selectContainer}>
                   <TextField
                     id="logo-dark-upload-field"
-                    label="Logotipo escuro"
+                    label={i18n.t("whitelabel.darkLogo")}
                     variant="standard"
                     value={settingsLoaded.appLogoDark || ""}
                     InputProps={{
@@ -469,12 +476,17 @@ export default function Whitelabel(props) {
                     }}
                   />
                 </FormControl>
+                <div>
+                 <Typography style={{fontSize: "11px"}}>
+                  {i18n.t("whitelabel.logoHint")}
+                 </Typography>
+                </div>
               </Grid>
               <Grid xs={12} sm={6} md={4} item>
                 <FormControl className={classes.selectContainer}>
                   <TextField
                     id="logo-favicon-upload-field"
-                    label="Favicon"
+                    label={i18n.t("whitelabel.favicon")}
                     variant="standard"
                     value={settingsLoaded.appLogoFavicon || ""}
                     InputProps={{
@@ -518,6 +530,11 @@ export default function Whitelabel(props) {
                     }}
                   />
                 </FormControl>
+                <div>
+                 <Typography style={{fontSize: "11px"}}>
+                  {i18n.t("whitelabel.faviconHint")}
+                 </Typography>
+                </div>
               </Grid>
               <Grid xs={12} sm={6} md={4} item>
                 <div className={classes.appLogoLightPreviewDiv}>

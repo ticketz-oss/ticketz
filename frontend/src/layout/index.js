@@ -242,9 +242,10 @@ const useStyles = makeStyles((theme) => ({
     // color: theme.barraSuperior.secondary.main,
   },
   logo: {
-    width: "192px",
+    maxWidth: "192px",
     height: "68px",
     logo: theme.logo,
+    margin: "auto",
     content: `url("${theme.calculatedLogo()}")`
   },
   logoIcon: {
