@@ -49,7 +49,7 @@ const internalFindOrCreateTicketService = async (
         const minTicketId = Number(await Ticket.min("id")) || 0;
 
         ticket = await Ticket.create({
-          id: minTicketId - 1,
+          id: minTicketId > 0 ? -1 : minTicketId - 1,
           contactId: groupContact ? groupContact.id : contact.id,
           status: "closed",
           isGroup: !!groupContact,
