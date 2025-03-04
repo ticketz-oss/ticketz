@@ -248,7 +248,8 @@ export class OmniServices {
               mimetype: media.mimetype,
               filename: media.originalname
             },
-            ticket
+            ticket.companyId,
+            ticket.id
           );
 
           let type = media.mimetype.split("/")[0] as

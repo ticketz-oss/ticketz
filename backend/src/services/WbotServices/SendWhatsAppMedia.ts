@@ -183,7 +183,8 @@ export const SendWhatsAppMedia = async ({
             mimetype: media.mimetype,
             filename: media.originalname
           },
-          ticket
+          ticket.companyId,
+          ticket.id
         )
       );
       if (!fileUrl.startsWith("http")) {

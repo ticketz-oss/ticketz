@@ -665,7 +665,7 @@ export const verifyMediaMessage = async (
 
   let mediaUrl = null;
   try {
-    mediaUrl = await saveMediaFile(media, ticket);
+    mediaUrl = await saveMediaFile(media, ticket.companyId, ticket.id);
   } catch (error) {
     logger.error({ media, ticketId: ticket.id }, "Error saving media to file");
   }
@@ -673,7 +673,11 @@ export const verifyMediaMessage = async (
   let thumbnailUrl = null;
   if (thumbnailMedia) {
     try {
-      thumbnailUrl = await saveMediaFile(thumbnailMedia, ticket);
+      thumbnailUrl = await saveMediaFile(
+        thumbnailMedia,
+        ticket.companyId,
+        ticket.id
+      );
     } catch (error) {
       logger.error(
         { thumbnailMedia, ticketId: ticket.id },
