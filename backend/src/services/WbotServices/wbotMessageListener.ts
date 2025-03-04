@@ -2642,7 +2642,7 @@ const wbotMessageListener = async (
         }
 
         const result = await wbot.fetchMessageHistory(
-          50,
+          500,
           oldestMessage.key,
           oldestMessage.messageTimestamp
         );

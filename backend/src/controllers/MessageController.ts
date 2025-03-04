@@ -379,7 +379,7 @@ export const history = async (
 
   const wbot = getWbot(whatsappId);
   const result = await wbot.fetchMessageHistory(
-    50,
+    500,
     msg.key,
     msg.messageTimestamp
   );
