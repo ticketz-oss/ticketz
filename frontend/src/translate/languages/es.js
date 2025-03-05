@@ -827,6 +827,9 @@ const messages = {
             disabled: "Desactivado",
           },
         },
+        FileUploadLimit: {
+          title: "Límite de carga de archivos (MB)",
+        },
         FileDownloadLimit: {
           title: "Límite de descarga de archivos (MB)",
         },
