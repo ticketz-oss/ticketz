@@ -46,6 +46,8 @@ import { Mutex } from "async-mutex";
 import { Html5AudioPlayer } from "../Html5AudioPlayer";
 import { OggAudioPlayer } from "../OggAudioPlayer";
 import { canPlayOggOpus, canRecordOggOpus } from "../../helpers/detectOggOpusSupport";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faDumbbell } from "@fortawesome/free-solid-svg-icons";
 
 const loadPageMutex = new Mutex();
 
@@ -537,6 +539,18 @@ const useStyles = makeStyles((theme) => ({
       marginLeft: '.5em',
     },
   },
+  
+  imagePlaceholderIcon: {
+    minWidth: 150,
+    height: 150,
+    padding: 15,
+    backgroundColor: "#00000030",
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+  },
+
 }));
 
 const recordOpus = canRecordOggOpus();
@@ -579,6 +593,27 @@ const reducer = (state, action) => {
 
     if (messageIndex !== -1) {
       state[messageIndex] = messageToUpdate;
+    }
+
+    return [...state];
+  }
+  
+  if (action.type === "UPDATE_MEDIA") {
+    const messageIndex = state.findIndex((m) => m.id === action.payload.messageId);
+
+    if (messageIndex !== -1) {
+      state[messageIndex].mediaUrl = action.payload.mediaUrl;
+      state[messageIndex].mediaType = action.payload.mediaType;
+    }
+
+    return [...state];
+  }
+  
+  if (action.type === "UPDATE_THUMBNAIL") {
+    const messageIndex = state.findIndex((m) => m.id === action.payload.messageId);
+
+    if (messageIndex !== -1) {
+      state[messageIndex].thumbnailUrl = action.payload.thumbnailUrl;
     }
 
     return [...state];
@@ -679,7 +714,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
         }
       }
     }
-
+    
     socket.on(`company-${companyId}-appMessage`, onAppMessage);
 
     socket.on(`company-${companyId}-presence`, (data) => {
@@ -692,6 +727,28 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
           if (isAtBottom) {
             scrollToBottom();
           }
+        }
+      }
+    });
+    
+    socket.on(`company-${companyId}-media`, (data) => {
+      if (data.ticketId === currentTicketId.current) {
+        const { scrollTop, clientHeight, scrollHeight } = scrollRef.current;
+        const isAtBottom = scrollTop + clientHeight >= (scrollHeight - clientHeight / 4);
+        dispatch({ type: "UPDATE_MEDIA", payload: data });
+        if (isAtBottom) {
+          scrollToBottom();
+        }
+      }
+    });
+    
+    socket.on(`company-${companyId}-thumbnail`, (data) => {
+      if (data.ticketId === currentTicketId.current) {
+        const { scrollTop, clientHeight, scrollHeight } = scrollRef.current;
+        const isAtBottom = scrollTop + clientHeight >= (scrollHeight - clientHeight / 4);
+        dispatch({ type: "UPDATE_THUMBNAIL", payload: data });
+        if (isAtBottom) {
+          scrollToBottom();
         }
       }
     });
@@ -740,10 +797,29 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
     setAnchorEl(null);
   };
 
+  const checkMessageMediaIcon = (message) => {
+    if (message.mediaType === "wait") {
+      return (
+        <>
+        <AccessTime className={classes.imagePlaceholderIcon} />
+        </>
+      )
+    }
+
+    if (message.mediaType === "overlimit") {
+      return (
+        <>
+          <FontAwesomeIcon className={classes.imagePlaceholderIcon} icon={faDumbbell} />
+        </>
+      );
+    }
+  };
+  
   const checkMessageMedia = (message, data) => {
     const document =
       data?.message?.documentMessage
       || data?.message?.documentWithCaptionMessage?.message?.documentMessage;
+
     if (!document && message.mediaType === "image") {
       const caption = data?.message?.imageMessage?.caption || message.body;
       return (
@@ -1241,6 +1317,8 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
               {message.thumbnailUrl && (
                 <img className={classes.previewThumbnail} src={message.thumbnailUrl} />
               )}
+              
+              {checkMessageMediaIcon(message)}
 
               {message.body.includes('data:image') ? messageLocation(message.body, message.createdAt)
                 :
@@ -1357,7 +1435,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
                   {renderMessageAck(message)}
                 </span>
               </div>
-              {message.mediaUrl && checkMessageMedia(message, data)}
+              {message.mediaType && checkMessageMedia(message, data)}
             </div>
           </React.Fragment>
         );
