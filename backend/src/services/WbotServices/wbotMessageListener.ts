@@ -4,7 +4,6 @@ import { isNil, head } from "lodash";
 
 import {
   WASocket,
-  downloadContentFromMessage,
   extractMessageContent,
   getContentType,
   jidNormalizedUser,
@@ -14,12 +13,11 @@ import {
   WAMessageStubType,
   WAMessageUpdate,
   Chat,
-  Contact as WAContact
+  Contact as WAContact,
+  MediaType
 } from "@whiskeysockets/baileys";
 import { Mutex } from "async-mutex";
 import { Op } from "sequelize";
-import { Transform } from "stream";
-import { Throttle } from "stream-throttle";
 import { Sequelize } from "sequelize-typescript";
 import mime from "mime-types";
 import Contact from "../../models/Contact";
@@ -59,7 +57,6 @@ import CheckSettings, { GetCompanySetting } from "../../helpers/CheckSettings";
 import Whatsapp from "../../models/Whatsapp";
 import { SimpleObjectCache } from "../../helpers/simpleObjectCache";
 
-import { CreateInternalMessageService } from "../MessageServices/CreateInternalMessageService";
 import {
   IntegrationMessage,
   IntegrationMessageMetadata,
@@ -69,7 +66,12 @@ import {
 import Integration from "../../models/Integration";
 import IntegrationSession from "../../models/IntegrationSession";
 import getFilenameFromUrl from "../../helpers/getFilenameFromUrl";
-import saveMediaFile from "../../helpers/saveMediaFile";
+import { WorkerManager } from "../../worker_manager";
+import {
+  BaileysDownloaderTaskData,
+  BaileysDownloadTaskResult
+} from "../../workers/BaileysDownloader";
+import { CreateInternalMessageService } from "../MessageServices/CreateInternalMessageService";
 
 type Session = WASocket & {
   id?: number;
@@ -104,6 +106,8 @@ const contactCache = new SimpleObjectCache(1000 * 30, logger);
 const outOfHoursCache = new SimpleObjectCache(1000 * 60 * 5, logger);
 
 const integrationServices = IntegrationServices.getInstance();
+
+const workerManager = WorkerManager.getInstance();
 
 const getTypeMessage = (msg: proto.IWebMessageInfo): string => {
   return getContentType(msg.message);
@@ -324,49 +328,7 @@ const getMessageMedia = (message: proto.IMessage) => {
   );
 };
 
-const downloadStream = async (stream: Transform): Promise<Buffer> => {
-  const MAX_SPEED = (5 * 1024 * 1024) / 8; // 5Mbps
-  const THROTTLE_SPEED = (1024 * 1024) / 8; // 1Mbps
-  const LARGE_FILE_SIZE = 1024 * 1024; // 1 MiB
-
-  const throttle = new Throttle({ rate: MAX_SPEED });
-  let buffer = Buffer.from([]);
-  let totalSize = 0;
-
-  try {
-    // eslint-disable-next-line no-restricted-syntax
-    for await (const chunk of stream.pipe(throttle)) {
-      buffer = Buffer.concat([buffer, chunk]);
-      totalSize += chunk.length;
-
-      if (totalSize > LARGE_FILE_SIZE) {
-        throttle.rate = THROTTLE_SPEED;
-      }
-    }
-  } catch (error) {
-    Sentry.setExtra("ERR_WAPP_DOWNLOAD_MEDIA", { error });
-    Sentry.captureException(new Error("ERR_WAPP_DOWNLOAD_MEDIA"));
-    throw new Error("ERR_WAPP_DOWNLOAD_MEDIA");
-  }
-
-  return buffer;
-};
-
-type ThumbnailMessage = {
-  mediaKey?: Uint8Array | null;
-  thumbnailDirectPath?: string | null;
-  mimetype?: string;
-};
-
-type MediaInfo = {
-  data: Buffer;
-  mimetype: string;
-  filename: string;
-};
-
-export const normalizeThumbnailMediaType = (
-  mimetype: string
-): "thumbnail-video" | "thumbnail-image" | "thumbnail-document" => {
+export const normalizeThumbnailMediaType = (mimetype: string): MediaType => {
   const types = ["thumbnail-video", "thumbnail-image", "thumbnail-document"];
   const type = mimetype.split("/")[0];
 
@@ -374,66 +336,7 @@ export const normalizeThumbnailMediaType = (
     return "thumbnail-document";
   }
 
-  return type as "thumbnail-video" | "thumbnail-image" | "thumbnail-document";
-};
-
-const downloadThumbnail = async ({
-  thumbnailDirectPath: directPath,
-  mediaKey,
-  mimetype
-}: ThumbnailMessage): Promise<MediaInfo> => {
-  if (!directPath || !mediaKey) {
-    return null;
-  }
-
-  logger.debug({ directPath, mediaKey, mimetype }, "downloading thumbnail");
-
-  const mediaType = mimetype
-    ? normalizeThumbnailMediaType(mimetype)
-    : "thumbnail-link";
-
-  let stream: Transform;
-
-  try {
-    stream = await downloadContentFromMessage(
-      { mediaKey, directPath },
-      mediaType
-    );
-  } catch (error) {
-    logger.error(
-      { directPath, mediaKey, mimetype },
-      `Error downloading thumbnail ${error.message}`
-    );
-  }
-
-  logger.debug({ stream }, "downloading thumbnail stream received");
-
-  if (!stream) {
-    throw new Error("Failed to get stream");
-  }
-
-  let buffer = null;
-  try {
-    buffer = await downloadStream(stream);
-  } catch (error) {
-    logger.error(
-      { error },
-      `Error downloading thumbnail: ${error.message} - ${directPath}`
-    );
-  }
-
-  if (!buffer) {
-    throw new Error("ERR_WAPP_DOWNLOAD_MEDIA");
-  }
-
-  const filename = `thumbnail-${makeRandomId(5)}-${new Date().getTime()}.jpg`;
-
-  const media = {
-    data: buffer,
-    mimetype: "image/jpeg",
-    filename
-  };
-  return media;
+  return `thumbnail-${type}` as MediaType;
 };
 
 export const normalizeMediaType = (
@@ -447,124 +350,6 @@ export const normalizeMediaType = (
   }
 
   return type as "audio" | "video" | "image" | "document";
-};
-
-const downloadMedia = async (
-  msg: proto.IWebMessageInfo,
-  wbot: Session,
-  ticket: Ticket
-): Promise<MediaInfo> => {
-  const unpackedMessage = getUnpackedMessage(msg);
-  const message = getMessageMedia(unpackedMessage);
-
-  if (!message) {
-    return null;
-  }
-
-  const fileLimit = parseInt(await CheckSettings("downloadLimit", "15"), 10);
-  if (
-    wbot &&
-    message?.fileLength &&
-    +message.fileLength > fileLimit * 1024 * 1024
-  ) {
-    if (ticket.id > 0) {
-      const fileLimitMessage = {
-        text: `*Mensagem Automática*:\nNosso sistema aceita apenas arquivos com no máximo ${fileLimit} MiB`
-      };
-
-      if (!ticket.isGroup && !msg.key?.fromMe) {
-        await wbot.sendMessage(
-          `${ticket.contact.number}@s.whatsapp.net`,
-          fileLimitMessage
-        );
-      }
-
-      await CreateInternalMessageService(
-        ticket,
-        "*Mensagem do sistema*:\nArquivo recebido além do limite de tamanho do sistema, se for necessário ele pode ser obtido no aplicativo do whatsapp.",
-        null
-      );
-    }
-
-    throw new Error("ERR_FILESIZE_OVER_LIMIT");
-  }
-
-  const messageType = unpackedMessage?.documentMessage
-    ? "document"
-    : normalizeMediaType(message.mimetype);
-
-  let stream: Transform;
-  let contDownload = 0;
-
-  logger.debug(
-    { messageType, id: msg?.key?.id, msg },
-    "downloading message media"
-  );
-
-  while (contDownload < 10 && !stream) {
-    try {
-      const tmpMessage = { ...message };
-      if (tmpMessage?.directPath) {
-        tmpMessage.url = "";
-      }
-
-      // eslint-disable-next-line no-await-in-loop
-      stream = await downloadContentFromMessage(tmpMessage, messageType);
-    } catch (error) {
-      if (ticket.id > 0) {
-        contDownload += 1;
-        // eslint-disable-next-line no-await-in-loop, no-loop-func
-        await new Promise(resolve => {
-          setTimeout(resolve, 1000 * contDownload * 2);
-        });
-        logger.warn(
-          `>>>> erro ${contDownload} de baixar o arquivo ${msg?.key?.id}`
-        );
-      } else {
-        contDownload = 10;
-      }
-    }
-  }
-
-  if (!stream) {
-    throw new Error("Failed to get stream");
-  }
-
-  console.debug({ id: msg?.key?.id }, "downloadMedia stream received");
-
-  let buffer = null;
-  try {
-    buffer = await downloadStream(stream);
-  } catch (error) {
-    logger.error(
-      { error },
-      `Error downloading media: ${error.message} - ${msg?.key?.id}`
-    );
-  }
-
-  if (!buffer) {
-    Sentry.setExtra("ERR_WAPP_DOWNLOAD_MEDIA", { msg });
-    Sentry.captureException(new Error("ERR_WAPP_DOWNLOAD_MEDIA"));
-    throw new Error("ERR_WAPP_DOWNLOAD_MEDIA");
-  }
-
-  let filename = unpackedMessage?.documentMessage?.fileName || "";
-
-  if (!filename) {
-    const ext = message.mimetype.split("/")[1].split(";")[0];
-    filename = `${makeRandomId(5)}-${new Date().getTime()}.${ext}`;
-  } else {
-    filename = `${filename.split(".").slice(0, -1).join(".")}.${makeRandomId(
-      5
-    )}.${filename.split(".").slice(-1)}`;
-  }
-
-  const media = {
-    data: buffer,
-    mimetype: message.mimetype,
-    filename
-  };
-  return media;
 };
 
 const verifyContact = async (
@@ -632,61 +417,13 @@ export const verifyMediaMessage = async (
 ): Promise<Message> => {
   const quotedMsg = await verifyQuotedMessage(msg);
 
-  const thumbnailMsg = messageMedia || msg?.message?.extendedTextMessage;
-
-  let thumbnailMedia: MediaInfo = null;
-  let media: MediaInfo = null;
-
-  if (thumbnailMsg) {
-    logger.debug(
-      { id: msg?.key?.id, thumbnailMsg },
-      "downloading thumbnail media"
-    );
-  }
-
-  try {
-    thumbnailMedia = thumbnailMsg && (await downloadThumbnail(thumbnailMsg));
-  } catch (error) {
-    logger.error(
-      { thumbnailMsg },
-      `Error downloading thumbnail ${error.message}`
-    );
-  }
-
-  try {
-    media = await downloadMedia(msg, wbot, ticket);
-  } catch (error) {
-    logger.error({ msg }, `Error downloading media ${error.message}`);
-  }
-
-  if (!media && !thumbnailMedia) {
-    throw new Error("ERR_WAPP_DOWNLOAD_MEDIA");
-  }
-
-  let mediaUrl = null;
-  try {
-    mediaUrl = await saveMediaFile(media, ticket.companyId, ticket.id);
-  } catch (error) {
-    logger.error({ media, ticketId: ticket.id }, "Error saving media to file");
-  }
-
-  let thumbnailUrl = null;
-  if (thumbnailMedia) {
-    try {
-      thumbnailUrl = await saveMediaFile(
-        thumbnailMedia,
-        ticket.companyId,
-        ticket.id
-      );
-    } catch (error) {
-      logger.error(
-        { thumbnailMedia, ticketId: ticket.id },
-        "Error saving thumbnail to file"
-      );
-    }
-  }
-
   const body = getBodyMessage(msg);
+  const unpackedMessage = getUnpackedMessage(msg);
+  const msgMedia = getMessageMedia(unpackedMessage);
+
+  const fileLimit =
+    Number(await CheckSettings("downloadLimit", "15")) * 1024 * 1024;
+  const overLimit = Number(msgMedia?.fileLength) > fileLimit;
 
   const messageData: MessageData = {
     id: msg.key.id,
@@ -696,9 +433,7 @@ export const verifyMediaMessage = async (
     body: body || "",
     fromMe: msg.key.fromMe,
     read: msg.key.fromMe || ticket.id < 0,
-    mediaUrl,
-    mediaType: media && normalizeMediaType(media.mimetype),
-    thumbnailUrl,
+    mediaType: msgMedia && (overLimit ? "overlimit" : "wait"),
     quotedMsgId: quotedMsg?.id,
     ack: msg.status,
     remoteJid: msg.key.remoteJid,
@@ -713,9 +448,21 @@ export const verifyMediaMessage = async (
     messageData.userId = userId;
   }
 
+  let filename = unpackedMessage?.documentMessage?.fileName || "";
+  if (msgMedia) {
+    if (!filename) {
+      const ext = msgMedia.mimetype.split("/")[1].split(";")[0];
+      filename = `${makeRandomId(5)}-${new Date().getTime()}.${ext}`;
+    } else {
+      filename = `${filename.split(".").slice(0, -1).join(".")}.${makeRandomId(
+        5
+      )}.${filename.split(".").slice(-1)}`;
+    }
+  }
+
   if (ticket.id > 0) {
     await ticket.update({
-      lastMessage: body || media?.filename ? `📎 ${media?.filename}` : ""
+      lastMessage: body || filename ? `📎 ${filename}` : ""
     });
   }
 
@@ -728,6 +475,8 @@ export const verifyMediaMessage = async (
     return newMessage;
   }
 
+  const io = getIO();
+
   if (!msg.key.fromMe && ticket.status === "closed") {
     await ticket.update({ status: "pending" });
     await ticket.reload({
@@ -737,8 +486,6 @@ export const verifyMediaMessage = async (
         { model: Contact, as: "contact" }
       ]
     });
-
-    const io = getIO();
 
     io.to(`company-${ticket.companyId}-closed`)
       .to(`queue-${ticket.queueId}-closed`)
@@ -757,6 +504,101 @@ export const verifyMediaMessage = async (
         ticketId: ticket.id
       });
   }
+
+  const thumbnailMsg = messageMedia || msg?.message?.extendedTextMessage;
+
+  if (thumbnailMsg?.thumbnailDirectPath) {
+    const thumbnailDownloadData: BaileysDownloaderTaskData = {
+      mediaKey: thumbnailMsg.mediaKey,
+      directPath: thumbnailMsg.thumbnailDirectPath,
+      mimetype: "image/jpeg",
+      filename: `thumbnail-${makeRandomId(5)}-${new Date().getTime()}.jpg`,
+      url: null,
+      mediaType: msgMedia?.mimetype
+        ? normalizeThumbnailMediaType(msgMedia.mimetype)
+        : "thumbnail-link",
+      companyId: ticket.companyId,
+      ticketId: ticket.id,
+      contactId: contact.id
+    };
+
+    workerManager
+      .runTask("BaileysDownloader", thumbnailDownloadData)
+      .then(async (result: BaileysDownloadTaskResult) => {
+        await newMessage.update({
+          thumbnailUrl: result.mediaUrl
+        });
+        io.to(ticket.id.toString()).emit(
+          `company-${ticket.companyId}-thumbnail`,
+          {
+            action: "update",
+            ticketId: ticket.id,
+            messageId: newMessage.id,
+            thumbnailUrl: newMessage.thumbnailUrl
+          }
+        );
+      })
+      .catch(error => {
+        logger.error({ error }, "error downloading thumbnail");
+      });
+  }
+
+  if (wbot && overLimit) {
+    if (ticket.id > 0) {
+      const fileLimitMessage = {
+        text: `*Mensagem Automática*:\nNosso sistema aceita apenas arquivos com no máximo ${fileLimit} MiB`
+      };
+
+      if (!ticket.isGroup && !msg.key?.fromMe) {
+        await wbot.sendMessage(
+          `${ticket.contact.number}@s.whatsapp.net`,
+          fileLimitMessage
+        );
+      }
+
+      await CreateInternalMessageService(
+        ticket,
+        "*Mensagem do sistema*:\nArquivo recebido além do limite de tamanho do sistema, se for necessário ele pode ser obtido no aplicativo do whatsapp.",
+        null
+      );
+    }
+
+    return newMessage;
+  }
+
+  const mediaDownloadData: BaileysDownloaderTaskData = {
+    mediaKey: msgMedia.mediaKey,
+    directPath: msgMedia.directPath,
+    mimetype: msgMedia.mimetype,
+    filename,
+    url: msgMedia.url,
+    mediaType: unpackedMessage?.documentMessage
+      ? "document"
+      : normalizeMediaType(msgMedia.mimetype),
+    companyId: ticket.companyId,
+    ticketId: ticket.id,
+    contactId: contact.id
+  };
+
+  workerManager
+    .runTask("BaileysDownloader", mediaDownloadData)
+    .then(async (result: BaileysDownloadTaskResult) => {
+      const mediaType = normalizeMediaType(msgMedia.mimetype);
+      await newMessage.update({
+        mediaUrl: result.mediaUrl,
+        mediaType
+      });
+      io.to(ticket.id.toString()).emit(`company-${ticket.companyId}-media`, {
+        action: "update",
+        ticketId: ticket.id,
+        messageId: newMessage.id,
+        mediaUrl: newMessage.mediaUrl,
+        mediaType
+      });
+    })
+    .catch(error => {
+      logger.error({ error }, "error downloading media");
+    });
 
   return newMessage;
 };
