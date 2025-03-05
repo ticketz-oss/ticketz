@@ -834,6 +834,9 @@ const messages = {
             disabled: "Dinonaktifkan",
           },
         },
+        FileUploadLimit: {
+          title: "Batas unduhan file (MB)",
+        },
         FileDownloadLimit: {
           title: "Batas unduhan file (MB)",
         },

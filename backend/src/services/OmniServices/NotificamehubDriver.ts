@@ -536,7 +536,8 @@ export class NotificamehubDriver implements OmniDriver {
             mimetype,
             filename
           },
-          ticket
+          ticket.companyId,
+          ticket.id
         );
       }
 
@@ -561,7 +562,8 @@ export class NotificamehubDriver implements OmniDriver {
               mimetype: getMimeByExtension(fileExtension),
               filename
             },
-            ticket
+            ticket.companyId,
+            ticket.id
           );
         }
       }

@@ -110,6 +110,7 @@ export default function Options(props) {
   const [soundGroupNotifications, setSoundGroupNotifications] = useState("disabled");
   const [groupsTab, setGroupsTab] = useState("disabled");
   const [apiToken, setApiToken] = useState("");
+  const [uploadLimit, setUploadLimit] = useState("15");
   const [downloadLimit, setDownloadLimit] = useState("15");
   const [fetchHistoryLimitDays, setFetchHistoryLimitDays] = useState("365");
   
@@ -204,6 +205,9 @@ export default function Options(props) {
         
       const apiToken = settings.find((s) => s.key === "apiToken");
       setApiToken(apiToken?.value || "");
+
+      const uploadLimit = settings.find((s) => s.key === "uploadLimit");
+      setUploadLimit(uploadLimit?.value || "");
 
       const downloadLimit = settings.find((s) => s.key === "downloadLimit");
       setDownloadLimit(downloadLimit?.value || "");
@@ -912,6 +916,24 @@ export default function Options(props) {
                     <MenuItem value={"disabled"}>{i18n.t("settings.AllowRegistration.options.disabled")}</MenuItem>
                     <MenuItem value={"enabled"}>{i18n.t("settings.AllowRegistration.options.enabled")}</MenuItem>
                   </Select>
+                </FormControl>
+              </Grid>
+              
+              <Grid xs={12} sm={6} md={4} item>
+                <FormControl className={classes.selectContainer}>
+                  <TextField
+                    id="upload-limit-field"
+                    label={i18n.t("settings.FileUploadLimit.title")}
+                    variant="standard"
+                    name="uploadLimit"
+                    value={uploadLimit}
+                    onChange={(e) => {
+                      setUploadLimit(e.target.value);
+                    }}
+                    onBlur={async (_) => {
+                      await handleSetting("uploadLimit", uploadLimit);
+                    }}
+                  />
                 </FormControl>
               </Grid>
 

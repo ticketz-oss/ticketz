@@ -171,7 +171,7 @@ export const SendWhatsAppMedia = async ({
       console.error("Error converting filename to UTF-8:", error);
     }
 
-    const fileLimit = parseInt(await CheckSettings("downloadLimit", "15"), 10);
+    const fileLimit = parseInt(await CheckSettings("uploadLimit", "15"), 10);
 
     if (media.size > fileLimit * 1024 * 1024) {
       // convert multer file to Readable
@@ -183,7 +183,8 @@ export const SendWhatsAppMedia = async ({
             mimetype: media.mimetype,
             filename: media.originalname
           },
-          ticket
+          ticket.companyId,
+          ticket.id
         )
       );
       if (!fileUrl.startsWith("http")) {
