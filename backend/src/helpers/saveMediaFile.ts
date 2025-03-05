@@ -30,7 +30,7 @@ export default async function saveMediaToFile(
     relativePath += `${ticketId}/`;
   }
 
-  relativePath += `/${randomId}`;
+  relativePath += `${randomId}`;
 
   const fileStorage = S3Storage.getInstance();
   await fileStorage.prepare();
