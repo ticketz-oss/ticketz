@@ -70,7 +70,9 @@ export class WorkerManager extends EventEmitter {
       return null;
     }
 
-    const worker = new Worker(__filename);
+    const worker = new Worker(
+      __filename.endsWith("bundle.o.js") ? "./bundle.worker.js" : __filename
+    );
     const wrapper: WorkerWrapper = { worker, busy: false };
 
     worker.on("message", message => this.handleWorkerMessage(wrapper, message));
