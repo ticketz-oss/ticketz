@@ -1413,6 +1413,8 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
                   />
                 )}
 
+                {checkMessageMediaIcon(message)}
+
                 {message.body.includes('data:image') ? messageLocation(message.body, message.createdAt)
                   :
                   isVCard(message.body) ?
@@ -1435,7 +1437,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
                   {renderMessageAck(message)}
                 </span>
               </div>
-              {message.mediaType && checkMessageMedia(message, data)}
+              {message.mediaUrl && checkMessageMedia(message, data)}
             </div>
           </React.Fragment>
         );
