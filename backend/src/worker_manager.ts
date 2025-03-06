@@ -71,7 +71,9 @@ export class WorkerManager extends EventEmitter {
     }
 
     const worker = new Worker(
-      __filename.endsWith("bundle.o.js") ? "./bundle.worker.js" : __filename
+      __filename.endsWith("bundle.o.js")
+        ? "./dist/bundle.worker.js"
+        : __filename
     );
     const wrapper: WorkerWrapper = { worker, busy: false };
 
