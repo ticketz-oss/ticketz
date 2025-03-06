@@ -30,6 +30,8 @@ WORKDIR /usr/src/app
 COPY --from=build --parents \
   /usr/src/app/./dist/bootstrap.js \
   /usr/src/app/./dist/bundle.o.js \
+  /usr/src/app/./dist/worker_manager.js \
+  /usr/src/app/./dist/workers \
   /usr/src/app/./dist/models \
   /usr/src/app/./dist/config \
   /usr/src/app/./dist/database \

@@ -16,6 +16,14 @@ module.exports = {
       if (request.includes('./models/')) {
         return callback(null, 'commonjs ' + request.replace(/^.*?(?=\.\/models\/)/, ''));
       }
+      // Exclude `worker_manager.js`
+      if (request.includes('worker_manager.js')) {
+        return callback(null, 'commonjs ' + request);
+      }
+      // Exclude `workers` folder
+      if (request.includes('./workers/') || request.includes('workers/')) {
+        return callback(null, 'commonjs ' + request);
+      }
       callback();
     }
   ],
