@@ -12,6 +12,7 @@ RUN --mount=type=cache,target=/root/.npm \
     npm ci && npm run build
 
 RUN webpack
+RUN webpack --config webpack.config.worker.js
 RUN javascript-obfuscator dist/bundle.js --output dist/bundle.o.js \
   --self-defending false \
   --control-flow-flattening true \
@@ -30,8 +31,7 @@ WORKDIR /usr/src/app
 COPY --from=build --parents \
   /usr/src/app/./dist/bootstrap.js \
   /usr/src/app/./dist/bundle.o.js \
-  /usr/src/app/./dist/worker_manager.js \
-  /usr/src/app/./dist/workers \
+  /usr/src/app/./dist/bundle.worker.js \
   /usr/src/app/./dist/models \
   /usr/src/app/./dist/config \
   /usr/src/app/./dist/database \

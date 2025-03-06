@@ -2,9 +2,9 @@ const path = require('path');
 const nodeExternals = require('webpack-node-externals');
 
 module.exports = {
-  entry: './dist/server.js', // Replace with your entry file
+  entry: './dist/worker_manager.js', // Replace with your entry file
   output: {
-    filename: 'bundle.js',
+    filename: 'bundle.worker.js',
     path: path.resolve(__dirname, 'dist'),
   },
   mode: 'production',
