@@ -26,7 +26,7 @@ import {
   Instagram,
   Description,
   Forward,
-  Business
+  Business,
 } from "@material-ui/icons";
 
 import MarkdownWrapper from "../MarkdownWrapper";
@@ -48,6 +48,8 @@ import { OggAudioPlayer } from "../OggAudioPlayer";
 import { canPlayOggOpus, canRecordOggOpus } from "../../helpers/detectOggOpusSupport";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDumbbell } from "@fortawesome/free-solid-svg-icons";
+
+import { downloadAndDecryptMedia } from "../../helpers/whatsappMedia";
 
 const loadPageMutex = new Mutex();
 
@@ -807,11 +809,50 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
     }
 
     if (message.mediaType === "overlimit") {
-      return (
-        <>
-          <FontAwesomeIcon className={classes.imagePlaceholderIcon} icon={faDumbbell} />
-        </>
-      );
+      const data = JSON.parse(message.dataJson);
+      const documentData =
+        data?.message?.documentMessage
+        || data?.message?.documentWithCaptionMessage?.message?.documentMessage;
+      if (documentData) {
+        return (
+          <>
+            <div className={classes.downloadMedia}>
+              <Button
+                startIcon={<Description />}
+                endIcon={<GetApp />}
+                color="primary"
+                variant="outlined"
+                target="_blank"
+                onClick={async () => {
+                  try {
+                    const file = await downloadAndDecryptMedia({
+                      directPath: documentData.directPath,
+                      mediaKey: documentData.mediaKey,
+                      mediaType: "Document"
+                    });
+                    const fileURL = URL.createObjectURL(new Blob([file]));
+                    const a = document.createElement("a");
+                    a.href = fileURL;
+                    a.download = documentData.fileName;
+                    a.click();
+                  } catch (error) {
+                    toastError(error);
+                  }
+                }
+                }
+              >
+               { documentData?.fileName || data?.fileName || message.body}
+              </Button>
+            </div>
+          </>
+        );
+      } else {
+        return (
+          <>
+            <FontAwesomeIcon className={classes.imagePlaceholderIcon} icon={faDumbbell} />
+          </>
+        );
+      }
     }
   };
   
@@ -1339,7 +1380,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
                     {message.quotedMsg && renderQuotedMessage(message)}
                     {renderLinkPreview(message)}
                     {!isSticker && (
-                      message.mediaUrl && !data?.message?.extendedTextMessage ?
+                      message.mediaType && !data?.message?.extendedTextMessage ?
                         ""
                         :
                         <>
@@ -1426,7 +1467,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
                     message.quotedMsg && renderQuotedMessage(message)}
                 {renderLinkPreview(message)}
                 {!isSticker && (
-                  message.mediaUrl ? "" : <MarkdownWrapper>{message.body}</MarkdownWrapper>
+                  message.mediaType ? "" : <MarkdownWrapper>{message.body}</MarkdownWrapper>
                 )
                 }
                 <span className={[clsx(classes.timestamp, {
