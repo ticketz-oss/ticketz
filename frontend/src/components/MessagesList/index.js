@@ -22,6 +22,7 @@ import {
   DoneAll,
   ExpandMore,
   GetApp,
+  CloudDownload,
   Facebook,
   Instagram,
   Description,
@@ -49,6 +50,7 @@ import { canPlayOggOpus, canRecordOggOpus } from "../../helpers/detectOggOpusSup
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDumbbell } from "@fortawesome/free-solid-svg-icons";
 
+import { getMessageMedia } from "../../helpers/getMessageMedia";
 import { downloadAndDecryptMedia } from "../../helpers/whatsappMedia";
 
 const loadPageMutex = new Mutex();
@@ -641,9 +643,32 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
   const messageOptionsMenuOpen = Boolean(anchorEl);
   const currentTicketId = useRef(ticketId);
   const [contactPresence, setContactPresence] = useState("available");
+  
+  const [bubbleStatus, setBubbleStatus] = useState({});
 
   const socketManager = useContext(SocketContext);
 
+  function updateBubbleStatus(messageId, field, value) {
+    setBubbleStatus((prev) => {
+      return {
+        ...prev,
+        [messageId]: {
+          ...prev[messageId],
+          [field]: value,
+        },
+      };
+    });
+  }
+  
+  function clearBubbleStatus(messageId) {
+    // remove messageId from bubbleStatus
+    setBubbleStatus((prev) => {
+      const newBubbleStatus = { ...prev };
+      delete newBubbleStatus[messageId];
+      return newBubbleStatus;
+    });
+  }
+  
   function loadData(incrementPage = false) {
     setLoading(true);
     const thisPageNumber = incrementPage ? pageNumber + 1 : 1;
@@ -810,40 +835,66 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
 
     if (message.mediaType === "overlimit") {
       const data = JSON.parse(message.dataJson);
-      const documentData =
-        data?.message?.documentMessage
-        || data?.message?.documentWithCaptionMessage?.message?.documentMessage;
-      if (documentData) {
+      const { messageMedia, mediaType } = getMessageMedia(data);
+
+      if (messageMedia && mediaType) {
+        const { directPath, mediaKey } = messageMedia;
+        const fileName = messageMedia.fileName || "file.bin";
+
+        let downloadProgress = -1;
+
         return (
           <>
             <div className={classes.downloadMedia}>
               <Button
                 startIcon={<Description />}
-                endIcon={<GetApp />}
+                endIcon={
+                  bubbleStatus[message.id]?.progress ?
+                    <CircularProgress
+                      style={{ width: 20, height: 20 }}
+                      variant={bubbleStatus[message.id].progress < 5 ? "indeterminate" : "determinate"}
+                      value={bubbleStatus[message.id].progress} />
+                    :
+                    <CloudDownload />
+                }
                 color="primary"
                 variant="outlined"
                 target="_blank"
                 onClick={async () => {
                   try {
                     const file = await downloadAndDecryptMedia({
-                      directPath: documentData.directPath,
-                      mediaKey: documentData.mediaKey,
-                      mediaType: "Document"
+                      directPath,
+                      mediaKey,
+                      mediaType
+                    }, (progress) => {
+                      updateBubbleStatus(message.id, "progress", progress);
                     });
                     const fileURL = URL.createObjectURL(new Blob([file]));
                     const a = document.createElement("a");
                     a.href = fileURL;
-                    a.download = documentData.fileName;
+                    a.download = fileName;
                     a.click();
+                    clearBubbleStatus(message.id);
                   } catch (error) {
                     toastError(error);
                   }
                 }
                 }
               >
-               { documentData?.fileName || data?.fileName || message.body}
+               { fileName }
               </Button>
             </div>
+            {message.body &&
+              <>
+                <div className={[clsx({
+                  [classes.textContentItemDeleted]: message.isDeleted,
+                }),]}>
+                  <MarkdownWrapper>
+                    { message.body }
+                  </MarkdownWrapper>
+                </div>
+              </>
+            }
           </>
         );
       } else {
