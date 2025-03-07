@@ -71,7 +71,6 @@ import {
   BaileysDownloaderTaskData,
   BaileysDownloadTaskResult
 } from "../../workers/BaileysDownloader";
-import { CreateInternalMessageService } from "../MessageServices/CreateInternalMessageService";
 
 type Session = WASocket & {
   id?: number;
@@ -411,7 +410,7 @@ export const verifyMediaMessage = async (
   msg: proto.IWebMessageInfo,
   ticket: Ticket,
   contact: Contact,
-  wbot: Session = null,
+  _wbot = null,
   messageMedia = null,
   userId: number = null
 ): Promise<Message> => {
@@ -453,10 +452,6 @@ export const verifyMediaMessage = async (
     if (!filename) {
       const ext = msgMedia.mimetype.split("/")[1].split(";")[0];
       filename = `${makeRandomId(5)}-${new Date().getTime()}.${ext}`;
-    } else {
-      filename = `${filename.split(".").slice(0, -1).join(".")}.${makeRandomId(
-        5
-      )}.${filename.split(".").slice(-1)}`;
     }
   }
 
@@ -543,26 +538,7 @@ export const verifyMediaMessage = async (
       });
   }
 
-  if (wbot && overLimit) {
-    if (ticket.id > 0) {
-      const fileLimitMessage = {
-        text: `*Mensagem Automática*:\nNosso sistema aceita apenas arquivos com no máximo ${fileLimit} MiB`
-      };
-
-      if (!ticket.isGroup && !msg.key?.fromMe) {
-        await wbot.sendMessage(
-          `${ticket.contact.number}@s.whatsapp.net`,
-          fileLimitMessage
-        );
-      }
-
-      await CreateInternalMessageService(
-        ticket,
-        "*Mensagem do sistema*:\nArquivo recebido além do limite de tamanho do sistema, se for necessário ele pode ser obtido no aplicativo do whatsapp.",
-        null
-      );
-    }
-
+  if (overLimit) {
     return newMessage;
   }
 
