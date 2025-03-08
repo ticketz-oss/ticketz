@@ -1,16 +1,18 @@
 import { Worker, isMainThread, parentPort } from "worker_threads";
 import { EventEmitter } from "events";
 import os from "os";
+import { Mutex } from "async-mutex";
 import { initLogger, logger } from "./utils/logger";
 import { makeRandomId } from "./helpers/MakeRandomId";
 import { WorkerHandler } from "./workers/WorkerHandler";
 import { BaileysDownloader } from "./workers/BaileysDownloader";
 import "./database";
+import { getIO } from "./libs/socket";
 
 interface Task {
   taskId: string;
   taskHandler: string;
-  taskData: any;
+  taskData: Record<string, any>;
   resolve: (value?: any) => void;
   reject: (reason?: any) => void;
   timeout: NodeJS.Timeout;
@@ -42,6 +44,8 @@ export class WorkerManager extends EventEmitter {
 
   private activeTasks: Map<string, Task>;
 
+  private mutex: Mutex;
+
   // eslint-disable-next-line no-use-before-define
   private static instance: WorkerManager;
 
@@ -49,12 +53,13 @@ export class WorkerManager extends EventEmitter {
     super();
     const cpus = os.cpus().length;
     this.minThreads = options?.minThreads ?? (cpus > 4 ? 4 : cpus);
-    this.maxThreads = options?.maxThreads ?? (cpus > 1 ? cpus - 1 : 1);
+    this.maxThreads = options?.maxThreads ?? (cpus > 4 ? cpus - 1 : cpus);
     this.timeout = options?.timeout ?? 30000;
 
     this.workers = [];
     this.taskQueue = [];
     this.activeTasks = new Map();
+    this.mutex = new Mutex();
 
     this.initWorkers();
   }
@@ -65,11 +70,7 @@ export class WorkerManager extends EventEmitter {
     }
   }
 
-  private addWorker(): WorkerWrapper {
-    if (this.workers.length >= this.maxThreads) {
-      return null;
-    }
-
+  private createWorker(): WorkerWrapper {
     const worker = new Worker(
       __filename.endsWith("bundle.o.js")
         ? "./dist/bundle.worker.js"
@@ -81,14 +82,41 @@ export class WorkerManager extends EventEmitter {
     worker.on("error", err => this.handleWorkerError(wrapper, err));
     worker.on("exit", code => this.handleWorkerExit(wrapper, code));
 
+    return wrapper;
+  }
+
+  public async sendStats(): Promise<void> {
+    const io = getIO();
+    if (!io) {
+      return;
+    }
+
+    const stats = {
+      min: this.minThreads,
+      max: this.maxThreads,
+      workers: this.workers.length,
+      queue: this.taskQueue.length,
+      active: this.activeTasks.size
+    };
+
+    io.to("super").emit("workerStats", stats);
+  }
+
+  private addWorker(): WorkerWrapper {
+    if (this.workers.length >= this.maxThreads) {
+      return null;
+    }
+
+    const wrapper = this.createWorker();
     this.workers.push(wrapper);
+    this.sendStats();
     return wrapper;
   }
 
   private handleWorkerMessage(wrapper: WorkerWrapper, message: any): void {
     logger.debug(
-      { message },
-      `Worker ${wrapper.worker.threadId} received message`
+      { message, threadId: wrapper.worker.threadId },
+      "Received message from worker"
     );
 
     const { taskId, result, error } = message;
@@ -103,8 +131,8 @@ export class WorkerManager extends EventEmitter {
       this.activeTasks.delete(taskId);
     }
 
-    wrapper.busy = false;
-    this.processNextTask();
+    this.sendStats();
+    this.processNextTask(wrapper);
   }
 
   private handleWorkerError(wrapper: WorkerWrapper, err: Error): void {
@@ -117,9 +145,14 @@ export class WorkerManager extends EventEmitter {
     this.removeWorker(wrapper);
   }
 
-  private removeWorker(wrapper: WorkerWrapper): void {
+  private removeWorker(wrapper: WorkerWrapper, force = false): void {
+    if (!force && this.workers.length <= this.minThreads) {
+      return;
+    }
     logger.debug(`Removing worker ${wrapper.worker.threadId}`);
     this.workers = this.workers.filter(w => w !== wrapper);
+    wrapper.worker.terminate();
+    this.sendStats();
     if (this.workers.length < this.minThreads) {
       this.addWorker();
     }
@@ -129,29 +162,43 @@ export class WorkerManager extends EventEmitter {
     return this.workers.find(worker => !worker.busy) || this.addWorker();
   }
 
-  private processNextTask(): void {
-    if (this.taskQueue.length === 0) return;
+  private async processNextTask(worker: WorkerWrapper = null): Promise<void> {
+    this.mutex
+      .runExclusive(async () => {
+        if (this.taskQueue.length === 0) return;
 
-    const availableWorker = this.findAvailableWorker();
-    if (!availableWorker) {
-      return;
-    }
+        const availableWorker = worker || this.findAvailableWorker();
+        if (!availableWorker) {
+          return;
+        }
 
-    const task = this.taskQueue.shift();
-    if (task) {
-      availableWorker.busy = true;
-      task.timeout = setTimeout(() => {
-        this.activeTasks.delete(task.taskId);
-        task.reject(new Error("Task timed out"));
-        availableWorker.worker.terminate();
-        this.removeWorker(availableWorker);
-      }, this.timeout);
-      availableWorker.worker.postMessage({
-        taskId: task.taskId,
-        taskHandler: task.taskHandler,
-        taskData: task.taskData
+        const task = this.taskQueue.shift();
+        if (task) {
+          availableWorker.busy = true;
+          task.timeout = setTimeout(() => {
+            this.activeTasks.delete(task.taskId);
+            task.reject(new Error("Task timed out"));
+            this.removeWorker(availableWorker, true);
+          }, this.timeout);
+          try {
+            availableWorker.worker.postMessage({
+              taskId: task.taskId,
+              taskHandler: task.taskHandler,
+              taskData: task.taskData
+            });
+          } catch (error) {
+            task.reject(error);
+            this.removeWorker(availableWorker, true);
+          }
+          this.sendStats();
+        } else {
+          availableWorker.busy = false;
+          this.removeWorker(availableWorker);
+        }
+      })
+      .catch(error => {
+        logger.error({ error }, "Error processing next task");
       });
-    }
   }
 
   public static getInstance(options?: WorkerManagerOptions): WorkerManager {
@@ -211,7 +258,7 @@ if (!isMainThread) {
     workerLogger.debug({ promise, reason }, "Unhandled Rejection");
   });
 
-  const handlers = {};
+  const handlers: { [key: string]: WorkerHandler } = {};
 
   const registerHandler = (handler: WorkerHandler): void => {
     handlers[handler.getName()] = handler;
