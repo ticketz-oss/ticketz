@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 
 import Paper from "@material-ui/core/Paper";
 import Container from "@material-ui/core/Container";
@@ -51,6 +51,7 @@ import OnlyForSuperUser from "../../components/OnlyForSuperUser";
 import useAuth from "../../hooks/useAuth.js";
 import clsx from "clsx";
 import { loadJSON } from "../../helpers/loadJSON";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 import TicketzRegistry from "../../components/TicketzRegistry";
 import config from "../../services/config";
@@ -261,6 +262,7 @@ const useStyles = makeStyles((theme) => ({
 const Dashboard = () => {
   const classes = useStyles();
   const [counters, setCounters] = useState({});
+  const [workerStats, setWorkerStats] = useState({});
   const [attendants, setAttendants] = useState([]);
   const [filterType, setFilterType] = useState(1);
   const [period, setPeriod] = useState(0);
@@ -279,6 +281,8 @@ const Dashboard = () => {
   const [registered, setRegistered] = useState(false);
   const [proInstructionsOpen, setProInstructionsOpen] = useState(false);
   
+  const socketManager = useContext(SocketContext);
+  
   async function showProInstructions() {
     if (gitinfo.commitHash) {
       setProInstructionsOpen(true);
@@ -288,6 +292,17 @@ const Dashboard = () => {
     window.open("https://pro.ticke.tz", "_blank");
   }
   
+  useEffect(() => {
+    const socket = socketManager.GetSocket(companyId);
+    socket.on("workerStats", (data) => {
+      setWorkerStats(data);
+    });
+
+    return () => {
+      socket.off("workerStats");
+    };
+  }, [socketManager]);
+
   useEffect(() => {
     getCurrentUserInfo().then(
       (user) => {
@@ -893,6 +908,14 @@ const Dashboard = () => {
               />
             ) : null}
           </Grid>
+          
+          <OnlyForSuperUser
+            user={currentUser}
+            yes={() => (
+              <Grid item xs={12}>
+              Worker Threads: Min: {workerStats.min} Max: {workerStats.max} Workers: {workerStats.workers} Active: { workerStats.active} Queue: {workerStats.queue}
+              </Grid>
+            )} />
 
         </Grid>
       </Container>
