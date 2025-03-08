@@ -163,8 +163,19 @@ export class WorkerManager extends EventEmitter {
   }
 
   private async processNextTask(worker: WorkerWrapper = null): Promise<void> {
+    const lockId = makeRandomId(10);
+    logger.debug(`Waiting for lock for task ${lockId}`);
+
+    const handleTimeout = (task: Task, availableWorker: WorkerWrapper) => {
+      logger.debug(`Task ${task.taskId} timed out / lockId ${lockId}`);
+      this.activeTasks.delete(task.taskId);
+      task.reject(new Error("Task timed out"));
+      this.removeWorker(availableWorker, true);
+    };
+
     this.mutex
       .runExclusive(async () => {
+        logger.debug(`Obtained lock ${lockId}`);
         if (this.taskQueue.length === 0) return;
 
         const availableWorker = worker || this.findAvailableWorker();
@@ -175,11 +186,10 @@ export class WorkerManager extends EventEmitter {
         const task = this.taskQueue.shift();
         if (task) {
           availableWorker.busy = true;
-          task.timeout = setTimeout(() => {
-            this.activeTasks.delete(task.taskId);
-            task.reject(new Error("Task timed out"));
-            this.removeWorker(availableWorker, true);
-          }, this.timeout);
+          task.timeout = setTimeout(
+            () => handleTimeout(task, availableWorker),
+            this.timeout
+          );
           try {
             availableWorker.worker.postMessage({
               taskId: task.taskId,
@@ -196,8 +206,14 @@ export class WorkerManager extends EventEmitter {
           this.removeWorker(availableWorker);
         }
       })
+      .then(() => {
+        logger.debug(`Released lock ${lockId}`);
+      })
       .catch(error => {
-        logger.error({ error }, "Error processing next task");
+        logger.error(
+          { error },
+          `Error processing next task - lockId ${lockId}`
+        );
       });
   }
 
