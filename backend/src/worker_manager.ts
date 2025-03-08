@@ -176,7 +176,14 @@ export class WorkerManager extends EventEmitter {
     this.mutex
       .runExclusive(async () => {
         logger.debug(`Obtained lock ${lockId}`);
-        if (this.taskQueue.length === 0) return;
+
+        if (this.taskQueue.length === 0) {
+          if (worker) {
+            worker.busy = false;
+            this.removeWorker(worker);
+          }
+          return;
+        }
 
         const availableWorker = worker || this.findAvailableWorker();
         if (!availableWorker) {
