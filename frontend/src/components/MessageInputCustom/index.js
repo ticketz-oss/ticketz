@@ -814,12 +814,15 @@ const MessageInputCustom = (props) => {
       <Paper square elevation={0} className={classes.mainWrapper}>
         {(replyingMessage && renderReplyingMessage(replyingMessage)) || (editingMessage && renderReplyingMessage(editingMessage))}
         <div className={classes.newMessageBox}>
-          <EmojiOptions
-            disabled={disableOption}
-            handleAddEmoji={handleAddEmoji}
-            showEmoji={showEmoji}
-            setShowEmoji={setShowEmoji}
-          />
+          {
+            /Mobi|Android|iPhone/i.test(navigator.userAgent) ||
+            <EmojiOptions
+              disabled={disableOption}
+              handleAddEmoji={handleAddEmoji}
+              showEmoji={showEmoji}
+              setShowEmoji={setShowEmoji}
+            />
+          }
 
           <FileInput
             disableOption={disableOption}
