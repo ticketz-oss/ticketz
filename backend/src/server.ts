@@ -18,6 +18,7 @@ import { TypebotIntegration } from "./services/IntegrationServices/TypebotIntegr
 import { NgrokInstance } from "./helpers/NgrokInstance";
 import { OmniServices } from "./services/OmniServices/OmniServices";
 import { NotificamehubDriver } from "./services/OmniServices/NotificamehubDriver";
+import Message from "./models/Message";
 
 import { ticketzPro } from "./ticketzPro/ticketzPro";
 
@@ -95,6 +96,17 @@ const server = app.listen(process.env.PORT, async () => {
   logger.info(`Server is listening on port: ${process.env.PORT}`);
   await startServer();
 });
+
+// Allow user to download media from messages the server failed to downloadit
+Message.update({ mediaType: "overlimit" }, { where: { mediaType: "wait" } })
+  .then(result => {
+    logger.debug(`Changed ${result[0]} media type 'wait' to 'overlimit'`);
+  })
+  .catch(error => {
+    logger.error(
+      `Error updating media type 'wait' to 'overlimit': ${error.message}`
+    );
+  });
 
 initIO(server);
 

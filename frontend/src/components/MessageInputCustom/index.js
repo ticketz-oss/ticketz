@@ -987,12 +987,15 @@ const MessageInputCustom = (props) => {
           </div>
         }
         <div className={classes.newMessageBox}>
-          <EmojiOptions
-            disabled={disableOption}
-            handleAddEmoji={handleAddEmoji}
-            showEmoji={showEmoji}
-            setShowEmoji={setShowEmoji}
-          />
+          {
+            /Mobi|Android|iPhone/i.test(navigator.userAgent) ||
+            <EmojiOptions
+              disabled={disableOption}
+              handleAddEmoji={handleAddEmoji}
+              showEmoji={showEmoji}
+              setShowEmoji={setShowEmoji}
+            />
+          }
 
           {isNarrowScreen ? (
             <div>
