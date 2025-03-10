@@ -72,6 +72,30 @@ const NotificationsPopOver = (props) => {
   
   const socketManager = useContext(SocketContext);
 
+  
+  function clearTicket(ticketId) {
+    setNotifications(prevState => {
+      const ticketIndex = prevState.findIndex(t => t.id === ticketId);
+      if (ticketIndex !== -1) {
+        prevState.splice(ticketIndex, 1);
+        return [...prevState];
+      }
+      return prevState;
+    });
+
+    setDesktopNotifications(prevState => {
+      const notfiticationIndex = prevState.findIndex(
+        n => n.tag === String(ticketId)
+      );
+      if (notfiticationIndex !== -1) {
+        prevState[notfiticationIndex].close();
+        prevState.splice(notfiticationIndex, 1);
+        return [...prevState];
+      }
+      return prevState;
+    });
+  }
+  
   useEffect(() => {
     getSetting("soundGroupNotifications").then((soundGroupNotifications) => {
       setSoundGroupNotifications(soundGroupNotifications === "enabled");
@@ -114,27 +138,12 @@ const NotificationsPopOver = (props) => {
     }
 
     const onCompanyTicketNotificationsPopover = (data) => {
-      if (data.action === "updateUnread" || data.action === "delete") {
-        setNotifications(prevState => {
-          const ticketIndex = prevState.findIndex(t => t.id === data.ticketId);
-          if (ticketIndex !== -1) {
-            prevState.splice(ticketIndex, 1);
-            return [...prevState];
-          }
-          return prevState;
-        });
+      if (data.action === "update" || data.ticket?.status === "closed") {
+        clearTicket(data.ticket.id);
+      }
 
-        setDesktopNotifications(prevState => {
-          const notfiticationIndex = prevState.findIndex(
-            n => n.tag === String(data.ticketId)
-          );
-          if (notfiticationIndex !== -1) {
-            prevState[notfiticationIndex].close();
-            prevState.splice(notfiticationIndex, 1);
-            return [...prevState];
-          }
-          return prevState;
-        });
+      if (data.action === "updateUnread" || data.action === "delete") {
+        clearTicket(data.ticketId);
       }
     };
 
