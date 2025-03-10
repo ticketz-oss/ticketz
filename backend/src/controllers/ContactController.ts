@@ -1,5 +1,7 @@
 import * as Yup from "yup";
 import { Request, Response } from "express";
+import { parse as csvParser } from "csv";
+import fs from "fs";
 import { getIO } from "../libs/socket";
 
 import ListContactsService from "../services/ContactServices/ListContactsService";
@@ -15,6 +17,8 @@ import SimpleListService, {
   SearchContactParams
 } from "../services/ContactServices/SimpleListService";
 import ContactCustomField from "../models/ContactCustomField";
+
+import { logger } from "../utils/logger";
 
 type IndexQuery = {
   searchParam: string;
@@ -200,4 +204,77 @@ export const list = async (req: Request, res: Response): Promise<Response> => {
   const contacts = await SimpleListService({ name, companyId });
 
   return res.json(contacts);
+};
+
+export const importCsv = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { companyId } = req.user;
+  const { file } = req;
+
+  if (!file) {
+    throw new AppError("ERR_NO_FILE", 400);
+  }
+
+  const parser = csvParser(
+    { delimiter: ",", columns: true },
+    async (err, data) => {
+      if (err) {
+        throw new AppError("ERR_INVALID_CSV", 400);
+      }
+
+      data.forEach(async (record: any) => {
+        const contact = {
+          companyId,
+          name: record.name || record.Name,
+          number: record.number || record.Number,
+          email: record.email || record.Email,
+          extraInfo: []
+        };
+
+        Object.keys(record).forEach((key: string) => {
+          if (
+            key !== "name" &&
+            key !== "number" &&
+            key !== "email" &&
+            key !== "Name" &&
+            key !== "Number" &&
+            key !== "Email" &&
+            record[key]
+          ) {
+            contact.extraInfo.push({
+              name: key,
+              value: record[key]
+            });
+          }
+        });
+
+        try {
+          const newContact = await CreateContactService(contact);
+          const io = getIO();
+          io.to(`company-${companyId}-mainchannel`).emit(
+            `company-${companyId}-contact`,
+            {
+              action: "update",
+              contact: newContact
+            }
+          );
+        } catch (error) {
+          logger.error({ contact }, `Error creating contact: ${error.message}`);
+        }
+      });
+    }
+  );
+
+  const readable = fs.createReadStream(file.path);
+
+  parser.on("end", () => {
+    readable.destroy();
+    fs.unlinkSync(file.path);
+  });
+
+  readable.pipe(parser);
+
+  return res.status(200).json({ message: "Contacts being imported" });
 };
