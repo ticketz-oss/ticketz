@@ -24,6 +24,7 @@ interface Request {
   showAll?: string;
   userId: string;
   withUnreadMessages?: string;
+  notClosed?: boolean;
   all?: boolean;
   queueIds: number[];
   tags: number[];
@@ -51,6 +52,7 @@ const ListTicketsService = async ({
   showAll,
   userId,
   withUnreadMessages,
+  notClosed,
   all,
   companyId
 }: Request): Promise<Response> => {
@@ -240,6 +242,13 @@ const ListTicketsService = async ({
 
   const limit = all ? undefined : 40;
   const offset = all ? undefined : limit * (+pageNumber - 1);
+
+  if (notClosed) {
+    whereCondition = {
+      ...whereCondition,
+      status: { [Op.ne]: "closed" }
+    };
+  }
 
   whereCondition = {
     ...whereCondition,
