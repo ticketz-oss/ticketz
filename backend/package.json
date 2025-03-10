@@ -33,6 +33,7 @@
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "cron": "^2.4.4",
+    "csv": "^6.3.11",
     "date-fns": "^2.30.0",
     "dotenv": "^16.4.5",
     "eslint-config-prettier": "^9.1.0",
