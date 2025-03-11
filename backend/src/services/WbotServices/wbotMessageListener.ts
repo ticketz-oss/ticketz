@@ -229,11 +229,14 @@ export const getBodyMessage = (msg: proto.IWebMessageInfo): string | null => {
       logger.warn({ type, msg }, "received unsupported message");
       return `unsupported message: ${type}`;
     }
-    const body = types[type] || "";
+    let body = types[type] || "";
     if (!body && type !== "imageMessage") {
       logger.debug({ body, key: msg?.key, type }, "Body is empty");
     }
-    return types[type] || "";
+    if (typeof body !== "string") {
+      body = "unsupported body content";
+    }
+    return body;
   } catch (error) {
     Sentry.setExtra("Error getTypeMessage", { msg, BodyMsg: msg.message });
     Sentry.captureException(error);
