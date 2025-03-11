@@ -10,6 +10,8 @@ import ShowTicketUUIDService from "../services/TicketServices/ShowTicketFromUUID
 import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import UpdateTicketService from "../services/TicketServices/UpdateTicketService";
 import ListTicketsServiceKanban from "../services/TicketServices/ListTicketsServiceKanban";
+import { makeRandomId } from "../helpers/MakeRandomId";
+import { logger } from "../utils/logger";
 
 type IndexQuery = {
   isSearch?: string;
@@ -152,8 +154,7 @@ export const kanban = async (
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
-  const { contactId, userId, queueId, whatsappId }: TicketData =
-    req.body;
+  const { contactId, userId, queueId, whatsappId }: TicketData = req.body;
   const { companyId } = req.user;
 
   const ticket = await CreateTicketService({
@@ -161,7 +162,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     userId,
     companyId,
     queueId,
-    whatsappId,
+    whatsappId
   });
 
   const io = getIO();
@@ -201,17 +202,30 @@ export const update = async (
 ): Promise<Response> => {
   const { ticketId } = req.params;
 
-  const { ticket } = await updateMutex.runExclusive(async () => {
-    const result = await UpdateTicketService({
-      ticketData: req.body,
-      ticketId: Number.parseInt(ticketId, 10),
-      tokenData: req.tokenData,
-      reqUserId: Number(req.user.id)
-    });
-    return result;
-  });
+  const lockId = makeRandomId(10);
 
-  return res.status(200).json(ticket);
+  logger.debug(`updateMutex: lockId ${lockId} - trying to acquire lock`);
+
+  try {
+    const { ticket } = await updateMutex.runExclusive(async () => {
+      logger.debug(`updateMutex: lockId ${lockId} - acquired lock`);
+      const result = await UpdateTicketService({
+        ticketData: req.body,
+        ticketId: Number.parseInt(ticketId, 10),
+        tokenData: req.tokenData,
+        reqUserId: Number(req.user.id)
+      });
+      logger.debug(`updateMutex: lockId ${lockId} - releasing lock`);
+      return result;
+    });
+    return res.status(200).json(ticket);
+  } catch (e) {
+    // get class of e
+    const type = e.constructor?.name || "Error";
+    const { message } = e;
+    logger.error({ type, message }, `updateMutex: lockId ${lockId} - error`);
+    return res.status(500).json({ error: e });
+  }
 };
 
 export const remove = async (
