@@ -220,11 +220,10 @@ export const update = async (
     });
     return res.status(200).json(ticket);
   } catch (e) {
-    // get class of e
     const type = e.constructor?.name || "Error";
     const { message } = e;
     logger.error({ type, message }, `updateMutex: lockId ${lockId} - error`);
-    return res.status(500).json({ error: e });
+    throw e;
   }
 };
 
