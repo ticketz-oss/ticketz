@@ -6,3 +6,5 @@
 /.externalToolBuilders/
 /.project
 /.settings/
+/private/*
+!/private/index.html
