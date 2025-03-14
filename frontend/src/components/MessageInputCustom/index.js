@@ -38,6 +38,8 @@ import useQuickMessages from "../../hooks/useQuickMessages";
 import Compressor from 'compressorjs';
 import LinearWithValueLabel from "./ProgressBarCustom";
 import MarkdownWrapper from "../MarkdownWrapper";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSignature } from '@fortawesome/free-solid-svg-icons';
 
 const Mp3Recorder = new MicRecorder({ bitRate: 128 });
 
@@ -174,6 +176,13 @@ const useStyles = makeStyles((theme) => ({
     color: "#6bcbef",
     fontWeight: 500,
   },
+
+  iconSwitch: {
+    color: (props) => (props.value ? theme.palette.primary.main : "gray"),
+    width: 48,
+    height: 48
+  },
+
 }));
 
 const EmojiOptions = (props) => {
@@ -204,28 +213,33 @@ const EmojiOptions = (props) => {
 };
 
 const SignSwitch = (props) => {
-  const { width, setSignMessage, signMessage } = props;
-  if (isWidthUp("md", width)) {
-    return (
-      <FormControlLabel
-        style={{ marginRight: 7, color: "gray" }}
-        label={i18n.t("messagesInput.signMessage")}
-        labelPlacement="start"
-        control={
-          <Switch
-            size="small"
-            checked={signMessage}
-            onChange={(e) => {
-              setSignMessage(e.target.checked);
-            }}
-            name="showAllTickets"
-            color="primary"
-          />
-        }
-      />
-    );
-  }
-  return null;
+  const { setSignMessage, signMessage } = props;
+  const classes = useStyles({ signMessage });
+
+  return (
+    <IconButton
+      onClick={() => setSignMessage(!signMessage)}
+      className={classes.signatureIcon}
+    >
+      <FontAwesomeIcon icon={faSignature} />
+    </IconButton>
+  );
+};
+
+const IconSwitch = (props) => {
+  const { setter, value, icon, tooltip } = props;
+  const classes = useStyles({ value });
+
+  return (
+    <Tooltip title={tooltip}>
+      <IconButton
+        onClick={() => setter(!value)}
+        className={classes.iconSwitch}
+      >
+        <FontAwesomeIcon icon={icon} />
+      </IconButton>
+    </Tooltip>
+  );
 };
 
 const FileInput = (props) => {
@@ -829,10 +843,11 @@ const MessageInputCustom = (props) => {
             handleChangeMedias={handleChangeMedias}
           />
 
-          <SignSwitch
-            width={props.width}
-            setSignMessage={setSignMessage}
-            signMessage={signMessage}
+          <IconSwitch
+            setter={setSignMessage}
+            value={signMessage}
+            icon={faSignature}
+            tooltip={i18n.t("messagesInput.signMessage")}
           />
 
           <CustomInput
