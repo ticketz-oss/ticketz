@@ -25,24 +25,12 @@ const processAudio = async (audio: string): Promise<string> => {
   const outputAudio = `${publicFolder}/${new Date().getTime()}.mp3`;
   return new Promise((resolve, reject) => {
     exec(
-      `${ffmpegPath.path} -i ${audio} -vn -ab 128k -ar 44100 -f ipod ${outputAudio} -y`,
+      `${ffmpegPath.path} -i "${audio}" -vn -ar 44100 -ac 2 -b:a 128k -f mp3 "${outputAudio}" -y`,
       (error, _stdout, _stderr) => {
-        if (error) reject(error);
-        fs.unlinkSync(audio);
-        resolve(outputAudio);
-      }
-    );
-  });
-};
-
-const processAudioFile = async (audio: string): Promise<string> => {
-  const outputAudio = `${publicFolder}/${new Date().getTime()}.mp3`;
-  return new Promise((resolve, reject) => {
-    exec(
-      `${ffmpegPath.path} -i ${audio} -vn -ar 44100 -ac 2 -b:a 192k ${outputAudio}`,
-      (error, _stdout, _stderr) => {
-        if (error) reject(error);
-        fs.unlinkSync(audio);
+        if (error) {
+          reject(error);
+          return;
+        }
         resolve(outputAudio);
       }
     );
@@ -114,24 +102,20 @@ export const getMessageOptions = async (
   }
 };
 
-const SendWhatsAppMedia = async ({
+export const SendWhatsAppMedia = async ({
   media,
   ticket,
   body
 }: Request): Promise<WAMessage> => {
   try {
     const wbot = await GetTicketWbot(ticket);
-
     const pathMedia = media.path;
     const typeMessage = media.mimetype.split("/")[0];
     let options: AnyMessageContent;
 
     let originalNameUtf8 = "";
     try {
-      originalNameUtf8 = iconv.decode(
-        Buffer.from(media.originalname, "binary"),
-        "utf8"
-      );
+      originalNameUtf8 = iconv.decode(Buffer.from(media.originalname, "binary"), "utf8");
     } catch (error) {
       console.error("Error converting filename to UTF-8:", error);
     }
@@ -141,24 +125,14 @@ const SendWhatsAppMedia = async ({
         video: fs.readFileSync(pathMedia),
         caption: body,
         fileName: originalNameUtf8
-        // gifPlayback: true
       };
     } else if (typeMessage === "audio") {
-      const typeAudio = originalNameUtf8.includes("audio-record-site");
-      if (typeAudio) {
-        const convert = await processAudio(media.path);
-        options = {
-          audio: fs.readFileSync(convert),
-          mimetype: typeAudio ? "audio/mp4" : media.mimetype,
-          ptt: true
-        };
-      } else {
-        const convert = await processAudioFile(media.path);
-        options = {
-          audio: fs.readFileSync(convert),
-          mimetype: typeAudio ? "audio/mp4" : media.mimetype
-        };
-      }
+      const convertedAudio = await processAudio(pathMedia);
+      options = {
+        audio: fs.readFileSync(convertedAudio),
+        mimetype: "audio/mpeg",
+        ptt: originalNameUtf8.includes("audio-record-site")
+      };
     } else if (typeMessage === "document" || typeMessage === "text") {
       options = {
         document: fs.readFileSync(pathMedia),
@@ -182,9 +156,7 @@ const SendWhatsAppMedia = async ({
 
     const sentMessage = await wbot.sendMessage(
       `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-      {
-        ...options
-      }
+      { ...options }
     );
     await verifyMediaMessage(sentMessage, ticket, ticket.contact);
     return sentMessage;

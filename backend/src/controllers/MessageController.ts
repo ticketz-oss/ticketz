@@ -81,8 +81,13 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     if (channel === "whatsapp") {
       await Promise.all(
         medias.map(async (media: Express.Multer.File) => {
-          await SendWhatsAppMedia({ media, ticket });
-          fs.unlinkSync(media.path);
+          try {
+            await SendWhatsAppMedia({ media, ticket, body });
+          } finally {
+            if (fs.existsSync(media.path)) {
+              fs.unlinkSync(media.path);
+            }
+          }
         })
       );
     }
