@@ -23,7 +23,7 @@
     "i18next": "^19.8.2",
     "i18next-browser-languagedetector": "^6.0.1",
     "libphonenumber-js": "^1.11.0",
-    "markdown-to-jsx": "^7.1.0",
+    "markdown-to-jsx": "^7.7.4",
     "material-ui-color": "^1.2.0",
     "material-ui-nested-menu-item": "^1.0.2",
     "material-ui-popup-state": "^1.7.0",
