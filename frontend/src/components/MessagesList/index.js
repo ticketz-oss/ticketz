@@ -889,9 +889,9 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
                 <div className={[clsx({
                   [classes.textContentItemDeleted]: message.isDeleted,
                 }),]}>
-                  <MarkdownWrapper>
+                  <WhatsMarked>
                     { message.body }
-                  </MarkdownWrapper>
+                  </WhatsMarked>
                 </div>
               </>
             }
@@ -1362,9 +1362,9 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
               title={message.queueId && message.queue?.name}
             >
               <div className={classes.textContentItem}>
-                <MarkdownWrapper>
+                <WhatsMarked>
                   {message.body}
-                </MarkdownWrapper>
+                </WhatsMarked>
               </div>
               <span className={classes.noteTimestamp}>
                 {format(parseISO(message.createdAt), "HH:mm")}
