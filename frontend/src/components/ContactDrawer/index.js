@@ -15,7 +15,7 @@ import CreateIcon from '@material-ui/icons/Create';
 import { i18n } from "../../translate/i18n";
 
 import ContactDrawerSkeleton from "../ContactDrawerSkeleton";
-import MarkdownWrapper from "../MarkdownWrapper";
+import WhatsMarked from "react-whatsmarked";
 import { CardHeader } from "@material-ui/core";
 import { ContactForm } from "../ContactForm";
 import ContactModal from "../ContactModal";
@@ -185,7 +185,7 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, ticket, loading }) =>
 								>
 									<InputLabel>{info.name}</InputLabel>
 									<Typography component="div" noWrap style={{ paddingTop: 2 }}>
-										<MarkdownWrapper>{info.value}</MarkdownWrapper>
+										<WhatsMarked>{info.value}</WhatsMarked>
 									</Typography>
 								</Paper>
 							))}

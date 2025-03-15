@@ -30,7 +30,7 @@ import {
   Business,
 } from "@material-ui/icons";
 
-import MarkdownWrapper from "../MarkdownWrapper";
+import WhatsMarked from "react-whatsmarked";
 import ModalImageCors from "../ModalImageCors";
 import MessageOptionsMenu from "../MessageOptionsMenu";
 import whatsBackground from "../../assets/wa-background.png";
@@ -924,9 +924,9 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
             }),]}>
               {caption &&
                 <>
-                  <MarkdownWrapper>
+                  <WhatsMarked>
                     {caption}
-                  </MarkdownWrapper>
+                  </WhatsMarked>
                 </>
               }
             </div>
@@ -979,9 +979,9 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
               <div className={[clsx({
                 [classes.textContentItemDeleted]: message.isDeleted,
               }),]}>
-                <MarkdownWrapper>
+                <WhatsMarked>
                   { caption }
-                </MarkdownWrapper>
+                </WhatsMarked>
               </div>
             </>
           }
@@ -1134,7 +1134,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
               {message.quotedMsg?.contact?.name}
             </span>
           )}
-          <MarkdownWrapper>{getQuotedMessageText(message.quotedMsg)}</MarkdownWrapper>
+          <WhatsMarked>{getQuotedMessageText(message.quotedMsg)}</WhatsMarked>
         </div>
         {imageUrl && (
           <img className={classes.quotedThumbnail} src={imageUrl} />
@@ -1442,9 +1442,9 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
                               className={classes.deletedIcon}
                             />
                           )}
-                          <MarkdownWrapper>
+                          <WhatsMarked>
                             {message.body}
-                          </MarkdownWrapper>
+                          </WhatsMarked>
                         </>
                     )
                     }
@@ -1518,7 +1518,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
                     message.quotedMsg && renderQuotedMessage(message)}
                 {renderLinkPreview(message)}
                 {!isSticker && (
-                  message.mediaType ? "" : <MarkdownWrapper>{message.body}</MarkdownWrapper>
+                  message.mediaType ? "" : <WhatsMarked>{message.body}</WhatsMarked>
                 )
                 }
                 <span className={[clsx(classes.timestamp, {
