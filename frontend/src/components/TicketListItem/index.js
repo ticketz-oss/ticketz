@@ -18,7 +18,7 @@ import { i18n } from "../../translate/i18n";
 
 import api from "../../services/api";
 import ButtonWithSpinner from "../ButtonWithSpinner";
-import MarkdownWrapper from "../MarkdownWrapper";
+import WhatsMarked from "react-whatsmarked";
 import { Tooltip } from "@material-ui/core";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
@@ -208,11 +208,11 @@ const TicketListItem = ({ ticket, groupActionButtons }) => {
                 color="textSecondary"
               >
                 {ticket.lastMessage ? (
-                  <MarkdownWrapper>
+                  <WhatsMarked oneline>
                     {
-                      ticket.lastMessage.startsWith('{"ticketzvCard"') ? "🪪" : ticket.lastMessage
+                      ticket.lastMessage.startsWith('{"ticketzvCard"') ? "🪪" : ticket.lastMessage.split("\n")[0]
                     }
-                  </MarkdownWrapper>
+                  </WhatsMarked>
                 ) : (
                   <br />
                 )}

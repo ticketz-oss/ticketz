@@ -37,7 +37,7 @@ import useQuickMessages from "../../hooks/useQuickMessages";
 
 import Compressor from 'compressorjs';
 import LinearWithValueLabel from "./ProgressBarCustom";
-import MarkdownWrapper from "../MarkdownWrapper";
+import WhatsMarked from "react-whatsmarked";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSignature } from '@fortawesome/free-solid-svg-icons';
 
@@ -758,9 +758,9 @@ const MessageInputCustom = (props) => {
               <span className={classes.messageContactName}>
                 {i18n.t("messagesInput.replying")} {message.contact?.name}
               </span>
-              <MarkdownWrapper>
+              <WhatsMarked>
                 { message.body.startsWith('{"ticketzvCard":') ? "🪪" : message.body }
-              </MarkdownWrapper>
+              </WhatsMarked>
             </div>
           )}
           {editingMessage && (
@@ -768,9 +768,9 @@ const MessageInputCustom = (props) => {
               <span className={classes.messageContactName}>
                 {i18n.t("messagesInput.editing")}
               </span>
-              <MarkdownWrapper>
+              <WhatsMarked>
                 {message.body}
-              </MarkdownWrapper>
+              </WhatsMarked>
             </div>
           )}
         </div>
