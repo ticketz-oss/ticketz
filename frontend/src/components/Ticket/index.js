@@ -40,7 +40,9 @@ const useStyles = makeStyles((theme) => ({
     borderTopLeftRadius: 0,
     borderBottomLeftRadius: 0,
     borderLeft: "0",
-    marginRight: -drawerWidth,
+    [theme.breakpoints.up(1399)]: {
+      marginRight: -drawerWidth,
+    },
     transition: theme.transitions.create("margin", {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
@@ -55,6 +57,19 @@ const useStyles = makeStyles((theme) => ({
       duration: theme.transitions.duration.enteringScreen,
     }),
     marginRight: 0,
+  },
+  drawerShade: {
+    display: "none",
+    [theme.breakpoints.down(1400)]: {
+      display: "block",
+      position: "absolute",
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
+      backdropFilter: "blur(2px)",
+      zIndex: 100,
+    },
   },
 }));
 
@@ -195,6 +210,9 @@ const Ticket = () => {
           [classes.mainWrapperShift]: drawerOpen,
         })}
       >
+        <div className={clsx({
+          [classes.drawerShade]: drawerOpen,
+        })} onClick={() => setDrawerOpen(false)}></div>
         <TicketHeader loading={loading}>
           {renderTicketInfo()}
           <TicketActionButtons ticket={ticket} showTabGroups={showTabGroups} />

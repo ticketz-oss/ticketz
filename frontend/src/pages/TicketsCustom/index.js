@@ -28,11 +28,14 @@ const useStyles = makeStyles(theme => ({
 		height: "100%",
 		flexDirection: "column",
 		overflowY: "hidden",
+    maxWidth: 534,
 	},
 	messagesWrapper: {
 		display: "flex",
 		height: "100%",
 		flexDirection: "column",
+    flexGrow: 1,
+    maxWidth: "unset",
 	},
 	welcomeMsg: {
 		display: "flex",
@@ -51,10 +54,10 @@ const TicketsCustom = () => {
 		<div className={classes.chatContainer}>
 			<div className={classes.chatPapper}>
 				<Grid container spacing={0}>
-					<Grid item xs={4} className={classes.contactsWrapper}>
+					<Grid item md={5} className={classes.contactsWrapper}>
 						<TicketsManager />
 					</Grid>
-					<Grid item xs={8} className={classes.messagesWrapper}>
+					<Grid item md={7} className={classes.messagesWrapper}>
 						{ticketId ? (
 							<>
 								<Ticket />

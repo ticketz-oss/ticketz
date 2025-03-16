@@ -29,6 +29,12 @@ const useStyles = makeStyles(theme => ({
 	drawer: {
 		width: drawerWidth,
 		flexShrink: 0,
+    [theme.breakpoints.down(1400)]: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      bottom: 0,
+    },
 	},
 	drawerPaper: {
 		width: drawerWidth,
