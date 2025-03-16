@@ -49,7 +49,9 @@ import NestedMenuItem from "material-ui-nested-menu-item";
 import GoogleAnalytics from "../components/GoogleAnalytics";
 import OnlyForSuperUser from "../components/OnlyForSuperUser";
 
+import { loadJSON } from "../helpers/loadJSON";
 
+const gitinfo = loadJSON('/gitinfo.json');
 
 const drawerWidth = 240;
 
@@ -73,23 +75,35 @@ const useStyles = makeStyles((theme) => ({
     paddingRight: 24, // keep right padding when drawer closed
     color: localStorage.getItem("impersonated") === "true" ? theme.palette.secondary.contrastText : theme.palette.primary.contrastText,
     background: localStorage.getItem("impersonated") === "true" ? theme.palette.secondary.main : theme.palette.primary.main,
+    marginRight: "10px",
+    marginTop: "10px",
+    marginBottom: "10px",
+    borderRadius: "10px",
   },
   toolbarIcon: {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    minHeight: "48px",
+    height: "68px",
+    margin: "auto",
   },
   appBar: {
+    marginLeft: "72px",
+    boxShadow: "unset",
+    width: "unset",
+    right: 0,
+    left: 0,
     zIndex: theme.zIndex.drawer + 1,
     transition: theme.transitions.create(["width", "margin"], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
   },
+  appBarMobile: {
+    marginLeft: "10px"
+  },
   appBarShift: {
     marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
     transition: theme.transitions.create(["width", "margin"], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
@@ -99,7 +113,7 @@ const useStyles = makeStyles((theme) => ({
     }
   },
   menuButton: {
-    marginRight: 36,
+    color: theme.palette.primary.contrastText,
   },
   menuButtonHidden: {
     display: "none",
@@ -118,11 +132,14 @@ const useStyles = makeStyles((theme) => ({
       duration: theme.transitions.duration.enteringScreen,
     }),
     overflowY: "clip",
+    border: "unset",
+    backgroundColor: theme.palette.fancyBackground,
     ...theme.scrollbarStylesSoft
   },
   drawerPaperClose: {
     overflowX: "hidden",
     overflowY: "clip",
+    marginBottom: "10px",
     transition: theme.transitions.create("width", {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
@@ -138,6 +155,36 @@ const useStyles = makeStyles((theme) => ({
   content: {
     flex: 1,
     overflow: "auto",
+    position: "absolute",
+    top: "68px",
+    bottom: "0px",
+    right: "0px",
+    left: "72px",
+    marginLeft: "0px",
+    marginRight: "10px",
+    marginBottom: "10px",
+    borderRadius: "10px",
+    borderColor: theme.palette.primary.main,
+    borderStyle: "solid",
+    borderWidth: "1px",
+    "&::-webkit-scrollbar": {
+      width: "10px",
+      height: "8px",
+    },
+    "&::-webkit-scrollbar-thumb": {
+      backgroundColor: theme.palette.primary.main,
+      borderRadius: "10px",
+    },    
+  },
+  contentShift: {
+    left: drawerWidth,
+    transition: theme.transitions.create(["width", "margin"], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+  },
+  contentMobile: {
+    left: "10px",
   },
   container: {
     paddingTop: theme.spacing(4),
@@ -149,25 +196,78 @@ const useStyles = makeStyles((theme) => ({
     overflow: "auto",
     flexDirection: "column"
   },
-  containerWithScroll: {
+  containerWideWithScroll: {
     flex: 1,
-    padding: theme.spacing(1),
     overflowY: "auto",
     overflowX: "clip",
-    ...theme.scrollbarStyles,
+    marginRight: "10px",
+    marginLeft: "10px",
+    borderStyle: "solid",
+    borderColor: theme.palette.primary.main,
+    borderWidth: "1px",
+    borderRadius: "10px",
+    "&::-webkit-scrollbar": {
+      width: "10px",
+      height: "8px",
+    },
+    "&::-webkit-scrollbar-thumb": {
+      backgroundColor: theme.palette.primary.main,
+      borderRadius: "10px",
+    },    
+    color: theme.palette.primary.main
+    // ...theme.scrollbarStyles,
+  },
+  containerNarrowWithScroll: {
+    flex: 1,
+    overflowY: "auto",
+    overflowX: "clip",
+    marginRight: "10px",
+    marginLeft: "10px",
+    borderStyle: "solid",
+    borderColor: theme.palette.primary.main,
+    borderWidth: "1px",
+    borderRadius: "10px",
+    "&::-webkit-scrollbar": {
+      width: "10px",
+      height: "8px",
+    },
+    "&::-webkit-scrollbar-thumb": {
+      backgroundColor: theme.palette.primary.main,
+      borderRadius: "10px",
+    },
+    // ...theme.scrollbarStyles,
   },
   NotificationsPopOver: {
     // color: theme.barraSuperior.secondary.main,
   },
   logo: {
     maxWidth: "192px",
-    maxHeight: "72px",
+    height: "68px",
     logo: theme.logo,
     margin: "auto",
     content: `url("${theme.calculatedLogo()}")`
   },
+  logoIcon: {
+    width: "48px",
+    height: "48px",
+    logo: theme.logo,
+    content: `url("${theme.calculatedLogoFavicon()}")`
+  },
+  version: {
+    margin: "auto",
+    fontSize: "12px",
+    textAlign: "center",
+    color: theme.palette.primary.contrastText,
+    fontWeight: "bold"
+  },
   hideLogo: {
-	display: "none",
+    display: "none",
+  },
+  versionBox: {
+    backgroundColor: theme.palette.primary.main,
+    margin: "10px",
+    padding: "8px",
+    borderRadius: "10px",
   }
 }));
 
@@ -246,11 +346,13 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   // }, []);
   //##############################################################################
 
+  /* * /
   useEffect(() => {
     if (document.body.offsetWidth > 600) {
       setDrawerOpen(true);
     }
   }, []);
+  /* */
   
   useEffect(() => {
     getCurrentUserInfo().then(
@@ -368,17 +470,20 @@ const LoggedInLayout = ({ children, themeToggle }) => {
         }}
         open={drawerOpen}
       >
-        <div className={classes.toolbarIcon}>
-          <img  className={drawerOpen ? classes.logo : classes.hideLogo } alt="logo" />
-          <IconButton onClick={() => setDrawerOpen(!drawerOpen)}>
-            <ChevronLeftIcon />
-          </IconButton>
+        <div className={classes.toolbarIcon} onClick={() => setDrawerOpen(!drawerOpen)}>
+          <img className={drawerOpen ? classes.logo : classes.logoIcon} alt="logo" />
         </div>
-        <Divider />
-        <List className={classes.containerWithScroll}>
+        <List className={drawerOpen && classes.containerWideWithScroll || classes.containerNarrowWithScroll}>
           <MainListItems drawerClose={drawerClose} drawerOpen={drawerOpen} collapsed={!drawerOpen} />
         </List>
-        <Divider />
+        {drawerOpen && gitinfo.commitHash !== "N/A" &&
+          <div className={classes.versionBox}>
+            <Typography className={classes.version}>
+              {`${gitinfo.tagName || gitinfo.branchName + " " + gitinfo.commitHash}`}
+            </Typography>
+          </div>
+        }
+            
       </Drawer>
       <UserModal
         open={userModalOpen}
@@ -391,21 +496,18 @@ const LoggedInLayout = ({ children, themeToggle }) => {
       />
       <AppBar
         position="absolute"
-        className={clsx(classes.appBar, drawerOpen && classes.appBarShift)}
-        color="primary"
+        className={clsx(classes.appBar, drawerVariant === "temporary" && classes.appBarMobile, drawerOpen && classes.appBarShift)}
+        color="transparent"
       >
         <Toolbar variant="dense" className={classes.toolbar}>
-          <IconButton
-            edge="start"
-            variant="contained"
-            aria-label="open drawer"
-            onClick={() => setDrawerOpen(!drawerOpen)}
+          <IconButton edge="start" onClick={() => setDrawerOpen(!drawerOpen)}
             className={clsx(
               classes.menuButton,
-              drawerOpen && classes.menuButtonHidden
             )}
           >
-            <MenuIcon />
+            {
+              drawerOpen ? <ChevronLeftIcon /> : <MenuIcon />
+            }
           </IconButton>
 
           <Typography
@@ -519,8 +621,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
 
         </Toolbar>
       </AppBar>
-      <main className={classes.content}>
-        <div className={classes.appBarSpacer} />
+      <main className={clsx(drawerVariant === "temporary" && classes.contentMobile, drawerOpen && classes.contentShift, classes.content)}>
         <OnlyForSuperUser
           user={currentUser}
           yes={() => (

@@ -488,12 +488,21 @@ const Dashboard = () => {
           <OnlyForSuperUser
             user={currentUser}
             yes={() => (
-              <Grid item xs={12}>
+              <>
                 {!registered &&
-                  <Paper className={classes.ticketzRegistryPaper}>
-                    <TicketzRegistry onRegister={setRegistered} />
-                  </Paper>
+                  <Grid item xs={12}>
+                    <Paper className={classes.ticketzRegistryPaper}>
+                      <TicketzRegistry onRegister={setRegistered} />
+                    </Paper>
+                  </Grid>
                 }
+              </>
+            )} />
+
+          <OnlyForSuperUser
+            user={currentUser}
+            yes={() => (
+              <Grid item xs={12} style={{ display: "none" }}>
                 <Paper className={clsx(classes.ticketzProPaper, {
                   [classes.clickpointer]: !proInstructionsOpen,
                 })} onClick={() => showProInstructions()}>
@@ -565,11 +574,10 @@ const Dashboard = () => {
               </Grid>
             )} />
 
-
           <OnlyForSuperUser
             user={currentUser}
             yes={() => (
-              <Grid item xs={12}>
+              <Grid item xs={12} style={{ display: "none" }}>
                 <Paper className={clsx(classes.supportPaper, {
                   [classes.clickpointer]: !supportBoxOpen,
                 })} onClick={() => setSupportBoxOpen(true)}>

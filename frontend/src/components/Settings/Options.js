@@ -13,11 +13,7 @@ import { grey, blue } from "@material-ui/core/colors";
 import OnlyForSuperUser from "../OnlyForSuperUser";
 import useAuth from "../../hooks/useAuth.js";
 import { Loop, Delete } from "@material-ui/icons";
-import {
-  IconButton,
-  TextField
-} from "@material-ui/core";
-
+import { IconButton, TextField } from "@material-ui/core";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCopy, faGears } from '@fortawesome/free-solid-svg-icons';
 
@@ -97,6 +93,7 @@ const useStyles = makeStyles((theme) => ({
   uploadInput: {
     display: "none",
   },
+  
 }));
 
 export default function Options(props) {

@@ -134,6 +134,7 @@ export default function ChatList({
       <div className={classes.mainContainer}>
         <div className={classes.chatList}>
           <List>
+            <Divider component="li" />
             {Array.isArray(chats) &&
               chats.length > 0 &&
               chats.map((chat, key) => (
