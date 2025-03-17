@@ -36,6 +36,11 @@ const useStyles = makeStyles(theme => ({
       bottom: 0,
     },
 	},
+
+  drawerHidden: {
+    display: 'none',
+  },
+
 	drawerPaper: {
 		width: drawerWidth,
 		display: "flex",
@@ -105,7 +110,7 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, ticket, loading }) =>
 	return (
 		<>
 			<Drawer
-				className={classes.drawer}
+				className={open ? classes.drawer : classes.drawerHidden}
 				variant="persistent"
 				anchor="right"
 				open={open}
