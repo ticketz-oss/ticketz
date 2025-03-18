@@ -362,8 +362,8 @@ const messages = {
         },
         appBar: {
           i18n: {
-            language: "Português",
-            language_short: "PT"
+            language: "Português 🇧🇷",
+            language_short: "pt_BR"
           },
           user: {
             profile: "Perfil",
