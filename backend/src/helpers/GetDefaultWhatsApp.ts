@@ -4,7 +4,12 @@ import { logger } from "../utils/logger";
 
 const GetDefaultWhatsApp = async (companyId: number): Promise<Whatsapp> => {
   let defaultWhatsapp = await Whatsapp.findOne({
-    where: { isDefault: true, companyId }
+    where: {
+      isDefault: true,
+      companyId,
+      channel: "whatsapp",
+      status: "CONNECTED"
+    }
   });
 
   if (!defaultWhatsapp) {
@@ -14,6 +19,7 @@ const GetDefaultWhatsApp = async (companyId: number): Promise<Whatsapp> => {
     defaultWhatsapp = await Whatsapp.findOne({
       where: {
         companyId,
+        channel: "whatsapp",
         status: "CONNECTED"
       }
     });
