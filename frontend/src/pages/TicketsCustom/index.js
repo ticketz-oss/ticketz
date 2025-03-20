@@ -31,6 +31,7 @@ const useStyles = makeStyles(theme => ({
     maxWidth: 534,
 	},
 	messagesWrapper: {
+    overflow: "hidden",
 		display: "flex",
 		height: "100%",
 		flexDirection: "column",
