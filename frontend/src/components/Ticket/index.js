@@ -40,9 +40,6 @@ const useStyles = makeStyles((theme) => ({
     borderTopLeftRadius: 0,
     borderBottomLeftRadius: 0,
     borderLeft: "0",
-    [theme.breakpoints.up(1399)]: {
-      marginRight: -drawerWidth,
-    },
     transition: theme.transitions.create("margin", {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,

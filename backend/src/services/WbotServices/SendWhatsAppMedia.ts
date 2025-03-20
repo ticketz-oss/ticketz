@@ -6,6 +6,7 @@ import path from "path";
 import ffmpegPath from "@ffmpeg-installer/ffmpeg";
 import mime from "mime-types";
 import iconv from "iconv-lite";
+import { Readable } from "stream";
 import AppError from "../../errors/AppError";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
 import Ticket from "../../models/Ticket";
@@ -24,29 +25,14 @@ const publicFolder = __dirname.endsWith("/dist")
   ? path.resolve(__dirname, "..", "public")
   : path.resolve(__dirname, "..", "..", "..", "public");
 
-const processAudio = async (audio: string): Promise<string> => {
-  const outputAudio = `${publicFolder}/${new Date().getTime()}.mp3`;
+const processRecordedAudio = async (audio: string): Promise<Readable> => {
+  const outputAudio = `${publicFolder}/${new Date().getTime()}.ogg`;
   return new Promise((resolve, reject) => {
     exec(
-      `${ffmpegPath.path} -i ${audio} -vn -ab 128k -ar 44100 -f ipod ${outputAudio} -y`,
+      `${ffmpegPath.path} -i "${audio}" -vn -ar 16000 -ac 1 -c:a libopus -b:a 0 ${outputAudio}`,
       (error, _stdout, _stderr) => {
         if (error) reject(error);
-        fs.unlinkSync(audio);
-        resolve(outputAudio);
-      }
-    );
-  });
-};
-
-const processAudioFile = async (audio: string): Promise<string> => {
-  const outputAudio = `${publicFolder}/${new Date().getTime()}.mp3`;
-  return new Promise((resolve, reject) => {
-    exec(
-      `${ffmpegPath.path} -i ${audio} -vn -ar 44100 -ac 2 -b:a 192k ${outputAudio}`,
-      (error, _stdout, _stderr) => {
-        if (error) reject(error);
-        fs.unlinkSync(audio);
-        resolve(outputAudio);
+        resolve(fs.createReadStream(outputAudio));
       }
     );
   });
@@ -54,47 +40,50 @@ const processAudioFile = async (audio: string): Promise<string> => {
 
 export const getMessageFileOptions = async (
   fileName: string,
-  pathMedia: string
-): Promise<any> => {
-  const mimeType = mime.lookup(pathMedia) || "application/octet-stream";
-  const typeMessage = mimeType.split("/")[0];
+  pathMedia: string,
+  mimetype?: string,
+  ptt?: boolean
+): Promise<AnyMessageContent> => {
+  mimetype = mimetype || mime.lookup(pathMedia) || "application/octet-stream";
 
   try {
-    if (!mimeType) {
-      throw new Error("Invalid mimetype");
-    }
     let options: AnyMessageContent;
 
-    if (typeMessage === "video") {
+    if (mimetype.startsWith("video/")) {
       options = {
-        video: fs.readFileSync(pathMedia),
-        // caption: fileName,
-        fileName
-        // gifPlayback: true
+        video: { stream: fs.createReadStream(pathMedia) }
       };
-    } else if (typeMessage === "audio") {
+    } else if (mimetype === "audio/ogg") {
       options = {
-        audio: fs.readFileSync(pathMedia),
-        mimetype: mimeType
+        audio: { stream: fs.createReadStream(pathMedia) },
+        mimetype: "audio/ogg; codecs=opus",
+        ptt: true
       };
-    } else if (typeMessage === "document") {
+    } else if (mimetype.startsWith("audio/")) {
+      const needConvert = fileName.includes("audio-record-site");
       options = {
-        document: fs.readFileSync(pathMedia),
-        caption: fileName,
+        audio: {
+          stream: needConvert
+            ? await processRecordedAudio(pathMedia)
+            : fs.createReadStream(pathMedia)
+        },
+        mimetype: needConvert ? "audio/ogg; codecs=opus" : mimetype,
+        ptt: needConvert || !!ptt
+      };
+    } else if (mimetype.startsWith("document/")) {
+      options = {
+        document: { stream: fs.createReadStream(pathMedia) },
         fileName,
-        mimetype: mimeType
+        mimetype
       };
-    } else if (typeMessage === "application") {
+    } else if (mimetype.startsWith("application/")) {
       options = {
-        document: fs.readFileSync(pathMedia),
-        caption: fileName,
-        fileName,
-        mimetype: mimeType
+        document: { stream: fs.createReadStream(pathMedia) },
+        mimetype
       };
     } else {
       options = {
-        image: fs.readFileSync(pathMedia),
-        caption: fileName
+        image: { stream: fs.createReadStream(pathMedia) }
       };
     }
 
@@ -156,10 +145,8 @@ export const SendWhatsAppMedia = async ({
   caption,
   ptt
 }: Request): Promise<WAMessage> => {
-  let options: AnyMessageContent;
   try {
     const pathMedia = media.path;
-    const typeMessage = media.mimetype.split("/")[0];
 
     let originalNameUtf8 = "";
     try {
@@ -195,45 +182,22 @@ export const SendWhatsAppMedia = async ({
         text: `📎 *${originalNameUtf8}*\n\n🔗 ${fileUrl}`
       });
     }
-    if (typeMessage === "video") {
-      options = {
-        video: fs.readFileSync(pathMedia),
-        caption,
-        fileName: originalNameUtf8
-        // gifPlayback: true
-      };
-    } else if (typeMessage === "audio") {
-      options = {
-        audio: fs.readFileSync(pathMedia),
-        mimetype: "audio/ogg; codecs=opus",
-        ptt: !!ptt
-      };
-    } else if (typeMessage === "document" || typeMessage === "text") {
-      options = {
-        document: fs.readFileSync(pathMedia),
-        caption,
-        fileName: originalNameUtf8,
-        mimetype: media.mimetype
-      };
-    } else if (typeMessage === "application") {
-      options = {
-        document: fs.readFileSync(pathMedia),
-        caption,
-        fileName: originalNameUtf8,
-        mimetype: media.mimetype
-      };
-    } else {
-      options = {
-        image: fs.readFileSync(pathMedia),
-        caption
-      };
-    }
+
+    const options = await getMessageFileOptions(
+      originalNameUtf8,
+      pathMedia,
+      media.mimetype,
+      ptt
+    );
+    return sendWhatsappFile(ticket, {
+      caption: caption || undefined,
+      ...options
+    } as AnyMessageContent);
   } catch (err) {
     Sentry.captureException(err);
     console.log(err);
     throw new AppError("ERR_SENDING_WAPP_MSG");
   }
-  return sendWhatsappFile(ticket, options);
 };
 
 export default SendWhatsAppMedia;
