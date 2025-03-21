@@ -541,7 +541,7 @@ export const verifyMediaMessage = async (
       });
   }
 
-  if (overLimit) {
+  if (!msgMedia || overLimit) {
     return newMessage;
   }
 
