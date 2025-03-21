@@ -1429,7 +1429,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
                     {message.quotedMsg && renderQuotedMessage(message)}
                     {renderLinkPreview(message)}
                     {!isSticker && (
-                      message.mediaType && !data?.message?.extendedTextMessage ?
+                      message.mediaUrl && !data?.message?.extendedTextMessage ?
                         ""
                         :
                         <>
@@ -1516,7 +1516,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
                     message.quotedMsg && renderQuotedMessage(message)}
                 {renderLinkPreview(message)}
                 {!isSticker && (
-                  message.mediaType ? "" : <WhatsMarked>{message.body}</WhatsMarked>
+                  message.mediaUrl ? "" : <WhatsMarked>{message.body}</WhatsMarked>
                 )
                 }
                 <span className={[clsx(classes.timestamp, {
