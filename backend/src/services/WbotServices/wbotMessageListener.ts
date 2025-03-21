@@ -712,7 +712,7 @@ export const verifyMessage = async (
   };
 
   await ticket.update({
-    lastMessage: body
+    lastMessage: body.substring(0, 255).replace(/\n/g, " ")
   });
 
   const newMessage = await CreateMessageService({
