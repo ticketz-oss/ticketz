@@ -268,6 +268,13 @@ const MessagesAPI = () => {
                 <li><b>Whatsapp JID:</b> Qualquer identificador do Whatsapp, para grupos ele é um número extenso seguido de @g.us</li>
               </ul>
           </li>
+          <li>
+            O campo saveOnTicket aceita boolean ou número:
+            <ul>
+              <li><b>true:</b> Salva a mensagem em um ticket</li>
+              <li><b>numero:</b> Salva a mensagem em um ticket na fila equivalente ao número</li>
+            </ul>
+          </li>
         </ul>
       </Typography>
       <Typography variant="h6" color="primary" className={classes.elementMargin}>
