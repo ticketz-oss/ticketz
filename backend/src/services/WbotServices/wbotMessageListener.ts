@@ -409,6 +409,24 @@ const verifyQuotedMessage = async (
   return quotedMsg;
 };
 
+const downloadMediaTasks: Map<string, Promise<boolean>> = new Map();
+
+type DeferredPromise = {
+  promise: Promise<boolean>;
+  resolve: (value: boolean) => void;
+  reject: (reason?: any) => void;
+};
+
+const createDeferred = (): DeferredPromise => {
+  let resolve;
+  let reject;
+  const promise = new Promise<boolean>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+};
+
 export const verifyMediaMessage = async (
   msg: proto.IWebMessageInfo,
   ticket: Ticket,
@@ -559,6 +577,12 @@ export const verifyMediaMessage = async (
     contactId: contact.id
   };
 
+  const deferred = createDeferred();
+  downloadMediaTasks.set(
+    `media-${ticket.id}-${newMessage.id}`,
+    deferred.promise
+  );
+
   workerManager
     .runTask("BaileysDownloader", mediaDownloadData)
     .then(async (result: BaileysDownloadTaskResult) => {
@@ -574,8 +598,12 @@ export const verifyMediaMessage = async (
         mediaUrl: newMessage.mediaUrl,
         mediaType
       });
+      deferred.resolve(true);
+      downloadMediaTasks.delete(`media-${ticket.id}-${newMessage.id}`);
     })
     .catch(error => {
+      deferred.reject(error);
+      downloadMediaTasks.delete(`media-${ticket.id}-${newMessage.id}`);
       logger.error({ error }, "error downloading media");
     });
 
@@ -1539,6 +1567,15 @@ export const checkIntegration = async (
     };
 
     if (message) {
+      if (message.mediaType === "wait") {
+        const mediaPromise = downloadMediaTasks.get(
+          `media-${message.ticketId}-${message.id}`
+        );
+        if (mediaPromise) {
+          await mediaPromise;
+        }
+        await message.reload();
+      }
       metadata.customPayload = JSON.parse(message.dataJson);
       integrationMessage = { type: "text" };
       const messagedetails = {
