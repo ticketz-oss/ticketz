@@ -70,6 +70,7 @@ export type IntegrationMessageMetadata = {
   ticketId: number;
   customPayload?: any;
   firstMessage?: string;
+  extraParams?: any;
 };
 
 export interface ReplyHandler {

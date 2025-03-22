@@ -106,7 +106,12 @@ export class WebhookIntegration implements IntegrationDriver {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  async processMessage(integrationSession, message, metadata, replyHandler) {
+  async processMessage(
+    integrationSession: IntegrationSession,
+    message: IntegrationMessage,
+    metadata: IntegrationMessageMetadata,
+    replyHandler: ReplyHandler
+  ) {
     const { ticket, token } = integrationSession;
     const { webhookUrl, webhookMethod, webhookToken, webhookExtraParams } =
       integrationSession.integration.configuration;
