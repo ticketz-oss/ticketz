@@ -26,7 +26,7 @@ class Integration extends Model<Integration> {
   driver: string;
 
   @Column(DataType.JSONB)
-  configuration: unknown;
+  configuration: any;
 
   @ForeignKey(() => Queue)
   @Column

@@ -21,7 +21,7 @@ export type MessageData = {
   internal?: boolean;
   ptt?: boolean;
   quickMessageMediaId?: number;
-  saveOnTicket?: boolean;
+  saveOnTicket?: boolean | number;
   fromMe?: boolean;
   read?: boolean;
   quotedMsg?: Message;
@@ -107,7 +107,10 @@ export const SendMessage = async (
       handleMessage(
         message,
         await GetWhatsappWbot(whatsapp),
-        whatsapp.companyId
+        whatsapp.companyId,
+        typeof messageData.saveOnTicket === "number"
+          ? messageData.saveOnTicket
+          : undefined
       );
     }
 
