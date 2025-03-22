@@ -286,8 +286,7 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
 
   try {
     let { number } = messageData;
-    const { body, linkPreview } = messageData;
-    const saveOnTicket = !!messageData.saveOnTicket;
+    const { body, linkPreview, saveOnTicket } = messageData;
 
     if (!number.includes("@")) {
       const numberToTest = messageData.number;

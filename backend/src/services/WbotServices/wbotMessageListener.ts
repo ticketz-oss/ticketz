@@ -1805,7 +1805,8 @@ const handleChartbot = async (
 const handleMessage = async (
   msg: proto.IWebMessageInfo,
   wbot: Session,
-  companyId: number
+  companyId: number,
+  queueId?: number
 ): Promise<void> => {
   if (!isValidMsg(msg)) return;
 
@@ -2009,7 +2010,12 @@ const handleMessage = async (
       wbot.id!,
       unreadMessages,
       companyId,
-      { groupContact }
+      {
+        groupContact,
+        queue: queueId
+          ? (await Queue.findByPk(queueId)) || undefined
+          : undefined
+      }
     );
 
     const ticketMessages = await Message.findAll({
