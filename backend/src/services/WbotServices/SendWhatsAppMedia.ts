@@ -178,7 +178,7 @@ export const SendWhatsAppMedia = async ({
       }
       readableFile.close();
       return SendWhatsAppMessage(ticket, {
-        text: `📎 *${originalNameUtf8}*\n\n🔗 ${fileUrl}`
+        text: `📎 *${fileName}*\n\n🔗 ${fileUrl}`
       });
     }
 
