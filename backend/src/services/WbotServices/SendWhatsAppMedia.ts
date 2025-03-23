@@ -73,7 +73,6 @@ export const getMessageFileOptions = async (
     } else if (mimetype.startsWith("document/")) {
       options = {
         document: { stream: fs.createReadStream(pathMedia) },
-        fileName,
         mimetype
       };
     } else if (mimetype.startsWith("application/")) {
@@ -148,9 +147,9 @@ export const SendWhatsAppMedia = async ({
   try {
     const pathMedia = media.path;
 
-    let originalNameUtf8 = "";
+    let fileName = "";
     try {
-      originalNameUtf8 = iconv.decode(
+      fileName = iconv.decode(
         Buffer.from(media.originalname, "binary"),
         "utf8"
       );
@@ -184,13 +183,14 @@ export const SendWhatsAppMedia = async ({
     }
 
     const options = await getMessageFileOptions(
-      originalNameUtf8,
+      fileName,
       pathMedia,
       media.mimetype,
       ptt
     );
     return sendWhatsappFile(ticket, {
       caption: caption || undefined,
+      fileName,
       ...options
     } as AnyMessageContent);
   } catch (err) {
