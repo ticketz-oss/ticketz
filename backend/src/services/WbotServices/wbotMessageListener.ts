@@ -574,8 +574,9 @@ const saveMediaToFile = async (media, ticket: Ticket): Promise<string> => {
   }
 
   const filePath = getPublicPath();
+  const randomId = makeRandomId(10);
 
-  const relativePath = `media/${ticket.companyId}/${ticket.contactId}/${ticket.id}`;
+  const relativePath = `media/${ticket.companyId}/${ticket.contactId}/${ticket.id}/${randomId}`;
 
   try {
     // create folders inside filepath if not exists
