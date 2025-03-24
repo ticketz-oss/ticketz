@@ -25,6 +25,8 @@ const publicFolder = __dirname.endsWith("/dist")
   ? path.resolve(__dirname, "..", "public")
   : path.resolve(__dirname, "..", "..", "..", "public");
 
+const supportedImages = ["image/png", "image/jpg", "image/jpeg", "image/webp"];
+
 const processRecordedAudio = async (audio: string): Promise<Readable> => {
   const outputAudio = `${publicFolder}/${new Date().getTime()}.ogg`;
   return new Promise((resolve, reject) => {
@@ -70,19 +72,14 @@ export const getMessageFileOptions = async (
         mimetype: needConvert ? "audio/ogg; codecs=opus" : mimetype,
         ptt: needConvert || !!ptt
       };
-    } else if (mimetype.startsWith("document/")) {
+    } else if (supportedImages.includes(mimetype)) {
       options = {
-        document: { stream: fs.createReadStream(pathMedia) },
-        mimetype
-      };
-    } else if (mimetype.startsWith("application/")) {
-      options = {
-        document: { stream: fs.createReadStream(pathMedia) },
-        mimetype
+        image: { stream: fs.createReadStream(pathMedia) }
       };
     } else {
       options = {
-        image: { stream: fs.createReadStream(pathMedia) }
+        document: { stream: fs.createReadStream(pathMedia) },
+        mimetype
       };
     }
 
