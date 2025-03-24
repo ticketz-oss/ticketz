@@ -6,6 +6,7 @@ import Ticket from "../../models/Ticket";
 
 import formatBody from "../../helpers/Mustache";
 import User from "../../models/User";
+import { getIO } from "../../libs/socket";
 
 interface Request {
   messageId: string;
@@ -66,6 +67,21 @@ const EditWhatsAppMessage = async ({
     await OldMessage.upsert(oldMessage);
 
     await message.update({ body: formattedBody, isEdited: true });
+
+    await ticket.update({ lastMessage: formattedBody });
+
+    const io = getIO();
+
+    io.to(ticket.id.toString())
+      .to(`company-${companyId}-${ticket.status}`)
+      .to(`company-${companyId}-notification`)
+      .to(`queue-${ticket.queueId}-${ticket.status}`)
+      .to(`queue-${ticket.queueId}-notification`)
+      .emit(`company-${ticket.companyId}-ticket`, {
+        action: "update",
+        ticket,
+        ticketId: ticket.id
+      });
 
     const savedMessage = await Message.findOne({
       where: {
