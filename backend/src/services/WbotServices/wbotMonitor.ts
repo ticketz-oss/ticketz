@@ -1,12 +1,7 @@
-import {
-  WASocket,
-  BinaryNode,
-  Contact as BContact
-} from "@whiskeysockets/baileys";
+import { BinaryNode, Contact as BContact } from "@whiskeysockets/baileys";
 import * as Sentry from "@sentry/node";
 
 import { Mutex } from "async-mutex";
-import { Store } from "../../libs/store";
 import Contact from "../../models/Contact";
 import Setting from "../../models/Setting";
 import Ticket from "../../models/Ticket";
@@ -14,13 +9,9 @@ import Whatsapp from "../../models/Whatsapp";
 import { logger } from "../../utils/logger";
 import createOrUpdateBaileysService from "../BaileysServices/CreateOrUpdateBaileysService";
 import CreateMessageService from "../MessageServices/CreateMessageService";
+import { Session } from "../../libs/wbot";
 
 const contactMutex = new Mutex();
-
-type Session = WASocket & {
-  id?: number;
-  store?: Store;
-};
 
 /* 
 interface IContact {

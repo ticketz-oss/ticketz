@@ -3,7 +3,6 @@ import makeWASocket, {
   WASocket,
   DisconnectReason,
   makeCacheableSignalKeyStore,
-  makeInMemoryStore,
   isJidBroadcast,
   CacheStore,
   WAMessageKey,
@@ -21,7 +20,6 @@ import { logger, loggerBaileys } from "../utils/logger";
 import authState from "../helpers/authState";
 import AppError from "../errors/AppError";
 import { getIO } from "./socket";
-import { Store } from "./store";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
 import DeleteBaileysService from "../services/BaileysServices/DeleteBaileysService";
 import Contact from "../models/Contact";
@@ -29,13 +27,15 @@ import Ticket from "../models/Ticket";
 import { GitInfo } from "../gitinfo";
 import GetPublicSettingService from "../services/SettingServices/GetPublicSettingService";
 import waVersion from "../waversion.json";
+import Message from "../models/Message";
 
 // const loggerBaileys = MAIN_LOGGER.child({});
 // loggerBaileys.level = process.env.BAILEYS_LOG_LEVEL || "error";
 
-type Session = WASocket & {
+export type Session = WASocket & {
   id?: number;
-  store?: Store;
+  store?: NodeCache;
+  cacheMessage?: (msg: proto.IWebMessageInfo) => void;
 };
 
 const sessions: Session[] = [];
@@ -138,24 +138,36 @@ export const initWASocket = async (
         let retriesQrCode = 0;
 
         let wsocket: Session = null;
-        const store = makeInMemoryStore({
-          logger: loggerBaileys
+        const store = new NodeCache({
+          stdTTL: 120,
+          checkperiod: 30,
+          useClones: false
         });
 
         async function getMessage(
           key: WAMessageKey
         ): Promise<WAMessageContent | undefined> {
-          if (store) {
-            const msg = await store.loadMessage(key.remoteJid!, key.id!);
-            logger.debug(
-              { key, message: JSON.stringify(msg) },
-              `[wbot.ts] getMessage: result of recovering message ${key.remoteJid} ${key.id}`
-            );
-            return msg?.message || undefined;
+          if (!key.id) return null;
+
+          const message = store.get(key.id);
+
+          if (message) {
+            logger.debug({ message }, "cacheMessage: recovered from cache");
+            return message;
           }
 
-          // only if store isn't present
-          return proto.Message.fromObject({});
+          logger.debug(
+            { key },
+            "cacheMessage: not found in cache - fallback to database"
+          );
+
+          const msg = await Message.findOne({
+            where: { id: key.id, fromMe: true }
+          });
+
+          const data = JSON.parse(msg.dataJson);
+
+          return data.message || undefined;
         }
 
         const { state, saveState } = await authState(whatsapp);
@@ -226,6 +238,14 @@ export const initWASocket = async (
             isJidBroadcast(jid) || jid?.endsWith("@newsletter"),
           transactionOpts: { maxCommitRetries: 1, delayBetweenTriesMs: 10 }
         });
+
+        wsocket.cacheMessage = (msg: proto.IWebMessageInfo): void => {
+          if (!msg.key.fromMe) return;
+
+          logger.debug({ message: msg.message }, "cacheMessage: saved");
+
+          store.set(msg.key.id, msg.message);
+        };
 
         // wsocket = makeWASocket({
         //   version,
@@ -452,8 +472,6 @@ export const initWASocket = async (
             groupCache.del(event.id);
           }
         });
-
-        store.bind(wsocket.ev);
       })();
     } catch (error) {
       Sentry.captureException(error);

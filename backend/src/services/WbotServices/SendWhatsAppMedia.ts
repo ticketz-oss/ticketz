@@ -121,6 +121,9 @@ const SendWhatsAppMedia = async ({
         ...options
       } as AnyMessageContent
     );
+
+    wbot.cacheMessage(sentMessage);
+
     await verifyMediaMessage(sentMessage, ticket, ticket.contact);
     return sentMessage;
   } catch (err) {

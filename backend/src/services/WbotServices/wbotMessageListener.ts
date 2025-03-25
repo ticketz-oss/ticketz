@@ -35,7 +35,6 @@ import FindOrCreateTicketService from "../TicketServices/FindOrCreateTicketServi
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
 import UpdateTicketService from "../TicketServices/UpdateTicketService";
 import formatBody from "../../helpers/Mustache";
-import { Store } from "../../libs/store";
 import TicketTraking from "../../models/TicketTraking";
 import UserRating from "../../models/UserRating";
 import SendWhatsAppMessage from "./SendWhatsAppMessage";
@@ -57,13 +56,9 @@ import CheckSettings, { GetCompanySetting } from "../../helpers/CheckSettings";
 import Whatsapp from "../../models/Whatsapp";
 import { SimpleObjectCache } from "../../helpers/simpleObjectCache";
 import { getPublicPath } from "../../helpers/GetPublicPath";
+import { Session } from "../../libs/wbot";
 
-type Session = WASocket & {
-  id?: number;
-  store?: Store;
-};
-
-interface ImessageUpsert {
+export interface ImessageUpsert {
   messages: proto.IWebMessageInfo[];
   type: MessageUpsertType;
 }
