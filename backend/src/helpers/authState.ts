@@ -86,7 +86,9 @@ const authState = async (
   };
 
   const removeKey = async (type: string, key: string) => {
-    logger.debug({ type, key }, "Deleting key");
+    logger.debug(
+      `Deleting key whatsappId: ${whatsappId} type: ${type} key: ${key}`
+    );
     return BaileysKeys.destroy({
       where: {
         whatsappId,
@@ -111,27 +113,8 @@ const authState = async (
     creds = result.creds;
     const { keys } = result;
 
-    // conversion from old format (remove in the future)
     if (Object.keys(keys).length) {
-      logger.debug("Starting conversion of keys to new format");
-      const TYPE_MAP = {
-        preKeys: "pre-key",
-        sessions: "session",
-        senderKeys: "sender-key",
-        appStateSyncKeys: "app-state-sync-key",
-        appStateVersions: "app-state-sync-version",
-        senderKeyMemory: "sender-key-memory"
-      };
-
-      // eslint-disable-next-line no-restricted-syntax
-      for await (const oldType of Object.keys(keys)) {
-        const newType = TYPE_MAP[oldType];
-        logger.debug(`Converting keys of type ${oldType} to ${newType}`);
-        // eslint-disable-next-line no-restricted-syntax
-        for await (const key of Object.keys(keys[oldType])) {
-          await saveKey(newType, key, keys[oldType][key]);
-        }
-      }
+      logger.info("Clearing old format session keys data");
       saveState();
     }
   } else {
