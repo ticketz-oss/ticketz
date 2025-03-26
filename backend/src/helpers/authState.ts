@@ -76,11 +76,11 @@ const authState = async (
       }
     });
 
-    logger.debug(
-      `${
-        baileysKey ? "Successfull" : "Failed"
-      } recover of key whatsappId: ${whatsappId} type: ${type} key: ${key}`
-    );
+    if (!baileysKey) {
+      logger.debug(
+        `Key not found whatsappId: ${whatsappId} type: ${type} key: ${key}`
+      );
+    }
 
     return baileysKey?.value ? JSON.parse(baileysKey.value) : null;
   };
@@ -126,8 +126,9 @@ const authState = async (
       creds,
       keys: {
         get: async (type, ids) => {
-          const data: { [_: string]: SignalDataTypeMap[typeof type] } = {};
+          const data: { [id: string]: SignalDataTypeMap[typeof type] } = {};
 
+          let counter = 0;
           // eslint-disable-next-line no-restricted-syntax
           for await (const id of ids) {
             try {
@@ -136,18 +137,27 @@ const authState = async (
                 value = proto.Message.AppStateSyncKeyData.fromObject(value);
               }
               data[id] = value;
+              if (value) {
+                counter += 1;
+              }
             } catch (error) {
               logger.error(`authState (69) -> error: ${error.message}`);
               logger.error(`authState (72) -> stack: ${error.stack}`);
             }
           }
 
+          logger.debug(
+            `Keys retrieved: whatsappId: ${whatsappId} type: ${type} Counter: ${counter}/${ids.length}`
+          );
           return data;
         },
         set: async (data: any) => {
           const tasks: Promise<unknown>[] = [];
           // eslint-disable-next-line no-restricted-syntax, guard-for-in
           for (const category in data) {
+            if (category === "pre-key") {
+              logger.info({ category: data[category] }, "Setting pre-keys");
+            }
             // eslint-disable-next-line no-restricted-syntax, guard-for-in
             for (const id in data[category]) {
               const value = data[category][id];
