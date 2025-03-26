@@ -34,7 +34,6 @@ import Message from "../models/Message";
 
 export type Session = WASocket & {
   id?: number;
-  store?: NodeCache;
   cacheMessage?: (msg: proto.IWebMessageInfo) => void;
 };
 
@@ -146,7 +145,7 @@ export const initWASocket = async (
 
         async function getMessage(
           key: WAMessageKey
-        ): Promise<WAMessageContent | undefined> {
+        ): Promise<WAMessageContent> {
           if (!key.id) return null;
 
           const message = store.get(key.id);
@@ -165,9 +164,22 @@ export const initWASocket = async (
             where: { id: key.id, fromMe: true }
           });
 
-          const data = JSON.parse(msg.dataJson);
+          try {
+            const data = JSON.parse(msg.dataJson);
+            logger.debug(
+              { key, data },
+              "cacheMessage: recovered from database"
+            );
+            store.set(key.id, data.message);
+            return data.message || undefined;
+          } catch (error) {
+            logger.error(
+              { key },
+              `cacheMessage: error parsing message from database - ${error.message}`
+            );
+          }
 
-          return data.message || undefined;
+          return undefined;
         }
 
         const { state, saveState } = await authState(whatsapp);
