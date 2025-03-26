@@ -40,6 +40,7 @@ import LinearWithValueLabel from "./ProgressBarCustom";
 import WhatsMarked from "react-whatsmarked";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSignature } from '@fortawesome/free-solid-svg-icons';
+import { isMobile } from "../../helpers/isMobile";
 
 const Mp3Recorder = new MicRecorder({ bitRate: 128 });
 
@@ -397,7 +398,7 @@ const CustomInput = (props) => {
 
   const onKeyPress = (e) => {
     if (loading || e.shiftKey) return;
-    else if (e.key === "Enter") {
+    else if (e.key === "Enter" && !isMobile()) {
       e.preventDefault();
       handleSendMessage();
     }
@@ -469,7 +470,7 @@ const CustomInput = (props) => {
               className={classes.messageInput}
               maxRows={5}
               endAdornment={
-                /Mobi|Android|iPhone/i.test(navigator.userAgent) &&
+                isMobile() &&
                 <InputAdornment position="end">
                   <input
                     type="file"
@@ -829,7 +830,7 @@ const MessageInputCustom = (props) => {
         {(replyingMessage && renderReplyingMessage(replyingMessage)) || (editingMessage && renderReplyingMessage(editingMessage))}
         <div className={classes.newMessageBox}>
           {
-            /Mobi|Android|iPhone/i.test(navigator.userAgent) ||
+            isMobile() ||
             <EmojiOptions
               disabled={disableOption}
               handleAddEmoji={handleAddEmoji}
