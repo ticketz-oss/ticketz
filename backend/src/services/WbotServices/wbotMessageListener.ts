@@ -96,29 +96,31 @@ export function makeid(length: number) {
 }
 
 const getBodyButton = (msg: proto.IWebMessageInfo): string => {
-  if (
-    msg.key.fromMe &&
-    msg?.message?.viewOnceMessage?.message?.buttonsMessage?.contentText
-  ) {
-    let bodyMessage = `*${msg?.message?.viewOnceMessage?.message?.buttonsMessage?.contentText}*`;
+  const buttonsMessage =
+    msg?.message?.buttonsMessage ||
+    msg?.message?.viewOnceMessage?.message?.buttonsMessage;
 
-    msg.message?.viewOnceMessage?.message?.buttonsMessage?.buttons.forEach(
-      button => {
-        bodyMessage += `\n\n${button.buttonText?.displayText}`;
-      }
-    );
+  if (msg.key.fromMe && buttonsMessage?.contentText) {
+    let bodyMessage = `*${buttonsMessage?.contentText}*`;
+
+    buttonsMessage?.buttons.forEach(button => {
+      bodyMessage += `\n\n${button.buttonText?.displayText}`;
+    });
+
     return bodyMessage;
   }
 
-  if (msg.key.fromMe && msg?.message?.viewOnceMessage?.message?.listMessage) {
-    let bodyMessage = `*${msg?.message?.viewOnceMessage?.message?.listMessage?.description}*`;
-    msg.message?.viewOnceMessage?.message?.listMessage?.sections.forEach(
-      button => {
-        button.rows.forEach(rows => {
-          bodyMessage += `\n\n${rows.title}`;
-        });
-      }
-    );
+  const listMessage =
+    msg?.message?.listMessage ||
+    msg?.message?.viewOnceMessage?.message?.listMessage;
+
+  if (listMessage) {
+    let bodyMessage = `*${listMessage?.description}*`;
+    listMessage?.sections.forEach(button => {
+      button.rows.forEach(rows => {
+        bodyMessage += `\n\n${rows.title}`;
+      });
+    });
 
     return bodyMessage;
   }
