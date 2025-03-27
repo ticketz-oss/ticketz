@@ -76,17 +76,19 @@ const authState = async (
       }
     });
 
-    logger.debug(
-      `${
-        baileysKey ? "Successfull" : "Failed"
-      } recover of key whatsappId: ${whatsappId} type: ${type} key: ${key}`
-    );
+    if (!baileysKey) {
+      logger.debug(
+        `Key not found whatsappId: ${whatsappId} type: ${type} key: ${key}`
+      );
+    }
 
     return baileysKey?.value ? JSON.parse(baileysKey.value) : null;
   };
 
   const removeKey = async (type: string, key: string) => {
-    logger.debug({ type, key }, "Deleting key");
+    logger.debug(
+      `Deleting key whatsappId: ${whatsappId} type: ${type} key: ${key}`
+    );
     return BaileysKeys.destroy({
       where: {
         whatsappId,
@@ -111,27 +113,8 @@ const authState = async (
     creds = result.creds;
     const { keys } = result;
 
-    // conversion from old format (remove in the future)
     if (Object.keys(keys).length) {
-      logger.debug("Starting conversion of keys to new format");
-      const TYPE_MAP = {
-        preKeys: "pre-key",
-        sessions: "session",
-        senderKeys: "sender-key",
-        appStateSyncKeys: "app-state-sync-key",
-        appStateVersions: "app-state-sync-version",
-        senderKeyMemory: "sender-key-memory"
-      };
-
-      // eslint-disable-next-line no-restricted-syntax
-      for await (const oldType of Object.keys(keys)) {
-        const newType = TYPE_MAP[oldType];
-        logger.debug(`Converting keys of type ${oldType} to ${newType}`);
-        // eslint-disable-next-line no-restricted-syntax
-        for await (const key of Object.keys(keys[oldType])) {
-          await saveKey(newType, key, keys[oldType][key]);
-        }
-      }
+      logger.info("Clearing old format session keys data");
       saveState();
     }
   } else {
@@ -143,8 +126,9 @@ const authState = async (
       creds,
       keys: {
         get: async (type, ids) => {
-          const data: { [_: string]: SignalDataTypeMap[typeof type] } = {};
+          const data: { [id: string]: SignalDataTypeMap[typeof type] } = {};
 
+          let counter = 0;
           // eslint-disable-next-line no-restricted-syntax
           for await (const id of ids) {
             try {
@@ -153,18 +137,27 @@ const authState = async (
                 value = proto.Message.AppStateSyncKeyData.fromObject(value);
               }
               data[id] = value;
+              if (value) {
+                counter += 1;
+              }
             } catch (error) {
               logger.error(`authState (69) -> error: ${error.message}`);
               logger.error(`authState (72) -> stack: ${error.stack}`);
             }
           }
 
+          logger.debug(
+            `Keys retrieved: whatsappId: ${whatsappId} type: ${type} Counter: ${counter}/${ids.length}`
+          );
           return data;
         },
         set: async (data: any) => {
           const tasks: Promise<unknown>[] = [];
           // eslint-disable-next-line no-restricted-syntax, guard-for-in
           for (const category in data) {
+            if (category === "pre-key") {
+              logger.info({ category: data[category] }, "Setting pre-keys");
+            }
             // eslint-disable-next-line no-restricted-syntax, guard-for-in
             for (const id in data[category]) {
               const value = data[category][id];

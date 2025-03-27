@@ -39,6 +39,8 @@ import LinearWithValueLabel from "./ProgressBarCustom";
 import WhatsMarked from "react-whatsmarked";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSignature, faNoteSticky } from '@fortawesome/free-solid-svg-icons';
+import { isMobile } from "../../helpers/isMobile";
+
 import { RecordOggOpus } from "../../helpers/recordOggOpus";
 import { makeRandomId } from "../../helpers/makeRandomId";
 
@@ -445,7 +447,7 @@ const CustomInput = (props) => {
 
   const onKeyPress = (e) => {
     if (loading || e.shiftKey) return;
-    else if (e.key === "Enter") {
+    else if (e.key === "Enter" && !isMobile()) {
       e.preventDefault();
       handleSendMessage(e);
     }
@@ -522,7 +524,7 @@ const CustomInput = (props) => {
               className={classes.messageInput}
               maxRows={5}
               endAdornment={
-                /Mobi|Android|iPhone/i.test(navigator.userAgent) &&
+                isMobile() &&
                 <InputAdornment position="end">
                   <input
                     type="file"
@@ -988,7 +990,7 @@ const MessageInputCustom = (props) => {
         }
         <div className={classes.newMessageBox}>
           {
-            /Mobi|Android|iPhone/i.test(navigator.userAgent) ||
+            isMobile() ||
             <EmojiOptions
               disabled={disableOption}
               handleAddEmoji={handleAddEmoji}
