@@ -41,6 +41,7 @@ import { getInitials } from "../../helpers/getInitials";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCloudArrowUp } from '@fortawesome/free-solid-svg-icons';
+import { FormControl, Grid, InputLabel, MenuItem, Select } from "@material-ui/core";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_CONTACTS") {
@@ -93,6 +94,11 @@ const useStyles = makeStyles((theme) => ({
     overflowY: "scroll",
     ...theme.scrollbarStyles,
   },
+  
+  selectContainer: {
+    width: "100%",
+    textAlign: "left",
+  },  
 }));
 
 const Contacts = () => {
@@ -112,10 +118,23 @@ const Contacts = () => {
   const [deletingContact, setDeletingContact] = useState(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [importConfirmOpen, setImportConfirmOpen] = useState(false);
+  const [connections, setConnections] = useState([]);
+  const [importConnectionId, setImportConnectionId] = useState("");
   const [hasMore, setHasMore] = useState(false);
 
   const socketManager = useContext(SocketContext);
 
+  useEffect(() => {
+    api.get('/whatsapp').then(({ data }) => {
+      setConnections(data);
+      data.map((connection) => {
+        if (connection.channel === "whatsapp" && connection.isDefault) {
+          setImportConnectionId(connection.id);
+        }
+      });
+    });
+  }, []);
+  
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
@@ -176,22 +195,6 @@ const Contacts = () => {
     setContactModalOpen(false);
   };
 
-  // const handleSaveTicket = async contactId => {
-  // 	if (!contactId) return;
-  // 	setLoading(true);
-  // 	try {
-  // 		const { data: ticket } = await api.post("/tickets", {
-  // 			contactId: contactId,
-  // 			userId: user?.id,
-  // 			status: "open",
-  // 		});
-  // 		history.push(`/tickets/${ticket.id}`);
-  // 	} catch (err) {
-  // 		toastError(err);
-  // 	}
-  // 	setLoading(false);
-  // };
-
   const handleCloseOrOpenTicket = (ticket) => {
     setNewTicketModalOpen(false);
     if (ticket !== undefined && ticket.uuid !== undefined) {
@@ -218,7 +221,7 @@ const Contacts = () => {
 
   const handleimportContact = async () => {
     try {
-      await api.post("/contacts/import");
+      await api.post("/contacts/import", { whatsappId: importConnectionId });
       history.go(0);
     } catch (err) {
       toastError(err);
@@ -291,13 +294,42 @@ const Contacts = () => {
       </ConfirmationModal>
       <ConfirmationModal
         title={`${i18n.t("contacts.confirmationModal.importTitlte")}`}
+        rawChildren
+        okEnabled={importConnectionId}
         open={importConfirmOpen}
         onClose={setImportConfirmOpen}
         onConfirm={() =>
           handleimportContact()
         }
       >
-        {i18n.t("contacts.confirmationModal.importMessage")}
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <FormControl
+              className={classes.selectContainer}
+              variant="outlined"
+              margin="dense"
+            >
+              <InputLabel id="labelSelectWhatsapp">
+                {i18n.t("common.connection")}
+              </InputLabel>
+              <Select
+                labelId="labelSelectWhatsapp"
+                label={i18n.t("common.connection")}
+                name="whatsappId"
+                value={importConnectionId || ""}
+                onChange={(e) => setImportConnectionId(e.target.value)}
+              >
+                <MenuItem value="">&nbsp;</MenuItem>
+                {connections.map((connection) => (
+                  connection.channel === "whatsapp" &&
+                  <MenuItem key={connection.id} value={connection.id}>
+                    {connection.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+        </Grid>
       </ConfirmationModal>
       <MainHeader>
         <Title>{i18n.t("contacts.title")}</Title>
