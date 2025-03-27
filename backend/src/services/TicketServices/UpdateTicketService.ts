@@ -248,15 +248,19 @@ const UpdateTicketService = async ({
         );
 
         const restrictTransferConnection =
-          (await GetCompanySetting(
+          !isGroup &&
+          ((await GetCompanySetting(
             companyId,
             "restrictTransferConnection",
             ""
-          )) === "enabled" || whatsapp.restrictToQueues;
+          )) === "enabled" ||
+            whatsapp.restrictToQueues);
 
         const transferToNewTicket =
-          (await GetCompanySetting(companyId, "transferToNewTicket", "")) ===
-            "enabled" || whatsapp.transferToNewTicket;
+          !isGroup &&
+          ((await GetCompanySetting(companyId, "transferToNewTicket", "")) ===
+            "enabled" ||
+            whatsapp.transferToNewTicket);
 
         // let oldTicket: Ticket = null;
         let newWhatsapp: Whatsapp = null;
