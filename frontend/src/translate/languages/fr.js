@@ -1,6 +1,27 @@
 const messages = {
   fr: {
     translations: {
+      common: {
+        search: "Rechercher",
+        edit: "Éditer",
+        delete: "Supprimer",
+        cancel: "Annuler",
+        save: "Enregistrer",
+        confirm: "Confirmer",
+        close: "Fermer",
+        error: "Erreur",
+        success: "Succès",
+        actions: "Actions",
+        add: "Ajouter",
+        name: "Nom",
+        email: "Email",
+        phone: "Téléphone",
+        company: "Entreprise",
+        user: "Utilisateur",
+        connection: "Connexion",
+        queue: "File d'attente",
+        contact: "Contact"
+      },
       signup: {
         title: "S'inscrire",
         toasts: {

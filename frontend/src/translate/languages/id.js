@@ -4,6 +4,26 @@ const messages = {
       date: {
         yesterday: "Kemarin",
       },
+      common: {
+        search: "Cari",
+        edit: "Edit",
+        delete: "Hapus",
+        cancel: "Batal",
+        save: "Simpan",
+        confirm: "Konfirmasi",
+        close: "Tutup",
+        error: "Kesalahan",
+        success: "Sukses",
+        actions: "Aksi",
+        add: "Tambah",
+        name: "Nama",
+        email: "Email",
+        phone: "Telepon",
+        company: "Perusahaan",
+        connection: "Koneksi",
+        queue: "Antrian",
+        contact: "Kontak"
+      },
       signup: {
         title: "Daftar",
         toasts: {
