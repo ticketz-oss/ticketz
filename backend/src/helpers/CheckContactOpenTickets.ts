@@ -17,7 +17,8 @@ const CheckContactOpenTickets = async (
   }
 
   const ticket = await Ticket.findOne({
-    where
+    where,
+    include: ["contact", "queue", "whatsapp", "user"]
   });
 
   if (ticket && !returnTicket) {
