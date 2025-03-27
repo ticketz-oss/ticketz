@@ -110,7 +110,8 @@ const Contacts = () => {
   const [newTicketModalOpen, setNewTicketModalOpen] = useState(false);
   const [contactTicket, setContactTicket] = useState({});
   const [deletingContact, setDeletingContact] = useState(null);
-  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [importConfirmOpen, setImportConfirmOpen] = useState(false);
   const [hasMore, setHasMore] = useState(false);
 
   const socketManager = useContext(SocketContext);
@@ -278,23 +279,25 @@ const Contacts = () => {
       ></ContactModal>
       <ConfirmationModal
         title={
-          deletingContact
-            ? `${i18n.t("contacts.confirmationModal.deleteTitle")} ${
-                deletingContact.name
-              }?`
-            : `${i18n.t("contacts.confirmationModal.importTitlte")}`
+          `${i18n.t("contacts.confirmationModal.deleteTitle")} ${deletingContact?.name}?`
         }
-        open={confirmOpen}
-        onClose={setConfirmOpen}
-        onConfirm={(e) =>
-          deletingContact
-            ? handleDeleteContact(deletingContact.id)
-            : handleimportContact()
+        open={deleteConfirmOpen}
+        onClose={setDeleteConfirmOpen}
+        onConfirm={() =>
+          handleDeleteContact(deletingContact.id)
         }
       >
-        {deletingContact
-          ? `${i18n.t("contacts.confirmationModal.deleteMessage")}`
-          : `${i18n.t("contacts.confirmationModal.importMessage")}`}
+        {i18n.t("contacts.confirmationModal.deleteMessage")}
+      </ConfirmationModal>
+      <ConfirmationModal
+        title={`${i18n.t("contacts.confirmationModal.importTitlte")}`}
+        open={importConfirmOpen}
+        onClose={setImportConfirmOpen}
+        onConfirm={() =>
+          handleimportContact()
+        }
+      >
+        {i18n.t("contacts.confirmationModal.importMessage")}
       </ConfirmationModal>
       <MainHeader>
         <Title>{i18n.t("contacts.title")}</Title>
@@ -315,14 +318,14 @@ const Contacts = () => {
           <Button
             variant="contained"
             color="primary"
-            onClick={(e) => importCsv()}
+            onClick={() => importCsv()}
           >
             &nbsp;<FontAwesomeIcon icon={faCloudArrowUp} />&nbsp;
           </Button>
           <Button
             variant="contained"
             color="primary"
-            onClick={(e) => setConfirmOpen(true)}
+            onClick={() => setImportConfirmOpen(true)}
           >
             {i18n.t("contacts.buttons.import")}
           </Button>
@@ -388,8 +391,8 @@ const Contacts = () => {
                       yes={() => (
                         <IconButton
                           size="small"
-                          onClick={(e) => {
-                            setConfirmOpen(true);
+                          onClick={() => {
+                            setDeleteConfirmOpen(true);
                             setDeletingContact(contact);
                           }}
                         >
