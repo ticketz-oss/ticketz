@@ -13,12 +13,6 @@ import { Session } from "../../libs/wbot";
 
 const contactMutex = new Mutex();
 
-/* 
-interface IContact {
-  contacts: BContact[];
-}
-/* */
-
 const wbotMonitor = async (
   wbot: Session,
   whatsapp: Whatsapp,
@@ -27,13 +21,6 @@ const wbotMonitor = async (
   try {
     wbot.ws.on("CB:call", async (node: BinaryNode) => {
       const content = node.content[0] as any;
-
-      /*
-      if (content.tag === "offer") {
-        const { from, id } = node.attrs;
-        // console.log(`${from} is calling you with id ${id}`);
-      }
-      /* */
 
       if (content.tag === "terminate") {
         const sendMsgCall = await Setting.findOne({
@@ -95,6 +82,7 @@ const wbotMonitor = async (
     });
 
     wbot.ev.on("contacts.upsert", async (contacts: BContact[]) => {
+      logger.debug({ contacts }, "contacts.upsert");
       contactMutex.runExclusive(async () => {
         await createOrUpdateBaileysService({
           whatsappId: whatsapp.id,
@@ -102,10 +90,6 @@ const wbotMonitor = async (
         });
       });
     });
-
-    // wbot.ev.on("contacts.set", async (contacts: IContact) => {
-    //  console.log("set", contacts);
-    // });
   } catch (err) {
     Sentry.captureException(err);
     logger.error(err);
