@@ -1,14 +1,29 @@
-import GetDefaultWhatsApp from "../../helpers/GetDefaultWhatsApp";
 import { getWbot } from "../../libs/wbot";
 import Contact from "../../models/Contact";
 import { logger } from "../../utils/logger";
 import ShowBaileysService from "../BaileysServices/ShowBaileysService";
 import CreateContactService from "../ContactServices/CreateContactService";
 import AppError from "../../errors/AppError";
+import Whatsapp from "../../models/Whatsapp";
 
-const ImportContactsService = async (companyId: number): Promise<void> => {
-  const defaultWhatsapp = await GetDefaultWhatsApp(companyId);
-  const wbot = getWbot(defaultWhatsapp.id);
+const ImportContactsService = async (
+  companyId: number,
+  whatsappId: number
+): Promise<void> => {
+  const whatsapp = await Whatsapp.findOne({
+    where: {
+      id: whatsappId,
+      companyId,
+      channel: "whatsapp",
+      status: "CONNECTED"
+    }
+  });
+
+  if (!whatsapp) {
+    throw new AppError("ERR_NO_WAPP_FOUND", 404);
+  }
+
+  const wbot = getWbot(whatsapp.id);
 
   const baileys = await ShowBaileysService(wbot.id);
 
