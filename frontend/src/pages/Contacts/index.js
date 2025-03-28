@@ -41,6 +41,7 @@ import { getInitials } from "../../helpers/getInitials";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCloudArrowUp } from '@fortawesome/free-solid-svg-icons';
+import { faDownload } from '@fortawesome/free-solid-svg-icons';
 import { FormControl, Grid, InputLabel, MenuItem, Select } from "@material-ui/core";
 
 const reducer = (state, action) => {
@@ -265,6 +266,22 @@ const Contacts = () => {
     };
   }
   
+  const exportCsv = async () => {
+    try {
+      const { data } = await api.get("/contacts/exportCsv", {
+        responseType: "blob",
+      });
+      const url = window.URL.createObjectURL(new Blob([data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "contacts.csv");
+      document.body.appendChild(link);
+      link.click();
+    } catch (err) {
+      toastError(err);
+    }
+  }
+  
   return (
     <MainContainer className={classes.mainContainer}>
       <NewTicketModal
@@ -353,6 +370,13 @@ const Contacts = () => {
             onClick={() => importCsv()}
           >
             &nbsp;<FontAwesomeIcon icon={faCloudArrowUp} />&nbsp;
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => exportCsv()}
+          >
+            &nbsp;<FontAwesomeIcon icon={faDownload} />&nbsp;
           </Button>
           <Button
             variant="contained"
