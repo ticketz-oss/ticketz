@@ -144,7 +144,7 @@ const CampaignModal = ({
         setCampaign((prev) => {
           let prevCampaignData = Object.assign({}, prev);
 
-          Object.entries(data).forEach(([key, value]) => {
+          Object.entries(data.campaign).forEach(([key, value]) => {
             if (key === "scheduledAt" && value !== "" && value !== null) {
               prevCampaignData[key] = moment(value).format("YYYY-MM-DDTHH:mm");
             } else {
