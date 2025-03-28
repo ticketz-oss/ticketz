@@ -131,6 +131,9 @@ class Message extends Model {
   @HasMany(() => OldMessage)
   oldMessages: OldMessage[];
 
+  @HasMany(() => Message, "quotedMsgId")
+  replies: Message[];
+
   @ForeignKey(() => User)
   @Column
   userId: number;

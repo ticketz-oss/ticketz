@@ -263,7 +263,7 @@ const getQuotedMessageId = (msg: proto.IWebMessageInfo) => {
     Object.keys(msg?.message).values().next().value
   ];
 
-  return body?.contextInfo?.stanzaId;
+  return body?.contextInfo?.stanzaId || msg?.message?.reactionMessage?.key?.id;
 };
 
 const getMeSocket = (wbot: Session): IMe => {
