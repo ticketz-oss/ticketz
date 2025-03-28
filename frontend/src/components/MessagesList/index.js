@@ -11,6 +11,7 @@ import {
   Divider,
   IconButton,
   makeStyles,
+  Tooltip,
   Typography,
 } from "@material-ui/core";
 
@@ -50,7 +51,8 @@ const useStyles = makeStyles((theme) => ({
       color: theme.palette.primary.main,
       fontWeight: "bold",
       textDecoration: "none",
-    },    
+    },
+    marginBottom: 5,
   },
   
   messagesListWrapper: {
@@ -91,7 +93,7 @@ const useStyles = makeStyles((theme) => ({
     height: "auto",
     display: "block",
     position: "relative",
-    "&:hover #messageActionsButton": {
+    "&:hover [id^='messageActionsButton']": {
       display: "flex",
       position: "absolute",
       top: 0,
@@ -476,6 +478,26 @@ const useStyles = makeStyles((theme) => ({
   },
   audioBottom: {
     marginBottom: "12px",
+  },
+  reactionsContainer: {
+    width: "fit-content",
+    height: 1,
+    marginLeft: "auto",
+    marginRight: "auto",
+  },
+  reactions: {
+    top: -8,
+    display: "ruby",
+    position: "relative",
+    zIndex: 1,
+    maxWidth: "75%",
+    paddingTop: 3,
+    paddingLeft: 5,
+    paddingRight: 5,
+    paddingBottom: 3,
+    borderRadius: 15,
+    backgroundColor: "gray",
+    cursor: "default"
   }
 }));
 
@@ -507,6 +529,14 @@ const reducer = (state, action) => {
       state.push(newMessage);
     }
 
+    if (newMessage.mediaType === "reactionMessage") {
+      const reactionIndex = state.findIndex((m) => m.id === newMessage.quotedMsgId);
+      if (reactionIndex !== -1) {
+        state[reactionIndex].replies = state[reactionIndex].replies || [];
+        state[reactionIndex].replies.push(newMessage);
+      }
+    }
+    
     return [...state];
   }
 
@@ -882,6 +912,38 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
     );
   };
 
+  const renderReplies = (replies) => {
+    const reactions = replies && replies.map((reply) => {
+      return (
+        reply?.mediaType === "reactionMessage" &&
+        (
+          reply.contact?.name ?
+            <Tooltip title={reply.contact?.name} placement="top" arrow >
+              <div
+                key={reply.id}
+              >
+                {reply.body}
+              </div>
+            </Tooltip>
+            :
+            <div
+              key={reply.id}
+            >
+              {reply.body}
+            </div>
+        )
+      );
+    });
+    
+    return (
+      reactions?.length > 0 && <div className={classes.reactionsContainer}>
+        <div className={classes.reactions}>
+          {reactions}
+        </div>
+      </div>
+    );
+  }
+  
   const renderLinkPreview = (message) => {
     const data = JSON.parse(message.dataJson);
     
@@ -1088,6 +1150,9 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
         
   const renderMessages = () => {
     const viewMessagesList = messagesList.map((message, index) => {
+      if (message.mediaType === "reactionMessage") {
+        return;
+      }
       const data = JSON.parse(message.dataJson);
       const dataContext = getDataContextInfo(data);
       const isSticker = data?.message && ("stickerMessage" in data.message);
@@ -1105,7 +1170,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
               <IconButton
                 variant="contained"
                 size="small"
-                id="messageActionsButton"
+                id={`messageActionsButton-${message.id}`}
                 disabled={message.isDeleted}
                 className={classes.messageActionsButton}
                 onClick={(e) => handleOpenMessageOptionsMenu(e, message, data)}
@@ -1171,6 +1236,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
                     </span>
                   </div>)}
                   {message.mediaUrl && !data?.message?.extendedTextMessage && checkMessageMedia(message, data)}
+                  {renderReplies(message.replies)}
             </div>
           </React.Fragment>
         );
@@ -1188,7 +1254,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
               <IconButton
                 variant="contained"
                 size="small"
-                id="messageActionsButton"
+                id={`messageActionsButton-${message.id}`}
                 disabled={message.isDeleted}
                 className={classes.messageActionsButton}
                 onClick={(e) => handleOpenMessageOptionsMenu(e, message, data)}
@@ -1243,6 +1309,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
                 </span>
               </div>
               {message.mediaUrl && checkMessageMedia(message, data)}
+              {renderReplies(message.replies)}
             </div>
           </React.Fragment>
         );
