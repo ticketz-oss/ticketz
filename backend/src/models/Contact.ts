@@ -56,7 +56,7 @@ class Contact extends Model<Contact> {
 
   @Default(false)
   @Column
-  disableBot: boolean
+  disableBot: boolean;
 
   @Default("available")
   @Column

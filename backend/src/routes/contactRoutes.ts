@@ -25,6 +25,13 @@ contactRoutes.post(
   ContactController.importCsv
 );
 
+contactRoutes.get(
+  "/contacts/exportCsv",
+  isAuth,
+  isAdmin,
+  ContactController.exportCsv
+);
+
 contactRoutes.get("/contacts", apiTokenAuth, isAuth, ContactController.index);
 
 contactRoutes.get(

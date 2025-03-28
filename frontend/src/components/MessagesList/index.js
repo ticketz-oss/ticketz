@@ -1174,10 +1174,11 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
   };
 
   const renderReplies = (replies) => {
-    const reactions = replies && replies.map((reply) => {
-      return (
-        reply?.mediaType === "reactionMessage" &&
-        (
+    const reactions = replies &&
+      replies.filter(
+        (reply) => reply?.mediaType === "reactionMessage"
+      ).map((reply) => {
+        return (
           reply.contact?.name ?
             <Tooltip title={reply.contact?.name} placement="top" arrow >
               <div
@@ -1193,9 +1194,8 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
               {reply.body}
             </div>
         )
-      );
-    });
-    
+      });
+
     return (
       reactions?.length > 0 && <div className={classes.reactionsContainer}>
         <div className={classes.reactions}>
