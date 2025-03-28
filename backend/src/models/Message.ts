@@ -126,6 +126,9 @@ class Message extends Model {
 
   @HasMany(() => OldMessage)
   oldMessages: OldMessage[];
+
+  @HasMany(() => Message, "quotedMsgId")
+  replies: Message[];
 }
 
 export default Message;
