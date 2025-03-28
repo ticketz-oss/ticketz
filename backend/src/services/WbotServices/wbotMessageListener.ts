@@ -623,7 +623,7 @@ export const verifyMessage = async (
     contactId: msg.key.fromMe ? undefined : contact.id,
     body,
     fromMe: msg.key.fromMe,
-    mediaType: null,
+    mediaType: getTypeMessage(msg),
     read: msg.key.fromMe || ticket.id < 0,
     quotedMsgId: quotedMsg?.id,
     ack: msg.status,

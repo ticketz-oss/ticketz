@@ -34,7 +34,6 @@ import { CreateInternalMessageService } from "../services/MessageServices/Create
 import QuickMessage from "../models/QuickMessage";
 import formatBody from "../helpers/Mustache";
 import { OmniServices } from "../services/OmniServices/OmniServices";
-import { getWbot } from "../libs/wbot";
 
 type IndexQuery = {
   pageNumber: string;

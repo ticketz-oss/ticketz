@@ -150,7 +150,13 @@ const ListMessagesService = async ({
     options = {
       where: {
         ticketId: { [Op.lte]: ticketId },
-        companyId
+        companyId,
+        mediaType: {
+          [Op.or]: {
+            [Op.ne]: "reactionMessage",
+            [Op.is]: null
+          }
+        }
       }
     };
   } else {
@@ -163,7 +169,7 @@ const ListMessagesService = async ({
             [Op.ne]: "reactionMessage",
             [Op.is]: null
           }
-        }        
+        }
       }
     };
   }

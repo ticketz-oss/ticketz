@@ -98,15 +98,15 @@ const MessageOptionsMenu = ({ message, data, menuOpen, handleClose, anchorEl }) 
   const isSticker = data?.message && ("stickerMessage" in data.message);
 
 	return (
-		<>
-			<ConfirmationModal
-				title={i18n.t("messageOptionsMenu.confirmationModal.title")}
-				open={confirmationOpen}
-				onClose={setConfirmationOpen}
-				onConfirm={handleDeleteMessage}
-			>
-				{i18n.t("messageOptionsMenu.confirmationModal.message")}
-			</ConfirmationModal>
+    <>
+      <ConfirmationModal
+        title={i18n.t("messageOptionsMenu.confirmationModal.title")}
+        open={confirmationOpen}
+        onClose={setConfirmationOpen}
+        onConfirm={handleDeleteMessage}
+      >
+        {i18n.t("messageOptionsMenu.confirmationModal.message")}
+      </ConfirmationModal>
       <MessageHistoryModal
         open={messageHistoryOpen}
         onClose={setMessageHistoryOpen}
@@ -119,50 +119,64 @@ const MessageOptionsMenu = ({ message, data, menuOpen, handleClose, anchorEl }) 
         messageId={message.id}
       />
       <Dialog open={showEmoji} onClose={() => setShowEmoji(false)}>
-          <Picker
-            perLine={16}
-            showPreview={false}
-            showSkinTones={false}
-            onSelect={(e) => handleReact(e.native)}
-          />
+        <Picker
+          perLine={16}
+          showPreview={false}
+          showSkinTones={false}
+          onSelect={(e) => handleReact(e.native)}
+        />
       </Dialog>
-			<Menu
-				anchorEl={anchorEl}
-				getContentAnchorEl={null}
-				anchorOrigin={{
-					vertical: "bottom",
-					horizontal: "right",
-				}}
-				transformOrigin={{
-					vertical: "top",
-					horizontal: "right",
-				}}
-				open={menuOpen}
-				onClose={handleClose}
-			>
-			  {message.mediaUrl && 
+      <Menu
+        anchorEl={anchorEl}
+        getContentAnchorEl={null}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+        open={menuOpen}
+        onClose={handleClose}
+      >
+        <div style={{ display: "flex", justifyContent: "space-around", padding: "8px" }}>
+          {mostUsedEmojis.map((emoji, index) => (
+            <div className={classes.emojiButton} onClick={() => handleReact(emoji)}>
+              <span style={{ fontSize: "1.5rem" }}>{emoji}</span>
+            </div>
+          ))}
+          <div className={classes.emojiButton} onClick={openEmoji}>
+            <span style={{ fontSize: "1.5rem" }}>&nbsp;+&nbsp;</span>
+          </div>
+        </div>
+        {message.mediaUrl &&
           <MenuItem key="download" onClick={() => handleDownload()}>
             {i18n.t("messageOptionsMenu.download")}
           </MenuItem>
-			  }
-				{message.fromMe && [
-					<MenuItem key="delete" onClick={handleOpenConfirmationModal}>
-						{i18n.t("messageOptionsMenu.delete")}
-					</MenuItem>,
+        }
+        {message.fromMe && [
+          <MenuItem key="delete" onClick={handleOpenConfirmationModal}>
+            {i18n.t("messageOptionsMenu.delete")}
+          </MenuItem>,
           !isSticker && (
             <MenuItem key="edit" onClick={handleEditMessage}>
               {i18n.t("messageOptionsMenu.edit")}
             </MenuItem>
-          )}
-          <MenuItem onClick={handleReplyMessage}>
-            {i18n.t("messageOptionsMenu.reply")}
+          )]}
+        {!isSticker && message.oldMessages?.length > 0 && (
+          <MenuItem key="history" onClick={handleOpenMessageHistoryModal}>
+            {i18n.t("messageOptionsMenu.history")}
           </MenuItem>
-          <MenuItem key="forward" onClick={handleOpenForwardModal}>
-            {i18n.t("messageOptionsMenu.forward")}
-          </MenuItem>
-        </>
+        )}
+        <MenuItem onClick={handleReplyMessage}>
+          {i18n.t("messageOptionsMenu.reply")}
+        </MenuItem>
+        <MenuItem key="forward" onClick={handleOpenForwardModal}>
+          {i18n.t("messageOptionsMenu.forward")}
+        </MenuItem>
       </Menu>
-		</>
+    </>
 	);
 };
 
