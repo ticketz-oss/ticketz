@@ -638,7 +638,9 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
         setContactPresence("available");
         if (data.action === "create") {
           dispatch({ type: "ADD_MESSAGE", payload: data.message });
-          scrollToBottom();
+          if (data.message.mediaType !== "reactionMessage") {
+            scrollToBottom();
+          } 
         }
 
         if (data.action === "update") {
