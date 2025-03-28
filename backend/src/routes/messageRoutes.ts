@@ -48,6 +48,7 @@ messageRoutes.post(
 messageRoutes.post(
   "/messages/react/:messageId",
   isAuth,
+  checkSubscription,
   MessageController.react
 );
 
