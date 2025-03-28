@@ -35,7 +35,6 @@ import FindOrCreateTicketService from "../TicketServices/FindOrCreateTicketServi
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
 import UpdateTicketService from "../TicketServices/UpdateTicketService";
 import formatBody from "../../helpers/Mustache";
-import { Store } from "../../libs/store";
 import TicketTraking from "../../models/TicketTraking";
 import UserRating from "../../models/UserRating";
 import SendWhatsAppMessage from "./SendWhatsAppMessage";
@@ -56,6 +55,7 @@ import { makeRandomId } from "../../helpers/MakeRandomId";
 import CheckSettings, { GetCompanySetting } from "../../helpers/CheckSettings";
 import Whatsapp from "../../models/Whatsapp";
 import { SimpleObjectCache } from "../../helpers/simpleObjectCache";
+import { Session } from "../../libs/wbot";
 
 import {
   IntegrationMessage,
@@ -74,12 +74,7 @@ import {
 
 import { SubscriptionService } from "../../ticketzPro/services/subscriptionService";
 
-type Session = WASocket & {
-  id?: number;
-  store?: Store;
-};
-
-interface ImessageUpsert {
+export interface ImessageUpsert {
   messages: proto.IWebMessageInfo[];
   type: MessageUpsertType;
 }
@@ -121,29 +116,31 @@ const getTypeEditedMessage = (msg: proto.IMessage): string => {
 const subscriptionService = SubscriptionService.getInstance();
 
 const getBodyButton = (msg: proto.IWebMessageInfo): string => {
-  if (
-    msg.key.fromMe &&
-    msg?.message?.viewOnceMessage?.message?.buttonsMessage?.contentText
-  ) {
-    let bodyMessage = `*${msg?.message?.viewOnceMessage?.message?.buttonsMessage?.contentText}*`;
+  const buttonsMessage =
+    msg?.message?.buttonsMessage ||
+    msg?.message?.viewOnceMessage?.message?.buttonsMessage;
 
-    msg.message?.viewOnceMessage?.message?.buttonsMessage?.buttons.forEach(
-      button => {
-        bodyMessage += `\n\n${button.buttonText?.displayText}`;
-      }
-    );
+  if (msg.key.fromMe && buttonsMessage?.contentText) {
+    let bodyMessage = `*${buttonsMessage?.contentText}*`;
+
+    buttonsMessage?.buttons.forEach(button => {
+      bodyMessage += `\n\n${button.buttonText?.displayText}`;
+    });
+
     return bodyMessage;
   }
 
-  if (msg.key.fromMe && msg?.message?.viewOnceMessage?.message?.listMessage) {
-    let bodyMessage = `*${msg?.message?.viewOnceMessage?.message?.listMessage?.description}*`;
-    msg.message?.viewOnceMessage?.message?.listMessage?.sections.forEach(
-      button => {
-        button.rows.forEach(rows => {
-          bodyMessage += `\n\n${rows.title}`;
-        });
-      }
-    );
+  const listMessage =
+    msg?.message?.listMessage ||
+    msg?.message?.viewOnceMessage?.message?.listMessage;
+
+  if (listMessage) {
+    let bodyMessage = `*${listMessage?.description}*`;
+    listMessage?.sections.forEach(button => {
+      button.rows.forEach(rows => {
+        bodyMessage += `\n\n${rows.title}`;
+      });
+    });
 
     return bodyMessage;
   }
@@ -231,7 +228,7 @@ const getBodyMessage = (msg: proto.IWebMessageInfo): string | null => {
         msg.message?.locationMessage?.degreesLongitude
       ),
       liveLocationMessage: `Latitude: ${msg.message?.liveLocationMessage?.degreesLatitude} - Longitude: ${msg.message?.liveLocationMessage?.degreesLongitude}`,
-      documentMessage: msg.message?.documentMessage?.title,
+      documentMessage: msg.message?.documentMessage?.caption,
       documentWithCaptionMessage:
         msg.message?.documentWithCaptionMessage?.message?.documentMessage
           ?.caption,
@@ -270,7 +267,7 @@ const getQuotedMessageId = (msg: proto.IWebMessageInfo) => {
     Object.keys(msg?.message).values().next().value
   ];
 
-  return body?.contextInfo?.stanzaId;
+  return body?.contextInfo?.stanzaId || msg?.message?.reactionMessage?.key?.id;
 };
 
 const getMeSocket = (wbot: Session): IMe => {
@@ -630,7 +627,7 @@ export const verifyMessage = async (
     contactId: msg.key.fromMe ? undefined : contact.id,
     body,
     fromMe: msg.key.fromMe,
-    mediaType: null,
+    mediaType: getTypeMessage(msg),
     read: msg.key.fromMe || ticket.id < 0,
     quotedMsgId: quotedMsg?.id,
     ack: msg.status,

@@ -125,6 +125,8 @@ export const SendWhatsAppMessage = async (
       options
     );
 
+    wbot.cacheMessage(sentMessage);
+
     await verifyMessage(sentMessage, ticket, ticket.contact);
 
     return sentMessage;

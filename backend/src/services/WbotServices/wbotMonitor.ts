@@ -1,12 +1,7 @@
-import {
-  WASocket,
-  BinaryNode,
-  Contact as BContact
-} from "@whiskeysockets/baileys";
+import { BinaryNode, Contact as BContact } from "@whiskeysockets/baileys";
 import * as Sentry from "@sentry/node";
 
 import { Mutex } from "async-mutex";
-import { Store } from "../../libs/store";
 import Contact from "../../models/Contact";
 import Setting from "../../models/Setting";
 import Ticket from "../../models/Ticket";
@@ -14,19 +9,9 @@ import Whatsapp from "../../models/Whatsapp";
 import { logger } from "../../utils/logger";
 import createOrUpdateBaileysService from "../BaileysServices/CreateOrUpdateBaileysService";
 import CreateMessageService from "../MessageServices/CreateMessageService";
+import { Session } from "../../libs/wbot";
 
 const contactMutex = new Mutex();
-
-type Session = WASocket & {
-  id?: number;
-  store?: Store;
-};
-
-/* 
-interface IContact {
-  contacts: BContact[];
-}
-/* */
 
 const wbotMonitor = async (
   wbot: Session,
@@ -36,13 +21,6 @@ const wbotMonitor = async (
   try {
     wbot.ws.on("CB:call", async (node: BinaryNode) => {
       const content = node.content[0] as any;
-
-      /*
-      if (content.tag === "offer") {
-        const { from, id } = node.attrs;
-        // console.log(`${from} is calling you with id ${id}`);
-      }
-      /* */
 
       if (content.tag === "terminate") {
         const sendMsgCall = await Setting.findOne({
@@ -104,6 +82,7 @@ const wbotMonitor = async (
     });
 
     wbot.ev.on("contacts.upsert", async (contacts: BContact[]) => {
+      logger.debug({ contacts }, "contacts.upsert");
       contactMutex.runExclusive(async () => {
         await createOrUpdateBaileysService({
           whatsappId: whatsapp.id,
@@ -111,10 +90,6 @@ const wbotMonitor = async (
         });
       });
     });
-
-    // wbot.ev.on("contacts.set", async (contacts: IContact) => {
-    //  console.log("set", contacts);
-    // });
   } catch (err) {
     Sentry.captureException(err);
     logger.error(err);
