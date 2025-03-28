@@ -22,6 +22,8 @@ import Message from "../models/Message";
 import Contact from "../models/Contact";
 import Ticket from "../models/Ticket";
 import ForwardMessageService from "../services/MessageServices/ForwardMessageService";
+import { getWbot } from "../libs/wbot";
+import { verifyMessage } from "../services/WbotServices/wbotMessageListener";
 
 type IndexQuery = {
   pageNumber: string;
@@ -90,6 +92,50 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     await SendWhatsAppMessage({ body, ticket, userId, quotedMsg });
   }
 
+  return res.send();
+};
+
+export const react = async (req: Request, res: Response): Promise<Response> => {
+  const { messageId } = req.params;
+  const { companyId } = req.user;
+  const userId = Number(req.user.id) || null;
+  const { ticketId, emoji } = req.body;
+
+  const message = await Message.findOne({
+    where: {
+      id: messageId,
+      ticketId
+    }
+  });
+
+  if (!message) {
+    throw new AppError("ERR_MESSAGE_NOT_FOUND", 404);
+  }
+
+  const ticket = await ShowTicketService(ticketId, companyId);
+  const wbot = await getWbot(ticket.whatsappId);
+
+  if (!wbot) {
+    throw new AppError("ERR_WHATSAPP_NOT_FOUND", 500);
+  }
+
+  const msg = JSON.parse(message.dataJson);
+
+  const sentMessage = await wbot.sendMessage(
+    ticket.contact.number + (ticket.isGroup ? "@g.us" : "@s.whatsapp.net"),
+    {
+      react: {
+        text: emoji,
+        key: msg.key
+      }
+    }
+  );
+
+  if (!sentMessage) {
+    throw new AppError("ERR_WHATSAPP_MESSAGE_NOT_SENT", 500);
+  }
+
+  await verifyMessage(sentMessage, ticket, ticket.contact);
   return res.send();
 };
 

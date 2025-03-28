@@ -23,6 +23,12 @@ messageRoutes.post(
 
 messageRoutes.post("/messages/edit/:messageId", isAuth, MessageController.edit);
 
+messageRoutes.post(
+  "/messages/react/:messageId",
+  isAuth,
+  MessageController.react
+);
+
 messageRoutes.delete("/messages/:messageId", isAuth, MessageController.remove);
 
 messageRoutes.post(
