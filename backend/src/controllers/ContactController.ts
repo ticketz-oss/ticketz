@@ -1,6 +1,6 @@
 import * as Yup from "yup";
 import { Request, Response } from "express";
-import { parse as csvParser } from "csv";
+import { parse as csvParser, stringify } from "csv";
 import fs from "fs";
 import { getIO } from "../libs/socket";
 
@@ -19,6 +19,7 @@ import SimpleListService, {
 import ContactCustomField from "../models/ContactCustomField";
 
 import { logger } from "../utils/logger";
+import Contact from "../models/Contact";
 
 type IndexQuery = {
   searchParam: string;
@@ -225,12 +226,19 @@ export const importCsv = async (
       }
 
       data.forEach(async (record: any) => {
+        let extraInfo;
+        try {
+          extraInfo = JSON.parse(record.ExtraInfo);
+        } catch (error) {
+          extraInfo = [];
+        }
+
         const contact = {
           companyId,
           name: record.name || record.Name,
           number: record.number || record.Number,
           email: record.email || record.Email,
-          extraInfo: []
+          extraInfo
         };
 
         Object.keys(record).forEach((key: string) => {
@@ -241,6 +249,7 @@ export const importCsv = async (
             key !== "Name" &&
             key !== "Number" &&
             key !== "Email" &&
+            key !== "ExtraInfo" &&
             record[key]
           ) {
             contact.extraInfo.push({
@@ -277,4 +286,51 @@ export const importCsv = async (
   readable.pipe(parser);
 
   return res.status(200).json({ message: "Contacts being imported" });
+};
+
+export const exportCsv = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { companyId } = req.user;
+
+  const contacts = await Contact.findAll({
+    where: {
+      companyId,
+      channel: "whatsapp",
+      isGroup: false
+    },
+    include: [
+      {
+        model: ContactCustomField,
+        as: "extraInfo"
+      }
+    ]
+  });
+
+  const records = contacts.map((contact: any) => {
+    const extraInfo = contact.extraInfo.map((info: any) => ({
+      name: info.name,
+      value: info.value
+    }));
+
+    return {
+      Name: contact.name,
+      Number: contact.number,
+      Email: contact.email || "",
+      ExtraInfo: JSON.stringify(extraInfo)
+    };
+  });
+
+  stringify(records, { header: true }, (err, output) => {
+    if (err) {
+      throw new AppError("ERR_GENERATING_CSV", 500);
+    }
+
+    res.setHeader("Content-disposition", "attachment; filename=contacts.csv");
+    res.set("Content-Type", "text/csv");
+    res.status(200).send(output);
+  });
+
+  return res;
 };

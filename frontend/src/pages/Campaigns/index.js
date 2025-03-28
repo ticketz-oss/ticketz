@@ -20,6 +20,8 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
 import EditIcon from "@material-ui/icons/Edit";
+import ZoomInIcon from "@material-ui/icons/ZoomIn";
+
 import DescriptionIcon from "@material-ui/icons/Description";
 import TimerOffIcon from "@material-ui/icons/TimerOff";
 import PlayCircleOutlineIcon from "@material-ui/icons/PlayCircleOutline";
@@ -340,81 +342,90 @@ const Campaigns = () => {
           </TableHead>
           <TableBody>
             <>
-              {campaigns.map((campaign) => (
-                <TableRow key={campaign.id}>
-                  <TableCell align="center">{campaign.name}</TableCell>
-                  <TableCell align="center">
-                    {formatStatus(campaign.status)}
-                  </TableCell>
-                  <TableCell align="center">
-                    {campaign.contactListId
-                      ? campaign.contactList.name
-                      : "Não definida"}
-                  </TableCell>
-                  <TableCell align="center">
-                    {campaign.whatsappId
-                      ? campaign.whatsapp.name
-                      : "Não definido"}
-                  </TableCell>
-                  <TableCell align="center">
-                    {campaign.scheduledAt
-                      ? datetimeToClient(campaign.scheduledAt)
-                      : "Sem agendamento"}
-                  </TableCell>
-                  <TableCell align="center">
-                    {campaign.completedAt
-                      ? datetimeToClient(campaign.completedAt)
-                      : "Não concluída"}
-                  </TableCell>
-                  <TableCell align="center">
-                    {campaign.confirmation ? "Habilitada" : "Desabilitada"}
-                  </TableCell>
-                  <TableCell align="center">
-                    {campaign.status === "EM_ANDAMENTO" && (
+              {campaigns.map((campaign) => {
+                const canEdit =
+                  campaign.status === "INATIVA"
+                  || (
+                    campaign.status === "PROGRAMADA"
+                    && new Date(campaign.scheduledAt) > new Date(Date.now() + 3600000)
+                  );
+                return (
+                  <TableRow key={campaign.id}>
+                    <TableCell align="center">{campaign.name}</TableCell>
+                    <TableCell align="center">
+                      {formatStatus(campaign.status)}
+                    </TableCell>
+                    <TableCell align="center">
+                      {campaign.contactListId
+                        ? campaign.contactList.name
+                        : "Não definida"}
+                    </TableCell>
+                    <TableCell align="center">
+                      {campaign.whatsappId
+                        ? campaign.whatsapp.name
+                        : "Não definido"}
+                    </TableCell>
+                    <TableCell align="center">
+                      {campaign.scheduledAt
+                        ? datetimeToClient(campaign.scheduledAt)
+                        : "Sem agendamento"}
+                    </TableCell>
+                    <TableCell align="center">
+                      {campaign.completedAt
+                        ? datetimeToClient(campaign.completedAt)
+                        : "Não concluída"}
+                    </TableCell>
+                    <TableCell align="center">
+                      {campaign.confirmation ? "Habilitada" : "Desabilitada"}
+                    </TableCell>
+                    <TableCell align="center">
+                      {campaign.status === "EM_ANDAMENTO" && (
+                        <IconButton
+                          onClick={() => cancelCampaign(campaign)}
+                          title="Parar Campanha"
+                          size="small"
+                        >
+                          <PauseCircleOutlineIcon />
+                        </IconButton>
+                      )}
+                      {campaign.status === "CANCELADA" && (
+                        <IconButton
+                          onClick={() => restartCampaign(campaign)}
+                          title="Parar Campanha"
+                          size="small"
+                        >
+                          <PlayCircleOutlineIcon />
+                        </IconButton>
+                      )}
                       <IconButton
-                        onClick={() => cancelCampaign(campaign)}
-                        title="Parar Campanha"
+                        onClick={() =>
+                          history.push(`/campaign/${campaign.id}/report`)
+                        }
                         size="small"
                       >
-                        <PauseCircleOutlineIcon />
+                        <DescriptionIcon />
                       </IconButton>
-                    )}
-                    {campaign.status === "CANCELADA" && (
                       <IconButton
-                        onClick={() => restartCampaign(campaign)}
-                        title="Parar Campanha"
                         size="small"
+                        onClick={() => handleEditCampaign(campaign)}
                       >
-                        <PlayCircleOutlineIcon />
+                        { canEdit ? <EditIcon /> : <ZoomInIcon /> }
                       </IconButton>
-                    )}
-                    <IconButton
-                      onClick={() =>
-                        history.push(`/campaign/${campaign.id}/report`)
-                      }
-                      size="small"
-                    >
-                      <DescriptionIcon />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleEditCampaign(campaign)}
-                    >
-                      <EditIcon />
-                    </IconButton>
 
-                    <IconButton
-                      size="small"
-                      onClick={(e) => {
-                        setConfirmModalOpen(true);
-                        setDeletingCampaign(campaign);
-                      }}
-                    >
-                      <DeleteOutlineIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
+                      <IconButton
+                        size="small"
+                        onClick={(e) => {
+                          setConfirmModalOpen(true);
+                          setDeletingCampaign(campaign);
+                        }}
+                      >
+                        <DeleteOutlineIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                )
+              }
+              )}
               {loading && <TableRowSkeleton columns={8} />}
             </>
           </TableBody>
