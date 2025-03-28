@@ -17,7 +17,7 @@ import { useStyles } from "./style";
 import 'emoji-mart/css/emoji-mart.css'
 import { Picker } from "emoji-mart";
 
-const mostUsedEmojis = ["👍", "❤️", "😂", "🎉"];
+const mostUsedEmojis = ["👍", "❤️", "😂", "🎉", "😮", "😢", "🙏"];
 
 const MessageOptionsMenu = ({ message, data, menuOpen, handleClose, anchorEl }) => {
   const classes = useStyles();
@@ -128,14 +128,14 @@ const MessageOptionsMenu = ({ message, data, menuOpen, handleClose, anchorEl }) 
         onClose={closeMenu}
       >
         <>
-          <div style={{ display: "flex", justifyContent: "space-around", padding: "8px" }}>
+          <div className={classes.flexContainer}>
             {mostUsedEmojis.map((emoji, index) => (
-              <div className={classes.emojiButton} onClick={() => handleReact(emoji)}>
-                <span style={{ fontSize: "1.5rem" }}>{emoji}</span>
+              <div className={classes.emojiButton} onClick={() => handleReact(emoji)} key={index}>
+                <span style={{ fontSize: "1rem" }}>{emoji}</span>
               </div>
             ))}
             <div className={classes.emojiButton} onClick={openEmoji}>
-              <span style={{ fontSize: "1.5rem" }}>&nbsp;+&nbsp;</span>
+              <span style={{ fontSize: "1rem" }}>+</span>
             </div>
           </div>
           {message.fromMe && [
