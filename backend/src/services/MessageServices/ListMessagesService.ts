@@ -6,6 +6,7 @@ import Ticket from "../../models/Ticket";
 import ShowTicketService from "../TicketServices/ShowTicketService";
 import Queue from "../../models/Queue";
 import { GetCompanySetting } from "../../helpers/CheckSettings";
+import { logger } from "../../utils/logger";
 
 interface Request {
   ticketId: string;
@@ -33,13 +34,19 @@ const ListMessagesService = async ({
     throw new AppError("ERR_NO_TICKET_FOUND", 404);
   }
 
-  const limit = 20;
+  const limit = 100;
   const offset = limit * (+pageNumber - 1);
 
   const options: FindOptions = {
     where: {
       ticketId,
-      companyId
+      companyId,
+      mediaType: {
+        [Op.or]: {
+          [Op.ne]: "reactionMessage",
+          [Op.is]: null
+        }
+      }
     }
   };
 
@@ -80,12 +87,22 @@ const ListMessagesService = async ({
         required: false
       },
       {
+        model: Message,
+        as: "replies",
+        where: {
+          ticketId: ticket.id
+        },
+        include: ["contact"],
+        required: false
+      },
+      {
         model: Queue,
         as: "queue"
       }
     ],
     offset,
-    order: [["createdAt", "DESC"]]
+    order: [["createdAt", "DESC"]],
+    logging: console.log
   });
 
   const hasMore = count > offset + messages.length;
