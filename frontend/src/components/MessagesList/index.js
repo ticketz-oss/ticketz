@@ -164,7 +164,7 @@ const useStyles = makeStyles((theme) => ({
     height: "auto",
     display: "block",
     position: "relative",
-    "&:hover #messageActionsButton": {
+    "&:hover [id^='messageActionsButton']": {
       display: "flex",
       position: "absolute",
       top: 0,
