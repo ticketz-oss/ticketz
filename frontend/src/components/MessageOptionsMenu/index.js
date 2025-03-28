@@ -6,22 +6,40 @@ import MenuItem from "@material-ui/core/MenuItem";
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import ConfirmationModal from "../ConfirmationModal";
-import { Menu } from "@material-ui/core";
+import { Dialog, DialogContent, DialogTitle, Menu } from "@material-ui/core";
 import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessageContext";
 import { EditMessageContext } from "../../context/EditingMessage/EditingMessageContext";
 import toastError from "../../errors/toastError";
 import MessageHistoryModal from "../MessageHistoryModal";
 import MessageForwardModal from "../MessageForwardModal";
+import { useStyles } from "./style";
+
+import 'emoji-mart/css/emoji-mart.css'
+import { Picker } from "emoji-mart";
+
+const mostUsedEmojis = ["👍", "❤️", "😂", "🎉"];
 
 const MessageOptionsMenu = ({ message, data, menuOpen, handleClose, anchorEl }) => {
-	const { setReplyingMessage } = useContext(ReplyMessageContext);
+  const classes = useStyles();
+  const { setReplyingMessage } = useContext(ReplyMessageContext);
  	const editingContext = useContext(EditMessageContext);
  	const setEditingMessage = editingContext ? editingContext.setEditingMessage : null;
  	
-	const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [forwardModalOpen, setForwardModalOpen] = useState(false);
-	const [messageHistoryOpen, setMessageHistoryOpen] = useState(false);
+  const [messageHistoryOpen, setMessageHistoryOpen] = useState(false);
+  const [showEmoji, setShowEmoji] = useState(false);
 
+  const closeMenu = () => {
+    handleClose();
+    setShowEmoji(false);
+  };
+  
+  const openEmoji = () => {
+    handleClose();
+    setShowEmoji(true);
+  };
+  
 	const handleDeleteMessage = async () => {
 		try {
 			await api.delete(`/messages/${message.id}`);
@@ -30,29 +48,38 @@ const MessageOptionsMenu = ({ message, data, menuOpen, handleClose, anchorEl }) 
 		}
 	};
 
-	const handleReplyMessage = () => {
+  const handleReact = async emoji => {
+    handleClose();
+    api.post(`/messages/react/${message.id}`, { ticketId: message.ticketId, emoji }).catch(err => {
+      ;
+      toastError(err);
+    });
+    setShowEmoji(false);
+  };
+
+  const handleReplyMessage = () => {
 		setReplyingMessage(message);
-		handleClose();
+		closeMenu();
 	};
 
 	const handleOpenConfirmationModal = e => {
 		setConfirmationOpen(true);
-		handleClose();
+		closeMenu();
 	};
 	
 	const handleEditMessage = async () => {
 		setEditingMessage(message);
-		handleClose();
+		closeMenu();
 	}
 	
 	const handleOpenMessageHistoryModal = (e) => {
 		setMessageHistoryOpen(true);
-		handleClose();
+		closeMenu();
 	}
   
   const handleOpenForwardModal = (e) => {
     setForwardModalOpen(true);
-    handleClose();
+    closeMenu();
   }
 
   const isSticker = data?.message && ("stickerMessage" in data.message);
@@ -71,49 +98,69 @@ const MessageOptionsMenu = ({ message, data, menuOpen, handleClose, anchorEl }) 
         open={messageHistoryOpen}
         onClose={setMessageHistoryOpen}
         oldMessages={message.oldMessages}
-      >
-      </MessageHistoryModal>
+      />
       <MessageForwardModal
         modalOpen={forwardModalOpen}
         onClose={setForwardModalOpen}
         ticketId={message.ticketId}
         messageId={message.id}
       />
-			<Menu
-				anchorEl={anchorEl}
-				getContentAnchorEl={null}
-				anchorOrigin={{
-					vertical: "bottom",
-					horizontal: "right",
-				}}
-				transformOrigin={{
-					vertical: "top",
-					horizontal: "right",
-				}}
-				open={menuOpen}
-				onClose={handleClose}
-			>
-				{message.fromMe && [
-					<MenuItem key="delete" onClick={handleOpenConfirmationModal}>
-						{i18n.t("messageOptionsMenu.delete")}
-					</MenuItem>,
-          !isSticker && (
-            <MenuItem key="edit" onClick={handleEditMessage}>
-              {i18n.t("messageOptionsMenu.edit")}
+      <Dialog open={showEmoji} onClose={() => setShowEmoji(false)}>
+          <Picker
+            perLine={16}
+            showPreview={false}
+            showSkinTones={false}
+            onSelect={(e) => handleReact(e.native)}
+          />
+      </Dialog>
+      <Menu
+        anchorEl={anchorEl}
+        getContentAnchorEl={null}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+        open={menuOpen}
+        onClose={closeMenu}
+      >
+        <>
+          <div style={{ display: "flex", justifyContent: "space-around", padding: "8px" }}>
+            {mostUsedEmojis.map((emoji, index) => (
+              <div className={classes.emojiButton} onClick={() => handleReact(emoji)}>
+                <span style={{ fontSize: "1.5rem" }}>{emoji}</span>
+              </div>
+            ))}
+            <div className={classes.emojiButton} onClick={openEmoji}>
+              <span style={{ fontSize: "1.5rem" }}>&nbsp;+&nbsp;</span>
+            </div>
+          </div>
+          {message.fromMe && [
+            <MenuItem key="delete" onClick={handleOpenConfirmationModal}>
+              {i18n.t("messageOptionsMenu.delete")}
+            </MenuItem>,
+            !isSticker && (
+              <MenuItem key="edit" onClick={handleEditMessage}>
+                {i18n.t("messageOptionsMenu.edit")}
+              </MenuItem>
+            ),
+          ]}
+          {!isSticker && message.oldMessages?.length > 0 && (
+            <MenuItem key="history" onClick={handleOpenMessageHistoryModal}>
+              {i18n.t("messageOptionsMenu.history")}
             </MenuItem>
-			    )]}
-				{!isSticker && message.oldMessages?.length > 0 && (
-					<MenuItem key="history" onClick={handleOpenMessageHistoryModal}>
-	                    {i18n.t("messageOptionsMenu.history")}
-				    </MenuItem>
-				)}
-				<MenuItem onClick={handleReplyMessage}>
-					{i18n.t("messageOptionsMenu.reply")}
-				</MenuItem>
-        <MenuItem key="forward" onClick={handleOpenForwardModal}>
-          {i18n.t("messageOptionsMenu.forward")}
-        </MenuItem>
-        </Menu>
+          )}
+          <MenuItem onClick={handleReplyMessage}>
+            {i18n.t("messageOptionsMenu.reply")}
+          </MenuItem>
+          <MenuItem key="forward" onClick={handleOpenForwardModal}>
+            {i18n.t("messageOptionsMenu.forward")}
+          </MenuItem>
+        </>
+      </Menu>
 		</>
 	);
 };
