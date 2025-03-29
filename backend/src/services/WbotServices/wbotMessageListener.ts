@@ -699,7 +699,7 @@ export const verifyMessage = async (
     contactId: msg.key.fromMe ? undefined : contact.id,
     body,
     fromMe: msg.key.fromMe,
-    mediaType: getTypeMessage(msg),
+    mediaType: msg.message.reactionMessage ? "reactionMessage" : null,
     read: msg.key.fromMe,
     quotedMsgId: quotedMsg?.id,
     ack: msg.status,
