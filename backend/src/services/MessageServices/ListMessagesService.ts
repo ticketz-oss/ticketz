@@ -6,7 +6,6 @@ import Ticket from "../../models/Ticket";
 import ShowTicketService from "../TicketServices/ShowTicketService";
 import Queue from "../../models/Queue";
 import { GetCompanySetting } from "../../helpers/CheckSettings";
-import { logger } from "../../utils/logger";
 
 interface Request {
   ticketId: string;
@@ -101,8 +100,7 @@ const ListMessagesService = async ({
       }
     ],
     offset,
-    order: [["createdAt", "DESC"]],
-    logging: console.log
+    order: [["createdAt", "DESC"]]
   });
 
   const hasMore = count > offset + messages.length;
