@@ -1,6 +1,15 @@
 [![en](https://img.shields.io/badge/lang-en-red.svg)](README.md)
 [![pt-br](https://img.shields.io/badge/lang-pt--br-green.svg)](README.pt.md)
 
+# Ticketz PRO
+
+Se você veio aqui para obter o código fonte do Ticketz PRO, infelizmente você caiu em uma
+pegadinha de 1º de Abril.
+
+Mas já que você está aqui, gaste alguns minutos para conhecer o projeto de código aberto.
+
+Se você deseja um período grátis de experiência do Ticketz PRO [é só me chamar no whatsapp](https://wa.me/5549999812291)
+
 # Sobre o projeto
 
 Ticketz é um comunicador com recursos de CRM e helpdesk que utiliza

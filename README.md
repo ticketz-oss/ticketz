@@ -1,6 +1,15 @@
 [![en](https://img.shields.io/badge/lang-en-green.svg)](README.md)
 [![pt-br](https://img.shields.io/badge/lang-pt--br-red.svg)](README.pt.md)
 
+# Ticketz PRO
+
+If you came here to get the sources of Ticketz PRO, unfortunately you have been pranked on an
+April Fool's Day trick.
+
+Anyway, you can spend a few minutes and give a look at the Open Source project.
+
+If you want a free trial period of Ticketz PRO [just ask me on my whatsapp](https://wa.me/5549999812291)
+
 # About the Project
 
 Ticketz is a communicator with CRM and helpdesk features that utilizes WhatsApp as a means of communication with clients.
