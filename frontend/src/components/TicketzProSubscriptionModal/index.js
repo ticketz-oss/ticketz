@@ -15,6 +15,12 @@ import {
   Grid,
   CircularProgress,
   DialogContentText,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@material-ui/core";
 import { AddressForm, useAddressData } from "../../components/AddressForm";
 import { MercadoPagoCreditCard } from "../../components/MercadoPagoCreditCard";
@@ -29,7 +35,12 @@ import WarningIcon from "@material-ui/icons/Warning";
 import moment from 'moment';
 import useAuth from "../../hooks/useAuth.js";
 import { i18n } from "../../translate/i18n";
-import Markdown from "markdown-to-jsx";
+import WhatsMarked from "react-whatsmarked";
+import { CreditCardForm } from "../CreditCardForm/index.js";
+import InputMask from "react-input-mask/lib/react-input-mask.development.js";
+import { cpf, cnpj } from "cpf-cnpj-validator";
+import { copyToClipboard } from "../../helpers/copyToClipboard";
+import QRCode from "qrcode.react";
 
 // Get preferred language from localStorage or browser
 const storedLanguage = localStorage.getItem('language');
@@ -100,6 +111,10 @@ const useStyles = makeStyles((theme) => ({
     overflowY: "scroll",
     ...theme.scrollbarStyles,
   },  
+  container: {
+    marginTop: 0,
+    marginBottom: 0,
+  },
   selectContainer: {
     width: "100%",
     textAlign: "left",
@@ -132,24 +147,10 @@ const useStyles = makeStyles((theme) => ({
     color: "orange",
     textAlign: "center"
   },
-  loadingContainer: {
-    position: 'relative',
-    pointerEvents: (props) => (props.loading ? 'none' : 'auto'), // Prevents interaction when loading
-  },
-  loadingOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Grays out the background
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1, // Ensures the overlay is on top
-  },
-  stepperContent: {
-    opacity: (props) => (props.loading ? 0.5 : 1), // Makes content semi-transparent when loading
+  loading: {
+    width: 40,
+    marginLeft: "auto",
+    marginRight: "auto",
   },
   errorMessage: {
     color: "yellow",
@@ -157,6 +158,14 @@ const useStyles = makeStyles((theme) => ({
     textAlign: "center",
     fontSize: "large",
     padding: 3
+  },
+  field: {
+    width: "100%",
+    textAlign: "left",
+    padding: "unset",
+  },
+  pix: {
+    textAlign: "center",
   }
 }));
 
@@ -172,9 +181,14 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
   const { getCurrentUserInfo } = useAuth();
   const [proStatus, setProStatus] = useState({});
   const [activeStep, setActiveStep] = useState(-1);
+  const [showPixQrCode, setShowPixQrCode] = useState(false);
+  const [customerName, setCustomerName] = useState("");
+  const [customerWhatsapp, setCustomerWhatsapp] = useState("");
   const [emailAddress, setEmailAddress] = useState("");
   const [emptyAddress] = useAddressData();
   const [addressData, setAddressData] = useAddressData();
+  const [customerIdType, setCustomerIdType] = useState("CPF");
+  const [customerId, setCustomerId] = useState("");
   const [paymentService, setPaymentService] = useState("stripe");
   const [currency, setCurrency] = useState("USD");
   const [ticketzProKey, setTicketzProKey] = useState("");
@@ -192,25 +206,28 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
   const stripeRef = useRef(null);
   const mercadoPagoRef = useRef(null);
 
+  const asaasCcRef = useRef(null);
+  const [ payMethod, setPayMethod ] = useState("boleto");
+
   const steps = [
     "ticketz.pro.stepperStart",
-    "ticketz.pro.stepperAddress",
+    "ticketz.pro.stepperCustomer",
     "ticketz.pro.stepperPayment",
+    "ticketz.pro.stepperProcessing",
     "ticketz.pro.stepperDone",
   ];
 
   const handleNext = async () => {
     if (activeStep === 2) {
+      setLoading(true);
       if (paymentService === "stripe" && stripeRef.current) {
-        const success = await stripeRef.current.submitPayment();
-        if (success) {
-          setActiveStep((prevStep) => prevStep + 1);
-        }
+        await stripeRef.current.submitPayment();
+      } else if (paymentService === "asaas" && payMethod === "boleto") {
+        handlePayment();
+      } else if (paymentService === "asaas" && asaasCcRef.current) {
+        await asaasCcRef.current.submitPayment();
       } else if (paymentService === "mp" && mercadoPagoRef.current) {
-        const success = await mercadoPagoRef.current.submitPayment();
-        if (success) {
-          setActiveStep((prevStep) => prevStep + 1);
-        }
+        await mercadoPagoRef.current.submitPayment();
       }
     } else {
       setActiveStep((prevStep) => prevStep + 1);
@@ -218,21 +235,30 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
   };
 
   const handleBack = () => {
+    setErrorMessage("");
     setActiveStep((prevStep) => prevStep - 1);
   };
 
-  const handlePayment = (cardToken) => {
+  const handlePayment = (cardData) => {
+    setActiveStep(3);
     setLoading(true);
+    const customerData = {
+      name: customerName,
+      email: emailAddress,
+      mobilePhone: customerWhatsapp,
+      cpfCnpj: customerId,
+    };
     ticketzProSubscribe({
       paymentService,
-      emailAddress,
-      cardToken,
+      customerData,
+      ccData: paymentService === "asaas" && payMethod === "cc" ? cardData : undefined,
+      cardToken: paymentService !== "asaas" ? cardData : undefined,
       addressData
     }).then(
       result => {
         setProStatus(result.status);
-        if (result.status?.subscriptionData?.id) {
-          setActiveStep(3);
+        if (result.status?.subscriptionData?.id && !result.status?.subscriptionData?.pix) {
+          setActiveStep(4);
         } else {
           console.debug("Subscription result",{ result });
         }
@@ -247,11 +273,12 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
 
   const handleCancelSubscription = () => {
     setLoading(true);
+    setProStatus({});
     ticketzProCancelSubscription().then(
       result => {
         setProStatus(result.status);
         if (result.status?.subscriptionData?.id) {
-          setActiveStep(3);
+          setActiveStep(4);
         } else {
           console.debug("Cancel subscription result",{ result });
         }
@@ -264,10 +291,48 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
     );
   };
 
+  const validatePhoneNumber = (phoneNumber) => {
+    return phoneNumber
+      && phoneNumber.match(/^\+?\d+$/)
+      && (phoneNumber.startsWith("+")
+        ? phoneNumber.length > 8 && phoneNumber.length < 17
+        : phoneNumber.length === 11
+      );
+  };
+                                
+  const validCustomerData = () => {
+    return customerName
+      && validatePhoneNumber(customerWhatsapp)
+      && isValidEmail(emailAddress)
+      && (addressData.country === "BR"
+        ? (customerIdType === "CPF" ? cpf.isValid(customerId) : cnpj.isValid(customerId))
+        : true);
+  };
+  
+  const recheckSubscription = () => {
+    setProStatus({});
+    setLoading(true);
+    ticketzProStatus({ recheck: true }).then(
+      ticketzPro => {
+        setProStatus(ticketzPro.status);
+        if (ticketzPro.status?.subscriptionData?.pending
+          || ticketzPro.status?.subscriptionData?.pix) {
+          setActiveStep(3);
+        } else if (ticketzPro.status?.success) {
+          setActiveStep(4);
+        } else {
+          setActiveStep(0);
+        }
+        setLoading(false);
+      }
+    );
+  };
+    
   useEffect(() => {
     if (open) {
       setErrorMessage("");
       setTicketzProKey("");
+      setProStatus({});
       settings.get("ticketzProKey").then(
         (proKey) => {
           setTicketzProKey(proKey);
@@ -280,8 +345,11 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
         ticketzProStatus().then(
           ticketzPro => {
             setProStatus(ticketzPro.status);
-            if (ticketzPro.status?.success) {
+            if (ticketzPro.status?.subscriptionData?.pending
+              || ticketzPro.status?.subscriptionData?.pix) {
               setActiveStep(3);
+            } else if (ticketzPro.status?.success) {
+              setActiveStep(4);
             } else {
               setActiveStep(0);
             }
@@ -304,7 +372,7 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
   useEffect(() => {
     if (addressData.country === "BR") {
       setCurrency("BRL");
-      setPaymentService("mp");
+      setPaymentService("asaas");
     } else if (isEurozone(addressData.country)) {
       setCurrency("EUR");
       setPaymentService("stripe");
@@ -341,7 +409,11 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
         setProStatus(ticketzPro.status);
         if (ticketzPro.status?.success) {
           setShowTicketzProKey(false);
-          setActiveStep(3);
+          if (ticketzPro.status?.subscriptionData?.pending) {
+            setActiveStep(3);
+          } else {
+            setActiveStep(4);
+          }
         } else {
           value && setErrorMessage(`${i18n.t("ticketz.pro.invalidKey")}: ${i18n.t(ticketzPro?.status?.message)}`);
         }
@@ -356,15 +428,9 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth disableBackdropClick maxWidth="sm">
-      <div className={classes.loadingContainer}>
         <div className={classes.stepperContent}>
           <DialogTitle>{i18n.t("ticketz.pro.subscriptionTitle")}</DialogTitle>
           <DialogContent>
-            {loading && (
-              <div className={classes.loadingOverlay}>
-                <CircularProgress color="inherit" />
-              </div>
-            )}
             <Stepper activeStep={activeStep} alternativeLabel>
               {steps.map((label) => (
                 <Step key={label}>
@@ -373,18 +439,21 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
               ))}
             </Stepper>
 
-            {activeStep === 0 &&
+            {loading &&
+              <div className={classes.loading}>
+                <CircularProgress color="inherit" />
+              </div>
+            }
+            
+            {!loading && activeStep === 0 &&
               <>
                 {!showTicketzProKey &&
                   <div>
-                    <Typography component="body1">
-                      <Markdown>
-                       {i18n.t("ticketz.pro.subscribeInstructions")}
-                      </Markdown>
-                    </Typography>
+                    <WhatsMarked>
+                      {i18n.t("ticketz.pro.subscribeInstructions")}
+                    </WhatsMarked>
                   </div>
                 }
-                  
 
                 {showTicketzProKey &&
                   <>
@@ -408,7 +477,7 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
               </>
             }
 
-            {activeStep >= 1 && activeStep <= 2 && (
+            {!loading && activeStep >= 1 && activeStep <= 2 && (
               <Typography component="h2" variant="h6">
                 {i18n.t("ticketz.pro.subscriptionPrice")}:&nbsp;
                 {currency === "BRL" ? "R$ 199" : (currency === "EUR" ? "€44" : "US$ 49")}
@@ -416,24 +485,109 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
               </Typography>
             )}
 
-            {activeStep === 1 && (
+            {!loading && activeStep === 1 && (
               <>
-                <FormControl fullWidth margin="normal">
-                  <TextField
-                    label={i18n.t("ticketz.pro.emailAddress")}
-                    variant="standard"
-                    value={emailAddress || ""}
-                    onChange={(e) => setEmailAddress(e.target.value)}
-                    error={!isValidEmail(emailAddress)}
-                  />
-                </FormControl>
+                <Grid className={classes.container} container spacing={2}>
+                  <Grid xs={12} sm={12} md={12} item>
+                    <FormControl className={classes.field}>
+                      <TextField
+                        label={i18n.t("common.name")}
+                        variant="standard"
+                        value={customerName || ""}
+                        onChange={(e) => setCustomerName(e.target.value)}
+                        error={!customerName}
+                      />
+                    </FormControl>
+                  </Grid>
+                  <Grid xs={12} sm={8} md={8} item>
+                    <FormControl className={classes.field}>
+                      <TextField
+                        label={i18n.t("common.email")}
+                        variant="standard"
+                        value={emailAddress || ""}
+                        onChange={(e) => setEmailAddress(e.target.value)}
+                        error={!isValidEmail(emailAddress)}
+                      />
+                    </FormControl>
+                  </Grid>
+                  <Grid xs={12} sm={4} md={4} item>
+                    <FormControl className={classes.field}>
+                      <TextField
+                        label={i18n.t("common.whatsappNumber")}
+                        variant="standard"
+                        value={customerWhatsapp || ""}
+                        onChange={(e) => setCustomerWhatsapp(e.target.value)}
+                        error={!validatePhoneNumber(customerWhatsapp)}
+                      />
+                    </FormControl>
+                  </Grid>
+                </Grid>
 
                 <AddressForm formData={addressData} setFormData={setAddressData} />
-              </>
+
+                {addressData.country === "BR" &&
+                  <Grid className={classes.container} container spacing={2}>
+                    <Grid xs={12} sm={4} md={4} item>
+                      <FormControl className={classes.field}>
+                        <InputLabel id="customer-id-type-label">{i18n.t('ccform.documentType')}</InputLabel>
+                        <Select
+                          labelId="customer-id-type-label"
+                          value={customerIdType || "CPF"}
+                          onChange={(e) => setCustomerIdType(e.target.value)}
+                          name="customerIdType"
+                        >
+                          <MenuItem value={"CPF"}>{i18n.t('ccform.cpf')}</MenuItem>
+                          <MenuItem value={"CNPJ"}>{i18n.t('ccform.cnpj')}</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+  
+                    <Grid xs={12} sm={8} md={8} item>
+                      <FormControl className={classes.field}>
+                        <InputMask
+                          mask={customerIdType === "CPF" ? '999.999.999-99' : '99.999.999/9999-99'}
+                          maskPlaceholder={null}
+                          value={customerId || ""}
+                          onChange={(e) => setCustomerId(e.target.value)}
+                        >
+                          <TextField
+                            id="customer-id"
+                            label={customerIdType === "CPF" ? i18n.t('ccform.cpf') : i18n.t('ccform.cnpj')}
+                            variant="standard"
+                            name="customerId"
+                            error={ !customerId || (customerIdType === "CPF" ? !cpf.isValid(customerId) : !cnpj.isValid(customerId)) }
+                          />
+                        </InputMask>
+                      </FormControl>
+                    </Grid>
+                  </Grid>
+                }
+                </>
             )}
 
-            {activeStep === 2 && (
+            {!loading && activeStep === 2 && (
               <>
+                {paymentService === "asaas" && (
+                  <>
+                    <FormControl component="fieldset" fullWidth margin="normal">
+                      <RadioGroup row value={payMethod} onChange={(e) => setPayMethod(e.target.value)}>
+                        <FormControlLabel value="boleto" control={<Radio />} label={i18n.t("ticketz.pro.boleto")} />
+                        <FormControlLabel value="cc" control={<Radio />} label={i18n.t("ticketz.pro.creditCard")} />
+                      </RadioGroup>
+                    </FormControl>
+                    {payMethod === "boleto" &&
+                      <WhatsMarked>
+                        {i18n.t("ticketz.pro.boletoInstructions")}
+                      </WhatsMarked>}
+                    {payMethod === "cc" &&
+                      <CreditCardForm
+                        ref={asaasCcRef}
+                        onSubmit={handlePayment}
+                        forceBR={true}
+                        renderSubmit={false}
+                      />}
+                  </>
+                )}
                 {paymentService === "mp" && (
                   <MercadoPagoCreditCard
                     ref={mercadoPagoRef}
@@ -454,8 +608,43 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
                 )}
               </>
             )}
+            
+            {!loading && activeStep === 3 && proStatus.subscriptionData?.pix &&
+              <Grid container spacing={2}>
+                <Grid xs={12} sm={8} md={8} item>
+                  <WhatsMarked>
+                    {i18n.t("ticketz.pro.pixFinishInstructions")}
+                  </WhatsMarked>
+                </Grid>
+                <Grid className={classes.pix} xs={12} sm={4} md={4} item>
+                  {proStatus.subscriptionData?.next_payment_date &&
+                    <div>
+                      {i18n.t("common.dueDate")}:<br />{moment(proStatus.subscriptionData.next_payment_date).format("LL")}
+                    </div>
+                  }
+                  <QRCode value={proStatus.subscriptionData.pix}
+                    style={
+                      {
+                        borderStyle: "solid",
+                        borderWidth: "1px",
+                        padding: "5px",
+                        borderColor: "black",
+                        backgroundColor: "white",
+                        height: "auto",
+                        maxWidth: "100%"
+                      }} />
+                  <br />
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => copyToClipboard(proStatus.subscriptionData.pix)}>
+                    {i18n.t("common.copy")}
+                  </Button>
+                </Grid>
+              </Grid>
+            }
 
-            {activeStep === 3 && (
+            {!loading && activeStep === 4 && (
               proStatus?.success ?
                 <>
                   {proStatus?.subscriptionData?.next_payment_date && 
@@ -498,9 +687,9 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
                     <DialogTitle id="alert-dialog-title">{i18n.t("ticketz.pro.cancelSubscriptionQuestion")}</DialogTitle>
                     <DialogContent>
                       <DialogContentText id="alert-dialog-description">
-                        <Markdown>
+                        <WhatsMarked>
                           {i18n.t("ticketz.pro.cancelSubscriptionDetails")}
-                        </Markdown>
+                        </WhatsMarked>
                       </DialogContentText>
                     </DialogContent>
                     <DialogActions>
@@ -528,9 +717,9 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
                     <DialogTitle id="alert-dialog-title">{i18n.t("ticketz.pro.resetLicenseQuestion")}</DialogTitle>
                     <DialogContent>
                       <DialogContentText id="alert-dialog-description">
-                        <Markdown>
+                        <WhatsMarked>
                           {i18n.t("ticketz.pro.resetLicenseDetails")}
-                        </Markdown>
+                        </WhatsMarked>
                       </DialogContentText>
                     </DialogContent>
                     <DialogActions>
@@ -550,8 +739,6 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
                       </Button>
                     </DialogActions>
                   </Dialog>
-
-
                 </>
                 :
                 <Typography variant="h5" align="center">
@@ -568,11 +755,15 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
           </DialogContent>
 
           <DialogActions>
-            <Button onClick={onClose}>
-              {i18n.t("ticketz.pro.close")}
-            </Button>
-
-            {activeStep > 0 && activeStep < 3 && <Button onClick={handleBack}>{i18n.t("ticketz.pro.back")}</Button>}
+            {!loading &&
+              <Button onClick={onClose}>
+                {i18n.t("ticketz.pro.close")}
+              </Button>
+            }
+  
+            {activeStep > 0 && activeStep < 4 && !loading &&
+              <Button onClick={handleBack}>{i18n.t("ticketz.pro.back")}</Button>
+            }
 
             {activeStep === 0 &&
               <>
@@ -629,21 +820,25 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
               </>
             }
 
-
             {activeStep === 2 ? (
               <Button onClick={handleNext} color="primary">
                 {i18n.t("ticketz.pro.pay")}
               </Button>
-            ) : activeStep === 3 ? (
+            ) : activeStep === 3 || activeStep === 4 ? (
               <></>
             ) : activeStep > 0 ? (
-              <Button onClick={handleNext} color="primary" disabled={!addressData.complete || !isValidEmail(emailAddress)}>
+              <Button onClick={handleNext} color="primary" disabled={!validCustomerData()}>
                 {i18n.t("ticketz.pro.next")}
               </Button>
             ) : ""}
+            
+            {activeStep === 3 && proStatus.subscriptionData?.pix && !loading &&
+              <Button onClick={recheckSubscription} color="primary">
+                {i18n.t("common.proceed")}
+              </Button>
+            }
           </DialogActions>
         </div>
-      </div>
     </Dialog>
   );
 }

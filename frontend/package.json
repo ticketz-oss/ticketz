@@ -19,6 +19,7 @@
     "bootstrap": "^5.2.3",
     "compressorjs": "^1.2.1",
     "context": "^4.0.0",
+    "cpf-cnpj-validator": "^1.0.3",
     "date-fns": "^2.16.1",
     "emoji-mart": "^3.0.0",
     "formik": "^2.2.0",

@@ -6,18 +6,27 @@ import { verifySignature } from "./verifySignature";
 import { makeRandomId } from "../../helpers/MakeRandomId";
 import UpdateSettingService from "../../services/SettingServices/UpdateSettingService";
 import AppError from "../../errors/AppError";
+import { GitInfo } from "../../gitinfo";
 
 type SubscriptionRequestData = {
   domain: string;
   paymentService: string;
-  email: string;
-  cardToken: object;
+  customerData: object;
   addressData: object;
+  ccData: object;
+  cardToken: object;
   challenge: string;
   debug?: boolean;
 };
 
-function getDomain(url) {
+const gitInfo = GitInfo;
+
+// code built from source will use test endpoints
+const FAAS_SUFFIX = gitInfo.commitHash ? "" : "-test";
+const FAAS_URL =
+  "https://m7afmggvk2xe7xakjkth4scpia.apigateway.sa-saopaulo-1.oci.customer-oci.com/mps";
+
+function getDomain(url: string) {
   try {
     const parsedUrl = new URL(url);
     return parsedUrl.hostname;
@@ -34,7 +43,7 @@ export class SubscriptionService {
 
   private lastSuccessfulRun: Date | null = null;
 
-  private taskStatus = {};
+  private taskStatus: any = {};
 
   // eslint-disable-next-line no-useless-constructor
   private constructor() {
@@ -67,8 +76,7 @@ export class SubscriptionService {
 
   // eslint-disable-next-line class-methods-use-this
   async checkSubscriptionStatus(): Promise<{ success: boolean }> {
-    const url =
-      "https://m7afmggvk2xe7xakjkth4scpia.apigateway.sa-saopaulo-1.oci.customer-oci.com/mps/check";
+    const url = `${FAAS_URL}/check${FAAS_SUFFIX}`;
 
     const ticketzProKey = await GetCompanySetting(1, "ticketzProKey", "");
 
@@ -139,8 +147,7 @@ export class SubscriptionService {
   }
 
   async cancel() {
-    const url =
-      "https://m7afmggvk2xe7xakjkth4scpia.apigateway.sa-saopaulo-1.oci.customer-oci.com/mps/subscribe";
+    const url = `${FAAS_URL}/subscribe${FAAS_SUFFIX}`;
 
     const ticketzProKey = await GetCompanySetting(1, "ticketzProKey", "");
 
@@ -206,25 +213,29 @@ export class SubscriptionService {
     });
   }
 
-  status() {
+  async status(recheck = false) {
+    if (recheck) {
+      await this.triggerSingleCheck();
+    }
     return this.taskStatus;
   }
 
-  async subscribe(
-    paymentService: string,
-    email: string,
-    cardToken: object,
-    addressData: object
-  ) {
-    const url =
-      "https://m7afmggvk2xe7xakjkth4scpia.apigateway.sa-saopaulo-1.oci.customer-oci.com/mps/subscribe";
+  async subscribe({
+    paymentService,
+    customerData,
+    addressData,
+    ccData,
+    cardToken
+  }) {
+    const url = `${FAAS_URL}/subscribe${FAAS_SUFFIX}`;
 
     const data: SubscriptionRequestData = {
       domain: getDomain(process.env.FRONTEND_URL),
       paymentService,
-      email,
-      cardToken,
+      customerData,
       addressData,
+      ccData,
+      cardToken,
       challenge: makeRandomId(32)
     };
 

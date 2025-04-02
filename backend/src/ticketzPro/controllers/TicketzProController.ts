@@ -24,15 +24,19 @@ export const checkStatus = async (
 /**
  * getStatus
  *
- * return license status from memory
- *
+ * return license status from memory cache or query license server
+ * if recheck=true, query license server
+ * if recheck=false, return cached status
+ * if recheck=undefined, return cached
+ * if no status, return 402
  * OK result includes subscription data
  */
 export const getStatus = async (
-  _req: Request,
+  req: Request,
   res: Response
 ): Promise<Response> => {
-  const status = subscriptionService.status();
+  const { recheck } = req.query;
+  const status = await subscriptionService.status(!!recheck);
   if (status) {
     return res.json({ message: "SUBSCRIPTION_STATUS", status });
   }
@@ -50,20 +54,17 @@ export const subscribe = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const {
-    paymentService,
-    emailAddress,
-    cardToken,
-    addressData
-  } = req.body;
+  const { paymentService, addressData, customerData, ccData, cardToken } =
+    req.body;
 
   try {
-    const status = await subscriptionService.subscribe(
+    const status = await subscriptionService.subscribe({
       paymentService,
-      emailAddress,
-      cardToken,
-      addressData
-    );
+      customerData,
+      addressData,
+      ccData,
+      cardToken
+    });
     if (status) {
       return res.json({ message: "SUBSCRIPTION_STATUS", status });
     }

@@ -85,6 +85,7 @@ const fetchZippopotamusData = async (country, zipCode) => {
 const useStyles = makeStyles((theme) => ({
   container: {
     marginTop: 0,
+    marginBottom: 0,
   },
   field: {
     width: "100%",

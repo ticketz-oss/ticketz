@@ -3,12 +3,13 @@ import { SubscriptionService } from "../services/subscriptionService";
 
 const subscriptionService = SubscriptionService.getInstance();
 
-export function checkSubscription(
+export async function checkSubscription(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
-  const result = subscriptionService.getTaskResult();
+  const status = await subscriptionService.status();
+  const result = status.success && !status.subscriptionData?.pending;
   if (result === false) {
     return res.status(402).json({ message: "ERR_SUBSCRIPTION_CHECK_FAILED" });
   }
