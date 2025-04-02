@@ -20,7 +20,12 @@ const messages = {
         user: "Utilizador",
         connection: "Conexão",
         queue: "Fila",
-        contact: "Contacto"
+        contact: "Contacto",
+        whatsappNumber: "Número do Whatsapp",
+        dueDate: "Data de vencimento",
+        copy: "Copiar",
+        paste: "Colar",
+        proceed: "Prosseguir",        
       },
       signup: {
         title: "Registar",
