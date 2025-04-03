@@ -25,6 +25,7 @@ import Company from "./models/Company";
 import Plan from "./models/Plan";
 import { handleMessage } from "./services/WbotServices/wbotMessageListener";
 import ShowService from "./services/CampaignService/ShowService";
+import Invoices from "./models/Invoices";
 
 const connection = process.env.REDIS_URI || "";
 const limiterMax = process.env.REDIS_OPT_LIMITER_MAX || 1;
@@ -585,44 +586,46 @@ async function handleLoginStatus() {
   });
 }
 
-async function handleInvoiceCreate() {
-  const job = new CronJob("0 * * * * *", async () => {
-    const companies = await Company.findAll();
-    companies.map(async c => {
-      const { dueDate } = c;
-      const date = moment(dueDate).format();
-      const timestamp = moment().format();
-      const hoje = moment(moment()).format("DD/MM/yyyy");
-      const vencimento = moment(dueDate).format("DD/MM/yyyy");
+const createInvoices = new CronJob("0 * * * * *", async () => {
+  const companies = await Company.findAll();
+  companies.map(async c => {
+    const dueDate = new Date(c.dueDate);
+    const today = new Date();
+    const diffTime = dueDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-      const diff = moment(vencimento, "DD/MM/yyyy").diff(
-        moment(hoje, "DD/MM/yyyy")
-      );
-      const dias = moment.duration(diff).asDays();
+    if (diffDays < 20) {
+      const plan = await Plan.findByPk(c.planId);
 
-      if (dias < 20) {
-        const plan = await Plan.findByPk(c.planId);
-
-        const sql = `SELECT COUNT(*) mycount FROM "Invoices" WHERE "companyId" = ${
-          c.id
-        } AND "dueDate"::text LIKE '${moment(dueDate).format("yyyy-MM-DD")}%';`;
-        const invoice: { mycount: number }[] = await sequelize.query(sql, {
-          type: QueryTypes.SELECT
-        });
-        if (+invoice[0].mycount === 0) {
-          // eslint-disable-next-line no-shadow
-          const sql = `INSERT INTO "Invoices" (detail, status, value, "updatedAt", "createdAt", "dueDate", "companyId")
-          VALUES ('${plan.name}', 'open', '${plan.value}', '${timestamp}', '${timestamp}', '${date}', ${c.id});`;
-
-          await sequelize.query(sql, { type: QueryTypes.INSERT });
+      const invoiceCount = await Invoices.count({
+        where: {
+          companyId: c.id,
+          dueDate: {
+            [Op.like]: `${dueDate.toISOString().split("T")[0]}%`
+          }
         }
-      }
-    });
-  });
-  job.start();
-}
+      });
 
-handleInvoiceCreate();
+      if (invoiceCount === 0) {
+        await Invoices.destroy({
+          where: {
+            companyId: c.id,
+            status: "open"
+          }
+        });
+        await Invoices.create({
+          detail: plan.name,
+          status: "open",
+          value: plan.value,
+          dueDate: dueDate.toISOString().split("T")[0],
+          companyId: c.id
+        });
+      }
+    }
+  });
+});
+
+createInvoices.start();
 
 export async function startQueueProcess() {
   logger.info("Iniciando processamento de filas");
