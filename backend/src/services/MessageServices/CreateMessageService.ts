@@ -43,6 +43,8 @@ const CreateMessageService = async ({
         include: [
           "contact",
           "queue",
+          "tags",
+          "user",
           {
             model: Whatsapp,
             as: "whatsapp",
