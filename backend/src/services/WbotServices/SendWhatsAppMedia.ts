@@ -1,4 +1,4 @@
-import { WAMessage, AnyMessageContent } from "@whiskeysockets/baileys";
+import { WAMessage, AnyMediaMessageContent } from "@whiskeysockets/baileys";
 import * as Sentry from "@sentry/node";
 import fs from "fs";
 import { exec } from "child_process";
@@ -41,18 +41,20 @@ export const getMessageOptions = async (
   fileName: string,
   pathMedia: string,
   mimetype?: string
-): Promise<AnyMessageContent> => {
+): Promise<AnyMediaMessageContent> => {
   mimetype = mimetype || mime.lookup(pathMedia) || "application/octet-stream";
 
   try {
-    let options: AnyMessageContent;
+    let options: AnyMediaMessageContent;
 
     if (mimetype.startsWith("video/")) {
       options = {
+        fileName,
         video: { stream: fs.createReadStream(pathMedia) }
       };
     } else if (mimetype === "audio/ogg") {
       options = {
+        fileName,
         audio: { stream: fs.createReadStream(pathMedia) },
         mimetype: "audio/ogg; codecs=opus",
         ptt: true
@@ -60,6 +62,7 @@ export const getMessageOptions = async (
     } else if (mimetype.startsWith("audio/")) {
       const needConvert = fileName.includes("audio-record-site");
       options = {
+        fileName,
         audio: {
           stream: needConvert
             ? await processRecordedAudio(pathMedia)
@@ -70,10 +73,12 @@ export const getMessageOptions = async (
       };
     } else if (supportedImages.includes(mimetype)) {
       options = {
+        fileName,
         image: { stream: fs.createReadStream(pathMedia) }
       };
     } else {
       options = {
+        fileName,
         document: { stream: fs.createReadStream(pathMedia) },
         mimetype
       };
@@ -119,7 +124,7 @@ const SendWhatsAppMedia = async ({
         caption: body || undefined,
         fileName,
         ...options
-      } as AnyMessageContent
+      } as AnyMediaMessageContent
     );
 
     wbot.cacheMessage(sentMessage);
