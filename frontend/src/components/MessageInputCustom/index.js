@@ -5,6 +5,13 @@ import { Picker } from "emoji-mart";
 import MicRecorder from "mic-recorder-to-mp3";
 import clsx from "clsx";
 
+import { 
+  Code,
+  FormatListNumbered,
+  FormatListBulleted,
+  FormatQuote,
+} from "@material-ui/icons";
+
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
 import InputBase from "@material-ui/core/InputBase";
@@ -20,7 +27,7 @@ import MicIcon from "@material-ui/icons/Mic";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import CameraAltIcon from "@material-ui/icons/CameraAlt";
-import { FormControlLabel, Switch, Tooltip, InputAdornment } from "@material-ui/core";
+import { FormControlLabel, Switch, Tooltip, InputAdornment, Typography } from "@material-ui/core";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { isString, isEmpty, isObject, has } from "lodash";
 
@@ -184,6 +191,15 @@ const useStyles = makeStyles((theme) => ({
     height: 48
   },
 
+  formatMenu: {
+    backgroundColor: theme.palette.background.paper,
+    color: theme.palette.text.primary,
+    borderRadius: 30,
+    boxShadow: theme.shadows[2],
+    padding: '4px 8px',
+    display: 'flex',
+    alignItems: 'center',
+  },
 }));
 
 const EmojiOptions = (props) => {
@@ -359,6 +375,17 @@ const CustomInput = (props) => {
   const { list: listQuickMessages } = useQuickMessages();
 
   useEffect(() => {
+    const handleClickAway = (event) => {
+      const menu = document.getElementById('format-menu');
+      if (menu && !menu.contains(event.target)) {
+        menu.style.display = 'none';
+      }
+    };
+    document.addEventListener('mousedown', handleClickAway);
+    return () => document.removeEventListener('mousedown', handleClickAway);
+  }, []);
+
+  useEffect(() => {
     async function fetchData() {
       const messages = await listQuickMessages();
       const options = messages.map((m) => {
@@ -424,6 +451,151 @@ const CustomInput = (props) => {
     }
   };
 
+  const showFormatMenu = () => {
+    const selection = window.getSelection();
+    const menuElement = document.getElementById('format-menu');
+    if (!selection?.toString()) {
+      menuElement.style.display = 'none';
+    } else {
+      menuElement.style.display = 'flex';
+      menuElement.style.top = `${selection.anchorNode.offsetTop - 40}px`;
+      menuElement.style.left = `${selection.anchorNode.offsetLeft}px`;
+    }
+  };
+  
+  const formatText = (prefix, suffix) => {
+    const selection = window.getSelection();
+    const selectedText = selection.toString().trim();
+    if (selectedText) {
+      let formattedText = `${prefix}${selectedText}${suffix}`;
+      const textArea = inputRef.current;
+      const start = textArea.selectionStart;
+      const end = textArea.selectionEnd;
+      const textBefore = inputMessage.substring(0, start);
+      const textAfter = inputMessage.substring(end);
+      
+      const prevChar = textBefore.charAt(start - 1);
+      if (prevChar && prevChar !== ' ' && prevChar !== '\n') {
+        formattedText = ` ${formattedText}`;
+      }
+      
+      const nextChar = textAfter.charAt(0);
+      if (nextChar && nextChar !== ' ' && nextChar !== '\n') {
+        formattedText = `${formattedText} `;
+      }
+      
+      setInputMessage(textBefore + formattedText + textAfter);
+      document.getElementById('format-menu').style.display = 'none';
+      setTimeout(() => {
+        textArea.focus();
+        textArea.setSelectionRange(
+          start + prefix.length - 1,
+          start + prefix.length + formattedText.length - 1
+        );
+        showFormatMenu();
+      }, 0);
+    }
+  };
+
+  const splitSelectionLines = () => {
+    const selection = window.getSelection();
+    const selectedText = selection.toString();
+    if (selectedText) {
+      const textArea = inputRef.current;
+      const start = textArea.selectionStart;
+      const end = textArea.selectionEnd;
+
+      const firstLineStart = inputMessage.substring(0, start).lastIndexOf("\n")+1;
+      const lastLineEnd = end+inputMessage.substring(end).indexOf("\n");
+      const textBefore = inputMessage.substring(0, firstLineStart);
+      const textAfter = inputMessage.substring(lastLineEnd);
+
+      const lines = inputMessage.substring(firstLineStart, lastLineEnd).split('\n');
+      return { lines, textBefore, textAfter };
+    }
+    return { lines: [], textBefore: inputMessage, textAfter: "" };
+  };
+  
+  const formatCode = () => {
+    const selection = window.getSelection();
+    if (selection.toString().indexOf('\n') === -1) {
+      formatText('`', '`');
+      return;
+    }
+      
+    const { lines, textBefore, textAfter } = splitSelectionLines();
+    if (lines.length > 0) {
+      const formattedText = "```\n" + lines.join('\n') + "\n```\n";
+      setInputMessage(textBefore + formattedText + textAfter);
+      setTimeout(() => {
+        const textArea = inputRef.current;
+        textArea.focus();
+        textArea.setSelectionRange(
+          textBefore.length,
+          textBefore.length + formattedText.length
+        );
+        showFormatMenu();
+      }, 0);
+    }
+  };
+          
+  const formatListNumbered = () => {
+    const { lines, textBefore, textAfter } = splitSelectionLines();
+    if (lines.length > 0) {
+      const formattedLines = lines.map((line, index) => `${index + 1}. ${line}`);
+      const formattedText = formattedLines.join('\n');
+
+      setInputMessage(textBefore + formattedText + textAfter);
+      setTimeout(() => {
+        const textArea = inputRef.current;
+        textArea.focus();
+        textArea.setSelectionRange(
+          textBefore.length,
+          textBefore.length + formattedText.length
+        );
+        showFormatMenu();
+      }, 0);
+    }
+  };
+
+  const formatListBulleted = () => {
+    const { lines, textBefore, textAfter } = splitSelectionLines();
+    if (lines.length > 0) {
+      const formattedLines = lines.map(line => `* ${line}`);
+      const formattedText = formattedLines.join('\n');
+
+      setInputMessage(textBefore + formattedText + textAfter);
+      setTimeout(() => {
+        const textArea = inputRef.current;
+        textArea.focus();
+        textArea.setSelectionRange(
+          textBefore.length,
+          textBefore.length + formattedText.length
+        );
+        showFormatMenu();
+      }, 0);
+    }
+  };
+
+  const formatQuote = () => {
+    const { lines, textBefore, textAfter } = splitSelectionLines();
+    if (lines.length > 0) {
+      const formattedLines = lines.map(line => `> ${line}`);
+      const formattedText = formattedLines.join('\n');
+
+      setInputMessage(textBefore + formattedText + textAfter);
+      setTimeout(() => {
+        const textArea = inputRef.current;
+        textArea.focus();
+        textArea.setSelectionRange(
+          textBefore.length,
+          textBefore.length + formattedText.length
+        );
+        showFormatMenu();
+      }, 0);
+    }
+  };
+  
   return (
     <div className={classes.messageInputWrapper}>
       <Autocomplete
@@ -460,11 +632,12 @@ const CustomInput = (props) => {
         renderInput={(params) => {
           const { InputLabelProps, InputProps, ...rest } = params;
           return (
+            <>
             <InputBase
               {...params.InputProps}
               {...rest}
               disabled={disableOption}
-              inputRef={setInputRef}
+              inputRef={(input) => setInputRef(input)}
               placeholder={renderPlaceholder()}
               multiline
               className={classes.messageInput}
@@ -501,7 +674,89 @@ const CustomInput = (props) => {
                   e.stopPropagation();
                 }
               }}
+              onMouseUp={showFormatMenu}
+              onKeyUp={showFormatMenu}
+              onKeyDown={(e) => {
+                if (e.ctrlKey && e.key === 'b') {
+                  e.preventDefault();
+                  formatText('*', '*');
+                } else if (e.ctrlKey && e.key === 'i') {
+                  e.preventDefault();
+                  formatText('_', '_');
+                } else if (e.ctrlKey && e.key === 's') {
+                  e.preventDefault();
+                  formatText('~', '~');
+                } else if (e.ctrlKey && e.key === 'm') {
+                  e.preventDefault();
+                  formatCode();
+                } else if (e.ctrlKey && e.key === 'q') {
+                  e.preventDefault();
+                  formatQuote();
+                } else if (e.ctrlKey && e.key === 'n') {
+                  e.preventDefault();
+                  formatListNumbered();
+                } else if (e.ctrlKey && e.key === 'l') {
+                  e.preventDefault();
+                  formatListBulleted();
+                }
+              }}
             />
+            <div
+              id="format-menu"
+              className={classes.formatMenu}
+              style={{ display: 'none', position: 'absolute', zIndex: 1000 }}
+            >
+              <IconButton 
+                size="small" 
+                onClick={() => formatText('*','*')}
+                style={{ padding: '6px', margin: '0 2px' }}
+              >
+                <Typography style={{ fontWeight: 'bold', fontSize: '15px' }}>B</Typography>
+              </IconButton>
+              <IconButton 
+                size="small" 
+                onClick={() => formatText('_','_')}
+                style={{ padding: '6px', margin: '0 2px' }}
+              >
+                <Typography style={{ fontStyle: 'italic', fontSize: '15px' }}>I</Typography>
+              </IconButton>
+              <IconButton 
+                size="small" 
+                onClick={() => formatText('~','~')}
+                style={{ padding: '6px', margin: '0 2px' }}
+              >
+                <Typography style={{ textDecoration: 'line-through', fontSize: '15px' }}>S</Typography>
+              </IconButton>
+              <IconButton 
+                size="small" 
+                onClick={formatCode}
+                style={{ padding: '6px', margin: '0 2px' }}
+              >
+                <Code fontSize="small" />
+              </IconButton>
+              <IconButton 
+                size="small" 
+                onClick={formatListNumbered}
+                style={{ padding: '6px', margin: '0 2px' }}
+              >
+                <FormatListNumbered fontSize="small" />
+              </IconButton>
+              <IconButton 
+                size="small" 
+                onClick={formatListBulleted}
+                style={{ padding: '6px', margin: '0 2px' }}
+              >
+                <FormatListBulleted fontSize="small" />
+              </IconButton>
+              <IconButton 
+                size="small" 
+                onClick={formatQuote}
+                style={{ padding: '6px', margin: '0 2px' }}
+              >
+                <FormatQuote fontSize="small" />
+              </IconButton>
+            </div>
+            </>
           );
         }}
       />
