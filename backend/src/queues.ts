@@ -35,6 +35,7 @@ import Invoice from "./models/Invoices";
 import { checkNewInvoice } from "./services/PaymentGatewayServices/PaymentGatewayServices";
 import { handleMessage } from "./services/WbotServices/wbotMessageListener";
 import ShowService from "./services/CampaignService/ShowService";
+import Invoices from "./models/Invoices";
 
 const connection = process.env.REDIS_URI || "";
 const limiterMax = process.env.REDIS_OPT_LIMITER_MAX || 1;
@@ -769,42 +770,46 @@ async function handleEveryMinute() {
   handleTicketTimeouts();
 }
 
-async function handleInvoiceCreate() {
-  const job = new CronJob("0 * * * * *", async () => {
-    const companies = await Company.findAll();
-    companies.map(async c => {
-      const diffDays = moment(c.dueDate).diff(moment(), "days");
+const createInvoices = new CronJob("0 * * * * *", async () => {
+  const companies = await Company.findAll();
+  companies.map(async c => {
+    const dueDate = new Date(c.dueDate);
+    const today = new Date();
+    const diffTime = dueDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-      if (diffDays < 20) {
-        const plan = await Plan.findByPk(c.planId);
+    if (diffDays < 20) {
+      const plan = await Plan.findByPk(c.planId);
 
-        const invoiceCount = await Invoice.count({
+      const invoiceCount = await Invoices.count({
+        where: {
+          companyId: c.id,
+          dueDate: {
+            [Op.like]: `${dueDate.toISOString().split("T")[0]}%`
+          }
+        }
+      });
+
+      if (invoiceCount === 0) {
+        await Invoices.destroy({
           where: {
             companyId: c.id,
-            dueDate: {
-              [Op.like]: `${moment(c.dueDate).format("yyyy-MM-DD")}%`
-            }
+            status: "open"
           }
         });
-
-        if (invoiceCount === 0) {
-          const newInvoice = await Invoice.create({
-            detail: plan.name,
-            status: "open",
-            value: plan.value,
-            dueDate: moment(c.dueDate).format(),
-            companyId: c.id
-          });
-          await checkNewInvoice(newInvoice);
-        }
+        await Invoices.create({
+          detail: plan.name,
+          status: "open",
+          value: plan.value,
+          dueDate: dueDate.toISOString().split("T")[0],
+          companyId: c.id
+        });
       }
-    });
+    }
   });
+});
 
-  job.start();
-}
-
-handleInvoiceCreate();
+createInvoices.start();
 
 export async function startQueueProcess() {
   logger.info("Iniciando processamento de filas");
