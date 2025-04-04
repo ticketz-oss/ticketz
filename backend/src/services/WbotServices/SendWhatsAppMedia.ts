@@ -1,4 +1,4 @@
-import { WAMessage, AnyMessageContent } from "@whiskeysockets/baileys";
+import { WAMessage, AnyMediaMessageContent } from "@whiskeysockets/baileys";
 import * as Sentry from "@sentry/node";
 import fs from "fs";
 import { exec } from "child_process";
@@ -45,18 +45,20 @@ export const getMessageFileOptions = async (
   pathMedia: string,
   mimetype?: string,
   ptt?: boolean
-): Promise<AnyMessageContent> => {
+): Promise<AnyMediaMessageContent> => {
   mimetype = mimetype || mime.lookup(pathMedia) || "application/octet-stream";
 
   try {
-    let options: AnyMessageContent;
+    let options: AnyMediaMessageContent;
 
     if (mimetype.startsWith("video/")) {
       options = {
+        fileName,
         video: { stream: fs.createReadStream(pathMedia) }
       };
     } else if (mimetype === "audio/ogg") {
       options = {
+        fileName,
         audio: { stream: fs.createReadStream(pathMedia) },
         mimetype: "audio/ogg; codecs=opus",
         ptt: true
@@ -64,6 +66,7 @@ export const getMessageFileOptions = async (
     } else if (mimetype.startsWith("audio/")) {
       const needConvert = fileName.includes("audio-record-site");
       options = {
+        fileName,
         audio: {
           stream: needConvert
             ? await processRecordedAudio(pathMedia)
@@ -74,10 +77,12 @@ export const getMessageFileOptions = async (
       };
     } else if (supportedImages.includes(mimetype)) {
       options = {
+        fileName,
         image: { stream: fs.createReadStream(pathMedia) }
       };
     } else {
       options = {
+        fileName,
         document: { stream: fs.createReadStream(pathMedia) },
         mimetype
       };
@@ -93,7 +98,7 @@ export const getMessageFileOptions = async (
 
 export const sendWhatsappFile = async (
   ticket: Ticket,
-  options: AnyMessageContent
+  options: AnyMediaMessageContent
 ): Promise<WAMessage> => {
   try {
     const wbot = await GetTicketWbot(ticket);
@@ -115,7 +120,7 @@ export const sendWhatsappFile = async (
 
 export const SendWhatsAppMessage = async (
   ticket: Ticket,
-  options: AnyMessageContent
+  options: AnyMediaMessageContent
 ): Promise<WAMessage> => {
   try {
     const wbot = await GetTicketWbot(ticket);
@@ -191,7 +196,7 @@ export const SendWhatsAppMedia = async ({
       caption: caption || undefined,
       fileName,
       ...options
-    } as AnyMessageContent);
+    } as AnyMediaMessageContent);
   } catch (err) {
     Sentry.captureException(err);
     console.log(err);
