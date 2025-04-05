@@ -336,14 +336,14 @@ const useStyles = makeStyles((theme) => ({
     textAlign: "center",
     alignSelf: "center",
     width: "110px",
-    backgroundColor: theme.mode === "light" ? "#e1f3fb" : "#424242",
+    backgroundColor: theme.palette.backgroundContrast.paper,
     margin: "10px",
     borderRadius: "10px",
-    boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000",
+    boxShadow: `0 1px 1px ${theme.palette.backgroundContrast.border}`,
   },
 
   dailyTimestampText: {
-    color: "#808888",
+    color: theme.palette.textCommon.main,
     padding: 8,
     alignSelf: "center",
     marginLeft: "0px",
@@ -1054,7 +1054,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
         </span>
       );
     }
-    if (index < messagesList.length - 1) {
+    if (index < messagesList.length) {
       let messageDay = parseISO(messagesList[index].createdAt);
       let previousMessageDay = parseISO(messagesList[index - 1].createdAt);
 
@@ -1070,14 +1070,6 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
           </span>
         );
       }
-    }
-    if (index === messagesList.length - 1) {
-      return (
-        <div
-          key={`ref-${message.createdAt}`}
-          style={{ float: "left", clear: "both" }}
-        />
-      );
     }
   };
 
