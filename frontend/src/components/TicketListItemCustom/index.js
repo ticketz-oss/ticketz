@@ -136,6 +136,7 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: "6px",
     marginTop: "3px",
     marginBottom: "3px",
+    overflow: "hidden",
   },
   
   avatar: {

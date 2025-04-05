@@ -31,8 +31,6 @@ import formatBody from "./helpers/Mustache";
 import Ticket from "./models/Ticket";
 import QueueModel from "./models/Queue";
 import UpdateTicketService from "./services/TicketServices/UpdateTicketService";
-import Invoice from "./models/Invoices";
-import { checkNewInvoice } from "./services/PaymentGatewayServices/PaymentGatewayServices";
 import { handleMessage } from "./services/WbotServices/wbotMessageListener";
 import ShowService from "./services/CampaignService/ShowService";
 import Invoices from "./models/Invoices";
@@ -681,11 +679,16 @@ async function handleNoQueueTimeout(
   timeout: number,
   action: number
 ) {
+  const groupsTab =
+    (await GetCompanySetting(company.id, "groupsTab", "disabled")) ===
+    "enabled";
+
   const tickets = await Ticket.findAll({
     where: {
       status: "pending",
       companyId: company.id,
       queueId: null,
+      isGroup: groupsTab ? false : undefined,
       updatedAt: {
         [Op.lt]: subMinutes(new Date(), timeout)
       }
