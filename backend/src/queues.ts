@@ -31,8 +31,6 @@ import formatBody from "./helpers/Mustache";
 import Ticket from "./models/Ticket";
 import QueueModel from "./models/Queue";
 import UpdateTicketService from "./services/TicketServices/UpdateTicketService";
-import Invoice from "./models/Invoices";
-import { checkNewInvoice } from "./services/PaymentGatewayServices/PaymentGatewayServices";
 import { handleMessage } from "./services/WbotServices/wbotMessageListener";
 import ShowService from "./services/CampaignService/ShowService";
 import Invoices from "./models/Invoices";
