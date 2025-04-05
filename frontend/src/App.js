@@ -97,7 +97,17 @@ const App = () => {
         type: mode,
         primary: { main: mode === "light" ? primaryColorLight : primaryColorDark },
         textPrimary: mode === "light" ? primaryColorLight : primaryColorDark,
+        textCommon: mode === "light" ? "#000" : "#fff",
         borderPrimary: mode === "light" ? primaryColorLight : primaryColorDark,
+        background: {
+          default: mode === "light" ? "#fafafa" : "#303030",
+          paper: mode === "light" ? "#fff" : "#424242"
+        },
+        backgroundContrast: {
+          default: mode === "light" ? "#ddd" : "#888",
+          paper: mode === "light" ? "#ddd" : "#888",
+          border: mode === "light" ? "#aaa" : "#444",
+        },
         dark: { main: mode === "light" ? "#333333" : "#666" },
         light: { main: mode === "light" ? "#F3F3F3" : "#333333" },
         tabHeaderBackground: mode === "light" ? "#EEE" : "#666",
