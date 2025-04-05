@@ -104,9 +104,9 @@ const App = () => {
           paper: mode === "light" ? "#fff" : "#424242"
         },
         backgroundContrast: {
-          default: mode === "light" ? "#ddd" : "#888",
-          paper: mode === "light" ? "#ddd" : "#888",
-          border: mode === "light" ? "#aaa" : "#444",
+          default: mode === "light" ? "#ccc" : "#888",
+          paper: mode === "light" ? "#ccc" : "#888",
+          border: mode === "light" ? "#999" : "#444",
         },
         dark: { main: mode === "light" ? "#333333" : "#666" },
         light: { main: mode === "light" ? "#F3F3F3" : "#333333" },
