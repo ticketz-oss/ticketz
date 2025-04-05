@@ -289,6 +289,9 @@ const Dashboard = () => {
   useEffect(() => {
     getCurrentUserInfo().then(
       (user) => {
+        if (user?.profile !== "admin") {
+          window.location.href = "/tickets";
+        }
         setCurrentUser(user);
       }
     );
