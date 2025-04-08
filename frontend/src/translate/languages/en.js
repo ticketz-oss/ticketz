@@ -833,7 +833,7 @@ const messages = {
             "respectTicketQueue": "Respect queue of ticket"
           }
         },
-        "keepQueueAndUser": {
+        "keepUserAndQueue": {
           "title": "Keep queue and user on closed ticket",
           "options": {
             "enabled": "Enabled",

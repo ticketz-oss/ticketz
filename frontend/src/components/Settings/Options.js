@@ -110,10 +110,10 @@ export default function Options(props) {
   const [groupsTab, setGroupsTab] = useState("disabled");
   const [apiToken, setApiToken] = useState("");
   const [downloadLimit, setDownloadLimit] = useState("15");
-  
+
   const [messageVisibility, setMessageVisibility] = useState("Respect Message Queue");
 
-  const [keepQueueAndUser, setKeepQueueAndUser] = useState("enabled");
+  const [keepUserAndQueue, setKeepUserAndQueue] = useState("enabled");
   const { getCurrentUserInfo } = useAuth();
   const [autoReopenTimeout, setAutoReopenTimeout] = useState(false);
   const [currentUser, setCurrentUser] = useState({});
@@ -168,8 +168,8 @@ export default function Options(props) {
       const quickMessages = settings.find((s) => s.key === "quickMessages");
       setQuickMessages(quickMessages?.value || "individual");
 
-      const keepQueueAndUser = settings.find((s) => s.key === "keepQueueAndUser");
-      setKeepQueueAndUser(keepQueueAndUser?.value || "enabled");
+      const keepUserAndQueue = settings.find((s) => s.key === "keepUserAndQueue");
+      setKeepUserAndQueue(keepUserAndQueue?.value || "enabled");
         
       const apiToken = settings.find((s) => s.key === "apiToken");
       setApiToken(apiToken?.value || "");
@@ -306,7 +306,7 @@ export default function Options(props) {
     /*     if (typeof scheduleTypeChanged === "function") {
           scheduleTypeChanged(value);
         } */
-  }
+   }
 
   return (
     <>
@@ -382,8 +382,8 @@ export default function Options(props) {
               <MenuItem value={"company"}>{i18n.t("settings.QuickMessages.options.enabled")}</MenuItem>
               <MenuItem value={"individual"}>{i18n.t("settings.QuickMessages.options.disabled")}</MenuItem>
             </Select>
-          </FormControl>
-        </Grid>
+         </FormControl>
+       </Grid>
                 
         <Grid item xs={12}>
           <h2 className={classes.groupTitle}>{i18n.t("settings.group.timeouts")}</h2>
@@ -530,17 +530,17 @@ export default function Options(props) {
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="keep-queue-and-user-label">
-              {i18n.t("settings.keepQueueAndUser.title")}
+            {i18n.t("settings.keepUserAndQueue.title")}
             </InputLabel>
             <Select
               labelId="keep-queue-and-user-label"
-              value={keepQueueAndUser}
+              value={keepUserAndQueue}
               onChange={async (e) => {
-                await handleSetting("keepQueueAndUser", e.target.value, setKeepQueueAndUser);
+                await handleSetting("keepUserAndQueue", e.target.value, setKeepUserAndQueue);  // Antes: keepUserAndQueue
               }}
             >
-              <MenuItem value={"enabled"}>{i18n.t("settings.keepQueueAndUser.options.enabled")}</MenuItem>
-              <MenuItem value={"disabled"}>{i18n.t("settings.keepQueueAndUser.options.disabled")}</MenuItem>
+              <MenuItem value={"enabled"}>{i18n.t("settings.keepUserAndQueue.options.enabled")}</MenuItem>
+              <MenuItem value={"disabled"}>{i18n.t("settings.keepUserAndQueue.options.disabled")}</MenuItem>
             </Select>
           </FormControl>
         </Grid>
