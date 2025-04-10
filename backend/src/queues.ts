@@ -679,6 +679,14 @@ async function handleNoQueueTimeout(
   timeout: number,
   action: number
 ) {
+  logger.trace(
+    {
+      timeout,
+      action,
+      companyId: company?.id
+    },
+    "handleNoQueueTimeout"
+  );
   const groupsTab =
     (await GetCompanySetting(company.id, "groupsTab", "disabled")) ===
     "enabled";
@@ -713,6 +721,14 @@ async function handleOpenTicketTimeout(
   timeout: number,
   status: string
 ) {
+  logger.trace(
+    {
+      timeout,
+      status,
+      companyId: company?.id
+    },
+    "handleOpenTicketTimeout"
+  );
   const tickets = await Ticket.findAll({
     where: {
       status: "open",
@@ -737,9 +753,11 @@ async function handleOpenTicketTimeout(
 }
 
 async function handleTicketTimeouts() {
+  logger.trace("handleTicketTimeouts");
   const companies = await Company.findAll();
 
   companies.forEach(async company => {
+    logger.trace({ companyId: company?.id }, "handleTicketTimeouts -> company");
     const noQueueTimeout = Number(
       await GetCompanySetting(company.id, "noQueueTimeout", "0")
     );
