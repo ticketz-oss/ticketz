@@ -11,7 +11,8 @@ import {
   AutoIncrement,
   Default,
   BeforeCreate,
-  BelongsToMany
+  BelongsToMany,
+  HasOne
 } from "sequelize-typescript";
 import { v4 as uuidv4 } from "uuid";
 
@@ -24,6 +25,7 @@ import Company from "./Company";
 import QueueOption from "./QueueOption";
 import Tag from "./Tag";
 import TicketTag from "./TicketTag";
+import TicketTraking from "./TicketTraking";
 
 @Table
 class Ticket extends Model<Ticket> {
@@ -117,6 +119,9 @@ class Ticket extends Model<Ticket> {
   static setUUID(ticket: Ticket) {
     ticket.uuid = uuidv4();
   }
+
+  @HasOne(() => TicketTraking)
+  ticketTraking: TicketTraking;
 }
 
 export default Ticket;
