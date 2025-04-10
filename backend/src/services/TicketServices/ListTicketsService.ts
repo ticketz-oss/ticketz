@@ -12,6 +12,7 @@ import Tag from "../../models/Tag";
 import TicketTag from "../../models/TicketTag";
 import Whatsapp from "../../models/Whatsapp";
 import { GetCompanySetting } from "../../helpers/CheckSettings";
+import TicketTraking from "../../models/TicketTraking";
 
 interface Request {
   isSearch?: boolean;
@@ -112,9 +113,24 @@ const ListTicketsService = async ({
   }
 
   if (status) {
+    includeCondition = [
+      ...includeCondition,
+      {
+        model: TicketTraking,
+        as: "ticketTraking",
+        attributes: ["id", "ratingAt", "rated"],
+        required: false
+      }
+    ];
+
     whereCondition = {
       ...whereCondition,
-      status
+      status,
+      // when status is requested, only list tickets that are not waiting for rating
+      [Op.or]: [
+        { "$ticketTraking.ratingAt$": null },
+        { "$ticketTraking.rated$": true }
+      ]
     };
   }
 
