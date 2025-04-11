@@ -48,7 +48,7 @@ export const update = async (
   const token: string = req.cookies.jrt;
 
   if (!token) {
-    throw new AppError("ERR_SESSION_EXPIRED", 401);
+    throw new AppError("ERR_UNAUTHORIZED", 401);
   }
 
   const { user, newToken, refreshToken } = await RefreshTokenService(
@@ -67,7 +67,7 @@ export const me = async (req: Request, res: Response): Promise<Response> => {
   const { id, profile, email, super: superAdmin } = user;
 
   if (!token) {
-    throw new AppError("ERR_SESSION_EXPIRED", 401);
+    throw new AppError("ERR_UNAUTHORIZED", 401);
   }
 
   return res.json({ id, profile, email, super: superAdmin });
@@ -94,7 +94,7 @@ export const impersonate = async (
   const { companyId } = req.params;
 
   if (!token) {
-    throw new AppError("ERR_SESSION_EXPIRED", 401);
+    throw new AppError("ERR_UNAUTHORIZED", 401);
   }
 
   const user = await User.findOne({
