@@ -818,7 +818,7 @@ const messages = {
             respectTicketQueue: "Ticketwarteschlange respektieren",
           },
         },
-        keepQueueAndUser: {
+        keepUserAndQueue: {
           title: "Warteschlange und Benutzer im geschlossenen Ticket beibehalten",
           options: {
             enabled: "Aktiviert",

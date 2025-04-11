@@ -820,7 +820,7 @@ const messages = {
             respectTicketQueue: "Rispetta coda del ticket",
           },
         },
-        keepQueueAndUser: {
+        keepUserAndQueue: {
           title: "Mantieni coda e utente nel ticket chiuso",
           options: {
             enabled: "Attivato",

@@ -823,7 +823,7 @@ const messages = {
             respectTicketQueue: "Respeitar fila do ticket",
           },
         },
-        keepQueueAndUser: {
+        keepUserAndQueue: {
           title: "Manter fila e utilizador no ticket fechado",
           options: {
             enabled: "Ativado",

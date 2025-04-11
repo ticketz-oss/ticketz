@@ -819,7 +819,7 @@ const messages = {
             respectTicketQueue: "Respecter la file d'attente du ticket",
           },
         },
-        keepQueueAndUser: {
+        keepUserAndQueue: {
           title: "Maintenir la file d'attente et l'utilisateur dans le ticket fermé",
           options: {
             enabled: "Activé",

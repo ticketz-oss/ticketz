@@ -842,7 +842,7 @@ const messages = {
             "respectTicketQueue": "Respeitar fila do ticket"
           }
         },
-        "keepQueueAndUser": {
+        "keepUserAndQueue": {
           "title": "Manter fila e usuário no ticket fechado",
           "options": {
             "enabled": "Ativado",
