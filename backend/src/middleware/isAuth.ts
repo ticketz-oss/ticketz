@@ -37,6 +37,7 @@ const isAuth = (req: Request, res: Response, next: NextFunction): void => {
       isSuper: req.tokenData.super,
       companyId: req.tokenData.companyId
     };
+    req.companyId = req.tokenData.companyId;
   } catch (err) {
     throw new AppError(
       `User: ${decodedData?.id} Invalid token. We'll try to assign a new one on next request`,

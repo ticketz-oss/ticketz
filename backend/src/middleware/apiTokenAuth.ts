@@ -40,8 +40,9 @@ const apiTokenAuth = async (
         id: `${user.id}`,
         profile: user.profile,
         isSuper: false,
-        companyId: setting.companyId
+        companyId: user.companyId
       };
+      req.companyId = user.companyId;
     }
 
     return next();
