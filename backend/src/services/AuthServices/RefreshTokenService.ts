@@ -37,12 +37,6 @@ export const RefreshTokenService = async (
       throw new AppError("ERR_SESSION_EXPIRED", 401);
     }
 
-    const dueDate = new Date(user.company.dueDate);
-
-    if (new Date() > dueDate) {
-      throw new AppError("ERR_SUBSCRIPTION_EXPIRED", 401);
-    }
-
     const newToken = createAccessToken(user);
     const refreshToken = createRefreshToken(user);
 
