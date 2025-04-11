@@ -1940,12 +1940,7 @@ const handleMessage = async (
       }
     }
 
-    if (whatsapp.queues.length === 1 && ticket.queue) {
-      if (ticket.chatbot && !msg.key.fromMe) {
-        await handleChartbot(ticket, msg, wbot, dontReadTheFirstQuestion);
-      }
-    }
-    if (whatsapp.queues.length > 1 && ticket.queue) {
+    if (whatsapp.queues.length && ticket.queue) {
       if (ticket.chatbot && !msg.key.fromMe) {
         await handleChartbot(ticket, msg, wbot, dontReadTheFirstQuestion);
       }
