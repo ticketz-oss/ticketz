@@ -963,6 +963,9 @@ const messages = {
         },
       },
       backendErrors: {
+        ERR_UNAUTHORIZED: "Não autorizado. Por favor, faça o login novamente.",
+        ERR_FORBIDDEN: "Acesso negado. Você não tem permissão para acessar este recurso.",
+        ERR_CHECK_NUMBER: "Erro ao verificar o número do WhatsApp.",
         ERR_NO_OTHER_WHATSAPP: "Deve haver pelo menos um WhatsApp padrão.",
         ERR_NO_DEF_WAPP_FOUND:
           "Nenhum WhatsApp padrão encontrado. Verifique a página de conexões.",
@@ -998,6 +1001,10 @@ const messages = {
           "Esta cor já está em uso, escolha outra.",
         ERR_WAPP_GREETING_REQUIRED:
           "A mensagem de saudação é obrigatória quando há mais de uma fila.",
+        ERR_SUBSCRIPTION_CHECK_FAILED: "Assinatura inválida ou não encontrada",
+        ERR_WAPP_NOT_FOUND: "Conexão indisponível",
+        ERR_SUBSCRIPTION_EXPIRED: "Assinatura expirada",
+        ERR_UNKOWN: "Erro desconhecido",
       },
       ticketz: {
         registration: {
