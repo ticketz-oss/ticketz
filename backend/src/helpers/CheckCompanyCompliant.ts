@@ -1,22 +1,44 @@
+import { Mutex } from "async-mutex";
 import Company from "../models/Company";
+import { logger } from "../utils/logger";
 import { GetCompanySetting } from "./CheckSettings";
+import { SimpleObjectCache } from "./simpleObjectCache";
+
+const companyComplianceCache = new SimpleObjectCache(60 * 1000, logger);
+const checkMutex = new Mutex();
 
 export async function checkCompanyCompliant(
   company: number | Company
 ): Promise<boolean> {
-  if ((typeof company === "object" && company?.id === 1) || company === 1) {
+  const companyId = typeof company === "number" ? company : company.id;
+
+  // company 1 is always compliant
+  if (companyId === 1) {
     return true;
   }
 
-  if (typeof company === "number") {
-    company = await Company.findByPk(company);
-  }
+  return checkMutex.runExclusive(async () => {
+    const cacheKey = `company-${companyId}`;
+    const cachedValue = await companyComplianceCache.get(cacheKey);
 
-  const gracePeriod =
-    Number(await GetCompanySetting(1, "gracePeriod", "0")) || 0;
+    if (cachedValue) {
+      return cachedValue;
+    }
 
-  const dueDate = new Date(company.dueDate);
-  dueDate.setDate(dueDate.getDate() + gracePeriod);
+    if (typeof company === "number") {
+      company = await Company.findByPk(company);
+    }
 
-  return new Date() <= dueDate;
+    const gracePeriod =
+      Number(await GetCompanySetting(1, "gracePeriod", "0")) || 0;
+
+    const dueDate = new Date(company.dueDate);
+    dueDate.setDate(dueDate.getDate() + gracePeriod);
+
+    const isCompliant = new Date() <= dueDate;
+
+    companyComplianceCache.set(cacheKey, isCompliant);
+
+    return isCompliant;
+  });
 }
