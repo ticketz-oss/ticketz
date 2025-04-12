@@ -113,7 +113,7 @@ export default function Options(props) {
   
   const [messageVisibility, setMessageVisibility] = useState("Respect Message Queue");
 
-  const [keepQueueAndUser, setKeepQueueAndUser] = useState("enabled");
+  const [keepUserAndQueue, setKeepUserAndQueue] = useState("enabled");
   const { getCurrentUserInfo } = useAuth();
   const [autoReopenTimeout, setAutoReopenTimeout] = useState(false);
   const [currentUser, setCurrentUser] = useState({});
@@ -168,8 +168,8 @@ export default function Options(props) {
       const quickMessages = settings.find((s) => s.key === "quickMessages");
       setQuickMessages(quickMessages?.value || "individual");
 
-      const keepQueueAndUser = settings.find((s) => s.key === "keepQueueAndUser");
-      setKeepQueueAndUser(keepQueueAndUser?.value || "enabled");
+      const keepUserAndQueue = settings.find((s) => s.key === "keepUserAndQueue");
+      setKeepUserAndQueue(keepUserAndQueue?.value || "enabled");
         
       const apiToken = settings.find((s) => s.key === "apiToken");
       setApiToken(apiToken?.value || "");
@@ -534,9 +534,9 @@ export default function Options(props) {
             </InputLabel>
             <Select
               labelId="keep-queue-and-user-label"
-              value={keepQueueAndUser}
+              value={keepUserAndQueue}
               onChange={async (e) => {
-                await handleSetting("keepQueueAndUser", e.target.value, setKeepQueueAndUser);
+                await handleSetting("keepUserAndQueue", e.target.value, setKeepUserAndQueue);
               }}
             >
               <MenuItem value={"enabled"}>{i18n.t("settings.keepQueueAndUser.options.enabled")}</MenuItem>
