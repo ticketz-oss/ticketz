@@ -7,22 +7,29 @@ import apiTokenAuth from "../middleware/apiTokenAuth";
 
 const ticketRoutes = express.Router();
 
-ticketRoutes.get("/tickets", apiTokenAuth, isAuth, isCompliant, TicketController.index);
-
 ticketRoutes.get(
-  "/tickets/:ticketId",
-  isAuth,
-  isCompliant,
-  TicketController.show
-);
-
-ticketRoutes.get(
-  "/tickets/:ticketId",
+  "/tickets",
   apiTokenAuth,
   isAuth,
   isCompliant,
+  TicketController.index
+);
+
+ticketRoutes.get(
+  "/tickets/:ticketId",
+  isAuth,
+  isCompliant,
   TicketController.show
 );
+
+ticketRoutes.get(
+  "/tickets/u/:uuid",
+  isAuth,
+  isCompliant,
+  TicketController.showFromUUID
+);
+
+ticketRoutes.post("/tickets", isAuth, isCompliant, TicketController.store);
 
 ticketRoutes.put(
   "/tickets/:ticketId",
