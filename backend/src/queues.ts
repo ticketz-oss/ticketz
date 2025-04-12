@@ -511,7 +511,7 @@ async function handleDispatchCampaign(job) {
     const { data } = job;
     const { campaignShippingId, campaignId }: DispatchCampaignData = data;
     const campaign = await Campaign.findByPk(campaignId, {
-      include: [{ model: Whatsapp, as: "whatsapp" }]
+      include: ["contactList", { model: Whatsapp, as: "whatsapp" }]
     });
 
     if (!campaign) {
