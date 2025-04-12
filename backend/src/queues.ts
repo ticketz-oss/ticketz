@@ -34,6 +34,7 @@ import UpdateTicketService from "./services/TicketServices/UpdateTicketService";
 import { handleMessage } from "./services/WbotServices/wbotMessageListener";
 import ShowService from "./services/CampaignService/ShowService";
 import Invoices from "./models/Invoices";
+import { mustacheFormat } from "./helpers/Mustache";
 
 const connection = process.env.REDIS_URI || "";
 const limiterMax = process.env.REDIS_OPT_LIMITER_MAX || 1;
@@ -127,7 +128,12 @@ async function handleSendScheduledMessage(job) {
   let scheduleRecord: Schedule | null = null;
 
   try {
-    scheduleRecord = await Schedule.findByPk(schedule.id);
+    scheduleRecord = await Schedule.findByPk(schedule.id, {
+      include: [
+        { model: Contact, as: "contact" },
+        { model: User, as: "user" }
+      ]
+    });
   } catch (e) {
     Sentry.captureException(e);
     logger.info(`Erro ao tentar consultar agendamento: ${schedule.id}`);
@@ -138,7 +144,11 @@ async function handleSendScheduledMessage(job) {
 
     const message = await SendMessage(whatsapp, {
       number: schedule.contact.number,
-      body: schedule.body
+      body: mustacheFormat({
+        body: schedule.body,
+        contact: schedule.contact,
+        currentUser: schedule.user
+      })
     });
 
     if (schedule.saveMessage) {
@@ -519,7 +529,7 @@ async function handleDispatchCampaign(job) {
     const { data } = job;
     const { campaignShippingId, campaignId }: DispatchCampaignData = data;
     const campaign = await Campaign.findByPk(campaignId, {
-      include: [{ model: Whatsapp, as: "whatsapp" }]
+      include: ["contactList", { model: Whatsapp, as: "whatsapp" }]
     });
 
     if (!campaign) {
@@ -679,6 +689,14 @@ async function handleNoQueueTimeout(
   timeout: number,
   action: number
 ) {
+  logger.trace(
+    {
+      timeout,
+      action,
+      companyId: company?.id
+    },
+    "handleNoQueueTimeout"
+  );
   const groupsTab =
     (await GetCompanySetting(company.id, "groupsTab", "disabled")) ===
     "enabled";
@@ -713,6 +731,14 @@ async function handleOpenTicketTimeout(
   timeout: number,
   status: string
 ) {
+  logger.trace(
+    {
+      timeout,
+      status,
+      companyId: company?.id
+    },
+    "handleOpenTicketTimeout"
+  );
   const tickets = await Ticket.findAll({
     where: {
       status: "open",
@@ -737,9 +763,11 @@ async function handleOpenTicketTimeout(
 }
 
 async function handleTicketTimeouts() {
+  logger.trace("handleTicketTimeouts");
   const companies = await Company.findAll();
 
   companies.forEach(async company => {
+    logger.trace({ companyId: company?.id }, "handleTicketTimeouts -> company");
     const noQueueTimeout = Number(
       await GetCompanySetting(company.id, "noQueueTimeout", "0")
     );

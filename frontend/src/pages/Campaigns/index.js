@@ -356,14 +356,10 @@ const Campaigns = () => {
                       {formatStatus(campaign.status)}
                     </TableCell>
                     <TableCell align="center">
-                      {campaign.contactListId
-                        ? campaign.contactList.name
-                        : "Não definida"}
+                      {campaign.contactList?.name || "Não definida"}
                     </TableCell>
                     <TableCell align="center">
-                      {campaign.whatsappId
-                        ? campaign.whatsapp.name
-                        : "Não definido"}
+                      {campaign.whatsapp?.name || "Não definido"}
                     </TableCell>
                     <TableCell align="center">
                       {campaign.scheduledAt

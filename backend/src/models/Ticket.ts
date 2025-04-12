@@ -25,6 +25,7 @@ import Company from "./Company";
 import QueueOption from "./QueueOption";
 import Tag from "./Tag";
 import TicketTag from "./TicketTag";
+import TicketTraking from "./TicketTraking";
 import IntegrationSession from "./IntegrationSession";
 
 @Table
@@ -118,6 +119,9 @@ class Ticket extends Model<Ticket> {
   static setUUID(ticket: Ticket) {
     ticket.uuid = uuidv4();
   }
+
+  @HasOne(() => TicketTraking)
+  ticketTraking: TicketTraking;
 
   @HasOne(() => IntegrationSession, {
     onDelete: "CASCADE",

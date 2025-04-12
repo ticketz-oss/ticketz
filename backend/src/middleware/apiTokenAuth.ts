@@ -48,7 +48,8 @@ const apiTokenAuth = async (
     }
 
     const user = await User.findOne({
-      where
+      where,
+      order: [["id", "ASC"]]
     });
 
     if (user) {
@@ -56,8 +57,9 @@ const apiTokenAuth = async (
         id: `${user.id}`,
         profile: user.profile,
         isSuper: user.super,
-        companyId: setting.companyId
+        companyId: user.companyId
       };
+      req.companyId = user.companyId;
     }
 
     return next();

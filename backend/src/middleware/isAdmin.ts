@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import AppError from "../errors/AppError";
 import User from "../models/User";
 
-const isSuper = async (
+const isAdmin = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -15,4 +15,4 @@ const isSuper = async (
   return next();
 };
 
-export default isSuper;
+export default isAdmin;

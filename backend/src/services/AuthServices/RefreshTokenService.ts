@@ -38,16 +38,6 @@ export const RefreshTokenService = async (
       throw new AppError("ERR_SESSION_EXPIRED", 401);
     }
 
-    const gracePeriod =
-      Number(await GetCompanySetting(1, "gracePeriod", "0")) || 0;
-
-    const dueDate = new Date(user.company.dueDate);
-    dueDate.setDate(dueDate.getDate() + gracePeriod);
-
-    if (new Date() > dueDate) {
-      throw new AppError("ERR_SUBSCRIPTION_EXPIRED", 401);
-    }
-
     const newToken = createAccessToken(user);
     const refreshToken = createRefreshToken(user);
 

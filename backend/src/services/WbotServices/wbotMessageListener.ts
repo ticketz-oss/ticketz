@@ -56,6 +56,7 @@ import CheckSettings, { GetCompanySetting } from "../../helpers/CheckSettings";
 import Whatsapp from "../../models/Whatsapp";
 import { SimpleObjectCache } from "../../helpers/simpleObjectCache";
 import { Session } from "../../libs/wbot";
+import { checkCompanyCompliant } from "../../helpers/CheckCompanyCompliant";
 
 import {
   IntegrationMessage,
@@ -1239,6 +1240,11 @@ export const startQueue = async (
     dontRunChatbot: true
   });
 
+  // do not process queue if company is not compliant with payments
+  if (!(await checkCompanyCompliant(companyId))) {
+    return;
+  }
+
   let filePath = null;
   let optionsMsg = null;
 
@@ -2010,6 +2016,12 @@ const handleMessage = async (
       }
     }
 
+    let defaultQueue: Queue;
+
+    if (msg.key.fromMe && !contact.isGroup && whatsapp.queues.length === 1) {
+      defaultQueue = await Queue.findByPk(whatsapp.queues[0].id);
+    }
+
     const { ticket, justCreated } = await FindOrCreateTicketService(
       contact,
       wbot.id!,
@@ -2018,8 +2030,8 @@ const handleMessage = async (
       {
         groupContact,
         queue: queueId
-          ? (await Queue.findByPk(queueId)) || undefined
-          : undefined
+          ? (await Queue.findByPk(queueId)) || defaultQueue
+          : defaultQueue
       }
     );
 

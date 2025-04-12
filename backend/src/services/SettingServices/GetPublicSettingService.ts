@@ -12,16 +12,15 @@ const publicSettingsKeys = [
   "appLogoDark",
   "appLogoFavicon",
   "appName"
-]
+];
 
 const GetPublicSettingService = async ({
   key
 }: Request): Promise<string | undefined> => {
-  
   if (!publicSettingsKeys.includes(key)) {
     return null;
   }
-  
+
   const setting = await Setting.findOne({
     where: {
       companyId: 1,
@@ -29,7 +28,7 @@ const GetPublicSettingService = async ({
     }
   });
 
-  return setting?.value;
+  return setting?.value || null;
 };
 
 export default GetPublicSettingService;

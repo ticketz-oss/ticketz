@@ -1,3 +1,4 @@
+import { checkCompanyCompliant } from "../../helpers/CheckCompanyCompliant";
 import { getIO } from "../../libs/socket";
 import Message from "../../models/Message";
 import OldMessage from "../../models/OldMessage";
@@ -108,6 +109,10 @@ const CreateMessageService = async ({
     await message.update({ queueId: message.ticket.queueId });
   }
 
+  if (!(await checkCompanyCompliant(companyId))) {
+    return message;
+  }
+
   const io = getIO();
   io.to(message.ticketId.toString())
     .to(`company-${companyId}-${message.ticket.status}`)
@@ -135,7 +140,7 @@ const CreateMessageService = async ({
       queue: message.ticket.queueId,
       status: message.ticket.status
     },
-    "sending create message to clients"
+    "sending appMessage event"
   );
   return message;
 };
