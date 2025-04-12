@@ -1045,6 +1045,7 @@ const messages = {
         },
       },
       backendErrors: {
+        ERR_UNAUTHORIZED: "You are not authorized to perform this action.",
         ERR_FORBIDDEN: "You do not have permission to access this resource.",
         ERR_CHECK_NUMBER: "Check the number and try again.",
         ERR_NO_OTHER_WHATSAPP: "There must be at least one default WhatsApp.",
@@ -1072,10 +1073,10 @@ const messages = {
         ERR_FETCH_WAPP_MSG: "Error fetching message from WhatsApp, perhaps it is too old.",
         ERR_QUEUE_COLOR_ALREADY_EXISTS: "This color is already in use, choose another.",
         ERR_WAPP_GREETING_REQUIRED: "Greeting message is mandatory when there is more than one queue.",
-        ERR_SUBSCRIPTION_CHECK_FAILED: "Subscription invalid or not found",
-        ERR_WAPP_NOT_FOUND: "Connection unavailable",
-        ERR_SUBSCRIPTION_EXPIRED: "Subscription expired",
-        ERR_UNKOWN: "Unknown error",
+        ERR_SUBSCRIPTION_CHECK_FAILED: "Subscription check failed.",
+        ERR_WAPP_NOT_FOUND: "Connection unavailable.",
+        ERR_SUBSCRIPTION_EXPIRED: "Your subscription has expired.",
+        ERR_UNKOWN: "Unknown error.",
       },
       "ccform": {
         "cardNumber": "Card Number",

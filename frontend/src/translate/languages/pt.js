@@ -1051,6 +1051,7 @@ const messages = {
         },
       },
       backendErrors: {
+        ERR_UNAUTHORIZED: "Você não está autorizado a acessar este recurso.",
         ERR_FORBIDDEN: "Você não tem permissão para acessar este recurso.",
         ERR_CHECK_NUMBER: "Verifique o número e tente novamente.",
         ERR_NO_OTHER_WHATSAPP: "Deve haver pelo menos um WhatsApp padrão.",
@@ -1092,7 +1093,6 @@ const messages = {
         ERR_WAPP_NOT_FOUND: "Conexão indisponível",
         ERR_SUBSCRIPTION_EXPIRED: "Assinatura expirada",
         ERR_UNKOWN: "Erro desconhecido",
-
       },
       "ccform": {
         "cardNumber": "Número do Cartão",
