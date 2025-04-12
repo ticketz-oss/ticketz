@@ -57,6 +57,7 @@ import Whatsapp from "../../models/Whatsapp";
 import { SimpleObjectCache } from "../../helpers/simpleObjectCache";
 import { getPublicPath } from "../../helpers/GetPublicPath";
 import { Session } from "../../libs/wbot";
+import { checkCompanyCompliant } from "../../helpers/CheckCompanyCompliant";
 
 export interface ImessageUpsert {
   messages: proto.IWebMessageInfo[];
@@ -1059,6 +1060,11 @@ const startQueue = async (
     companyId: ticket.companyId
   });
 
+  // do not process queue if company is not compliant with payments
+  if (!(await checkCompanyCompliant(companyId))) {
+    return;
+  }
+
   let filePath = null;
   let optionsMsg = null;
 
@@ -1289,7 +1295,6 @@ export const handleRating = async (
   ticket: Ticket,
   ticketTraking: TicketTraking
 ) => {
-  const io = getIO();
   let rate: number | null = null;
 
   if (msg?.message?.conversation || msg?.message?.extendedTextMessage) {
@@ -1346,6 +1351,12 @@ export const handleRating = async (
       userId: keepUserAndQueue ? ticket.userId : null,
       status: "closed"
     });
+
+    if (!(await checkCompanyCompliant(ticket.companyId))) {
+      return;
+    }
+
+    const io = getIO();
 
     io.to(`company-${ticket.companyId}-open`)
       .to(`queue-${ticket.queueId}-open`)
