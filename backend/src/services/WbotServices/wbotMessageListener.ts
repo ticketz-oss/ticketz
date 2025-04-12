@@ -1747,12 +1747,20 @@ const handleMessage = async (
       }
     }
 
+    let defaultQueue: Queue;
+
+    if (msg.key.fromMe && !contact.isGroup && whatsapp.queues.length === 1) {
+      defaultQueue = await Queue.findByPk(whatsapp.queues[0].id);
+    }
+
     const { ticket, justCreated } = await FindOrCreateTicketService(
       contact,
       wbot.id!,
       unreadMessages,
       companyId,
-      groupContact
+      groupContact,
+      undefined,
+      defaultQueue
     );
 
     // voltar para o menu inicial
