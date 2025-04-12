@@ -24,6 +24,7 @@ messageRoutes.get(
   "/messages/history/:contactId/:whatsappId",
   isAuth,
   isAdmin,
+  isCompliant,
   MessageController.history
 );
 
@@ -71,6 +72,11 @@ messageRoutes.post(
   MessageController.send
 );
 
-messageRoutes.get("/api/messages/send", gammuAuth, MessageController.send);
+messageRoutes.get(
+  "/api/messages/send",
+  gammuAuth,
+  isCompliant,
+  MessageController.send
+);
 
 export default messageRoutes;
