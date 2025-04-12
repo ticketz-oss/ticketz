@@ -2022,8 +2022,8 @@ const handleMessage = async (
       {
         groupContact,
         queue: queueId
-          ? (await Queue.findByPk(queueId)) || undefined
-          : undefined
+          ? (await Queue.findByPk(queueId)) || defaultQueue
+          : defaultQueue
       }
     );
 
