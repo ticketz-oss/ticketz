@@ -64,10 +64,14 @@ const ListTicketsService = async ({
     !isSearch &&
     (await GetCompanySetting(companyId, "groupsTab", "disabled")) === "enabled";
 
-  const orCondition = [{ userId }, { status: "pending" }];
+  const andedOrs = [
+    {
+      [Op.or]: [{ userId }, { status: "pending" }]
+    }
+  ];
 
   let whereCondition: WhereOptions<Ticket> = {
-    [Op.or]: orCondition,
+    [Op.and]: andedOrs,
     queueId:
       user?.profile === "admin" ? { [Op.or]: [queueIds, null] } : queueIds
   };
@@ -131,8 +135,12 @@ const ListTicketsService = async ({
     }
   ];
 
-  if (showAll === "true" && user?.profile === "admin") {
-    whereCondition = { queueId: { [Op.or]: [queueIds, null] } };
+  if (showAll === "true" && user.profile === "admin") {
+    andedOrs.length = 0;
+    whereCondition = {
+      [Op.and]: andedOrs,
+      queueId: { [Op.or]: [queueIds, null] }
+    };
     if (groupsTab) {
       whereCondition.isGroup = groups === "true";
     }
@@ -149,14 +157,17 @@ const ListTicketsService = async ({
       }
     ];
 
-    whereCondition = {
-      ...whereCondition,
-      status,
-      // when status is requested, only list tickets that are not waiting for rating
+    // when status is requested, only list tickets that are not waiting for rating
+    andedOrs.push({
       [Op.or]: [
         { "$ticketTraking.ratingAt$": null },
         { "$ticketTraking.rated$": true }
-      ]
+      ] as any[]
+    });
+
+    whereCondition = {
+      ...whereCondition,
+      status
     };
   }
 
@@ -181,8 +192,7 @@ const ListTicketsService = async ({
       }
     ];
 
-    whereCondition = {
-      ...whereCondition,
+    andedOrs.push({
       [Op.or]: [
         {
           "$contact.name$": where(
@@ -199,12 +209,13 @@ const ListTicketsService = async ({
             `%${sanitizedSearchParam}%`
           )
         }
-      ]
-    };
+      ] as any[]
+    });
   }
 
   if (date) {
     whereCondition = {
+      [Op.and]: andedOrs,
       createdAt: {
         [Op.between]: [+startOfDay(parseISO(date)), +endOfDay(parseISO(date))]
       }
@@ -213,6 +224,7 @@ const ListTicketsService = async ({
 
   if (updatedAt) {
     whereCondition = {
+      [Op.and]: andedOrs,
       updatedAt: {
         [Op.between]: [
           +startOfDay(parseISO(updatedAt)),
