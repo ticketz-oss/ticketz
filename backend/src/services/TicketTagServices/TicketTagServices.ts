@@ -2,13 +2,15 @@ import AppError from "../../errors/AppError";
 import Tag from "../../models/Tag";
 import Ticket from "../../models/Ticket";
 import TicketTag from "../../models/TicketTag";
+import ShowTicketService from "../TicketServices/ShowTicketService";
+import { websocketUpdateTicket } from "../TicketServices/UpdateTicketService";
 
 export async function ticketTagAdd(
   ticketId: number,
   tagId: number,
   companyId?: number
 ) {
-  const ticket = await Ticket.findByPk(ticketId);
+  const ticket = await ShowTicketService(ticketId, companyId);
   if (!Ticket) {
     throw new AppError("ERR_NOT_FOUND", 404);
   }
@@ -35,6 +37,9 @@ export async function ticketTagAdd(
     throw new AppError("ERR_UNKNOWN", 400);
   }
 
+  await ticket.reload();
+  websocketUpdateTicket(ticket);
+
   return ticketTag;
 }
 
@@ -43,7 +48,7 @@ export async function ticketTagRemove(
   tagId: number,
   companyId?: number
 ) {
-  const ticket = await Ticket.findByPk(ticketId);
+  const ticket = await ShowTicketService(ticketId, companyId);
   if (!ticket) {
     throw new AppError("ERR_NOT_FOUND", 404);
   }
@@ -58,10 +63,13 @@ export async function ticketTagRemove(
       tagId
     }
   });
+
+  await ticket.reload();
+  websocketUpdateTicket(ticket);
 }
 
 export async function ticketTagRemoveAll(ticketId: number, companyId?: number) {
-  const ticket = await Ticket.findByPk(ticketId);
+  const ticket = await ShowTicketService(ticketId, companyId);
   if (!ticket) {
     throw new AppError("ERR_NOT_FOUND", 404);
   }
@@ -75,4 +83,7 @@ export async function ticketTagRemoveAll(ticketId: number, companyId?: number) {
       ticketId
     }
   });
+
+  await ticket.reload();
+  websocketUpdateTicket(ticket);
 }
