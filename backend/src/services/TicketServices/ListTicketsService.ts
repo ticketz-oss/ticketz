@@ -63,8 +63,14 @@ const ListTicketsService = async ({
 
   const user = await ShowUserService(userId);
 
+  const andedOrs = [
+    {
+      [Op.or]: [{ userId }, { status: "pending" }]
+    }
+  ];
+
   let whereCondition: Filterable["where"] = {
-    [Op.or]: [{ userId }, { status: "pending" }],
+    [Op.and]: andedOrs,
     queueId: {
       [Op.or]: user.profile === "admin" ? [queueIds, null] : [queueIds]
     }
@@ -104,7 +110,9 @@ const ListTicketsService = async ({
   ];
 
   if (showAll === "true" && user.profile === "admin") {
+    andedOrs.length = 0;
     whereCondition = {
+      [Op.and]: andedOrs,
       queueId: { [Op.or]: [queueIds, null] }
     };
     if (groupsTab) {
@@ -123,14 +131,17 @@ const ListTicketsService = async ({
       }
     ];
 
-    whereCondition = {
-      ...whereCondition,
-      status,
-      // when status is requested, only list tickets that are not waiting for rating
+    // when status is requested, only list tickets that are not waiting for rating
+    andedOrs.push({
       [Op.or]: [
         { "$ticketTraking.ratingAt$": null },
         { "$ticketTraking.rated$": true }
-      ]
+      ] as any[]
+    });
+
+    whereCondition = {
+      ...whereCondition,
+      status
     };
   }
 
@@ -155,8 +166,7 @@ const ListTicketsService = async ({
       }
     ];
 
-    whereCondition = {
-      ...whereCondition,
+    andedOrs.push({
       [Op.or]: [
         {
           "$contact.name$": where(
@@ -173,12 +183,13 @@ const ListTicketsService = async ({
             `%${sanitizedSearchParam}%`
           )
         }
-      ]
-    };
+      ] as any[]
+    });
   }
 
   if (date) {
     whereCondition = {
+      [Op.and]: andedOrs,
       createdAt: {
         [Op.between]: [+startOfDay(parseISO(date)), +endOfDay(parseISO(date))]
       }
@@ -187,6 +198,7 @@ const ListTicketsService = async ({
 
   if (updatedAt) {
     whereCondition = {
+      [Op.and]: andedOrs,
       updatedAt: {
         [Op.between]: [
           +startOfDay(parseISO(updatedAt)),
@@ -197,19 +209,10 @@ const ListTicketsService = async ({
   }
 
   if (withUnreadMessages === "true") {
-    const userQueueIds = user.queues.map(queue => queue.id);
-
     whereCondition = {
-      [Op.or]: [{ userId }, { status: "pending" }],
-      queueId: {
-        [Op.or]:
-          user.profile === "admin" ? [userQueueIds, null] : [userQueueIds]
-      },
+      ...whereCondition,
       unreadMessages: { [Op.gt]: 0 }
     };
-    if (groupsTab) {
-      whereCondition.isGroup = groups === "true";
-    }
   }
 
   if (Array.isArray(tags) && tags.length > 0) {
