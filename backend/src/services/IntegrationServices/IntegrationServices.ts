@@ -36,6 +36,11 @@ import { wbotReplyHandler } from "../WbotServices/wbotMessageListener";
 import UpdateTicketService from "../TicketServices/UpdateTicketService";
 import Contact from "../../models/Contact";
 import { CreateInternalMessageService } from "../MessageServices/CreateInternalMessageService";
+import {
+  ticketTagAdd,
+  ticketTagRemove,
+  ticketTagRemoveAll
+} from "../TicketTagServices/TicketTagServices";
 
 export type IntegrationOptions = {
   fields: {
@@ -100,9 +105,16 @@ export interface IntegrationDriver {
 }
 
 export type IntegrationWebhookRequest = {
-  action?: "endSession" | "updateTicket" | "note";
+  action?:
+    | "endSession"
+    | "updateTicket"
+    | "note"
+    | "addTag"
+    | "removeTag"
+    | "clearTags";
   message?: IntegrationMessage;
   ticketData?: any;
+  tagId?: number;
 };
 
 const reloadIntegrationSession = async (
@@ -294,6 +306,26 @@ export class IntegrationServices {
         message.content
       );
       return;
+    }
+
+    if (action === "addTag") {
+      const { tagId } = body;
+      if (!tagId) {
+        throw new Error("Tag ID is required");
+      }
+      await ticketTagAdd(integrationSession.ticket.id, tagId);
+    }
+
+    if (action === "removeTag") {
+      const { tagId } = body;
+      if (!tagId) {
+        throw new Error("Tag ID is required");
+      }
+      await ticketTagRemove(integrationSession.ticket.id, tagId);
+    }
+
+    if (action === "clearTags") {
+      await ticketTagRemoveAll(integrationSession.ticket.id);
     }
 
     // this needs modification when the system goes to be multi-channel
