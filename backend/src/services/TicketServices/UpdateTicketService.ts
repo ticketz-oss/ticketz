@@ -46,6 +46,28 @@ interface Response {
   oldUserId: number | undefined;
 }
 
+export function websocketUpdateTicket(ticket: Ticket, moreChannels?: string[]) {
+  const io = getIO();
+  const ioStack = io
+    .to(ticket.id.toString())
+    .to(`user-${ticket?.userId}`)
+    .to(`queue-${ticket.queueId}-notification`)
+    .to(`queue-${ticket.queueId}-${ticket.status}`)
+    .to(`company-${ticket.companyId}-notification`)
+    .to(`company-${ticket.companyId}-${ticket.status}`);
+
+  if (moreChannels) {
+    moreChannels.forEach(channel => {
+      ioStack.to(channel);
+    });
+  }
+
+  io.emit(`company-${ticket.companyId}-ticket`, {
+    action: "update",
+    ticket
+  });
+}
+
 const UpdateTicketService = async ({
   ticketData,
   ticketId,
@@ -280,17 +302,7 @@ const UpdateTicketService = async ({
         });
     }
 
-    io.to(`company-${companyId}-${ticket.status}`)
-      .to(`company-${companyId}-notification`)
-      .to(`queue-${ticket.queueId}-${ticket.status}`)
-      .to(`queue-${ticket.queueId}-notification`)
-      .to(ticketId.toString())
-      .to(`user-${ticket?.userId}`)
-      .to(`user-${oldUserId}`)
-      .emit(`company-${companyId}-ticket`, {
-        action: "update",
-        ticket
-      });
+    websocketUpdateTicket(ticket, [`user-${oldUserId}`]);
 
     return { ticket, oldStatus, oldUserId };
   } catch (err) {
