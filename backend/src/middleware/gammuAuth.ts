@@ -40,6 +40,7 @@ const gammuAuth = async (
       req.params = {
         whatsappId: whatsapp.id.toString()
       };
+      req.companyId = whatsapp.companyId;
     } else {
       throw new Error();
     }

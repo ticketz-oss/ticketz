@@ -1,4 +1,4 @@
-import { Op, fn, where, col, Includeable, WhereOptions } from "sequelize";
+import { Op, fn, where, col, Filterable, Includeable } from "sequelize";
 import { startOfDay, endOfDay, parseISO } from "date-fns";
 
 import { intersection } from "lodash";
@@ -7,6 +7,7 @@ import Contact from "../../models/Contact";
 import Message from "../../models/Message";
 import Queue from "../../models/Queue";
 import User from "../../models/User";
+import ShowUserService from "../UserServices/ShowUserService";
 import Tag from "../../models/Tag";
 import TicketTag from "../../models/TicketTag";
 import Whatsapp from "../../models/Whatsapp";
@@ -56,18 +57,22 @@ const ListTicketsService = async ({
   all,
   companyId
 }: Request): Promise<Response> => {
-  const user = await User.findByPk(userId, {
-    include: [{ model: Queue, as: "queues", attributes: ["id"] }]
-  });
-
   const groupsTab =
     !isSearch &&
     (await GetCompanySetting(companyId, "groupsTab", "disabled")) === "enabled";
 
+  const user = await ShowUserService(userId);
+
   const orCondition = [{ userId }, { status: "pending" }];
 
-  let whereCondition: WhereOptions<Ticket> = {
-    [Op.or]: orCondition,
+  const andedOrs = [
+    {
+      [Op.or]: orCondition
+    }
+  ];
+
+  let whereCondition: Filterable["where"] = {
+    [Op.and]: andedOrs,
     queueId:
       user?.profile === "admin" ? { [Op.or]: [queueIds, null] } : queueIds
   };
@@ -131,8 +136,12 @@ const ListTicketsService = async ({
     }
   ];
 
-  if (showAll === "true" && user?.profile === "admin") {
-    whereCondition = { queueId: { [Op.or]: [queueIds, null] } };
+  if (showAll === "true" && user.profile === "admin") {
+    andedOrs.length = 0;
+    whereCondition = {
+      [Op.and]: andedOrs,
+      queueId: { [Op.or]: [queueIds, null] }
+    };
     if (groupsTab) {
       whereCondition.isGroup = groups === "true";
     }
@@ -149,14 +158,17 @@ const ListTicketsService = async ({
       }
     ];
 
-    whereCondition = {
-      ...whereCondition,
-      status,
-      // when status is requested, only list tickets that are not waiting for rating
+    // when status is requested, only list tickets that are not waiting for rating
+    andedOrs.push({
       [Op.or]: [
         { "$ticketTraking.ratingAt$": null },
         { "$ticketTraking.rated$": true }
-      ]
+      ] as any[]
+    });
+
+    whereCondition = {
+      ...whereCondition,
+      status
     };
   }
 
@@ -181,8 +193,7 @@ const ListTicketsService = async ({
       }
     ];
 
-    whereCondition = {
-      ...whereCondition,
+    andedOrs.push({
       [Op.or]: [
         {
           "$contact.name$": where(
@@ -199,12 +210,13 @@ const ListTicketsService = async ({
             `%${sanitizedSearchParam}%`
           )
         }
-      ]
-    };
+      ] as any[]
+    });
   }
 
   if (date) {
     whereCondition = {
+      [Op.and]: andedOrs,
       createdAt: {
         [Op.between]: [+startOfDay(parseISO(date)), +endOfDay(parseISO(date))]
       }
@@ -213,6 +225,7 @@ const ListTicketsService = async ({
 
   if (updatedAt) {
     whereCondition = {
+      [Op.and]: andedOrs,
       updatedAt: {
         [Op.between]: [
           +startOfDay(parseISO(updatedAt)),

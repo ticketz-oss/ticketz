@@ -63,7 +63,7 @@ export const reloadTicketService = async ticket => {
 
 const ShowTicketService = async (
   id: string | number,
-  companyId: number = null
+  companyId?: number
 ): Promise<Ticket> => {
   const ticket = await Ticket.findOne({
     where: {

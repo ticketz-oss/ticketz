@@ -2016,9 +2016,32 @@ const handleMessage = async (
       }
     }
 
+    const scheduleType = await GetCompanySetting(
+      companyId,
+      "scheduleType",
+      "disabled"
+    );
+
+    const outOfHoursAction = await GetCompanySetting(
+      companyId,
+      "outOfHoursAction",
+      "pending"
+    );
+    let currentSchedule: ScheduleResult = null;
+
+    if (scheduleType === "company") {
+      currentSchedule = await VerifyCurrentSchedule(companyId);
+    }
+
     let defaultQueue: Queue;
 
-    if (msg.key.fromMe && !contact.isGroup && whatsapp.queues.length === 1) {
+    if (
+      (msg.key.fromMe ||
+        contact.disableBot ||
+        currentSchedule?.inActivity === false) &&
+      !contact.isGroup &&
+      whatsapp.queues.length === 1
+    ) {
       defaultQueue = await Queue.findByPk(whatsapp.queues[0].id);
     }
 
@@ -2114,21 +2137,8 @@ const handleMessage = async (
       return;
     }
 
-    const scheduleType = await GetCompanySetting(
-      companyId,
-      "scheduleType",
-      "disabled"
-    );
-
     try {
       if (!msg.key.fromMe && scheduleType) {
-        const outOfHoursAction = await GetCompanySetting(
-          companyId,
-          "outOfHoursAction",
-          "pending"
-        );
-        let currentSchedule: ScheduleResult = null;
-
         const isOpenOnline =
           ticket.status === "open" && ticket.user.socketSessions.length > 0;
 
@@ -2136,36 +2146,34 @@ const handleMessage = async (
           !isOpenOnline && outOfHoursCache.get(`ticket-${ticket.id}`);
 
         if (scheduleType === "company" && !isOpenOnline) {
-          currentSchedule = await VerifyCurrentSchedule(companyId);
-        }
-
-        if (
-          !isNil(currentSchedule) &&
-          (!currentSchedule || currentSchedule.inActivity === false)
-        ) {
-          if (!avoidResend) {
-            outOfHoursCache.set(`ticket-${ticket.id}`, true);
-            const outOfHoursMessage =
-              whatsapp.outOfHoursMessage.trim() ||
-              "Estamos fora do horário de expediente";
-            const sentMessage = await wbot.sendMessage(
-              `${ticket.contact.number}@${
-                ticket.isGroup ? "g.us" : "s.whatsapp.net"
-              }`,
-              {
-                text: formatBody(outOfHoursMessage, ticket)
-              }
-            );
-            await verifyMessage(sentMessage, ticket, ticket.contact);
+          if (
+            !isNil(currentSchedule) &&
+            (!currentSchedule || currentSchedule.inActivity === false)
+          ) {
+            if (!avoidResend) {
+              outOfHoursCache.set(`ticket-${ticket.id}`, true);
+              const outOfHoursMessage =
+                whatsapp.outOfHoursMessage.trim() ||
+                "Estamos fora do horário de expediente";
+              const sentMessage = await wbot.sendMessage(
+                `${ticket.contact.number}@${
+                  ticket.isGroup ? "g.us" : "s.whatsapp.net"
+                }`,
+                {
+                  text: formatBody(outOfHoursMessage, ticket)
+                }
+              );
+              await verifyMessage(sentMessage, ticket, ticket.contact);
+            }
+            if (ticket.status !== "open") {
+              await UpdateTicketService({
+                ticketData: { chatbot: false, status: outOfHoursAction },
+                ticketId: ticket.id,
+                companyId: ticket.companyId
+              });
+            }
+            return;
           }
-          if (ticket.status !== "open") {
-            await UpdateTicketService({
-              ticketData: { chatbot: false, status: outOfHoursAction },
-              ticketId: ticket.id,
-              companyId: ticket.companyId
-            });
-          }
-          return;
         }
 
         if (
