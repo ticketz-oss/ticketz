@@ -2129,33 +2129,34 @@ const handleMessage = async (
           !isOpenOnline && outOfHoursCache.get(`ticket-${ticket.id}`);
 
         if (scheduleType === "company" && !isOpenOnline) {
-        if (
-          !isNil(currentSchedule) &&
-          (!currentSchedule || currentSchedule.inActivity === false)
-        ) {
-          if (!avoidResend) {
-            outOfHoursCache.set(`ticket-${ticket.id}`, true);
-            const outOfHoursMessage =
-              whatsapp.outOfHoursMessage.trim() ||
-              "Estamos fora do horário de expediente";
-            const sentMessage = await wbot.sendMessage(
-              `${ticket.contact.number}@${
-                ticket.isGroup ? "g.us" : "s.whatsapp.net"
-              }`,
-              {
-                text: formatBody(outOfHoursMessage, ticket)
-              }
-            );
-            await verifyMessage(sentMessage, ticket, ticket.contact);
+          if (
+            !isNil(currentSchedule) &&
+            (!currentSchedule || currentSchedule.inActivity === false)
+          ) {
+            if (!avoidResend) {
+              outOfHoursCache.set(`ticket-${ticket.id}`, true);
+              const outOfHoursMessage =
+                whatsapp.outOfHoursMessage.trim() ||
+                "Estamos fora do horário de expediente";
+              const sentMessage = await wbot.sendMessage(
+                `${ticket.contact.number}@${
+                  ticket.isGroup ? "g.us" : "s.whatsapp.net"
+                }`,
+                {
+                  text: formatBody(outOfHoursMessage, ticket)
+                }
+              );
+              await verifyMessage(sentMessage, ticket, ticket.contact);
+            }
+            if (ticket.status !== "open") {
+              await UpdateTicketService({
+                ticketData: { chatbot: false, status: outOfHoursAction },
+                ticketId: ticket.id,
+                companyId: ticket.companyId
+              });
+            }
+            return;
           }
-          if (ticket.status !== "open") {
-            await UpdateTicketService({
-              ticketData: { chatbot: false, status: outOfHoursAction },
-              ticketId: ticket.id,
-              companyId: ticket.companyId
-            });
-          }
-          return;
         }
 
         if (
