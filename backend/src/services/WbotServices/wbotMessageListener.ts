@@ -2008,9 +2008,32 @@ const handleMessage = async (
       }
     }
 
+    const scheduleType = await GetCompanySetting(
+      companyId,
+      "scheduleType",
+      "disabled"
+    );
+
+    const outOfHoursAction = await GetCompanySetting(
+      companyId,
+      "outOfHoursAction",
+      "pending"
+    );
+    let currentSchedule: ScheduleResult = null;
+
+    if (scheduleType === "company") {
+      currentSchedule = await VerifyCurrentSchedule(companyId);
+    }
+
     let defaultQueue: Queue;
 
-    if (msg.key.fromMe && !contact.isGroup && whatsapp.queues.length === 1) {
+    if (
+      (msg.key.fromMe ||
+        contact.disableBot ||
+        currentSchedule?.inActivity === false) &&
+      !contact.isGroup &&
+      whatsapp.queues.length === 1
+    ) {
       defaultQueue = await Queue.findByPk(whatsapp.queues[0].id);
     }
 
@@ -2097,21 +2120,8 @@ const handleMessage = async (
       return;
     }
 
-    const scheduleType = await GetCompanySetting(
-      companyId,
-      "scheduleType",
-      "disabled"
-    );
-
     try {
       if (!msg.key.fromMe && scheduleType) {
-        const outOfHoursAction = await GetCompanySetting(
-          companyId,
-          "outOfHoursAction",
-          "pending"
-        );
-        let currentSchedule: ScheduleResult = null;
-
         const isOpenOnline =
           ticket.status === "open" && ticket.user.socketSessions.length > 0;
 
@@ -2119,9 +2129,6 @@ const handleMessage = async (
           !isOpenOnline && outOfHoursCache.get(`ticket-${ticket.id}`);
 
         if (scheduleType === "company" && !isOpenOnline) {
-          currentSchedule = await VerifyCurrentSchedule(companyId);
-        }
-
         if (
           !isNil(currentSchedule) &&
           (!currentSchedule || currentSchedule.inActivity === false)
