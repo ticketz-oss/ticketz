@@ -1,4 +1,4 @@
-import { Op, fn, where, col, Includeable, WhereOptions } from "sequelize";
+import { Op, fn, where, col, Filterable, Includeable } from "sequelize";
 import { startOfDay, endOfDay, parseISO } from "date-fns";
 
 import { intersection } from "lodash";
@@ -7,6 +7,7 @@ import Contact from "../../models/Contact";
 import Message from "../../models/Message";
 import Queue from "../../models/Queue";
 import User from "../../models/User";
+import ShowUserService from "../UserServices/ShowUserService";
 import Tag from "../../models/Tag";
 import TicketTag from "../../models/TicketTag";
 import Whatsapp from "../../models/Whatsapp";
@@ -56,21 +57,21 @@ const ListTicketsService = async ({
   all,
   companyId
 }: Request): Promise<Response> => {
-  const user = await User.findByPk(userId, {
-    include: [{ model: Queue, as: "queues", attributes: ["id"] }]
-  });
-
   const groupsTab =
     !isSearch &&
     (await GetCompanySetting(companyId, "groupsTab", "disabled")) === "enabled";
 
+  const user = await ShowUserService(userId);
+
+  const orCondition = [{ userId }, { status: "pending" }];
+
   const andedOrs = [
     {
-      [Op.or]: [{ userId }, { status: "pending" }]
+      [Op.or]: orCondition
     }
   ];
 
-  let whereCondition: WhereOptions<Ticket> = {
+  let whereCondition: Filterable["where"] = {
     [Op.and]: andedOrs,
     queueId:
       user?.profile === "admin" ? { [Op.or]: [queueIds, null] } : queueIds
