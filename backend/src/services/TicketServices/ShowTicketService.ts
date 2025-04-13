@@ -9,7 +9,7 @@ import UserSocketSession from "../../models/UserSocketSession";
 
 const ShowTicketService = async (
   id: string | number,
-  companyId: number
+  companyId?: number
 ): Promise<Ticket> => {
   const ticket = await Ticket.findOne({
     where: {
@@ -61,7 +61,7 @@ const ShowTicketService = async (
     ]
   });
 
-  if (ticket?.companyId !== companyId) {
+  if (companyId && ticket?.companyId !== companyId) {
     throw new AppError("Não é possível consultar registros de outra empresa");
   }
 
