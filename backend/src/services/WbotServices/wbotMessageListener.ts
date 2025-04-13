@@ -1749,7 +1749,11 @@ const handleMessage = async (
 
     let defaultQueue: Queue;
 
-    if (msg.key.fromMe && !contact.isGroup && whatsapp.queues.length === 1) {
+    if (
+      (msg.key.fromMe || contact.disableBot) &&
+      !contact.isGroup &&
+      whatsapp.queues.length === 1
+    ) {
       defaultQueue = await Queue.findByPk(whatsapp.queues[0].id);
     }
 
