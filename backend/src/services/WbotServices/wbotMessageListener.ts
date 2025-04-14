@@ -1512,10 +1512,10 @@ const handleChartbot = async (
     }
 
     if (currentOption.exitChatbot || currentOption.forwardQueueId) {
-      const text = formatBody(`${currentOption.message}`, ticket);
+      const text = formatBody(`${currentOption.message.trim()}`, ticket);
 
       if (filePath) {
-        optionsMsg.caption = text;
+        optionsMsg.caption = text || undefined;
         const sentMessage = await wbot.sendMessage(
           `${ticket.contact.number}@${
             ticket.isGroup ? "g.us" : "s.whatsapp.net"
@@ -1523,7 +1523,7 @@ const handleChartbot = async (
           { ...optionsMsg }
         );
         await verifyMediaMessage(sentMessage, ticket, ticket.contact);
-      } else {
+      } else if (text) {
         const sendMsg = await wbot.sendMessage(
           `${ticket.contact.number}@${
             ticket.isGroup ? "g.us" : "s.whatsapp.net"
