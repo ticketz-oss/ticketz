@@ -120,8 +120,8 @@ class Ticket extends Model<Ticket> {
     ticket.uuid = uuidv4();
   }
 
-  @HasOne(() => TicketTraking)
-  ticketTraking: TicketTraking;
+  @HasMany(() => TicketTraking)
+  ticketTrakings: TicketTraking;
 }
 
 export default Ticket;
