@@ -1,5 +1,6 @@
-import { Op } from "sequelize";
+import { Op, Transaction } from "sequelize";
 import TicketTraking from "../../models/TicketTraking";
+import sequelize from "../../database"; // Adjust the import to your Sequelize instance
 
 interface Params {
   ticketId: number;
@@ -16,27 +17,33 @@ const FindOrCreateATicketTrakingService = async ({
   userId,
   channel
 }: Params): Promise<TicketTraking> => {
-  const ticketTraking = await TicketTraking.findOne({
-    where: {
-      ticketId,
-      finishedAt: {
-        [Op.is]: null
-      }
+  return sequelize.transaction(async (transaction: Transaction) => {
+    const ticketTraking = await TicketTraking.findOne({
+      where: {
+        ticketId,
+        finishedAt: {
+          [Op.is]: null
+        }
+      },
+      transaction
+    });
+
+    if (ticketTraking) {
+      return ticketTraking;
     }
+
+    const newRecord = await TicketTraking.create(
+      {
+        ticketId,
+        companyId,
+        whatsappId,
+        userId
+      },
+      { transaction }
+    );
+
+    return newRecord;
   });
-
-  if (ticketTraking) {
-    return ticketTraking;
-  }
-
-  const newRecord = await TicketTraking.create({
-    ticketId,
-    companyId,
-    whatsappId,
-    userId,
-  });
-
-  return newRecord;
 };
 
 export default FindOrCreateATicketTrakingService;
