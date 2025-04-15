@@ -134,8 +134,9 @@ const ListTicketsService = async ({
     // when status is requested, only list tickets that are not waiting for rating
     andedOrs.push({
       [Op.or]: [
-        { "$ticketTraking.ratingAt$": null },
-        { "$ticketTraking.rated$": true }
+        { "$ticketTraking.id$": null }, // tracking not found
+        { "$ticketTraking.ratingAt$": null }, // tracking not being rated
+        { "$ticketTraking.rated$": true } // tracking already rated
       ] as any[]
     });
 
@@ -278,6 +279,7 @@ const ListTicketsService = async ({
     where: whereCondition,
     include: includeCondition,
     distinct: true,
+    col: "id",
     limit,
     offset,
     order: [["updatedAt", "DESC"]],
