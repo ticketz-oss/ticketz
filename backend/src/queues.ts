@@ -721,7 +721,19 @@ async function handleNoQueueTimeout(
       ticketId: ticket.id,
       ticketData: { status, userId, queueId },
       companyId: company.id
-    });
+    })
+      .then(response => {
+        logger.trace(
+          { response },
+          "handleNoQueueTimeout -> UpdateTicketService"
+        );
+      })
+      .catch(error => {
+        logger.error(
+          { error, message: error?.message },
+          "handleNoQueueTimeout -> UpdateTicketService"
+        );
+      });
   });
 }
 
@@ -757,7 +769,19 @@ async function handleOpenTicketTimeout(
         userId: status !== "pending" ? ticket.userId : null
       },
       companyId: company.id
-    });
+    })
+      .then(response => {
+        logger.trace(
+          { response },
+          "handleOpenTicketTimeout -> UpdateTicketService"
+        );
+      })
+      .catch(error => {
+        logger.error(
+          { error, message: error?.message },
+          "handleOpenTicketTimeout -> UpdateTicketService"
+        );
+      });
   });
 }
 
