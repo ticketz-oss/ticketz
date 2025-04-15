@@ -27,14 +27,13 @@ import Plan from "./models/Plan";
 import TicketTraking from "./models/TicketTraking";
 import { GetCompanySetting } from "./helpers/CheckSettings";
 import { getWbot } from "./libs/wbot";
-import formatBody from "./helpers/Mustache";
 import Ticket from "./models/Ticket";
 import QueueModel from "./models/Queue";
 import UpdateTicketService from "./services/TicketServices/UpdateTicketService";
 import { handleMessage } from "./services/WbotServices/wbotMessageListener";
 import ShowService from "./services/CampaignService/ShowService";
 import Invoices from "./models/Invoices";
-import { mustacheFormat } from "./helpers/Mustache";
+import formatBody, { mustacheFormat } from "./helpers/Mustache";
 
 const connection = process.env.REDIS_URI || "";
 const limiterMax = process.env.REDIS_OPT_LIMITER_MAX || 1;
@@ -722,7 +721,19 @@ async function handleNoQueueTimeout(
       ticketId: ticket.id,
       ticketData: { status, userId, queueId },
       companyId: company.id
-    });
+    })
+      .then(response => {
+        logger.trace(
+          { response },
+          "handleNoQueueTimeout -> UpdateTicketService"
+        );
+      })
+      .catch(error => {
+        logger.error(
+          { error, message: error?.message },
+          "handleNoQueueTimeout -> UpdateTicketService"
+        );
+      });
   });
 }
 
@@ -758,7 +769,19 @@ async function handleOpenTicketTimeout(
         userId: status !== "pending" ? ticket.userId : null
       },
       companyId: company.id
-    });
+    })
+      .then(response => {
+        logger.trace(
+          { response },
+          "handleOpenTicketTimeout -> UpdateTicketService"
+        );
+      })
+      .catch(error => {
+        logger.error(
+          { error, message: error?.message },
+          "handleOpenTicketTimeout -> UpdateTicketService"
+        );
+      });
   });
 }
 
