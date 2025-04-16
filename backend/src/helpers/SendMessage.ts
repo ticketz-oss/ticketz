@@ -41,7 +41,7 @@ export const SendMessage = async (
       // get filesize
       const filesize = fs.statSync(messageData.mediaPath).size;
       const fileLimit = parseInt(
-        await CheckSettings("downloadLimit", "15"),
+        await CheckSettings("uploadLimit", "15"),
         10
       );
 
@@ -100,9 +100,7 @@ export const SendMessage = async (
         message,
         await GetWhatsappWbot(whatsapp),
         whatsapp.companyId,
-        typeof messageData.saveOnTicket === "number"
-          ? messageData.saveOnTicket
-          : undefined
+        Number(messageData.saveOnTicket) || null
       );
     }
 
