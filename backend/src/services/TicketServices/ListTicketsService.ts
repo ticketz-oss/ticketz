@@ -1,12 +1,4 @@
-import {
-  Op,
-  fn,
-  where,
-  col,
-  Filterable,
-  Includeable,
-  literal
-} from "sequelize";
+import { Op, fn, where, col, Filterable, Includeable } from "sequelize";
 import { startOfDay, endOfDay, parseISO } from "date-fns";
 
 import { intersection } from "lodash";
@@ -20,8 +12,6 @@ import Tag from "../../models/Tag";
 import TicketTag from "../../models/TicketTag";
 import Whatsapp from "../../models/Whatsapp";
 import { GetCompanySetting } from "../../helpers/CheckSettings";
-import TicketTraking from "../../models/TicketTraking";
-import { logger } from "../../utils/logger";
 
 interface Request {
   isSearch?: boolean;
@@ -130,36 +120,6 @@ const ListTicketsService = async ({
   }
 
   if (status) {
-    includeCondition = [
-      ...includeCondition,
-      {
-        model: TicketTraking,
-        as: "ticketTrakings",
-        attributes: ["id", "ratingAt", "rated"],
-        required: false,
-        duplicating: false,
-        on: literal(`
-          "ticketTrakings"."id" = (
-            SELECT "id"
-            FROM "TicketTraking"
-            WHERE "TicketTraking"."ticketId" = "Ticket"."id" AND
-            "TicketTraking"."finishedAt" IS NULL
-            ORDER BY "createdAt" DESC
-            LIMIT 1
-          )
-        `)
-      }
-    ];
-
-    // when status is requested, only list tickets that are not waiting for rating
-    andedOrs.push({
-      [Op.or]: [
-        { "$ticketTrakings.id$": null }, // tracking not found
-        { "$ticketTrakings.ratingAt$": null }, // tracking not being rated
-        { "$ticketTrakings.rated$": true } // tracking already rated
-      ] as any[]
-    });
-
     whereCondition = {
       ...whereCondition,
       status
@@ -303,25 +263,7 @@ const ListTicketsService = async ({
     limit,
     offset,
     order: [["updatedAt", "DESC"]],
-    subQuery: false,
-    logging: (sql: string) => {
-      logger.trace(
-        {
-          sql,
-          options: {
-            where: whereCondition,
-            include: includeCondition,
-            distinct: true,
-            col: "id",
-            limit,
-            offset,
-            order: [["updatedAt", "DESC"]],
-            subQuery: false
-          }
-        },
-        "ListTicketsService"
-      );
-    }
+    subQuery: false
   });
 
   const hasMore = count > offset + tickets.length;
