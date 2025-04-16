@@ -23,6 +23,7 @@ import { faCopy, faGears } from '@fortawesome/free-solid-svg-icons';
 
 import { generateSecureToken } from "../../helpers/generateSecureToken";
 import { copyToClipboard } from "../../helpers/copyToClipboard";
+import useQueues from "../../hooks/useQueues";
 import { i18n } from "../../translate/i18n.js";
 
 const useStyles = makeStyles((theme) => ({
@@ -109,18 +110,37 @@ export default function Options(props) {
   const [soundGroupNotifications, setSoundGroupNotifications] = useState("disabled");
   const [groupsTab, setGroupsTab] = useState("disabled");
   const [apiToken, setApiToken] = useState("");
+  const [uploadLimit, setUploadLimit] = useState("15");
   const [downloadLimit, setDownloadLimit] = useState("15");
-  
-  const [messageVisibility, setMessageVisibility] = useState("Respect Message Queue");
+
+  const [messageVisibility, setMessageVisibility] = useState("message");
+
+  const [noQueueTimeout, setNoQueueTimeout] = useState("0");
+  const [noQueueTimeoutAction, setNoQueueTimeoutAction] = useState("0");
+  const [openTicketTimeout, setOpenTicketTimeout] = useState("0");
+  const [openTicketTimeoutAction, setOpenTicketTimeoutAction] = useState("pending");
+  const [queues, setQueues] = useState([]);
+  const { findAll: findAllQueues } = useQueues();
 
   const [keepUserAndQueue, setKeepUserAndQueue] = useState("enabled");
-  const { getCurrentUserInfo } = useAuth();
+  const [ratingsTimeout, setRatingsTimeout] = useState(false);
   const [autoReopenTimeout, setAutoReopenTimeout] = useState(false);
+  const [gracePeriod, setGracePeriod] = useState(0);
+
+  const { getCurrentUserInfo } = useAuth();
   const [currentUser, setCurrentUser] = useState({});
 
   const downloadLimitInput = useRef(null);
 
   const { update } = useSettings();
+
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     getCurrentUserInfo().then(
@@ -174,17 +194,49 @@ export default function Options(props) {
       const apiToken = settings.find((s) => s.key === "apiToken");
       setApiToken(apiToken?.value || "");
 
+      const uploadLimit = settings.find((s) => s.key === "uploadLimit");
+      setUploadLimit(uploadLimit?.value || "");
+
       const downloadLimit = settings.find((s) => s.key === "downloadLimit");
       setDownloadLimit(downloadLimit?.value || "");
       
       const messageVisibility = settings.find((s) => s.key === "messageVisibility");
       setMessageVisibility(messageVisibility?.value || "message");
 
+      const ratingsTimeout = settings.find((s) => s.key === "ratingsTimeout");
+      setRatingsTimeout(ratingsTimeout?.value || "5");
+
       const autoReopenTimeout = settings.find((s) => s.key === "autoReopenTimeout");
       setAutoReopenTimeout(autoReopenTimeout?.value || "0");
+
+      const noQueueTimeout = settings.find((s) => s.key === "noQueueTimeout");
+      setNoQueueTimeout(noQueueTimeout?.value || "0");
+
+	    const noQueueTimeoutAction = settings.find((s) => s.key === "noQueueTimeoutAction");
+	    setNoQueueTimeoutAction(noQueueTimeoutAction?.value || "0");
+
+	    const openTicketTimeout = settings.find((s) => s.key === "openTicketTimeout");
+	    setOpenTicketTimeout(openTicketTimeout?.value || "0");
+
+	    const openTicketTimeoutAction = settings.find((s) => s.key === "openTicketTimeoutAction");
+	    setOpenTicketTimeoutAction(openTicketTimeoutAction?.value || "pending");
+
+      const gracePeriod = settings.find((s) => s.key === "gracePeriod");
+      setGracePeriod(gracePeriod?.value || 0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
+
+
+  useEffect(() => {
+    if (isMounted.current) {
+      const loadQueues = async () => {
+        const list = await findAllQueues();
+        setQueues(list);
+      };
+      loadQueues();
+    }
+  }, []);
 
   async function handleChangeUserRating(value) {
     setUserRating(value);
@@ -252,6 +304,15 @@ export default function Options(props) {
     i18nToast.success("settings.success");
   }
 
+  async function handleRatingsTimeout(value) {
+    setRatingsTimeout(value);
+    await update({
+      key: "ratingsTimeout",
+      value,
+    });
+    i18nToast.success("settings.success");
+  }
+
   async function handleAutoReopenTimeout(value) {
     setAutoReopenTimeout(value);
     await update({
@@ -273,7 +334,7 @@ export default function Options(props) {
   }
 
   async function generateApiToken() {
-    const newToken = generateSecureToken(32);
+    const newToken = generateSecureToken(33);
     setApiToken(newToken);
     await update({
       key: "apiToken",
@@ -384,10 +445,29 @@ export default function Options(props) {
             </Select>
           </FormControl>
         </Grid>
-                
+
         <Grid item xs={12}>
           <h2 className={classes.groupTitle}>{i18n.t("settings.group.timeouts")}</h2>
         </Grid>
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <TextField
+              id="ratings-timeout-field"
+              label="Timeout para avaliação (minutos)"
+              variant="standard"
+              name="ratingsTimeout"
+              type="number"
+              value={ratingsTimeout}
+              onChange={(e) => {
+                setRatingsTimeout(e.target.value);
+              }}
+              onBlur={async (_) => {
+                await handleRatingsTimeout(ratingsTimeout);
+              }}
+            />
+          </FormControl>
+        </Grid>
+
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <TextField
@@ -406,7 +486,86 @@ export default function Options(props) {
             />
           </FormControl>
         </Grid>
-        
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <TextField
+              id="noqueue-timeout-field"
+              label="Timeout para ticket sem fila (minutos)"
+              variant="standard"
+              name="noQueueTimeout"
+              type="number"
+              value={noQueueTimeout}
+              onChange={(e) => {
+                setNoQueueTimeout(e.target.value);
+              }}
+              onBlur={async (_) => {
+                await handleSetting("noQueueTimeout", noQueueTimeout);
+              }}
+            />
+          </FormControl>
+        </Grid>
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="noqueue-timeout-action-label">
+              Ação para timeout de ticket sem fila
+            </InputLabel>
+            <Select
+              labelId="open-timeout-action-label"
+              value={noQueueTimeoutAction}
+              onChange={async (e) => {
+                handleSetting("noQueueTimeoutAction", e.target.value, setNoQueueTimeoutAction);
+              }}
+            >
+              <MenuItem value={"0"}>Fechar</MenuItem>
+              {queues.map((queue) => (
+                <MenuItem key={queue.id} value={queue.id}>
+                  Transferir para {queue.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <TextField
+              id="openticket-timeout-field"
+              label="Timeout para ticket em atendimento (minutos)"
+              variant="standard"
+              name="openTicketTimeout"
+              type="number"
+              value={openTicketTimeout}
+              onChange={(e) => {
+                setOpenTicketTimeout(e.target.value);
+              }}
+              onBlur={async (_) => {
+                await handleSetting("openTicketTimeout", openTicketTimeout);
+              }}
+            />
+          </FormControl>
+        </Grid>
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="opentimeout-action-label">
+              Ação para timeout de ticket aberto
+            </InputLabel>
+            <Select
+              labelId="open-timeout-action-label"
+              value={openTicketTimeoutAction}
+              onChange={async (e) => {
+                handleSetting("openTicketTimeoutAction", e.target.value, setOpenTicketTimeoutAction);
+              }}
+            >
+              <MenuItem value={"pending"}>Retornar para a fila</MenuItem>
+              <MenuItem value={"closed"}>Fechar atendimento</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+
         <Grid item xs={12}>
           <h2 className={classes.groupTitle}>{i18n.t("settings.group.officeHours")}</h2>
         </Grid>
@@ -627,6 +786,24 @@ export default function Options(props) {
                   </Select>
                 </FormControl>
               </Grid>
+              
+              <Grid xs={12} sm={6} md={4} item>
+                <FormControl className={classes.selectContainer}>
+                  <TextField
+                    id="upload-limit-field"
+                    label={i18n.t("settings.FileUploadLimit.title")}
+                    variant="standard"
+                    name="uploadLimit"
+                    value={uploadLimit}
+                    onChange={(e) => {
+                      setUploadLimit(e.target.value);
+                    }}
+                    onBlur={async (_) => {
+                      await handleSetting("uploadLimit", uploadLimit);
+                    }}
+                  />
+                </FormControl>
+              </Grid>
 
               <Grid xs={12} sm={6} md={4} item>
                 <FormControl className={classes.selectContainer}>
@@ -642,6 +819,24 @@ export default function Options(props) {
                     }}
                     onBlur={async (_) => {
                       await handleDownloadLimit(downloadLimit);
+                    }}
+                  />
+                </FormControl>
+              </Grid>
+              <Grid xs={12} sm={6} md={4} item>
+                <FormControl className={classes.selectContainer}>
+                  <TextField
+                    id="grace-period-field"
+                    label={i18n.t("settings.GracePeriod.title")}
+                    variant="standard"
+                    name="gracePeriod"
+                    type="number"
+                    value={gracePeriod}
+                    onChange={(e) => {
+                      setGracePeriod(e.target.value);
+                    }}
+                    onBlur={async (_) => {
+                      await handleSetting("gracePeriod", gracePeriod);
                     }}
                   />
                 </FormControl>
