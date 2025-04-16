@@ -141,14 +141,18 @@ const internalFindOrCreateTicketService = async (
   return result;
 };
 
+type FindOrCreateTicketOptions = {
+  groupContact?: Contact;
+  doNotReopen?: boolean;
+  queue?: Queue;
+};
+
 const FindOrCreateTicketService = async (
   contact: Contact,
   whatsappId: number,
   unreadMessages: number,
   companyId: number,
-  groupContact?: Contact,
-  doNotReopen?: boolean,
-  queue?: Queue
+  { groupContact, doNotReopen, queue }: FindOrCreateTicketOptions = {}
 ): Promise<{ ticket: Ticket; justCreated: boolean }> => {
   const release = await createTicketMutex.acquire();
 
