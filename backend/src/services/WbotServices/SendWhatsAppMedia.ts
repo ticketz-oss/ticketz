@@ -1,4 +1,8 @@
-import { WAMessage, AnyMediaMessageContent } from "@whiskeysockets/baileys";
+import {
+  WAMessage,
+  AnyMediaMessageContent,
+  AnyMessageContent
+} from "@whiskeysockets/baileys";
 import * as Sentry from "@sentry/node";
 import fs from "fs";
 import { exec } from "child_process";
@@ -10,12 +14,15 @@ import { Readable } from "stream";
 import AppError from "../../errors/AppError";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
 import Ticket from "../../models/Ticket";
-import { verifyMediaMessage } from "./wbotMessageListener";
+import { verifyMediaMessage, verifyMessage } from "./wbotMessageListener";
+import CheckSettings from "../../helpers/CheckSettings";
+import saveMediaToFile from "../../helpers/saveMediaFile";
 
 interface Request {
   media: Express.Multer.File;
   ticket: Ticket;
-  body?: string;
+  caption?: string;
+  ptt?: boolean;
 }
 
 const publicFolder = __dirname.endsWith("/dist")
@@ -37,10 +44,11 @@ const processRecordedAudio = async (audio: string): Promise<Readable> => {
   });
 };
 
-export const getMessageOptions = async (
+export const getMessageFileOptions = async (
   fileName: string,
   pathMedia: string,
-  mimetype?: string
+  mimetype?: string,
+  ptt?: boolean
 ): Promise<AnyMediaMessageContent> => {
   mimetype = mimetype || mime.lookup(pathMedia) || "application/octet-stream";
 
@@ -69,7 +77,7 @@ export const getMessageOptions = async (
             : fs.createReadStream(pathMedia)
         },
         mimetype: needConvert ? "audio/ogg; codecs=opus" : mimetype,
-        ptt: needConvert
+        ptt: needConvert || !!ptt
       };
     } else if (supportedImages.includes(mimetype)) {
       options = {
@@ -92,14 +100,59 @@ export const getMessageOptions = async (
   }
 };
 
-const SendWhatsAppMedia = async ({
-  media,
-  ticket,
-  body
-}: Request): Promise<WAMessage> => {
+export const sendWhatsappFile = async (
+  ticket: Ticket,
+  options: AnyMediaMessageContent
+): Promise<WAMessage> => {
   try {
     const wbot = await GetTicketWbot(ticket);
 
+    const sentMessage = await wbot.sendMessage(
+      `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
+      options
+    );
+
+    await verifyMediaMessage(sentMessage, ticket, ticket.contact);
+
+    return sentMessage;
+  } catch (err) {
+    Sentry.captureException(err);
+    console.log(err);
+    throw new AppError("ERR_SENDING_WAPP_MSG");
+  }
+};
+
+export const SendWhatsAppMessage = async (
+  ticket: Ticket,
+  options: AnyMessageContent
+): Promise<WAMessage> => {
+  try {
+    const wbot = await GetTicketWbot(ticket);
+
+    const sentMessage = await wbot.sendMessage(
+      `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
+      options
+    );
+
+    wbot.cacheMessage(sentMessage);
+
+    await verifyMessage(sentMessage, ticket, ticket.contact);
+
+    return sentMessage;
+  } catch (err) {
+    Sentry.captureException(err);
+    console.log(err);
+    throw new AppError("ERR_SENDING_WAPP_MSG");
+  }
+};
+
+export const SendWhatsAppMedia = async ({
+  media,
+  ticket,
+  caption,
+  ptt
+}: Request): Promise<WAMessage> => {
+  try {
     const pathMedia = media.path;
 
     let fileName = "";
@@ -112,25 +165,42 @@ const SendWhatsAppMedia = async ({
       console.error("Error converting filename to UTF-8:", error);
     }
 
-    const options = await getMessageOptions(
+    const fileLimit = parseInt(await CheckSettings("uploadLimit", "15"), 10);
+
+    if (media.size > fileLimit * 1024 * 1024) {
+      // convert multer file to Readable
+      const readableFile = fs.createReadStream(pathMedia);
+      let fileUrl = encodeURI(
+        await saveMediaToFile(
+          {
+            data: readableFile,
+            mimetype: media.mimetype,
+            filename: media.originalname
+          },
+          ticket.companyId,
+          ticket.id
+        )
+      );
+      if (!fileUrl.startsWith("http")) {
+        fileUrl = `${process.env.BACKEND_URL}/public/${fileUrl}`;
+      }
+      readableFile.close();
+      return SendWhatsAppMessage(ticket, {
+        text: `📎 *${fileName}*\n\n🔗 ${fileUrl}`
+      });
+    }
+
+    const options = await getMessageFileOptions(
       fileName,
       pathMedia,
-      media.mimetype
+      media.mimetype,
+      ptt
     );
-
-    const sentMessage = await wbot.sendMessage(
-      `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-      {
-        caption: body || undefined,
-        fileName,
-        ...options
-      } as AnyMediaMessageContent
-    );
-
-    wbot.cacheMessage(sentMessage);
-
-    await verifyMediaMessage(sentMessage, ticket, ticket.contact);
-    return sentMessage;
+    return sendWhatsappFile(ticket, {
+      caption: caption || undefined,
+      fileName,
+      ...options
+    } as AnyMediaMessageContent);
   } catch (err) {
     Sentry.captureException(err);
     console.log(err);
