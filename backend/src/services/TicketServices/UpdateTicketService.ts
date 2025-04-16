@@ -4,7 +4,6 @@ import CheckContactOpenTickets from "../../helpers/CheckContactOpenTickets";
 import SetTicketMessagesAsRead from "../../helpers/SetTicketMessagesAsRead";
 import { getIO } from "../../libs/socket";
 import Ticket from "../../models/Ticket";
-import Setting from "../../models/Setting";
 import ShowTicketService from "./ShowTicketService";
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
 import SendWhatsAppMessage from "../WbotServices/SendWhatsAppMessage";
@@ -13,6 +12,7 @@ import GetTicketWbot from "../../helpers/GetTicketWbot";
 import { verifyMessage } from "../WbotServices/wbotMessageListener";
 import AppError from "../../errors/AppError";
 import { GetCompanySetting } from "../../helpers/CheckSettings";
+import User from "../../models/User";
 import formatBody from "../../helpers/Mustache";
 
 interface TicketData {
@@ -27,6 +27,7 @@ interface TicketData {
 interface Request {
   ticketData: TicketData;
   ticketId: number;
+  reqUserId?: number;
   companyId?: number | undefined;
   tokenData?:
     | {
@@ -84,20 +85,20 @@ const UpdateTicketService = async ({
     const { justClose } = ticketData;
     let { status } = ticketData;
     let { queueId, userId } = ticketData;
-    let chatbot: boolean | null = ticketData.chatbot || false;
+    const fromChatbot = ticketData.chatbot || false;
+    let chatbot: boolean | null = fromChatbot;
     let queueOptionId: number | null = ticketData.queueOptionId || null;
 
     const io = getIO();
 
-    const key = "userRating";
-    const setting = await Setting.findOne({
-      where: {
-        companyId,
-        key
-      }
-    });
+    const userRatingSetting = await GetCompanySetting(
+      companyId,
+      "userRating",
+      "disabled"
+    );
 
     const ticket = await ShowTicketService(ticketId, companyId);
+    const isGroup = ticket.contact?.isGroup || ticket.isGroup;
 
     if (tokenData && ticket.status !== "pending") {
       if (
@@ -124,6 +125,14 @@ const UpdateTicketService = async ({
     const oldUserId = ticket.user?.id;
     const oldQueueId = ticket.queueId;
 
+    // only admin can accept pending tickets that have no queue
+    if (!oldQueueId && userId && oldStatus === "pending" && status === "open") {
+      const acceptUser = await User.findByPk(userId);
+      if (acceptUser.profile !== "admin") {
+        throw new AppError("ERR_NO_PERMISSION", 403);
+      }
+    }
+
     if (oldStatus === "closed") {
       await CheckContactOpenTickets(ticket.contactId, ticket.whatsappId);
       chatbot = null;
@@ -137,14 +146,15 @@ const UpdateTicketService = async ({
       );
 
       if (
-        !ticket.contact.isGroup &&
-        !ticket.contact.disableBot &&
-        setting?.value === "enabled"
+        userRatingSetting === "enabled" &&
+        ticket.userId &&
+        !isGroup &&
+        !ticket.contact.disableBot
       ) {
         if (ticketTraking.ratingAt == null && !justClose) {
           const ratingTxt =
             ratingMessage?.trim() || "Por favor avalie nosso atendimento";
-          const bodyRatingMessage = `${ratingTxt}\n\n*Digite uma nota de 1 a 5*\n`;
+          const bodyRatingMessage = `${ratingTxt}\n\n*Digite uma nota de 1 a 5*\n\nEnvie *\`!\`* para retornar ao atendimento`;
 
           if (ticket.channel === "whatsapp") {
             await SendWhatsAppMessage({ body: bodyRatingMessage, ticket });
@@ -154,11 +164,28 @@ const UpdateTicketService = async ({
             ratingAt: moment().toDate()
           });
 
+          await ticket.update({
+            chatbot: null,
+            queueOptionId: null,
+            status: "closed"
+          });
+
+          await ticket.reload();
+
           io.to(`company-${ticket.companyId}-open`)
             .to(`queue-${ticket.queueId}-open`)
             .to(ticketId.toString())
             .emit(`company-${ticket.companyId}-ticket`, {
               action: "delete",
+              ticketId: ticket.id
+            });
+
+          io.to(`company-${ticket.companyId}-closed`)
+            .to(`queue-${ticket.queueId}-closed`)
+            .to(ticket.id.toString())
+            .emit(`company-${ticket.companyId}-ticket`, {
+              action: "update",
+              ticket,
               ticketId: ticket.id
             });
 
@@ -169,7 +196,7 @@ const UpdateTicketService = async ({
       }
 
       if (
-        !ticket.contact.isGroup &&
+        !isGroup &&
         !ticket.contact.disableBot &&
         !justClose &&
         !isNil(complationMessage) &&
@@ -177,7 +204,7 @@ const UpdateTicketService = async ({
       ) {
         const body = formatBody(`${complationMessage}`, ticket);
 
-        if (ticket.channel === "whatsapp" && !ticket.isGroup) {
+        if (ticket.channel === "whatsapp" && !isGroup) {
           const sentMessage = await SendWhatsAppMessage({ body, ticket });
 
           await verifyMessage(sentMessage, ticket, ticket.contact);

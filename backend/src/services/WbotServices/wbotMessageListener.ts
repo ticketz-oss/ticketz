@@ -2,7 +2,7 @@ import path, { join } from "path";
 import { promisify } from "util";
 import fs, { writeFile } from "fs";
 import * as Sentry from "@sentry/node";
-import { isNil, isNull, head } from "lodash";
+import { isNil, head } from "lodash";
 
 import {
   WASocket,
@@ -50,7 +50,7 @@ import User from "../../models/User";
 import Setting from "../../models/Setting";
 import { cacheLayer } from "../../libs/cache";
 import { debounce } from "../../helpers/Debounce";
-import { getMessageOptions } from "./SendWhatsAppMedia";
+import { getMessageFileOptions } from "./SendWhatsAppMedia";
 import { makeRandomId } from "../../helpers/MakeRandomId";
 import CheckSettings, { GetCompanySetting } from "../../helpers/CheckSettings";
 import Whatsapp from "../../models/Whatsapp";
@@ -866,6 +866,31 @@ export const verifyDeleteMessage = async (
     });
 };
 
+const quickMessage = async (
+  wbot: Session,
+  ticket: Ticket,
+  text: string,
+  updateTicket = false
+) => {
+  const debouncedSentMessage = debounce(
+    async () => {
+      const sentMessage = await wbot.sendMessage(
+        `${ticket.contact.number}@s.whatsapp.net"
+        }`,
+        {
+          text: `\u200e${text}`
+        }
+      );
+      if (updateTicket) {
+        verifyMessage(sentMessage, ticket, ticket.contact);
+      }
+    },
+    1000,
+    ticket.id
+  );
+  debouncedSentMessage();
+};
+
 const isValidMsg = (msg: proto.IWebMessageInfo): boolean => {
   if (msg.key.remoteJid === "status@broadcast") return false;
   try {
@@ -1070,7 +1095,7 @@ const startQueue = async (
 
   if (queue.mediaPath !== null && queue.mediaPath !== "") {
     filePath = path.resolve("public", queue.mediaPath);
-    optionsMsg = await getMessageOptions(queue.mediaName, filePath);
+    optionsMsg = await getMessageFileOptions(queue.mediaName, filePath);
   }
 
   /* Tratamento para envio de mensagem quando a fila está fora do expediente */
@@ -1290,91 +1315,54 @@ export const verifyRating = (ticketTraking: TicketTraking) => {
   return false;
 };
 
-export const handleRating = async (
-  msg: WAMessage,
+const handleRating = async (
+  rate: number,
   ticket: Ticket,
-  ticketTraking: TicketTraking
+  ticketTraking: TicketTraking,
+  wbot: Session
 ) => {
-  let rate: number | null = null;
+  const whatsapp = await ShowWhatsAppService(
+    ticket.whatsappId,
+    ticket.companyId
+  );
 
-  if (msg?.message?.conversation || msg?.message?.extendedTextMessage) {
-    rate =
-      parseInt(
-        msg.message.conversation || msg.message.extendedTextMessage.text,
-        10
-      ) || null;
+  let finalRate = rate;
+
+  if (rate < 1) {
+    finalRate = 1;
+  }
+  if (rate > 5) {
+    finalRate = 5;
   }
 
-  if (!Number.isNaN(rate) && Number.isInteger(rate) && !isNull(rate)) {
-    const whatsapp = await ShowWhatsAppService(
-      ticket.whatsappId,
-      ticket.companyId
+  await UserRating.create({
+    ticketId: ticketTraking.ticketId,
+    companyId: ticketTraking.companyId,
+    userId: ticketTraking.userId,
+    rate: finalRate
+  });
+
+  const complationMessage =
+    whatsapp.complationMessage.trim() || "Atendimento finalizado";
+
+  const text = formatBody(`\u200e${complationMessage}`, ticket);
+  const jid = `${ticket.contact.number}@${
+    ticket.isGroup ? "g.us" : "s.whatsapp.net"
+  }`;
+
+  wbot
+    .sendMessage(jid, {
+      text
+    })
+    .then(
+      () => {
+        ticketTraking.update({
+          finishedAt: new Date(),
+          rated: true
+        });
+      },
+      e => logger.error({ e }, "error sending message")
     );
-
-    let finalRate = rate;
-
-    if (rate < 1) {
-      finalRate = 1;
-    }
-    if (rate > 5) {
-      finalRate = 5;
-    }
-
-    await UserRating.create({
-      ticketId: ticketTraking.ticketId,
-      companyId: ticketTraking.companyId,
-      userId: ticketTraking.userId,
-      rate: finalRate
-    });
-
-    const complationMessage =
-      whatsapp.complationMessage.trim() || "Atendimento finalizado";
-    const body = formatBody(`${complationMessage}`, ticket);
-    await SendWhatsAppMessage({ body, ticket });
-
-    await ticketTraking.update({
-      finishedAt: moment().toDate(),
-      rated: true
-    });
-
-    const keepUserAndQueue =
-      (await GetCompanySetting(
-        ticket.companyId,
-        "keepUserAndQueue",
-        "enabled"
-      )) === "enabled";
-
-    await ticket.update({
-      queueId: keepUserAndQueue ? ticket.queueId : null,
-      chatbot: null,
-      queueOptionId: null,
-      userId: keepUserAndQueue ? ticket.userId : null,
-      status: "closed"
-    });
-
-    if (!(await checkCompanyCompliant(ticket.companyId))) {
-      return;
-    }
-
-    const io = getIO();
-
-    io.to(`company-${ticket.companyId}-open`)
-      .to(`queue-${ticket.queueId}-open`)
-      .emit(`company-${ticket.companyId}-ticket`, {
-        action: "delete",
-        ticket,
-        ticketId: ticket.id
-      });
-
-    io.to(`company-${ticket.companyId}-${ticket.status}`)
-      .to(`queue-${ticket.queueId}-${ticket.status}`)
-      .to(ticket.id.toString())
-      .emit(`company-${ticket.companyId}-ticket`, {
-        action: "update",
-        ticket,
-        ticketId: ticket.id
-      });
-  }
 };
 
 const handleChartbot = async (
@@ -1508,7 +1496,10 @@ const handleChartbot = async (
     let optionsMsg = null;
     if (currentOption.mediaPath !== null && currentOption.mediaPath !== "") {
       filePath = path.resolve("public", currentOption.mediaPath);
-      optionsMsg = await getMessageOptions(currentOption.mediaName, filePath);
+      optionsMsg = await getMessageFileOptions(
+        currentOption.mediaName,
+        filePath
+      );
     }
 
     if (currentOption.exitChatbot || currentOption.forwardQueueId) {
@@ -1569,7 +1560,8 @@ const handleChartbot = async (
 const handleMessage = async (
   msg: proto.IWebMessageInfo,
   wbot: Session,
-  companyId: number
+  companyId: number,
+  queueId?: number
 ): Promise<void> => {
   if (!isValidMsg(msg)) return;
 
@@ -1682,6 +1674,7 @@ const handleMessage = async (
           where: {
             whatsappId: whatsapp.id,
             rated: false,
+            expired: false,
             ratingAt: { [Op.not]: null },
             finishedAt: null
           },
@@ -1689,7 +1682,7 @@ const handleMessage = async (
             {
               model: Ticket,
               where: {
-                status: "open",
+                status: "closed",
                 contactId: contact.id
               },
               include: [
@@ -1713,31 +1706,51 @@ const handleMessage = async (
            * Tratamento para avaliação do atendente
            */
 
-          // insistir a responder avaliação
+          logger.debug(
+            { ticketTracking },
+            `start handling tracking rating for ticket ${ticketTracking.ticketId}`
+          );
+
           const rate = Number(bodyMessage);
 
-          if (!Number.isFinite(rate)) {
-            const debouncedSentMessage = debounce(
-              async () => {
-                await wbot.sendMessage(
-                  `${ticketTracking.ticket.contact.number}@${
-                    ticketTracking.ticket.isGroup ? "g.us" : "s.whatsapp.net"
-                  }`,
-                  {
-                    text: "\n*Por favor avalie nosso atendimento com uma nota de 1 a 5*"
-                  }
-                );
-              },
-              1000,
-              ticketTracking.ticket.id
+          if (Number.isFinite(rate)) {
+            logger.debug(
+              `received rate ${rate} for ticket ${ticketTracking.ticketId}`
             );
-            debouncedSentMessage();
+            handleRating(rate, ticketTracking.ticket, ticketTracking, wbot);
             return;
           }
-          // dev Ricardo
-
-          if (verifyRating(ticketTracking)) {
-            handleRating(msg, ticketTracking.ticket, ticketTracking);
+          if (bodyMessage.trim() === "!") {
+            // abort rating and reopen ticket
+            logger.debug(
+              `ticket ${ticketTracking.ticketId} reopen by contact request`
+            );
+            ticketTracking.update({
+              ratingAt: null
+            });
+            ticketTracking.ticket.update({
+              status: "open",
+              userId: ticketTracking.userId
+            });
+            quickMessage(
+              wbot,
+              ticketTracking.ticket,
+              "Atendimento reaberto",
+              true
+            );
+            return;
+          }
+          // expire rating
+          logger.debug(
+            `tracking of ticket ${ticketTracking.ticketId} expired by wrong rate ${bodyMessage}`
+          );
+          ticketTracking.update({
+            finishedAt: new Date(),
+            expired: true
+          });
+          quickMessage(wbot, ticketTracking.ticket, "Avaliação cancelada");
+          if (bodyMessage.length < 10) {
+            // short message just stop the processing
             return;
           }
         } catch (e) {
@@ -1781,9 +1794,12 @@ const handleMessage = async (
       wbot.id!,
       unreadMessages,
       companyId,
-      groupContact,
-      undefined,
-      defaultQueue
+      {
+        groupContact,
+        queue: queueId
+          ? (await Queue.findByPk(queueId)) || defaultQueue
+          : defaultQueue
+      }
     );
 
     // voltar para o menu inicial
