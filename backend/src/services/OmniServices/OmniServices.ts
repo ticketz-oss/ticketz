@@ -41,9 +41,10 @@ import { getIO } from "../../libs/socket";
 import saveMediaToFile from "../../helpers/saveMediaFile";
 import { DebugException } from "../../helpers/DebugException";
 import AppError from "../../errors/AppError";
+import { ProcessedMedia } from "../../helpers/mediaConversion";
 
 export type OmniMessage = {
-  type: "text" | "image" | "video" | "audio" | "document";
+  type: "text" | "image" | "video" | "audio" | "document" | "reaction";
   body?: string;
   fileName?: string;
   mediaUrl?: string;
@@ -64,6 +65,10 @@ export interface OmniDriver {
     connection: Whatsapp
   ): Promise<{ ticket: Ticket; justCreated: boolean }>;
   createMessages(ticket: Ticket, data: any): Promise<Message[]>;
+  getMediaProcessor(
+    type: string,
+    channel: string
+  ): (media: Express.Multer.File) => Promise<ProcessedMedia>;
   sendMessage(ticket: Ticket, message: OmniMessage): Promise<Message[]>;
   processStatus(data: any): Promise<Message>;
 }
@@ -218,13 +223,15 @@ export class OmniServices {
 
     let messageBody = req.body.body
       ? formatBody(req.body.body || "", ticket, user)
-      : null;
+      : req.body.emoji || null;
 
-    const quotedMsg = req.body.quotedMsg
+    const quotedMsgId = req.body.quotedMsg?.id || req.params.messageId;
+
+    const quotedMsg = quotedMsgId
       ? await Message.findOne({
           where: {
-            id: req.body.quotedMsg.id,
-            ticketId: req.body.quotedMsg.ticketId
+            id: quotedMsgId,
+            ticketId: ticket.id
           }
         })
       : undefined;
@@ -232,7 +239,7 @@ export class OmniServices {
     const medias = req.files as Express.Multer.File[];
     if (medias) {
       await Promise.all(
-        medias.map(async media => {
+        medias.map(async originalMedia => {
           const body = await firstBodyMutex.runExclusive(async () => {
             if (messageBody) {
               const tmpBody = messageBody;
@@ -242,21 +249,29 @@ export class OmniServices {
             return null;
           });
 
+          let type =
+            (originalMedia.mimetype.split("/")[0] as
+              | "image"
+              | "video"
+              | "audio"
+              | "document") || "document";
+
+          const media = await driver.getMediaProcessor(
+            type,
+            ticket.contact.channel
+          )(originalMedia);
+
+          fs.unlink(originalMedia.path, err => {
+            if (err) {
+              logger.error(`Error deleting file: ${err}`);
+            }
+          });
+
           const mediaUrl = await saveMediaToFile(
-            {
-              data: fs.createReadStream(media.path),
-              mimetype: media.mimetype,
-              filename: media.originalname
-            },
+            media,
             ticket.companyId,
             ticket.id
           );
-
-          let type = media.mimetype.split("/")[0] as
-            | "image"
-            | "video"
-            | "audio"
-            | "document";
 
           if (!["image", "video", "audio", "document"].includes(type)) {
             type = "document";
@@ -266,7 +281,7 @@ export class OmniServices {
             type,
             mediaUrl,
             mimetype: media.mimetype,
-            fileName: media.originalname,
+            fileName: media.filename,
             body,
             quotedMsg
           };
@@ -278,7 +293,7 @@ export class OmniServices {
 
     if (messageBody) {
       const messageData: OmniMessage = {
-        type: "text",
+        type: req.body.emoji ? "reaction" : "text",
         body: messageBody,
         quotedMsg
       };

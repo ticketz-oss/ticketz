@@ -1,5 +1,6 @@
 import path from "path";
 import multer from "multer";
+import { makeRandomId } from "../helpers/MakeRandomId";
 
 const publicFolder = __dirname.endsWith("/dist")
   ? path.resolve(__dirname, "..", "public")
@@ -12,9 +13,9 @@ export default {
   },
   storage: multer.diskStorage({
     destination: publicFolder,
-    filename(req, file, cb) {
-      const fileName = `${new Date().getTime()} ${path.basename(
-        file.originalname
+    filename(_req, file, cb) {
+      const fileName = `${makeRandomId(5)}-${path.basename(
+        file.originalname.replace(/ /g, "_")
       )}`;
 
       return cb(null, fileName);

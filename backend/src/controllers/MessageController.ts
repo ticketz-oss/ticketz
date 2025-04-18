@@ -182,6 +182,12 @@ export const react = async (req: Request, res: Response): Promise<Response> => {
   }
 
   const ticket = await ShowTicketService(ticketId, companyId);
+
+  if (ticket.whatsapp.channel !== "whatsapp") {
+    const omniServices = OmniServices.getInstance();
+    return omniServices.sendMessageFromRequest(ticket, req, res);
+  }
+
   const wbot = await getWbot(ticket.whatsappId);
 
   if (!wbot) {
