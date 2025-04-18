@@ -26,6 +26,8 @@ const messages = {
         copy: "Copy",
         paste: "Paste",
         proceed: "Proceed",
+        enabled: "Enabled",
+        disabled: "Disabled",
       },
       signup: {
         title: "Sign Up",
@@ -738,6 +740,7 @@ const messages = {
           groups: "Groups",
           confidenciality: "Confidentiality",
           api: "API",
+          externalServices: "External Services",
           serveradmin: "Server Administration",
         },
         success: "Setting saved successfully.",
@@ -865,6 +868,9 @@ const messages = {
         },
         PaymentGateways: {
           title: "Pasarelas de pago",
+        },
+        AudioTranscriptions: {
+          title: "Audio Transcriptions",
         },
       },
       messagesList: {
