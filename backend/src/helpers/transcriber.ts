@@ -31,7 +31,7 @@ export const transcriber = async (
 
   const extension = filename?.split(".").pop() || "ogg";
 
-  let audio: Uploadable | ReadStream;
+  let audio: Uploadable;
   if (Buffer.isBuffer(audioInput)) {
     const tempFilePath = path.join(
       tmpdir(),
