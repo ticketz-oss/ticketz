@@ -4,6 +4,7 @@ import fs, { ReadStream } from "fs";
 import { logger } from "../utils/logger";
 import AppError from "../errors/AppError";
 import { bufferToReadStreamTmp } from "./bufferToReadStreamTmp";
+import { convertAudioToOggOpus } from "./mediaConversion";
 
 const supportedFormats = [
   "flac",
@@ -45,7 +46,10 @@ export const transcriber = async (
 
   let audio: Uploadable;
 
-  if (typeof audioInput === "string") {
+  if (!supportedFormats.includes(extension)) {
+    const converted = await convertAudioToOggOpus(audioInput);
+    audio = converted.data;
+  } else if (typeof audioInput === "string") {
     if (audioInput.startsWith("http")) {
       const response = await fetch(audioInput);
       if (!response.ok) {
@@ -56,17 +60,8 @@ export const transcriber = async (
     } else {
       audio = fs.createReadStream(audioInput);
     }
-  }
-  if (Buffer.isBuffer(audioInput)) {
+  } else if (Buffer.isBuffer(audioInput)) {
     audio = bufferToReadStreamTmp(audioInput, extension);
-  }
-
-  if (!supportedFormats.includes(extension)) {
-    throw new AppError(
-      `Unsupported audio format. Supported formats are: ${supportedFormats.join(
-        ", "
-      )}`
-    );
   }
 
   try {
