@@ -6,6 +6,7 @@ import Ticket from "../../models/Ticket";
 import User from "../../models/User";
 import Whatsapp from "../../models/Whatsapp";
 import { logger } from "../../utils/logger";
+import { AudioTranscriptionService } from "./AudioTranscriptionService";
 
 export interface MessageData {
   id: string;
@@ -142,6 +143,16 @@ const CreateMessageService = async ({
     },
     "sending appMessage event"
   );
+
+  if (message.mediaType === "audio") {
+    AudioTranscriptionService(message).catch(err => {
+      logger.error(
+        { error: err.message },
+        "Error in audio transcription service"
+      );
+    });
+  }
+
   return message;
 };
 

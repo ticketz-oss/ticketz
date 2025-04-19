@@ -43,6 +43,33 @@ export function streamAndDeleteFile(filePath: string): ReadStream {
   return stream;
 }
 
+function convertMedia(
+  media: string | Express.Multer.File,
+  extension: string,
+  ffmpegOptions: string,
+  mimetype: string,
+  codec?: string
+): Promise<ProcessedMedia> {
+  const mediaPath = typeof media === "string" ? media : media.path;
+  const filename = replaceFileExtension(path.basename(mediaPath), extension);
+  const outputFile = `${temporaryFilename()}.${extension}`;
+  return new Promise((resolve, reject) => {
+    exec(
+      `${ffmpegPath.path} -i "${mediaPath}" ${ffmpegOptions} "${outputFile}"`,
+      (error, _stdout, _stderr) => {
+        if (error) reject(error);
+
+        resolve({
+          data: streamAndDeleteFile(outputFile),
+          mimetype,
+          codec,
+          filename
+        });
+      }
+    );
+  });
+}
+
 /**
  * Converts a media file to aac format.
  *
@@ -55,23 +82,22 @@ export function streamAndDeleteFile(filePath: string): ReadStream {
 export async function convertAudioToAac(
   media: string | Express.Multer.File
 ): Promise<ProcessedMedia> {
-  const mediaPath = typeof media === "string" ? media : media.path;
-  const filename = replaceFileExtension(path.basename(mediaPath), "aac");
-  const outputAudio = `${temporaryFilename()}.aac`;
-  return new Promise((resolve, reject) => {
-    exec(
-      `${ffmpegPath.path} -i "${mediaPath}" -vn -c:a aac -b:a 128k "${outputAudio}"`,
-      (error, _stdout, _stderr) => {
-        if (error) reject(error);
+  return convertMedia(media, "aac", "-vn -c:a aac -b:a 128k", "audio/aac");
+}
 
-        resolve({
-          data: streamAndDeleteFile(outputAudio),
-          mimetype: "audio/aac",
-          filename
-        });
-      }
-    );
-  });
+/**
+ * Converts a media file to mp4 format.
+ *
+ * Temporary file is deleted after the stream is consumed.
+ *
+ * @param {string} mediaPath - The path to the media file to be converted.
+ * @returns {Promise<ProcessedMedia>} - A promise that resolves to a ProcessedMedia object.
+ * @throws {Error} - If there is an error during the conversion process.
+ */
+export async function convertAudioToMp4(
+  media: string | Express.Multer.File
+): Promise<ProcessedMedia> {
+  return convertMedia(media, "mp4", "-vn -c:a aac -b:a 128k", "audio/mp4");
 }
 
 /**
@@ -86,22 +112,11 @@ export async function convertAudioToAac(
 export async function convertAudioToOggOpus(
   media: string | Express.Multer.File
 ): Promise<ProcessedMedia> {
-  const mediaPath = typeof media === "string" ? media : media.path;
-  const filename = replaceFileExtension(path.basename(mediaPath), "ogg");
-  const outputAudio = `${temporaryFilename()}.ogg`;
-  return new Promise((resolve, reject) => {
-    exec(
-      `${ffmpegPath.path} -i "${mediaPath}" -vn -ar 16000 -ac 1 -c:a libopus -b:a 0 ${outputAudio}`,
-      (error, _stdout, _stderr) => {
-        if (error) reject(error);
-
-        resolve({
-          data: streamAndDeleteFile(outputAudio),
-          mimetype: "audio/ogg",
-          codec: "opus",
-          filename
-        });
-      }
-    );
-  });
+  return convertMedia(
+    media,
+    "ogg",
+    "-vn -ar 16000 -ac 1 -c:a libopus -b:a 0",
+    "audio/ogg",
+    "opus"
+  );
 }

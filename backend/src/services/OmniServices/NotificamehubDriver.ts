@@ -708,7 +708,7 @@ export class NotificamehubDriver implements OmniDriver {
     const { client } = this.sessions[connection.id];
     const channel = client.setChannel(ticket.contact.channel);
 
-    if (content)
+    if (content) {
       promises.push(
         messageMutex.runExclusive(async () => {
           const result = await channel.sendMessage(
@@ -736,6 +736,7 @@ export class NotificamehubDriver implements OmniDriver {
           return sentMessage;
         })
       );
+    }
 
     if (["image", "audio", "video", "document"].includes(message.type)) {
       const fileContent = new FileContent(
@@ -770,6 +771,7 @@ export class NotificamehubDriver implements OmniDriver {
             },
             companyId: ticket.companyId
           });
+
           return sentMessage;
         })
       );
