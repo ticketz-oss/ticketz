@@ -1,30 +1,29 @@
 import OpenAI from "openai";
 import { Uploadable } from "openai/uploads";
-import { tmpdir } from "os";
-import path from "path";
-import fs, { ReadStream } from "fs";
-import { Readable } from "stream";
-import { GetCompanySetting } from "./CheckSettings";
+import fs from "fs";
 import { logger } from "../utils/logger";
+import AppError from "../errors/AppError";
+import { bufferToReadStreamTmp } from "./bufferToReadStreamTmp";
 
 /**
  * Transcribes audio using OpenAI's Whisper model.
  *
  * @param {Uploadable | Buffer | string} audioInput - The audio file to be transcribed.
- * @param {number} companyId - The ID of the company making the request.
+ * @param {string} apiKey - The OpenAI API key.
  * @returns {Promise<string>} - The transcribed text.
  * @throws {Error} - Throws an error if the transcription fails.
  */
 export const transcriber = async (
   audioInput: Uploadable | Buffer | string,
-  companyId: number,
+  apiKey: string,
   filename?: string
 ): Promise<string> => {
-  const apiKey = await GetCompanySetting(companyId, "openAiKey", null);
+  if (!audioInput) {
+    throw new AppError("No audio file provided");
+  }
 
   if (!apiKey) {
-    logger.error("No OpenAI API key found for company", companyId);
-    return null;
+    throw new AppError("No OpenAI API key provided");
   }
 
   const openai = new OpenAI({ apiKey });
@@ -45,27 +44,7 @@ export const transcriber = async (
     }
   }
   if (Buffer.isBuffer(audioInput)) {
-    const tempFilePath = path.join(
-      tmpdir(),
-      `audio-${Date.now()}.${extension}`
-    );
-    const audioTmp = fs.createWriteStream(tempFilePath);
-    const readableAudio = Readable.from(audioInput);
-    await new Promise((resolve, reject) => {
-      readableAudio.pipe(audioTmp);
-      audioTmp.on("finish", resolve);
-      audioTmp.on("error", reject);
-    });
-    audio = fs.createReadStream(tempFilePath);
-    (audio as ReadStream).on("close", () => {
-      fs.unlink(tempFilePath, err => {
-        if (err) {
-          logger.error("Error deleting temporary file", err);
-        } else {
-          logger.info("Temporary file deleted");
-        }
-      });
-    });
+    audio = bufferToReadStreamTmp(audioInput, extension);
   }
 
   try {
@@ -74,7 +53,6 @@ export const transcriber = async (
       model: "whisper-1"
     });
 
-    console.log("Transcription created");
     return transcription.text;
   } catch (err) {
     logger.error({ error: err.message }, "Error creating transcription");

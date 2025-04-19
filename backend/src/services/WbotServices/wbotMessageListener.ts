@@ -597,15 +597,23 @@ export const verifyMediaMessage = async (
           "disabled"
         )) === "enabled"
       ) {
-        const audioTranscription = await transcriber(
-          result.mediaUrl.startsWith("http")
-            ? result.mediaUrl
-            : `${getPublicPath()}/${result.mediaUrl}`,
+        const apiKey = await GetCompanySetting(
           ticket.companyId,
-          filename
+          "openAiKey",
+          null
         );
-        if (audioTranscription) {
-          transcriptionText = audioTranscription;
+
+        if (apiKey) {
+          const audioTranscription = await transcriber(
+            result.mediaUrl.startsWith("http")
+              ? result.mediaUrl
+              : `${getPublicPath()}/${result.mediaUrl}`,
+            apiKey,
+            filename
+          );
+          if (audioTranscription) {
+            transcriptionText = audioTranscription;
+          }
         }
       }
 
