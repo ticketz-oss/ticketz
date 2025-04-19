@@ -1094,7 +1094,7 @@ const MessageInputCustom = (props) => {
           const formData = new FormData();
           const filename = `ticketz-audio-${makeRandomId(10)}.ogg`;
           formData.append("medias", blob, filename);
-          formData.append("body", filename);
+          formData.append("body", "");
           formData.append("fromMe", true);
           formData.append("ptt", true);
 
