@@ -1,7 +1,8 @@
-import { exec } from "child_process";
 import ffmpegPath from "@ffmpeg-installer/ffmpeg";
 import fs, { ReadStream } from "fs";
 import path from "path";
+import { Readable } from "stream";
+import { spawn } from "child_process";
 import { logger } from "../utils/logger";
 import { makeRandomId } from "./MakeRandomId";
 import { replaceFileExtension } from "./replaceExtension";
@@ -20,6 +21,8 @@ export type ProcessedMedia = {
   codec?: string;
   filename: string;
 };
+
+export type MediaSource = string | Express.Multer.File | ReadStream | Buffer;
 
 /**
  * Streams a file and deletes it after the stream is consumed.
@@ -44,29 +47,52 @@ export function streamAndDeleteFile(filePath: string): ReadStream {
 }
 
 function convertMedia(
-  media: string | Express.Multer.File,
+  media: MediaSource,
   extension: string,
   ffmpegOptions: string,
   mimetype: string,
   codec?: string
 ): Promise<ProcessedMedia> {
-  const mediaPath = typeof media === "string" ? media : media.path;
-  const filename = replaceFileExtension(path.basename(mediaPath), extension);
+  const isBuffer = Buffer.isBuffer(media);
+  const isStream = media instanceof ReadStream;
+  const isMulterFile = typeof media === "object" && "path" in media;
+  const mediaPath = isMulterFile ? (media as Express.Multer.File).path : media;
   const outputFile = `${temporaryFilename()}.${extension}`;
-  return new Promise((resolve, reject) => {
-    exec(
-      `${ffmpegPath.path} -i "${mediaPath}" ${ffmpegOptions} "${outputFile}"`,
-      (error, _stdout, _stderr) => {
-        if (error) reject(error);
+  const ffmpegArgs =
+    isBuffer || isStream
+      ? ["-i", "pipe:0", ...ffmpegOptions.split(" "), outputFile]
+      : ["-i", mediaPath as string, ...ffmpegOptions.split(" "), outputFile];
 
+  return new Promise((resolve, reject) => {
+    const ffmpeg = spawn(ffmpegPath.path, ffmpegArgs);
+
+    if (isBuffer) {
+      const inputStream = new Readable();
+      inputStream.push(media as Buffer);
+      inputStream.push(null);
+      inputStream.pipe(ffmpeg.stdin);
+    } else if (isStream) {
+      (media as ReadStream).pipe(ffmpeg.stdin);
+    }
+
+    ffmpeg.stderr.on("data", data => {
+      logger.error(`FFmpeg error: ${data}`);
+    });
+
+    ffmpeg.on("error", error => reject(error));
+
+    ffmpeg.on("close", code => {
+      if (code === 0) {
         resolve({
           data: streamAndDeleteFile(outputFile),
           mimetype,
           codec,
-          filename
+          filename: replaceFileExtension(path.basename(outputFile), extension)
         });
+      } else {
+        reject(new Error(`FFmpeg exited with code ${code}`));
       }
-    );
+    });
   });
 }
 
@@ -75,12 +101,12 @@ function convertMedia(
  *
  * Temporary file is deleted after the stream is consumed.
  *
- * @param {string} mediaPath - The path to the media file to be converted.
+ * @param {MediaSource} media - The path to the media file to be converted.
  * @returns {Promise<ProcessedMedia>} - A promise that resolves to a ProcessedMedia object.
  * @throws {Error} - If there is an error during the conversion process.
  */
 export async function convertAudioToAac(
-  media: string | Express.Multer.File
+  media: MediaSource
 ): Promise<ProcessedMedia> {
   return convertMedia(media, "aac", "-vn -c:a aac -b:a 128k", "audio/aac");
 }
@@ -90,12 +116,12 @@ export async function convertAudioToAac(
  *
  * Temporary file is deleted after the stream is consumed.
  *
- * @param {string} mediaPath - The path to the media file to be converted.
+ * @param {MediaSource} media - The path to the media file to be converted.
  * @returns {Promise<ProcessedMedia>} - A promise that resolves to a ProcessedMedia object.
  * @throws {Error} - If there is an error during the conversion process.
  */
 export async function convertAudioToMp4(
-  media: string | Express.Multer.File
+  media: MediaSource
 ): Promise<ProcessedMedia> {
   return convertMedia(media, "mp4", "-vn -c:a aac -b:a 128k", "audio/mp4");
 }
@@ -105,12 +131,12 @@ export async function convertAudioToMp4(
  *
  * Temporary file is deleted after the stream is consumed.
  *
- * @param {string} mediaPath - The path to the media file to be converted.
+ * @param {MediaSource} media - The path to the media file to be converted.
  * @returns {Promise<ProcessedMedia>} - A promise that resolves to a ProcessedMedia object.
  * @throws {Error} - If there is an error during the conversion process.
  */
 export async function convertAudioToOggOpus(
-  media: string | Express.Multer.File
+  media: MediaSource
 ): Promise<ProcessedMedia> {
   return convertMedia(
     media,
