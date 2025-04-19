@@ -48,6 +48,24 @@ export function streamAndDeleteFile(filePath: string): ReadStream {
   return stream;
 }
 
+/**
+ * Converts media files using ffmpeg.
+ *
+ * This function takes a media source (file path, buffer, stream, a Multer
+ * file object or URL), converts it to a specified format using ffmpeg, and
+ * returns a promise that resolves to a ProcessedMedia object.
+ *
+ * @param {MediaSource} media - The media source to be converted. Can be a
+ * file path, buffer, stream, or URL.
+ * @param {string} extension - The desired file extension for the output file.
+ * @param {string} ffmpegOptions - The ffmpeg options to be used for conversion.
+ * @param {string} mimetype - The MIME type of the output file.
+ * @param {string} [codec] - The codec to be used for conversion (optional).
+ * @returns {Promise<ProcessedMedia>} - A promise that resolves to a
+ * ProcessedMedia object containing the converted media stream, MIME type,
+ * codec, and filename.
+ * @throws {Error} - If there is an error during the conversion process.
+ */
 function convertMedia(
   media: MediaSource,
   extension: string,
@@ -113,6 +131,8 @@ function convertMedia(
 /**
  * Converts a media file to aac format.
  *
+ * MediaSource can be a file path, buffer, stream, a Multer file object, or URL.
+ *
  * Temporary file is deleted after the stream is consumed.
  *
  * @param {MediaSource} media - The path to the media file to be converted.
@@ -128,6 +148,8 @@ export async function convertAudioToAac(
 /**
  * Converts a media file to mp4 format.
  *
+ * MediaSource can be a file path, buffer, stream, a Multer file object, or URL.
+ *
  * Temporary file is deleted after the stream is consumed.
  *
  * @param {MediaSource} media - The path to the media file to be converted.
@@ -142,6 +164,8 @@ export async function convertAudioToMp4(
 
 /**
  * Converts a media file to ogg/opus format.
+ *
+ * MediaSource can be a file path, buffer, stream, a Multer file object, or URL.
  *
  * Temporary file is deleted after the stream is consumed.
  *
