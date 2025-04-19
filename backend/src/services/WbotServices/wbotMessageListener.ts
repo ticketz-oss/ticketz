@@ -57,6 +57,7 @@ import Whatsapp from "../../models/Whatsapp";
 import { SimpleObjectCache } from "../../helpers/simpleObjectCache";
 import { Session } from "../../libs/wbot";
 import { checkCompanyCompliant } from "../../helpers/CheckCompanyCompliant";
+import { transcriber } from "../../helpers/transcriber";
 
 import {
   IntegrationMessage,

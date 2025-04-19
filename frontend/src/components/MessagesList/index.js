@@ -966,6 +966,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
     }
     if (!document && message.mediaType === "audio") {
       return (
+        <>
         !playOpus && message.mediaUrl.endsWith(".ogg") ?
           <OggAudioPlayer src={message.mediaUrl}>
             {message.fromMe ?
@@ -977,6 +978,14 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
               <Avatar className={classes.businessAvatar} src={message.contact?.profilePicUrl}><Business /></Avatar> :
               <Avatar style={{ backgroundColor: generateColor(message.contact?.number), color: "white", fontWeight: "bold" }} src={message.contact?.profilePicUrl}>{getInitials(message.contact?.name || "")}</Avatar>}
           </Html5AudioPlayer>
+          {
+            message.body &&
+            !message.body.startsWith("Áudio") &&
+            <div className={classes.mediaDescription}>
+              {message.body}
+            </div>
+          }
+        </>
       );
     }
 
