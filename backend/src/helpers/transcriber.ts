@@ -10,13 +10,13 @@ import { logger } from "../utils/logger";
 /**
  * Transcribes audio using OpenAI's Whisper model.
  *
- * @param {Uploadable | Buffer} audioInput - The audio file to be transcribed.
+ * @param {Uploadable | Buffer | string} audioInput - The audio file to be transcribed.
  * @param {number} companyId - The ID of the company making the request.
  * @returns {Promise<string>} - The transcribed text.
  * @throws {Error} - Throws an error if the transcription fails.
  */
 export const transcriber = async (
-  audioInput: Uploadable | Buffer,
+  audioInput: Uploadable | Buffer | string,
   companyId: number,
   filename?: string
 ): Promise<string> => {
@@ -32,6 +32,18 @@ export const transcriber = async (
   const extension = filename?.split(".").pop() || "ogg";
 
   let audio: Uploadable;
+  if (typeof audioInput === "string") {
+    if (audioInput.startsWith("http")) {
+      const response = await fetch(audioInput);
+      if (!response.ok) {
+        logger.error("Failed to fetch audio file", response.statusText);
+        return null;
+      }
+      audio = response;
+    } else {
+      audio = fs.createReadStream(audioInput);
+    }
+  }
   if (Buffer.isBuffer(audioInput)) {
     const tempFilePath = path.join(
       tmpdir(),
