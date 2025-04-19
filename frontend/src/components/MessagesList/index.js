@@ -539,6 +539,15 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: "gray",
     cursor: "default"
   },
+  mediaDescription: {
+    padding: 10,
+    marginBottom: 20,
+    marginLeft: 25,
+    maxWidth: 270,
+    border: "2px solid",
+    borderRadius: "0 10px 10px 10px",
+    borderColor: theme.mode === 'light' ? "#000" : "#fff",
+  },
   businessAvatar: {
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.primary.contrastText
@@ -636,6 +645,9 @@ const reducer = (state, action) => {
     if (messageIndex !== -1) {
       state[messageIndex].mediaUrl = action.payload.mediaUrl;
       state[messageIndex].mediaType = action.payload.mediaType;
+      if (action.payload.body) {
+        state[messageIndex].body = action.payload.body;
+      }
     }
 
     return [...state];
@@ -967,17 +979,19 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
     if (!document && message.mediaType === "audio") {
       return (
         <>
-        !playOpus && message.mediaUrl.endsWith(".ogg") ?
-          <OggAudioPlayer src={message.mediaUrl}>
-            {message.fromMe ?
-              <Avatar className={classes.businessAvatar} src={message.contact?.profilePicUrl}><Business /></Avatar> :
-              <Avatar style={{ backgroundColor: generateColor(message.contact?.number), color: "white", fontWeight: "bold" }} src={message.contact?.profilePicUrl}>{getInitials(message.contact?.name || "")}</Avatar>}
-          </OggAudioPlayer> :
-          <Html5AudioPlayer src={message.mediaUrl}>
-            {message.fromMe ?
-              <Avatar className={classes.businessAvatar} src={message.contact?.profilePicUrl}><Business /></Avatar> :
-              <Avatar style={{ backgroundColor: generateColor(message.contact?.number), color: "white", fontWeight: "bold" }} src={message.contact?.profilePicUrl}>{getInitials(message.contact?.name || "")}</Avatar>}
-          </Html5AudioPlayer>
+          {
+            !playOpus && message.mediaUrl.endsWith(".ogg") ?
+              <OggAudioPlayer src={message.mediaUrl}>
+                {message.fromMe ?
+                  <Avatar className={classes.businessAvatar} src={message.contact?.profilePicUrl}><Business /></Avatar> :
+                  <Avatar style={{ backgroundColor: generateColor(message.contact?.number), color: "white", fontWeight: "bold" }} src={message.contact?.profilePicUrl}>{getInitials(message.contact?.name || "")}</Avatar>}
+              </OggAudioPlayer> :
+              <Html5AudioPlayer src={message.mediaUrl}>
+                {message.fromMe ?
+                  <Avatar className={classes.businessAvatar} src={message.contact?.profilePicUrl}><Business /></Avatar> :
+                  <Avatar style={{ backgroundColor: generateColor(message.contact?.number), color: "white", fontWeight: "bold" }} src={message.contact?.profilePicUrl}>{getInitials(message.contact?.name || "")}</Avatar>}
+              </Html5AudioPlayer>
+          }
           {
             message.body &&
             !message.body.startsWith("Áudio") &&
