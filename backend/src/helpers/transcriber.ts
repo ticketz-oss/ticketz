@@ -16,7 +16,7 @@ import { logger } from "../utils/logger";
  * @throws {Error} - Throws an error if the transcription fails.
  */
 export const transcriber = async (
-  audioInput: Uploadable | Buffer,
+  audioInput: Uploadable | Buffer | string,
   companyId: number,
   filename?: string
 ): Promise<string> => {
@@ -32,6 +32,18 @@ export const transcriber = async (
   const extension = filename?.split(".").pop() || "ogg";
 
   let audio: Uploadable;
+  if (typeof audioInput === "string") {
+    if (audioInput.startsWith("http")) {
+      const response = await fetch(audioInput);
+      if (!response.ok) {
+        logger.error("Failed to fetch audio file", response.statusText);
+        return null;
+      }
+      audio = response;
+    } else {
+      audio = fs.createReadStream(audioInput);
+    }
+  }
   if (Buffer.isBuffer(audioInput)) {
     const tempFilePath = path.join(
       tmpdir(),
