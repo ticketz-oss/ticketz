@@ -10,7 +10,7 @@ import { logger } from "../utils/logger";
 /**
  * Transcribes audio using OpenAI's Whisper model.
  *
- * @param {Uploadable | Buffer} audioInput - The audio file to be transcribed.
+ * @param {Uploadable | Buffer | string} audioInput - The audio file to be transcribed.
  * @param {number} companyId - The ID of the company making the request.
  * @returns {Promise<string>} - The transcribed text.
  * @throws {Error} - Throws an error if the transcription fails.
