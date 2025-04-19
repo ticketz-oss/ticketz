@@ -3,6 +3,8 @@ import fs, { ReadStream } from "fs";
 import path from "path";
 import { Readable } from "stream";
 import { spawn } from "child_process";
+import http from "http";
+import https from "https";
 import { logger } from "../utils/logger";
 import { makeRandomId } from "./MakeRandomId";
 import { replaceFileExtension } from "./replaceExtension";
@@ -56,10 +58,11 @@ function convertMedia(
   const isBuffer = Buffer.isBuffer(media);
   const isStream = media instanceof ReadStream;
   const isMulterFile = typeof media === "object" && "path" in media;
+  const isUrl = typeof media === "string" && /^https?:\/\//.test(media);
   const mediaPath = isMulterFile ? (media as Express.Multer.File).path : media;
   const outputFile = `${temporaryFilename()}.${extension}`;
   const ffmpegArgs =
-    isBuffer || isStream
+    isBuffer || isStream || isUrl
       ? ["-i", "pipe:0", ...ffmpegOptions.split(" "), outputFile]
       : ["-i", mediaPath as string, ...ffmpegOptions.split(" "), outputFile];
 
@@ -73,6 +76,17 @@ function convertMedia(
       inputStream.pipe(ffmpeg.stdin);
     } else if (isStream) {
       (media as ReadStream).pipe(ffmpeg.stdin);
+    } else if (isUrl) {
+      const client = media.startsWith("https") ? https : http;
+      client
+        .get(media, response => {
+          if (response.statusCode !== 200) {
+            reject(new Error(`Failed to fetch URL: ${response.statusCode}`));
+            return;
+          }
+          response.pipe(ffmpeg.stdin);
+        })
+        .on("error", error => reject(error));
     }
 
     ffmpeg.stderr.on("data", data => {
