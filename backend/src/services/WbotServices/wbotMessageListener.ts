@@ -636,13 +636,19 @@ export const verifyMediaMessage = async (
       "disabled"
     )) === "enabled"
   ) {
-    const audioTranscription = await transcriber(
-      media.data,
-      ticket.companyId,
-      media.filename
-    );
-    if (audioTranscription) {
-      body = audioTranscription;
+    const apiKey = await GetCompanySetting(ticket.companyId, "openAiKey", null);
+
+    if (apiKey) {
+      const audioTranscription = await transcriber(
+        mediaUrl.startsWith("http")
+          ? mediaUrl
+          : `${getPublicPath()}/${mediaUrl}`,
+        apiKey,
+        media.filename
+      );
+      if (audioTranscription) {
+        body = audioTranscription;
+      }
     }
   }
 
