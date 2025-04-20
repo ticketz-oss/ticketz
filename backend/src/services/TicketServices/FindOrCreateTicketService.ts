@@ -175,7 +175,7 @@ const internalFindOrCreateTicketService = async (
   return result;
 };
 
-type FindOrCreateTicketOptions = {
+export type FindOrCreateTicketOptions = {
   groupContact?: Contact;
   doNotReopen?: boolean;
   queue?: Queue;
