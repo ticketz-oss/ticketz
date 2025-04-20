@@ -42,6 +42,9 @@ import saveMediaToFile from "../../helpers/saveMediaFile";
 import { DebugException } from "../../helpers/DebugException";
 import AppError from "../../errors/AppError";
 import { ProcessedMedia } from "../../helpers/mediaConversion";
+import { FindOrCreateTicketOptions } from "../TicketServices/FindOrCreateTicketService";
+import { automationHandler } from "./QueueChatbot";
+import Queue from "../../models/Queue";
 
 export type OmniMessage = {
   type: "text" | "image" | "video" | "audio" | "document" | "reaction";
@@ -62,7 +65,8 @@ export interface OmniDriver {
   findOrCreateContact(connection: Whatsapp, data: any): Promise<Contact>;
   findOrCreateTicket(
     contact: Contact,
-    connection: Whatsapp
+    connection: Whatsapp,
+    options: FindOrCreateTicketOptions
   ): Promise<{ ticket: Ticket; justCreated: boolean }>;
   createMessages(ticket: Ticket, data: any): Promise<Message[]>;
   getMediaProcessor(
@@ -71,6 +75,7 @@ export interface OmniDriver {
   ): (media: Express.Multer.File) => Promise<ProcessedMedia>;
   sendMessage(ticket: Ticket, message: OmniMessage): Promise<Message[]>;
   processStatus(data: any): Promise<Message>;
+  allowChatbot(ticket: Ticket): Promise<boolean>;
 }
 
 const firstBodyMutex = new Mutex();
@@ -133,16 +138,6 @@ export class OmniServices {
     );
   }
 
-  private static async automationHandler(
-    messages: Message[],
-    driver: OmniDriver
-  ) {
-    logger.debug("OmniServices:automationHandler");
-    messages.forEach(message => {
-      // do nothing
-    });
-  }
-
   public async messageHandler(channel: string, data: any) {
     logger.debug({ data }, "OmniServices:messageHandler");
     const driver = this.drivers[channel];
@@ -162,16 +157,31 @@ export class OmniServices {
             if (!contact) {
               throw new Error("Contact not found or created");
             }
+
+            let defaultQueue: Queue;
+
+            if (connection.queues && connection.queues.length === 1) {
+              // eslint-disable-next-line prefer-destructuring
+              defaultQueue = connection.queues[0];
+            }
+
             driver
-              .findOrCreateTicket(contact, connection)
+              .findOrCreateTicket(contact, connection, { queue: defaultQueue })
               .then(({ ticket, justCreated }) => {
                 if (!ticket) {
                   throw new Error("Ticket not found or not created");
                 }
                 driver
                   .createMessages(ticket, data)
-                  .then(messages => {
-                    OmniServices.automationHandler(messages, driver);
+                  .then(async messages => {
+                    if (
+                      ((await driver.allowChatbot(ticket)) &&
+                        ticket.status === "pending" &&
+                        ticket.chatbot) ||
+                      justCreated
+                    ) {
+                      automationHandler(messages, driver);
+                    }
                   })
                   .catch(error => {
                     if (error instanceof DebugException) {

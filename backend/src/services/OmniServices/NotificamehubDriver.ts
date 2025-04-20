@@ -60,9 +60,9 @@ import {
   convertAudioToOggOpus,
   ProcessedMedia
 } from "../../helpers/mediaConversion";
+import Queue from "../../models/Queue";
 
 const contactMutex = new Mutex();
-const ticketMutex = new Mutex();
 const messageMutex = new Mutex();
 
 export type NotificamehubVisitor = {
@@ -199,6 +199,8 @@ const audioMediaProcessors = {
   whatsapp: convertAudioToAac,
   default: convertAudioToOggOpus
 };
+
+const chatbotChannels = ["whatsapp", "instagram", "telegram", "webchat"];
 
 export type NotificamehubSession = {
   client: Client;
@@ -383,10 +385,29 @@ export class NotificamehubDriver implements OmniDriver {
     const whatsapp = await Whatsapp.findOne({
       where: {
         qrcode: message.to
-      }
+      },
+      include: ["queues"]
     });
 
     return whatsapp;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  async allowChatbot(ticket: Ticket): Promise<boolean> {
+    logger.debug("notificamehub:allowChatbot");
+
+    const channel = ticket.contact?.channel;
+
+    if (!chatbotChannels.includes(channel)) {
+      return false;
+    }
+
+    if (channel === "instagram") {
+      // TODO: detect if it is a comment
+      return false;
+    }
+
+    return true;
   }
 
   async startService(connection: Whatsapp): Promise<void> {
@@ -461,18 +482,20 @@ export class NotificamehubDriver implements OmniDriver {
   // eslint-disable-next-line class-methods-use-this
   async findOrCreateTicket(
     contact: Contact,
-    connection: Whatsapp
+    connection: Whatsapp,
+    options: {
+      queue?: Queue;
+    } = {}
   ): Promise<{ ticket: Ticket; justCreated: boolean }> {
     logger.debug("notificamehub:findOrCreateTicket");
 
-    return ticketMutex.runExclusive(async () => {
-      return FindOrCreateTicketService(
-        contact,
-        connection.id,
-        1,
-        connection.companyId
-      );
-    });
+    return FindOrCreateTicketService(
+      contact,
+      connection.id,
+      1,
+      connection.companyId,
+      options
+    );
   }
 
   // eslint-disable-next-line class-methods-use-this
