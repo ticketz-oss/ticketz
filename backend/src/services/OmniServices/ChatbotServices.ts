@@ -1,8 +1,11 @@
+import { GetCompanySetting } from "../../helpers/CheckSettings";
+import formatBody from "../../helpers/Mustache";
 import Contact from "../../models/Contact";
 import Integration from "../../models/Integration";
 import IntegrationSession from "../../models/IntegrationSession";
 import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
+import Whatsapp from "../../models/Whatsapp";
 import { logger } from "../../utils/logger";
 import {
   IntegrationMessage,
@@ -10,7 +13,9 @@ import {
   IntegrationMessageTypes,
   IntegrationServices
 } from "../IntegrationServices/IntegrationServices";
+import ShowTicketService from "../TicketServices/ShowTicketService";
 import UpdateTicketService from "../TicketServices/UpdateTicketService";
+import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
 import { OmniDriver } from "./OmniServices";
 
 const integrationServices = IntegrationServices.getInstance();
@@ -29,24 +34,104 @@ async function replyHandler(
   }
 }
 
+async function showConnectionMenu(
+  driver: OmniDriver,
+  ticket: Ticket,
+  connection: Whatsapp
+) {
+  let body = `${formatBody(connection.greetingMessage, ticket)}\n\n`;
+
+  connection.queues.forEach((q, i) => {
+    body += `${i + 1} - ${q.name}\n`;
+  });
+
+  await driver.sendMessage(ticket, {
+    type: "text",
+    body
+  });
+}
+
+async function startQueueMenu(
+  driver: OmniDriver,
+  ticket: Ticket,
+  connection: Whatsapp
+) {
+  logger.debug("QueueChatbot:handleQueueMenu");
+
+  await showConnectionMenu(driver, ticket, connection);
+
+  await UpdateTicketService({
+    ticketData: { status: "pending", chatbot: true },
+    ticketId: ticket.id,
+    companyId: ticket.companyId,
+    dontRunChatbot: true
+  });
+}
+
+async function handleQueueMenu(
+  driver: OmniDriver,
+  ticket: Ticket,
+  connection: Whatsapp,
+  message: Message,
+  firstIteration = false
+) {
+  logger.debug("QueueChatbot:handleQueueMenu");
+
+  const selected = Number(message?.body);
+
+  if (selected > 0 && connection.queues[selected - 1]) {
+    await UpdateTicketService({
+      ticketData: { queueId: connection.queues[selected - 1].id },
+      ticketId: ticket.id,
+      companyId: ticket.companyId
+    });
+    await ticket.reload();
+    return;
+  }
+
+  if (
+    !firstIteration &&
+    (await GetCompanySetting(
+      ticket.companyId,
+      "chatbotAutoExit",
+      "disabled"
+    )) === "enabled"
+  ) {
+    await UpdateTicketService({
+      ticketData: { chatbot: false, status: "pending" },
+      ticketId: ticket.id,
+      companyId: ticket.companyId,
+      dontRunChatbot: true
+    });
+    await ticket.reload();
+  }
+}
+
 export const checkIntegration = async (
   source: Message | Ticket,
-  driver: OmniDriver
+  driver: OmniDriver,
+  firstIteration?: boolean
 ) => {
   const message = source instanceof Message ? source : null;
-  const ticket = source instanceof Ticket ? source : null;
+  const ticket =
+    source instanceof Ticket
+      ? source
+      : message && (await ShowTicketService(message.ticketId));
 
-  if (!message && !ticket) {
+  if (!ticket) {
     throw new Error("checkIntegration: Invalid source");
   }
 
-  const contactId = message?.contactId || ticket.contactId;
-  const contact =
-    message?.contact || ticket?.contact || (await Contact.findByPk(contactId));
+  if (!ticket.chatbot) {
+    return;
+  }
+
+  const { contactId } = ticket;
+  const contact = ticket?.contact || (await Contact.findByPk(contactId));
 
   const integrationSession = await IntegrationSession.findOne({
     where: {
-      ticketId: message?.ticketId || ticket.id
+      ticketId: ticket.id
     },
     include: [
       {
@@ -90,9 +175,23 @@ export const checkIntegration = async (
       async (t, r) => replyHandler(t, r, driver)
     );
 
-    return true;
+    return;
   }
-  return false;
+
+  const connection = await ShowWhatsAppService(
+    ticket.whatsappId,
+    ticket.companyId
+  );
+
+  if (connection.queues.length > 1) {
+    await handleQueueMenu(
+      driver,
+      ticket,
+      connection,
+      message,
+      !!firstIteration
+    );
+  }
 };
 
 async function startQueue(
@@ -102,12 +201,22 @@ async function startQueue(
 ) {
   logger.debug("QueueChatbot:startQueue");
 
-  if (!ticket.queue) {
+  const { queue } = ticket;
+
+  if (!queue) {
+    const connection = await ShowWhatsAppService(
+      ticket.whatsappId,
+      ticket.companyId
+    );
+
+    if (connection.queues.length > 1) {
+      await startQueueMenu(driver, ticket, connection);
+      return;
+    }
+
     logger.debug("QueueChatbot:startQueue - No queue found");
     return;
   }
-
-  const { queue } = ticket;
 
   const integration = await Integration.findOne({
     where: {
@@ -120,7 +229,7 @@ async function startQueue(
       channel: ticket.contact.channel,
       from: ticket.contact || (await Contact.findByPk(ticket.contactId)),
       ticketId: ticket.id,
-      firstMessage: message.body
+      firstMessage: message?.body || undefined
     };
 
     await UpdateTicketService({
@@ -146,19 +255,16 @@ async function startQueue(
   }
 }
 
-export async function chatbotHandler(messages: Message[], driver: OmniDriver) {
+export async function chatbotHandler(
+  driver: OmniDriver,
+  ticket: Ticket,
+  message?: Message
+) {
   logger.trace("QueueChatbot:automationHandler");
 
-  const [firstMessage] = messages;
-  const { ticket } = firstMessage;
-
-  if (!firstMessage) {
-    logger.debug("QueueChatbot:automationHandler - No messages found");
-    return;
+  const firstIteration = !ticket.chatbot;
+  if (firstIteration) {
+    await startQueue(ticket, driver, message);
   }
-
-  if (!ticket.chatbot) {
-    await startQueue(ticket, driver, firstMessage);
-  }
-  await checkIntegration(firstMessage, driver);
+  await checkIntegration(message || ticket, driver, firstIteration);
 }
