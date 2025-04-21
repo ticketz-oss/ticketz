@@ -215,11 +215,11 @@ export class OmniServices {
 
     const quotedMsg = quotedMsgId
       ? await Message.findOne({
-        where: {
-          id: quotedMsgId,
-          ticketId: ticket.id
-        }
-      })
+          where: {
+            id: quotedMsgId,
+            ticketId: ticket.id
+          }
+        })
       : undefined;
 
     const medias = req.files as Express.Multer.File[];
