@@ -142,78 +142,54 @@ export class OmniServices {
     logger.debug({ data }, "OmniServices:messageHandler");
     const driver = this.drivers[channel];
     if (!driver) {
-      return Promise.reject(new Error(`OmniDriver ${channel} not found`));
+      Promise.reject(new Error(`OmniDriver ${channel} not found`));
+      return;
     }
 
-    return driver
-      .getConnection(data)
-      .then(connection => {
-        if (!connection) {
-          throw new Error("Connection not found");
-        }
-        driver
-          .findOrCreateContact(connection, data)
-          .then(contact => {
-            if (!contact) {
-              throw new Error("Contact not found or created");
-            }
+    try {
+      const connection = await driver.getConnection(data);
+      if (!connection) {
+        throw new Error("Connection not found");
+      }
 
-            let defaultQueue: Queue;
+      const contact = await driver.findOrCreateContact(connection, data);
+      if (!contact) {
+        throw new Error("Contact not found or created");
+      }
 
-            if (connection.queues && connection.queues.length === 1) {
-              // eslint-disable-next-line prefer-destructuring
-              defaultQueue = connection.queues[0];
-            }
+      let defaultQueue: Queue;
+      if (connection.queues && connection.queues.length === 1) {
+        // eslint-disable-next-line prefer-destructuring
+        defaultQueue = connection.queues[0];
+      }
 
-            driver
-              .findOrCreateTicket(contact, connection, { queue: defaultQueue })
-              .then(({ ticket, justCreated }) => {
-                if (!ticket) {
-                  throw new Error("Ticket not found or not created");
-                }
-                driver
-                  .createMessages(ticket, data)
-                  .then(async messages => {
-                    if (
-                      ((await driver.allowChatbot(ticket)) &&
-                        ticket.status === "pending" &&
-                        ticket.chatbot) ||
-                      justCreated
-                    ) {
-                      chatbotHandler(messages, driver);
-                    }
-                  })
-                  .catch(error => {
-                    if (error instanceof DebugException) {
-                      logger.debug(error.message);
-                      return;
-                    }
-                    throw error;
-                  });
-              })
-              .catch(error => {
-                if (error instanceof DebugException) {
-                  logger.debug(error.message);
-                  return;
-                }
-                throw error;
-              });
-          })
-          .catch(error => {
-            if (error instanceof DebugException) {
-              logger.debug(error.message);
-              return;
-            }
-            throw error;
-          });
-      })
-      .catch(error => {
-        if (error instanceof DebugException) {
-          logger.debug(error.message);
-          return;
-        }
+      const { ticket, justCreated } = await driver.findOrCreateTicket(
+        contact,
+        connection,
+        { queue: defaultQueue }
+      );
+      if (!ticket) {
+        throw new Error("Ticket not found or not created");
+      }
+
+      const messages = await driver.createMessages(ticket, data);
+      if (
+        ((await driver.allowChatbot(ticket)) &&
+          ticket.status === "pending" &&
+          ticket.chatbot) ||
+        justCreated
+      ) {
+        chatbotHandler(messages, driver);
+      }
+    } catch (error) {
+      if (error instanceof DebugException) {
+        logger.debug(error.message);
+      } else {
         throw error;
-      });
+      }
+    }
+
+    Promise.resolve();
   }
 
   public async sendMessageFromRequest(
@@ -239,11 +215,11 @@ export class OmniServices {
 
     const quotedMsg = quotedMsgId
       ? await Message.findOne({
-          where: {
-            id: quotedMsgId,
-            ticketId: ticket.id
-          }
-        })
+        where: {
+          id: quotedMsgId,
+          ticketId: ticket.id
+        }
+      })
       : undefined;
 
     const medias = req.files as Express.Multer.File[];
