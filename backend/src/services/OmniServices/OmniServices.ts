@@ -105,6 +105,24 @@ export class OmniServices {
     logger.info(`OmniDriver ${name} registered`);
   }
 
+  public getOmniDriver(input: Ticket | Whatsapp | string): OmniDriver {
+    logger.debug("OmniServices:getOmniDriver");
+    const channel =
+      // eslint-disable-next-line no-nested-ternary
+      typeof input === "string"
+        ? input
+        : input instanceof Ticket
+        ? input.whatsapp?.channel || input.get("whatsapp").channel
+        : input.channel;
+
+    const driver = this.drivers[channel];
+    if (!driver) {
+      return null;
+    }
+
+    return driver;
+  }
+
   public async startService(connection: Whatsapp): Promise<void> {
     logger.debug("OmniServices:startService");
     const driver = this.drivers[connection.channel];
@@ -173,13 +191,17 @@ export class OmniServices {
       }
 
       const messages = await driver.createMessages(ticket, data);
-      if (
-        ((await driver.allowChatbot(ticket)) &&
-          ticket.status === "pending" &&
-          ticket.chatbot) ||
-        justCreated
-      ) {
-        chatbotHandler(messages, driver);
+
+      if (!(await driver.allowChatbot(ticket))) {
+        return;
+      }
+
+      if (justCreated) {
+        // TODO: checkSchedule(ticket);
+      }
+
+      if (ticket.status === "pending" && (ticket.chatbot || justCreated)) {
+        chatbotHandler(driver, ticket, messages[0]);
       }
     } catch (error) {
       if (error instanceof DebugException) {
