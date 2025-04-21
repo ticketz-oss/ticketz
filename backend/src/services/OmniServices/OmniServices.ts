@@ -43,8 +43,8 @@ import { DebugException } from "../../helpers/DebugException";
 import AppError from "../../errors/AppError";
 import { ProcessedMedia } from "../../helpers/mediaConversion";
 import { FindOrCreateTicketOptions } from "../TicketServices/FindOrCreateTicketService";
-import { automationHandler } from "./QueueChatbot";
 import Queue from "../../models/Queue";
+import { chatbotHandler } from "./ChatbotServices";
 
 export type OmniMessage = {
   type: "text" | "image" | "video" | "audio" | "document" | "reaction";
@@ -180,7 +180,7 @@ export class OmniServices {
                         ticket.chatbot) ||
                       justCreated
                     ) {
-                      automationHandler(messages, driver);
+                      chatbotHandler(messages, driver);
                     }
                   })
                   .catch(error => {

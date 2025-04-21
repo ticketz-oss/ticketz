@@ -146,10 +146,7 @@ async function startQueue(
   }
 }
 
-export async function automationHandler(
-  messages: Message[],
-  driver: OmniDriver
-) {
+export async function chatbotHandler(messages: Message[], driver: OmniDriver) {
   logger.trace("QueueChatbot:automationHandler");
 
   const [firstMessage] = messages;

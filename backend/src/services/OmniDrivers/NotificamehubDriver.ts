@@ -44,7 +44,7 @@ import Ticket from "../../models/Ticket";
 import Whatsapp from "../../models/Whatsapp";
 import { logger } from "../../utils/logger";
 import { IntegrationOptions } from "../IntegrationServices/IntegrationServices";
-import { OmniDriver, OmniMessage } from "./OmniServices";
+import { OmniDriver, OmniMessage } from "../OmniServices/OmniServices";
 import FindOrCreateTicketService from "../TicketServices/FindOrCreateTicketService";
 import CreateMessageService from "../MessageServices/CreateMessageService";
 import { NgrokInstance } from "../../helpers/NgrokInstance";
