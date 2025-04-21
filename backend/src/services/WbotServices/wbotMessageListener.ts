@@ -57,6 +57,7 @@ import Whatsapp from "../../models/Whatsapp";
 import { SimpleObjectCache } from "../../helpers/simpleObjectCache";
 import { Session } from "../../libs/wbot";
 import { checkCompanyCompliant } from "../../helpers/CheckCompanyCompliant";
+import { transcriber } from "../../helpers/transcriber";
 
 import {
   IntegrationMessage,
@@ -72,6 +73,7 @@ import {
   BaileysDownloaderTaskData,
   BaileysDownloadTaskResult
 } from "../../workers/BaileysDownloader";
+import { getPublicPath } from "../../helpers/GetPublicPath";
 
 import { SubscriptionService } from "../../ticketzPro/services/subscriptionService";
 
@@ -589,15 +591,47 @@ export const verifyMediaMessage = async (
     .runTask("BaileysDownloader", mediaDownloadData)
     .then(async (result: BaileysDownloadTaskResult) => {
       const mediaType = normalizeMediaType(msgMedia.mimetype);
+
+      let transcriptionText: string;
+      if (
+        mediaType === "audio" &&
+        (await GetCompanySetting(
+          ticket.companyId,
+          "audioTranscriptions",
+          "disabled"
+        )) === "enabled"
+      ) {
+        const apiKey = await GetCompanySetting(
+          ticket.companyId,
+          "openAiKey",
+          null
+        );
+
+        if (apiKey) {
+          const audioTranscription = await transcriber(
+            result.mediaUrl.startsWith("http")
+              ? result.mediaUrl
+              : `${getPublicPath()}/${result.mediaUrl}`,
+            apiKey,
+            filename
+          );
+          if (audioTranscription) {
+            transcriptionText = audioTranscription;
+          }
+        }
+      }
+
       await newMessage.update({
         mediaUrl: result.mediaUrl,
-        mediaType
+        mediaType,
+        body: transcriptionText || undefined
       });
       io.to(ticket.id.toString()).emit(`company-${ticket.companyId}-media`, {
         action: "update",
         ticketId: ticket.id,
         messageId: newMessage.id,
         mediaUrl: newMessage.mediaUrl,
+        body: transcriptionText || undefined,
         mediaType
       });
       deferred.resolve(true);

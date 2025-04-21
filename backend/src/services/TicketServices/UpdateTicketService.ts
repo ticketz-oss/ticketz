@@ -24,8 +24,11 @@ import { CreateInternalMessageService } from "../MessageServices/CreateInternalM
 import User from "../../models/User";
 import formatBody from "../../helpers/Mustache";
 import { IntegrationServices } from "../IntegrationServices/IntegrationServices";
+import { OmniServices } from "../OmniServices/OmniServices";
+import { chatbotHandler } from "../OmniServices/ChatbotServices";
 
 const integrationServices = IntegrationServices.getInstance();
+const omniServices = OmniServices.getInstance();
 
 interface TicketData {
   status?: string;
@@ -66,11 +69,22 @@ const sendFormattedMessage = async (
   ticket: Ticket,
   user?: User
 ) => {
+  const messageText = formatBody(message, ticket, user);
+  const omniDriver = omniServices.getOmniDriver(ticket);
+
+  if (omniDriver) {
+    await omniDriver.sendMessage(ticket, {
+      type: "text",
+      body: messageText
+    });
+    return;
+  }
+
   const wbot = await GetTicketWbot(ticket);
   const queueChangedMessage = await wbot.sendMessage(
     `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
     {
-      text: `\u200e${formatBody(message, ticket, user)}`
+      text: messageText
     }
   );
   await verifyMessage(queueChangedMessage, ticket, ticket.contact);
@@ -427,6 +441,12 @@ const UpdateTicketService = async ({
 
     if (!dontRunChatbot && !ticket.userId && ticket.queueId !== oldQueueId) {
       await integrationServices.endAllSessions(ticket);
+
+      const omniDriver = omniServices.getOmniDriver(ticket);
+      if (omniDriver?.allowChatbot(ticket)) {
+        await chatbotHandler(omniDriver, ticket);
+      }
+
       const wbot = await GetTicketWbot(ticket);
       if (wbot) {
         await startQueue(wbot, ticket);

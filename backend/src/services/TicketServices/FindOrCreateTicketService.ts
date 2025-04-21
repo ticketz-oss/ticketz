@@ -13,16 +13,26 @@ import Queue from "../../models/Queue";
 
 const createTicketMutex = new Mutex();
 
+export type FindOrCreateTicketOptions = {
+  groupContact?: Contact;
+  doNotReopen?: boolean;
+  queue?: Queue;
+  history?: boolean;
+  timestamp?: number;
+};
+
 const internalFindOrCreateTicketService = async (
   contact: Contact,
   whatsappId: number,
   unreadMessages: number,
   companyId: number,
-  groupContact?: Contact,
-  doNotReopen?: boolean,
-  queue?: Queue,
-  history?: boolean,
-  timestamp?: number
+  {
+    groupContact,
+    doNotReopen,
+    queue,
+    history,
+    timestamp
+  }: FindOrCreateTicketOptions = {}
 ): Promise<{ ticket: Ticket; justCreated: boolean }> => {
   let justCreated = false;
   const result = await sequelize.transaction(async () => {
@@ -175,26 +185,12 @@ const internalFindOrCreateTicketService = async (
   return result;
 };
 
-type FindOrCreateTicketOptions = {
-  groupContact?: Contact;
-  doNotReopen?: boolean;
-  queue?: Queue;
-  history?: boolean;
-  timestamp?: number;
-};
-
 const FindOrCreateTicketService = async (
   contact: Contact,
   whatsappId: number,
   unreadMessages: number,
   companyId: number,
-  {
-    groupContact,
-    doNotReopen,
-    queue,
-    history,
-    timestamp
-  }: FindOrCreateTicketOptions = {}
+  options: FindOrCreateTicketOptions = {}
 ): Promise<{ ticket: Ticket; justCreated: boolean }> => {
   const release = await createTicketMutex.acquire();
 
@@ -204,11 +200,7 @@ const FindOrCreateTicketService = async (
       whatsappId,
       unreadMessages,
       companyId,
-      groupContact,
-      doNotReopen,
-      queue,
-      history,
-      timestamp
+      options
     );
   } finally {
     release();

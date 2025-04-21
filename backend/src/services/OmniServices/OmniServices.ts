@@ -41,9 +41,13 @@ import { getIO } from "../../libs/socket";
 import saveMediaToFile from "../../helpers/saveMediaFile";
 import { DebugException } from "../../helpers/DebugException";
 import AppError from "../../errors/AppError";
+import { ProcessedMedia } from "../../helpers/mediaConversion";
+import { FindOrCreateTicketOptions } from "../TicketServices/FindOrCreateTicketService";
+import Queue from "../../models/Queue";
+import { chatbotHandler } from "./ChatbotServices";
 
 export type OmniMessage = {
-  type: "text" | "image" | "video" | "audio" | "document";
+  type: "text" | "image" | "video" | "audio" | "document" | "reaction";
   body?: string;
   fileName?: string;
   mediaUrl?: string;
@@ -61,11 +65,17 @@ export interface OmniDriver {
   findOrCreateContact(connection: Whatsapp, data: any): Promise<Contact>;
   findOrCreateTicket(
     contact: Contact,
-    connection: Whatsapp
+    connection: Whatsapp,
+    options: FindOrCreateTicketOptions
   ): Promise<{ ticket: Ticket; justCreated: boolean }>;
   createMessages(ticket: Ticket, data: any): Promise<Message[]>;
+  getMediaProcessor(
+    type: string,
+    channel: string
+  ): (media: Express.Multer.File) => Promise<ProcessedMedia>;
   sendMessage(ticket: Ticket, message: OmniMessage): Promise<Message[]>;
   processStatus(data: any): Promise<Message>;
+  allowChatbot(ticket: Ticket): Promise<boolean>;
 }
 
 const firstBodyMutex = new Mutex();
@@ -93,6 +103,24 @@ export class OmniServices {
     const name = driver.getName();
     this.drivers[name] = driver;
     logger.info(`OmniDriver ${name} registered`);
+  }
+
+  public getOmniDriver(input: Ticket | Whatsapp | string): OmniDriver {
+    logger.debug("OmniServices:getOmniDriver");
+    const channel =
+      // eslint-disable-next-line no-nested-ternary
+      typeof input === "string"
+        ? input
+        : input instanceof Ticket
+        ? input.whatsapp?.channel || input.get("whatsapp").channel
+        : input.channel;
+
+    const driver = this.drivers[channel];
+    if (!driver) {
+      return null;
+    }
+
+    return driver;
   }
 
   public async startService(connection: Whatsapp): Promise<void> {
@@ -128,77 +156,62 @@ export class OmniServices {
     );
   }
 
-  private static async automationHandler(
-    messages: Message[],
-    driver: OmniDriver
-  ) {
-    logger.debug("OmniServices:automationHandler");
-    messages.forEach(message => {
-      // do nothing
-    });
-  }
-
   public async messageHandler(channel: string, data: any) {
     logger.debug({ data }, "OmniServices:messageHandler");
     const driver = this.drivers[channel];
     if (!driver) {
-      return Promise.reject(new Error(`OmniDriver ${channel} not found`));
+      Promise.reject(new Error(`OmniDriver ${channel} not found`));
+      return;
     }
 
-    return driver
-      .getConnection(data)
-      .then(connection => {
-        if (!connection) {
-          throw new Error("Connection not found");
-        }
-        driver
-          .findOrCreateContact(connection, data)
-          .then(contact => {
-            if (!contact) {
-              throw new Error("Contact not found or created");
-            }
-            driver
-              .findOrCreateTicket(contact, connection)
-              .then(({ ticket, justCreated }) => {
-                if (!ticket) {
-                  throw new Error("Ticket not found or not created");
-                }
-                driver
-                  .createMessages(ticket, data)
-                  .then(messages => {
-                    OmniServices.automationHandler(messages, driver);
-                  })
-                  .catch(error => {
-                    if (error instanceof DebugException) {
-                      logger.debug(error.message);
-                      return;
-                    }
-                    throw error;
-                  });
-              })
-              .catch(error => {
-                if (error instanceof DebugException) {
-                  logger.debug(error.message);
-                  return;
-                }
-                throw error;
-              });
-          })
-          .catch(error => {
-            if (error instanceof DebugException) {
-              logger.debug(error.message);
-              return;
-            }
-            throw error;
-          });
-      })
-      .catch(error => {
-        if (error instanceof DebugException) {
-          logger.debug(error.message);
-          return;
-        }
+    try {
+      const connection = await driver.getConnection(data);
+      if (!connection) {
+        throw new Error("Connection not found");
+      }
+
+      const contact = await driver.findOrCreateContact(connection, data);
+      if (!contact) {
+        throw new Error("Contact not found or created");
+      }
+
+      let defaultQueue: Queue;
+      if (connection.queues && connection.queues.length === 1) {
+        // eslint-disable-next-line prefer-destructuring
+        defaultQueue = connection.queues[0];
+      }
+
+      const { ticket, justCreated } = await driver.findOrCreateTicket(
+        contact,
+        connection,
+        { queue: defaultQueue }
+      );
+      if (!ticket) {
+        throw new Error("Ticket not found or not created");
+      }
+
+      const messages = await driver.createMessages(ticket, data);
+
+      if (!(await driver.allowChatbot(ticket))) {
+        return;
+      }
+
+      if (justCreated) {
+        // TODO: checkSchedule(ticket);
+      }
+
+      if (ticket.status === "pending" && (ticket.chatbot || justCreated)) {
+        chatbotHandler(driver, ticket, messages[0]);
+      }
+    } catch (error) {
+      if (error instanceof DebugException) {
+        logger.debug(error.message);
+      } else {
         throw error;
-      });
+      }
+    }
+
+    Promise.resolve();
   }
 
   public async sendMessageFromRequest(
@@ -218,13 +231,15 @@ export class OmniServices {
 
     let messageBody = req.body.body
       ? formatBody(req.body.body || "", ticket, user)
-      : null;
+      : req.body.emoji || null;
 
-    const quotedMsg = req.body.quotedMsg
+    const quotedMsgId = req.body.quotedMsg?.id || req.params.messageId;
+
+    const quotedMsg = quotedMsgId
       ? await Message.findOne({
           where: {
-            id: req.body.quotedMsg.id,
-            ticketId: req.body.quotedMsg.ticketId
+            id: quotedMsgId,
+            ticketId: ticket.id
           }
         })
       : undefined;
@@ -232,7 +247,7 @@ export class OmniServices {
     const medias = req.files as Express.Multer.File[];
     if (medias) {
       await Promise.all(
-        medias.map(async media => {
+        medias.map(async originalMedia => {
           const body = await firstBodyMutex.runExclusive(async () => {
             if (messageBody) {
               const tmpBody = messageBody;
@@ -242,21 +257,29 @@ export class OmniServices {
             return null;
           });
 
+          let type =
+            (originalMedia.mimetype.split("/")[0] as
+              | "image"
+              | "video"
+              | "audio"
+              | "document") || "document";
+
+          const media = await driver.getMediaProcessor(
+            type,
+            ticket.contact.channel
+          )(originalMedia);
+
+          fs.unlink(originalMedia.path, err => {
+            if (err) {
+              logger.error(`Error deleting file: ${err}`);
+            }
+          });
+
           const mediaUrl = await saveMediaToFile(
-            {
-              data: fs.createReadStream(media.path),
-              mimetype: media.mimetype,
-              filename: media.originalname
-            },
+            media,
             ticket.companyId,
             ticket.id
           );
-
-          let type = media.mimetype.split("/")[0] as
-            | "image"
-            | "video"
-            | "audio"
-            | "document";
 
           if (!["image", "video", "audio", "document"].includes(type)) {
             type = "document";
@@ -266,7 +289,7 @@ export class OmniServices {
             type,
             mediaUrl,
             mimetype: media.mimetype,
-            fileName: media.originalname,
+            fileName: media.filename,
             body,
             quotedMsg
           };
@@ -278,7 +301,7 @@ export class OmniServices {
 
     if (messageBody) {
       const messageData: OmniMessage = {
-        type: "text",
+        type: req.body.emoji ? "reaction" : "text",
         body: messageBody,
         quotedMsg
       };

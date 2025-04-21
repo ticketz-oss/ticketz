@@ -32,6 +32,7 @@ import {
   MessageSubscription,
   TextContent,
   ReplyContent,
+  ReactionContent,
   FileContent
 } from "notificamehubsdk";
 import { Op } from "sequelize";
@@ -43,7 +44,7 @@ import Ticket from "../../models/Ticket";
 import Whatsapp from "../../models/Whatsapp";
 import { logger } from "../../utils/logger";
 import { IntegrationOptions } from "../IntegrationServices/IntegrationServices";
-import { OmniDriver, OmniMessage } from "./OmniServices";
+import { OmniDriver, OmniMessage } from "../OmniServices/OmniServices";
 import FindOrCreateTicketService from "../TicketServices/FindOrCreateTicketService";
 import CreateMessageService from "../MessageServices/CreateMessageService";
 import { NgrokInstance } from "../../helpers/NgrokInstance";
@@ -54,9 +55,14 @@ import NotificamehubIdMapping from "../../models/NotificamehubIdMapping";
 import { DebugException } from "../../helpers/DebugException";
 import { makeRandomId } from "../../helpers/MakeRandomId";
 import { getMimeByExtension } from "../../helpers/getMimeByExtension";
+import {
+  convertAudioToAac,
+  convertAudioToOggOpus,
+  ProcessedMedia
+} from "../../helpers/mediaConversion";
+import Queue from "../../models/Queue";
 
 const contactMutex = new Mutex();
-const ticketMutex = new Mutex();
 const messageMutex = new Mutex();
 
 export type NotificamehubVisitor = {
@@ -76,12 +82,28 @@ export type NotificamehubContentMedia = {
   link: string;
 };
 
+export type NotificamehubMessageReference = {
+  providerMessageId: string;
+};
+
+export type NotificamehubReaction = {
+  reaction?: string;
+  emoji?: string;
+  reaction_to?: NotificamehubMessageReference;
+};
+
+export type NotificamehubMessageContext = {
+  from: string;
+  id: string;
+};
+
 export type NotificamehubContent = {
   type:
     | "text"
     | "photo"
     | "image"
     | "video"
+    | "audio"
     | "voice"
     | "document"
     | "comment"
@@ -94,9 +116,11 @@ export type NotificamehubContent = {
   fileName?: string;
   caption?: string;
   item?: string;
+  reaction?: NotificamehubReaction;
 };
 
 export type NotificamehubMessage = {
+  type: string;
   id: string;
   from: string;
   to: string;
@@ -107,6 +131,7 @@ export type NotificamehubMessage = {
   isGroup: boolean;
   contents: NotificamehubContent[];
   timestamp: string;
+  context?: NotificamehubMessageContext;
 };
 
 export type NotificamehubPayload = {
@@ -114,6 +139,7 @@ export type NotificamehubPayload = {
   id: string;
   timestamp: string;
   subscriptionId: string;
+  providerMessageId: string;
   channel: string;
   direction: "IN" | "OUT";
   message: NotificamehubMessage;
@@ -137,17 +163,17 @@ export type NotificamehubStatusMessage = {
 
 const statusAck = {
   REJECTED: -1,
-  PENDING: 0,
-  SENT: 1,
-  DELIVERED: 2,
-  READ: 3
+  PENDING: 1,
+  SENT: 2,
+  DELIVERED: 3,
+  READ: 4
 };
 
 const defaultTypeMapping = {
   image: "image",
   audio: "audio",
   video: "video",
-  document: "file"
+  default: "file"
 };
 
 const typeMappings = {
@@ -155,13 +181,26 @@ const typeMappings = {
     image: "photo",
     audio: "audio",
     video: "video",
-    document: "file"
+    default: "file"
   },
   facebook: defaultTypeMapping,
   instagram: defaultTypeMapping,
-  whatsapp: defaultTypeMapping,
+  whatsapp: {
+    image: "image",
+    audio: "audio",
+    video: "video",
+    default: "document"
+  },
   webchat: defaultTypeMapping
 };
+
+const audioMediaProcessors = {
+  instagram: convertAudioToAac,
+  whatsapp: convertAudioToAac,
+  default: convertAudioToOggOpus
+};
+
+const chatbotChannels = ["whatsapp", "instagram", "telegram", "webchat"];
 
 export type NotificamehubSession = {
   client: Client;
@@ -346,10 +385,29 @@ export class NotificamehubDriver implements OmniDriver {
     const whatsapp = await Whatsapp.findOne({
       where: {
         qrcode: message.to
-      }
+      },
+      include: ["queues"]
     });
 
     return whatsapp;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  async allowChatbot(ticket: Ticket): Promise<boolean> {
+    logger.debug("notificamehub:allowChatbot");
+
+    const channel = ticket.contact?.channel;
+
+    if (!chatbotChannels.includes(channel)) {
+      return false;
+    }
+
+    if (channel === "instagram") {
+      // TODO: detect if it is a comment
+      return false;
+    }
+
+    return true;
   }
 
   async startService(connection: Whatsapp): Promise<void> {
@@ -381,12 +439,6 @@ export class NotificamehubDriver implements OmniDriver {
       `${message.visitor.firstName} ${message.visitor.lastName}`.trim();
     let name = fullName || message.visitor.name || String(message.from);
     let email: string;
-
-    if (message.contents[0]?.type === "reaction") {
-      throw new DebugException(
-        "notificamehub:findOrCreateContact: Ignoring reaction message"
-      );
-    }
 
     if (
       !forcePoster &&
@@ -430,22 +482,27 @@ export class NotificamehubDriver implements OmniDriver {
   // eslint-disable-next-line class-methods-use-this
   async findOrCreateTicket(
     contact: Contact,
-    connection: Whatsapp
+    connection: Whatsapp,
+    options: {
+      queue?: Queue;
+    } = {}
   ): Promise<{ ticket: Ticket; justCreated: boolean }> {
     logger.debug("notificamehub:findOrCreateTicket");
 
-    return ticketMutex.runExclusive(async () => {
-      return FindOrCreateTicketService(
-        contact,
-        connection.id,
-        1,
-        connection.companyId
-      );
-    });
+    return FindOrCreateTicketService(
+      contact,
+      connection.id,
+      1,
+      connection.companyId,
+      options
+    );
   }
 
   // eslint-disable-next-line class-methods-use-this
-  async createMessages(ticket: Ticket, data: any): Promise<Message[]> {
+  async createMessages(
+    ticket: Ticket,
+    data: NotificamehubPayload
+  ): Promise<Message[]> {
     logger.debug("notificamehub:createMessage");
 
     let posterContactId: number;
@@ -568,21 +625,56 @@ export class NotificamehubDriver implements OmniDriver {
         }
       }
 
+      const providerQuotedMsgId =
+        content.reaction?.reaction_to?.providerMessageId ||
+        message.context?.id ||
+        undefined;
+
+      const quotedMsg = await NotificamehubIdMapping.findOne({
+        where: {
+          id: `${message.to}:${providerQuotedMsgId}`
+        }
+      });
+
+      const quotedMsgId = quotedMsg?.messageId || undefined;
+
+      const mediaType =
+        content.type !== "text"
+          ? content.type.replace(/^reaction$/, "reactionMessage")
+          : undefined;
+
       return CreateMessageService({
         messageData: {
           id: message.id,
+          quotedMsgId,
           contactId: posterContactId || ticket.contactId,
           ticketId: ticket.id,
-          body: content.text || content.caption || "",
+          body:
+            content.text || content.caption || content.reaction?.emoji || "",
           channel: ticket.contact.channel,
-          // mediaType: file
-          //   ? finalContent.fileMimeType.split("/")[0] || "document"
-          //  : "",
+          mediaType,
           mediaUrl,
-          // thumbnailUrl,
+          thumbnailUrl,
           dataJson: JSON.stringify(finalContent)
         },
         companyId: ticket.companyId
+      }).then(newMessage => {
+        NotificamehubIdMapping.create({
+          id: `${message.to}:${newMessage.id}`,
+          messageId: data.providerMessageId,
+          ticketId: ticket.id
+        }).catch(error => {
+          logger.error(
+            {
+              error: error.message,
+              messageId: message.id,
+              ticketId: ticket.id,
+              connectionId: ticket.whatsappId
+            },
+            "notificamehub:createMessage: Error creating NotificamehubIdMapping"
+          );
+        });
+        return newMessage;
       });
     });
 
@@ -594,7 +686,7 @@ export class NotificamehubDriver implements OmniDriver {
 
     const connection = await Whatsapp.findByPk(ticket.whatsappId);
 
-    let content: TextContent | ReplyContent;
+    let content: TextContent | ReplyContent | ReactionContent;
     const promises = [];
 
     let { number } = ticket.contact;
@@ -617,14 +709,29 @@ export class NotificamehubDriver implements OmniDriver {
       content = new ReplyContent(number, message.body);
     }
 
-    if (!content && message.type === "text") {
-      content = new TextContent(message.body);
+    const quotedMappingMsg =
+      message.quotedMsg?.id &&
+      (await NotificamehubIdMapping.findOne({
+        where: {
+          id: `${connection.qrcode}:${message.quotedMsg.id}`
+        }
+      }));
+
+    if (!content) {
+      if (message.type === "text") {
+        content = new TextContent(message.body);
+      } else if (message.type === "reaction" && quotedMappingMsg) {
+        content = new ReactionContent({
+          message_id: quotedMappingMsg.messageId,
+          emoji: message.body
+        });
+      }
     }
 
     const { client } = this.sessions[connection.id];
     const channel = client.setChannel(ticket.contact.channel);
 
-    if (content)
+    if (content) {
       promises.push(
         messageMutex.runExclusive(async () => {
           const result = await channel.sendMessage(
@@ -640,6 +747,8 @@ export class NotificamehubDriver implements OmniDriver {
               contactId: ticket.contactId,
               ticketId: ticket.id,
               body: message.body,
+              mediaType:
+                message.type === "reaction" ? "reactionMessage" : undefined,
               quotedMsgId: message.quotedMsg?.id || undefined,
               fromMe: true,
               channel: ticket.contact.channel,
@@ -650,12 +759,15 @@ export class NotificamehubDriver implements OmniDriver {
           return sentMessage;
         })
       );
+    }
 
     if (["image", "audio", "video", "document"].includes(message.type)) {
       const fileContent = new FileContent(
         message.mediaUrl,
-        typeMappings[ticket.contact.channel][message.type] || "file",
-        message.body || "",
+        typeMappings[ticket.contact.channel][message.type] ||
+          typeMappings[ticket.contact.channel].default ||
+          "file",
+        message.body || message.type,
         message.fileName
       );
       promises.push(
@@ -682,6 +794,7 @@ export class NotificamehubDriver implements OmniDriver {
             },
             companyId: ticket.companyId
           });
+
           return sentMessage;
         })
       );
@@ -782,5 +895,20 @@ export class NotificamehubDriver implements OmniDriver {
         }
       }
     );
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  getMediaProcessor(
+    type: string,
+    channel: string
+  ): (media: Express.Multer.File) => Promise<ProcessedMedia> {
+    const processor =
+      audioMediaProcessors[channel] || audioMediaProcessors.default;
+
+    if (type === "audio") {
+      return processor;
+    }
+
+    return null;
   }
 }

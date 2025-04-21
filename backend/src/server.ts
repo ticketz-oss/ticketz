@@ -17,7 +17,7 @@ import { WebhookIntegration } from "./services/IntegrationServices/WebhookIntegr
 import { TypebotIntegration } from "./services/IntegrationServices/TypebotIntegration";
 import { NgrokInstance } from "./helpers/NgrokInstance";
 import { OmniServices } from "./services/OmniServices/OmniServices";
-import { NotificamehubDriver } from "./services/OmniServices/NotificamehubDriver";
+import { NotificamehubDriver } from "./services/OmniDrivers/NotificamehubDriver";
 import Message from "./models/Message";
 
 import { ticketzPro } from "./ticketzPro/ticketzPro";
