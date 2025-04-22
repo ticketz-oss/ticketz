@@ -17,6 +17,11 @@ export async function AudioTranscriptionService(message: Message) {
       "openAiKey",
       null
     );
+    const provider = await GetCompanySetting(
+      message.companyId,
+      "aiProvider",
+      "openai"
+    );
 
     if (!apiKey) {
       return;
@@ -26,7 +31,7 @@ export async function AudioTranscriptionService(message: Message) {
       message.mediaUrl.startsWith("http")
         ? message.mediaUrl
         : `${getPublicPath()}/${message.mediaUrl}`,
-      apiKey,
+      { apiKey, provider },
       message.mediaUrl.split("/").pop()
     );
 
