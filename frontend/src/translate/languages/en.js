@@ -869,6 +869,9 @@ const messages = {
         PaymentGateways: {
           title: "Pasarelas de pago",
         },
+        AIProvider: {
+          title: "AI Provider",
+        },
         AudioTranscriptions: {
           title: "Audio Transcriptions",
         },

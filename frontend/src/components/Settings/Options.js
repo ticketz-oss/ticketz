@@ -111,6 +111,7 @@ export default function Options(props) {
   const [groupsTab, setGroupsTab] = useState("disabled");
   const [apiToken, setApiToken] = useState("");
   const [openAiKey, setOpenAiKey] = useState("");
+  const [aiProvider, setAiProvider] = useState("openai");
   const [audioTranscriptions, setAudioTranscriptions] = useState("disabled");
   const [uploadLimit, setUploadLimit] = useState("15");
   const [downloadLimit, setDownloadLimit] = useState("15");
@@ -198,6 +199,9 @@ export default function Options(props) {
       
       const openAiKey = settings.find((s) => s.key === "openAiKey");
       setOpenAiKey(openAiKey?.value || "");
+      
+      const aiProvider = settings.find((s) => s.key === "aiProvider");
+      setAiProvider(aiProvider?.value || "openai");
       
       const audioTranscriptions = settings.find((s) => s.key === "audioTranscriptions");
       setAudioTranscriptions(audioTranscriptions?.value || "disabled");
@@ -774,11 +778,29 @@ export default function Options(props) {
           <h2 className={classes.groupTitle}>{i18n.t("settings.group.externalServices")}</h2>
         </Grid>
         
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="ai-provider-label">
+              {i18n.t("settings.AIProvider.title")}
+            </InputLabel>
+            <Select
+              labelId="ai-provider-label"
+              value={aiProvider}
+              onChange={async (e) => {
+                handleSetting("aiProvider", e.target.value, setAiProvider);
+              }}
+            >
+              <MenuItem value="openai">OpenAI</MenuItem>
+              <MenuItem value="grok">Grok</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+        
         <Grid xs={12} sm={12} md={8} item>
           <FormControl className={classes.selectContainer}>
             <TextField
               id="openai-key-field"
-              label="OpenAI Key"
+              label="AI Key"
               variant="standard"
               value={openAiKey}
               onChange={(e) => {
