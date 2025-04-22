@@ -606,13 +606,18 @@ export const verifyMediaMessage = async (
           "openAiKey",
           null
         );
+        const provider = await GetCompanySetting(
+          ticket.companyId,
+          "aiProvider",
+          "openai"
+        );
 
         if (apiKey) {
           const audioTranscription = await transcriber(
             result.mediaUrl.startsWith("http")
               ? result.mediaUrl
               : `${getPublicPath()}/${result.mediaUrl}`,
-            apiKey,
+            { apiKey, provider },
             filename
           );
           if (audioTranscription) {
