@@ -6,6 +6,16 @@ import AppError from "../errors/AppError";
 import { bufferToReadStreamTmp } from "./bufferToReadStreamTmp";
 import { convertAudioToOggOpus } from "./mediaConversion";
 
+export type TranscriberAIOptions = {
+  apiKey: string;
+  provider?: string;
+};
+
+type providerOptions = {
+  baseURL: string;
+  model: string;
+};
+
 const supportedFormats = [
   "flac",
   "m4a",
@@ -19,6 +29,17 @@ const supportedFormats = [
   "webm"
 ];
 
+const providerConfig: Record<string, providerOptions> = {
+  openai: {
+    baseURL: "https://api.openai.com/v1",
+    model: "whisper-1"
+  },
+  grok: {
+    baseURL: "https://api.groq.com/openai/v1",
+    model: "whisper-large-v3-turbo"
+  }
+};
+
 /**
  * Transcribes audio using OpenAI's Whisper model.
  *
@@ -29,7 +50,7 @@ const supportedFormats = [
  */
 export const transcriber = async (
   audioInput: ReadStream | Buffer | string,
-  apiKey: string,
+  { apiKey, provider }: TranscriberAIOptions,
   filename?: string
 ): Promise<string> => {
   if (!audioInput) {
@@ -40,7 +61,10 @@ export const transcriber = async (
     throw new AppError("No OpenAI API key provided");
   }
 
-  const openai = new OpenAI({ apiKey });
+  const openai = new OpenAI({
+    baseURL: providerConfig[provider]?.baseURL || undefined,
+    apiKey
+  });
 
   const extension = filename?.split(".").pop() || "ogg";
 
@@ -67,7 +91,7 @@ export const transcriber = async (
   try {
     const transcription = await openai.audio.transcriptions.create({
       file: audio,
-      model: "whisper-1"
+      model: providerConfig[provider]?.model || "whisper-1"
     });
 
     return transcription.text;
