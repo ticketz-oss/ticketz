@@ -694,11 +694,13 @@ async function handleNoQueueTimeout(
       action,
       companyId: company?.id
     },
-    "handleNoQueueTimeout"
+    "handleNoQueueTimeout: entering"
   );
   const groupsTab =
     (await GetCompanySetting(company.id, "groupsTab", "disabled")) ===
     "enabled";
+
+  logger.debug({ groupsTab }, "handleNoQueueTimeout -> groupsTab");
 
   const tickets = await Ticket.findAll({
     where: {
@@ -712,10 +714,19 @@ async function handleNoQueueTimeout(
     }
   });
 
+  logger.debug(
+    { expiredCount: tickets.length },
+    "handleNoQueueTimeout -> tickets"
+  );
+
   const status = action ? "pending" : "closed";
   const queueId = action || null;
 
   tickets.forEach(ticket => {
+    logger.trace(
+      { ticket: ticket.id, userId: ticket.userId, status, queueId },
+      "handleNoQueueTimeout -> UpdateTicketService"
+    );
     const userId = status === "pending" ? null : ticket.userId;
     UpdateTicketService({
       ticketId: ticket.id,
@@ -735,6 +746,15 @@ async function handleNoQueueTimeout(
         );
       });
   });
+
+  logger.trace(
+    {
+      timeout,
+      action,
+      companyId: company?.id
+    },
+    "handleNoQueueTimeout: exiting"
+  );
 }
 
 async function handleOpenTicketTimeout(
@@ -798,7 +818,19 @@ async function handleTicketTimeouts() {
       const noQueueTimeoutAction = Number(
         await GetCompanySetting(company.id, "noQueueTimeoutAction", "0")
       );
-      handleNoQueueTimeout(company, noQueueTimeout, noQueueTimeoutAction || 0);
+      handleNoQueueTimeout(company, noQueueTimeout, noQueueTimeoutAction || 0)
+        .then(() => {
+          logger.trace(
+            { companyId: company?.id },
+            "handleTicketTimeouts -> returned from handleNoQueueTimeout"
+          );
+        })
+        .catch(error => {
+          logger.error(
+            { error, message: error?.message },
+            "handleTicketTimeouts -> error on handleNoQueueTimeout"
+          );
+        });
     }
     const openTicketTimeout = Number(
       await GetCompanySetting(company.id, "openTicketTimeout", "0")
