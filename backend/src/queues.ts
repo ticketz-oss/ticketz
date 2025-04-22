@@ -1,7 +1,7 @@
 import * as Sentry from "@sentry/node";
 import Queue from "bull";
 import moment from "moment";
-import { Op, QueryTypes } from "sequelize";
+import { Op, QueryTypes, WhereOptions } from "sequelize";
 import { isEmpty, isNil, isArray } from "lodash";
 import path from "path";
 import { CronJob } from "cron";
@@ -700,19 +700,20 @@ async function handleNoQueueTimeout(
     (await GetCompanySetting(company.id, "groupsTab", "disabled")) ===
     "enabled";
 
-  const isGroup = groupsTab ? false : undefined;
-
-  const tickets = await Ticket.findAll({
-    where: {
-      status: "pending",
-      companyId: company.id,
-      queueId: null,
-      isGroup,
-      updatedAt: {
-        [Op.lt]: subMinutes(new Date(), timeout)
-      }
+  const where: WhereOptions<Ticket> = {
+    status: "pending",
+    companyId: company.id,
+    queueId: null,
+    updatedAt: {
+      [Op.lt]: subMinutes(new Date(), timeout)
     }
-  });
+  };
+
+  if (groupsTab) {
+    where.isGroup = false;
+  }
+
+  const tickets = await Ticket.findAll({ where });
 
   logger.debug(
     { expiredCount: tickets.length },
