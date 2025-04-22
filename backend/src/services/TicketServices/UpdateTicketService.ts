@@ -92,7 +92,7 @@ const sendFormattedMessage = async (
 
 export function websocketUpdateTicket(ticket: Ticket, moreChannels?: string[]) {
   const io = getIO();
-  const ioStack = io
+  let ioStack = io
     .to(ticket.id.toString())
     .to(`user-${ticket?.userId}`)
     .to(`queue-${ticket.queueId}-notification`)
@@ -102,11 +102,11 @@ export function websocketUpdateTicket(ticket: Ticket, moreChannels?: string[]) {
 
   if (moreChannels) {
     moreChannels.forEach(channel => {
-      ioStack.to(channel);
+      ioStack = ioStack.to(channel);
     });
   }
 
-  io.emit(`company-${ticket.companyId}-ticket`, {
+  ioStack.emit(`company-${ticket.companyId}-ticket`, {
     action: "update",
     ticket
   });
