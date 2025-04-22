@@ -700,14 +700,14 @@ async function handleNoQueueTimeout(
     (await GetCompanySetting(company.id, "groupsTab", "disabled")) ===
     "enabled";
 
-  logger.debug({ groupsTab }, "handleNoQueueTimeout -> groupsTab");
+  const isGroup = groupsTab ? false : undefined;
 
   const tickets = await Ticket.findAll({
     where: {
       status: "pending",
       companyId: company.id,
       queueId: null,
-      isGroup: groupsTab ? false : undefined,
+      isGroup,
       updatedAt: {
         [Op.lt]: subMinutes(new Date(), timeout)
       }
