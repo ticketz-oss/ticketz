@@ -14,6 +14,7 @@ import AppError from "../../errors/AppError";
 import { GetCompanySetting } from "../../helpers/CheckSettings";
 import User from "../../models/User";
 import formatBody from "../../helpers/Mustache";
+import { logger } from "../../utils/logger";
 
 interface TicketData {
   status?: string;
@@ -333,6 +334,7 @@ const UpdateTicketService = async ({
 
     return { ticket, oldStatus, oldUserId };
   } catch (err) {
+    logger.error({ message: err?.message }, "UpdateTicketService");
     if (err instanceof AppError) {
       throw err;
     }
