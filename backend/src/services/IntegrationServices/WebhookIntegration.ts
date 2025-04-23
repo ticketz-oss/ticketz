@@ -39,8 +39,13 @@ import {
 } from "./IntegrationServices";
 import { logger } from "../../utils/logger";
 import IntegrationSession from "../../models/IntegrationSession";
+import { fileToBase64 } from "../../helpers/fileToBase64";
 
 const integrations = IntegrationServices.getInstance();
+
+export type WebhookIntegrationMessage = IntegrationMessage & {
+  mediaB64?: string;
+};
 
 export class WebhookIntegration implements IntegrationDriver {
   private name = "webhook";
@@ -94,6 +99,15 @@ export class WebhookIntegration implements IntegrationDriver {
         },
         null,
         {
+          name: "webhookFileB64",
+          title: "Use base64 for file",
+          description: "Use base64 for file",
+          type: "checkbox",
+          lgWidth: 4,
+          required: false
+        },
+        null,
+        {
           name: "webhookExtraParams",
           title: "Extra Parameters (JSON)",
           description: "Extra parameters formatted in JSON",
@@ -108,13 +122,18 @@ export class WebhookIntegration implements IntegrationDriver {
   // eslint-disable-next-line class-methods-use-this
   async processMessage(
     integrationSession: IntegrationSession,
-    message: IntegrationMessage,
+    message: WebhookIntegrationMessage,
     metadata: IntegrationMessageMetadata,
     replyHandler: ReplyHandler
   ) {
     const { ticket, token } = integrationSession;
-    const { webhookUrl, webhookMethod, webhookToken, webhookExtraParams } =
-      integrationSession.integration.configuration;
+    const {
+      webhookUrl,
+      webhookMethod,
+      webhookToken,
+      webhookFileB64,
+      webhookExtraParams
+    } = integrationSession.integration.configuration;
 
     try {
       if (webhookExtraParams) {
@@ -137,6 +156,9 @@ export class WebhookIntegration implements IntegrationDriver {
           params: message
         });
       } else if (webhookMethod === "POST") {
+        if (message.mediaUrl && webhookFileB64) {
+          message.mediaB64 = await fileToBase64(message.mediaUrl);
+        }
         response = await axios.post(
           webhookUrl,
           { ...message, token, metadata },
@@ -176,7 +198,7 @@ export class WebhookIntegration implements IntegrationDriver {
         );
       }
     } catch (error) {
-      logger.error({ error }, "Error calling webhook");
+      logger.error({ message: error?.message }, "Error calling webhook");
     }
   }
 
