@@ -17,7 +17,6 @@ import {
 } from "../WbotServices/wbotMessageListener";
 import AppError from "../../errors/AppError";
 import FindOrCreateTicketService from "./FindOrCreateTicketService";
-import { logger } from "../../utils/logger";
 import Whatsapp from "../../models/Whatsapp";
 import { GetCompanySetting } from "../../helpers/CheckSettings";
 import { CreateInternalMessageService } from "../MessageServices/CreateInternalMessageService";
