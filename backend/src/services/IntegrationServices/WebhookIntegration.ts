@@ -34,6 +34,7 @@ import {
   IntegrationMessage,
   IntegrationMessageMetadata,
   IntegrationOptions,
+  IntegrationPayload,
   IntegrationServices,
   ReplyHandler
 } from "./IntegrationServices";
@@ -41,7 +42,7 @@ import { logger } from "../../utils/logger";
 import IntegrationSession from "../../models/IntegrationSession";
 import { fileToBase64 } from "../../helpers/fileToBase64";
 
-const integrations = IntegrationServices.getInstance();
+const integrationServices = IntegrationServices.getInstance();
 
 export type WebhookIntegrationMessage = IntegrationMessage & {
   mediaB64?: string;
@@ -126,7 +127,7 @@ export class WebhookIntegration implements IntegrationDriver {
     metadata: IntegrationMessageMetadata,
     replyHandler: ReplyHandler
   ) {
-    const { ticket, token } = integrationSession;
+    const { token } = integrationSession;
     const {
       webhookUrl,
       webhookMethod,
@@ -143,8 +144,8 @@ export class WebhookIntegration implements IntegrationDriver {
       // do nothing
     }
 
+    let response;
     try {
-      let response;
       if (webhookMethod === "GET") {
         response = await axios.get(webhookUrl, {
           headers: webhookToken
@@ -169,36 +170,27 @@ export class WebhookIntegration implements IntegrationDriver {
           }
         );
       }
-
-      const responseData = response?.data;
-
-      if (Array.isArray(responseData)) {
-        // eslint-disable-next-line no-restricted-syntax
-        for await (const data of responseData) {
-          if (data?.type && (data?.content || data?.mediaUrl)) {
-            await replyHandler(ticket, data);
-          }
-          if (data.trigger) {
-            await integrations.processTrigger(integrationSession, data.trigger);
-          }
-        }
-        return;
-      }
-
-      if (
-        responseData?.type &&
-        (responseData?.content || responseData?.mediaUrl)
-      ) {
-        replyHandler(ticket, responseData);
-      }
-      if (responseData.trigger) {
-        await integrations.processTrigger(
-          integrationSession,
-          responseData.trigger
-        );
-      }
     } catch (error) {
       logger.error({ message: error?.message }, "Error calling webhook");
+    }
+
+    try {
+      const responseData: IntegrationPayload = response?.data;
+
+      await integrationServices.processPayload(
+        integrationSession,
+        responseData,
+        replyHandler
+      );
+    } catch (error) {
+      logger.error(
+        {
+          message: error?.message,
+          payload: response?.data,
+          stack: error?.stack
+        },
+        "Error processing webhook response"
+      );
     }
   }
 
