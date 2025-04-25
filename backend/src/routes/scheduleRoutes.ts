@@ -2,19 +2,41 @@ import express from "express";
 import isAuth from "../middleware/isAuth";
 
 import * as ScheduleController from "../controllers/ScheduleController";
+import apiTokenAuth from "../middleware/apiTokenAuth";
 
 const scheduleRoutes = express.Router();
 
-scheduleRoutes.get("/schedules", isAuth, ScheduleController.index);
+scheduleRoutes.get(
+  "/schedules",
+  apiTokenAuth,
+  isAuth,
+  ScheduleController.index
+);
 
-scheduleRoutes.post("/schedules", isAuth, ScheduleController.store);
+scheduleRoutes.post(
+  "/schedules",
+  apiTokenAuth,
+  isAuth,
+  ScheduleController.store
+);
 
-scheduleRoutes.put("/schedules/:scheduleId", isAuth, ScheduleController.update);
+scheduleRoutes.put(
+  "/schedules/:scheduleId",
+  apiTokenAuth,
+  isAuth,
+  ScheduleController.update
+);
 
-scheduleRoutes.get("/schedules/:scheduleId", isAuth, ScheduleController.show);
+scheduleRoutes.get(
+  "/schedules/:scheduleId",
+  apiTokenAuth,
+  isAuth,
+  ScheduleController.show
+);
 
 scheduleRoutes.delete(
   "/schedules/:scheduleId",
+  apiTokenAuth,
   isAuth,
   ScheduleController.remove
 );

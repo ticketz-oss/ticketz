@@ -33,8 +33,9 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
-  const { body, sendAt, contactId, userId, saveMessage } = req.body;
+  const { body, sendAt, contactId, saveMessage } = req.body;
   const { companyId } = req.user;
+  const userId = Number(req.user.id);
 
   const schedule = await CreateService({
     body,
