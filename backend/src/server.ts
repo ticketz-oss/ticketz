@@ -9,6 +9,7 @@ import {
   checkOpenInvoices,
   payGatewayInitialize
 } from "./services/PaymentGatewayServices/PaymentGatewayServices";
+import chatIntegrationService from "./services/ChatIntegrationService/ChatIntegrationService";
 
 // Environment Variable Validation
 if (!process.env.PORT) {
@@ -29,9 +30,15 @@ async function startServer() {
           `Error starting WhatsApp session for company ID: ${company.id} - ${error.message}`
         );
       }
-    });
+    });    await Promise.all(sessionPromises);
 
-    await Promise.all(sessionPromises);
+    // Inicializar serviço de integração de chat
+    try {
+      await chatIntegrationService.init();
+      logger.info("Chat Integration Service initialized successfully");
+    } catch (error) {
+      logger.error(`Error initializing Chat Integration Service: ${error.message}`);
+    }
 
     startQueueProcess();
     logger.info(`Server started on port: ${process.env.PORT}`);

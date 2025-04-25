@@ -4,6 +4,7 @@ import Message from "../../models/Message";
 import OldMessage from "../../models/OldMessage";
 import Ticket from "../../models/Ticket";
 import Whatsapp from "../../models/Whatsapp";
+import chatIntegrationService from "../ChatIntegrationService/ChatIntegrationService";
 import { logger } from "../../utils/logger";
 
 interface MessageData {
@@ -97,8 +98,7 @@ const CreateMessageService = async ({
     .emit(`company-${companyId}-appMessage`, {
       action: "create",
       message,
-      ticket: message.ticket,
-      contact: message.ticket.contact
+      ticket: message.ticket,    contact: message.ticket.contact
     });
 
   io.to(`company-${companyId}-mainchannel`).emit(
@@ -117,6 +117,24 @@ const CreateMessageService = async ({
     },
     "sending appMessage event"
   );
+
+  // Forward message to chat integration (N8n, etc.) if it's not from the system and a queue exists
+  try {
+    if (!messageData.fromMe && message.ticket.queueId) {
+      await chatIntegrationService.processIncomingMessage({
+        ticketId: message.ticketId,
+        queueId: message.ticket.queueId,
+        contactId: message.ticket.contactId,
+        body: messageData.body,
+        timestamp: new Date(),
+        messageId: messageData.id
+      });
+      logger.info(`Message ${messageData.id} forwarded to integration service for ticket ${message.ticketId}`);
+    }
+  } catch (error) {
+    logger.error(`Error forwarding message to integration service: ${error.message}`);
+  }
+
   return message;
 };
 

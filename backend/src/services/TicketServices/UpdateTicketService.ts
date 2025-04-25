@@ -15,6 +15,7 @@ import { GetCompanySetting } from "../../helpers/CheckSettings";
 import User from "../../models/User";
 import formatBody from "../../helpers/Mustache";
 import { logger } from "../../utils/logger";
+import chatIntegrationService from "../../services/ChatIntegrationService/ChatIntegrationService";
 
 interface TicketData {
   status?: string;
@@ -230,9 +231,10 @@ const UpdateTicketService = async ({
 
     if (queueId !== undefined && queueId !== null) {
       ticketTraking.queuedAt = moment().toDate();
-    }
-
-    if (oldQueueId !== queueId && !isNil(oldQueueId) && !isNil(queueId)) {
+    }    if (oldQueueId !== queueId && !isNil(oldQueueId) && !isNil(queueId)) {
+      // Notificar serviço de integração sobre mudança de fila
+      await chatIntegrationService.handleQueueChange(ticketId, oldQueueId, queueId);
+      
       if (ticket.channel === "whatsapp") {
         const wbot = await GetTicketWbot(ticket);
         const { transferMessage } = await ShowWhatsAppService(

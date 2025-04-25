@@ -21,11 +21,12 @@ import Title from "../../components/Title";
 import { i18n } from "../../translate/i18n";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
-import { DeleteOutline, Edit } from "@material-ui/icons";
+import { DeleteOutline, Edit, Settings } from "@material-ui/icons";
 import QueueModal from "../../components/QueueModal";
 import { toast } from "react-toastify";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import { SocketContext } from "../../context/Socket/SocketContext";
+import { Link as RouterLink } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   mainPaper: {
@@ -209,59 +210,65 @@ const Queues = () => {
               </TableCell>
               <TableCell align="center">
                 {i18n.t("queues.table.actions")}
-              </TableCell>
-            </TableRow>
+              </TableCell>            </TableRow>
           </TableHead>
           <TableBody>
-            <>
-              {queues.map((queue) => (
-                <TableRow key={queue.id}>
-                  <TableCell align="center">{queue.name}</TableCell>
-                  <TableCell align="center">
-                    <div className={classes.customTableCell}>
-                      <span
-                        style={{
-                          backgroundColor: queue.color,
-                          width: 60,
-                          height: 20,
-                          alignSelf: "center",
-                        }}
-                      />
-                    </div>
-                  </TableCell>
-                  <TableCell align="center">
-                    <div className={classes.customTableCell}>
-                      <Typography
-                        style={{ width: 300, align: "center" }}
-                        noWrap
-                        variant="body2"
-                      >
-                        {queue.greetingMessage}
-                      </Typography>
-                    </div>
-                  </TableCell>
-                  <TableCell align="center">
-                    <IconButton
-                      size="small"
-                      onClick={() => handleEditQueue(queue)}
-                    >
-                      <Edit />
-                    </IconButton>
-
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        setSelectedQueue(queue);
-                        setConfirmModalOpen(true);
+            {queues.map((queue) => (
+              <TableRow key={queue.id}>
+                <TableCell align="center">{queue.name}</TableCell>
+                <TableCell align="center">
+                  <div className={classes.customTableCell}>
+                    <span
+                      style={{
+                        backgroundColor: queue.color,
+                        width: 60,
+                        height: 20,
+                        alignSelf: "center",
                       }}
+                    />
+                  </div>
+                </TableCell>
+                <TableCell align="center">
+                  <div className={classes.customTableCell}>
+                    <Typography
+                      style={{ width: 300, align: "center" }}
+                      noWrap
+                      variant="body2"
                     >
-                      <DeleteOutline />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {loading && <TableRowSkeleton columns={4} />}
-            </>
+                      {queue.greetingMessage}
+                    </Typography>
+                  </div>
+                </TableCell>
+                <TableCell align="center">
+                  <IconButton
+                    size="small"
+                    onClick={() => handleEditQueue(queue)}
+                  >
+                    <Edit />
+                  </IconButton>
+
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      setSelectedQueue(queue);
+                      setConfirmModalOpen(true);
+                    }}
+                  >
+                    <DeleteOutline />
+                  </IconButton>
+
+                  <IconButton
+                    size="small"
+                    component={RouterLink}
+                    to={`/queue-integrations/${queue.id}`}
+                    title={i18n.t("queueIntegration.title")}
+                  >
+                    <Settings />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))}
+            {loading && <TableRowSkeleton columns={4} />}
           </TableBody>
         </Table>
       </Paper>

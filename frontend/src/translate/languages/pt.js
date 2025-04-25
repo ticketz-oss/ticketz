@@ -294,9 +294,7 @@ const messages = {
           cancel: "Cancelar",
         },
         success: "Tag salvo com sucesso.",
-        successKanban: "Lane salva com sucesso.",
-
-      },
+        successKanban: "Lane salva com sucesso.",      },
       chat: {
         noTicketMessage: "Selecione um ticket para começar a conversar.",
       },
@@ -304,6 +302,46 @@ const messages = {
         titles: {
           titleUploadMsgDragDrop: "ARRASTE E SOLTE ARQUIVOS NO CAMPO ABAIXO",
           titleFileList: "Lista de arquivo(s)"
+        },
+      },
+      queueIntegration: {
+        title: "Integrações da Fila",
+        toasts: {
+          created: "Integração criada com sucesso!",
+          updated: "Integração atualizada com sucesso!",
+          deleted: "Integração removida com sucesso!",
+        },
+        buttons: {
+          add: "Adicionar Integração",
+          cancel: "Cancelar",
+          save: "Salvar",
+          back: "Voltar para Filas",
+        },
+        table: {
+          name: "Nome",
+          provider: "Provedor",
+          status: "Status",
+          active: "Ativa",
+          inactive: "Inativa",
+          actions: "Ações",
+          noIntegrations: "Nenhuma integração encontrada para esta fila",
+        },
+        form: {
+          name: "Nome da Integração",
+          provider: "Provedor",
+          flowId: "ID do Fluxo / Workflow",
+          webhookUrl: "URL do Webhook",
+          active: "Ativa",
+          settings: "Configurações do Provedor (JSON)",
+          custom: "Personalizado",
+        },
+        modal: {
+          add: "Adicionar Integração",
+          edit: "Editar Integração",
+        },
+        confirmationModal: {
+          deleteTitle: "Excluir Integração",
+          deleteMessage: "Tem certeza que deseja excluir esta integração? Esta ação não pode ser desfeita.",
         },
       },
       ticketsManager: {

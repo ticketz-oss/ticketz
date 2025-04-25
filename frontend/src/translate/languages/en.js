@@ -291,12 +291,51 @@ const messages = {
         successKanban: "Lane saved successfully.",
       },
       chat: {
-        noTicketMessage: "Select a ticket to start the conversation.",
-      },
+        noTicketMessage: "Select a ticket to start the conversation.",      },
       uploads: {
         titles: {
           titleUploadMsgDragDrop: "DRAG AND DROP FILES IN THE FIELD BELOW",
           titleFileList: "List of file(s)"
+        },
+      },
+      queueIntegration: {
+        title: "Queue Integrations",
+        toasts: {
+          created: "Integration successfully created!",
+          updated: "Integration successfully updated!",
+          deleted: "Integration successfully deleted!",
+        },
+        buttons: {
+          add: "Add Integration",
+          cancel: "Cancel",
+          save: "Save",
+          back: "Back to Queues",
+        },
+        table: {
+          name: "Name",
+          provider: "Provider",
+          status: "Status",
+          active: "Active",
+          inactive: "Inactive",
+          actions: "Actions",
+          noIntegrations: "No integrations found for this queue",
+        },
+        form: {
+          name: "Integration Name",
+          provider: "Provider",
+          flowId: "Flow ID / Workflow ID",
+          webhookUrl: "Webhook URL",
+          active: "Active",
+          settings: "Provider Settings (JSON)",
+          custom: "Custom",
+        },
+        modal: {
+          add: "Add Integration",
+          edit: "Edit Integration",
+        },
+        confirmationModal: {
+          deleteTitle: "Delete Integration",
+          deleteMessage: "Are you sure you want to delete this integration? This action cannot be undone.",
         },
       },
       ticketsManager: {

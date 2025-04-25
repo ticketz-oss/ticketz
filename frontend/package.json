@@ -41,6 +41,7 @@
     "react-helmet": "^6.1.0",
     "react-icons": "^4.4.0",
     "react-input-mask": "^2.0.4",
+    "react-json-editor-ajrm": "^2.5.14",
     "react-jwt": "^1.2.1",
     "react-modal-image": "^2.5.0",
     "react-number-format": "^4.6.4",

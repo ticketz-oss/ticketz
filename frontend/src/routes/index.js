@@ -32,6 +32,7 @@ import Annoucements from "../pages/Annoucements";
 import Chat from "../pages/Chat";
 import ToDoList from "../pages/ToDoList/";
 import Subscription from "../pages/Subscription/";
+import QueueIntegrations from "../pages/QueueIntegrations";
 
 const Routes = () => {
   const [showCampaigns, setShowCampaigns] = useState(false);
@@ -105,8 +106,13 @@ const Routes = () => {
                   path="/financeiro"
                   component={Financeiro}
                   isPrivate
+                />                <Route exact path="/queues" component={Queues} isPrivate />
+                <Route
+                  exact
+                  path="/queue-integrations/:queueId"
+                  component={QueueIntegrations}
+                  isPrivate
                 />
-                <Route exact path="/queues" component={Queues} isPrivate />
                 <Route
                   exact
                   path="/announcements"
