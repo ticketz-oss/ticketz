@@ -134,9 +134,11 @@ export const checkIntegration = async (
       ticketId: ticket.id
     },
     include: [
+      "integration",
       {
-        model: Integration,
-        as: "integration"
+        model: Ticket,
+        as: "ticket",
+        include: ["contact", "whatsapp"]
       }
     ],
     order: [["id", "DESC"]]

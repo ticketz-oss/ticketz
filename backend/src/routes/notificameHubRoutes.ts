@@ -9,7 +9,7 @@ notificameHubRoutes.post("/notificamehub/webhook/:channelId", (req, res) => {
 
   const omniServices = OmniServices.getInstance();
 
-  if (req.body?.message) {
+  if (req.body?.message?.from) {
     omniServices.messageHandler("notificamehub", req.body);
   }
 

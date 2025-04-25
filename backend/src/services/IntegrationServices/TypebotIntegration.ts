@@ -327,7 +327,11 @@ export class TypebotIntegration implements IntegrationDriver {
           }
 
           if (trigger) {
-            await integrations.processTrigger(integrationSession, trigger);
+            await integrations.processCommand(
+              integrationSession,
+              trigger,
+              replyHandler
+            );
             if (trigger.queueId) {
               autoStop = false;
             }

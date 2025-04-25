@@ -32,7 +32,7 @@ const supportedFormats = [
 const providerConfig: Record<string, providerOptions> = {
   openai: {
     baseURL: "https://api.openai.com/v1",
-    model: "whisper-1"
+    model: "gpt-4o-mini-transcribe"
   },
   grok: {
     baseURL: "https://api.groq.com/openai/v1",

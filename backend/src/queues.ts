@@ -34,6 +34,7 @@ import { handleMessage } from "./services/WbotServices/wbotMessageListener";
 import ShowService from "./services/CampaignService/ShowService";
 import Invoices from "./models/Invoices";
 import formatBody, { mustacheFormat } from "./helpers/Mustache";
+import Setting from "./models/Setting";
 
 const connection = process.env.REDIS_URI || "";
 const limiterMax = process.env.REDIS_OPT_LIMITER_MAX || 1;
@@ -696,6 +697,32 @@ async function handleNoQueueTimeout(
     },
     "handleNoQueueTimeout: entering"
   );
+
+  if (action) {
+    const queue = await QueueModel.findOne({
+      where: {
+        companyId: company.id,
+        id: action
+      }
+    });
+
+    if (!queue) {
+      const removed = await Setting.destroy({
+        where: {
+          companyId: company.id,
+          key: {
+            [Op.like]: "noQueueTimeout%"
+          }
+        }
+      });
+      logger.info(
+        { companyId: company.id, action, removed },
+        "handleNoQueueTimeout -> removed incorrect setting"
+      );
+      return;
+    }
+  }
+
   const groupsTab =
     (await GetCompanySetting(company.id, "groupsTab", "disabled")) ===
     "enabled";

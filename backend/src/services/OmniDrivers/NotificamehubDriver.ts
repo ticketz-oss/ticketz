@@ -403,8 +403,7 @@ export class NotificamehubDriver implements OmniDriver {
     }
 
     if (channel === "instagram") {
-      // TODO: detect if it is a comment
-      return false;
+      return !ticket.contact.number.startsWith("post:");
     }
 
     return true;
@@ -719,7 +718,7 @@ export class NotificamehubDriver implements OmniDriver {
 
     if (!content) {
       if (message.type === "text") {
-        content = new TextContent(message.body);
+        content = new TextContent(message.body.replace(/'/g, '"'));
       } else if (message.type === "reaction" && quotedMappingMsg) {
         content = new ReactionContent({
           message_id: quotedMappingMsg.messageId,
@@ -739,6 +738,14 @@ export class NotificamehubDriver implements OmniDriver {
             number,
             content
           );
+          if (!result) {
+            logger.error(
+              { channel: connection.qrcode, number, content },
+              "Failed to send message"
+            );
+            throw new Error("Failed to send message");
+          }
+
           logger.debug({ result }, "Message body sent");
 
           const sentMessage = await CreateMessageService({
@@ -777,6 +784,15 @@ export class NotificamehubDriver implements OmniDriver {
             ticket.contact.number,
             fileContent
           );
+
+          if (!result) {
+            logger.error(
+              { channel: connection.qrcode, number, content },
+              "Failed to send message"
+            );
+            throw new Error("Failed to send message");
+          }
+
           logger.debug({ result }, "Message media sent");
 
           const sentMessage = await CreateMessageService({

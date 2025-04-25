@@ -34,7 +34,10 @@ import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
 import Whatsapp from "../../models/Whatsapp";
 import { logger } from "../../utils/logger";
-import { IntegrationOptions } from "../IntegrationServices/IntegrationServices";
+import {
+  IntegrationMessage,
+  IntegrationOptions
+} from "../IntegrationServices/IntegrationServices";
 import formatBody from "../../helpers/Mustache";
 import User from "../../models/User";
 import { getIO } from "../../libs/socket";
@@ -45,6 +48,7 @@ import { ProcessedMedia } from "../../helpers/mediaConversion";
 import { FindOrCreateTicketOptions } from "../TicketServices/FindOrCreateTicketService";
 import Queue from "../../models/Queue";
 import { chatbotHandler } from "./ChatbotServices";
+import { multerPassthrough } from "../../helpers/multerPassthrough";
 
 export type OmniMessage = {
   type: "text" | "image" | "video" | "audio" | "document" | "reaction";
@@ -264,22 +268,23 @@ export class OmniServices {
               | "audio"
               | "document") || "document";
 
-          const media = await driver.getMediaProcessor(
-            type,
-            ticket.contact.channel
-          )(originalMedia);
+          const processor =
+            driver.getMediaProcessor(type, ticket.contact.channel) ||
+            multerPassthrough;
 
-          fs.unlink(originalMedia.path, err => {
-            if (err) {
-              logger.error(`Error deleting file: ${err}`);
-            }
-          });
+          const media = await processor(originalMedia);
 
           const mediaUrl = await saveMediaToFile(
             media,
             ticket.companyId,
             ticket.id
           );
+
+          fs.unlink(originalMedia.path, err => {
+            if (err) {
+              logger.error(`Error deleting file: ${err}`);
+            }
+          });
 
           if (!["image", "video", "audio", "document"].includes(type)) {
             type = "document";
@@ -320,5 +325,16 @@ export class OmniServices {
     }
 
     return res.send();
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  public convertIntegrationMessage(message: IntegrationMessage): OmniMessage {
+    const omniMessage: OmniMessage = {
+      type: message.type === "gif" ? "video" : message.type,
+      body: message.content,
+      mediaUrl: message.mediaUrl
+    };
+
+    return omniMessage;
   }
 }

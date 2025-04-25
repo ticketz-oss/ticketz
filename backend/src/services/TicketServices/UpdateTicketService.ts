@@ -17,7 +17,6 @@ import {
 } from "../WbotServices/wbotMessageListener";
 import AppError from "../../errors/AppError";
 import FindOrCreateTicketService from "./FindOrCreateTicketService";
-import { logger } from "../../utils/logger";
 import Whatsapp from "../../models/Whatsapp";
 import { GetCompanySetting } from "../../helpers/CheckSettings";
 import { CreateInternalMessageService } from "../MessageServices/CreateInternalMessageService";
@@ -26,6 +25,7 @@ import formatBody from "../../helpers/Mustache";
 import { IntegrationServices } from "../IntegrationServices/IntegrationServices";
 import { OmniServices } from "../OmniServices/OmniServices";
 import { chatbotHandler } from "../OmniServices/ChatbotServices";
+import { logger } from "../../utils/logger";
 
 const integrationServices = IntegrationServices.getInstance();
 const omniServices = OmniServices.getInstance();
@@ -519,6 +519,7 @@ const UpdateTicketService = async ({
 
     return { ticket, oldStatus, oldUserId };
   } catch (err) {
+    logger.error({ message: err?.message }, "UpdateTicketService");
     if (err instanceof AppError) {
       throw err;
     }

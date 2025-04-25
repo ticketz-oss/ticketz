@@ -1,5 +1,9 @@
 import { Request, Response } from "express";
 import { IntegrationServices } from "../services/IntegrationServices/IntegrationServices";
+import { logger } from "../utils/logger";
+import AppError from "../errors/AppError";
+
+const integrationServices = IntegrationServices.getInstance();
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const integrations = IntegrationServices.getInstance();
@@ -18,10 +22,20 @@ export const webhook = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const integrations = IntegrationServices.getInstance();
-  const { integrationSession, body } = req;
+  const { integrationSession, replyHandler, body } = req;
 
-  await integrations.webhook(integrationSession, body);
-
-  return res.json({ executed: true });
+  try {
+    await integrationServices.processPayload(
+      integrationSession,
+      body,
+      replyHandler
+    );
+    return res.json({ executed: true });
+  } catch (error) {
+    logger.error(
+      { message: error?.message, payload: body },
+      "Error processing webhook"
+    );
+    throw new AppError("ERR_WEBHOOK_PROCESSING", 500);
+  }
 };
