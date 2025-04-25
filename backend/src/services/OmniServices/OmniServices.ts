@@ -48,7 +48,7 @@ import { ProcessedMedia } from "../../helpers/mediaConversion";
 import { FindOrCreateTicketOptions } from "../TicketServices/FindOrCreateTicketService";
 import Queue from "../../models/Queue";
 import { chatbotHandler } from "./ChatbotServices";
-import { multerPassthrough } from "../../routes/mullterPassthrough";
+import { multerPassthrough } from "../../helpers/multerPassthrough";
 
 export type OmniMessage = {
   type: "text" | "image" | "video" | "audio" | "document" | "reaction";

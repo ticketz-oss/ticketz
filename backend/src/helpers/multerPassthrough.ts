@@ -1,5 +1,5 @@
 import fs from "fs";
-import { ProcessedMedia } from "../helpers/mediaConversion";
+import { ProcessedMedia } from "./mediaConversion";
 
 export async function multerPassthrough(
   media: Express.Multer.File
