@@ -26,13 +26,11 @@
    
  */
 
-import GetTicketWbot from "../../helpers/GetTicketWbot";
 import { makeRandomId } from "../../helpers/MakeRandomId";
 import Integration from "../../models/Integration";
 import IntegrationSession from "../../models/IntegrationSession";
 import Ticket from "../../models/Ticket";
 import { logger } from "../../utils/logger";
-import { wbotReplyHandler } from "../WbotServices/wbotMessageListener";
 import UpdateTicketService from "../TicketServices/UpdateTicketService";
 import Contact from "../../models/Contact";
 import { CreateInternalMessageService } from "../MessageServices/CreateInternalMessageService";
@@ -41,6 +39,7 @@ import {
   ticketTagRemove,
   ticketTagRemoveAll
 } from "../TicketTagServices/TicketTagServices";
+import { NgrokInstance } from "../../helpers/NgrokInstance";
 
 export type IntegrationOptions = {
   fields: {
@@ -62,11 +61,43 @@ export type IntegrationMessageTypes =
   | "gif"
   | "document";
 
+export type IntegrationActionTypes =
+  | "endSession"
+  | "updateTicket"
+  | "note"
+  | "addTag"
+  | "removeTag"
+  | "clearTags"
+  | "wait"
+  | "ping";
+
 export type IntegrationMessage = {
   type: IntegrationMessageTypes;
   content?: string;
   mediaUrl?: string;
 };
+
+export type IntegrationCommand = {
+  action?: IntegrationActionTypes;
+  message?: IntegrationMessage | IntegrationMessage[];
+  ticketData?: any;
+  tagId?: number;
+  // legacy format support
+  stopbot?: boolean;
+  closeTicket?: boolean;
+  queueId?: number;
+  userId?: number;
+  seconds?: number;
+};
+
+export type IntegrationMessageWithTrigger = IntegrationMessage & {
+  trigger: IntegrationCommand;
+};
+
+export type IntegrationPayload =
+  | IntegrationCommand
+  | IntegrationMessageWithTrigger
+  | IntegrationMessageWithTrigger[];
 
 export type IntegrationMessageMetadata = {
   backendUrl?: string;
@@ -104,19 +135,6 @@ export interface IntegrationDriver {
   endSession(integrationSession: IntegrationSession): Promise<void>;
 }
 
-export type IntegrationWebhookRequest = {
-  action?:
-    | "endSession"
-    | "updateTicket"
-    | "note"
-    | "addTag"
-    | "removeTag"
-    | "clearTags";
-  message?: IntegrationMessage;
-  ticketData?: any;
-  tagId?: number;
-};
-
 const reloadIntegrationSession = async (
   integrationSession: IntegrationSession
 ) => {
@@ -129,7 +147,7 @@ const reloadIntegrationSession = async (
       {
         model: Ticket,
         as: "ticket",
-        include: ["contact"]
+        include: ["contact", "whatsapp"]
       }
     ]
   });
@@ -235,7 +253,8 @@ export class IntegrationServices {
       );
     }
 
-    metadata.backendUrl = process.env.BACKEND_URL;
+    metadata.backendUrl =
+      NgrokInstance.getInstance().getUrl() || process.env.BACKEND_URL;
 
     return driver.continueSession(
       integrationSession,
@@ -283,24 +302,52 @@ export class IntegrationServices {
     );
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  public async webhook(
+  public async processCommand(
     integrationSession: IntegrationSession,
-    body: IntegrationWebhookRequest
+    command: IntegrationCommand,
+    replyHandler: ReplyHandler
   ) {
     await reloadIntegrationSession(integrationSession);
-    const { action, message, ticketData } = body;
+
+    // support for legacy commands
+    const { stopbot, closeTicket, queueId, userId } = command;
+
+    if (stopbot) {
+      await this.endSession(integrationSession);
+      return;
+    }
+
+    if (closeTicket) {
+      await updateTicket(integrationSession.ticket, {
+        status: "closed",
+        justClose: true
+      });
+      return;
+    }
+
+    if (queueId && userId) {
+      await updateTicket(integrationSession.ticket, {
+        queueId,
+        userId
+      });
+      return;
+    }
+
+    if (queueId) {
+      await updateTicket(integrationSession.ticket, {
+        queueId
+      });
+      return;
+    }
+
+    const { action, message, ticketData } = command;
 
     if (action === "endSession") {
       await this.endSession(integrationSession);
       return;
     }
 
-    if (action === "updateTicket" && ticketData) {
-      await updateTicket(integrationSession.ticket, ticketData);
-    }
-
-    if (action === "note" && message?.content) {
+    if (action === "note" && !Array.isArray(message) && message?.content) {
       await CreateInternalMessageService(
         integrationSession.ticket,
         message.content
@@ -309,7 +356,7 @@ export class IntegrationServices {
     }
 
     if (action === "addTag") {
-      const { tagId } = body;
+      const { tagId } = command;
       if (!tagId) {
         throw new Error("Tag ID is required");
       }
@@ -317,7 +364,7 @@ export class IntegrationServices {
     }
 
     if (action === "removeTag") {
-      const { tagId } = body;
+      const { tagId } = command;
       if (!tagId) {
         throw new Error("Tag ID is required");
       }
@@ -328,53 +375,94 @@ export class IntegrationServices {
       await ticketTagRemoveAll(integrationSession.ticket.id);
     }
 
-    // this needs modification when the system goes to be multi-channel
-    if (integrationSession.ticket.channel === "whatsapp" && message) {
-      const wbot = await GetTicketWbot(integrationSession.ticket);
-
-      // test if message is an array
+    if (message) {
       if (Array.isArray(message)) {
         // eslint-disable-next-line no-restricted-syntax
         for await (const msg of message) {
-          await wbotReplyHandler(wbot, integrationSession.ticket, msg);
+          await replyHandler(integrationSession.ticket, msg);
         }
       } else {
-        await wbotReplyHandler(wbot, integrationSession.ticket, message);
+        await replyHandler(integrationSession.ticket, message);
       }
+    }
+
+    if (action === "updateTicket" && ticketData) {
+      await updateTicket(integrationSession.ticket, ticketData);
+    }
+
+    if (action === "wait") {
+      const { seconds } = command;
+      if (!seconds) {
+        throw new Error("Seconds is required");
+      }
+      await new Promise(resolve => {
+        setTimeout(resolve, seconds * 1000);
+      });
+    }
+
+    if (action === "ping") {
+      await this.continueSession(
+        integrationSession,
+        {
+          type: "text",
+          content: "pong"
+        },
+        {
+          channel: integrationSession.ticket.channel,
+          from: integrationSession.ticket.contact,
+          ticketId: integrationSession.ticketId
+        },
+        replyHandler
+      );
     }
   }
 
-  public async processTrigger(
+  public async processMessageWithTrigger(
     integrationSession: IntegrationSession,
-    trigger: any
+    message: IntegrationMessageWithTrigger,
+    replyHandler: ReplyHandler
   ) {
-    if (trigger.action) {
-      await this.webhook(integrationSession, trigger);
-    } else if (trigger.stopbot) {
-      await this.endSession(integrationSession);
-    } else if (trigger.closeTicket) {
-      await this.webhook(integrationSession, {
-        action: "updateTicket",
-        ticketData: {
-          status: "closed",
-          justClose: true
-        }
-      });
-    } else if (trigger.userId && trigger.queueId) {
-      await this.webhook(integrationSession, {
-        action: "updateTicket",
-        ticketData: {
-          queueId: trigger.queueId,
-          userId: trigger.userId
-        }
-      });
-    } else if (trigger.queueId) {
-      await this.webhook(integrationSession, {
-        action: "updateTicket",
-        ticketData: {
-          queueId: trigger.queueId
-        }
-      });
+    if (message?.type && (message?.content || message?.mediaUrl)) {
+      await replyHandler(integrationSession.ticket, message);
     }
+    if (message.trigger) {
+      await this.processCommand(
+        integrationSession,
+        message.trigger,
+        replyHandler
+      );
+    }
+  }
+
+  public async processPayload(
+    integrationSession: IntegrationSession,
+    payload: IntegrationPayload,
+    replyHandler: ReplyHandler
+  ) {
+    // support array of IntegrationMessagesWithTrigger
+    if (Array.isArray(payload)) {
+      // eslint-disable-next-line no-restricted-syntax
+      for await (const message of payload) {
+        await this.processMessageWithTrigger(
+          integrationSession,
+          message,
+          replyHandler
+        );
+      }
+      return;
+    }
+
+    // support single IntegrationMessageWithTrigger
+    if ("type" in payload || "trigger" in payload) {
+      await this.processMessageWithTrigger(
+        integrationSession,
+        payload as IntegrationMessageWithTrigger,
+        replyHandler
+      );
+      return;
+    }
+
+    // finally support IntegrationCommand
+    await this.processCommand(integrationSession, payload, replyHandler);
   }
 }
