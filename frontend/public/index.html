@@ -164,19 +164,33 @@
 		    .then(response => response.json())
         .then(data => {
           const root = document.documentElement;
-          root.style.setProperty('--primary', data);
+          
+          if (data) {
+            root.style.setProperty('--primary', data);
+            return;
+          }
+          
+          root.style.setProperty('--primary', theme === "dark" ? "#39ACE7" : "#00f");
         });
 		
-		fetch(settingsBaseUrl + "/appLogo" + (theme === "dark" ? "Dark" : "Light"))
-        .then(response => response.json())
-        .then(data => {
-        	const appLogo = document.getElementById('app-logo');
-          appLogo.src = data ?
-        		  backendUrl + "/public/" + data :
-        			`/vector/logo${theme === "dark" ? "-dark" : ""}.svg`;
-          const appLogoDiv = document.getElementById('app-logo-div');
-          appLogoDiv.style.display = "block";
-        });
+		Promise.all([
+				fetch(settingsBaseUrl + "/appLogoDark"),
+				fetch(settingsBaseUrl + "/appLogoLight")
+				]).then(async responses => {
+					const appLogo = document.getElementById('app-logo');
+					
+					const logoSrc =
+						await (theme === "dark" ? responses[0] : responses[1]).json() ||
+						await (theme === "dark" ? responses[1] : responses[0]).json();
+					
+					if (!logoSrc) {
+            appLogo.src = `/vector/logo${theme === "dark" ? "-dark" : ""}.svg`;
+          } else {
+        	  appLogo.src = backendUrl + "/public/" + (logoSrc || logoAltSrc);
+          }
+					const appLogoDiv = document.getElementById('app-logo-div');
+					appLogoDiv.style.display = "block";
+				});
 		
 		fetch(settingsBaseUrl + "/appName")
         .then(response => response.json())
