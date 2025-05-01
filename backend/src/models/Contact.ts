@@ -11,15 +11,18 @@ import {
   Default,
   HasMany,
   ForeignKey,
-  BelongsTo
+  BelongsTo,
+  BelongsToMany
 } from "sequelize-typescript";
 import ContactCustomField from "./ContactCustomField";
 import Ticket from "./Ticket";
 import Company from "./Company";
 import Schedule from "./Schedule";
+import ContactTag from "./ContactTag";
+import Tag from "./Tag";
 
 @Table
-class Contact extends Model<Contact> {
+class Contact extends Model {
   @PrimaryKey
   @AutoIncrement
   @Column
@@ -83,6 +86,12 @@ class Contact extends Model<Contact> {
     hooks: true
   })
   schedules: Schedule[];
+
+  @HasMany(() => ContactTag)
+  contactTags: ContactTag[];
+
+  @BelongsToMany(() => Tag, () => ContactTag)
+  tags: Tag[];
 }
 
 export default Contact;
