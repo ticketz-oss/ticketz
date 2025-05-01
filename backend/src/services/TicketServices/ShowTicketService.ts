@@ -28,7 +28,7 @@ const ShowTicketService = async (
           "presence",
           "disableBot"
         ],
-        include: ["extraInfo"]
+        include: ["tags", "extraInfo"]
       },
       {
         model: User,

@@ -1,4 +1,5 @@
 import AppError from "../../errors/AppError";
+import { getIO } from "../../libs/socket";
 import Contact from "../../models/Contact";
 import ContactCustomField from "../../models/ContactCustomField";
 
@@ -12,13 +13,32 @@ interface ContactData {
   number?: string;
   name?: string;
   extraInfo?: ExtraInfo[];
-  disableBot?: boolean
+  disableBot?: boolean;
 }
 
 interface Request {
   contactData: ContactData;
   contactId: string;
   companyId: number;
+}
+
+export function websocketUpdateContact(
+  contact: Contact,
+  moreChannels?: string[]
+) {
+  const io = getIO();
+  let ioStack = io.to(`company-${contact.companyId}-mainchannel`);
+
+  if (moreChannels) {
+    moreChannels.forEach(channel => {
+      ioStack = ioStack.to(channel);
+    });
+  }
+
+  ioStack.emit(`company-${contact.companyId}-contact`, {
+    action: "update",
+    contact
+  });
 }
 
 const UpdateContactService = async ({
@@ -69,7 +89,7 @@ const UpdateContactService = async ({
 
   await contact.reload({
     attributes: ["id", "name", "number", "email", "profilePicUrl"],
-    include: ["extraInfo"]
+    include: ["tags", "extraInfo"]
   });
 
   return contact;

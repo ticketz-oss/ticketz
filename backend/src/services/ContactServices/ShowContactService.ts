@@ -5,7 +5,9 @@ const ShowContactService = async (
   id: string | number,
   companyId?: number
 ): Promise<Contact> => {
-  const contact = await Contact.findByPk(id, { include: ["extraInfo"] });
+  const contact = await Contact.findByPk(id, {
+    include: ["tags", "extraInfo"]
+  });
 
   if (companyId && contact?.companyId !== companyId) {
     throw new AppError("Não é possível consultar registro de outra empresa");
