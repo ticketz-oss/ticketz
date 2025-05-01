@@ -36,13 +36,16 @@ import DoneIcon from '@material-ui/icons/Done';
 import ClearOutlinedIcon from '@material-ui/icons/ClearOutlined';
 import { generateColor } from "../../helpers/colorGenerator";
 import { getInitials } from "../../helpers/getInitials";
+import TagsLine from "../TagsLine";
 
 const useStyles = makeStyles((theme) => ({
   ticket: {
     position: "relative",
     height: 98,
     paddingHorizontal: 10,
-    paddingVertical: 0
+    paddingVertical: 0,
+    paddingTop: 0,
+    paddingBottom: 0,
   },
 
   pendingTicket: {
@@ -73,7 +76,7 @@ const useStyles = makeStyles((theme) => ({
   },
 
   contactNameWrapper: {
-    display: "flex",
+    display: "grid",
     justifyContent: "space-between",
   },
 
@@ -499,6 +502,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
           <Avatar style={{ backgroundColor: generateColor(ticket?.contact?.number), color: "white", fontWeight: "bold" }} src={ticket?.contact?.profilePicUrl}>{ getInitials(ticket?.contact?.name || "") }</Avatar>
         </ListItemAvatar>
         <ListItemText
+          style={{ paddingBottom: 10 }}
           disableTypography
           primary={
             <span className={classes.contactNameWrapper}>
@@ -538,6 +542,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
                 </>
               )}
               </Typography>
+              <TagsLine tags={[...ticket.tags, ...ticket.contact.tags]} />
               <ListItemSecondaryAction style={{ left: 73 }}>
                 <Box className={classes.ticketInfo1}>{renderTicketInfo()}</Box>
               </ListItemSecondaryAction>
