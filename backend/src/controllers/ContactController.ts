@@ -20,6 +20,7 @@ import ContactCustomField from "../models/ContactCustomField";
 
 import { logger } from "../utils/logger";
 import Contact from "../models/Contact";
+import Tag from "../models/Tag";
 
 type IndexQuery = {
   searchParam: string;
@@ -205,6 +206,35 @@ export const list = async (req: Request, res: Response): Promise<Response> => {
   const contacts = await SimpleListService({ name, companyId });
 
   return res.json(contacts);
+};
+
+export const storeTag = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { contactId } = req.params;
+  const { tagId } = req.body;
+  const { companyId } = req.user;
+
+  const contact = await ShowContactService(contactId, companyId);
+
+  await contact.$add("tags", tagId);
+
+  return res.status(200).json({ message: "Tag added to contact" });
+};
+
+export const removeTag = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { contactId, tagId } = req.params;
+  const { companyId } = req.user;
+
+  const contact = await ShowContactService(contactId, companyId);
+
+  await contact.$remove("tags", tagId);
+
+  return res.status(200).json({ message: "Tag removed from contact" });
 };
 
 export const importCsv = async (
