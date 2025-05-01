@@ -42,7 +42,7 @@ import { getInitials } from "../../helpers/getInitials";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCloudArrowUp } from '@fortawesome/free-solid-svg-icons';
 import { faDownload } from '@fortawesome/free-solid-svg-icons';
-import { FormControl, Grid, InputLabel, MenuItem, Select } from "@material-ui/core";
+import { FormControl, Grid, InputLabel, MenuItem, Select, Tooltip } from "@material-ui/core";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_CONTACTS") {
@@ -99,7 +99,24 @@ const useStyles = makeStyles((theme) => ({
   selectContainer: {
     width: "100%",
     textAlign: "left",
-  },  
+  },
+  tagsdiv: {
+    display: "flex",
+    maxWidth: 350,
+    flexWrap: "wrap",
+  },
+  tag: {
+    marginTop: 3,
+    borderRadius: 15,
+    padding: "2px 15px",
+    marginRight: 5,
+    textWrapMode: "nowrap",
+    maxWidth: 150,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  },
+  contactName: {
+  }
 }));
 
 const Contacts = () => {
@@ -403,7 +420,7 @@ const Contacts = () => {
           <TableHead>
             <TableRow>
               <TableCell padding="checkbox" />
-              <TableCell>{i18n.t("contacts.table.name")}</TableCell>
+              <TableCell className={classes.contactName}>{i18n.t("contacts.table.name")}</TableCell>
               <TableCell align="center">
                 {i18n.t("contacts.table.whatsapp")}
               </TableCell>
@@ -422,7 +439,26 @@ const Contacts = () => {
                   <TableCell style={{ paddingRight: 0 }}>
                     {<Avatar style={{ backgroundColor: generateColor(contact?.number), fontWeight: "bold", color: "white" }} src={contact.profilePicUrl}>{getInitials(contact?.name)}</Avatar>}
                   </TableCell>
-                  <TableCell>{contact.name}</TableCell>
+                  <TableCell className={classes.contactName}>
+                    {contact.name}
+                    <div className={classes.tagsdiv}>
+                      {
+                        contact.tags.map((tag) => (
+                          <Tooltip title={tag.name} placement="top" arrow>
+                            <div
+                              key={tag.id}
+                              className={classes.tag}
+                              style={{
+                                backgroundColor: tag.color
+                              }}
+                            >
+                              {tag.name}
+                            </div>
+                          </Tooltip>
+                        ))
+                      }
+                    </div>
+                  </TableCell>
                   <TableCell align="center">{contact.number}</TableCell>
                   <TableCell align="center">{contact.email}</TableCell>
                   <TableCell align="center">
