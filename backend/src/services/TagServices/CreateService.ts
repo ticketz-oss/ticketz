@@ -2,6 +2,7 @@ import * as Yup from "yup";
 
 import AppError from "../../errors/AppError";
 import Tag from "../../models/Tag";
+import { generateColor } from "../../helpers/colorGenerator";
 
 interface Request {
   name: string;
@@ -12,7 +13,7 @@ interface Request {
 
 const CreateService = async ({
   name,
-  color = "#A4CCCC",
+  color,
   kanban,
   companyId
 }: Request): Promise<Tag> => {
@@ -28,6 +29,10 @@ const CreateService = async ({
 
   if (kanban === null) {
     kanban = 0;
+  }
+
+  if (!color) {
+    color = generateColor(name);
   }
 
   const [tag] = await Tag.findOrCreate({
