@@ -22,6 +22,7 @@ import ContactModal from "../ContactModal";
 import { ContactNotes } from "../ContactNotes";
 import { generateColor } from "../../helpers/colorGenerator";
 import { getInitials } from "../../helpers/getInitials";
+import { TagsContainer } from "../TagsContainer";
 
 const drawerWidth = 320;
 
@@ -172,6 +173,9 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, ticket, loading }) =>
 							</Button>
 							{(contact.id && openForm) && <ContactForm initialContact={contact} onCancel={() => setOpenForm(false)} />}
 						</Paper>
+            <Paper square variant="outlined" className={classes.contactDetails}>
+              <TagsContainer contact={contact} />
+            </Paper>
 						<Paper square variant="outlined" className={classes.contactDetails}>
 							<Typography variant="subtitle1" style={{marginBottom: 10}}>
 								{i18n.t("ticketOptionsMenu.appointmentsModal.title")}

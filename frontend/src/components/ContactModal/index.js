@@ -23,6 +23,7 @@ import { i18n } from "../../translate/i18n";
 
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
+import { TagsContainer } from "../TagsContainer";
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -74,6 +75,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 	};
 
 	const [contact, setContact] = useState(initialState);
+  const [tags, setTags] = useState(contact.tags || [])
 
 	useEffect(() => {
 		const fetchContact = async () => {
@@ -119,7 +121,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 		}
 	};
 
-	return (
+  return (
 		<div className={classes.root}>
 			<Dialog open={open} onClose={handleClose} maxWidth="lg" scroll="paper">
 				<DialogTitle id="form-dialog-title">
@@ -195,6 +197,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 									}
 								/>
 								</>
+                <TagsContainer contact={contact} />
 								<Typography
 									style={{ marginBottom: 8, marginTop: 12 }}
 									variant="subtitle1"
