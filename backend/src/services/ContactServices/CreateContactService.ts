@@ -47,6 +47,10 @@ const CreateContactService = async ({
     }
   );
 
+  await contact.reload({
+    include: ["tags", "extraInfo"]
+  });
+
   return contact;
 };
 
