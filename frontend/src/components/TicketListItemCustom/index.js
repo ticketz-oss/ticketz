@@ -542,7 +542,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
                 </>
               )}
               </Typography>
-              <TagsLine tags={[...ticket.tags, ...ticket.contact.tags]} />
+              <TagsLine tags={[...ticket.tags, ...ticket.contact?.tags]} />
               <ListItemSecondaryAction style={{ left: 73 }}>
                 <Box className={classes.ticketInfo1}>{renderTicketInfo()}</Box>
               </ListItemSecondaryAction>
