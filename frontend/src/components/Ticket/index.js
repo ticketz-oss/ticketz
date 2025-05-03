@@ -82,6 +82,7 @@ const Ticket = () => {
   const [contact, setContact] = useState({});
   const [ticket, setTicket] = useState({});
   const [showTabGroups, setShowTabGroups] = useState(false);
+  const [tagsMode, setTagsMode] = useState("ticket");
   const { getSetting } = useSettings();
 
   const socketManager = useContext(SocketContext);
@@ -92,6 +93,10 @@ const Ticket = () => {
       getSetting("groupsTab")
     ]).then(([ignoreGroups, groupsTab]) => {
       setShowTabGroups(ignoreGroups === "disabled" && groupsTab === "enabled");
+    });
+    
+    getSetting("tagsMode","ticket").then((tagsMode) => {
+      setTagsMode(tagsMode);
     });
   }, []);
 
@@ -215,7 +220,10 @@ const Ticket = () => {
           <TicketActionButtons ticket={ticket} showTabGroups={showTabGroups} />
         </TicketHeader>
         <Paper>
-          <TagsContainer ticket={ticket} />
+          <TagsContainer
+            ticket={["ticket","both"].includes(tagsMode) && ticket}
+            contact={tagsMode === "contact" && contact}
+          />
         </Paper>
         <ReplyMessageProvider>
           <EditMessageProvider>
