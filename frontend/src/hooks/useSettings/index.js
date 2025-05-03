@@ -28,12 +28,12 @@ const useSettings = () => {
         return data;
     }
 
-    const getSetting = async (key) => {
+    const getSetting = async (key, defaultValue = "") => {
       const { data } = await api.request({
         url: `/settings/${key}`,
         method: 'GET'
       });
-      return data;
+      return data || defaultValue;
     }
 
     return {
