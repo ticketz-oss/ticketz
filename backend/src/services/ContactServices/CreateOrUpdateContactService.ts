@@ -51,6 +51,10 @@ const CreateOrUpdateContactService = async ({
       disableBot
     });
 
+    await contact.reload({
+      include: ["tags", "extraInfo"]
+    });
+
     io.to(`company-${companyId}-mainchannel`).emit(
       `company-${companyId}-contact`,
       {
@@ -64,7 +68,8 @@ const CreateOrUpdateContactService = async ({
         where: {
           number,
           companyId
-        }
+        },
+        include: ["tags", "extraInfo"]
       });
 
       if (contact) {

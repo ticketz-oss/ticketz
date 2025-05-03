@@ -23,7 +23,7 @@ const include = [
       "presence",
       "disableBot"
     ],
-    include: ["extraInfo"]
+    include: ["tags", "extraInfo"]
   },
   {
     model: User,

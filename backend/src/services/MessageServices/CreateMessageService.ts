@@ -1,5 +1,6 @@
 import { checkCompanyCompliant } from "../../helpers/CheckCompanyCompliant";
 import { getIO } from "../../libs/socket";
+import Contact from "../../models/Contact";
 import Message from "../../models/Message";
 import OldMessage from "../../models/OldMessage";
 import Ticket from "../../models/Ticket";
@@ -51,7 +52,11 @@ const CreateMessageService = async ({
         model: Ticket,
         as: "ticket",
         include: [
-          "contact",
+          {
+            model: Contact,
+            as: "contact",
+            include: ["tags", "extraInfo"]
+          },
           "queue",
           "tags",
           "user",
