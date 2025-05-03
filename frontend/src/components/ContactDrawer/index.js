@@ -23,6 +23,7 @@ import { ContactNotes } from "../ContactNotes";
 import { generateColor } from "../../helpers/colorGenerator";
 import { getInitials } from "../../helpers/getInitials";
 import { TagsContainer } from "../TagsContainer";
+import useSettings from "../../hooks/useSettings";
 
 const drawerWidth = 320;
 
@@ -100,11 +101,17 @@ const useStyles = makeStyles(theme => ({
 
 const ContactDrawer = ({ open, handleDrawerClose, contact, ticket, loading }) => {
 	const classes = useStyles();
+  const { getSetting } = useSettings();
 
 	const [modalOpen, setModalOpen] = useState(false);
 	const [openForm, setOpenForm] = useState(false);
+  const [showTags, setShowTags] = useState(false);
 
 	useEffect(() => {
+    getSetting("tagsMode").then(res => {
+      setShowTags(["contact", "both"].includes(res));
+    });
+        
 		setOpenForm(false);
 	}, [open, contact]);
 
@@ -173,9 +180,11 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, ticket, loading }) =>
 							</Button>
 							{(contact.id && openForm) && <ContactForm initialContact={contact} onCancel={() => setOpenForm(false)} />}
 						</Paper>
-            <Paper square variant="outlined" className={classes.contactDetails}>
-              <TagsContainer contact={contact} />
-            </Paper>
+              {showTags && (
+                <Paper square variant="outlined" className={classes.contactDetails}>
+                  <TagsContainer contact={contact} />
+                </Paper>
+              )}
 						<Paper square variant="outlined" className={classes.contactDetails}>
 							<Typography variant="subtitle1" style={{marginBottom: 10}}>
 								{i18n.t("ticketOptionsMenu.appointmentsModal.title")}

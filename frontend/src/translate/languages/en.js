@@ -875,6 +875,14 @@ const messages = {
         AudioTranscriptions: {
           title: "Audio Transcriptions",
         },
+        TagsMode: {
+          title: "Tags Mode",
+          options: {
+            ticket: "Ticket",
+            contact: "Contact",
+            both: "Ticket and Contact"
+          },
+        },
       },
       messagesList: {
         header: {

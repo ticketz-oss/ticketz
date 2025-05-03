@@ -881,6 +881,14 @@ const messages = {
         AudioTranscriptions: {
           title: "Transcripciones de audio",
         },
+        TagsMode: {
+          title: "Modo de etiquetas",
+          options: {
+            ticket: "Ticket",
+            contact: "Contacto",
+            both: "Ticket y contacto",
+          },
+        },
       },
       messagesList: {
         header: {

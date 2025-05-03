@@ -20,7 +20,7 @@ import ContactCustomField from "../models/ContactCustomField";
 
 import { logger } from "../utils/logger";
 import Contact from "../models/Contact";
-import Tag from "../models/Tag";
+import { GetCompanySetting } from "../helpers/CheckSettings";
 
 type IndexQuery = {
   searchParam: string;
@@ -216,6 +216,12 @@ export const storeTag = async (
   const { tagId } = req.body;
   const { companyId } = req.user;
 
+  const tagsMode = await GetCompanySetting(companyId, "tagsMode", "ticket");
+
+  if (!["contact", "both"].includes(tagsMode)) {
+    throw new AppError("ERR_INVALID_TAGMODE", 400);
+  }
+
   const contact = await ShowContactService(contactId, companyId);
 
   await contact.$add("tags", tagId);
@@ -229,6 +235,12 @@ export const removeTag = async (
 ): Promise<Response> => {
   const { contactId, tagId } = req.params;
   const { companyId } = req.user;
+
+  const tagsMode = await GetCompanySetting(companyId, "tagsMode", "ticket");
+
+  if (!["contact", "both"].includes(tagsMode)) {
+    throw new AppError("ERR_INVALID_TAGMODE", 400);
+  }
 
   const contact = await ShowContactService(contactId, companyId);
 

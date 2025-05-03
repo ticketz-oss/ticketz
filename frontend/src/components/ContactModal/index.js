@@ -24,6 +24,7 @@ import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import { TagsContainer } from "../TagsContainer";
+import useSettings from "../../hooks/useSettings";
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -66,7 +67,8 @@ const ContactSchema = Yup.object().shape({
 
 const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 	const classes = useStyles();
-
+  const { getSetting } = useSettings();
+  
 	const initialState = {
 		name: "",
 		number: "",
@@ -75,9 +77,13 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 	};
 
 	const [contact, setContact] = useState(initialState);
-  const [tags, setTags] = useState(contact.tags || [])
+  const [showTags, setShowTags] = useState(false);
 
 	useEffect(() => {
+    getSetting("tagsMode").then(res => {
+      setShowTags(["contact", "both"].includes(res));
+    });
+    
 		const fetchContact = async () => {
 			if (initialValues) {
 				setContact(prevState => {
@@ -197,7 +203,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 									}
 								/>
 								</>
-                <TagsContainer contact={contact} />
+                { showTags && <TagsContainer contact={contact} /> }
 								<Typography
 									style={{ marginBottom: 8, marginTop: 12 }}
 									variant="subtitle1"

@@ -129,6 +129,7 @@ export default function Options(props) {
   const [ratingsTimeout, setRatingsTimeout] = useState(false);
   const [autoReopenTimeout, setAutoReopenTimeout] = useState(false);
   const [gracePeriod, setGracePeriod] = useState(0);
+  const [tagsMode, setTagsMode] = useState("ticket");
 
   const { getCurrentUserInfo } = useAuth();
   const [currentUser, setCurrentUser] = useState({});
@@ -235,6 +236,9 @@ export default function Options(props) {
 
       const gracePeriod = settings.find((s) => s.key === "gracePeriod");
       setGracePeriod(gracePeriod?.value || 0);
+      
+      const tagsMode = settings.find((s) => s.key === "tagsMode");
+      setTagsMode(tagsMode?.value || "ticket");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
@@ -454,6 +458,25 @@ export default function Options(props) {
             >
               <MenuItem value={"company"}>{i18n.t("settings.QuickMessages.options.enabled")}</MenuItem>
               <MenuItem value={"individual"}>{i18n.t("settings.QuickMessages.options.disabled")}</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+        
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="tags-mode-label">
+              {i18n.t("settings.TagsMode.title")}
+            </InputLabel>
+            <Select
+              labelId="tags-mode-label"
+              value={tagsMode}
+              onChange={async (e) => {
+                handleSetting("tagsMode", e.target.value, setTagsMode);
+              }}
+            >
+              <MenuItem value={"ticket"}>{i18n.t("settings.TagsMode.options.ticket")}</MenuItem>
+              <MenuItem value={"contact"}>{i18n.t("settings.TagsMode.options.contact")}</MenuItem>
+              <MenuItem value={"both"}>{i18n.t("settings.TagsMode.options.both")}</MenuItem>
             </Select>
           </FormControl>
         </Grid>

@@ -1,4 +1,5 @@
 import AppError from "../../errors/AppError";
+import { GetCompanySetting } from "../../helpers/CheckSettings";
 import Contact from "../../models/Contact";
 import ContactTag from "../../models/ContactTag";
 import Tag from "../../models/Tag";
@@ -13,18 +14,29 @@ interface Request {
   tags: Tag[];
   ticketId?: number;
   contactId?: number;
+  companyId?: number;
 }
 
 const SyncTicketTags = async ({
   tags,
-  ticketId
+  ticketId,
+  companyId
 }: Request): Promise<Ticket | null> => {
   const ticket = await ShowTicketService(ticketId);
+  const tagsMode = await GetCompanySetting(companyId, "tagsMode", "ticket");
 
-  const tagList = tags.map(t => ({ tagId: t.id, ticketId }));
-
-  await TicketTag.destroy({ where: { ticketId } });
-  await TicketTag.bulkCreate(tagList);
+  if (["ticket", "both"].includes(tagsMode)) {
+    const tagList = tags.map(t => ({ tagId: t.id, ticketId }));
+    await TicketTag.destroy({ where: { ticketId } });
+    await TicketTag.bulkCreate(tagList);
+  } else if (tagsMode === "contact") {
+    const tagList = tags.map(t => ({
+      tagId: t.id,
+      contactId: ticket.contactId
+    }));
+    await ContactTag.destroy({ where: { contactId: ticket.contactId } });
+    await ContactTag.bulkCreate(tagList);
+  }
 
   await ticket.reload();
   websocketUpdateTicket(ticket);
@@ -34,8 +46,15 @@ const SyncTicketTags = async ({
 
 const SyncContactTags = async ({
   tags,
-  contactId
+  contactId,
+  companyId
 }: Request): Promise<Contact | null> => {
+  const tagsMode = await GetCompanySetting(companyId, "tagsMode", "ticket");
+
+  if (!["contact", "both"].includes(tagsMode)) {
+    throw new AppError("ERR_INVALID_TAGMODE", 400);
+  }
+
   const contact = await ShowContactService(contactId);
 
   const tagList = tags.map(t => ({ tagId: t.id, contactId }));
@@ -49,17 +68,13 @@ const SyncContactTags = async ({
   return contact;
 };
 
-const SyncTags = async ({
-  tags,
-  ticketId,
-  contactId
-}: Request): Promise<Ticket | Contact> => {
-  if (ticketId) {
-    return SyncTicketTags({ tags, ticketId });
+const SyncTags = async (req: Request): Promise<Ticket | Contact> => {
+  if (req.ticketId) {
+    return SyncTicketTags(req);
   }
 
-  if (contactId) {
-    return SyncContactTags({ tags, contactId });
+  if (req.contactId) {
+    return SyncContactTags(req);
   }
 
   throw new AppError("ERR_NO_TICKET_OR_CONTACT", 400);
