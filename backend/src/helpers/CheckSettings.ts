@@ -19,6 +19,14 @@ const CheckSettings = async (
   return setting?.value || defaultValue;
 };
 
+/**
+ * Get the company setting by key
+ *
+ * @param companyId - The ID of the company
+ * @param key - The key of the setting
+ * @param defaultValue - The default value to return if the setting is not found
+ * @return The value of the setting or the default value
+ */
 export const GetCompanySetting = async (
   companyId: number,
   key: string,
