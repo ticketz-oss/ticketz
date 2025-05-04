@@ -45,7 +45,7 @@ import VerifyCurrentSchedule, {
 } from "../CompanyService/VerifyCurrentSchedule";
 import Campaign from "../../models/Campaign";
 import CampaignShipping from "../../models/CampaignShipping";
-import { campaignQueue, parseToMilliseconds, randomValue } from "../../queues";
+import { campaignQueue } from "../../queues/campaign";
 import User from "../../models/User";
 import Setting from "../../models/Setting";
 import { cacheLayer } from "../../libs/cache";
@@ -59,6 +59,8 @@ import { getPublicPath } from "../../helpers/GetPublicPath";
 import { Session } from "../../libs/wbot";
 import { checkCompanyCompliant } from "../../helpers/CheckCompanyCompliant";
 import { transcriber } from "../../helpers/transcriber";
+import { parseToMilliseconds } from "../../helpers/parseToMilliseconds";
+import { randomValue } from "../../helpers/randomValue";
 
 export interface ImessageUpsert {
   messages: proto.IWebMessageInfo[];
