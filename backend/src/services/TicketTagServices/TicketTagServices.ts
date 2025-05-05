@@ -11,7 +11,7 @@ export async function ticketTagAdd(
   companyId?: number
 ) {
   const ticket = await ShowTicketService(ticketId, companyId);
-  if (!Ticket) {
+  if (!ticket) {
     throw new AppError("ERR_NOT_FOUND", 404);
   }
 
