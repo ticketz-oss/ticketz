@@ -1,9 +1,9 @@
 import * as Yup from "yup";
 import { Request, Response } from "express";
-import { getIO } from "../libs/socket";
 import { head } from "lodash";
 import fs from "fs";
 import path from "path";
+import { getIO } from "../libs/socket";
 
 import ListService from "../services/CampaignService/ListService";
 import CreateService from "../services/CampaignService/CreateService";
@@ -30,6 +30,7 @@ type StoreData = {
   confirmation: boolean;
   scheduledAt: Date;
   companyId: number;
+  tagId?: number;
   contactListId: number;
 };
 
