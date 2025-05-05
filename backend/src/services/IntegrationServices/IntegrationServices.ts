@@ -94,10 +94,13 @@ export type IntegrationMessageWithTrigger = IntegrationMessage & {
   trigger: IntegrationCommand;
 };
 
+export type IntegrationMessageOrCommand =
+  | IntegrationMessageWithTrigger
+  | IntegrationCommand;
+
 export type IntegrationPayload =
   | IntegrationCommand
-  | IntegrationMessageWithTrigger
-  | IntegrationMessageWithTrigger[];
+  | IntegrationMessageOrCommand[];
 
 export type IntegrationMessageMetadata = {
   backendUrl?: string;
@@ -417,21 +420,30 @@ export class IntegrationServices {
     }
   }
 
-  public async processMessageWithTrigger(
+  public async processMessageOrCommand(
     integrationSession: IntegrationSession,
-    message: IntegrationMessageWithTrigger,
+    message: IntegrationMessageOrCommand,
     replyHandler: ReplyHandler
   ) {
-    if (message?.type && (message?.content || message?.mediaUrl)) {
-      await replyHandler(integrationSession.ticket, message);
+    if (!message) {
+      return;
     }
-    if (message.trigger) {
-      await this.processCommand(
-        integrationSession,
-        message.trigger,
-        replyHandler
-      );
+
+    if ("type" in message) {
+      if ("content" in message || "mediaUrl" in message) {
+        await replyHandler(integrationSession.ticket, message);
+      }
+      if ("trigger" in message) {
+        await this.processCommand(
+          integrationSession,
+          message.trigger,
+          replyHandler
+        );
+      }
+      return;
     }
+
+    await this.processCommand(integrationSession, message, replyHandler);
   }
 
   public async processPayload(
@@ -442,10 +454,10 @@ export class IntegrationServices {
     // support array of IntegrationMessagesWithTrigger
     if (Array.isArray(payload)) {
       // eslint-disable-next-line no-restricted-syntax
-      for await (const message of payload) {
-        await this.processMessageWithTrigger(
+      for await (const item of payload) {
+        await this.processMessageOrCommand(
           integrationSession,
-          message,
+          item,
           replyHandler
         );
       }
@@ -454,7 +466,7 @@ export class IntegrationServices {
 
     // support single IntegrationMessageWithTrigger
     if ("type" in payload || "trigger" in payload) {
-      await this.processMessageWithTrigger(
+      await this.processMessageOrCommand(
         integrationSession,
         payload as IntegrationMessageWithTrigger,
         replyHandler
