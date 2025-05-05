@@ -583,6 +583,7 @@ const messages = {
             scheduledAt: "Agendamiento",
             confirmation: "Confirmación",
             contactList: "Lista de Contacto",
+            tag: "Etiqueta",
           },
           buttons: {
             add: "Agregar",

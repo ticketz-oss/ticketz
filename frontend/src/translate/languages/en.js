@@ -580,6 +580,7 @@ const messages = {
             scheduledAt: "Scheduled",
             confirmation: "Confirmation",
             contactList: "Contact List",
+            tag: "Tag",
           },
           buttons: {
             add: "Add",

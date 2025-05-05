@@ -103,6 +103,7 @@ const CampaignModal = ({
     confirmation: false,
     scheduledAt: "",
     whatsappId: "",
+    tagId: "",
     contactListId: "",
     companyId,
   };
@@ -110,6 +111,7 @@ const CampaignModal = ({
   const [campaign, setCampaign] = useState(initialState);
   const [whatsapps, setWhatsapps] = useState([]);
   const [contactLists, setContactLists] = useState([]);
+  const [tags, setTags] = useState([]);
   const [messageTab, setMessageTab] = useState(0);
   const [attachment, setAttachment] = useState(null);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
@@ -136,8 +138,19 @@ const CampaignModal = ({
 
       api
         .get(`/whatsapp`, { params: { companyId, session: 0 } })
-        .then(({ data }) => setWhatsapps(data));
+        .then(
+          ({ data }) => setWhatsapps(data.filter((whatsapp) => {
+            return whatsapp.status === "CONNECTED" && whatsapp.channel === "whatsapp"
+          }))
+        );
 
+      api
+        .get(`/tags`, { params: { companyId } })
+        .then(({ data }) => {
+          setTags(data.tags || []);
+        }
+      );
+        
       if (!campaignId) return;
 
       api.get(`/campaigns/${campaignId}`).then(({ data }) => {
@@ -387,7 +400,40 @@ const CampaignModal = ({
                       </Field>
                     </FormControl>
                   </Grid>
-                  <Grid xs={12} md={4} item>
+                  <Grid xs={12} md={3} item>
+                    <FormControl
+                      variant="outlined"
+                      margin="dense"
+                      fullWidth
+                      className={classes.formControl}
+                    >
+                      <InputLabel id="tag-selection-label">
+                        {i18n.t("campaigns.dialog.form.tag")}
+                      </InputLabel>
+                      <Field
+                        as={Select}
+                        label={i18n.t("campaigns.dialog.form.tag")}
+                        placeholder={i18n.t("campaigns.dialog.form.tag")}
+                        labelId="tag-selection-label"
+                        id="tagId"
+                        name="tagId"
+                        error={touched.tagId && Boolean(errors.tagId)}
+                        disabled={!campaignEditable || values.contactListId}
+                      >
+                        <MenuItem value="">Nenhuma</MenuItem>
+                        {tags &&
+                          tags.map((tag) => (
+                            <MenuItem
+                              key={tag.id}
+                              value={tag.id}
+                            >
+                              {tag.name}
+                            </MenuItem>
+                          ))}
+                      </Field>
+                    </FormControl>
+                  </Grid>
+                  <Grid xs={12} md={3} item>
                     <FormControl
                       variant="outlined"
                       margin="dense"
@@ -409,7 +455,7 @@ const CampaignModal = ({
                         error={
                           touched.contactListId && Boolean(errors.contactListId)
                         }
-                        disabled={!campaignEditable}
+                        disabled={!campaignEditable || values.tagId}
                       >
                         <MenuItem value="">Nenhuma</MenuItem>
                         {contactLists &&
@@ -424,7 +470,7 @@ const CampaignModal = ({
                       </Field>
                     </FormControl>
                   </Grid>
-                  <Grid xs={12} md={4} item>
+                  <Grid xs={12} md={3} item>
                     <FormControl
                       variant="outlined"
                       margin="dense"
@@ -454,7 +500,7 @@ const CampaignModal = ({
                       </Field>
                     </FormControl>
                   </Grid>
-                  <Grid xs={12} md={4} item>
+                  <Grid xs={12} md={3} item>
                     <Field
                       as={TextField}
                       label={i18n.t("campaigns.dialog.form.scheduledAt")}
