@@ -40,6 +40,12 @@ import {
   ticketTagRemoveAll
 } from "../TicketTagServices/TicketTagServices";
 import { NgrokInstance } from "../../helpers/NgrokInstance";
+import { GetCompanySetting } from "../../helpers/CheckSettings";
+import {
+  contactTagAdd,
+  contactTagRemove,
+  contactTagRemoveAll
+} from "../ContactTagService/ContactTagService";
 
 export type IntegrationOptions = {
   fields: {
@@ -68,6 +74,9 @@ export type IntegrationActionTypes =
   | "addTag"
   | "removeTag"
   | "clearTags"
+  | "addContactTag"
+  | "removeContactTag"
+  | "clearContactTags"
   | "wait"
   | "ping";
 
@@ -363,7 +372,19 @@ export class IntegrationServices {
       if (!tagId) {
         throw new Error("Tag ID is required");
       }
-      await ticketTagAdd(integrationSession.ticket.id, tagId);
+
+      const tagsMode = await GetCompanySetting(
+        integrationSession.ticket.companyId,
+        "tagsMode",
+        "ticket",
+        true
+      );
+
+      if (tagsMode === "contact") {
+        await contactTagAdd(integrationSession.ticket.contactId, tagId);
+      } else {
+        await ticketTagAdd(integrationSession.ticket.id, tagId);
+      }
     }
 
     if (action === "removeTag") {
@@ -371,11 +392,89 @@ export class IntegrationServices {
       if (!tagId) {
         throw new Error("Tag ID is required");
       }
-      await ticketTagRemove(integrationSession.ticket.id, tagId);
+
+      const tagsMode = await GetCompanySetting(
+        integrationSession.ticket.companyId,
+        "tagsMode",
+        "ticket",
+        true
+      );
+
+      if (tagsMode === "contact") {
+        await contactTagRemove(integrationSession.ticket.contactId, tagId);
+      } else {
+        await ticketTagRemove(integrationSession.ticket.id, tagId);
+      }
     }
 
     if (action === "clearTags") {
-      await ticketTagRemoveAll(integrationSession.ticket.id);
+      const tagsMode = await GetCompanySetting(
+        integrationSession.ticket.companyId,
+        "tagsMode",
+        "ticket",
+        true
+      );
+
+      if (tagsMode === "contact") {
+        await contactTagRemoveAll(integrationSession.ticket.contactId);
+      } else {
+        await ticketTagRemoveAll(integrationSession.ticket.id);
+      }
+    }
+
+    if (action === "addContactTag") {
+      const { tagId } = command;
+      if (!tagId) {
+        throw new Error("Tag ID is required");
+      }
+
+      const tagsMode = await GetCompanySetting(
+        integrationSession.ticket.companyId,
+        "tagsMode",
+        "ticket",
+        true
+      );
+
+      if (tagsMode === "ticket") {
+        await ticketTagAdd(integrationSession.ticket.id, tagId);
+      } else {
+        await contactTagAdd(integrationSession.ticket.contactId, tagId);
+      }
+    }
+
+    if (action === "removeContactTag") {
+      const { tagId } = command;
+      if (!tagId) {
+        throw new Error("Tag ID is required");
+      }
+
+      const tagsMode = await GetCompanySetting(
+        integrationSession.ticket.companyId,
+        "tagsMode",
+        "ticket",
+        true
+      );
+
+      if (tagsMode === "ticket") {
+        await ticketTagRemove(integrationSession.ticket.id, tagId);
+      } else {
+        await contactTagRemove(integrationSession.ticket.contactId, tagId);
+      }
+    }
+
+    if (action === "clearContactTags") {
+      const tagsMode = await GetCompanySetting(
+        integrationSession.ticket.companyId,
+        "tagsMode",
+        "ticket",
+        true
+      );
+
+      if (tagsMode === "ticket") {
+        await ticketTagRemoveAll(integrationSession.ticket.id);
+      } else {
+        await contactTagRemoveAll(integrationSession.ticket.contactId);
+      }
     }
 
     if (message) {
