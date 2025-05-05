@@ -14,9 +14,11 @@ import {
 import Company from "./Company";
 import Ticket from "./Ticket";
 import TicketTag from "./TicketTag";
+import Contact from "./Contact";
+import ContactTag from "./ContactTag";
 
 @Table
-class Tag extends Model<Tag> {
+class Tag extends Model {
   @PrimaryKey
   @AutoIncrement
   @Column
@@ -36,6 +38,12 @@ class Tag extends Model<Tag> {
 
   @BelongsToMany(() => Ticket, () => TicketTag)
   tickets: Ticket[];
+
+  @HasMany(() => ContactTag)
+  contactTags: ContactTag[];
+
+  @BelongsToMany(() => Contact, () => ContactTag)
+  contacts: Contact[];
 
   @ForeignKey(() => Company)
   @Column
