@@ -17,6 +17,8 @@ import { logger } from "../utils/logger";
 import { randomValue } from "../helpers/randomValue";
 import { parseToMilliseconds } from "../helpers/parseToMilliseconds";
 import GetWhatsappWbot from "../helpers/GetWhatsappWbot";
+import Contact from "../models/Contact";
+import Tag from "../models/Tag";
 
 const connection = process.env.REDIS_URI || "";
 export const campaignQueue = new Queue("CampaignQueue", connection);
@@ -31,6 +33,8 @@ interface DispatchCampaignData {
   campaignShippingId: number;
   contactListItemId: number;
 }
+
+type CampaignContact = ContactListItem | Contact;
 
 async function handleVerifyCampaigns() {
   /**
@@ -71,7 +75,7 @@ async function handleVerifyCampaigns() {
   });
 }
 
-async function getCampaign(id: number) {
+async function getCampaign(id: number): Promise<Campaign> {
   return Campaign.findByPk(id, {
     include: [
       {
@@ -86,6 +90,12 @@ async function getCampaign(id: number) {
             where: { isWhatsappValid: true }
           }
         ]
+      },
+      {
+        model: Tag,
+        as: "tag",
+        attributes: ["id", "name"],
+        include: ["contacts"]
       },
       {
         model: Whatsapp,
@@ -202,7 +212,11 @@ function getCampaignValidConfirmationMessages(campaign) {
   return messages;
 }
 
-function getProcessedMessage(msg: string, variables: any[], contact: any) {
+function getProcessedMessage(
+  msg: string,
+  variables: any[],
+  contact: CampaignContact
+) {
   let finalMessage = msg;
 
   if (finalMessage.includes("{nome}")) {
@@ -241,15 +255,29 @@ async function verifyAndFinalizeCampaign(campaign: Campaign) {
 async function prepareContact(
   campaign: Campaign,
   variables: any[],
-  contact: ContactListItem,
+  contact: CampaignContact,
   delay: number,
   messages: string | any[],
   confirmationMessages: string | any[]
 ) {
+  if (
+    contact instanceof Contact &&
+    (contact.channel !== "whatsapp" || contact.isGroup)
+  ) {
+    return;
+  }
+
+  if (contact instanceof ContactListItem && !contact.isWhatsappValid) {
+    return;
+  }
+
   const campaignShipping: any = {};
   campaignShipping.number = contact.number;
-  campaignShipping.contactId = contact.id;
   campaignShipping.campaignId = campaign.id;
+
+  if (contact instanceof ContactListItem) {
+    campaignShipping.contactId = contact.id;
+  }
 
   if (messages.length) {
     const radomIndex = randomValue(0, messages.length);
@@ -276,7 +304,7 @@ async function prepareContact(
   const [record, created] = await CampaignShipping.findOrCreate({
     where: {
       campaignId: campaignShipping.campaignId,
-      contactId: campaignShipping.contactId
+      number: campaignShipping.number
     },
     defaults: campaignShipping
   });
@@ -295,8 +323,7 @@ async function prepareContact(
       "DispatchCampaign",
       {
         campaignId: campaign.id,
-        campaignShippingId: record.id,
-        contactListItemId: contact.id
+        campaignShippingId: record.id
       },
       {
         delay
@@ -314,7 +341,16 @@ async function handleProcessCampaign(job) {
     const campaign = await getCampaign(id);
     const settings = await getSettings(campaign);
     if (campaign) {
-      const { contacts } = campaign.contactList;
+      const contacts = [];
+
+      if (campaign.contactList) {
+        contacts.push(...campaign.contactList.contacts);
+      }
+
+      if (campaign.tag) {
+        contacts.push(...campaign.tag.contacts);
+      }
+
       const messages = getCampaignValidMessages(campaign);
       const confirmationMessages = campaign.confirmation
         ? getCampaignValidConfirmationMessages(campaign)
@@ -358,7 +394,7 @@ async function handleDispatchCampaign(job) {
     const { data } = job;
     const { campaignShippingId, campaignId }: DispatchCampaignData = data;
     const campaign = await Campaign.findByPk(campaignId, {
-      include: ["contactList", { model: Whatsapp, as: "whatsapp" }]
+      include: ["contactList", "tag", { model: Whatsapp, as: "whatsapp" }]
     });
 
     if (!campaign) {
@@ -375,7 +411,7 @@ async function handleDispatchCampaign(job) {
     const campaignShipping = await CampaignShipping.findByPk(
       campaignShippingId,
       {
-        include: [{ model: ContactListItem, as: "contact" }]
+        include: [{ model: ContactListItem, as: "contact", required: false }]
       }
     );
 
@@ -412,7 +448,7 @@ async function handleDispatchCampaign(job) {
     });
 
     logger.info(
-      `Campanha enviada para: Campanha=${campaignId};Contato=${campaignShipping.contact.name}`
+      `Campanha enviada para: Campanha=${campaignId};Numero=${campaignShipping.number}`
     );
   } catch (err: unknown) {
     logger.error((err as Error).message);
