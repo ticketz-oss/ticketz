@@ -115,6 +115,7 @@ export type IntegrationMessageMetadata = {
   backendUrl?: string;
   channel: string;
   from: Contact;
+  ticket?: Ticket;
   ticketId: number;
   customPayload?: any;
   firstMessage?: string;
@@ -550,6 +551,10 @@ export class IntegrationServices {
     payload: IntegrationPayload,
     replyHandler: ReplyHandler
   ) {
+    if (!payload) {
+      throw new Error("Payload is required");
+    }
+
     // support array of IntegrationMessagesWithTrigger
     if (Array.isArray(payload)) {
       // eslint-disable-next-line no-restricted-syntax
