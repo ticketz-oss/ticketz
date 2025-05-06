@@ -583,6 +583,7 @@ const messages = {
             scheduledAt: "Agendamiento",
             confirmation: "Confirmación",
             contactList: "Lista de Contacto",
+            tag: "Etiqueta",
           },
           buttons: {
             add: "Agregar",
@@ -948,6 +949,14 @@ const messages = {
         },
         AudioTranscriptions: {
           title: "Transcripciones de audio",
+        },
+        TagsMode: {
+          title: "Modo de etiquetas",
+          options: {
+            ticket: "Ticket",
+            contact: "Contacto",
+            both: "Ticket y contacto",
+          },
         },
       },
       messagesList: {

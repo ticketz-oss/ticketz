@@ -200,7 +200,13 @@ const audioMediaProcessors = {
   default: convertAudioToOggOpus
 };
 
-const chatbotChannels = ["whatsapp", "instagram", "telegram", "webchat"];
+const chatbotChannels = [
+  "whatsapp",
+  "instagram",
+  "facebook",
+  "telegram",
+  "webchat"
+];
 
 export type NotificamehubSession = {
   client: Client;
@@ -274,7 +280,18 @@ function checkSupportedPayload(data: NotificamehubPayload): void {
     ["facebook"].includes(data.channel) &&
     data.message.contents[0].type === "comment"
   ) {
-    throw new DebugException("notificamehub: Unsupported payload");
+    throw new DebugException(
+      "notificamehub: facebook comments is unsupported yet"
+    );
+  }
+
+  if (
+    ["facebook"].includes(data.channel) &&
+    data.message.contents[0].type === "reaction"
+  ) {
+    throw new DebugException(
+      "notificamehub: facebook reactions is unsupported yet"
+    );
   }
 }
 
@@ -384,7 +401,7 @@ export class NotificamehubDriver implements OmniDriver {
 
     const whatsapp = await Whatsapp.findOne({
       where: {
-        qrcode: message.to
+        qrcode: message.direction === "OUT" ? message.from : message.to
       },
       include: ["queues"]
     });

@@ -20,6 +20,7 @@ ticketRoutes.get(
 
 ticketRoutes.get(
   "/tickets/:ticketId",
+  apiTokenAuth,
   isAuth,
   checkSubscription,
   isCompliant,
@@ -44,6 +45,7 @@ ticketRoutes.post(
 
 ticketRoutes.put(
   "/tickets/:ticketId",
+  apiTokenAuth,
   isAuth,
   checkSubscription,
   isCompliant,

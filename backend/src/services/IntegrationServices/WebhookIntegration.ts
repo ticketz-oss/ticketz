@@ -41,6 +41,7 @@ import {
 import { logger } from "../../utils/logger";
 import IntegrationSession from "../../models/IntegrationSession";
 import { fileToBase64 } from "../../helpers/fileToBase64";
+import ShowTicketService from "../TicketServices/ShowTicketService";
 
 const integrationServices = IntegrationServices.getInstance();
 
@@ -109,6 +110,15 @@ export class WebhookIntegration implements IntegrationDriver {
         },
         null,
         {
+          name: "sendTicket",
+          title: "Send ticket metadata",
+          description: "Send ticket metadata to webhook",
+          type: "checkbox",
+          lgWidth: 4,
+          required: false
+        },
+        null,
+        {
           name: "webhookExtraParams",
           title: "Extra Parameters (JSON)",
           description: "Extra parameters formatted in JSON",
@@ -133,6 +143,7 @@ export class WebhookIntegration implements IntegrationDriver {
       webhookMethod,
       webhookToken,
       webhookFileB64,
+      sendTicket,
       webhookExtraParams
     } = integrationSession.integration.configuration;
 
@@ -142,6 +153,17 @@ export class WebhookIntegration implements IntegrationDriver {
       }
     } catch (_) {
       // do nothing
+    }
+
+    try {
+      if (sendTicket) {
+        const ticket = await ShowTicketService(integrationSession.ticketId);
+        if (ticket) {
+          metadata.ticket = ticket.toJSON();
+        }
+      }
+    } catch (error) {
+      logger.error({ message: error?.message }, "Error getting ticket");
     }
 
     let response;
@@ -172,6 +194,7 @@ export class WebhookIntegration implements IntegrationDriver {
       }
     } catch (error) {
       logger.error({ message: error?.message }, "Error calling webhook");
+      return;
     }
 
     try {

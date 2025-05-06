@@ -3,8 +3,8 @@ import Campaign from "../../models/Campaign";
 import AppError from "../../errors/AppError";
 import CampaignShipping from "../../models/CampaignShipping";
 import ContactList from "../../models/ContactList";
-import ContactListItem from "../../models/ContactListItem";
 import Whatsapp from "../../models/Whatsapp";
+import Tag from "../../models/Tag";
 
 const ShowService = async (
   id: string | number
@@ -18,6 +18,7 @@ const ShowService = async (
   const campaign = await Campaign.findByPk(id, {
     include: [
       { model: ContactList },
+      { model: Tag },
       { model: Whatsapp, attributes: ["id", "name"] }
     ]
   });
@@ -26,10 +27,9 @@ const ShowService = async (
     throw new AppError("ERR_NO_TICKETNOTE_FOUND", 404);
   }
 
-  const valids = await ContactListItem.count({
+  const valids = await CampaignShipping.count({
     where: {
-      contactListId: campaign.contactListId,
-      isWhatsappValid: true
+      campaignId: campaign.id
     }
   });
 

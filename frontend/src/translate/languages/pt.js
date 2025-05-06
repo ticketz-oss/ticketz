@@ -586,6 +586,7 @@ const messages = {
             scheduledAt: "Agendamento",
             confirmation: "Confirmação",
             contactList: "Lista de Contato",
+            tag: "Tag",
           },
           buttons: {
             add: "Adicionar",
@@ -952,6 +953,14 @@ const messages = {
         AudioTranscriptions: {
           title: "Transcrição de áudio",
         },        
+        TagsMode: {
+          title: "Modo de Tags",
+          options: {
+            ticket: "Ticket",
+            contact: "Contato",
+            both: "Ticket e Contacto"
+          },
+        },
       },
       messagesList: {
         header: {

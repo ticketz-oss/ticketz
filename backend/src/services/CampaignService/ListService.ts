@@ -1,8 +1,9 @@
 import { Op, fn, col, where } from "sequelize";
-import Campaign from "../../models/Campaign";
 import { isEmpty } from "lodash";
+import Campaign from "../../models/Campaign";
 import ContactList from "../../models/ContactList";
 import Whatsapp from "../../models/Whatsapp";
+import Tag from "../../models/Tag";
 
 interface Request {
   companyId: number | string;
@@ -50,6 +51,7 @@ const ListService = async ({
     order: [["name", "ASC"]],
     include: [
       { model: ContactList },
+      { model: Tag },
       { model: Whatsapp, attributes: ["id", "name"] }
     ]
   });

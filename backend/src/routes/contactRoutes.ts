@@ -64,4 +64,18 @@ contactRoutes.delete(
   ContactController.remove
 );
 
+contactRoutes.post(
+  "/contacts/:contactId/tags",
+  apiTokenAuth,
+  isAuth,
+  ContactController.storeTag
+);
+
+contactRoutes.delete(
+  "/contacts/:contactId/tags/:tagId",
+  apiTokenAuth,
+  isAuth,
+  ContactController.removeTag
+);
+
 export default contactRoutes;

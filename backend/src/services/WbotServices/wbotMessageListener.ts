@@ -45,7 +45,7 @@ import VerifyCurrentSchedule, {
 } from "../CompanyService/VerifyCurrentSchedule";
 import Campaign from "../../models/Campaign";
 import CampaignShipping from "../../models/CampaignShipping";
-import { campaignQueue, parseToMilliseconds, randomValue } from "../../queues";
+import { campaignQueue } from "../../queues/campaign";
 import User from "../../models/User";
 import Setting from "../../models/Setting";
 import { cacheLayer } from "../../libs/cache";
@@ -58,6 +58,8 @@ import { SimpleObjectCache } from "../../helpers/simpleObjectCache";
 import { Session } from "../../libs/wbot";
 import { checkCompanyCompliant } from "../../helpers/CheckCompanyCompliant";
 import { transcriber } from "../../helpers/transcriber";
+import { parseToMilliseconds } from "../../helpers/parseToMilliseconds";
+import { randomValue } from "../../helpers/randomValue";
 
 import {
   IntegrationMessage,
@@ -74,6 +76,7 @@ import {
   BaileysDownloadTaskResult
 } from "../../workers/BaileysDownloader";
 import { getPublicPath } from "../../helpers/GetPublicPath";
+import ShowContactService from "../ContactServices/ShowContactService";
 
 import { SubscriptionService } from "../../ticketzPro/services/subscriptionService";
 
@@ -1588,8 +1591,7 @@ export const checkIntegration = async (
   }
 
   const contactId = message?.contactId || ticket.contactId;
-  const contact =
-    message?.contact || ticket?.contact || (await Contact.findByPk(contactId));
+  const contact = await ShowContactService(contactId);
 
   const integrationSession = await IntegrationSession.findOne({
     where: {

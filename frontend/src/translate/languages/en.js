@@ -580,6 +580,7 @@ const messages = {
             scheduledAt: "Scheduled",
             confirmation: "Confirmation",
             contactList: "Contact List",
+            tag: "Tag",
           },
           buttons: {
             add: "Add",
@@ -945,6 +946,14 @@ const messages = {
         },
         AudioTranscriptions: {
           title: "Audio Transcriptions",
+        },
+        TagsMode: {
+          title: "Tags Mode",
+          options: {
+            ticket: "Ticket",
+            contact: "Contact",
+            both: "Ticket and Contact"
+          },
         },
       },
       messagesList: {

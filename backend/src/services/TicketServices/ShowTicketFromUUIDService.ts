@@ -15,8 +15,16 @@ const ShowTicketUUIDService = async (uuid: string): Promise<Ticket> => {
       {
         model: Contact,
         as: "contact",
-        attributes: ["id", "name", "number", "email", "profilePicUrl", "presence", "disableBot"],
-        include: ["extraInfo"]
+        attributes: [
+          "id",
+          "name",
+          "number",
+          "email",
+          "profilePicUrl",
+          "presence",
+          "disableBot"
+        ],
+        include: ["tags", "extraInfo"]
       },
       {
         model: User,

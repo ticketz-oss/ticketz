@@ -25,7 +25,7 @@ const ListContactsService = async ({
         name: Sequelize.where(
           Sequelize.fn(
             "LOWER",
-            Sequelize.fn("UNACCENT", Sequelize.col("name"))
+            Sequelize.fn("UNACCENT", Sequelize.col("Contact.name"))
           ),
           {
             [Op.like]: Sequelize.literal(
@@ -45,9 +45,10 @@ const ListContactsService = async ({
 
   const { count, rows: contacts } = await Contact.findAndCountAll({
     where: whereCondition,
+    include: ["tags"],
     limit,
     offset,
-    order: [["name", "ASC"]]
+    order: [[Sequelize.col("Contact.name"), "ASC"]]
   });
 
   const hasMore = count > offset + contacts.length;

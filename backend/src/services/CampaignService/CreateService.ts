@@ -3,6 +3,7 @@ import AppError from "../../errors/AppError";
 import Campaign from "../../models/Campaign";
 import ContactList from "../../models/ContactList";
 import Whatsapp from "../../models/Whatsapp";
+import Tag from "../../models/Tag";
 
 interface Data {
   name: string;
@@ -10,7 +11,8 @@ interface Data {
   confirmation: boolean;
   scheduledAt: Date;
   companyId: number;
-  contactListId: number;
+  contactListId?: number;
+  tagId?: number;
   message1?: string;
   message2?: string;
   message3?: string;
@@ -47,6 +49,7 @@ const CreateService = async (data: Data): Promise<Campaign> => {
   await record.reload({
     include: [
       { model: ContactList },
+      { model: Tag },
       { model: Whatsapp, attributes: ["id", "name"] }
     ]
   });

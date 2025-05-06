@@ -5,7 +5,7 @@ import { isArray, isString } from "lodash";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 
-export function TagsContainer ({ ticket }) {
+export function TagsContainer ({ ticket, contact }) {
 
     const [tags, setTags] = useState([]);
     const [selecteds, setSelecteds] = useState([]);
@@ -18,6 +18,8 @@ export function TagsContainer ({ ticket }) {
     }, [])
 
     useEffect(() => {
+        if (!ticket) return;
+
         if (isMounted.current) {
             loadTags().then(() => {
                 if (Array.isArray(ticket.tags)) {
@@ -28,6 +30,20 @@ export function TagsContainer ({ ticket }) {
             });
         }
     }, [ticket]);
+
+    useEffect(() => {
+        if (!contact) return;
+
+        if (isMounted.current) {
+            loadTags().then(() => {
+                if (Array.isArray(contact.tags)) {
+                    setSelecteds(contact.tags);
+                } else {
+                    setSelecteds([]);
+                }
+            });
+        }
+    }, [contact]);
 
     const createTag = async (data) => {
         try {
@@ -74,11 +90,10 @@ export function TagsContainer ({ ticket }) {
             optionsChanged = value;
         }
         setSelecteds(optionsChanged);
-        await syncTags({ ticketId: ticket.id, tags: optionsChanged });
+        await syncTags({ ticketId: ticket?.id, contactId: contact?.id, tags: optionsChanged });
     }
 
     return (
-        <Paper style={{padding: 12}}>
             <Autocomplete
                 multiple
                 size="small"
@@ -107,6 +122,5 @@ export function TagsContainer ({ ticket }) {
                     </Paper>
                 )}
             />
-        </Paper>
     )
 }

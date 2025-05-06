@@ -131,10 +131,11 @@ const reducer = (state, action) => {
 
   if (action.type === "UPDATE_TICKET_CONTACT") {
     const contact = action.payload;
-    const ticketIndex = state.findIndex((t) => t.contactId === contact.id);
-    if (ticketIndex !== -1) {
-      state[ticketIndex].contact = contact;
-    }
+    state.forEach((ticket) => {
+      if (ticket.contactId === contact.id) {
+        ticket.contact = contact;
+      }
+    });
     return [...state];
   }
   
