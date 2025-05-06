@@ -7,6 +7,7 @@ import Ticket from "../../models/Ticket";
 import formatBody from "../../helpers/Mustache";
 import User from "../../models/User";
 import { getIO } from "../../libs/socket";
+import Contact from "../../models/Contact";
 
 interface Request {
   messageId: string;
@@ -30,7 +31,17 @@ const EditWhatsAppMessage = async ({
       {
         model: Ticket,
         as: "ticket",
-        include: ["contact", "queue", "user"]
+        include: [
+          {
+            model: Contact,
+            as: "contact",
+            include: ["tags", "extraInfo"]
+          },
+          "queue",
+          "whatsapp",
+          "user",
+          "tags"
+        ]
       }
     ]
   });
