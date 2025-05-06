@@ -17,6 +17,7 @@ ticketRoutes.get(
 
 ticketRoutes.get(
   "/tickets/:ticketId",
+  apiTokenAuth,
   isAuth,
   isCompliant,
   TicketController.show
@@ -33,6 +34,7 @@ ticketRoutes.post("/tickets", isAuth, isCompliant, TicketController.store);
 
 ticketRoutes.put(
   "/tickets/:ticketId",
+  apiTokenAuth,
   isAuth,
   isCompliant,
   TicketController.update
