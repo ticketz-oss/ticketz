@@ -401,7 +401,7 @@ export class NotificamehubDriver implements OmniDriver {
 
     const whatsapp = await Whatsapp.findOne({
       where: {
-        qrcode: message.to
+        qrcode: message.direction === "OUT" ? message.from : message.to
       },
       include: ["queues"]
     });
