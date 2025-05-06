@@ -76,6 +76,7 @@ import {
   BaileysDownloadTaskResult
 } from "../../workers/BaileysDownloader";
 import { getPublicPath } from "../../helpers/GetPublicPath";
+import ShowContactService from "../ContactServices/ShowContactService";
 
 export interface ImessageUpsert {
   messages: proto.IWebMessageInfo[];
@@ -1586,8 +1587,7 @@ export const checkIntegration = async (
   }
 
   const contactId = message?.contactId || ticket.contactId;
-  const contact =
-    message?.contact || ticket?.contact || (await Contact.findByPk(contactId));
+  const contact = await ShowContactService(contactId);
 
   const integrationSession = await IntegrationSession.findOne({
     where: {

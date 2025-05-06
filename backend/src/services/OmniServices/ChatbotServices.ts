@@ -7,6 +7,7 @@ import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
 import Whatsapp from "../../models/Whatsapp";
 import { logger } from "../../utils/logger";
+import ShowContactService from "../ContactServices/ShowContactService";
 import {
   IntegrationMessage,
   IntegrationMessageMetadata,
@@ -127,7 +128,7 @@ export const checkIntegration = async (
   }
 
   const { contactId } = ticket;
-  const contact = ticket?.contact || (await Contact.findByPk(contactId));
+  const contact = await ShowContactService(contactId);
 
   const integrationSession = await IntegrationSession.findOne({
     where: {
