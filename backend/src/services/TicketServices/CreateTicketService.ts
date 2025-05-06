@@ -5,6 +5,7 @@ import Ticket from "../../models/Ticket";
 import ShowContactService from "../ContactServices/ShowContactService";
 import { getIO } from "../../libs/socket";
 import FindOrCreateATicketTrakingService from "./FindOrCreateATicketTrakingService";
+import Contact from "../../models/Contact";
 
 interface Request {
   contactId: number;
@@ -25,7 +26,7 @@ const CreateTicketService = async ({
 
   const { isGroup } = await ShowContactService(contactId, companyId);
 
-  const { id } = await Ticket.create({
+  const ticket = await Ticket.create({
     contactId,
     companyId,
     queueId,
@@ -33,10 +34,6 @@ const CreateTicketService = async ({
     status: "open",
     isGroup,
     userId
-  });
-
-  const ticket = await Ticket.findByPk(id, {
-    include: ["contact", "queue", "whatsapp", "user"]
   });
 
   if (!ticket) {
@@ -48,6 +45,20 @@ const CreateTicketService = async ({
     companyId: ticket.companyId,
     whatsappId: ticket.whatsappId,
     userId: ticket.userId
+  });
+
+  await ticket.reload({
+    include: [
+      {
+        model: Contact,
+        as: "contact",
+        include: ["tags", "extraInfo"]
+      },
+      "queue",
+      "whatsapp",
+      "user",
+      "tags"
+    ]
   });
 
   const io = getIO();
