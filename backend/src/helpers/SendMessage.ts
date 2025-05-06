@@ -33,7 +33,7 @@ export const SendMessage = async (
   messageData: MessageData
 ): Promise<any> => {
   try {
-    if (!subscriptionService.getTaskResult) {
+    if (!subscriptionService.isValid()) {
       throw new Error("ERR_SUBSCRIPTION_CHECK_FAILED");
     }
 

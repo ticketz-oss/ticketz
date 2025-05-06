@@ -8,9 +8,7 @@ export async function checkSubscription(
   res: Response,
   next: NextFunction
 ) {
-  const status = await subscriptionService.status();
-  const result = status.success && !status.subscriptionData?.pending;
-  if (result === false) {
+  if (!subscriptionService.isValid()) {
     return res.status(402).json({ message: "ERR_SUBSCRIPTION_CHECK_FAILED" });
   }
   return next();

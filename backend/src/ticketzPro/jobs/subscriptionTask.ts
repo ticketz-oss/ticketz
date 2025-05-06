@@ -49,7 +49,7 @@ recheckQueue.process(async _job => {
   const subscriptionService = SubscriptionService.getInstance();
   await subscriptionService.executeDailyTask();
 
-  if (subscriptionService.getTaskResult()) {
+  if (subscriptionService.isValid()) {
     await subscriptionService.cancelRechecks();
   }
 });

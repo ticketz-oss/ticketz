@@ -1662,7 +1662,7 @@ const handleChartbot = async (
   wbot: Session,
   dontReadTheFirstQuestion = false
 ) => {
-  if (!subscriptionService.getTaskResult) {
+  if (!subscriptionService.isValid()) {
     return;
   }
 
@@ -2127,7 +2127,7 @@ const handleMessage = async (
         queueId: null
       });
 
-      if (!subscriptionService.getTaskResult) {
+      if (!subscriptionService.isValid()) {
         return;
       }
 
@@ -2170,7 +2170,7 @@ const handleMessage = async (
       newMessage = await verifyMessage(msg, ticket, contact);
     }
 
-    if (!subscriptionService.getTaskResult) {
+    if (!subscriptionService.isValid()) {
       return;
     }
 

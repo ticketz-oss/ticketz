@@ -57,10 +57,11 @@ export class SubscriptionService {
     return SubscriptionService.instance;
   }
 
-  async executeDailyTask(): Promise<void> {
+  async triggerSingleCheck(): Promise<boolean> {
     try {
       const result = await this.checkSubscriptionStatus();
-      this.taskResult = result.success;
+      this.taskResult =
+        result.success && !this.taskStatus?.subscriptionData?.pending;
 
       if (this.taskResult) {
         this.lastSuccessfulRun = new Date();
@@ -69,9 +70,15 @@ export class SubscriptionService {
         this.scheduleRechecks();
       }
     } catch (error) {
-      logger.error("Error executing daily task:", error);
+      logger.error(error, `Error executing single check: ${error?.message}`);
       this.taskResult = false;
     }
+
+    return this.taskResult;
+  }
+
+  async executeDailyTask(): Promise<void> {
+    await this.triggerSingleCheck();
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -127,25 +134,6 @@ export class SubscriptionService {
     }
   }
 
-  async triggerSingleCheck(): Promise<boolean> {
-    try {
-      const result = await this.checkSubscriptionStatus();
-      this.taskResult = result.success;
-
-      if (this.taskResult) {
-        this.lastSuccessfulRun = new Date();
-        await this.cancelRechecks();
-      } else if (this.lastSuccessfulRun) {
-        this.scheduleRechecks();
-      }
-      return this.taskResult;
-    } catch (error) {
-      logger.error(error, `Error executing single check: ${error?.message}`);
-      this.taskResult = false;
-      return false;
-    }
-  }
-
   async cancel() {
     const url = `${FAAS_URL}/subscribe${FAAS_SUFFIX}`;
 
@@ -188,10 +176,6 @@ export class SubscriptionService {
     return this.taskStatus;
   }
 
-  getTaskResult(): boolean | null {
-    return this.taskResult;
-  }
-
   // eslint-disable-next-line class-methods-use-this
   scheduleRechecks(): void {
     this.lastSuccessfulRun = null;
@@ -218,6 +202,10 @@ export class SubscriptionService {
       await this.triggerSingleCheck();
     }
     return this.taskStatus;
+  }
+
+  isValid() {
+    return !!this.taskResult;
   }
 
   async subscribe({
@@ -277,7 +265,7 @@ export class SubscriptionService {
     });
 
     this.taskStatus = response.data;
-    this.taskResult = success;
+    this.taskResult = success && !this.taskStatus?.subscriptionData?.pending;
     return this.taskStatus;
   }
 }
