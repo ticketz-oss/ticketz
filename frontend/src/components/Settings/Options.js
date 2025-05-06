@@ -145,7 +145,7 @@ export default function Options(props) {
       isMounted.current = false;
     };
   }, []);
-
+  
   useEffect(() => {
     getCurrentUserInfo().then(
       (u) => {
@@ -814,7 +814,7 @@ export default function Options(props) {
               }}
             >
               <MenuItem value="openai">OpenAI</MenuItem>
-              <MenuItem value="grok">Grok</MenuItem>
+              <MenuItem value="groq">Groq</MenuItem>
             </Select>
           </FormControl>
         </Grid>

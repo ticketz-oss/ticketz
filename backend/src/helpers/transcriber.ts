@@ -34,7 +34,7 @@ const providerConfig: Record<string, providerOptions> = {
     baseURL: "https://api.openai.com/v1",
     model: "gpt-4o-mini-transcribe"
   },
-  grok: {
+  groq: {
     baseURL: "https://api.groq.com/openai/v1",
     model: "whisper-large-v3-turbo"
   }
