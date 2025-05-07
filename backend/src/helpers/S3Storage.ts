@@ -107,6 +107,31 @@ export class S3Storage {
         { step: "build" }
       );
 
+      // Add middleware to strip checksum headers for backblaze
+      if (s3ConfigData.endpoint.endsWith("backblazeb2.com")) {
+        client.middlewareStack.addRelativeTo(
+          (next, _context) => async (args: any) => {
+            // Strip problematic headers
+            if (args.request.headers) {
+              delete args.request.headers["x-amz-sdk-checksum-algorithm"];
+              delete args.request.headers["x-amz-checksum-crc32"];
+              delete args.request.headers["x-amz-checksum-crc32c"];
+              delete args.request.headers["x-amz-checksum-sha1"];
+              delete args.request.headers["x-amz-checksum-sha256"];
+              delete args.request.headers["x-amz-checksum-algorithm"];
+              delete args.request.headers["x-amz-checksum-mode"];
+            }
+            return next(args);
+          },
+          {
+            relation: "before",
+            toMiddleware: "retryMiddleware",
+            name: "removeChecksumHeadersMiddleware",
+            override: true
+          }
+        );
+      }
+
       this.storage = new FileStorage(adapter);
     } catch (error) {
       this.failed = true;
