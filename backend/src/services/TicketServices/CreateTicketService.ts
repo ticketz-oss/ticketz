@@ -6,6 +6,7 @@ import ShowContactService from "../ContactServices/ShowContactService";
 import { getIO } from "../../libs/socket";
 import FindOrCreateATicketTrakingService from "./FindOrCreateATicketTrakingService";
 import Contact from "../../models/Contact";
+import { incrementCounter } from "../CounterServices/IncrementCounter";
 import Queue from "../../models/Queue";
 import { GetCompanySetting } from "../../helpers/CheckSettings";
 import Whatsapp from "../../models/Whatsapp";
@@ -98,6 +99,8 @@ const CreateTicketService = async ({
     whatsappId: ticket.whatsappId,
     userId: ticket.userId
   });
+
+  incrementCounter(ticket.companyId, "ticket-create");
 
   await ticket.reload({
     include: [

@@ -18,7 +18,7 @@ import Whatsapp from "./Whatsapp";
 @Table({
   tableName: "TicketTraking"
 })
-class TicketTraking extends Model<TicketTraking> {
+class TicketTraking extends Model {
   @PrimaryKey
   @AutoIncrement
   @Column
@@ -65,6 +65,9 @@ class TicketTraking extends Model<TicketTraking> {
   updatedAt: Date;
 
   @Column
+  chatbotendAt: Date;
+
+  @Column
   startedAt: Date;
 
   @Column
@@ -75,6 +78,12 @@ class TicketTraking extends Model<TicketTraking> {
 
   @Column
   ratingAt: Date;
+
+  @Column
+  waitTime: number;
+
+  @Column
+  serviceTime: number;
 }
 
 export default TicketTraking;
