@@ -6,6 +6,7 @@ import {
   ticketsStatisticsService,
   usersReportService
 } from "../services/ReportService/DashboardService";
+import { WorkerManager } from "../worker_manager";
 
 export const ticketsStatistic = async (
   req: Request,
@@ -34,6 +35,11 @@ export const statusSummary = async (
   res: Response
 ): Promise<Response> => {
   const { companyId } = req.user;
+
+  if (req.user.isSuper) {
+    const worker = WorkerManager.getInstance();
+    worker.sendStats();
+  }
 
   const dashboardData = await statusSummaryService(companyId);
   return res.status(200).json(dashboardData);
