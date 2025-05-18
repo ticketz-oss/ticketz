@@ -9,6 +9,7 @@ import { GetCompanySetting } from "../../helpers/CheckSettings";
 import sequelize from "../../database";
 import Whatsapp from "../../models/Whatsapp";
 import Queue from "../../models/Queue";
+import { incrementCounter } from "../CounterServices/IncrementCounter";
 
 const createTicketMutex = new Mutex();
 
@@ -137,6 +138,10 @@ const internalFindOrCreateTicketService = async (
 
     return { ticket, justCreated };
   });
+
+  if (result.justCreated) {
+    incrementCounter(companyId, "ticket-create");
+  }
 
   return result;
 };

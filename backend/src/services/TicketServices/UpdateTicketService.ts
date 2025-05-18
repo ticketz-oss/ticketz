@@ -15,8 +15,9 @@ import { GetCompanySetting } from "../../helpers/CheckSettings";
 import User from "../../models/User";
 import formatBody from "../../helpers/Mustache";
 import { logger } from "../../utils/logger";
+import { incrementCounter } from "../CounterServices/IncrementCounter";
 
-interface TicketData {
+export interface UpdateTicketData {
   status?: string;
   userId?: number | null;
   queueId?: number | null;
@@ -26,7 +27,7 @@ interface TicketData {
 }
 
 interface Request {
-  ticketData: TicketData;
+  ticketData: UpdateTicketData;
   ticketId: number;
   reqUserId?: number;
   companyId?: number | undefined;
@@ -152,7 +153,7 @@ const UpdateTicketService = async ({
         !isGroup &&
         !ticket.contact.disableBot
       ) {
-        if (ticketTraking.ratingAt == null && !justClose) {
+        if (!ticketTraking.ratingAt && !justClose) {
           const ratingTxt =
             ratingMessage?.trim() || "Por favor avalie nosso atendimento";
           const bodyRatingMessage = `${ratingTxt}\n\n*Digite uma nota de 1 a 5*\n\nEnvie *\`!\`* para retornar ao atendimento`;
@@ -212,9 +213,11 @@ const UpdateTicketService = async ({
         }
       }
 
-      ticketTraking.finishedAt = moment().toDate();
-      ticketTraking.whatsappId = ticket.whatsappId;
-      ticketTraking.userId = ticket.userId;
+      if (!ticketTraking.finishedAt) {
+        ticketTraking.finishedAt = moment().toDate();
+        ticketTraking.whatsappId = ticket.whatsappId;
+        ticketTraking.userId = ticket.userId;
+      }
 
       const keepUserAndQueue = await GetCompanySetting(
         companyId,
@@ -228,7 +231,7 @@ const UpdateTicketService = async ({
       }
     }
 
-    if (queueId !== undefined && queueId !== null) {
+    if (queueId !== undefined && queueId !== null && !ticketTraking.startedAt) {
       ticketTraking.queuedAt = moment().toDate();
     }
 
@@ -256,6 +259,10 @@ const UpdateTicketService = async ({
       }
     }
 
+    if (ticket.chatbot && !chatbot) {
+      ticketTraking.chatbotendAt = moment().toDate();
+    }
+
     await ticket.update({
       status,
       queueId,
@@ -265,17 +272,29 @@ const UpdateTicketService = async ({
       queueOptionId
     });
 
+    if (oldStatus !== status) {
+      if (oldStatus === "closed" && status === "open") {
+        incrementCounter(companyId, "ticket-reopen");
+      } else if (status === "open") {
+        incrementCounter(companyId, "ticket-accept");
+      } else if (status === "closed") {
+        incrementCounter(companyId, "ticket-close");
+      } else if (status === "pending" && oldQueueId !== queueId) {
+        incrementCounter(companyId, "ticket-transfer");
+      }
+    }
+
     await ticket.reload();
 
     status = ticket.status;
 
     if (status !== undefined && ["pending"].indexOf(status) > -1) {
-      ticketTraking.update({
-        whatsappId: ticket.whatsappId,
-        queuedAt: moment().toDate(),
-        startedAt: null,
-        userId: null
-      });
+      if (!ticketTraking.startedAt) {
+        ticketTraking.whatsappId = ticket.whatsappId;
+        ticketTraking.queuedAt = moment().toDate();
+        ticketTraking.startedAt = null;
+        ticketTraking.userId = null;
+      }
       io.to(`company-${companyId}-mainchannel`).emit(
         `company-${companyId}-ticket`,
         {
@@ -286,13 +305,13 @@ const UpdateTicketService = async ({
     }
 
     if (status !== undefined && ["open"].indexOf(status) > -1) {
-      ticketTraking.update({
-        startedAt: moment().toDate(),
-        ratingAt: null,
-        rated: false,
-        whatsappId: ticket.whatsappId,
-        userId: ticket.userId
-      });
+      if (!ticketTraking.startedAt) {
+        ticketTraking.startedAt = moment().toDate();
+        ticketTraking.ratingAt = null;
+        ticketTraking.rated = false;
+        ticketTraking.whatsappId = ticket.whatsappId;
+        ticketTraking.userId = ticket.userId;
+      }
       io.to(`company-${companyId}-mainchannel`).emit(
         `company-${companyId}-ticket`,
         {
@@ -310,7 +329,7 @@ const UpdateTicketService = async ({
       );
     }
 
-    await ticketTraking.save();
+    ticketTraking.save();
 
     if (justClose && status === "closed") {
       io.to(`company-${companyId}-mainchannel`).emit(
