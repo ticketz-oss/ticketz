@@ -29,7 +29,6 @@ import OnlyForSuperUser from "../../components/OnlyForSuperUser";
 import useAuth from "../../hooks/useAuth.js";
 import clsx from "clsx";
 import { loadJSON } from "../../helpers/loadJSON";
-import { SocketContext } from "../../context/Socket/SocketContext";
 
 import { SmallPie } from "./SmallPie";
 import { TicketCountersChart } from "./TicketCountersChart";
@@ -536,8 +535,9 @@ const Dashboard = () => {
                 }
               </>
             )} />
+          }
 
-          <OnlyForSuperUser
+          { !localStorage.getItem("hideAds") && <OnlyForSuperUser
             user={currentUser}
             yes={() => (
               <Grid item xs={12} style={{ display: "none" }}>
