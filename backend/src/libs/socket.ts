@@ -68,6 +68,10 @@ const joinTicketChannel = async (
   logger.debug(`joinChatbox[${c}]: Channel: ${ticketId} by user ${user.id}`);
 };
 
+const notifyOnlineChange = (companyId: number) => {
+  io.to("super").to(`company-${companyId}-admin`).emit("userOnlineChange");
+};
+
 export const initIO = (httpServer: Server): SocketIO => {
   io = new SocketIO(httpServer, {
     cors: {
@@ -133,6 +137,7 @@ export const initIO = (httpServer: Server): SocketIO => {
       active: true
     }).then(_ => {
       logger.debug(`started session ${socket.id} for user ${userId}`);
+      notifyOnlineChange(user.companyId);
     });
 
     socket.on("disconnect", async () => {
@@ -141,6 +146,7 @@ export const initIO = (httpServer: Server): SocketIO => {
         { where: { id: socket.id } }
       ).then(() => {
         logger.debug(`finished session ${socket.id} for user ${userId}`);
+        notifyOnlineChange(user.companyId);
       });
     });
 
@@ -149,6 +155,10 @@ export const initIO = (httpServer: Server): SocketIO => {
 
     if (user.super) {
       socket.join("super");
+    }
+
+    if (user.profile === "admin") {
+      socket.join(`company-${user.companyId}-admin`);
     }
 
     socket.on("joinChatBox", async (ticketId: string) => {
