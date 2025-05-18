@@ -68,8 +68,8 @@ export function TicketCountersChart({ ticketCounters, start, end }) {
     
     const chartData = Object.keys(createData).map((key) => ({
       time: key,
-      create: createData[key],
-      close: closeData[key]
+      created: createData[key],
+      closed: closeData[key]
     }));
     
     setChartData(chartData);
@@ -78,7 +78,7 @@ export function TicketCountersChart({ ticketCounters, start, end }) {
   
 	return (
 		<React.Fragment>
-			<Title>{t("dashboard.charts.perPeriod.title")}</Title>
+			<Title>{t("dashboard.ticketsOnPeriod")}</Title>
 			<ResponsiveContainer>
 				<AreaChart
 					data={chartData}
@@ -154,7 +154,7 @@ export function TicketCountersChart({ ticketCounters, start, end }) {
 					<Tooltip content={<CustomTooltip i18nBase="dashboard.ticketCountersLabels"/>} cursor={true} />
 					<Area
 						type="monotone"
-						dataKey="create"
+						dataKey="created"
 						stroke="blue"
 						strokeWidth={1}
 						fillOpacity={0.5}
@@ -163,7 +163,7 @@ export function TicketCountersChart({ ticketCounters, start, end }) {
 					/>
           <Area
             type="monotone"
-            dataKey="close"
+            dataKey="closed"
             stroke="green"
             strokeWidth={1}
             fillOpacity={0.5}
