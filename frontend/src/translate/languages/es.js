@@ -28,7 +28,9 @@ const messages = {
         proceed: "Proceder",
         enabled: "Activado",
         disabled: "Desactivado",
-      },      
+        noqueue: "Sin cola",
+        rating: "Calificación",
+      },
       signup: {
         title: "Registrarse",
         toasts: {
@@ -73,10 +75,27 @@ const messages = {
         token: "Token",
       },
       dashboard: {
-        charts: {
-          perDay: {
-            title: "Atenciones hoy: ",
-          },
+        usersOnline: "Usuarios en línea",
+        ticketsOpen: "Atenciones abiertas",
+        ticketsDone: "Atenciones resueltas",
+        totalTickets: "Total de atenciones",
+        newContacts: "Nuevos contactos",
+        avgServiceTime: "Tiempo promedio de atención",
+        avgWaitTime: "Tiempo promedio de espera",
+        ticketsOnPeriod: "Atenciones en el período",
+        userCurrentStatus: "Estado (Actual)",
+        filter: {
+          period: "Período",
+          custom: "Personalizado",
+          last3days: "Últimos 3 días",
+          last7days: "Últimos 7 días",
+          last14days: "Últimos 14 días",
+          last30days: "Últimos 30 días",
+          last90days: "Últimos 90 días"
+        },
+        ticketCountersLabels: {
+          created: "Creado",
+          closed: "Cerrado",
         },
       },
       connections: {

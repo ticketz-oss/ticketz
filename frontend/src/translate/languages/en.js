@@ -28,6 +28,8 @@ const messages = {
         proceed: "Proceed",
         enabled: "Enabled",
         disabled: "Disabled",
+        noqueue: "No queue",
+        rating: "Rating",
       },
       signup: {
         title: "Sign Up",
@@ -73,10 +75,28 @@ const messages = {
         token: "Token",
       },
       dashboard: {
-        charts: {
-          perDay: {
-            title: "Today's Interactions: ",
-          },
+        usersOnline: "Users online",
+        ticketsWaiting: "Tickets waiting",
+        ticketsOpen: "Open tickets",
+        ticketsDone: "Resolved tickets",
+        totalTickets: "Total tickets",
+        newContacts: "New contacts",
+        avgServiceTime: "Average service time",
+        avgWaitTime: "Average wait time",
+        ticketsOnPeriod: "Tickets in the period",
+        userCurrentStatus: "Current status",
+        filter: {
+          period: "Period",
+          custom: "Custom",
+          last3days: "Last 3 days",
+          last7days: "Last 7 days",
+          last14days: "Last 14 days",
+          last30days: "Last 30 days",
+          last90days: "Last 90 days"
+        },
+        ticketCountersLabels: {
+          created: "Created",
+          closed: "Closed",
         },
       },
       connections: {
@@ -1037,7 +1057,7 @@ const messages = {
           country: "Country",
           phoneNumber: "Whatsapp Number",
           submit: "Register",
-        },        
+        },
         support: {
           title: "Support Ticketz project",
           mercadopagotitle: "Credit Card",
