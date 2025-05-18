@@ -17,6 +17,7 @@ import TicketNote from "../models/TicketNote";
 import QuickMessage from "../models/QuickMessage";
 import Help from "../models/Help";
 import TicketTraking from "../models/TicketTraking";
+import Counter from "../models/Counter";
 import UserRating from "../models/UserRating";
 import QueueOption from "../models/QueueOption";
 import Schedule from "../models/Schedule";
@@ -62,6 +63,7 @@ const models = [
   QuickMessage,
   Help,
   TicketTraking,
+  Counter,
   UserRating,
   QueueOption,
   Schedule,
