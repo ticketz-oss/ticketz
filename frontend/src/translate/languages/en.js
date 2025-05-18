@@ -94,6 +94,10 @@ const messages = {
           last30days: "Last 30 days",
           last90days: "Last 90 days"
         },
+        date: {
+          start: "Start date",
+          end: "End date",
+        },
         ticketCountersLabels: {
           created: "Created",
           closed: "Closed",
