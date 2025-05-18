@@ -17,6 +17,7 @@ import ErrorIcon from '@material-ui/icons/Error';
 import moment from 'moment';
 
 import Rating from '@material-ui/lab/Rating';
+import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles(theme => ({
 	on: {
@@ -46,17 +47,17 @@ export default function TableAttendantsStatus(props) {
 	const classes = useStyles();
 
     function renderList () {
-        return attendants.map((a, k) => (
-            <TableRow key={k}>
+        return attendants.map(a => (
+            <TableRow key={a.id}>
                 <TableCell>{a.name}</TableCell>
                 <TableCell align="center" className={classes.pointer}>
-                    <RatingBox rating={a.rating} />
+                    <RatingBox rating={a.averageRating} />
                 </TableCell>
-                <TableCell align="center">{a.tickets}</TableCell>
-                <TableCell align="center">{a.openCount}</TableCell>
-                <TableCell align="center">{a.closeCount}</TableCell>
+                <TableCell align="center">{a.totalTickets}</TableCell>
+                <TableCell align="center">{a.openTickets}</TableCell>
+                <TableCell align="center">{a.closedTickets}</TableCell>
                 <TableCell align="center">{formatTime(a.avgWaitTime, 2)}</TableCell>
-                <TableCell align="center">{formatTime(a.avgSupportTime, 2)}</TableCell>
+                <TableCell align="center">{formatTime(a.avgServiceTime, 2)}</TableCell>
                 <TableCell align="center">
                     { a.online ?
                         <CheckCircleIcon className={classes.on} />
@@ -76,34 +77,18 @@ export default function TableAttendantsStatus(props) {
             <Table>
                 <TableHead>
                     <TableRow>
-                        <TableCell>Nome</TableCell>
-                        <TableCell align="center">Avaliações</TableCell>
-                        <TableCell align="center">Total de Atendimentos</TableCell>
-                        <TableCell align="center">Acontecendo</TableCell>
-                        <TableCell align="center">Finalizados</TableCell>
-                        <TableCell align="center">T.M. de Espera</TableCell>
-                        <TableCell align="center">T.M. de Atendimento</TableCell>
-                        <TableCell align="center">Status (Atual)</TableCell>
+                        <TableCell>{i18n.t("common.user")}</TableCell>
+                        <TableCell align="center">{i18n.t("common.rating")}</TableCell>
+                        <TableCell align="center">{i18n.t("dashboard.totalTickets")}</TableCell>
+                        <TableCell align="center">{i18n.t("dashboard.ticketsOpen")}</TableCell>
+                        <TableCell align="center">{i18n.t("dashboard.ticketsDone")}</TableCell>
+                        <TableCell align="center">{i18n.t("dashboard.avgWaitTime")}</TableCell>
+                        <TableCell align="center">{i18n.t("dashboard.avgServiceTime")}</TableCell>
+                        <TableCell align="center">{i18n.t("dashboard.userCurrentStatus")}</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
                     { renderList() }
-                    {/* <TableRow>
-                        <TableCell>Nome 4</TableCell>
-                        <TableCell align="center">10</TableCell>
-                        <TableCell align="center">10 minutos</TableCell>
-                        <TableCell align="center">
-                            <CheckCircleIcon className={classes.off} />
-                        </TableCell>
-                    </TableRow>
-                    <TableRow>
-                        <TableCell>Nome 5</TableCell>
-                        <TableCell align="center">10</TableCell>
-                        <TableCell align="center">10 minutos</TableCell>
-                        <TableCell align="center">
-                            <CheckCircleIcon className={classes.on} />
-                        </TableCell>
-                    </TableRow> */}
                 </TableBody>
             </Table>
         </TableContainer>

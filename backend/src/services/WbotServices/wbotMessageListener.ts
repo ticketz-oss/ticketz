@@ -33,7 +33,9 @@ import { logger } from "../../utils/logger";
 import CreateOrUpdateContactService from "../ContactServices/CreateOrUpdateContactService";
 import FindOrCreateTicketService from "../TicketServices/FindOrCreateTicketService";
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
-import UpdateTicketService from "../TicketServices/UpdateTicketService";
+import UpdateTicketService, {
+  UpdateTicketData
+} from "../TicketServices/UpdateTicketService";
 import formatBody from "../../helpers/Mustache";
 import TicketTraking from "../../models/TicketTraking";
 import UserRating from "../../models/UserRating";
@@ -430,6 +432,16 @@ const createDeferred = (): DeferredPromise => {
   return { promise, resolve, reject };
 };
 
+async function updateTicket(ticket: Ticket, ticketData: UpdateTicketData) {
+  await UpdateTicketService({
+    ticketData,
+    ticketId: ticket.id,
+    companyId: ticket.companyId
+  });
+  await ticket.reload();
+  return ticket;
+}
+
 export const verifyMediaMessage = async (
   msg: proto.IWebMessageInfo,
   ticket: Ticket,
@@ -497,7 +509,7 @@ export const verifyMediaMessage = async (
   const io = getIO();
 
   if (!msg.key.fromMe && ticket.status === "closed") {
-    await ticket.update({ status: "pending" });
+    await updateTicket(ticket, { status: "pending" });
     await ticket.reload({
       include: [
         { model: Queue, as: "queue" },
@@ -697,7 +709,7 @@ export const verifyMessage = async (
   }
 
   if (!msg.key.fromMe && ticket.status === "closed") {
-    await ticket.update({ status: "pending" });
+    await updateTicket(ticket, { status: "pending" });
     await ticket.reload({
       include: [
         { model: Queue, as: "queue" },
@@ -854,7 +866,7 @@ const quickMessage = async (
   wbot: Session,
   ticket: Ticket,
   text: string,
-  updateTicket = false
+  saveOnTicket = false
 ) => {
   const debouncedSentMessage = debounce(
     async () => {
@@ -865,7 +877,7 @@ const quickMessage = async (
           text: `\u200e${text}`
         }
       );
-      if (updateTicket) {
+      if (saveOnTicket) {
         verifyMessage(sentMessage, ticket, ticket.contact);
       }
     },
@@ -1395,69 +1407,6 @@ const verifyQueue = async (
   const selectedOption = Number(firstMessage);
   const choosenQueue = selectedOption ? queues[+selectedOption - 1] : null;
 
-  const { companyId } = ticket;
-
-  const buttonActive = await Setting.findOne({
-    where: {
-      key: "chatBotType",
-      companyId
-    }
-  });
-
-  const botList = async () => {
-    const sectionsRows = [];
-
-    queues.forEach((queue, index) => {
-      sectionsRows.push({
-        title: queue.name,
-        rowId: `${index + 1}`
-      });
-    });
-
-    const sections = [
-      {
-        rows: sectionsRows
-      }
-    ];
-
-    const listMessage = {
-      text: formatBody(`${greetingMessage}`, ticket),
-      buttonText: "Escolha uma opção",
-      sections
-    };
-
-    const sendMsg = await wbot.sendMessage(
-      `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-      listMessage
-    );
-
-    await verifyMessage(sendMsg, ticket, ticket.contact);
-  };
-
-  const botButton = async () => {
-    const buttons = [];
-    queues.forEach((queue, index) => {
-      buttons.push({
-        buttonId: `${index + 1}`,
-        buttonText: { displayText: queue.name },
-        type: 4
-      });
-    });
-
-    const buttonMessage = {
-      text: formatBody(`${greetingMessage}`, ticket),
-      buttons,
-      headerType: 4
-    };
-
-    const sendMsg = await wbot.sendMessage(
-      `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-      buttonMessage
-    );
-
-    await verifyMessage(sendMsg, ticket, ticket.contact);
-  };
-
   const botText = async () => {
     let options = "";
 
@@ -1494,22 +1443,10 @@ const verifyQueue = async (
       await SendWhatsAppMessage({ body, ticket });
     }
   } else {
-    switch (buttonActive.value) {
-      case "list":
-        botList();
-        break;
-      case "button":
-        if (queues.length > 4) {
-          botText();
-        } else {
-          botButton();
-        }
-        break;
-      case "text":
-        botText();
-        break;
-      default:
-    }
+    botText();
+    await updateTicket(ticket, {
+      chatbot: true
+    });
   }
 };
 
@@ -1677,7 +1614,11 @@ const handleChartbot = async (
 
   if (messageBody === "#") {
     // voltar para o menu inicial
-    await ticket.update({ queueOptionId: null, chatbot: false, queueId: null });
+    await updateTicket(ticket, {
+      queueOptionId: null,
+      chatbot: false,
+      queueId: null
+    });
     await verifyQueue(wbot, msg, ticket, ticket.contact);
     return;
   }
@@ -1736,7 +1677,7 @@ const handleChartbot = async (
       )) === "enabled"
     ) {
       // message didn't identified an option and company setting to exit chatbot
-      await ticket.update({ chatbot: false });
+      await updateTicket(ticket, { chatbot: false });
       const whatsapp = await Whatsapp.findByPk(ticket.whatsappId);
       if (whatsapp.transferMessage) {
         const body = formatBody(`${whatsapp.transferMessage}`, ticket);
@@ -1813,17 +1754,16 @@ const handleChartbot = async (
       }
 
       if (currentOption.exitChatbot) {
-        await ticket.update({
+        await updateTicket(ticket, {
           chatbot: false,
           queueOptionId: null
         });
       } else if (currentOption.forwardQueueId) {
-        await ticket.update({
+        await updateTicket(ticket, {
           queueOptionId: null,
           chatbot: false,
           queueId: currentOption.forwardQueueId
         });
-        await ticket.reload();
         await startQueue(wbot, ticket, currentOption.forwardQueue);
         await checkIntegration(newMessage, wbot);
       }
@@ -2017,7 +1957,7 @@ const handleMessage = async (
             ticketTracking.update({
               ratingAt: null
             });
-            ticketTracking.ticket.update({
+            updateTicket(ticketTracking.ticket, {
               status: "open",
               userId: ticketTracking.userId
             });
@@ -2113,7 +2053,7 @@ const handleMessage = async (
       !isGroup &&
       !integrationSession
     ) {
-      await ticket.update({
+      await updateTicket(ticket, {
         queueOptionId: null,
         chatbot: false,
         queueId: null

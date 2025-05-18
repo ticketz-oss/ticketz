@@ -31,6 +31,8 @@ const messages = {
         proceed: "Prosseguir",
         enabled: "Ativado",
         disabled: "Desativado",
+        noqueue: "Sem fila",
+        rating: "Avaliação",
       },
       signup: {
         title: "Cadastre-se",
@@ -76,10 +78,32 @@ const messages = {
         token: "Token",
       },
       dashboard: {
-        charts: {
-          perDay: {
-            title: "Atendimentos hoje: ",
-          },
+        usersOnline: "Usuários online",
+        ticketsWaiting: "Atendimentos aguardando",
+        ticketsOpen: "Atendimentos abertos",
+        ticketsDone: "Atendimentos resolvidos",
+        totalTickets: "Total de atendimentos",
+        newContacts: "Novos contatos",
+        avgServiceTime: "Tempo médio de atendimento",
+        avgWaitTime: "Tempo médio de espera",
+        ticketsOnPeriod: "Atendimentos no período",
+        userCurrentStatus: "Status (Atual)",
+        filter: {
+          period: "Período",
+          custom: "Personalizado",
+          last3days: "Últimos 3 dias",
+          last7days: "Últimos 7 dias",
+          last14days: "Últimos 14 dias",
+          last30days: "Últimos 30 dias",
+          last90days: "Últimos 90 dias"
+        },
+        date: {
+          start: "Data inicial",
+          end: "Data final",
+        },
+        ticketCountersLabels: {
+          created: "Criado",
+          closed: "Fechado",
         },
       },
       connections: {
