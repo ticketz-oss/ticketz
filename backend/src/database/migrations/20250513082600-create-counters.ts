@@ -15,7 +15,7 @@ async function createCounters(
       DATE_TRUNC('hour', "${timeField}") + INTERVAL '30 minutes' * DIV(EXTRACT(MINUTE FROM "${timeField}"), 30) AS "timestamp",
       COUNT(*) AS "value"
     FROM "TicketTraking"
-    WHERE "${timeField}" IS NOT NULL
+    WHERE "${timeField}" IS NOT NULL AND "companyId" IS NOT NULL
     GROUP BY "companyId", "timestamp";
     `,
     { transaction }
