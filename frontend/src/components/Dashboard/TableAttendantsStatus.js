@@ -35,11 +35,14 @@ const useStyles = makeStyles(theme => ({
 
 export function RatingBox ({ rating }) {
     const ratingTrunc = rating === null ? 0 : Math.trunc(rating);
-    return <Rating
+    return <div style={{ width: "max-content" }}>
+      <Rating
         defaultValue={ratingTrunc}
         max={5}
         readOnly
-    />
+      />
+      <span style={{ verticalAlign: "super"}}>&nbsp;({ratingTrunc?.toFixed(1)})</span>
+    </div>
 }
 
 export default function TableAttendantsStatus(props) {
