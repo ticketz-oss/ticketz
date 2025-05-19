@@ -368,6 +368,104 @@ async function handleNoQueueTimeout(
   );
 }
 
+async function handleChatbotTicketTimeout(
+  company: Company,
+  timeout: number,
+  action: number
+) {
+  logger.trace(
+    {
+      timeout,
+      action,
+      companyId: company?.id
+    },
+    "handleChatbotTicketTimeout: entering"
+  );
+
+  if (action) {
+    const queue = await QueueModel.findOne({
+      where: {
+        companyId: company.id,
+        id: action
+      }
+    });
+
+    if (!queue) {
+      const removed = await Setting.destroy({
+        where: {
+          companyId: company.id,
+          key: {
+            [Op.like]: "chatbotTicketTimeout%"
+          }
+        }
+      });
+      logger.info(
+        { companyId: company.id, action, removed },
+        "handleChatbotTicketTimeout -> removed incorrect setting"
+      );
+      return;
+    }
+  }
+
+  const where: WhereOptions<Ticket> = {
+    status: "pending",
+    companyId: company.id,
+    isGroup: false,
+    chatbot: true,
+    updatedAt: {
+      [Op.lt]: subMinutes(new Date(), timeout)
+    }
+  };
+
+  const tickets = await Ticket.findAll({ where });
+
+  logger.debug(
+    { expiredCount: tickets.length },
+    "handleChatbotTicketTimeout -> tickets"
+  );
+
+  const ticketData: any = {
+    status: action ? "pending" : "closed"
+  };
+
+  if (action) {
+    ticketData.queueId = action;
+  }
+
+  tickets.forEach(ticket => {
+    logger.trace(
+      { ...ticketData },
+      "handleChatbotTicketTimeout -> UpdateTicketService"
+    );
+    UpdateTicketService({
+      ticketId: ticket.id,
+      ticketData,
+      companyId: company.id
+    })
+      .then(response => {
+        logger.trace(
+          { response },
+          "handleChatbotTicketTimeout -> UpdateTicketService"
+        );
+      })
+      .catch(error => {
+        logger.error(
+          { error, message: error?.message },
+          "handleNoQueueTimeout -> UpdateTicketService"
+        );
+      });
+  });
+
+  logger.trace(
+    {
+      timeout,
+      action,
+      companyId: company?.id
+    },
+    "handleChatbotTicketTimeout: exiting"
+  );
+}
+
 async function handleOpenTicketTimeout(
   company: Company,
   timeout: number,
@@ -456,6 +554,20 @@ async function handleTicketTimeouts() {
         company,
         openTicketTimeout,
         openTicketTimeoutAction
+      );
+    }
+    const chatbotTicketTimeout = Number(
+      await GetCompanySetting(company.id, "chatbotTicketTimeout", "0")
+    );
+    if (chatbotTicketTimeout) {
+      const chatbotTicketTimeoutAction =
+        Number(
+          await GetCompanySetting(company.id, "chatbotTicketTimeoutAction", "0")
+        ) || 0;
+      handleChatbotTicketTimeout(
+        company,
+        chatbotTicketTimeout,
+        chatbotTicketTimeoutAction
       );
     }
   });
