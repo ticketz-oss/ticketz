@@ -22,9 +22,10 @@ import Company from "./Company";
 import Whatsapp from "./Whatsapp";
 import WhatsappQueue from "./WhatsappQueue";
 import QueueOption from "./QueueOption";
+import Ticket from "./Ticket";
 
 @Table
-class Queue extends Model<Queue> {
+class Queue extends Model {
   @PrimaryKey
   @AutoIncrement
   @Column
@@ -84,6 +85,9 @@ class Queue extends Model<Queue> {
 
   @Column
   mediaName: string;
+
+  @HasMany(() => Ticket)
+  tickets: Ticket[];
 }
 
 export default Queue;
