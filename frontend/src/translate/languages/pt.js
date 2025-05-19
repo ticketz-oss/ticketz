@@ -30,6 +30,7 @@ const messages = {
         disabled: "Desativado",
         noqueue: "Sem fila",
         rating: "Avaliação",
+        transferTo: "Transferir para",
       },
       signup: {
         title: "Cadastre-se",
@@ -779,6 +780,8 @@ const messages = {
         success: "Configurações salvas com sucesso.",
         copiedToClipboard: "Copiado para a área de transferência",
         title: "Configurações",
+        chatbotTicketTimeout: "Timeout do chatbot (minutos)",
+        chatbotTicketTimeoutAction: "Ação do timeout do chatbot",
         settings: {
           userCreation: {
             name: "Criação de usuário",

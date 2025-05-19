@@ -122,6 +122,9 @@ export default function Options(props) {
   const [noQueueTimeoutAction, setNoQueueTimeoutAction] = useState("0");
   const [openTicketTimeout, setOpenTicketTimeout] = useState("0");
   const [openTicketTimeoutAction, setOpenTicketTimeoutAction] = useState("pending");
+  const [chatbotTicketTimeout, setChatbotTicketTimeout] = useState("0");
+  const [chatbotTicketTimeoutAction, setChatbotTicketTimeoutAction] = useState(0);
+
   const [queues, setQueues] = useState([]);
   const { findAll: findAllQueues } = useQueues();
 
@@ -601,6 +604,47 @@ export default function Options(props) {
           </FormControl>
         </Grid>
 
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <TextField
+              id="chatbot-timeout-field"
+              label={i18n.t("settings.chatbotTicketTimeout")}
+              variant="standard"
+              name="chatbotTicketTimeout"
+              type="number"
+              value={chatbotTicketTimeout}
+              onChange={(e) => {
+                setChatbotTicketTimeout(e.target.value);
+              }}
+              onBlur={async (_) => {
+                await handleSetting("chatbotTicketTimeout", chatbotTicketTimeout);
+              }}
+            />
+          </FormControl>
+        </Grid>
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="chatbot-ticket-timeout-action-label">
+              {i18n.t("settings.chatbotTicketTimeoutAction")}
+            </InputLabel>
+            <Select
+              labelId="chatbot-ticket-timeout-action-label"
+              value={chatbotTicketTimeoutAction}
+              onChange={async (e) => {
+                handleSetting("chatbotTicketTimeoutAction", e.target.value, setChatbotTicketTimeoutAction);
+              }}
+            >
+              <MenuItem value={"0"}>{i18n.t("common.close")}</MenuItem>
+              {queues.map((queue) => (
+                <MenuItem key={queue.id} value={queue.id}>
+                  {i18n.t("common.transferTo")} {queue.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+        
         <Grid item xs={12}>
           <h2 className={classes.groupTitle}>{i18n.t("settings.group.officeHours")}</h2>
         </Grid>
