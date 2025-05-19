@@ -734,7 +734,7 @@ const Dashboard = () => {
           </Grid>
 
 
-          {/* USUARIOS ONLINE */}
+          {/* USER REPORT */}
           <Grid item xs={12}>
             {usersData.userReport?.length ? (
               <TableAttendantsStatus
