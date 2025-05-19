@@ -31,4 +31,12 @@ routes.get(
   DashboardController.usersReport
 );
 
+routes.get(
+  "/dashboard/queues",
+  isAuth,
+  isAdmin,
+  isCompliant,
+  DashboardController.queuesReport
+);
+
 export default routes;

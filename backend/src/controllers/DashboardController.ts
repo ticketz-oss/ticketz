@@ -7,6 +7,7 @@ import {
   usersReportService
 } from "../services/ReportService/DashboardService";
 import { WorkerManager } from "../worker_manager";
+import { queuesReportService } from "../services/ReportService/QueuesReportService";
 
 export const ticketsStatistic = async (
   req: Request,
@@ -27,6 +28,17 @@ export const usersReport = async (
   const { companyId } = req.user;
 
   const result = await usersReportService(companyId, params);
+  return res.status(200).json(result);
+};
+
+export const queuesReport = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const params: DashboardDateRange = req.query;
+  const { companyId } = req.user;
+
+  const result = await queuesReportService(companyId, params);
   return res.status(200).json(result);
 };
 
