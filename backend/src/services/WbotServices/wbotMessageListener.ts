@@ -1113,12 +1113,26 @@ const sendMenu = async (
   }
 };
 
-const startQueue = async (
+export const startQueue = async (
   wbot: Session,
   ticket: Ticket,
-  queue: Queue,
+  queue: Queue = null,
   sendBackToMain = true
 ) => {
+  if (!queue) {
+    queue = await Queue.findByPk(ticket.queueId, {
+      include: [
+        {
+          model: QueueOption,
+          as: "options",
+          where: { parentId: null },
+          required: false
+        }
+      ],
+      order: [["options", "option", "ASC"]]
+    });
+  }
+
   const { companyId, contact } = ticket;
   let chatbot = false;
 
