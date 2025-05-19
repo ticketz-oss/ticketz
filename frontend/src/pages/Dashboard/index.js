@@ -15,12 +15,15 @@ import GroupAddIcon from "@material-ui/icons/GroupAdd";
 import HourglassEmptyIcon from "@material-ui/icons/HourglassEmpty";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import TimerIcon from '@material-ui/icons/Timer';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faDownload } from '@fortawesome/free-solid-svg-icons';
 
 import { makeStyles } from "@material-ui/core/styles";
 import { grey, blue } from "@material-ui/core/colors";
 import { toast } from "react-toastify";
 
 import TableAttendantsStatus from "../../components/Dashboard/TableAttendantsStatus";
+import TableQueueReport from "../../components/Dashboard/TableQueueReport";
 
 import { isEmpty } from "lodash";
 import moment from "moment";
@@ -36,6 +39,8 @@ import { TicketCountersChart } from "./TicketCountersChart";
 import TicketzRegistry from "../../components/TicketzRegistry";
 import api from "../../services/api.js";
 import { SocketContext } from "../../context/Socket/SocketContext.js";
+import { Box, IconButton, Tab, Tabs } from "@material-ui/core";
+import { exportCsv } from "../../helpers/exportCsv.js";
 
 const gitinfo = loadJSON('/gitinfo.json');
 
@@ -280,6 +285,8 @@ const Dashboard = () => {
 
   const [ticketsData, setTicketsData] = useState({});
   const [usersData, setUsersData] = useState([]);
+  const [queuesData, setQueuesData] = useState([]);
+  const [reportBy, setReportBy] = useState("users");
   const [loadingUsers, setLoadingUsers] = useState(false);
 
   const socketManager = useContext(SocketContext);
@@ -439,6 +446,14 @@ const Dashboard = () => {
           setLoadingUsers(false);
         }
       });
+      
+    api.get("/dashboard/queues", { params }).then(
+      result => {
+        if (result?.data) {
+          setQueuesData(result.data);
+        }
+      });
+      
   }
 
   useEffect(() => {
@@ -509,7 +524,7 @@ const Dashboard = () => {
         </>
       );
   }
-
+  
   if (currentUser?.profile !== "admin") {
     return (
       <div>
@@ -733,17 +748,46 @@ const Dashboard = () => {
             </Paper>
           </Grid>
 
-
-          {/* USER REPORT */}
           <Grid item xs={12}>
-            {usersData.userReport?.length ? (
+            <Box display="flex" justifyContent="space-between">
+              <Tabs
+                value={reportBy}
+                onChange={(e, v) => setReportBy(v)}
+                indicatorColor="primary"
+                textColor="primary"
+              >
+                <Tab label={i18n.t("common.user")} value={"users"} />
+                <Tab label={i18n.t("common.queue")} value={"queues"} />
+              </Tabs>
+              <IconButton
+                color="primary"
+                onClick={() => exportCsv(
+                  reportBy === "users"
+                   ? usersData.userReport
+                   : queuesData.queuesReport,
+                  `report-${reportBy}.csv`
+                 )}
+              >
+                <FontAwesomeIcon icon={faDownload} />
+              </IconButton>
+            </Box>
+
+            {reportBy === "users" && usersData.userReport?.length ? (
               <TableAttendantsStatus
                 attendants={usersData.userReport}
                 loading={loadingUsers}
               />
             ) : null}
+
+            {reportBy === "queues" && queuesData.queuesReport?.length ? (
+              <TableQueueReport
+                attendants={queuesData.queuesReport}
+                loading={loadingUsers}
+              />
+            ) : null}
+
           </Grid>
-          
+
           <OnlyForSuperUser
             user={currentUser}
             yes={() => (
