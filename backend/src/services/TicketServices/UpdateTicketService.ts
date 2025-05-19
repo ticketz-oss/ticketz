@@ -9,7 +9,7 @@ import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
 import SendWhatsAppMessage from "../WbotServices/SendWhatsAppMessage";
 import FindOrCreateATicketTrakingService from "./FindOrCreateATicketTrakingService";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
-import { verifyMessage } from "../WbotServices/wbotMessageListener";
+import { startQueue, verifyMessage } from "../WbotServices/wbotMessageListener";
 import AppError from "../../errors/AppError";
 import { GetCompanySetting } from "../../helpers/CheckSettings";
 import User from "../../models/User";
@@ -330,6 +330,14 @@ const UpdateTicketService = async ({
     }
 
     ticketTraking.save();
+
+    if (!ticket.userId && ticket.queueId && ticket.queueId !== oldQueueId) {
+      const wbot = await GetTicketWbot(ticket);
+      if (wbot) {
+        await startQueue(wbot, ticket);
+        await ticket.reload();
+      }
+    }
 
     if (justClose && status === "closed") {
       io.to(`company-${companyId}-mainchannel`).emit(
