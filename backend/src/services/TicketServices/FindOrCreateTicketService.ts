@@ -13,14 +13,19 @@ import { incrementCounter } from "../CounterServices/IncrementCounter";
 
 const createTicketMutex = new Mutex();
 
+type FindOrCreateTicketOptions = {
+  groupContact?: Contact;
+  doNotReopen?: boolean;
+  findOnly?: boolean;
+  queue?: Queue;
+};
+
 const internalFindOrCreateTicketService = async (
   contact: Contact,
   whatsappId: number,
   unreadMessages: number,
   companyId: number,
-  groupContact?: Contact,
-  doNotReopen?: boolean,
-  queue?: Queue
+  { groupContact, doNotReopen, findOnly, queue }: FindOrCreateTicketOptions = {}
 ): Promise<{ ticket: Ticket; justCreated: boolean }> => {
   let justCreated = false;
   const result = await sequelize.transaction(async () => {
@@ -113,6 +118,10 @@ const internalFindOrCreateTicketService = async (
       }
     }
 
+    if (findOnly && !ticket) {
+      return { ticket: null, justCreated: false };
+    }
+
     if (!ticket) {
       ticket = await Ticket.create({
         contactId: groupContact ? groupContact.id : contact.id,
@@ -146,18 +155,12 @@ const internalFindOrCreateTicketService = async (
   return result;
 };
 
-type FindOrCreateTicketOptions = {
-  groupContact?: Contact;
-  doNotReopen?: boolean;
-  queue?: Queue;
-};
-
 const FindOrCreateTicketService = async (
   contact: Contact,
   whatsappId: number,
   unreadMessages: number,
   companyId: number,
-  { groupContact, doNotReopen, queue }: FindOrCreateTicketOptions = {}
+  options: FindOrCreateTicketOptions = {}
 ): Promise<{ ticket: Ticket; justCreated: boolean }> => {
   const release = await createTicketMutex.acquire();
 
@@ -167,9 +170,7 @@ const FindOrCreateTicketService = async (
       whatsappId,
       unreadMessages,
       companyId,
-      groupContact,
-      doNotReopen,
-      queue
+      options
     );
   } finally {
     release();
