@@ -34,6 +34,7 @@ export async function checkCompanyCompliant(
 
     const dueDate = new Date(company.dueDate);
     dueDate.setDate(dueDate.getDate() + gracePeriod);
+    dueDate.setHours(23, 59, 59, 999);
 
     const isCompliant = new Date() <= dueDate;
 
