@@ -1436,7 +1436,7 @@ const verifyQueue = async (
   if (!ignoreMessage && choosenQueue) {
     await startQueue(wbot, ticket, choosenQueue);
   } else if (!ignoreMessage && !choosenQueue && chatbotAutoExit) {
-    await ticket.update({ chatbot: false });
+    await updateTicket(ticket, { chatbot: false });
     const whatsapp = await Whatsapp.findByPk(ticket.whatsappId);
     if (whatsapp.transferMessage) {
       const body = formatBody(`\u200e${whatsapp.transferMessage}`, ticket);
