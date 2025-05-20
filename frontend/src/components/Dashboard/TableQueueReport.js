@@ -12,11 +12,9 @@ import Skeleton from "@material-ui/lab/Skeleton";
 import { makeStyles } from "@material-ui/core/styles";
 import { green, red } from '@material-ui/core/colors';
 
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import ErrorIcon from '@material-ui/icons/Error';
 import moment from 'moment';
 
-import Rating from '@material-ui/lab/Rating';
+import { RatingBox } from './TableAttendantsStatus';
 import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles(theme => ({
@@ -33,25 +31,13 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-export function RatingBox ({ rating }) {
-    const ratingTrunc = rating === null ? 0 : Math.trunc(rating);
-    return <div style={{ width: "max-content" }}>
-      <Rating
-        defaultValue={ratingTrunc}
-        max={5}
-        readOnly
-      />
-      <span style={{ verticalAlign: "super"}}>&nbsp;({ratingTrunc?.toFixed(1)})</span>
-    </div>
-}
-
-export default function TableAttendantsStatus(props) {
+export default function TableQueueReport(props) {
     const { loading, attendants } = props
 	const classes = useStyles();
 
     function renderList () {
         return attendants.map(a => (
-            <TableRow key={a.id}>
+            Number(a.totalTickets) ? <TableRow key={a.id}>
                 <TableCell>{a.name}</TableCell>
                 <TableCell align="center" className={classes.pointer}>
                     <RatingBox rating={a.averageRating} />
@@ -61,13 +47,8 @@ export default function TableAttendantsStatus(props) {
                 <TableCell align="center">{a.closedTickets}</TableCell>
                 <TableCell align="center">{formatTime(a.avgWaitTime, 2)}</TableCell>
                 <TableCell align="center">{formatTime(a.avgServiceTime, 2)}</TableCell>
-                <TableCell align="center">
-                    { a.online ?
-                        <CheckCircleIcon className={classes.on} />
-                        : <ErrorIcon className={classes.off} />
-                    }
-                </TableCell>
             </TableRow>
+            : ""
         ))
     }
 
@@ -80,14 +61,13 @@ export default function TableAttendantsStatus(props) {
             <Table>
                 <TableHead>
                     <TableRow>
-                        <TableCell>{i18n.t("common.user")}</TableCell>
+                        <TableCell>{i18n.t("common.queue")}</TableCell>
                         <TableCell align="center">{i18n.t("common.rating")}</TableCell>
                         <TableCell align="center">{i18n.t("dashboard.totalTickets")}</TableCell>
                         <TableCell align="center">{i18n.t("dashboard.ticketsOpen")}</TableCell>
                         <TableCell align="center">{i18n.t("dashboard.ticketsDone")}</TableCell>
                         <TableCell align="center">{i18n.t("dashboard.avgWaitTime")}</TableCell>
                         <TableCell align="center">{i18n.t("dashboard.avgServiceTime")}</TableCell>
-                        <TableCell align="center">{i18n.t("dashboard.userCurrentStatus")}</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>

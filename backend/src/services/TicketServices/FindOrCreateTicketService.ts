@@ -17,6 +17,7 @@ const createTicketMutex = new Mutex();
 export type FindOrCreateTicketOptions = {
   groupContact?: Contact;
   doNotReopen?: boolean;
+  findOnly?: boolean;
   queue?: Queue;
   history?: boolean;
   timestamp?: number;
@@ -30,6 +31,7 @@ const internalFindOrCreateTicketService = async (
   {
     groupContact,
     doNotReopen,
+    findOnly,
     queue,
     history,
     timestamp
@@ -155,6 +157,10 @@ const internalFindOrCreateTicketService = async (
       if (whatsapp?.queues.length === 1) {
         queueId = whatsapp.queues[0].id;
       }
+    }
+
+    if (findOnly && !ticket) {
+      return { ticket: null, justCreated: false };
     }
 
     if (!ticket) {

@@ -28,14 +28,14 @@ const isAuth = (req: Request, res: Response, next: NextFunction): void => {
   const [, token] = authHeader.split(" ");
 
   try {
-    req.tokenData = verify(token, authConfig.secret) as TokenPayload;
+    const tokenData = verify(token, authConfig.secret) as TokenPayload;
     req.user = {
-      id: req.tokenData.id,
-      profile: req.tokenData.profile,
-      isSuper: req.tokenData.super,
-      companyId: req.tokenData.companyId
+      id: tokenData.id,
+      profile: tokenData.profile,
+      isSuper: tokenData.super,
+      companyId: tokenData.companyId
     };
-    req.companyId = req.tokenData.companyId;
+    req.companyId = tokenData.companyId;
   } catch (err) {
     throw new AppError("ERR_SESSION_EXPIRED", 403, "debug");
   }

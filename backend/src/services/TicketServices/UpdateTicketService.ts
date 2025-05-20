@@ -46,16 +46,6 @@ interface Request {
   ticketId: number;
   reqUserId?: number;
   companyId?: number | undefined;
-  tokenData?:
-    | {
-        id: string;
-        username: string;
-        profile: string;
-        companyId: number;
-        iat: number;
-        exp: number;
-      }
-    | undefined;
   dontRunChatbot?: boolean;
 }
 
@@ -116,17 +106,22 @@ export function websocketUpdateTicket(ticket: Ticket, moreChannels?: string[]) {
 const UpdateTicketService = async ({
   ticketData,
   ticketId,
-  tokenData,
-  companyId,
   reqUserId,
+  companyId,
   dontRunChatbot
 }: Request): Promise<Response> => {
   try {
-    if (!companyId && !tokenData) {
-      throw new Error("Need companyId or tokenData");
+    if (!companyId && !reqUserId) {
+      throw new Error("Need reqUserId or companyId");
     }
-    if (tokenData) {
-      companyId = tokenData.companyId;
+
+    const user = reqUserId ? await User.findByPk(reqUserId) : null;
+
+    if (reqUserId) {
+      if (!user) {
+        throw new AppError("User not found", 404);
+      }
+      companyId = user.companyId;
     }
     const { justClose, annotation } = ticketData;
     let { status } = ticketData;
@@ -146,11 +141,8 @@ const UpdateTicketService = async ({
     let ticket = await ShowTicketService(ticketId, companyId);
     const isGroup = ticket.contact?.isGroup || ticket.isGroup;
 
-    if (tokenData && ticket.status !== "pending") {
-      if (
-        tokenData.profile !== "admin" &&
-        ticket.userId !== parseInt(tokenData.id, 10)
-      ) {
+    if (user && ticket.status !== "pending") {
+      if (user.profile !== "admin" && ticket.userId !== user.id) {
         throw new AppError(
           "Apenas o usuário ativo do ticket ou o Admin podem fazer alterações no ticket"
         );

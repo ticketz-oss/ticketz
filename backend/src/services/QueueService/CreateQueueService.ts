@@ -104,7 +104,7 @@ const CreateQueueService = async (
   }
 
   const resultQueue = await sequelize.transaction(async t => {
-    const queue = await Queue.create(queueData, { transaction: t });
+    const queue = await Queue.create({ ...queueData }, { transaction: t });
     if (requestData.integration) {
       await Integration.create(
         {

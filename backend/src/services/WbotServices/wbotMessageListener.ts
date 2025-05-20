@@ -1440,7 +1440,7 @@ const verifyQueue = async (
   if (!ignoreMessage && choosenQueue) {
     await startQueue(wbot, ticket, choosenQueue);
   } else if (!ignoreMessage && !choosenQueue && chatbotAutoExit) {
-    await ticket.update({ chatbot: false });
+    await updateTicket(ticket, { chatbot: false });
     const whatsapp = await Whatsapp.findByPk(ticket.whatsappId);
     if (whatsapp.transferMessage) {
       const body = formatBody(`\u200e${whatsapp.transferMessage}`, ticket);
@@ -2026,6 +2026,13 @@ const handleMessage = async (
       defaultQueue = await Queue.findByPk(whatsapp.queues[0].id);
     }
 
+    const findOnly = [
+      "reactionMessage",
+      "stickerMessage",
+      "editedMessage",
+      "protocolMessage"
+    ].includes(msgType);
+
     const { ticket, justCreated } = await FindOrCreateTicketService(
       contact,
       wbot.id!,
@@ -2033,11 +2040,16 @@ const handleMessage = async (
       companyId,
       {
         groupContact,
+        findOnly,
         queue: queueId
           ? (await Queue.findByPk(queueId)) || defaultQueue
           : defaultQueue
       }
     );
+
+    if (!ticket) {
+      return;
+    }
 
     const ticketMessages = await Message.findAll({
       where: {

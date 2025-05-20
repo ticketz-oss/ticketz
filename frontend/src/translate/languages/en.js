@@ -33,6 +33,7 @@ const messages = {
         disabled: "Disabled",
         noqueue: "No queue",
         rating: "Rating",
+        transferTo: "Transfer to",
       },
       signup: {
         title: "Sign Up",
@@ -804,6 +805,8 @@ const messages = {
         success: "Setting saved successfully.",
         copiedToClipboard: "Copied to clipboard",
         title: "Settings",
+        chatbotTicketTimeout: "Chatbot ticket timeout (minutes)",
+        chatbotTicketTimeoutAction: "Action after chatbot timeout",
         settings: {
           userCreation: {
             name: "User creation",
