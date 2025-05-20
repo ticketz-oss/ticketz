@@ -1,4 +1,12 @@
-import { Op, fn, where, col, Filterable, Includeable } from "sequelize";
+import {
+  Op,
+  fn,
+  where,
+  col,
+  Filterable,
+  Includeable,
+  WhereOptions
+} from "sequelize";
 import { startOfDay, endOfDay, parseISO } from "date-fns";
 
 import { intersection } from "lodash";
@@ -12,6 +20,7 @@ import Tag from "../../models/Tag";
 import TicketTag from "../../models/TicketTag";
 import Whatsapp from "../../models/Whatsapp";
 import { GetCompanySetting } from "../../helpers/CheckSettings";
+import ContactTag from "../../models/ContactTag";
 
 interface Request {
   isSearch?: boolean;
@@ -64,7 +73,7 @@ const ListTicketsService = async ({
 
   const orCondition = [{ userId }, { status: "pending" }];
 
-  const andedOrs = [
+  const andedOrs: WhereOptions<Ticket>[] = [
     {
       [Op.or]: orCondition
     }
@@ -226,6 +235,7 @@ const ListTicketsService = async ({
 
   if (Array.isArray(tags) && tags.length > 0) {
     const ticketsTagFilter: any[] | null = [];
+    const contactsTagFilter: any[] | null = [];
     // eslint-disable-next-line no-restricted-syntax
     for await (const tag of tags) {
       const ticketTags = await TicketTag.findAll({
@@ -234,16 +244,29 @@ const ListTicketsService = async ({
       if (ticketTags) {
         ticketsTagFilter.push(ticketTags.map(t => t.ticketId));
       }
+
+      const contactTags = await ContactTag.findAll({
+        where: { tagId: tag }
+      });
+
+      if (contactTags) {
+        contactsTagFilter.push(contactTags.map(c => c.contactId));
+      }
     }
 
     const ticketsIntersection: number[] = intersection(...ticketsTagFilter);
+    const contactsIntersection: number[] = intersection(...contactsTagFilter);
 
-    whereCondition = {
-      ...whereCondition,
-      id: {
-        [Op.in]: ticketsIntersection
-      }
-    };
+    andedOrs.push({
+      [Op.or]: [
+        {
+          id: { [Op.in]: ticketsIntersection }
+        },
+        {
+          contactId: { [Op.in]: contactsIntersection }
+        }
+      ]
+    });
   }
 
   if (Array.isArray(users) && users.length > 0) {

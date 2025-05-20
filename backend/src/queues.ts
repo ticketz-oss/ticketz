@@ -417,6 +417,12 @@ async function handleChatbotTicketTimeout(
     }
   };
 
+  if (action) {
+    where.queueId = {
+      [Op.or]: [{ [Op.ne]: action }, { [Op.is]: null }]
+    };
+  }
+
   const tickets = await Ticket.findAll({ where });
 
   logger.debug(

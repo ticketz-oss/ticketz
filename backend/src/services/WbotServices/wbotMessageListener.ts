@@ -2018,6 +2018,13 @@ const handleMessage = async (
       defaultQueue = await Queue.findByPk(whatsapp.queues[0].id);
     }
 
+    const findOnly = [
+      "reactionMessage",
+      "stickerMessage",
+      "editedMessage",
+      "protocolMessage"
+    ].includes(msgType);
+
     const { ticket, justCreated } = await FindOrCreateTicketService(
       contact,
       wbot.id!,
@@ -2025,11 +2032,16 @@ const handleMessage = async (
       companyId,
       {
         groupContact,
+        findOnly,
         queue: queueId
           ? (await Queue.findByPk(queueId)) || defaultQueue
           : defaultQueue
       }
     );
+
+    if (!ticket) {
+      return;
+    }
 
     const ticketMessages = await Message.findAll({
       where: {

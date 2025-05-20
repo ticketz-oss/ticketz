@@ -16,18 +16,31 @@ interface PrivacyData {
   disappearing?: "86400" | "604800" | "7776000" | "0";
   whatsappId?: number;
 }
+
+function checkWhatsapp(whatsapp: Whatsapp) {
+  if (!whatsapp) {
+    throw new AppError("ERR_NOT_FOUND", 404);
+  }
+
+  if (whatsapp.status !== "CONNECTED") {
+    throw new AppError("ERR_NOT_CONNECTED", 404);
+  }
+
+  if (whatsapp.channel !== "whatsapp") {
+    throw new AppError("ERR_NOT_APPLICABLE", 404);
+  }
+}
+
 export const show = async (req: Request, res: Response): Promise<Response> => {
   const { whatsappId } = req.params;
   const { companyId } = req.user;
 
   const whatsapp: Whatsapp = await ShowWhatsAppService(whatsappId, companyId);
 
-  if (whatsapp) {
-    const privacy: PrivacyData = await ShowPrivacyService(whatsappId);
-    return res.status(200).json(privacy);
-  }
+  checkWhatsapp(whatsapp);
 
-  throw new AppError("ERR_NO_PRIVACY_FOUND", 404);
+  const privacy: PrivacyData = await ShowPrivacyService(whatsappId);
+  return res.status(200).json(privacy);
 };
 
 export const update = async (
@@ -39,12 +52,9 @@ export const update = async (
 
   const whatsapp: Whatsapp = await ShowWhatsAppService(whatsappId, companyId);
 
-  if (whatsapp) {
-    const privacyData: PrivacyData = req.body;
-    if (await UpdatePrivacyWhatsapp(whatsapp.id, privacyData, true)) {
-      return res.status(200).json(true);
-    }
-  }
+  checkWhatsapp(whatsapp);
 
-  throw new AppError("ERR_NO_PRIVACY_FOUND", 404);
+  const privacyData: PrivacyData = req.body;
+  await UpdatePrivacyWhatsapp(whatsapp.id, privacyData, true);
+  return res.status(200).json(true);
 };
