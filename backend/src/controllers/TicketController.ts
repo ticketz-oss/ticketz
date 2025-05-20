@@ -212,7 +212,6 @@ export const update = async (
       const result = await UpdateTicketService({
         ticketData: req.body,
         ticketId: Number.parseInt(ticketId, 10),
-        tokenData: req.tokenData,
         reqUserId: Number(req.user.id)
       });
       logger.debug(`updateMutex: lockId ${lockId} - releasing lock`);

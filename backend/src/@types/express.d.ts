@@ -4,16 +4,5 @@ declare namespace Express {
     companyId: number | undefined;
     integrationSession?: IntegrationSession;
     replyHandler?: ReplyHandler;
-    tokenData:
-      | {
-          id: string;
-          username: string;
-          profile: string;
-          super: boolean;
-          companyId: number;
-          iat: number;
-          exp: number;
-        }
-      | undefined;
   }
 }
