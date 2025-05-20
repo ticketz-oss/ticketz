@@ -2,6 +2,9 @@ import moment from "moment";
 
 export function useDate() {
   function dateToClient(strDate) {
+    if (!strDate) {
+      return "";
+    }
     const [year, month, day] = strDate.split("T")[0].split("-").map(Number);
     const date = new Date(year, month - 1, day);
     const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
