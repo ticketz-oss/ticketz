@@ -2,10 +2,10 @@ import moment from "moment";
 
 export function useDate() {
   function dateToClient(strDate) {
-    if (moment(strDate).isValid()) {
-      return moment(strDate).format("DD/MM/YYYY");
-    }
-    return strDate;
+    const [year, month, day] = strDate.split("T")[0].split("-").map(Number);
+    const date = new Date(year, month - 1, day);
+    const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
+    return date.toLocaleDateString(undefined, options);
   }
 
   function datetimeToClient(strDate) {
