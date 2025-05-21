@@ -450,7 +450,12 @@ const UpdateTicketService = async ({
 
     ticketTraking.save();
 
-    if (!dontRunChatbot && !ticket.userId && ticket.queueId !== oldQueueId) {
+    if (
+      !dontRunChatbot &&
+      !ticket.userId &&
+      ticket.queueId &&
+      ticket.queueId !== oldQueueId
+    ) {
       await integrationServices.endAllSessions(ticket);
 
       const omniDriver = omniServices.getOmniDriver(ticket);

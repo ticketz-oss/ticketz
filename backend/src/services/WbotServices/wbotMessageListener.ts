@@ -436,11 +436,21 @@ const createDeferred = (): DeferredPromise => {
   return { promise, resolve, reject };
 };
 
-async function updateTicket(ticket: Ticket, ticketData: UpdateTicketData) {
+/**
+ * @description: call UpdateTicketService to update ticket status, if ticketData have a queue id it will not run the chatbot
+ * @params {Ticket} ticket - ticket to be updated
+ * @params {UpdateTicketData} ticketData - data to be updated
+ * @returns {Promise<Ticket>} - updated ticket
+ */
+async function updateTicket(
+  ticket: Ticket,
+  ticketData: UpdateTicketData
+): Promise<Ticket> {
   await UpdateTicketService({
     ticketData,
     ticketId: ticket.id,
-    companyId: ticket.companyId
+    companyId: ticket.companyId,
+    dontRunChatbot: !!ticketData.queueId
   });
   await ticket.reload();
   return ticket;

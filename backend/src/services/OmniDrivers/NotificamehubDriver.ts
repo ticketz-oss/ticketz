@@ -787,7 +787,9 @@ export class NotificamehubDriver implements OmniDriver {
 
     if (["image", "audio", "video", "document"].includes(message.type)) {
       const fileContent = new FileContent(
-        message.mediaUrl,
+        message.mediaUrl.startsWith("https://")
+          ? message.mediaUrl
+          : `${process.env.BACKEND_URL}/message.mediaUrl`,
         typeMappings[ticket.contact.channel][message.type] ||
           typeMappings[ticket.contact.channel].default ||
           "file",
