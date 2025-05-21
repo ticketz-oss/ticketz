@@ -86,6 +86,7 @@ function convertMedia(
 
   return new Promise((resolve, reject) => {
     const ffmpeg = spawn(ffmpegPath.path, ffmpegArgs);
+    let stderrOutput = "";
 
     if (isBuffer) {
       const inputStream = new Readable();
@@ -108,7 +109,7 @@ function convertMedia(
     }
 
     ffmpeg.stderr.on("data", data => {
-      logger.error(`FFmpeg error: ${data}`);
+      stderrOutput += data.toString();
     });
 
     ffmpeg.on("error", error => reject(error));
@@ -122,6 +123,8 @@ function convertMedia(
           filename: replaceFileExtension(path.basename(outputFile), extension)
         });
       } else {
+        logger.error(`FFmpeg exited with code ${code}`);
+        logger.error(`FFmpeg stderr: ${stderrOutput}`); // Log stderr only on error
         reject(new Error(`FFmpeg exited with code ${code}`));
       }
     });
