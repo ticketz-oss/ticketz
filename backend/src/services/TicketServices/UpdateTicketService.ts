@@ -230,30 +230,6 @@ const UpdateTicketService = async ({
       ticketTraking.queuedAt = moment().toDate();
     }
 
-    if (oldQueueId !== queueId && !isNil(oldQueueId) && !isNil(queueId)) {
-      if (ticket.channel === "whatsapp") {
-        const wbot = await GetTicketWbot(ticket);
-        const { transferMessage } = await ShowWhatsAppService(
-          ticket.whatsappId,
-          companyId
-        );
-
-        if (!ticket.isGroup) {
-          if (transferMessage?.trim()) {
-            const queueChangedMessage = await wbot.sendMessage(
-              `${ticket.contact.number}@${
-                ticket.isGroup ? "g.us" : "s.whatsapp.net"
-              }`,
-              {
-                text: `${formatBody(`${transferMessage}`, ticket)}`
-              }
-            );
-            await verifyMessage(queueChangedMessage, ticket, ticket.contact);
-          }
-        }
-      }
-    }
-
     if (ticket.chatbot && !chatbot) {
       ticketTraking.chatbotendAt = moment().toDate();
     }
@@ -325,6 +301,33 @@ const UpdateTicketService = async ({
     }
 
     ticketTraking.save();
+
+    if (
+      !!oldQueueId &&
+      !!queueId &&
+      oldQueueId !== queueId &&
+      !ticket.isGroup
+    ) {
+      if (ticket.channel === "whatsapp") {
+        const wbot = await GetTicketWbot(ticket);
+        const { transferMessage } = await ShowWhatsAppService(
+          ticket.whatsappId,
+          companyId
+        );
+
+        if (transferMessage?.trim()) {
+          const queueChangedMessage = await wbot.sendMessage(
+            `${ticket.contact.number}@${
+              ticket.isGroup ? "g.us" : "s.whatsapp.net"
+            }`,
+            {
+              text: `${formatBody(`${transferMessage}`, ticket)}`
+            }
+          );
+          await verifyMessage(queueChangedMessage, ticket, ticket.contact);
+        }
+      }
+    }
 
     if (
       !dontRunChatbot &&
