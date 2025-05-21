@@ -1142,7 +1142,8 @@ export const startQueue = async (
   await UpdateTicketService({
     ticketData: { queueId: queue.id, chatbot, status: "pending" },
     ticketId: ticket.id,
-    companyId: ticket.companyId
+    companyId: ticket.companyId,
+    dontRunChatbot: true
   });
 
   // do not process queue if company is not compliant with payments
