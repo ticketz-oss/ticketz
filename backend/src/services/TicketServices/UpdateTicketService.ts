@@ -31,6 +31,7 @@ interface Request {
   ticketId: number;
   reqUserId?: number;
   companyId?: number | undefined;
+  dontRunChatbot?: boolean;
 }
 
 interface Response {
@@ -65,7 +66,8 @@ const UpdateTicketService = async ({
   ticketData,
   ticketId,
   reqUserId,
-  companyId
+  companyId,
+  dontRunChatbot
 }: Request): Promise<Response> => {
   try {
     if (!companyId && !reqUserId) {
@@ -324,7 +326,12 @@ const UpdateTicketService = async ({
 
     ticketTraking.save();
 
-    if (!ticket.userId && ticket.queueId && ticket.queueId !== oldQueueId) {
+    if (
+      !dontRunChatbot &&
+      !ticket.userId &&
+      ticket.queueId &&
+      ticket.queueId !== oldQueueId
+    ) {
       const wbot = await GetTicketWbot(ticket);
       if (wbot) {
         await startQueue(wbot, ticket);
