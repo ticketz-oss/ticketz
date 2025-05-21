@@ -245,7 +245,7 @@ const UpdateTicketService = async ({
                 ticket.isGroup ? "g.us" : "s.whatsapp.net"
               }`,
               {
-                text: `${transferMessage}`
+                text: `${formatBody(`${transferMessage}`, ticket)}`
               }
             );
             await verifyMessage(queueChangedMessage, ticket, ticket.contact);
