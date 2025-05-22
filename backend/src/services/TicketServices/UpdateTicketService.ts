@@ -142,6 +142,12 @@ const UpdateTicketService = async ({
         companyId
       );
 
+      if (!ticketTraking.finishedAt) {
+        ticketTraking.finishedAt = moment().toDate();
+        ticketTraking.whatsappId = ticket.whatsappId;
+        ticketTraking.userId = ticket.userId;
+      }
+
       if (
         userRatingSetting === "enabled" &&
         ticket.userId &&
@@ -157,9 +163,8 @@ const UpdateTicketService = async ({
             await SendWhatsAppMessage({ body: bodyRatingMessage, ticket });
           }
 
-          await ticketTraking.update({
-            ratingAt: moment().toDate()
-          });
+          ticketTraking.ratingAt = moment().toDate();
+          await ticketTraking.save();
 
           await ticket.update({
             chatbot: null,
@@ -206,12 +211,6 @@ const UpdateTicketService = async ({
 
           await verifyMessage(sentMessage, ticket, ticket.contact);
         }
-      }
-
-      if (!ticketTraking.finishedAt) {
-        ticketTraking.finishedAt = moment().toDate();
-        ticketTraking.whatsappId = ticket.whatsappId;
-        ticketTraking.userId = ticket.userId;
       }
 
       const keepUserAndQueue = await GetCompanySetting(
