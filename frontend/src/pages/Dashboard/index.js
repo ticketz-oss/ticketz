@@ -1,41 +1,57 @@
-import React, { useState, useEffect, useContext } from "react";
-
-import Paper from "@material-ui/core/Paper";
-import Container from "@material-ui/core/Container";
-import Grid from "@material-ui/core/Grid";
-import MenuItem from "@material-ui/core/MenuItem";
-import FormControl from "@material-ui/core/FormControl";
-import InputLabel from "@material-ui/core/InputLabel";
-import Select from "@material-ui/core/Select";
-import TextField from "@material-ui/core/TextField";
-import Typography from "@material-ui/core/Typography";
-
-// ICONS
-import GroupAddIcon from "@material-ui/icons/GroupAdd";
-import HourglassEmptyIcon from "@material-ui/icons/HourglassEmpty";
-import CheckCircleIcon from "@material-ui/icons/CheckCircle";
-import TimerIcon from '@material-ui/icons/Timer';
-
+import React, { useState, useEffect } from "react";
+import {
+  Paper,
+  Container,
+  Grid,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select,
+  TextField,
+  FormHelperText,
+  Typography,
+  Box,
+  Card,
+  CardContent,
+  Divider
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { grey, blue } from "@material-ui/core/colors";
+import { grey, blue, green, orange, purple, red, deepPurple, indigo } from "@material-ui/core/colors";
 import { toast } from "react-toastify";
-
-import TableAttendantsStatus from "../../components/Dashboard/TableAttendantsStatus";
-
-import { isEmpty } from "lodash";
+import clsx from "clsx";
+import { isEmpty, isArray } from "lodash";
 import moment from "moment";
+import {
+  Speed as SpeedIcon,
+  Group as GroupIcon,
+  Assignment as AssignmentIcon,
+  Person as PersonIcon,
+  Today as TodayIcon,
+  Call as CallIcon,
+  RecordVoiceOver as RecordVoiceOverIcon,
+  GroupAdd as GroupAddIcon,
+  HourglassEmpty as HourglassEmptyIcon,
+  CheckCircle as CheckCircleIcon,
+  Forum as ForumIcon,
+  FilterList as FilterListIcon,
+  Clear as ClearIcon,
+  Send as SendIcon,
+  Message as MessageIcon,
+  AccessAlarm as AccessAlarmIcon,
+  Timer as TimerIcon
+} from "@material-ui/icons";
+
+import Chart from "./Chart";
+import ButtonWithSpinner from "../../components/ButtonWithSpinner";
+import TableAttendantsStatus from "../../components/Dashboard/TableAttendantsStatus";
+import useDashboard from "../../hooks/useDashboard";
+import useCompanies from "../../hooks/useCompanies";
 import { i18n } from "../../translate/i18n";
 import OnlyForSuperUser from "../../components/OnlyForSuperUser";
 import useAuth from "../../hooks/useAuth.js";
-import clsx from "clsx";
 import { loadJSON } from "../../helpers/loadJSON";
-
-import { SmallPie } from "./SmallPie";
-import { TicketCountersChart } from "./TicketCountersChart";
-
-import TicketzRegistry from "../../components/TicketzRegistry";
+import config from "../../services/config";
 import api from "../../services/api.js";
-import { SocketContext } from "../../context/Socket/SocketContext.js";
 
 const gitinfo = loadJSON('/gitinfo.json');
 
@@ -48,367 +64,173 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(2),
     display: "flex",
     flexDirection: "column",
-    height: 240,
+    height: 300,
+    borderRadius: 12,
+    boxShadow: "0 8px 16px 0 rgba(0,0,0,0.1)",
     overflowY: "auto",
     ...theme.scrollbarStyles,
   },
-  pixkey: {
-    fontSize: "9pt",
-  },
-  paymentimg: {
-    maxWidth: "100%",
-    marginTop: "30px",
-  },
-  paymentpix: {
-    maxWidth: "100%",
-    maxHeight: "150px",
-    padding: "5px",
-    backgroundColor: "white",
-    borderColor: "black",
-    borderStyle: "solid",
-    borderWidth: "2px",
-  },
-  supportPaper: {
-    padding: theme.spacing(2),
-    display: "flex",
-    flexDirection: "column",
-    overflowY: "auto",
-    backgroundColor: theme.palette.secondary.main,
-    color: theme.palette.secondary.contrastText,
-    ...theme.scrollbarStyles,
-  },
-  supportBox: {
-    backgroundColor: theme.palette.secondary.light,
-    borderRadius: "10px",
-    textAlign: "center",
-    borderColor: theme.palette.secondary.main,
-    borderWidth: "3px",
-    borderStyle: "solid",
-  },
-  cardAvatar: {
-    fontSize: "55px",
-    color: grey[500],
-    backgroundColor: "#ffffff",
-    width: theme.spacing(7),
-    height: theme.spacing(7),
+  card: {
+    padding: theme.spacing(3),
+    height: "100%",
+    borderRadius: 12,
+    boxShadow: "0 4px 12px 0 rgba(0,0,0,0.08)",
+    transition: "transform 0.3s, box-shadow 0.3s",
+    "&:hover": {
+      transform: "translateY(-4px)",
+      boxShadow: "0 8px 16px 0 rgba(0,0,0,0.12)",
+    },
   },
   cardTitle: {
-    fontSize: "18px",
-    color: blue[700],
+    fontSize: "0.875rem",
+    fontWeight: 500,
+    textTransform: "uppercase",
+    letterSpacing: "0.5px",
+    color: theme.palette.text.secondary,
+    marginBottom: theme.spacing(1),
   },
-  cardSubtitle: {
-    color: grey[600],
-    fontSize: "14px",
+  cardValue: {
+    fontSize: "2rem",
+    fontWeight: 700,
+    color: theme.palette.text.primary,
+    marginBottom: theme.spacing(1),
   },
-  alignRight: {
-    textAlign: "right",
+  cardIcon: {
+    fontSize: "3.5rem",
+    opacity: 0.2,
+    position: "absolute",
+    right: theme.spacing(2),
+    bottom: theme.spacing(2),
   },
-  fullWidth: {
-    width: "100%",
+  filterContainer: {
+    backgroundColor: theme.palette.background.paper,
+    padding: theme.spacing(2),
+    borderRadius: 12,
+    marginBottom: theme.spacing(3),
+    boxShadow: "0 4px 12px 0 rgba(0,0,0,0.05)",
   },
   selectContainer: {
     width: "100%",
     textAlign: "left",
   },
-  cardSolid: {
-    padding: theme.spacing(2),
-    display: "flex",
-    overflow: "hidden",
-    flexDirection: "row",
-    height: "100%",
+  cardContent: {
+    position: "relative",
+    paddingBottom: theme.spacing(6),
+  },
+  card1: {
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.primary.contrastText,
   },
-  cardGray: {
-    padding: theme.spacing(2),
-    display: "flex",
+  card2: {
+    backgroundColor: theme.palette.secondary.main,
+    color: theme.palette.secondary.contrastText,
+  },
+  card3: {
+    backgroundColor: purple[500],
+    color: theme.palette.getContrastText(purple[500]),
+  },
+  card4: {
+    backgroundColor: orange[500],
+    color: theme.palette.getContrastText(orange[500]),
+  },
+  card5: {
+    backgroundColor: green[500],
+    color: theme.palette.getContrastText(green[500]),
+  },
+  card6: {
+    backgroundColor: deepPurple[500],
+    color: theme.palette.getContrastText(deepPurple[500]),
+  },
+  card7: {
+    backgroundColor: indigo[500],
+    color: theme.palette.getContrastText(indigo[500]),
+  },
+  card8: {
+    backgroundColor: red[500],
+    color: theme.palette.getContrastText(red[500]),
+  },
+  card9: {
+    backgroundColor: "#3f51b5",
+    color: theme.palette.getContrastText("#3f51b5"),
+  },
+  statusTable: {
+    borderRadius: 12,
     overflow: "hidden",
-    flexDirection: "row",
-    height: "100%",
-    color: theme.palette.primary.main,
+    boxShadow: "0 4px 12px 0 rgba(0,0,0,0.05)",
   },
-  cardData: {
-    display: "block",
-    width: "100%",
-    zIndex: 1,
+  sectionTitle: {
+    marginBottom: theme.spacing(3),
+    fontWeight: 600,
+    color: theme.palette.text.secondary,
   },
-  cardIcon: {
-    width: 100,
-    color: theme.palette.primary.light,
-    position: "sticky",
-    opacity: 0.4,
-    right: 0,
-  },
-  cardRingGraph: {
-    width: 100,
-    position: "sticky",
-    right: 0,
-  },
-  ticketzProPaper: {
-    padding: theme.spacing(2),
-    display: "flex",
-    flexDirection: "column",
-    overflowY: "auto",
-    backgroundColor: theme.palette.ticketzproad.main,
-    color: theme.palette.ticketzproad.contrastText,
-    ...theme.scrollbarStyles,
-  },
-  ticketzRegistryPaper: {
-    padding: theme.spacing(2),
-    display: "flex",
-    flexDirection: "column",
-    overflowY: "auto",
-    backgroundColor: theme.palette.background.main,
-    color: theme.palette.background.contrastText,
-    borderColor: theme.palette.primary.main,
-    borderWidth: "3px",
-    borderStyle: "solid",
-    marginBottom: "1em",
-    ...theme.scrollbarStyles,
-  },
-  ticketzProBox: {
-    textAlign: "center",
-    alignContent: "center"
-  },
-  ticketzProTitle: {
-    fontWeight: "bold"
-  },
-  ticketzProScreen: {
-    maxHeight: "300px",
-    maxWidth: "100%"
-  },
-  ticketzProFeatures: {
-    padding: 0,
-    listStyleType: "none"
-  },
-  ticketzProCommand: {
-    fontFamily: "monospace",
-    backgroundColor: "#00000080"
-  },
-  clickpointer: {
-    cursor: "pointer"
-  }
 }));
-
-const InfoCard = ({ title, value, icon }) => {
-  const classes = useStyles();
-  
-  return (
-    <Grid item xs={12} sm={6} md={3}>
-      <Paper
-        className={classes.cardGray}
-        elevation={6}
-      >
-        <div className={classes.cardData}>
-          <Typography
-            component="h3"
-            variant="h6"
-            paragraph
-          >
-            {title}
-          </Typography>
-          <Typography
-            component="h1"
-            variant="h4"
-          >
-            {value}
-          </Typography>
-        </div>
-        <div className={classes.cardIcon}>
-          {icon}
-        </div>
-      </Paper>
-    </Grid>
-  )
-}
-
-const InfoRingCard = ({ title, value, graph }) => {
-  const classes = useStyles();
-  return (
-    <Grid item xs={12} sm={6} md={4}>
-      <Paper
-        className={classes.cardSolid}
-        elevation={4}
-      >
-        <div className={classes.cardData}>
-          <Typography
-            component="h3"
-            variant="h6"
-            paragraph
-          >
-            {title}
-          </Typography>
-          <Typography
-            component="h1"
-            variant="h4"
-          >
-            {value}
-          </Typography>
-        </div>
-        <div className={classes.cardRingGraph}>
-          <div style={{ width: "100px", height: "100px" }}>
-            {graph}
-          </div>
-        </div>
-      </Paper>
-    </Grid>
-  )
-};
 
 const Dashboard = () => {
   const classes = useStyles();
+  const [counters, setCounters] = useState({});
+  const [attendants, setAttendants] = useState([]);
+  const [filterType, setFilterType] = useState(1);
   const [period, setPeriod] = useState(0);
+  const [companyDueDate, setCompanyDueDate] = useState();
   const [currentUser, setCurrentUser] = useState({});
-  const [dateFrom, setDateFrom] = useState(
-    moment("1", "D").format("YYYY-MM-DD")
-  );
+  const [dateFrom, setDateFrom] = useState(moment("1", "D").format("YYYY-MM-DD"));
   const [dateTo, setDateTo] = useState(moment().format("YYYY-MM-DD"));
+  const [loading, setLoading] = useState(false);
+  const { find } = useDashboard();
+  const { finding } = useCompanies();
   const { getCurrentUserInfo } = useAuth();
-    
-  const [supportBoxOpen, setSupportBoxOpen] = useState(false);
-  const [registered, setRegistered] = useState(false);
-  const [proInstructionsOpen, setProInstructionsOpen] = useState(false);
-  
-  const [usersOnlineTotal, setUsersOnlineTotal] = useState(0);
-  const [usersOfflineTotal, setUsersOfflineTotal] = useState(0);
-  const [usersStatusChartData, setUsersStatusChartData] = useState([]);
-  const [pendingTotal, setPendingTotal] = useState(0);
-  const [pendingChartData, setPendingChartData] = useState([]);
-  const [openedTotal, setOpenedTotal] = useState(0);
-  const [openedChartData, setOpenedChartData] = useState([]);
-  
-  const [ticketsData, setTicketsData] = useState({});
-  const [usersData, setUsersData] = useState([]);
-  const [loadingUsers, setLoadingUsers] = useState(false);
 
-  const socketManager = useContext(SocketContext);
-    
-  async function showProInstructions() {
-    if (gitinfo.commitHash) {
-      setProInstructionsOpen(true);
-      return;
-    }
-    
-    window.open("https://pro.ticke.tz", "_blank");
-  }
-  
   useEffect(() => {
-    const socket = socketManager.GetSocket(companyId);
-    
-    socket.on("userOnlineChange", updateStatus);
-    socket.on("counter", updateStatus);
-
-    return () => {
-      socket.disconnect();
-    }
-  }, [socketManager]);
-  
-  useEffect(() => {
-    getCurrentUserInfo().then(
-      (user) => {
-        if (user?.profile !== "admin") {
-          window.location.href = "/tickets";
-        }
-        setCurrentUser(user);
+    getCurrentUserInfo().then((user) => {
+      if (user?.profile !== "admin") {
+        window.location.href = "/tickets";
       }
-    );
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+      setCurrentUser(user);
+    });
   }, []);
 
-  useEffect(async () => {
-    const registry = await api.get("/ticketz/registry");
-
-    setRegistered( registry?.data?.disabled || !!(registry?.data?.whatsapp ) );
-  }, []);
-    
   useEffect(() => {
-    fetchData();
-  }, [period]);
-  
+    async function firstLoad() {
+      await fetchData();
+    }
+    setTimeout(() => {
+      firstLoad();
+    }, 1000);
+  }, []);
+
   async function handleChangePeriod(value) {
     setPeriod(value);
   }
 
-  async function updateStatus() {
-    const { data } = await api.get("/dashboard/status");
-    
-    if (!data) return;
-
-    let usersOnlineTotal = 0;
-    let usersOfflineTotal = 0;
-    data.usersStatusSummary.forEach((item) => {
-      if (item.online) {
-        usersOnlineTotal++;
-      } else {
-        usersOfflineTotal++;
-      }
-    });
-
-    setUsersStatusChartData([
-      {
-        name: "Online",
-        value: usersOnlineTotal,
-        color: "#00ff00"
-      },
-      {
-        name: "Offline",
-        value: usersOfflineTotal,
-        color: "#ff0000"
-      }
-    ]);
-
-    setUsersOnlineTotal(usersOnlineTotal);
-    setUsersOfflineTotal(usersOfflineTotal);
-
-    let pendingTotal = 0;
-    let openedTotal = 0;
-    const pendingChartData = [];
-    const openedChartData = [];
-    data.ticketsStatusSummary.forEach((item) => {
-      if (item.status === "pending") {
-        pendingTotal += Number(item.count);
-        pendingChartData.push({
-          name: item.queue?.name || i18n.t("common.noqueue"),
-          value: Number(item.count),
-          color: item.queue?.color || "#888"
-          });
-        return;
-      }
-      if (item.status === "open") {
-        openedTotal += Number(item.count);
-        openedChartData.push({
-          name: item.queue?.name || i18n.t("common.noqueue"),
-          value: Number(item.count),
-          color: item.queue?.color || "#888" 
-        });
-      }
-    });
-    setPendingTotal(pendingTotal);
-    setPendingChartData(pendingChartData);
-    setOpenedTotal(openedTotal);
-    setOpenedChartData(openedChartData);
+  async function handleChangeFilterType(value) {
+    setFilterType(value);
+    if (value === 1) {
+      setPeriod(0);
+    } else {
+      setDateFrom("");
+      setDateTo("");
+    }
   }
-  
-  async function fetchData() {
-    let params = {};
-    
-    const days = Number(period);
 
-    if (days) {
+  async function fetchData() {
+    setLoading(true);
+
+    let params = {};
+
+    if (period > 0) {
       params = {
-        date_from: moment().subtract(days, "days").format("YYYY-MM-DD"),
-        date_to: moment().format("YYYY-MM-DD")
+        days: period,
       };
     }
 
-    if (!days && !isEmpty(dateFrom) && moment(dateFrom).isValid()) {
+    if (!isEmpty(dateFrom) && moment(dateFrom).isValid()) {
       params = {
         ...params,
         date_from: moment(dateFrom).format("YYYY-MM-DD"),
       };
     }
 
-    if (!days && !isEmpty(dateTo) && moment(dateTo).isValid()) {
+    if (!isEmpty(dateTo) && moment(dateTo).isValid()) {
       params = {
         ...params,
         date_to: moment(dateTo).format("YYYY-MM-DD"),
@@ -416,32 +238,46 @@ const Dashboard = () => {
     }
 
     if (Object.keys(params).length === 0) {
-      toast.error(i18n.t("dashboard.filter.invalid"));
+      toast.error("Parametrize o filtro");
+      setLoading(false);
       return;
     }
 
-    api.get("/dashboard/tickets", { params }).then(
-      result => {
-        if (result?.data) {
-          setTicketsData(result.data);
-        }
-      });
+    const data = await find(params);
 
-    setLoadingUsers(true);
-    api.get("/dashboard/users", { params }).then(
-      result => {
-        if (result?.data) {
-          setUsersData(result.data);
-          setLoadingUsers(false);
-        }
-      });
+    if (!data) {
+      setLoading(false);
+      return;
+    }
+
+    setCounters(data.counters);
+    if (isArray(data.attendants)) {
+      setAttendants(data.attendants);
+    } else {
+      setAttendants([]);
+    }
+
+    setLoading(false);
   }
 
   useEffect(() => {
-    updateStatus();
-  }, [])
+    async function fetchData() {
+      await loadCompanies();
+    }
+    fetchData();
+  }, []);
 
   const companyId = localStorage.getItem("companyId");
+  const loadCompanies = async () => {
+    setLoading(true);
+    try {
+      const companiesList = await finding(companyId);
+      setCompanyDueDate(moment(companiesList.dueDate).format("DD/MM/yyyy"));
+    } catch (e) {
+      console.log("🚀 Console Log : e", e);
+    }
+    setLoading(false);
+  };
 
   function formatTime(minutes) {
     return moment()
@@ -451,167 +287,194 @@ const Dashboard = () => {
   }
 
   function renderFilters() {
+    if (filterType === 1) {
       return (
         <>
-          <Grid item xs={12} sm={6} md={3}>
-            <FormControl className={classes.selectContainer}>
-              <InputLabel id="period-selector-label">{i18n.t("dashboard.filter.period")}</InputLabel>
-              <Select
-                labelId="period-selector-label"
-                id="period-selector"
-                value={period}
-                onChange={(e) => handleChangePeriod(e.target.value)}
-              >
-                <MenuItem value={0}>{i18n.t("dashboard.filter.custom")}</MenuItem>
-                <MenuItem value={3}>{i18n.t("dashboard.filter.last3days")}</MenuItem>
-                <MenuItem value={7}>{i18n.t("dashboard.filter.last7days")}</MenuItem>
-                <MenuItem value={15}>{i18n.t("dashboard.filter.last14days")}</MenuItem>
-                <MenuItem value={30}>{i18n.t("dashboard.filter.last30days")}</MenuItem>
-                <MenuItem value={90}>{i18n.t("dashboard.filter.last90days")}</MenuItem>
-              </Select>
-            </FormControl>
+          <Grid item xs={12} sm={6} md={4}>
+            <TextField
+              label="Data Inicial"
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              className={classes.fullWidth}
+              InputLabelProps={{
+                shrink: true,
+              }}
+              variant="outlined"
+              fullWidth
+            />
           </Grid>
-          {!period &&
-            <>
-              <Grid item xs={12} sm={6} md={3}>
-                <TextField
-                  label={i18n.t("dashboard.date.start")}
-                  type="date"
-                  value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
-                  onBlur={fetchData}
-                  className={classes.fullWidth}
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <TextField
-                  label={i18n.t("dashboard.date.end")}
-                  type="date"
-                  value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
-                  onBlur={fetchData}
-                  className={classes.fullWidth}
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                />
-              </Grid>
-            </>
-          }
-          <Grid item xs={12} sm={6} md={period ? 9 : 3} />
+          <Grid item xs={12} sm={6} md={4}>
+            <TextField
+              label="Data Final"
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              className={classes.fullWidth}
+              InputLabelProps={{
+                shrink: true,
+              }}
+              variant="outlined"
+              fullWidth
+            />
+          </Grid>
         </>
       );
+    } else {
+      return (
+        <Grid item xs={12} sm={6} md={4}>
+          <FormControl className={classes.selectContainer} variant="outlined">
+            <InputLabel id="period-selector-label">Período</InputLabel>
+            <Select
+              labelId="period-selector-label"
+              id="period-selector"
+              value={period}
+              onChange={(e) => handleChangePeriod(e.target.value)}
+              label="Período"
+            >
+              <MenuItem value={0}>Nenhum selecionado</MenuItem>
+              <MenuItem value={3}>Últimos 3 dias</MenuItem>
+              <MenuItem value={7}>Últimos 7 dias</MenuItem>
+              <MenuItem value={15}>Últimos 15 dias</MenuItem>
+              <MenuItem value={30}>Últimos 30 dias</MenuItem>
+              <MenuItem value={60}>Últimos 60 dias</MenuItem>
+              <MenuItem value={90}>Últimos 90 dias</MenuItem>
+            </Select>
+            <FormHelperText>Selecione o período desejado</FormHelperText>
+          </FormControl>
+        </Grid>
+      );
+    }
   }
 
   if (currentUser?.profile !== "admin") {
-    return (
-      <div>
-      </div>
-    );
+    return <div></div>;
   }
-      
+
+  const stats = [
+    {
+      title: "Atd. Pendentes",
+      value: counters.supportPending || 0,
+      icon: <CallIcon className={classes.cardIcon} />,
+      className: classes.card1,
+    },
+    {
+      title: "Atd. Acontecendo",
+      value: counters.supportHappening || 0,
+      icon: <HourglassEmptyIcon className={classes.cardIcon} />,
+      className: classes.card2,
+    },
+    {
+      title: "Finalizados",
+      value: counters.supportFinished || 0,
+      icon: <CheckCircleIcon className={classes.cardIcon} />,
+      className: classes.card3,
+    },
+    {
+      title: "Novos Contatos",
+      value: counters.leads || 0,
+      icon: <GroupAddIcon className={classes.cardIcon} />,
+      className: classes.card4,
+    },
+    {
+      title: "T.M. de Atendimento",
+      value: formatTime(counters.avgSupportTime) || "00h 00m",
+      icon: <AccessAlarmIcon className={classes.cardIcon} />,
+      className: classes.card8,
+    },
+    {
+      title: "T.M. de Espera",
+      value: formatTime(counters.avgWaitTime) || "00h 00m",
+      icon: <TimerIcon className={classes.cardIcon} />,
+      className: classes.card9,
+    },
+  ];
+
   return (
-    <div>
-      <Container maxWidth="lg" className={classes.container}>
-        <Grid container spacing={3} justifyContent="flex-start">
+    <Container maxWidth="lg" className={classes.container}>
+      {/* FILTERS SECTION */}
+      <Paper className={classes.filterContainer}>
+        <Typography variant="h6" className={classes.sectionTitle}>
+          Filtros
+        </Typography>
+        <Grid container spacing={3} alignItems="center">
+          <Grid item xs={12} sm={6} md={4}>
+            <FormControl className={classes.selectContainer} variant="outlined">
+              <InputLabel id="period-selector-label">Tipo de Filtro</InputLabel>
+              <Select
+                labelId="period-selector-label"
+                value={filterType}
+                onChange={(e) => handleChangeFilterType(e.target.value)}
+                label="Tipo de Filtro"
+              >
+                <MenuItem value={1}>Filtro por Data</MenuItem>
+                <MenuItem value={2}>Filtro por Período</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
 
-          { !localStorage.getItem("hideAds") && <OnlyForSuperUser
-            user={currentUser}
-            yes={() => (
-              <Grid item xs={12}>
-                {!registered &&
-                  <Paper className={classes.ticketzRegistryPaper}>
-                    <TicketzRegistry onRegister={setRegistered} />
-                  </Paper>
-                }
-                
-
-          {/* USUARIOS ONLINE */}
-          <InfoRingCard
-            title={i18n.t("dashboard.usersOnline")}
-            value={`${usersOnlineTotal}/${usersOnlineTotal + usersOfflineTotal}`}
-            graph={
-              <SmallPie chartData={usersStatusChartData} />
-            }
-          />
-
-          {/* ATENDIMENTOS PENDENTES */}
-          <InfoRingCard
-            title={i18n.t("dashboard.ticketsWaiting")}
-            value={pendingTotal}
-            graph={
-              <SmallPie chartData={pendingChartData} />
-            }
-          />
-
-          {/* ATENDIMENTOS ACONTECENDO */}
-          <InfoRingCard
-            title={i18n.t("dashboard.ticketsOpen")}
-            value={openedTotal}
-            graph={
-              <SmallPie chartData={openedChartData} />
-            }
-          />
-
-          {/* FILTROS */}
           {renderFilters()}
 
-          {/* ATENDIMENTOS REALIZADOS */}
-          <InfoCard
-            title={i18n.t("dashboard.ticketsDone")}
-            value={ticketsData.ticketStatistics?.totalClosed || 0}
-            icon={<CheckCircleIcon style={{ fontSize: 100 }} />}
-          />
-
-          {/* NOVOS CONTATOS */}
-          <InfoCard
-            title={i18n.t("dashboard.newContacts")}
-            value={ticketsData.ticketStatistics?.newContacts || 0}
-            icon={<GroupAddIcon style={{ fontSize: 100 }} />}
-          />
-
-          {/* T.M. DE ATENDIMENTO */}
-          <InfoCard
-            title={i18n.t("dashboard.avgServiceTime")}
-            value={formatTime(ticketsData.ticketStatistics?.avgServiceTime)}
-            icon={<TimerIcon style={{ fontSize: 100 }} />}
-          />
-
-          {/* T.M. DE ESPERA */}
-          <InfoCard
-            title={i18n.t("dashboard.avgWaitTime")}
-            value={formatTime(ticketsData.ticketStatistics?.avgWaitTime)}
-            icon={<HourglassEmptyIcon style={{ fontSize: 100 }} />}
-          />
-
-          {/* DASHBOARD ATENDIMENTOS NO PERÍODO */}
-          <Grid item xs={12}>
-            <Paper className={classes.fixedHeightPaper}>
-              <TicketCountersChart
-                ticketCounters={ticketsData.ticketCounters}
-                start={ticketsData.start}
-                end={ticketsData.end}
-               />
-            </Paper>
+          <Grid item xs={12} className={classes.alignRight}>
+            <ButtonWithSpinner
+              loading={loading}
+              onClick={() => fetchData()}
+              variant="contained"
+              color="primary"
+              size="large"
+            >
+              Aplicar Filtros
+            </ButtonWithSpinner>
           </Grid>
-
-
-          {/* USER REPORT */}
-          <Grid item xs={12}>
-            {usersData.userReport?.length ? (
-              <TableAttendantsStatus
-                attendants={usersData.userReport}
-                loading={loadingUsers}
-              />
-            ) : null}
-          </Grid>
-
         </Grid>
-      </Container>
-    </div>
+      </Paper>
+
+      {/* CHART SECTION */}
+      <Box mb={4}>
+        <Typography variant="h6" className={classes.sectionTitle}>
+          Estatísticas de Atendimento
+        </Typography>
+        <Paper className={classes.fixedHeightPaper}>
+          <Chart />
+        </Paper>
+      </Box>
+
+      {/* STATS CARDS */}
+      <Box mb={4}>
+        <Typography variant="h6" className={classes.sectionTitle}>
+          Métricas Principais
+        </Typography>
+        <Grid container spacing={3}>
+          {stats.map((stat, index) => (
+            <Grid item xs={12} sm={6} md={4} key={index}>
+              <Card className={clsx(classes.card, stat.className)}>
+                <CardContent className={classes.cardContent}>
+                  <Typography className={classes.cardTitle}>
+                    {stat.title}
+                  </Typography>
+                  <Typography className={classes.cardValue}>
+                    {stat.value}
+                  </Typography>
+                  {stat.icon}
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+
+      {/* ATTENDANTS TABLE */}
+      {attendants.length > 0 && (
+        <Box mb={4}>
+          <Typography variant="h6" className={classes.sectionTitle}>
+            Status dos Atendentes
+          </Typography>
+          <Paper className={classes.statusTable}>
+            <TableAttendantsStatus attendants={attendants} loading={loading} />
+          </Paper>
+        </Box>
+      )}
+    </Container>
   );
 };
 
