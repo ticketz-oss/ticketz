@@ -1464,18 +1464,6 @@ const verifyQueue = async (
   }
 };
 
-export const verifyRating = (ticketTraking: TicketTraking) => {
-  if (
-    ticketTraking &&
-    ticketTraking.finishedAt === null &&
-    ticketTraking.userId !== null &&
-    ticketTraking.ratingAt !== null
-  ) {
-    return true;
-  }
-  return false;
-};
-
 const handleRating = async (
   rate: number,
   ticket: Ticket,
@@ -1518,7 +1506,6 @@ const handleRating = async (
     .then(
       () => {
         ticketTraking.update({
-          finishedAt: new Date(),
           rated: true
         });
       },
@@ -1922,8 +1909,7 @@ const handleMessage = async (
             whatsappId: whatsapp.id,
             rated: false,
             expired: false,
-            ratingAt: { [Op.not]: null },
-            finishedAt: null
+            ratingAt: { [Op.not]: null }
           },
           include: [
             {
@@ -1992,7 +1978,6 @@ const handleMessage = async (
             `tracking of ticket ${ticketTracking.ticketId} expired by wrong rate ${bodyMessage}`
           );
           ticketTracking.update({
-            finishedAt: new Date(),
             expired: true
           });
           quickMessage(wbot, ticketTracking.ticket, "Avaliação cancelada");

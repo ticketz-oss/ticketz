@@ -208,6 +208,12 @@ const chatbotChannels = [
   "webchat"
 ];
 
+const ngrokInstance = NgrokInstance.getInstance();
+
+function getBackendUrl() {
+  return ngrokInstance.getUrl() || process.env.BACKEND_URL;
+}
+
 export type NotificamehubSession = {
   client: Client;
   hubChannel: string;
@@ -230,10 +236,7 @@ async function initializeWebhook(
 
   const client = new Client(hubToken);
 
-  const backendUrl =
-    NgrokInstance.getInstance().getUrl() || process.env.BACKEND_URL;
-
-  const url = `${backendUrl}/notificamehub/webhook/${hubChannel}`;
+  const url = `${getBackendUrl()}/notificamehub/webhook/${hubChannel}`;
 
   const subscription = new MessageSubscription(
     {
@@ -789,7 +792,7 @@ export class NotificamehubDriver implements OmniDriver {
       const fileContent = new FileContent(
         message.mediaUrl.startsWith("https://")
           ? message.mediaUrl
-          : `${process.env.BACKEND_URL}/message.mediaUrl`,
+          : `${getBackendUrl()}/public/${message.mediaUrl}`,
         typeMappings[ticket.contact.channel][message.type] ||
           typeMappings[ticket.contact.channel].default ||
           "file",

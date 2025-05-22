@@ -170,6 +170,9 @@ const UserModal = ({ open, onClose, userId }) => {
                     variant="outlined"
                     margin="dense"
                     fullWidth
+                    inputProps={{
+                      autoComplete: "off",
+                    }}
                   />
                 </div>
                 <div className={classes.multFieldLine}>
