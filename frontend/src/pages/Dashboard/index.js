@@ -493,6 +493,57 @@ const Dashboard = () => {
             )} />
           }
 
+          { !localStorage.getItem("hideAds") && <OnlyForSuperUser
+            user={currentUser}
+            yes={() => (
+              <Grid item xs={12}>
+                <Paper className={clsx(classes.supportPaper, {
+                  [classes.clickpointer]: !supportBoxOpen,
+                })} onClick={() => setSupportBoxOpen(true)}>
+                  <Typography component="h2" variant="h6" gutterBottom>
+                    {i18n.t("ticketz.support.title")}
+                  </Typography>
+                  {supportBoxOpen &&
+                    <Grid container justifyContent="flex-end">
+                      <Grid className={classes.supportBox} item xs={12} md={4} sm={12}>
+                        <Typography component="h3" variant="h6" gutterBottom>
+                          PIX
+                        </Typography>
+                        <div>
+                          <img className={classes.paymentpix} src="/ticketzpix.png" />
+                        </div>
+                        <Typography className={classes.pixkey} component="body2" paragraph>
+                          1ab11506-9480-4303-8e1e-988e7c49ed4d
+                        </Typography>
+                      </Grid>
+                      <Grid className={classes.supportBox} item xs={12} md={4} sm={12}>
+                        <Typography component="h3" variant="h6" gutterBottom>
+                          {i18n.t("ticketz.support.mercadopagotitle")}
+                        </Typography>
+                        <Typography component="body2" paragraph>
+                          {i18n.t("ticketz.support.recurringbrl")}
+                        </Typography>
+                        <div><a href="https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=2c9380848f1b8ed1018f2b011f90061f" target="_blank">
+                          <img className={classes.paymentimg} src="/mercadopago.png" />
+                        </a></div>
+                      </Grid>
+                      <Grid className={classes.supportBox} item xs={12} md={4} sm={12}>
+                        <Typography component="h3" variant="h6" gutterBottom>
+                          {i18n.t("ticketz.support.paypaltitle")}
+                        </Typography>
+                        <Typography component="body2" paragraph>
+                          {i18n.t("ticketz.support.international")}
+                        </Typography>
+                        <div><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=X6XHVCPMRQEL4" target="_blank">
+                          <img className={classes.paymentimg} src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" />
+                        </a></div>
+                      </Grid>
+                    </Grid>
+                  }
+                </Paper>
+              </Grid>
+            )} /> }
+
           {/* USUARIOS ONLINE */}
           <InfoRingCard
             title={i18n.t("dashboard.usersOnline")}
