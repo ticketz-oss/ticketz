@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useContext } from "react";
-
 import Paper from "@material-ui/core/Paper";
 import Container from "@material-ui/core/Container";
 import Grid from "@material-ui/core/Grid";
@@ -9,19 +8,15 @@ import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
-
 // ICONS
 import GroupAddIcon from "@material-ui/icons/GroupAdd";
 import HourglassEmptyIcon from "@material-ui/icons/HourglassEmpty";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import TimerIcon from '@material-ui/icons/Timer';
-
 import { makeStyles } from "@material-ui/core/styles";
 import { grey, blue } from "@material-ui/core/colors";
 import { toast } from "react-toastify";
-
 import TableAttendantsStatus from "../../components/Dashboard/TableAttendantsStatus";
-
 import { isEmpty } from "lodash";
 import moment from "moment";
 import { i18n } from "../../translate/i18n";
@@ -29,15 +24,10 @@ import OnlyForSuperUser from "../../components/OnlyForSuperUser";
 import useAuth from "../../hooks/useAuth.js";
 import clsx from "clsx";
 import { loadJSON } from "../../helpers/loadJSON";
-
 import { SmallPie } from "./SmallPie";
 import { TicketCountersChart } from "./TicketCountersChart";
-
-import TicketzRegistry from "../../components/TicketzRegistry";
 import api from "../../services/api.js";
 import { SocketContext } from "../../context/Socket/SocketContext.js";
-
-const gitinfo = loadJSON('/gitinfo.json');
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -51,39 +41,6 @@ const useStyles = makeStyles((theme) => ({
     height: 240,
     overflowY: "auto",
     ...theme.scrollbarStyles,
-  },
-  pixkey: {
-    fontSize: "9pt",
-  },
-  paymentimg: {
-    maxWidth: "100%",
-    marginTop: "30px",
-  },
-  paymentpix: {
-    maxWidth: "100%",
-    maxHeight: "150px",
-    padding: "5px",
-    backgroundColor: "white",
-    borderColor: "black",
-    borderStyle: "solid",
-    borderWidth: "2px",
-  },
-  supportPaper: {
-    padding: theme.spacing(2),
-    display: "flex",
-    flexDirection: "column",
-    overflowY: "auto",
-    backgroundColor: theme.palette.secondary.main,
-    color: theme.palette.secondary.contrastText,
-    ...theme.scrollbarStyles,
-  },
-  supportBox: {
-    backgroundColor: theme.palette.secondary.light,
-    borderRadius: "10px",
-    textAlign: "center",
-    borderColor: theme.palette.secondary.main,
-    borderWidth: "3px",
-    borderStyle: "solid",
   },
   cardAvatar: {
     fontSize: "55px",
@@ -144,55 +101,10 @@ const useStyles = makeStyles((theme) => ({
     position: "sticky",
     right: 0,
   },
-  ticketzProPaper: {
-    padding: theme.spacing(2),
-    display: "flex",
-    flexDirection: "column",
-    overflowY: "auto",
-    backgroundColor: theme.palette.ticketzproad.main,
-    color: theme.palette.ticketzproad.contrastText,
-    ...theme.scrollbarStyles,
-  },
-  ticketzRegistryPaper: {
-    padding: theme.spacing(2),
-    display: "flex",
-    flexDirection: "column",
-    overflowY: "auto",
-    backgroundColor: theme.palette.background.main,
-    color: theme.palette.background.contrastText,
-    borderColor: theme.palette.primary.main,
-    borderWidth: "3px",
-    borderStyle: "solid",
-    marginBottom: "1em",
-    ...theme.scrollbarStyles,
-  },
-  ticketzProBox: {
-    textAlign: "center",
-    alignContent: "center"
-  },
-  ticketzProTitle: {
-    fontWeight: "bold"
-  },
-  ticketzProScreen: {
-    maxHeight: "300px",
-    maxWidth: "100%"
-  },
-  ticketzProFeatures: {
-    padding: 0,
-    listStyleType: "none"
-  },
-  ticketzProCommand: {
-    fontFamily: "monospace",
-    backgroundColor: "#00000080"
-  },
-  clickpointer: {
-    cursor: "pointer"
-  }
 }));
 
 const InfoCard = ({ title, value, icon }) => {
   const classes = useStyles();
-  
   return (
     <Grid item xs={12} sm={6} md={3}>
       <Paper
@@ -220,7 +132,7 @@ const InfoCard = ({ title, value, icon }) => {
       </Paper>
     </Grid>
   )
-}
+};
 
 const InfoRingCard = ({ title, value, graph }) => {
   const classes = useStyles();
@@ -264,11 +176,6 @@ const Dashboard = () => {
   );
   const [dateTo, setDateTo] = useState(moment().format("YYYY-MM-DD"));
   const { getCurrentUserInfo } = useAuth();
-    
-  const [supportBoxOpen, setSupportBoxOpen] = useState(false);
-  const [registered, setRegistered] = useState(false);
-  const [proInstructionsOpen, setProInstructionsOpen] = useState(false);
-  
   const [usersOnlineTotal, setUsersOnlineTotal] = useState(0);
   const [usersOfflineTotal, setUsersOfflineTotal] = useState(0);
   const [usersStatusChartData, setUsersStatusChartData] = useState([]);
@@ -276,33 +183,20 @@ const Dashboard = () => {
   const [pendingChartData, setPendingChartData] = useState([]);
   const [openedTotal, setOpenedTotal] = useState(0);
   const [openedChartData, setOpenedChartData] = useState([]);
-  
   const [ticketsData, setTicketsData] = useState({});
   const [usersData, setUsersData] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
-
   const socketManager = useContext(SocketContext);
-    
-  async function showProInstructions() {
-    if (gitinfo.commitHash) {
-      setProInstructionsOpen(true);
-      return;
-    }
-    
-    window.open("https://pro.ticke.tz", "_blank");
-  }
-  
+
   useEffect(() => {
-    const socket = socketManager.GetSocket(companyId);
-    
+    const socket = socketManager.GetSocket();
     socket.on("userOnlineChange", updateStatus);
     socket.on("counter", updateStatus);
-
     return () => {
       socket.disconnect();
     }
   }, [socketManager]);
-  
+
   useEffect(() => {
     getCurrentUserInfo().then(
       (user) => {
@@ -315,25 +209,17 @@ const Dashboard = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(async () => {
-    const registry = await api.get("/ticketz/registry");
-
-    setRegistered( registry?.data?.disabled || !!(registry?.data?.whatsapp ) );
-  }, []);
-    
   useEffect(() => {
     fetchData();
   }, [period]);
-  
+
   async function handleChangePeriod(value) {
     setPeriod(value);
   }
 
   async function updateStatus() {
     const { data } = await api.get("/dashboard/status");
-    
     if (!data) return;
-
     let usersOnlineTotal = 0;
     let usersOfflineTotal = 0;
     data.usersStatusSummary.forEach((item) => {
@@ -343,7 +229,6 @@ const Dashboard = () => {
         usersOfflineTotal++;
       }
     });
-
     setUsersStatusChartData([
       {
         name: "Online",
@@ -356,10 +241,8 @@ const Dashboard = () => {
         color: "#ff0000"
       }
     ]);
-
     setUsersOnlineTotal(usersOnlineTotal);
     setUsersOfflineTotal(usersOfflineTotal);
-
     let pendingTotal = 0;
     let openedTotal = 0;
     const pendingChartData = [];
@@ -388,45 +271,38 @@ const Dashboard = () => {
     setOpenedTotal(openedTotal);
     setOpenedChartData(openedChartData);
   }
-  
+
   async function fetchData() {
     let params = {};
-    
     const days = Number(period);
-
     if (days) {
       params = {
         date_from: moment().subtract(days, "days").format("YYYY-MM-DD"),
         date_to: moment().format("YYYY-MM-DD")
       };
     }
-
     if (!days && !isEmpty(dateFrom) && moment(dateFrom).isValid()) {
       params = {
         ...params,
         date_from: moment(dateFrom).format("YYYY-MM-DD"),
       };
     }
-
     if (!days && !isEmpty(dateTo) && moment(dateTo).isValid()) {
       params = {
         ...params,
         date_to: moment(dateTo).format("YYYY-MM-DD"),
       };
     }
-
     if (Object.keys(params).length === 0) {
       toast.error(i18n.t("dashboard.filter.invalid"));
       return;
     }
-
     api.get("/dashboard/tickets", { params }).then(
       result => {
         if (result?.data) {
           setTicketsData(result.data);
         }
       });
-
     setLoadingUsers(true);
     api.get("/dashboard/users", { params }).then(
       result => {
@@ -507,17 +383,13 @@ const Dashboard = () => {
   }
 
   if (currentUser?.profile !== "admin") {
-    return (
-      <div>
-      </div>
-    );
+    return null;
   }
-      
+
   return (
     <div>
       <Container maxWidth="lg" className={classes.container}>
-        <Grid container spacing={3} justifyContent="flex-start">          
-
+        <Grid container spacing={3} justifyContent="flex-start">
           {/* USUARIOS ONLINE */}
           <InfoRingCard
             title={i18n.t("dashboard.usersOnline")}
@@ -526,7 +398,6 @@ const Dashboard = () => {
               <SmallPie chartData={usersStatusChartData} />
             }
           />
-
           {/* ATENDIMENTOS PENDENTES */}
           <InfoRingCard
             title={i18n.t("dashboard.ticketsWaiting")}
@@ -535,7 +406,6 @@ const Dashboard = () => {
               <SmallPie chartData={pendingChartData} />
             }
           />
-
           {/* ATENDIMENTOS ACONTECENDO */}
           <InfoRingCard
             title={i18n.t("dashboard.ticketsOpen")}
@@ -544,38 +414,32 @@ const Dashboard = () => {
               <SmallPie chartData={openedChartData} />
             }
           />
-
           {/* FILTROS */}
           {renderFilters()}
-
           {/* ATENDIMENTOS REALIZADOS */}
           <InfoCard
             title={i18n.t("dashboard.ticketsDone")}
             value={ticketsData.ticketStatistics?.totalClosed || 0}
             icon={<CheckCircleIcon style={{ fontSize: 100 }} />}
           />
-
           {/* NOVOS CONTATOS */}
           <InfoCard
             title={i18n.t("dashboard.newContacts")}
             value={ticketsData.ticketStatistics?.newContacts || 0}
             icon={<GroupAddIcon style={{ fontSize: 100 }} />}
           />
-
           {/* T.M. DE ATENDIMENTO */}
           <InfoCard
             title={i18n.t("dashboard.avgServiceTime")}
             value={formatTime(ticketsData.ticketStatistics?.avgServiceTime)}
             icon={<TimerIcon style={{ fontSize: 100 }} />}
           />
-
           {/* T.M. DE ESPERA */}
           <InfoCard
             title={i18n.t("dashboard.avgWaitTime")}
             value={formatTime(ticketsData.ticketStatistics?.avgWaitTime)}
             icon={<HourglassEmptyIcon style={{ fontSize: 100 }} />}
           />
-
           {/* DASHBOARD ATENDIMENTOS NO PERÍODO */}
           <Grid item xs={12}>
             <Paper className={classes.fixedHeightPaper}>
@@ -586,8 +450,6 @@ const Dashboard = () => {
                />
             </Paper>
           </Grid>
-
-
           {/* USER REPORT */}
           <Grid item xs={12}>
             {usersData.userReport?.length ? (
@@ -597,7 +459,6 @@ const Dashboard = () => {
               />
             ) : null}
           </Grid>
-
         </Grid>
       </Container>
     </div>
