@@ -341,7 +341,8 @@ export class IntegrationServices {
     if (queueId && userId) {
       await updateTicket(integrationSession.ticket, {
         queueId,
-        userId
+        userId,
+        status: "open"
       });
       return;
     }
