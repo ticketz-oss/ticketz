@@ -9,7 +9,6 @@ on:
       - 'test-**'
     tags:
       - 'v*.*.*'
-
 env:
   REGISTRY: ghcr.io
   IMAGE_BACKEND: ticketz-oss/ticketz-backend
@@ -22,7 +21,6 @@ jobs:
       contents: read
       packages: write
       attestations: write
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -63,13 +61,12 @@ jobs:
 
       - name: Docker meta Backend
         id: metabackend
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v3
         with:
           images: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_BACKEND }}
           labels: |
             org.opencontainers.image.title=ticketz-backend
-            org.opencontainers.image.source=https://github.com/${{ github.repository }}
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}
@@ -79,13 +76,12 @@ jobs:
 
       - name: Docker meta Frontend
         id: metafrontend
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v3
         with:
           images: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_FRONTEND }}
           labels: |
             org.opencontainers.image.title=ticketz-frontend
-            org.opencontainers.image.source=https://github.com/${{ github.repository }}
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}
@@ -95,26 +91,21 @@ jobs:
 
       - name: Build and push backend Docker image
         id: backend
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v2
         with:
           context: ./backend
           push: true
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.metabackend.outputs.tags }}
           labels: ${{ steps.metabackend.outputs.labels }}
-          build-args: |
-            TICKETZ_REGISTRY_URL=${{ secrets.TICKETZ_REGISTRY_URL }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          build-args: TICKETZ_REGISTRY_URL=${{secrets.TICKETZ_REGISTRY_URL}}
 
       - name: Build and push frontend Docker image
         id: frontend
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v2
         with:
           context: ./frontend
           push: true
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.metafrontend.outputs.tags }}
           labels: ${{ steps.metafrontend.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
