@@ -190,13 +190,16 @@ async function handleLoginStatus() {
   });
 }
 
-async function setRatingExpired(tracking, date) {
-  const wbot = getWbot(tracking.whatsapp.id);
-
+async function setRatingExpired(tracking: TicketTraking, threshold: Date) {
   tracking.update({
-    finishedAt: date,
     expired: true
   });
+
+  if (tracking.ratingAt < subMinutes(threshold, 5)) {
+    return;
+  }
+
+  const wbot = getWbot(tracking.whatsapp.id);
 
   const complationMessage =
     tracking.whatsapp.complationMessage.trim() || "Atendimento finalizado";
@@ -206,11 +209,7 @@ async function setRatingExpired(tracking, date) {
       tracking.ticket.isGroup ? "g.us" : "s.whatsapp.net"
     }`,
     {
-      text: formatBody(
-        `\u200e${complationMessage}`,
-        tracking.ticket.contact,
-        tracking.ticket
-      )
+      text: formatBody(`\u200e${complationMessage}`, tracking.ticket)
     }
   );
 
@@ -261,7 +260,7 @@ async function handleRatingsTimeout() {
       ratingThresholds[tracking.companyId] = subMinutes(currentTime, timeout);
     }
     if (tracking.ratingAt < ratingThresholds[tracking.companyId]) {
-      setRatingExpired(tracking, currentTime);
+      setRatingExpired(tracking, ratingThresholds[tracking.companyId]);
     }
   }
 }
