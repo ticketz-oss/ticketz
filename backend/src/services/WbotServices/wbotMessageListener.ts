@@ -1299,17 +1299,6 @@ const verifyQueue = async (
   }
 };
 
-export const verifyRating = (ticketTraking: TicketTraking) => {
-  if (
-    ticketTraking &&
-    ticketTraking.userId !== null &&
-    ticketTraking.ratingAt !== null
-  ) {
-    return true;
-  }
-  return false;
-};
-
 const handleRating = async (
   rate: number,
   ticket: Ticket,
