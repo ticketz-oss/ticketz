@@ -14,7 +14,8 @@ interface Request {
 const safeSettingsKeys = {
   groupsTab: "disabled",
   CheckMsgIsGroup: "disabled",
-  soundGroupNotifications: "disabled"
+  soundGroupNotifications: "disabled",
+  tagsMode: "ticket"
 };
 
 export const GetSettingService = async ({

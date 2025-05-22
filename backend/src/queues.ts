@@ -222,7 +222,6 @@ async function handleRatingsTimeout() {
     where: {
       rated: false,
       expired: false,
-      finishedAt: null,
       ratingAt: { [Op.not]: null }
     },
     include: [

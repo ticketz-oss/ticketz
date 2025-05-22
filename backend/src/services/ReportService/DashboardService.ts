@@ -96,6 +96,7 @@ export async function calculateTicketStatistics(
         "Contacts" c ON t."contactId" = c.id
     WHERE 
         (tt."createdAt" BETWEEN :startDate AND :endDate)
+        AND (tt."companyId" = :companyId)
         AND (tt."finishedAt" BETWEEN :startDate AND :endDate)
         AND (c."createdAt" BETWEEN :startDate AND :endDate)
   ) GROUP BY "contactId")
@@ -103,6 +104,7 @@ export async function calculateTicketStatistics(
 
   const newContacts = (await sequelize.query(countContactsQuery, {
     replacements: {
+      companyId,
       startDate: start,
       endDate: end
     },
