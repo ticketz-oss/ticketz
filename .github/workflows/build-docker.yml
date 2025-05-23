@@ -3,12 +3,12 @@ name: Create and publish multi-arch Docker images
 on:
   push:
     branches:
-      - 'CRM'
+      - 'main'
       - 'fix/**'
       - 'dev'
       - 'test-**'
     tags:
-      - 'v3.0.1'
+      - 'v*.*.*'
 env:
   REGISTRY: ghcr.io
   IMAGE_BACKEND: tutujaru/botconversa-backend
