@@ -1,7 +1,7 @@
 export const GitInfo = {
-  commitHash: "CRM",
+  commitHash: "",
   commitTimestamp: "",
   branchName: "",
-  tagName: "v3.0.1",
-  buildTimestamp: "Glecson Mendes"
+  tagName: "v1.0.x",
+  buildTimestamp: "custom build"
 };
