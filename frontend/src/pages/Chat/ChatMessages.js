@@ -9,138 +9,81 @@ import {
   makeStyles,
   Paper,
   Typography,
+  CircularProgress,
 } from "@material-ui/core";
-import SendIcon from "@material-ui/icons/Send";
+import {
+  Send as SendIcon,
+  AttachFile as AttachFileIcon,
+  Cancel as CancelIcon,
+  GetApp,
+  Mic as MicIcon,
+  HighlightOff as HighlightOffIcon,
+  CheckCircleOutline as CheckCircleOutlineIcon,
+} from "@material-ui/icons";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { useDate } from "../../hooks/useDate";
 import api from "../../services/api";
-
-import { green } from "@material-ui/core/colors";
-import AttachFileIcon from "@material-ui/icons/AttachFile";
-import CancelIcon from "@material-ui/icons/Cancel";
-import CircularProgress from "@material-ui/core/CircularProgress";
 import ModalImageCors from "../../components/ModalImageCors";
-import { GetApp } from "@material-ui/icons";
 import toastError from "../../errors/toastError";
 import MicRecorder from "mic-recorder-to-mp3";
-import MicIcon from "@material-ui/icons/Mic";
-import HighlightOffIcon from "@material-ui/icons/HighlightOff";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import RecordingTimer from "../../components/MessageInputCustom/RecordingTimer";
 
 const useStyles = makeStyles((theme) => ({
   mainContainer: {
     display: "flex",
     flexDirection: "column",
-    position: "relative",
-    flex: 1,
-    overflow: "hidden",
-    borderRadius: 0,
     height: "100%",
-    borderLeft: "1px solid rgba(0, 0, 0, 0.12)",
+    borderLeft: "1px solid rgba(0,0,0,0.12)",
+    backgroundColor: "#ece5dd",
   },
   messageList: {
-    position: "relative",
+    flex: 1,
     overflowY: "auto",
-    height: "100%",
-    ...theme.scrollbarStyles,
-    backgroundColor: theme.palette.chatlist, //DARK MODE PLW DESIGN//
+    padding: "10px",
+    backgroundImage: "url('/whatsapp-bg.png')",
+    backgroundSize: "cover",
+  },
+  messageBox: {
+    maxWidth: "60%",
+    padding: "10px",
+    borderRadius: "7.5px",
+    marginBottom: "10px",
+    wordBreak: "break-word",
+    position: "relative",
+  },
+  sent: {
+    marginLeft: "auto",
+    backgroundColor: "#dcf8c6",
+    borderBottomRightRadius: 0,
+  },
+  received: {
+    marginRight: "auto",
+    backgroundColor: "#fff",
+    borderBottomLeftRadius: 0,
   },
   inputArea: {
-    position: "relative",
-    height: "auto",
+    padding: "10px",
+    borderTop: "1px solid rgba(0,0,0,0.12)",
+    backgroundColor: "#f0f0f0",
   },
   input: {
-    padding: "20px",
-  },
-  buttonSend: {
-    margin: theme.spacing(1),
-  },
-  boxLeft: {
-    padding: "10px 10px 5px",
-    margin: "10px",
-    position: "relative",
-    backgroundColor: "blue",
-    maxWidth: 300,
-    borderRadius: 10,
-    borderBottomLeftRadius: 0,
-    border: "1px solid rgba(0, 0, 0, 0.12)",
-  },
-  boxRight: {
-    padding: "10px 10px 5px",
-    margin: "10px 10px 10px auto",
-    position: "relative",
-    backgroundColor: "green", //DARK MODE PLW DESIGN//
-    textAlign: "right",
-    maxWidth: 300,
-    borderRadius: 10,
-    borderBottomRightRadius: 0,
-    border: "1px solid rgba(0, 0, 0, 0.12)",
-  },
-
-  sendMessageIcons: {
-    color: "grey",
+    flex: 1,
+    marginRight: "10px",
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    padding: "10px 15px",
   },
   uploadInput: {
     display: "none",
   },
-  circleLoading: {
-    color: green[500],
-    opacity: "70%",
-    position: "absolute",
-    top: "20%",
-    left: "50%",
-    marginLeft: -12,
-  },
-  viewMediaInputWrapper: {
+  mediaPreview: {
+    padding: "10px",
+    backgroundColor: "#f0f0f0",
     display: "flex",
-    padding: "10px 13px",
-    position: "relative",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#eee",
-    borderTop: "1px solid rgba(0, 0, 0, 0.12)",
   },
-
-  downloadMedia: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "inherit",
-    padding: 10,
-  },
-  messageMedia: {
-    objectFit: "cover",
-    width: 250,
-    height: 200,
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
-  },
-
-  recorderWrapper: {
-    display: "flex",
-    alignItems: "center",
-    alignContent: "middle",
-    justifyContent: 'flex-end',
-  },
-
-  cancelAudioIcon: {
-    color: "red",
-  },
-
-
-  audioLoading: {
-    color: green[500],
-    opacity: "70%",
-  },
-
-  sendAudioIcon: {
-    color: "green",
-  },
-
 }));
 
 const Mp3Recorder = new MicRecorder({ bitRate: 128 });
@@ -165,108 +108,55 @@ export default function ChatMessages({
 
   const scrollToBottom = () => {
     if (baseRef.current) {
-      baseRef.current.scrollIntoView({});
+      baseRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  };
-
-  const unreadMessages = (chat) => {
-    if (chat !== undefined) {
-      const currentUser = chat.users.find((u) => u.userId === user.id);
-      return currentUser.unreads > 0;
-    }
-    return 0;
   };
 
   useEffect(() => {
-    if (unreadMessages(chat) > 0) {
-      try {
-        api.post(`/chats/${chat.id}/read`, { userId: user.id });
-      } catch (err) { }
-    }
     scrollToBottomRef.current = scrollToBottom;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    scrollToBottom();
+  }, [messages]);
 
   const handleScroll = (e) => {
-    const { scrollTop } = e.currentTarget;
     if (!pageInfo.hasMore || loading) return;
-    if (scrollTop < 600) {
-      handleLoadMore();
-    }
+    if (e.currentTarget.scrollTop < 600) handleLoadMore();
   };
 
   const handleChangeMedias = (e) => {
-
-
-    if (!e.target.files) {
-      return;
-    }
-
+    if (!e.target.files) return;
     const selectedMedias = Array.from(e.target.files);
     setMedias(selectedMedias);
   };
 
   const checkMessageMedia = (message) => {
-
-    if (message.mediaType === "image") {
-      return <ModalImageCors imageUrl={message.mediaPath} />;
-    }
-    if (message.mediaType === "audio") {
-      return (
-        <audio controls>
-          <source src={message.mediaPath} type="audio/ogg"></source>
-        </audio>
-      );
-    }
-
-    if (message.mediaType === "video") {
-      return (
-        <video
-          className={classes.messageMedia}
-          src={message.mediaPath}
-          controls
-        />
-      );
-    } else {
-      return (
-        <>
-          <div className={classes.downloadMedia}>
-            <Button
-              startIcon={<GetApp />}
-              color="primary"
-              variant="outlined"
-              target="_blank"
-              href={message.mediaPath}
-            >
-              Download
-            </Button>
-          </div>
-          {/* <Divider /> */}
-        </>
-      );
+    switch (message.mediaType) {
+      case "image": return <ModalImageCors imageUrl={message.mediaPath} />;
+      case "audio": return <audio controls src={message.mediaPath} />;
+      case "video": return <video width="250" controls src={message.mediaPath} />;
+      default:
+        return (
+          <Button startIcon={<GetApp />} href={message.mediaPath} target="_blank" download>
+            Download
+          </Button>
+        );
     }
   };
 
-  const handleSendMedia = async (e) => {
+  const handleSendMedia = async () => {
     setLoading(true);
-    e.preventDefault();
-
     const formData = new FormData();
-    formData.append("fromMe", true);
     medias.forEach((media) => {
       formData.append("medias", media);
       formData.append("body", media.name);
     });
-
+    formData.append("fromMe", true);
     try {
       await api.post(`/chats/${chat.id}/messages`, formData);
+      setMedias([]);
     } catch (err) {
-      console.log(err);
       toastError(err);
     }
-
     setLoading(false);
-    setMedias([]);
   };
 
   const handleStartRecording = async () => {
@@ -275,27 +165,20 @@ export default function ChatMessages({
       await navigator.mediaDevices.getUserMedia({ audio: true });
       await Mp3Recorder.start();
       setRecording(true);
-      setLoading(false);
     } catch (err) {
       toastError(err);
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   const handleUploadAudio = async () => {
     setLoading(true);
     try {
       const [, blob] = await Mp3Recorder.stop().getMp3();
-
-      if (blob.size < 10000) {
-        setLoading(false);
-        setRecording(false);
-        return;
-      }
+      if (blob.size < 10000) throw new Error("Audio muito curto");
 
       const formData = new FormData();
-      const filename = `audio-${new Date().getTime()}.mp3`;
-
+      const filename = `audio-${Date.now()}.mp3`;
       formData.append("medias", blob, filename);
       formData.append("body", filename);
       formData.append("fromMe", true);
@@ -304,184 +187,81 @@ export default function ChatMessages({
     } catch (err) {
       toastError(err);
     }
-
     setRecording(false);
     setLoading(false);
   };
 
   const handleCancelAudio = async () => {
     try {
-      await Mp3Recorder.stop().getMp3();
-      setRecording(false);
-    } catch (err) {
-      toastError(err);
-    }
+      await Mp3Recorder.stop();
+    } catch {}
+    setRecording(false);
   };
 
   return (
     <Paper className={classes.mainContainer}>
       <div onScroll={handleScroll} className={classes.messageList}>
-        {Array.isArray(messages) &&
-          messages.map((item, key) => {
-            if (item.senderId === user.id) {
-              return (
-                <Box key={key} className={classes.boxRight}>
-                  <Typography variant="subtitle2">
-                    {item.sender.name}
-                  </Typography>
-                  {item.mediaPath && checkMessageMedia(item)}
-                  {item.message}
-                  <Typography variant="caption" display="block">
-                    {datetimeToClient(item.createdAt)}
-                  </Typography>
-                </Box>
-              );
-            } else {
-              return (
-                <Box key={key} className={classes.boxLeft}>
-                  <Typography variant="subtitle2">
-                    {item.sender.name}
-                  </Typography>
-                  {item.mediaPath && checkMessageMedia(item)}
-                  {item.message}
-                  <Typography variant="caption" display="block">
-                    {datetimeToClient(item.createdAt)}
-                  </Typography>
-                </Box>
-              );
+        {messages.map((msg, i) => (
+          <Box
+            key={i}
+            className={
+              msg.senderId === user.id
+                ? `${classes.messageBox} ${classes.sent}`
+                : `${classes.messageBox} ${classes.received}`
             }
-          })}
-        <div ref={baseRef}></div>
+          >
+            <Typography variant="body2">{msg.sender.name}</Typography>
+            {msg.mediaPath && checkMessageMedia(msg)}
+            <Typography variant="body1">{msg.message}</Typography>
+            <Typography variant="caption">{datetimeToClient(msg.createdAt)}</Typography>
+          </Box>
+        ))}
+        <div ref={baseRef} />
       </div>
       <div className={classes.inputArea}>
-        <FormControl variant="outlined" fullWidth>
-
-          {recording ? (
-            <div className={classes.recorderWrapper}>
-              <IconButton
-                aria-label="cancelRecording"
-                component="span"
-                fontSize="large"
-                disabled={loading}
-                onClick={handleCancelAudio}
-              >
-                <HighlightOffIcon className={classes.cancelAudioIcon} />
-              </IconButton>
-              {loading ? (
-                <div>
-                  <CircularProgress className={classes.audioLoading} />
-                </div>
-              ) : (
-                <RecordingTimer />
-              )}
-
-              <IconButton
-                aria-label="sendRecordedAudio"
-                component="span"
-                onClick={handleUploadAudio}
-                disabled={loading}
-              >
-                <CheckCircleOutlineIcon className={classes.sendAudioIcon} />
-              </IconButton>
-            </div>
-
-          )
-            :
-            <>
-              {medias.length > 0 ?
-                <>
-                  <Paper elevation={0} square className={classes.viewMediaInputWrapper}>
-                    <IconButton
-                      aria-label="cancel-upload"
-                      component="span"
-                      onClick={(e) => setMedias([])}
-                    >
-                      <CancelIcon className={classes.sendMessageIcons} />
-                    </IconButton>
-
-                    {loading ? (
-                      <div>
-                        <CircularProgress className={classes.circleLoading} />
-                      </div>
-                    ) : (
-                      <span>
-                        {medias[0]?.name}
-                      </span>
-                    )}
-                    <IconButton
-                      aria-label="send-upload"
-                      component="span"
-                      onClick={handleSendMedia}
-                      disabled={loading}
-                    >
-                      <SendIcon className={classes.sendMessageIcons} />
-                    </IconButton>
-                  </Paper>
-                </>
-                :
-                <React.Fragment>
-                  <Input
-                    multiline
-                    value={contentMessage}
-                    onKeyUp={(e) => {
-                      if (e.key === "Enter" && contentMessage.trim() !== "") {
-
-                        handleSendMessage(contentMessage);
-                        setContentMessage("");
-                      }
-                    }}
-                    onChange={(e) => setContentMessage(e.target.value)}
-                    className={classes.input}
-                    startAdornment={
-                      <InputAdornment position="start">
-                        <FileInput disableOption={loading} handleChangeMedias={handleChangeMedias} />
-                      </InputAdornment>
-                    }
-                    endAdornment={
-                      <InputAdornment position="end">
-                        {contentMessage ? (
-                          <IconButton
-                            onClick={() => {
-                              if (contentMessage.trim() !== "") {
-                                handleSendMessage(contentMessage);
-                                setContentMessage("");
-                              }
-                            }}
-                            className={classes.buttonSend}
-                          >
-                            <SendIcon />
-                          </IconButton>
-
-                        )
-
-                          : (
-                            <IconButton
-                              aria-label="showRecorder"
-                              component="span"
-                              disabled={loading}
-                              onClick={handleStartRecording}
-                            >
-                              <MicIcon className={classes.sendMessageIcons} />
-                            </IconButton>
-                          )
-
-                        }
-                      </InputAdornment>
-                    }
-                  />
-                </React.Fragment>
-              }
-            </>
-          }
-
-        </FormControl>
+        {recording ? (
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <IconButton onClick={handleCancelAudio}><HighlightOffIcon /></IconButton>
+            <RecordingTimer />
+            <IconButton onClick={handleUploadAudio}><CheckCircleOutlineIcon /></IconButton>
+          </div>
+        ) : medias.length > 0 ? (
+          <div className={classes.mediaPreview}>
+            <IconButton onClick={() => setMedias([])}><CancelIcon /></IconButton>
+            <Typography>{medias[0]?.name}</Typography>
+            <IconButton onClick={handleSendMedia}><SendIcon /></IconButton>
+          </div>
+        ) : (
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <FileInput handleChangeMedias={handleChangeMedias} disableOption={loading} />
+            <Input
+              placeholder="Mensagem"
+              value={contentMessage}
+              onChange={(e) => setContentMessage(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === "Enter" && contentMessage.trim()) {
+                  handleSendMessage(contentMessage);
+                  setContentMessage("");
+                }
+              }}
+              className={classes.input}
+            />
+            {contentMessage ? (
+              <IconButton onClick={() => {
+                handleSendMessage(contentMessage);
+                setContentMessage("");
+              }}><SendIcon /></IconButton>
+            ) : (
+              <IconButton onClick={handleStartRecording}><MicIcon /></IconButton>
+            )}
+          </div>
+        )}
       </div>
     </Paper>
   );
 }
 
-const FileInput = (props) => {
-  const { handleChangeMedias, disableOption } = props;
+const FileInput = ({ handleChangeMedias, disableOption }) => {
   const classes = useStyles();
   return (
     <>
@@ -494,12 +274,8 @@ const FileInput = (props) => {
         onChange={handleChangeMedias}
       />
       <label htmlFor="upload-button">
-        <IconButton
-          aria-label="upload"
-          component="span"
-          disabled={disableOption}
-        >
-          <AttachFileIcon className={classes.sendMessageIcons} />
+        <IconButton component="span" disabled={disableOption}>
+          <AttachFileIcon />
         </IconButton>
       </label>
     </>
