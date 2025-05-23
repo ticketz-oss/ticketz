@@ -33,7 +33,6 @@ import { loadJSON } from "../../helpers/loadJSON";
 import { SmallPie } from "./SmallPie";
 import { TicketCountersChart } from "./TicketCountersChart";
 
-import TicketzRegistry from "../../components/TicketzRegistry";
 import api from "../../services/api.js";
 import { SocketContext } from "../../context/Socket/SocketContext.js";
 
@@ -51,39 +50,6 @@ const useStyles = makeStyles((theme) => ({
     height: 240,
     overflowY: "auto",
     ...theme.scrollbarStyles,
-  },
-  pixkey: {
-    fontSize: "9pt",
-  },
-  paymentimg: {
-    maxWidth: "100%",
-    marginTop: "30px",
-  },
-  paymentpix: {
-    maxWidth: "100%",
-    maxHeight: "150px",
-    padding: "5px",
-    backgroundColor: "white",
-    borderColor: "black",
-    borderStyle: "solid",
-    borderWidth: "2px",
-  },
-  supportPaper: {
-    padding: theme.spacing(2),
-    display: "flex",
-    flexDirection: "column",
-    overflowY: "auto",
-    backgroundColor: theme.palette.secondary.main,
-    color: theme.palette.secondary.contrastText,
-    ...theme.scrollbarStyles,
-  },
-  supportBox: {
-    backgroundColor: theme.palette.secondary.light,
-    borderRadius: "10px",
-    textAlign: "center",
-    borderColor: theme.palette.secondary.main,
-    borderWidth: "3px",
-    borderStyle: "solid",
   },
   cardAvatar: {
     fontSize: "55px",
@@ -143,19 +109,6 @@ const useStyles = makeStyles((theme) => ({
     width: 100,
     position: "sticky",
     right: 0,
-  },
-  ticketzRegistryPaper: {
-    padding: theme.spacing(2),
-    display: "flex",
-    flexDirection: "column",
-    overflowY: "auto",
-    backgroundColor: theme.palette.background.main,
-    color: theme.palette.background.contrastText,
-    borderColor: theme.palette.primary.main,
-    borderWidth: "3px",
-    borderStyle: "solid",
-    marginBottom: "1em",
-    ...theme.scrollbarStyles,
   },
   clickpointer: {
     cursor: "pointer"
@@ -237,9 +190,6 @@ const Dashboard = () => {
   const [dateTo, setDateTo] = useState(moment().format("YYYY-MM-DD"));
   const { getCurrentUserInfo } = useAuth();
     
-  const [supportBoxOpen, setSupportBoxOpen] = useState(false);
-  const [registered, setRegistered] = useState(false);
-  
   const [usersOnlineTotal, setUsersOnlineTotal] = useState(0);
   const [usersOfflineTotal, setUsersOfflineTotal] = useState(0);
   const [usersStatusChartData, setUsersStatusChartData] = useState([]);
@@ -277,11 +227,6 @@ const Dashboard = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(async () => {
-    const registry = await api.get("/ticketz/registry");
-
-    setRegistered( registry?.data?.disabled || !!(registry?.data?.whatsapp ) );
-  }, []);
     
   useEffect(() => {
     fetchData();
@@ -480,70 +425,6 @@ const Dashboard = () => {
       <Container maxWidth="lg" className={classes.container}>
         <Grid container spacing={3} justifyContent="flex-start">
 
-          { !localStorage.getItem("hideAds") && <OnlyForSuperUser
-            user={currentUser}
-            yes={() => (
-              <Grid item xs={12}>
-                {!registered &&
-                  <Paper className={classes.ticketzRegistryPaper}>
-                    <TicketzRegistry onRegister={setRegistered} />
-                  </Paper>
-                }
-              </Grid>
-            )} />
-          }
-
-          { !localStorage.getItem("hideAds") && <OnlyForSuperUser
-            user={currentUser}
-            yes={() => (
-              <Grid item xs={12}>
-                <Paper className={clsx(classes.supportPaper, {
-                  [classes.clickpointer]: !supportBoxOpen,
-                })} onClick={() => setSupportBoxOpen(true)}>
-                  <Typography component="h2" variant="h6" gutterBottom>
-                    {i18n.t("ticketz.support.title")}
-                  </Typography>
-                  {supportBoxOpen &&
-                    <Grid container justifyContent="flex-end">
-                      <Grid className={classes.supportBox} item xs={12} md={4} sm={12}>
-                        <Typography component="h3" variant="h6" gutterBottom>
-                          PIX
-                        </Typography>
-                        <div>
-                          <img className={classes.paymentpix} src="/ticketzpix.png" />
-                        </div>
-                        <Typography className={classes.pixkey} component="body2" paragraph>
-                          1ab11506-9480-4303-8e1e-988e7c49ed4d
-                        </Typography>
-                      </Grid>
-                      <Grid className={classes.supportBox} item xs={12} md={4} sm={12}>
-                        <Typography component="h3" variant="h6" gutterBottom>
-                          {i18n.t("ticketz.support.mercadopagotitle")}
-                        </Typography>
-                        <Typography component="body2" paragraph>
-                          {i18n.t("ticketz.support.recurringbrl")}
-                        </Typography>
-                        <div><a href="https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=2c9380848f1b8ed1018f2b011f90061f" target="_blank">
-                          <img className={classes.paymentimg} src="/mercadopago.png" />
-                        </a></div>
-                      </Grid>
-                      <Grid className={classes.supportBox} item xs={12} md={4} sm={12}>
-                        <Typography component="h3" variant="h6" gutterBottom>
-                          {i18n.t("ticketz.support.paypaltitle")}
-                        </Typography>
-                        <Typography component="body2" paragraph>
-                          {i18n.t("ticketz.support.international")}
-                        </Typography>
-                        <div><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=X6XHVCPMRQEL4" target="_blank">
-                          <img className={classes.paymentimg} src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" />
-                        </a></div>
-                      </Grid>
-                    </Grid>
-                  }
-                </Paper>
-              </Grid>
-            )} /> }
-
           {/* USUARIOS ONLINE */}
           <InfoRingCard
             title={i18n.t("dashboard.usersOnline")}
@@ -612,7 +493,6 @@ const Dashboard = () => {
                />
             </Paper>
           </Grid>
-
 
           {/* USER REPORT */}
           <Grid item xs={12}>
