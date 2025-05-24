@@ -3,6 +3,7 @@ import moment from "moment";
 import { QueryTypes } from "sequelize";
 import { isEmpty, isNil, isArray } from "lodash";
 import path from "path";
+import { AnyMessageContent } from "@whiskeysockets/baileys";
 import Campaign from "../models/Campaign";
 import ContactList from "../models/ContactList";
 import ContactListItem from "../models/ContactListItem";
@@ -17,6 +18,8 @@ import { logger } from "../utils/logger";
 import { randomValue } from "../helpers/randomValue";
 import { parseToMilliseconds } from "../helpers/parseToMilliseconds";
 import GetWhatsappWbot from "../helpers/GetWhatsappWbot";
+import OutOfTicketMessage from "../models/OutOfTicketMessages";
+import { Session } from "../libs/wbot";
 import Contact from "../models/Contact";
 import Tag from "../models/Tag";
 
@@ -389,6 +392,26 @@ async function handleProcessCampaign(job) {
   }
 }
 
+async function sendCampaignMessage(
+  whatsappId: number,
+  wbot: Session,
+  jid: string,
+  content: AnyMessageContent
+) {
+  try {
+    const message = await wbot.sendMessage(jid, content);
+    OutOfTicketMessage.create({
+      id: message.key.id,
+      dataJson: JSON.stringify(message),
+      whatsappId
+    });
+    return message;
+  } catch (err) {
+    logger.error({ message: err?.message }, "Error sending campaign message");
+    return null;
+  }
+}
+
 async function handleDispatchCampaign(job) {
   try {
     const { data } = job;
@@ -418,22 +441,22 @@ async function handleDispatchCampaign(job) {
     const chatId = `${campaignShipping.number}@s.whatsapp.net`;
 
     if (campaign.confirmation && campaignShipping.confirmation === null) {
-      await wbot.sendMessage(chatId, {
+      await sendCampaignMessage(campaign.whatsappId, wbot, chatId, {
         text: campaignShipping.confirmationMessage
       });
       await campaignShipping.update({ confirmationRequestedAt: moment() });
     } else {
-      await wbot.sendMessage(chatId, {
+      await sendCampaignMessage(campaign.whatsappId, wbot, chatId, {
         text: campaignShipping.message
       });
       if (campaign.mediaPath) {
         const filePath = path.resolve("public", campaign.mediaPath);
-        const options = await getMessageFileOptions(
+        const content = await getMessageFileOptions(
           campaign.mediaName,
           filePath
         );
-        if (Object.keys(options).length) {
-          await wbot.sendMessage(chatId, { ...options });
+        if (Object.keys(content).length) {
+          await sendCampaignMessage(campaign.whatsappId, wbot, chatId, content);
         }
       }
       await campaignShipping.update({ deliveredAt: moment() });
