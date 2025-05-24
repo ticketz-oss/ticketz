@@ -28,6 +28,7 @@ import { GitInfo } from "../gitinfo";
 import GetPublicSettingService from "../services/SettingServices/GetPublicSettingService";
 import waVersion from "../waversion.json";
 import Message from "../models/Message";
+import OutOfTicketMessage from "../models/OutOfTicketMessages";
 
 // const loggerBaileys = MAIN_LOGGER.child({});
 // loggerBaileys.level = process.env.BAILEYS_LOG_LEVEL || "error";
@@ -160,9 +161,17 @@ export const initWASocket = async (
             "cacheMessage: not found in cache - fallback to database"
           );
 
-          const msg = await Message.findOne({
+          let msg: Message | OutOfTicketMessage;
+
+          msg = await Message.findOne({
             where: { id: key.id, fromMe: true }
           });
+
+          if (!msg) {
+            msg = await OutOfTicketMessage.findOne({
+              where: { id: key.id }
+            });
+          }
 
           try {
             const data = JSON.parse(msg.dataJson);

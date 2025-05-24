@@ -236,8 +236,6 @@ const UpdateTicketService = async ({
 
           return { ticket, oldStatus, oldUserId };
         }
-        ticketTraking.ratingAt = moment().toDate();
-        ticketTraking.rated = false;
       }
 
       if (

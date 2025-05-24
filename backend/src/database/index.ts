@@ -37,6 +37,7 @@ import Invoices from "../models/Invoices";
 import Subscriptions from "../models/Subscriptions";
 import BaileysKeys from "../models/BaileysKeys";
 import UserSocketSession from "../models/UserSocketSession";
+import OutOfTicketMessage from "../models/OutOfTicketMessages";
 import Integration from "../models/Integration";
 import IntegrationSession from "../models/IntegrationSession";
 import NotificamehubIdMapping from "../models/NotificamehubIdMapping";
@@ -84,6 +85,7 @@ const models = [
   ChatUser,
   ChatMessage,
   Invoices,
+  OutOfTicketMessage,
   Subscriptions,
   Integration,
   IntegrationSession,

@@ -9,6 +9,7 @@ import { handleMessage } from "../services/WbotServices/wbotMessageListener";
 import Message from "../models/Message";
 import CheckSettings from "./CheckSettings";
 import saveMediaToFile from "./saveMediaFile";
+import OutOfTicketMessage from "../models/OutOfTicketMessages";
 
 export type MessageData = {
   number: string;
@@ -102,6 +103,12 @@ export const SendMessage = async (
         whatsapp.companyId,
         Number(messageData.saveOnTicket) || null
       );
+    } else {
+      await OutOfTicketMessage.create({
+        id: message.key.id,
+        dataJson: JSON.stringify(message),
+        whatsappId: whatsapp.id
+      });
     }
 
     return message;
