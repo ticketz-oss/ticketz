@@ -243,6 +243,11 @@ export default function Options(props) {
       const chatbotTicketTimeoutAction = settings.find((s) => s.key === "chatbotTicketTimeoutAction");
       setChatbotTicketTimeoutAction(chatbotTicketTimeoutAction?.value || "0");
 
+      const chatbotTicketTimeoutAction = settings.find((s) => s.key === "chatbotTicketTimeoutAction");
+      if (chatbotTicketTimeoutAction) {
+        setChatbotTicketTimeoutAction(chatbotTicketTimeoutAction.value);
+      }
+
       const gracePeriod = settings.find((s) => s.key === "gracePeriod");
       setGracePeriod(gracePeriod?.value || 0);
       
