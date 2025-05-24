@@ -37,6 +37,7 @@ import Invoices from "../models/Invoices";
 import Subscriptions from "../models/Subscriptions";
 import BaileysKeys from "../models/BaileysKeys";
 import UserSocketSession from "../models/UserSocketSession";
+import OutOfTicketMessage from "../models/OutOfTicketMessages";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const dbConfig = require("../config/database");
@@ -81,6 +82,7 @@ const models = [
   ChatUser,
   ChatMessage,
   Invoices,
+  OutOfTicketMessage,
   Subscriptions
 ];
 
