@@ -286,6 +286,7 @@ const UpdateTicketService = async ({
 
         const transferToNewTicket =
           !isGroup &&
+          !fromChatbot &&
           ((await GetCompanySetting(companyId, "transferToNewTicket", "")) ===
             "enabled" ||
             whatsapp.transferToNewTicket);
