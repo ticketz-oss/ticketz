@@ -1251,6 +1251,23 @@ export const startQueue = async (
   }
 };
 
+const showQueueMessageWithEmojis = (queue: Queue, index: number): string => {
+  const numEmojis = [
+    "1️⃣",
+    "2️⃣",
+    "3️⃣",
+    "4️⃣",
+    "5️⃣",
+    "6️⃣",
+    "7️⃣",
+    "8️⃣",
+    "9️⃣",
+    "🔟"
+  ];
+
+  return `${numEmojis[index]} - ${queue.name}\n`;
+};
+
 const verifyQueue = async (
   wbot: Session,
   msg: proto.IWebMessageInfo | null,
@@ -1267,6 +1284,13 @@ const verifyQueue = async (
     return;
   }
 
+  const showNumericIcons = await Setting.findOne({
+    where: {
+      key: "showNumericIcons",
+      companyId: ticket.companyId
+    }
+  });
+
   const selectedOption = msg ? getBodyMessage(msg) : null;
   const choosenQueue = selectedOption ? queues[+selectedOption - 1] : null;
 
@@ -1274,7 +1298,11 @@ const verifyQueue = async (
     let options = "";
 
     queues.forEach((queue, index) => {
-      options += `*[ ${index + 1} ]* - ${queue.name}\n`;
+      if (showNumericIcons.value === "enabled" && queues.length <= 10) {
+        options += showQueueMessageWithEmojis(queue, index);
+      } else {
+        options += `*[ ${index + 1} ]* - ${queue.name}\n`;
+      }
     });
 
     const textMessage = {
