@@ -998,6 +998,24 @@ ${JSON.stringify(msg?.message)}`);
   }
 };
 
+const emojiNumberOption = (number: number): string => {
+  const numEmojis = [
+    "0️⃣",
+    "1️⃣",
+    "2️⃣",
+    "3️⃣",
+    "4️⃣",
+    "5️⃣",
+    "6️⃣",
+    "7️⃣",
+    "8️⃣",
+    "9️⃣",
+    "🔟"
+  ];
+
+  return number <= 10 ? numEmojis[number] : `[ ${number} ]`;
+};
+
 const sendMenu = async (
   wbot: Session,
   ticket: Ticket,
@@ -1083,14 +1101,27 @@ const sendMenu = async (
   };
 
   const botText = async () => {
+    const showNumericIcons =
+      currentOption.options.length <= 10 &&
+      (await GetCompanySetting(
+        ticket.companyId,
+        "showNumericIcons",
+        "disabled"
+      )) === "enabled";
+
     let options = "";
 
     currentOption.options.forEach(option => {
-      options += `*[ ${option.option} ]* - ${option.title}\n`;
+      options += showNumericIcons
+        ? `${emojiNumberOption(Number(option.option))} - `
+        : `*[ ${option.option} ]* - `;
+      options += `${option.title}\n`;
     });
 
     if (sendBackToMain) {
-      options += "\n*[ # ]* - Voltar Menu Inicial";
+      options += showNumericIcons
+        ? "\n#️⃣ - Voltar Menu Inicial"
+        : "\n*[ # ]* - Voltar Menu Inicial";
     }
 
     const textMessage = {
@@ -1251,23 +1282,6 @@ export const startQueue = async (
   }
 };
 
-const showQueueMessageWithEmojis = (queue: Queue, index: number): string => {
-  const numEmojis = [
-    "1️⃣",
-    "2️⃣",
-    "3️⃣",
-    "4️⃣",
-    "5️⃣",
-    "6️⃣",
-    "7️⃣",
-    "8️⃣",
-    "9️⃣",
-    "🔟"
-  ];
-
-  return `${numEmojis[index]} - ${queue.name}\n`;
-};
-
 const verifyQueue = async (
   wbot: Session,
   msg: proto.IWebMessageInfo | null,
@@ -1284,12 +1298,13 @@ const verifyQueue = async (
     return;
   }
 
-  const showNumericIcons = await Setting.findOne({
-    where: {
-      key: "showNumericIcons",
-      companyId: ticket.companyId
-    }
-  });
+  const showNumericIcons =
+    queues.length <= 10 &&
+    (await GetCompanySetting(
+      ticket.companyId,
+      "showNumericIcons",
+      "disabled"
+    )) === "enabled";
 
   const selectedOption = msg ? getBodyMessage(msg) : null;
   const choosenQueue = selectedOption ? queues[+selectedOption - 1] : null;
@@ -1298,11 +1313,10 @@ const verifyQueue = async (
     let options = "";
 
     queues.forEach((queue, index) => {
-      if (showNumericIcons.value === "enabled" && queues.length <= 10) {
-        options += showQueueMessageWithEmojis(queue, index);
-      } else {
-        options += `*[ ${index + 1} ]* - ${queue.name}\n`;
-      }
+      options += showNumericIcons
+        ? `${emojiNumberOption(index + 1)} - `
+        : `*[ ${index + 1} ]* - `;
+      options += `${queue.name}\n`;
     });
 
     const textMessage = {

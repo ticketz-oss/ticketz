@@ -190,9 +190,7 @@ export default function Options(props) {
       }
 
       const showNumericIcons = settings.find((s) => s.key === "showNumericIcons");
-      if (showNumericIcons) {
-        setShowNumericIcons(showNumericIcons.value);
-      }
+      setShowNumericIcons(showNumericIcons?.value || "disabled");
 
       const allowSignup = settings.find((s) => s.key === "allowSignup");
       if (allowSignup) {
@@ -303,15 +301,6 @@ export default function Options(props) {
     setChatbotAutoExit(value);
     await update({
       key: "chatbotAutoExit",
-      value,
-    });
-    i18nToast.success("settings.success");
-  }
-
-  async function handleShowNumericIcons(value) {
-    setShowNumericIcons(value);
-    await update({
-      key: "showNumericIcons",
       value,
     });
     i18nToast.success("settings.success");
@@ -507,18 +496,18 @@ export default function Options(props) {
 
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
-            <InputLabel id="group-type-label">
+            <InputLabel id="shownumericicons-label">
             {i18n.t("settings.ShowNumericEmoticons.title")}
             </InputLabel>
             <Select
-              labelId="chatbot-autoexit"
+              labelId="shownumericicons-label"
               value={showNumericIcons}
               onChange={async (e) => {
-                handleShowNumericIcons(e.target.value);
+                handleSetting("showNumericIcons", e.target.value, setShowNumericIcons);
               }}
             >
-              <MenuItem value={"disabled"}>{i18n.t("settings.ShowNumericEmoticons.options.disabled")}</MenuItem>
-              <MenuItem value={"enabled"}>{i18n.t("settings.ShowNumericEmoticons.options.enabled")}</MenuItem>
+              <MenuItem value={"disabled"}>{i18n.t("common.disabled")}</MenuItem>
+              <MenuItem value={"enabled"}>{i18n.t("common.enabled")}</MenuItem>
             </Select>
           </FormControl>
         </Grid>
