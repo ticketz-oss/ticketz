@@ -5,14 +5,13 @@ import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
-import FormHelperText from "@material-ui/core/FormHelperText";
 import useSettings from "../../hooks/useSettings";
 import { i18nToast } from "../../helpers/i18nToast";
 import { makeStyles } from "@material-ui/core/styles";
 import { grey, blue } from "@material-ui/core/colors";
 import OnlyForSuperUser from "../OnlyForSuperUser";
 import useAuth from "../../hooks/useAuth.js";
-import { Loop, Delete } from "@material-ui/icons";
+import { Delete } from "@material-ui/icons";
 import {
   IconButton,
   TextField
@@ -106,6 +105,7 @@ export default function Options(props) {
   const [quickMessages, setQuickMessages] = useState("");
   const [allowSignup, setAllowSignup] = useState("disabled");
   const [chatbotAutoExit, setChatbotAutoExit] = useState("disabled");
+  const [showNumericIcons, setShowNumericIcons] = useState("disabled");
   const [CheckMsgIsGroup, setCheckMsgIsGroupType] = useState("enabled");
   const [soundGroupNotifications, setSoundGroupNotifications] = useState("disabled");
   const [groupsTab, setGroupsTab] = useState("disabled");
@@ -188,6 +188,12 @@ export default function Options(props) {
       if (chatbotAutoExit) {
         setChatbotAutoExit(chatbotAutoExit.value);
       }
+
+      const showNumericIcons = settings.find((s) => s.key === "showNumericIcons");
+      if (showNumericIcons) {
+        setShowNumericIcons(showNumericIcons.value);
+      }
+
       const allowSignup = settings.find((s) => s.key === "allowSignup");
       if (allowSignup) {
         setAllowSignup(allowSignup.value);
@@ -297,6 +303,15 @@ export default function Options(props) {
     setChatbotAutoExit(value);
     await update({
       key: "chatbotAutoExit",
+      value,
+    });
+    i18nToast.success("settings.success");
+  }
+
+  async function handleShowNumericIcons(value) {
+    setShowNumericIcons(value);
+    await update({
+      key: "showNumericIcons",
       value,
     });
     i18nToast.success("settings.success");
@@ -486,6 +501,24 @@ export default function Options(props) {
               <MenuItem value={"ticket"}>{i18n.t("settings.TagsMode.options.ticket")}</MenuItem>
               <MenuItem value={"contact"}>{i18n.t("settings.TagsMode.options.contact")}</MenuItem>
               <MenuItem value={"both"}>{i18n.t("settings.TagsMode.options.both")}</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="group-type-label">
+            {i18n.t("settings.ShowNumericEmoticons.title")}
+            </InputLabel>
+            <Select
+              labelId="chatbot-autoexit"
+              value={showNumericIcons}
+              onChange={async (e) => {
+                handleShowNumericIcons(e.target.value);
+              }}
+            >
+              <MenuItem value={"disabled"}>{i18n.t("settings.ShowNumericEmoticons.options.disabled")}</MenuItem>
+              <MenuItem value={"enabled"}>{i18n.t("settings.ShowNumericEmoticons.options.enabled")}</MenuItem>
             </Select>
           </FormControl>
         </Grid>
