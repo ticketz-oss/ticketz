@@ -27,9 +27,10 @@ import Contact from "../models/Contact";
 import Ticket from "../models/Ticket";
 import ForwardMessageService from "../services/MessageServices/ForwardMessageService";
 import { getWbot } from "../libs/wbot";
-import { verifyMessage } from "../services/WbotServices/wbotMessageListener";
-
-import { verifyMediaMessage } from "../services/WbotServices/wbotMessageListener";
+import {
+  verifyMessage,
+  verifyMediaMessage
+} from "../services/WbotServices/wbotMessageListener";
 import { CreateInternalMessageService } from "../services/MessageServices/CreateInternalMessageService";
 import QuickMessage from "../models/QuickMessage";
 import formatBody from "../helpers/Mustache";
@@ -167,7 +168,6 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 export const react = async (req: Request, res: Response): Promise<Response> => {
   const { messageId } = req.params;
   const { companyId } = req.user;
-  const userId = Number(req.user.id) || null;
   const { ticketId, emoji } = req.body;
 
   const message = await Message.findOne({
