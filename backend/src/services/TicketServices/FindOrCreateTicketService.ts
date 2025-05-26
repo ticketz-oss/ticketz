@@ -40,6 +40,7 @@ const internalFindOrCreateTicketService = async (
   let justCreated = false;
   const result = await sequelize.transaction(async () => {
     const where: WhereOptions<Ticket> = {
+      id: { [Op.gt]: 0 },
       status: {
         [Op.or]: ["open", "pending"]
       },
