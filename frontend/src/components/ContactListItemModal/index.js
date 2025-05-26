@@ -80,6 +80,7 @@ const ContactListItemModal = ({
     name: "",
     number: "",
     email: "",
+    extraInfo: "{}",
   };
 
   const [contact, setContact] = useState(initialState);
@@ -103,6 +104,9 @@ const ContactListItemModal = ({
       try {
         const { data } = await api.get(`/contact-list-items/${contactId}`);
         if (isMounted.current) {
+          if (data.extraInfo) {
+            data.extraInfo = JSON.stringify(data.extraInfo, null, 2);
+          }
           setContact(data);
         }
       } catch (err) {
@@ -118,7 +122,16 @@ const ContactListItemModal = ({
     setContact(initialState);
   };
 
-  const handleSaveContact = async (values) => {
+  const handleSaveContact = async (fieldValues) => {
+    const values = { ...fieldValues };
+    if (values.extraInfo) {
+      try {
+        values.extraInfo = JSON.parse(values.extraInfo);
+      } catch (err) {
+        toast.error(i18n.t("contactModal.error.invalidExtraInfo"));
+        return;
+      }
+    }
     try {
       if (contactId) {
         await api.put(`/contact-list-items/${contactId}`, {
@@ -203,6 +216,24 @@ const ContactListItemModal = ({
                     variant="outlined"
                   />
                 </div>
+                <Field
+                  as={TextField}
+                  label={i18n.t("contactModal.form.extraInfo")}
+                  name="extraInfo"
+                  error={
+                    touched.extraInfo && Boolean(errors.extraInfo)
+                  }
+                  helperText={
+                    touched.extraInfo && errors.extraInfo
+                  }
+                  placeholder={i18n.t("contactModal.form.extraInfoPlaceholder")}
+                  fullWidth
+                  multiline
+                  rows={4}
+                  variant="outlined"
+                  margin="dense"
+                  className={classes.extraAttr}
+                />
               </DialogContent>
               <DialogActions>
                 <Button

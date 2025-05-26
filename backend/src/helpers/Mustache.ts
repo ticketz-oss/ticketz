@@ -2,11 +2,12 @@ import Mustache from "mustache";
 import Ticket from "../models/Ticket";
 import User from "../models/User";
 import Contact from "../models/Contact";
+import ContactListItem from "../models/ContactListItem";
 
 type MustacheFormatProps = {
   body: string;
   ticket?: Ticket;
-  contact?: Contact;
+  contact?: Contact | ContactListItem;
   currentUser?: User;
   customTags?: [string, string];
 };
@@ -36,6 +37,7 @@ export function mustacheFormat({
   const greeting = genGreeting();
   const queue = ticket?.queue?.name || "{{queue}}";
   const user = currentUser?.name || ticket?.user?.name || "{{user}}";
+  const email = contact?.email || "{{email}}";
   const now = new Date();
   const protocol =
     (ticket &&
@@ -43,9 +45,21 @@ export function mustacheFormat({
     "{{protocol}}";
   const time = now.toLocaleTimeString("en-GB", { hour12: false });
 
+  let extraInfo: any;
+
+  if (contact instanceof ContactListItem) {
+    extraInfo = contact.extraInfo;
+  } else if (contact && contact.extraInfo) {
+    extraInfo = contact.extraInfo.reduce((acc, field) => {
+      acc[field.name] = field.value;
+      return acc;
+    }, {});
+  }
+
   const view = {
     name,
     firstname,
+    email,
     greeting,
     queue,
     protocol,
@@ -56,7 +70,8 @@ export function mustacheFormat({
     ms: greeting,
     hora: time,
     fila: queue,
-    usuario: user
+    usuario: user,
+    extraInfo
   };
   return Mustache.render(body, view, null, customTags);
 }

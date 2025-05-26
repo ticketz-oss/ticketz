@@ -130,6 +130,10 @@ const UpdateTicketService = async ({
     let chatbot: boolean | null = fromChatbot;
     let queueOptionId: number | null = ticketData.queueOptionId || null;
 
+    if (ticketId < 1 && status === "open") {
+      throw new AppError("ERR_BAD_REQUEST", 400);
+    }
+
     const io = getIO();
 
     const userRatingSetting = await GetCompanySetting(
@@ -286,6 +290,7 @@ const UpdateTicketService = async ({
 
         const transferToNewTicket =
           !isGroup &&
+          !fromChatbot &&
           ((await GetCompanySetting(companyId, "transferToNewTicket", "")) ===
             "enabled" ||
             whatsapp.transferToNewTicket);

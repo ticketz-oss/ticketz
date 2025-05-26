@@ -80,6 +80,17 @@ messageRoutes.post(
   MessageController.send
 );
 
+// wsw compatibility
+
+["Image", "Audio", "Video", "Document"].forEach(type => {
+  messageRoutes.post(
+    `/api/messages/sendURL${type}`,
+    tokenAuth,
+    isCompliant,
+    MessageController.send
+  );
+});
+
 messageRoutes.get(
   "/api/messages/send",
   gammuAuth,

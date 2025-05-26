@@ -875,6 +875,13 @@ const messages = {
             disabled: "Desactivado",
           },
         },
+        ShowNumericEmoticons: {
+          title: "Mostrar emojis numéricos en la cola",
+          options: {
+            enabled: "Activado",
+            disabled: "Desactivado",
+          },
+        },
         QuickMessages: {
           title: "Respuestas rápidas",
           options: {

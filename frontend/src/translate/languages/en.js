@@ -873,6 +873,13 @@ const messages = {
             disabled: "disabled",
           },
         },
+        ShowNumericEmoticons: {
+          title: "Display numeric emojis in the queue",
+          options: {
+            enabled: "enabled",
+            disabled: "disabled",
+          },
+        },
         QuickMessages: {
           title: "Quick Messages",
           options: {

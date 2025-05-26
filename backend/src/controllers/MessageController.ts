@@ -27,9 +27,10 @@ import Contact from "../models/Contact";
 import Ticket from "../models/Ticket";
 import ForwardMessageService from "../services/MessageServices/ForwardMessageService";
 import { getWbot } from "../libs/wbot";
-import { verifyMessage } from "../services/WbotServices/wbotMessageListener";
-
-import { verifyMediaMessage } from "../services/WbotServices/wbotMessageListener";
+import {
+  verifyMessage,
+  verifyMediaMessage
+} from "../services/WbotServices/wbotMessageListener";
 import { CreateInternalMessageService } from "../services/MessageServices/CreateInternalMessageService";
 import QuickMessage from "../models/QuickMessage";
 import formatBody from "../helpers/Mustache";
@@ -167,7 +168,6 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 export const react = async (req: Request, res: Response): Promise<Response> => {
   const { messageId } = req.params;
   const { companyId } = req.user;
-  const userId = Number(req.user.id) || null;
   const { ticketId, emoji } = req.body;
 
   const message = await Message.findOne({
@@ -337,7 +337,7 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
 
   try {
     let { number } = messageData;
-    const { body, linkPreview, saveOnTicket } = messageData;
+    const { body } = messageData;
 
     if (!number.includes("@")) {
       const numberToTest = messageData.number;
@@ -360,11 +360,11 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
             {
               whatsappId,
               data: {
+                ...messageData,
                 number,
                 body:
                   (Array.isArray(body) ? body[i] : body) || media.originalname,
-                mediaPath: media.path,
-                saveOnTicket
+                mediaPath: media.path
               }
             },
             { removeOnComplete: true, attempts: 3 }
@@ -376,12 +376,7 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
         "SendMessage",
         {
           whatsappId,
-          data: {
-            number,
-            body,
-            linkPreview,
-            saveOnTicket
-          }
+          data: { ...messageData, number }
         },
 
         { removeOnComplete: false, attempts: 3 }

@@ -22,6 +22,7 @@ import OutOfTicketMessage from "../models/OutOfTicketMessages";
 import { Session } from "../libs/wbot";
 import Contact from "../models/Contact";
 import Tag from "../models/Tag";
+import { mustacheFormat } from "../helpers/Mustache";
 
 const connection = process.env.REDIS_URI || "";
 export const campaignQueue = new Queue("CampaignQueue", connection);
@@ -89,7 +90,14 @@ async function getCampaign(id: number): Promise<Campaign> {
           {
             model: ContactListItem,
             as: "contacts",
-            attributes: ["id", "name", "number", "email", "isWhatsappValid"],
+            attributes: [
+              "id",
+              "name",
+              "number",
+              "email",
+              "isWhatsappValid",
+              "extraInfo"
+            ],
             where: { isWhatsappValid: true }
           }
         ]
@@ -98,7 +106,13 @@ async function getCampaign(id: number): Promise<Campaign> {
         model: Tag,
         as: "tag",
         attributes: ["id", "name"],
-        include: ["contacts"]
+        include: [
+          {
+            model: Contact,
+            as: "contacts",
+            include: ["extraInfo"]
+          }
+        ]
       },
       {
         model: Whatsapp,
@@ -220,7 +234,10 @@ function getProcessedMessage(
   variables: any[],
   contact: CampaignContact
 ) {
-  let finalMessage = msg;
+  let finalMessage = mustacheFormat({
+    body: msg,
+    contact
+  });
 
   if (finalMessage.includes("{nome}")) {
     finalMessage = finalMessage.replace(/{nome}/g, contact.name);

@@ -9,7 +9,8 @@ import {
   AllowNull,
   Default,
   ForeignKey,
-  BelongsTo
+  BelongsTo,
+  DataType
 } from "sequelize-typescript";
 import Company from "./Company";
 import ContactList from "./ContactList";
@@ -36,6 +37,9 @@ class ContactListItem extends Model<ContactListItem> {
 
   @Column
   isWhatsappValid: boolean;
+
+  @Column(DataType.JSONB)
+  extraInfo: any;
 
   @CreatedAt
   createdAt: Date;

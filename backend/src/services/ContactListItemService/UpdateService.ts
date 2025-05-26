@@ -8,10 +8,11 @@ interface Data {
   name: string;
   number: string;
   email?: string;
+  extraInfo?: any;
 }
 
 const UpdateService = async (data: Data): Promise<ContactListItem> => {
-  const { id, name, number, email } = data;
+  const { id, name, number, email, extraInfo } = data;
 
   const record = await ContactListItem.findByPk(id);
 
@@ -22,14 +23,15 @@ const UpdateService = async (data: Data): Promise<ContactListItem> => {
   await record.update({
     name,
     number,
-    email
+    email,
+    extraInfo
   });
 
   try {
     const response = await CheckContactNumber(record.number, record.companyId);
     record.isWhatsappValid = response.exists;
-    const number = response.jid.replace(/\D/g, "");
-    record.number = number;
+    const fixedNumber = response.jid.replace(/\D/g, "");
+    record.number = fixedNumber;
     await record.save();
   } catch (e) {
     logger.error(`Número de contato inválido: ${record.number}`);
