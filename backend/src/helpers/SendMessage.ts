@@ -1,4 +1,8 @@
-import { AnyMessageContent, proto } from "@whiskeysockets/baileys";
+import {
+  AnyMediaMessageContent,
+  AnyMessageContent,
+  proto
+} from "@whiskeysockets/baileys";
 import fs from "fs";
 import mime from "mime-types";
 import iconv from "iconv-lite";
@@ -14,6 +18,8 @@ import OutOfTicketMessage from "../models/OutOfTicketMessages";
 export type MessageData = {
   number: string;
   body: string;
+  mimeType?: string;
+  caption?: string;
   mediaPath?: string;
   internal?: boolean;
   ptt?: boolean;
@@ -41,10 +47,7 @@ export const SendMessage = async (
     if (messageData.mediaPath) {
       // get filesize
       const filesize = fs.statSync(messageData.mediaPath).size;
-      const fileLimit = parseInt(
-        await CheckSettings("uploadLimit", "15"),
-        10
-      );
+      const fileLimit = Number(await CheckSettings("uploadLimit", "15"));
 
       let options: AnyMessageContent;
 
@@ -86,6 +89,45 @@ export const SendMessage = async (
           ...options
         });
       }
+    } else if (messageData.mimeType && body.startsWith("http")) {
+      let options: AnyMediaMessageContent;
+
+      const type = messageData.mimeType.split("/")[0];
+
+      if (type === "audio") {
+        options = {
+          audio: {
+            url: messageData.body.trim()
+          },
+          mimetype: messageData.mimeType,
+          ptt: messageData.ptt || false
+        };
+      } else if (type === "video") {
+        options = {
+          video: {
+            url: messageData.body.trim()
+          },
+          caption: messageData.caption || undefined
+        };
+      } else if (type === "image") {
+        options = {
+          image: {
+            url: messageData.body.trim()
+          },
+          caption: messageData.caption || undefined
+        };
+      } else {
+        options = {
+          document: {
+            url: messageData.body.trim()
+          },
+          mimetype: messageData.mimeType,
+          fileName: messageData.body,
+          caption: messageData.caption || undefined
+        };
+      }
+
+      message = await wbot.sendMessage(chatId, options);
     } else {
       message = await wbot.sendMessage(chatId, {
         text: body,
