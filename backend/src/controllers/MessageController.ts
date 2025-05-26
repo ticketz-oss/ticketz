@@ -337,7 +337,7 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
 
   try {
     let { number } = messageData;
-    const { body, linkPreview, saveOnTicket } = messageData;
+    const { body } = messageData;
 
     if (!number.includes("@")) {
       const numberToTest = messageData.number;
@@ -360,11 +360,11 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
             {
               whatsappId,
               data: {
+                ...messageData,
                 number,
                 body:
                   (Array.isArray(body) ? body[i] : body) || media.originalname,
-                mediaPath: media.path,
-                saveOnTicket
+                mediaPath: media.path
               }
             },
             { removeOnComplete: true, attempts: 3 }
@@ -376,12 +376,7 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
         "SendMessage",
         {
           whatsappId,
-          data: {
-            number,
-            body,
-            linkPreview,
-            saveOnTicket
-          }
+          data: { ...messageData, number }
         },
 
         { removeOnComplete: false, attempts: 3 }
