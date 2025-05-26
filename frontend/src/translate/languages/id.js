@@ -835,6 +835,13 @@ const messages = {
             disabled: "Dinonaktifkan",
           },
         },
+        ShowNumericEmoticons: {
+          title: "Menampilkan emoji numerik dalam antrean",
+          options: {
+            enabled: "Diaktifkan",
+            disabled: "Dinonaktifkan",
+          },
+        },
         QuickMessages: {
           title: "Pesan cepat",
           options: {
