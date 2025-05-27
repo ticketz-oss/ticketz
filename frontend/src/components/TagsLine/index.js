@@ -20,9 +20,9 @@ const useStyles = makeStyles((theme) => ({
 
 }));
 
-const TagsLine = (ticket) => {
+const TagsLine = ({ ticket }) => {
   const classes = useStyles();
-
+  
   const tags = [...(ticket.tags || []), ...(ticket.contact?.tags || []) ];
   
   return (
