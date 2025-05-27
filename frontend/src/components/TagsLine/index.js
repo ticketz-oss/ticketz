@@ -20,9 +20,11 @@ const useStyles = makeStyles((theme) => ({
 
 }));
 
-const TagsLine = ({ tags }) => {
+const TagsLine = ({ ticket }) => {
   const classes = useStyles();
-
+  
+  const tags = [...(ticket.tags || []), ...(ticket.contact?.tags || []) ];
+  
   return (
     <div className={classes.root}>
       {tags?.map((tag, index) => (
