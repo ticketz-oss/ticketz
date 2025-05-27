@@ -3,7 +3,7 @@ import Queue from "bull";
 import moment from "moment";
 import { Op, QueryTypes, WhereOptions } from "sequelize";
 import { CronJob } from "cron";
-import { subMinutes } from "date-fns";
+import { subDays, subMinutes } from "date-fns";
 import { MessageData, SendMessage } from "./helpers/SendMessage";
 import Whatsapp from "./models/Whatsapp";
 import { logger } from "./utils/logger";
@@ -27,6 +27,7 @@ import formatBody, { mustacheFormat } from "./helpers/Mustache";
 import Setting from "./models/Setting";
 import { parseToMilliseconds } from "./helpers/parseToMilliseconds";
 import { startCampaignQueues } from "./queues/campaign";
+import OutOfTicketMessage from "./models/OutOfTicketMessages";
 
 const connection = process.env.REDIS_URI || "";
 const limiterMax = process.env.REDIS_OPT_LIMITER_MAX || 1;
@@ -100,7 +101,18 @@ async function handleVerifySchedules() {
   }
 }
 
+async function handleExpireOutOfTicketMessages() {
+  OutOfTicketMessage.destroy({
+    where: {
+      createdAt: {
+        [Op.lt]: subDays(new Date(), 1)
+      }
+    }
+  });
+}
+
 async function handleSendScheduledMessage(job) {
+  handleExpireOutOfTicketMessages();
   const {
     data: { schedule }
   } = job;

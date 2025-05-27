@@ -795,6 +795,13 @@ const messages = {
             disabled: "Désactivé",
           },
         },
+        ShowNumericEmoticons: {
+          title: "Afficher les émojis numériques dans la file d'attente",
+          options: {
+            enabled: "Activé",
+            disabled: "Désactivé",
+          },
+        },
         QuickMessages: {
           title: "Messages Rapides",
           options: {
