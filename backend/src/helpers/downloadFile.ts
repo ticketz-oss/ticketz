@@ -4,6 +4,13 @@ import { logger } from "../utils/logger";
 
 export default async function downloadFile(url: string): Promise<Readable> {
   try {
+    if (url.startsWith("data:")) {
+      logger.debug("downloadFile: detected data URL");
+      const base64Data = url.split(",")[1];
+      const buffer = Buffer.from(base64Data, "base64");
+      return Readable.from(buffer);
+    }
+
     const response = await axios({
       url,
       method: "GET",

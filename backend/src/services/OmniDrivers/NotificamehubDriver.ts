@@ -600,8 +600,15 @@ export class NotificamehubDriver implements OmniDriver {
           }
         }
 
-        const mimetype = overrideMimeType || content.fileMimeType;
-        const filename = overrideFilename || content.fileName;
+        const mimetype =
+          overrideMimeType ||
+          content.fileMimeType ||
+          "application/octet-stream";
+
+        const filename =
+          overrideFilename ||
+          content.fileName ||
+          `${new Date().getTime()}.${mimetype.split("/").pop()}`;
 
         finalContent.fileMimeType = mimetype;
         finalContent.fileName = filename;
