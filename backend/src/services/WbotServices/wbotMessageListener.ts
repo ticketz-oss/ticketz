@@ -1022,83 +1022,10 @@ const sendMenu = async (
   currentOption: Queue | QueueOption,
   sendBackToMain = true
 ) => {
-  const { companyId } = ticket;
-  const buttonActive = await Setting.findOne({
-    where: {
-      key: "chatBotType",
-      companyId
-    }
-  });
-
   const message =
     currentOption instanceof Queue
       ? (currentOption as Queue).greetingMessage
       : (currentOption as QueueOption).message;
-
-  const botList = async () => {
-    const sectionsRows = [];
-
-    currentOption.options.forEach(option => {
-      sectionsRows.push({
-        title: option.title,
-        rowId: `${option.option}`
-      });
-    });
-    if (sendBackToMain) {
-      sectionsRows.push({
-        title: "Voltar Menu Inicial",
-        rowId: "#"
-      });
-    }
-    const sections = [
-      {
-        rows: sectionsRows
-      }
-    ];
-
-    const listMessage = {
-      text: formatBody(`${message}`, ticket),
-      buttonText: "Escolha uma opção",
-      sections
-    };
-
-    const sendMsg = await wbot.sendMessage(
-      `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-      listMessage
-    );
-
-    await verifyMessage(sendMsg, ticket, ticket.contact);
-  };
-
-  const botButton = async () => {
-    const buttons = [];
-    currentOption.options.forEach(option => {
-      buttons.push({
-        buttonId: `${option.option}`,
-        buttonText: { displayText: option.title },
-        type: 4
-      });
-    });
-    if (sendBackToMain) {
-      buttons.push({
-        buttonId: "#",
-        buttonText: { displayText: "Voltar Menu Inicial" },
-        type: 4
-      });
-    }
-    const buttonMessage = {
-      text: formatBody(`${message}`, ticket),
-      buttons,
-      headerType: 4
-    };
-
-    const sendMsg = await wbot.sendMessage(
-      `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-      buttonMessage
-    );
-
-    await verifyMessage(sendMsg, ticket, ticket.contact);
-  };
 
   const botText = async () => {
     const showNumericIcons =
@@ -1136,22 +1063,7 @@ const sendMenu = async (
     await verifyMessage(sendMsg, ticket, ticket.contact);
   };
 
-  switch (buttonActive.value) {
-    case "list":
-      botList();
-      break;
-    case "button":
-      if (QueueOption.length > 4) {
-        botText();
-      } else {
-        botButton();
-      }
-      break;
-    case "text":
-      botText();
-      break;
-    default:
-  }
+  botText();
 };
 
 export const startQueue = async (
