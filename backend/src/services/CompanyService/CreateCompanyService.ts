@@ -3,6 +3,7 @@ import AppError from "../../errors/AppError";
 import Company from "../../models/Company";
 import User from "../../models/User";
 import Setting from "../../models/Setting";
+import Plan from "../../models/Plan";
 
 interface CompanyData {
   name: string;
@@ -224,6 +225,7 @@ const CreateCompanyService = async (
   });
 
   if (companyData.campaignsEnabled !== undefined) {
+    // Se campanhas foram especificadas manualmente, usar essa configuração
     const [setting, created] = await Setting.findOrCreate({
       where: {
         companyId: company.id,
@@ -238,6 +240,22 @@ const CreateCompanyService = async (
     });
     if (!created) {
       await setting.update({ value: `${campaignsEnabled}` });
+    }
+  } else if (planId) {
+    // Se um plano foi especificado, configurar campanhas baseado no plano
+    const plan = await Plan.findByPk(planId);
+    if (plan) {
+      await Setting.findOrCreate({
+        where: {
+          companyId: company.id,
+          key: "campaignsEnabled"
+        },
+        defaults: {
+          companyId: company.id,
+          key: "campaignsEnabled",
+          value: `${plan.campaignsEnabled}`
+        }
+      });
     }
   }
 

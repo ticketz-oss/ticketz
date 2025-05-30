@@ -44,6 +44,10 @@ class Plan extends Model<Plan> {
   @Default(true)
   @Column
   isPublic: boolean;
+
+  @Default(false)
+  @Column
+  campaignsEnabled: boolean;
 }
 
 export default Plan;

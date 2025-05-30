@@ -1,6 +1,7 @@
 import AppError from "../../errors/AppError";
 import Company from "../../models/Company";
 import Setting from "../../models/Setting";
+import Plan from "../../models/Plan";
 
 interface CompanyData {
   name: string;
@@ -43,6 +44,7 @@ const UpdateCompanyService = async (
     recurrence
   });
 
+  // Se campanhas foram especificadas manualmente, usar essa configuração
   if (companyData.campaignsEnabled !== undefined) {
     const [setting, created] = await Setting.findOrCreate({
       where: {
@@ -57,6 +59,26 @@ const UpdateCompanyService = async (
     });
     if (!created) {
       await setting.update({ value: `${campaignsEnabled}` });
+    }
+  }
+  // Se o planId foi alterado, configurar campanhas baseado no plano
+  else if (planId && planId !== company.planId) {
+    const plan = await Plan.findByPk(planId);
+    if (plan) {
+      const [setting, created] = await Setting.findOrCreate({
+        where: {
+          companyId: company.id,
+          key: "campaignsEnabled"
+        },
+        defaults: {
+          companyId: company.id,
+          key: "campaignsEnabled",
+          value: `${plan.campaignsEnabled}`
+        }
+      });
+      if (!created) {
+        await setting.update({ value: `${plan.campaignsEnabled}` });
+      }
     }
   }
 
