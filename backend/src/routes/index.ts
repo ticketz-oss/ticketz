@@ -30,6 +30,7 @@ import ticketTagRoutes from "./ticketTagRoutes";
 import pwaRoutes from "./pwaRoutes";
 import versionRoutes from "./versionRoutes";
 import ticketzOSSRoutes from "./ticketzOSSRoutes";
+import taskRouter from "./tasksRoutes";
 
 const routes = Router();
 
@@ -64,5 +65,6 @@ routes.use(ticketTagRoutes);
 routes.use(pwaRoutes);
 routes.use(versionRoutes);
 routes.use(ticketzOSSRoutes);
+routes.use(taskRouter);
 
 export default routes;
