@@ -5,7 +5,7 @@ import {
   SignalDataTypeMap,
   initAuthCreds,
   BufferJSON
-} from "@whiskeysockets/baileys";
+} from "baileys";
 import Whatsapp from "../models/Whatsapp";
 import { cacheLayer } from "../libs/cache";
 import { logger } from "../utils/logger";
