@@ -453,7 +453,7 @@ const downloadMedia = async (
       text: `*Mensagem Automática*:\nNosso sistema aceita apenas arquivos com no máximo ${fileLimit} MiB`
     };
 
-    if (!ticket.isGroup) {
+    if (!ticket.isGroup && !msg.key?.fromMe) {
       const sendMsg = await wbot.sendMessage(
         `${ticket.contact.number}@s.whatsapp.net`,
         fileLimitMessage
