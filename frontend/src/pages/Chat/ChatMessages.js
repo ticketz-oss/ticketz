@@ -19,7 +19,9 @@ import {
   Mic as MicIcon,
   HighlightOff as HighlightOffIcon,
   CheckCircleOutline as CheckCircleOutlineIcon,
+  InsertEmoticon as InsertEmoticonIcon,
 } from "@material-ui/icons";
+import EmojiPicker from 'emoji-picker-react';
 
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { useDate } from "../../hooks/useDate";
@@ -66,6 +68,7 @@ const useStyles = makeStyles((theme) => ({
     padding: "10px",
     borderTop: "1px solid rgba(0,0,0,0.12)",
     backgroundColor: "#f0f0f0",
+    position: "relative",
   },
   input: {
     flex: 1,
@@ -84,6 +87,13 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "space-between",
     alignItems: "center",
   },
+  emojiPickerContainer: {
+    position: "absolute",
+    bottom: "60px",
+    left: "10px",
+    zIndex: 1000,
+    boxShadow: "0px 5px 10px rgba(0,0,0,0.2)",
+  },
 }));
 
 const Mp3Recorder = new MicRecorder({ bitRate: 128 });
@@ -100,11 +110,13 @@ export default function ChatMessages({
   const { user } = useContext(AuthContext);
   const { datetimeToClient } = useDate();
   const baseRef = useRef();
+  const emojiPickerRef = useRef();
 
   const [contentMessage, setContentMessage] = useState("");
   const [medias, setMedias] = useState([]);
   const [loading, setLoading] = useState(false);
   const [recording, setRecording] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const scrollToBottom = () => {
     if (baseRef.current) {
@@ -117,6 +129,18 @@ export default function ChatMessages({
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
+        setShowEmojiPicker(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   const handleScroll = (e) => {
     if (!pageInfo.hasMore || loading) return;
     if (e.currentTarget.scrollTop < 600) handleLoadMore();
@@ -126,6 +150,10 @@ export default function ChatMessages({
     if (!e.target.files) return;
     const selectedMedias = Array.from(e.target.files);
     setMedias(selectedMedias);
+  };
+
+  const handleEmojiClick = (emojiObject) => {
+    setContentMessage(prev => prev + emojiObject.emoji);
   };
 
   const checkMessageMedia = (message) => {
@@ -234,6 +262,17 @@ export default function ChatMessages({
         ) : (
           <div style={{ display: "flex", alignItems: "center" }}>
             <FileInput handleChangeMedias={handleChangeMedias} disableOption={loading} />
+            
+            <IconButton onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
+              <InsertEmoticonIcon />
+            </IconButton>
+
+            {showEmojiPicker && (
+              <div ref={emojiPickerRef} className={classes.emojiPickerContainer}>
+                <EmojiPicker onEmojiClick={handleEmojiClick} />
+              </div>
+            )}
+
             <Input
               placeholder="Mensagem"
               value={contentMessage}
@@ -246,6 +285,7 @@ export default function ChatMessages({
               }}
               className={classes.input}
             />
+            
             {contentMessage ? (
               <IconButton onClick={() => {
                 handleSendMessage(contentMessage);
