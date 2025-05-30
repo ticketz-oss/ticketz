@@ -364,6 +364,7 @@ async function sendCampaignMessage(
 ) {
   try {
     const message = await wbot.sendMessage(jid, content);
+    wbot.cacheMessage(message);
     OutOfTicketMessage.create({
       id: message.key.id,
       dataJson: JSON.stringify(message),

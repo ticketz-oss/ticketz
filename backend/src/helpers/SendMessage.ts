@@ -101,6 +101,7 @@ export const SendMessage = async (
         Number(messageData.saveOnTicket) || null
       );
     } else {
+      wbot.cacheMessage(message);
       await OutOfTicketMessage.create({
         id: message.key.id,
         dataJson: JSON.stringify(message),
