@@ -3,6 +3,7 @@ import AppError from "../../errors/AppError";
 import Company from "../../models/Company";
 import User from "../../models/User";
 import Setting from "../../models/Setting";
+import Plan from "../../models/Plan";
 
 interface CompanyData {
   name: string;
@@ -12,6 +13,7 @@ interface CompanyData {
   status?: boolean;
   planId?: number;
   campaignsEnabled?: boolean;
+  downloadLimit?: number;
   dueDate?: string;
   recurrence?: string;
 }
@@ -27,6 +29,7 @@ const CreateCompanyService = async (
     planId,
     password,
     campaignsEnabled,
+    downloadLimit,
     dueDate,
     recurrence
   } = companyData;
@@ -63,6 +66,7 @@ const CreateCompanyService = async (
     email,
     status,
     planId,
+    downloadLimit,
     dueDate,
     recurrence
   });
@@ -223,7 +227,37 @@ const CreateCompanyService = async (
     },
   });
 
-  if (companyData.campaignsEnabled !== undefined) {
+  // Configurar campanhas baseado no plano (prioridade 1)
+  if (planId) {
+    const plan = await Plan.findByPk(planId);
+    if (plan) {
+      await Setting.findOrCreate({
+        where: {
+          companyId: company.id,
+          key: "campaignsEnabled"
+        },
+        defaults: {
+          companyId: company.id,
+          key: "campaignsEnabled",
+          value: `${plan.campaignsEnabled}`
+        }
+      });
+
+      // Configurar limite de download baseado no plano
+      await Setting.findOrCreate({
+        where: {
+          companyId: company.id,
+          key: "downloadLimit"
+        },
+        defaults: {
+          companyId: company.id,
+          key: "downloadLimit",
+          value: `${plan.downloadLimitMB}`
+        }
+      });
+    }
+  } else if (companyData.campaignsEnabled !== undefined) {
+    // Se não há plano especificado, usar configuração manual (prioridade 2)
     const [setting, created] = await Setting.findOrCreate({
       where: {
         companyId: company.id,
@@ -234,11 +268,25 @@ const CreateCompanyService = async (
         key: "campaignsEnabled",
         value: `${campaignsEnabled}`
       },
-
     });
     if (!created) {
       await setting.update({ value: `${campaignsEnabled}` });
     }
+  }
+
+  // Se não há plano especificado, usar limite padrão de download
+  if (!planId) {
+    await Setting.findOrCreate({
+      where: {
+        companyId: company.id,
+        key: "downloadLimit"
+      },
+      defaults: {
+        companyId: company.id,
+        key: "downloadLimit",
+        value: "15"
+      }
+    });
   }
 
   return company;

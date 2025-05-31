@@ -9,7 +9,7 @@ interface PlanData {
   queues: number;
   value: number;
   isPublic: boolean;
-
+  downloadLimitMB?: number;
 }
 
 const CreatePlanService = async (planData: PlanData): Promise<Plan> => {

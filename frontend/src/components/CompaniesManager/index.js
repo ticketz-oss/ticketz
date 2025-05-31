@@ -28,7 +28,6 @@ import ModalUsers from "../ModalUsers";
 import api from "../../services/api";
 import { head, isArray, has } from "lodash";
 import { useDate } from "../../hooks/useDate";
-
 import moment from "moment";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
@@ -84,6 +83,7 @@ export function CompanyForm(props) {
     planId: "",
     status: true,
     campaignsEnabled: false,
+    downloadLimit: 15,
     dueDate: "",
     recurrence: "",
     ...initialValue,
@@ -285,6 +285,17 @@ export function CompanyForm(props) {
                 </FormControl>
               </Grid>
               <Grid xs={12} sm={6} md={2} item>
+                <Field
+                  as={TextField}
+                  label="Limite Download (MB)"
+                  name="downloadLimit"
+                  type="number"
+                  variant="outlined"
+                  className={classes.fullWidth}
+                  margin="dense"
+                />
+              </Grid>
+              <Grid xs={12} sm={6} md={2} item>
                 <FormControl variant="outlined" fullWidth>
                   <Field
                     as={TextField}
@@ -435,6 +446,20 @@ export function CompaniesManagerGrid(props) {
     return "Desabilitadas";
   };
 
+  const renderDownloadLimit = (row) => {
+    if (
+      has(row, "settings") &&
+      isArray(row.settings) &&
+      row.settings.length > 0
+    ) {
+      const setting = row.settings.find((s) => s.key === "downloadLimit");
+      if (setting) {
+        return `${setting.value} MB`;
+      }
+    }
+    return "15 MB"; // valor padrão
+  };
+
   const rowStyle = (record) => {
     if (moment(record.dueDate).isValid()) {
       const now = moment();
@@ -470,6 +495,7 @@ export function CompaniesManagerGrid(props) {
             <TableCell align="left">Telefone</TableCell>
             <TableCell align="left">Plano</TableCell>
             <TableCell align="left">Campanhas</TableCell>
+            <TableCell align="left">Download (MB)</TableCell>
             <TableCell align="left">Status</TableCell>
             <TableCell align="left">Criada Em</TableCell>
             <TableCell align="left">Vencimento</TableCell>
@@ -488,6 +514,7 @@ export function CompaniesManagerGrid(props) {
               <TableCell align="left">{row.phone || "-"}</TableCell>
               <TableCell align="left">{renderPlan(row)}</TableCell>
               <TableCell align="left">{renderCampaignsStatus(row)}</TableCell>
+              <TableCell align="left">{renderDownloadLimit(row)}</TableCell>
               <TableCell align="left">{renderStatus(row)}</TableCell>
               <TableCell align="left">{dateToClient(row.createdAt)}</TableCell>
               <TableCell align="left">
@@ -518,6 +545,7 @@ export default function CompaniesManager() {
     planId: "",
     status: true,
     campaignsEnabled: false,
+    downloadLimit: 15,
     dueDate: "",
     recurrence: "",
   });
@@ -593,6 +621,7 @@ export default function CompaniesManager() {
       planId: "",
       status: true,
       campaignsEnabled: false,
+      downloadLimit: 15,
       dueDate: "",
       recurrence: "",
     }));
@@ -600,13 +629,21 @@ export default function CompaniesManager() {
 
   const handleSelect = (data) => {
     let campaignsEnabled = false;
+    let downloadLimit = 15; // valor padrão
 
-    const setting = data.settings.find(
+    const campaignsSetting = data.settings.find(
       (s) => s.key.indexOf("campaignsEnabled") > -1
     );
-    if (setting) {
+    if (campaignsSetting) {
       campaignsEnabled =
-        setting.value === "true" || setting.value === "enabled";
+        campaignsSetting.value === "true" || campaignsSetting.value === "enabled";
+    }
+
+    const downloadSetting = data.settings.find(
+      (s) => s.key.indexOf("downloadLimit") > -1
+    );
+    if (downloadSetting) {
+      downloadLimit = parseInt(downloadSetting.value) || 15;
     }
 
     setRecord((prev) => ({
@@ -618,6 +655,7 @@ export default function CompaniesManager() {
       planId: data.planId || "",
       status: data.status === false ? false : true,
       campaignsEnabled,
+      downloadLimit,
       dueDate: data.dueDate || "",
       recurrence: data.recurrence || "",
     }));

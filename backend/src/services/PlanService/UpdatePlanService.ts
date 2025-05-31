@@ -9,11 +9,11 @@ interface PlanData {
   queues?: number;
   value?: number;
   isPublic?: boolean;
-
+  downloadLimitMB?: number;
 }
 
 const UpdatePlanService = async (planData: PlanData): Promise<Plan> => {
-  const { id, name, users, connections, queues, value, isPublic } = planData;
+  const { id, name, users, connections, queues, value, isPublic, downloadLimitMB } = planData;
 
   const plan = await Plan.findByPk(id);
 
@@ -27,7 +27,8 @@ const UpdatePlanService = async (planData: PlanData): Promise<Plan> => {
     connections,
     queues,
     value,
-    isPublic
+    isPublic,
+    downloadLimitMB
   });
 
   return plan;
