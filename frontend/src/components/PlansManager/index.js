@@ -78,7 +78,8 @@ export function PlanManagerForm(props) {
         queues: 0,
         value: 0,
         isPublic: true,
-        campaignsEnabled: false
+        campaignsEnabled: false,
+        downloadLimitMB: 15
     });
 
     useEffect(() => {
@@ -192,6 +193,17 @@ export function PlanManagerForm(props) {
                                 </Field>
                             </FormControl>
                         </Grid>
+                        <Grid xs={12} sm={6} md={4} item>
+                            <Field
+                                as={TextField}
+                                label="Limite Download (MB)"
+                                name="downloadLimitMB"
+                                variant="outlined"
+                                className={classes.fullWidth}
+                                margin="dense"
+                                type="number"
+                            />
+                        </Grid>
                         <Grid xs={12} item>
                             <Grid justifyContent="flex-end" spacing={1} container>
                                 <Grid xs={4} md={1} item>
@@ -237,6 +249,7 @@ export function PlansManagerGrid(props) {
                         <TableCell align="center">Conexões</TableCell>
                         <TableCell align="center">Filas</TableCell>
                         <TableCell align="center">Campanhas</TableCell>
+                        <TableCell align="center">Download (MB)</TableCell>
                         <TableCell align="center">Valor</TableCell>
                     </TableRow>
                 </TableHead>
@@ -254,6 +267,7 @@ export function PlansManagerGrid(props) {
                             <TableCell align="center">{row.connections || '-'}</TableCell>
                             <TableCell align="center">{row.queues || '-'}</TableCell>
                             <TableCell align="center">{row.campaignsEnabled ? "Habilitadas" : "Desabilitadas"}</TableCell>
+                            <TableCell align="center">{row.downloadLimitMB || 15}</TableCell>
                             <TableCell align="center">{row.value.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }) || '-'}</TableCell>
                         </TableRow>
                     ))}
@@ -277,7 +291,8 @@ export default function PlansManager() {
         queues: 0,
         value: 0,
         isPublic: true,
-        campaignsEnabled: false
+        campaignsEnabled: false,
+        downloadLimitMB: 15
     })
 
     useEffect(() => {
@@ -309,7 +324,8 @@ export default function PlansManager() {
             users: data.users,
             value: data.value.replace(",", "."),
             isPublic: data.isPublic,
-            campaignsEnabled: data.campaignsEnabled
+            campaignsEnabled: data.campaignsEnabled,
+            downloadLimitMB: data.downloadLimitMB
         }
         console.log(datanew)
         setLoading(true)
@@ -353,7 +369,8 @@ export default function PlansManager() {
             queues: 0,
             value: 0,
             isPublic: true,
-            campaignsEnabled: false
+            campaignsEnabled: false,
+            downloadLimitMB: 15
         })
     }
 
@@ -366,7 +383,8 @@ export default function PlansManager() {
             queues: data.queues || 0,
             value: data.value.toLocaleString('pt-br', { minimumFractionDigits: 2 }) || 0,
             isPublic: data.isPublic,
-            campaignsEnabled: data.campaignsEnabled || false
+            campaignsEnabled: data.campaignsEnabled || false,
+            downloadLimitMB: data.downloadLimitMB || 15
         })
     }
 

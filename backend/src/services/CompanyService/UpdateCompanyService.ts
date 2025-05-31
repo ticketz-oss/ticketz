@@ -11,6 +11,7 @@ interface CompanyData {
   status?: boolean;
   planId?: number;
   campaignsEnabled?: boolean;
+  downloadLimit?: number;
   dueDate?: string;
   recurrence?: string;
 }
@@ -26,6 +27,7 @@ const UpdateCompanyService = async (
     status,
     planId,
     campaignsEnabled,
+    downloadLimit,
     dueDate,
     recurrence
   } = companyData;
@@ -40,6 +42,7 @@ const UpdateCompanyService = async (
     email,
     status,
     planId,
+    downloadLimit,
     dueDate,
     recurrence
   });
@@ -61,23 +64,65 @@ const UpdateCompanyService = async (
       await setting.update({ value: `${campaignsEnabled}` });
     }
   }
+  
+  // Se downloadLimit foi especificado manualmente, usar essa configuração
+  if (companyData.downloadLimit !== undefined) {
+    const [downloadSetting, downloadCreated] = await Setting.findOrCreate({
+      where: {
+        companyId: company.id,
+        key: "downloadLimit"
+      },
+      defaults: {
+        companyId: company.id,
+        key: "downloadLimit",
+        value: `${downloadLimit}`
+      }
+    });
+    if (!downloadCreated) {
+      await downloadSetting.update({ value: `${downloadLimit}` });
+    }
+    console.log(`🔧 [MANUAL] Limite de download atualizado manualmente para empresa ${company.name}: ${downloadLimit}MB`);
+  }
+  
   // Se o planId foi alterado, configurar campanhas baseado no plano
-  else if (planId && planId !== company.planId) {
+  if (planId && planId !== company.planId) {
     const plan = await Plan.findByPk(planId);
     if (plan) {
-      const [setting, created] = await Setting.findOrCreate({
-        where: {
-          companyId: company.id,
-          key: "campaignsEnabled"
-        },
-        defaults: {
-          companyId: company.id,
-          key: "campaignsEnabled",
-          value: `${plan.campaignsEnabled}`
+      // Só atualizar campanhas se não foi especificado manualmente
+      if (companyData.campaignsEnabled === undefined) {
+        const [setting, created] = await Setting.findOrCreate({
+          where: {
+            companyId: company.id,
+            key: "campaignsEnabled"
+          },
+          defaults: {
+            companyId: company.id,
+            key: "campaignsEnabled",
+            value: `${plan.campaignsEnabled}`
+          }
+        });
+        if (!created) {
+          await setting.update({ value: `${plan.campaignsEnabled}` });
         }
-      });
-      if (!created) {
-        await setting.update({ value: `${plan.campaignsEnabled}` });
+      }
+
+      // Só atualizar downloadLimit se não foi especificado manualmente
+      if (companyData.downloadLimit === undefined) {
+        const [downloadSetting, downloadCreated] = await Setting.findOrCreate({
+          where: {
+            companyId: company.id,
+            key: "downloadLimit"
+          },
+          defaults: {
+            companyId: company.id,
+            key: "downloadLimit",
+            value: `${plan.downloadLimitMB}`
+          }
+        });
+        if (!downloadCreated) {
+          await downloadSetting.update({ value: `${plan.downloadLimitMB}` });
+        }
+        console.log(`🔧 [PLANO] Limite de download atualizado pelo plano para empresa ${company.name}: ${plan.downloadLimitMB}MB (plano: ${plan.name})`);
       }
     }
   }

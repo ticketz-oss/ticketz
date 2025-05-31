@@ -443,14 +443,14 @@ const downloadMedia = async (
     return null;
   }
 
-  const fileLimit = parseInt(await CheckSettings("downloadLimit", "15"), 10);
+  const fileLimit = parseInt(await GetCompanySetting(ticket.companyId, "downloadLimit", "15"), 10);
   if (
     wbot &&
     message?.fileLength &&
     +message.fileLength > fileLimit * 1024 * 1024
   ) {
     const fileLimitMessage = {
-      text: `*Mensagem Automática*:\nNosso sistema aceita apenas arquivos com no máximo ${fileLimit} MiB`
+      text: `*Mensagem Automática*:\nNosso sistema aceita apenas arquivos com no máximo ${fileLimit} MB`
     };
 
     if (!ticket.isGroup) {

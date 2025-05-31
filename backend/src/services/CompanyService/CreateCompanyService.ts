@@ -13,6 +13,7 @@ interface CompanyData {
   status?: boolean;
   planId?: number;
   campaignsEnabled?: boolean;
+  downloadLimit?: number;
   dueDate?: string;
   recurrence?: string;
 }
@@ -28,6 +29,7 @@ const CreateCompanyService = async (
     planId,
     password,
     campaignsEnabled,
+    downloadLimit,
     dueDate,
     recurrence
   } = companyData;
@@ -64,6 +66,7 @@ const CreateCompanyService = async (
     email,
     status,
     planId,
+    downloadLimit,
     dueDate,
     recurrence
   });
@@ -240,6 +243,20 @@ const CreateCompanyService = async (
           value: `${plan.campaignsEnabled}`
         }
       });
+
+      // Configurar limite de download baseado no plano
+      console.log(`🔧 [BUG FIX] Aplicando limite de download do plano ${plan.name}: downloadLimitMB = ${plan.downloadLimitMB}MB`);
+      await Setting.findOrCreate({
+        where: {
+          companyId: company.id,
+          key: "downloadLimit"
+        },
+        defaults: {
+          companyId: company.id,
+          key: "downloadLimit",
+          value: `${plan.downloadLimitMB}`
+        }
+      });
     }
   } else if (companyData.campaignsEnabled !== undefined) {
     // Se não há plano especificado, usar configuração manual (prioridade 2)
@@ -258,6 +275,21 @@ const CreateCompanyService = async (
     if (!created) {
       await setting.update({ value: `${campaignsEnabled}` });
     }
+  }
+
+  // Se não há plano especificado, usar limite padrão de download
+  if (!planId) {
+    await Setting.findOrCreate({
+      where: {
+        companyId: company.id,
+        key: "downloadLimit"
+      },
+      defaults: {
+        companyId: company.id,
+        key: "downloadLimit",
+        value: "15"
+      }
+    });
   }
 
   return company;

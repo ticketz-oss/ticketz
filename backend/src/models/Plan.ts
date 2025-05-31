@@ -48,6 +48,10 @@ class Plan extends Model<Plan> {
   @Default(false)
   @Column
   campaignsEnabled: boolean;
+
+  @Default(15)
+  @Column
+  downloadLimitMB: number;
 }
 
 export default Plan;
