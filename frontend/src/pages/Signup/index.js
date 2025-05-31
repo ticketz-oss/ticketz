@@ -109,7 +109,7 @@ const SignUp = () => {
 		
 		Object.assign(values, { recurrence: "MENSAL" });
 		Object.assign(values, { status: "t" });
-		Object.assign(values, { campaignsEnabled: true });
+		// 🔧 [BUG FIX] Removido campaignsEnabled: true para respeitar configuração do plano
 		try {
 			await openApi.post("/companies/cadastro", values);
 			toast.success(i18n.t("signup.toasts.success"));

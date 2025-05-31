@@ -224,27 +224,11 @@ const CreateCompanyService = async (
     },
   });
 
-  if (companyData.campaignsEnabled !== undefined) {
-    // Se campanhas foram especificadas manualmente, usar essa configuração
-    const [setting, created] = await Setting.findOrCreate({
-      where: {
-        companyId: company.id,
-        key: "campaignsEnabled"
-      },
-      defaults: {
-        companyId: company.id,
-        key: "campaignsEnabled",
-        value: `${campaignsEnabled}`
-      },
-
-    });
-    if (!created) {
-      await setting.update({ value: `${campaignsEnabled}` });
-    }
-  } else if (planId) {
-    // Se um plano foi especificado, configurar campanhas baseado no plano
+  // Configurar campanhas baseado no plano (prioridade 1)
+  if (planId) {
     const plan = await Plan.findByPk(planId);
     if (plan) {
+      console.log(`🔧 [BUG FIX] Aplicando configuração do plano ${plan.name}: campaignsEnabled = ${plan.campaignsEnabled}`);
       await Setting.findOrCreate({
         where: {
           companyId: company.id,
@@ -256,6 +240,23 @@ const CreateCompanyService = async (
           value: `${plan.campaignsEnabled}`
         }
       });
+    }
+  } else if (companyData.campaignsEnabled !== undefined) {
+    // Se não há plano especificado, usar configuração manual (prioridade 2)
+    console.log(`🔧 [BUG FIX] Usando configuração manual: campaignsEnabled = ${campaignsEnabled}`);
+    const [setting, created] = await Setting.findOrCreate({
+      where: {
+        companyId: company.id,
+        key: "campaignsEnabled"
+      },
+      defaults: {
+        companyId: company.id,
+        key: "campaignsEnabled",
+        value: `${campaignsEnabled}`
+      },
+    });
+    if (!created) {
+      await setting.update({ value: `${campaignsEnabled}` });
     }
   }
 
