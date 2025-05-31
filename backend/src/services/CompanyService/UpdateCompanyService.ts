@@ -81,7 +81,6 @@ const UpdateCompanyService = async (
     if (!downloadCreated) {
       await downloadSetting.update({ value: `${downloadLimit}` });
     }
-    console.log(`🔧 [MANUAL] Limite de download atualizado manualmente para empresa ${company.name}: ${downloadLimit}MB`);
   }
   
   // Se o planId foi alterado, configurar campanhas baseado no plano
@@ -122,7 +121,6 @@ const UpdateCompanyService = async (
         if (!downloadCreated) {
           await downloadSetting.update({ value: `${plan.downloadLimitMB}` });
         }
-        console.log(`🔧 [PLANO] Limite de download atualizado pelo plano para empresa ${company.name}: ${plan.downloadLimitMB}MB (plano: ${plan.name})`);
       }
     }
   }

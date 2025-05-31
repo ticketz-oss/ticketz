@@ -231,7 +231,6 @@ const CreateCompanyService = async (
   if (planId) {
     const plan = await Plan.findByPk(planId);
     if (plan) {
-      console.log(`🔧 [BUG FIX] Aplicando configuração do plano ${plan.name}: campaignsEnabled = ${plan.campaignsEnabled}`);
       await Setting.findOrCreate({
         where: {
           companyId: company.id,
@@ -245,7 +244,6 @@ const CreateCompanyService = async (
       });
 
       // Configurar limite de download baseado no plano
-      console.log(`🔧 [BUG FIX] Aplicando limite de download do plano ${plan.name}: downloadLimitMB = ${plan.downloadLimitMB}MB`);
       await Setting.findOrCreate({
         where: {
           companyId: company.id,
@@ -260,7 +258,6 @@ const CreateCompanyService = async (
     }
   } else if (companyData.campaignsEnabled !== undefined) {
     // Se não há plano especificado, usar configuração manual (prioridade 2)
-    console.log(`🔧 [BUG FIX] Usando configuração manual: campaignsEnabled = ${campaignsEnabled}`);
     const [setting, created] = await Setting.findOrCreate({
       where: {
         companyId: company.id,
