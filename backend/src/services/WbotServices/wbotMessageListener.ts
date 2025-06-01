@@ -2104,6 +2104,7 @@ const wbotMessageListener = async (
 ): Promise<void> => {
   try {
     wbot.ev.on("messages.upsert", async (messageUpsert: ImessageUpsert) => {
+      logger.trace({ messageUpsert }, "wbotMessageListener: messages.upsert");
       const messages = messageUpsert.messages
         .filter(filterMessages)
         .map(msg => msg);
@@ -2125,6 +2126,7 @@ const wbotMessageListener = async (
     });
 
     wbot.ev.on("messages.update", (messageUpdate: WAMessageUpdate[]) => {
+      logger.trace({ messageUpdate }, "wbotMessageListener: messages.update");
       if (messageUpdate.length === 0) return;
       messageUpdate.forEach(async (message: WAMessageUpdate) => {
         (wbot as WASocket)!.readMessages([message.key]);
