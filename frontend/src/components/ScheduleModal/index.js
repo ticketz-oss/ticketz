@@ -57,10 +57,10 @@ const useStyles = makeStyles(theme => ({
 
 const ScheduleSchema = Yup.object().shape({
 	body: Yup.string()
-		.min(5, "Mensagem muito curta")
-		.required("Obrigatório"),
-	contactId: Yup.number().required("Obrigatório"),
-	sendAt: Yup.string().required("Obrigatório"),
+		.min(5, i18n.t("scheduleModal.errorMessages.tooShort"))
+		.required(i18n.t("scheduleModal.errorMessages.required")),
+	contactId: Yup.number().required(i18n.t("scheduleModal.errorMessages.required")),
+	sendAt: Yup.string().required(i18n.t("scheduleModal.errorMessages.required")),
 	saveMessage: Yup.bool()
 });
 
@@ -166,7 +166,11 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 				scroll="paper"
 			>
 				<DialogTitle id="form-dialog-title">
-					{schedule.status === 'ERRO' ? 'Erro de Envio' : `Mensagem ${capitalize(schedule.status)}`}
+					{/* {schedule.status === 'ERRO' ? 'Erro de Envio' : `Mensagem ${capitalize(schedule.status)}`} */}
+					{schedule.status === 'ERRO' 
+						? i18n.t("scheduleModal.errorMessages.sendError") 
+						: `${i18n.t("scheduleModal.errorMessages.default")} ${capitalize(schedule.status)}`
+					}
 				</DialogTitle>
 				<Formik
 					initialValues={schedule}
@@ -200,7 +204,7 @@ const ScheduleModal = ({ open, onClose, scheduleId, contactId, cleanContact, rel
 											getOptionSelected={(option, value) => {
 												return value.id === option.id
 											}}
-											renderInput={(params) => <TextField {...params} variant="outlined" placeholder="Contato" />}
+											renderInput={(params) => <TextField {...params} variant="outlined" placeholder={i18n.t("scheduleModal.form.contact")} />}
 										/>
 									</FormControl>
 								</div>

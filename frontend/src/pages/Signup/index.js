@@ -201,7 +201,7 @@ const SignUp = () => {
 										variant="outlined"
 										fullWidth
 										id="phone"
-										label="Telefone com (DDD)"
+										label={i18n.t("signup.form.phone")}
 										name="phone"
 										error={touched.email && Boolean(errors.email)}
 										helperText={touched.email && errors.email}
@@ -226,19 +226,19 @@ const SignUp = () => {
 									/>
 								</Grid>
 								<Grid item xs={12}>
-									<InputLabel htmlFor="plan-selection">Plano</InputLabel>
+									<InputLabel htmlFor="plan-selection">{i18n.t("signup.form.plan")}</InputLabel>
 									<Field
 										as={Select}
 										variant="outlined"
 										fullWidth
 										id="plan-selection"
-										label="Plano"
+										label={i18n.t("signup.form.plan")}
 										name="planId"
 										required
 									>
 										{plans.map((plan, key) => (
 											<MenuItem key={key} value={plan.id}>
-												{plan.name} - Atendentes: {plan.users} - WhatsApp: {plan.connections} - Filas: {plan.queues} - R$ {plan.value}
+												{plan.name} - {i18n.t("signup.form.atendentes")}: {plan.users} - {i18n.t("signup.form.whatsApp")}: {plan.connections} - {i18n.t("signup.form.queue")}: {plan.queues} - {i18n.t("signup.form.currency")} {plan.value}
 											</MenuItem>
 										))}
 									</Field>

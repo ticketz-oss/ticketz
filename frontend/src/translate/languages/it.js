@@ -71,6 +71,23 @@ const messages = {
             title: "Interazioni di oggi: ",
           },
         },
+        ticketzPro: {
+          title: "Ticketz PRO",
+          features1: "Whatsapp Ufficiale - Instagram - Messenger e altri",
+          features2: "Funzionalità esclusive - Supporto Avanzato - Migrazione Facilitata",
+          price: "Abbonati a R$ 199/mese",
+          note: "direttamente nel sistema",
+          upgrade: "Clicca per le istruzioni di Upgrade",
+          visit: "Clicca per visitare il sito!",
+          upgradeInstructions: {
+            title: "Istruzioni per l'Upgrade",
+            paragraph1: "Se hai installato le immagini fornite dal progetto su un server o VPS utilizzando le istruzioni semplificate, tutto ciò che devi fare è accedere al tuo server e digitare il seguente comando:",
+            command: "curl -sSL update.ticke.tz | sudo bash -s pro",
+            paragraph2: "In pochi istanti, Ticketz PRO sarà installato con tutti i tuoi dati. Ora vai semplicemente nel menu utente, clicca su 'Abbonamento Ticketz PRO' e completa il tuo abbonamento.",
+            paragraph3: "Se la tua installazione è diversa o hai bisogno di aiuto per installare Ticketz Pro, ",
+            paragraph4: "contattaci e ti aiuteremo!",
+          },
+        },
       },
       connections: {
         title: "Connessioni",
@@ -1019,6 +1036,12 @@ const messages = {
           paypaltitle: "Carta di Credito",
           international: "Internazionale in US$",
         },
+      },
+      owenAd: {
+        title: "Owen Payments supporta Ticketz",
+        description1: "La startup Owen Payments offre pagamenti PIX a un costo fisso di R$ 0,99 per transazione.",
+        description2: "Una parte del valore di ogni transazione viene devoluta al progetto Ticketz, quindi utilizzando questo metodo di pagamento supporterai anche il progetto.",
+        description3: 'Seleziona il gateway di pagamento "Owen Payments 💎" e richiedi l\'apertura del tuo account senza uscire da Ticketz!'
       },
     },
   },

@@ -141,12 +141,12 @@ export default function ContactNotesDialog ({ modalOpen, onClose, ticket }) {
     return (
         <>
             <ConfirmationModal
-                title="Excluir Registro"
+                title={i18n.t("quickMessages.dialog.deleteRecord")}
                 open={showOnDeleteDialog}
                 onClose={setShowOnDeleteDialog}
                 onConfirm={handleDelete}
             >
-                Deseja realmente excluir este registro?
+                {i18n.t("quickMessages.dialog.questionAnswer")}
             </ConfirmationModal>
             <Dialog
                 open={open}

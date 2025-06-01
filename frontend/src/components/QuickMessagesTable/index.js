@@ -14,6 +14,7 @@ import {
 } from "@material-ui/icons";
 
 import TableRowSkeleton from "../../components/TableRowSkeleton";
+import { i18n } from "../../translate/i18n.js";
 
 function QuickMessagesTable(props) {
     const { messages, showLoading, editMessage, deleteMessage, readOnly } = props
@@ -69,10 +70,10 @@ function QuickMessagesTable(props) {
         <Table size="small">
             <TableHead>
                 <TableRow>
-                    <TableCell align="center">Atalho</TableCell>
-                    <TableCell align="left">Mensagem</TableCell>
+                    <TableCell align="center">{i18n.t("quickMessages.dialog.shortcode")}</TableCell>
+                    <TableCell align="left">{i18n.t("quickMessages.dialog.message")}</TableCell>
                     { !readOnly ? (
-                        <TableCell align="center">Ações</TableCell>
+                        <TableCell align="center">{i18n.t("quickMessages.dialog.action")}</TableCell>
                     ) : null}
                 </TableRow>
             </TableHead>

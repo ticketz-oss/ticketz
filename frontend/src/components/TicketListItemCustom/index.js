@@ -268,7 +268,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
                 top: -6,
                 marginRight: 3
               }}
-              badgeContent={ticket.queue?.name || "Sem fila"}
+              badgeContent={ticket.queue?.name || i18n.t("common.noqueue")}
             //color="primary"
             />
           )}
@@ -365,7 +365,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
                 marginRight: 2
 
               }}
-              badgeContent={ticket.queue?.name || "Sem fila"}
+              badgeContent={ticket.queue?.name || i18n.t("common.noqueue")}
             //color=
             />
           )}
@@ -491,7 +491,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
         <Tooltip
           arrow
           placement="right"
-          title={ticket.queue?.name || "Sem fila"}
+          title={ticket.queue?.name || i18n.t("common.noqueue")}
         >
           <span
             style={{ backgroundColor: ticket.queue?.color || "#7C7C7C" }}
@@ -554,7 +554,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
           {ticket.status === "closed" && (
             <Badge
               className={classes.Radiusdot}
-              badgeContent={"FECHADO"}
+              badgeContent={i18n.t("tickets.tabs.closed.close")}
               //color="primary"
               style={{
                 backgroundColor: ticket.queue?.color || "#ff0000",

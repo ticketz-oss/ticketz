@@ -19,7 +19,25 @@ const messages = {
         company: "Firma",
         connection: "Verbindung",
         queue: "Warteschlange",
-        contact: "Kontakt"
+        noqueue: "Ohne Warteschlange",
+        contact: "Kontakt",
+        user: "Benutzer",
+        whatsappNumber: "WhatsApp-Nummer",
+        dueDate: "Fälligkeitsdatum",
+        copy: "Kopieren",
+        paste: "Einfügen",
+        proceed: "Fortfahren",
+        enabled: "Aktiviert",
+        disabled: "Deaktiviert",
+        rating: "Bewertung",
+        transferTo: "Weiterleiten an",
+        chat: "Chat",
+        plan: "Plan",
+        status: "Status",
+        clear: "Löschen",
+        accessAs: "Zugriff als",
+        createdAt: "Erstellt am",
+        price: "Preis",
       },
       signup: {
         title: "Registrieren",
@@ -31,6 +49,11 @@ const messages = {
           name: "Name",
           email: "Email",
           password: "Passwort",
+          phone: "Telefonnummer mit Ländercode (+49)",
+          atendentes: "Kundenservice",
+          whatsApp: "Anzahl der WhatsApp-Nummern",
+          queue: "Anzahl der Warteschlangen",
+          currency: "€ ",
         },
         buttons: {
           submit: "Registrieren",
@@ -50,12 +73,31 @@ const messages = {
       },
       companies: {
         title: "Unternehmen registrieren",
+        campaigns: "Kampagnen",
+        recurrence: {
+          title: "Häufigkeit",
+          monthly: "Monatlich",
+          bimonthly: "Zweimonatlich",
+          quarterly: "Vierteljährlich",
+          semiannual: "Halbjährlich",
+          annual: "Jährlich",
+        },
         form: {
           name: "Name des Unternehmens",
           plan: "Plan",
           token: "Token",
           submit: "Registrieren",
           success: "Unternehmen erfolgreich erstellt!",
+        },
+        options: {
+          enabled: "Aktiviert",
+          disabled: "Deaktiviert",
+        },
+        modal: {
+          titleDeleted: "Datenlöschung",
+          titleaccessAs: "Zugriff als",
+          deletedNote: "Möchten Sie diese Daten wirklich löschen?",
+          accessAsNote: "Möchten Sie das System als dieses Unternehmen aufrufen?",
         },
       },
       auth: {
@@ -65,9 +107,48 @@ const messages = {
         token: "Token",
       },
       dashboard: {
-        charts: {
-          perDay: {
-            title: "Heutige Interaktionen: ",
+        usersOnline: "Benutzer online",
+        ticketsWaiting: "Wartende Tickets",
+        ticketsOpen: "Offene Tickets",
+        ticketsDone: "Erledigte Tickets",
+        totalTickets: "Tickets insgesamt",
+        newContacts: "Neue Kontakte",
+        avgServiceTime: "Durchschnittliche Bearbeitungszeit",
+        avgWaitTime: "Durchschnittliche Wartezeit",
+        ticketsOnPeriod: "Tickets im Zeitraum",
+        userCurrentStatus: "Aktueller Status",
+        filter: {
+          period: "Zeitraum",
+          custom: "Benutzerdefiniert",
+          last3days: "Letzte 3 Tage",
+          last7days: "Letzte 7 Tage",
+          last14days: "Letzte 14 Tage",
+          last30days: "Letzte 30 Tage",
+          last90days: "Letzte 90 Tage"
+        },
+        date: {
+          start: "Startdatum",
+          end: "Enddatum",
+        },
+        ticketCountersLabels: {
+          created: "Erstellt",
+          closed: "Geschlossen",        
+        },
+        ticketzPro: {
+          title: "Ticketz PRO",
+          features1: "Offizielles Whatsapp - Instagram - Messenger und andere",
+          features2: "Exklusive Funktionen - Premium-Support - Einfache Migration",
+          price: "Abonnieren für R$ 199/Monat",
+          note: "direkt im System",
+          upgrade: "Klicken Sie für Upgrade-Anleitung",
+          visit: "Klicken Sie, um die Website zu besuchen!",
+          upgradeInstructions: {
+            title: "Upgrade-Anleitung",
+            paragraph1: "Wenn Sie die vom Projekt bereitgestellten Images auf einem Server oder VPS mit den vereinfachten Anweisungen installiert haben, müssen Sie nur auf Ihren Server zugreifen und folgenden Befehl eingeben:",
+            command: "curl -sSL update.ticke.tz | sudo bash -s pro",
+            paragraph2: "Innerhalb kürzester Zeit wird Ticketz PRO mit all Ihren Daten installiert. Gehen Sie nun einfach zum Benutzermenü, klicken Sie auf 'Ticketz PRO-Abonnement' und schließen Sie Ihr Abonnement ab.",
+            paragraph3: "Wenn Ihre Installation anders ist oder Sie Hilfe bei der Installation von Ticketz Pro benötigen, ",
+            paragraph4: "kontaktieren Sie uns und wir helfen Ihnen!",
           },
         },
       },
@@ -80,8 +161,7 @@ const messages = {
           deleteTitle: "Löschen",
           deleteMessage: "Sind Sie sicher? Diese Aktion kann nicht rückgängig gemacht werden.",
           disconnectTitle: "Trennen",
-          disconnectMessage:
-            "Sind Sie sicher? Sie müssen den QR-Code erneut scannen.",
+          disconnectMessage: "Sind Sie sicher? Sie müssen den QR-Code erneut scannen.",
         },
         buttons: {
           add: "WhatsApp hinzufügen",
@@ -94,22 +174,24 @@ const messages = {
         toolTips: {
           disconnected: {
             title: "Fehler beim Starten der WhatsApp-Sitzung",
-            content:
-              "Stellen Sie sicher, dass Ihr Telefon mit dem Internet verbunden ist, und versuchen Sie es erneut, oder fordern Sie einen neuen QR-Code an",
+            content: "Stellen Sie sicher, dass Ihr Telefon mit dem Internet verbunden ist, und versuchen Sie es erneut, oder fordern Sie einen neuen QR-Code an",
           },
           qrcode: {
             title: "Warten auf QR-Code-Scan",
-            content:
-              "Klicken Sie auf die Schaltfläche 'QR CODE' und scannen Sie den QR-Code mit Ihrem Telefon, um die Sitzung zu starten",
+            content: "Klicken Sie auf die Schaltfläche 'QR CODE' und scannen Sie den QR-Code mit Ihrem Telefon, um die Sitzung zu starten",
           },
           connected: {
             title: "Verbindung hergestellt!",
           },
           timeout: {
             title: "Verbindung zum Telefon verloren",
-            content:
-              "Stellen Sie sicher, dass Ihr Telefon mit dem Internet verbunden ist und WhatsApp geöffnet ist, oder klicken Sie auf die Schaltfläche 'Trennen', um einen neuen QR-Code zu erhalten",
+            content: "Stellen Sie sicher, dass Ihr Telefon mit dem Internet verbunden ist und WhatsApp geöffnet ist, oder klicken Sie auf die Schaltfläche 'Trennen', um einen neuen QR-Code zu erhalten",
           },
+          refresh: "Aktualisieren",
+          disconnect: "Trennen",
+          scan: "Scannen",
+          newQr: "Neuer QR-Code",
+          retry: "Erneut versuchen",
         },
         table: {
           name: "Name",
@@ -122,6 +204,10 @@ const messages = {
       },
       internalChat: {
         title: "Interner Chat",
+        alertChatTitle: "Bitte geben Sie einen Chat-Titel ein.",
+        alertChatUser: "Bitte wählen Sie mindestens einen Benutzer aus.",
+        labelTitle: "Titel",
+        labelPlaceholder: "Titel eingeben",
       },
       whatsappModal: {
         title: {
@@ -151,8 +237,7 @@ const messages = {
         confirmationModal: {
           deleteTitle: "Löschen",
           importTitlte: "Kontakte importieren",
-          deleteMessage:
-            "Sind Sie sicher, dass Sie diesen Kontakt löschen möchten? Alle zugehörigen Interaktionen gehen verloren.",
+          deleteMessage: "Sind Sie sicher, dass Sie diesen Kontakt löschen möchten? Alle zugehörigen Interaktionen gehen verloren.",
           importMessage: "Möchten Sie alle Kontakte vom Telefon importieren?",
         },
         buttons: {
@@ -190,26 +275,40 @@ const messages = {
         success: "Kontakt erfolgreich gespeichert.",
       },
       queueModal: {
-        title: {
-          add: "Warteschlange hinzufügen",
-          edit: "Warteschlange bearbeiten",
-        },
+    title: {
+      titleNotDefined: "Titel nicht definiert",
+      titleTabsQueue: "Warteschlangendaten",
+      titleTabsHours: "Servicezeiten",
+      optionText: "Textoption eingeben",
+      optionTitle: "Optionsüberschrift",
+    },
+    toasts: {
+
+    },
+    confirmationModal: {
+      notificationAdd: "Warteschlangendaten erfolgreich gespeichert",
+      notificationEdit: "Warteschlangendaten erfolgreich geändert",
+      notificationDeleted: "Warteschlangendaten erfolgreich gelöscht",
+      notificationHours: "Klicken Sie auf Speichern, um Änderungen zu übernehmen",
+    },
+  },
         form: {
-          name: "Name",
-          color: "Farbe",
-          greetingMessage: "Begrüßungsnachricht",
-          complationMessage: "Abschlussnachricht",
-          outOfHoursMessage: "Nachricht außerhalb der Geschäftszeiten",
-          ratingMessage: "Bewertungsnachricht",
-          transferMessage: "Übertragungsnachricht",
-          token: "Token",
-        },
-        buttons: {
-          okAdd: "Hinzufügen",
-          okEdit: "Speichern",
-          cancel: "Abbrechen",
-          attach: "Datei anhängen",
-        },
+          noutOfHoursAction: {
+    title: "Aktion außerhalb der Öffnungszeiten",
+    options: {
+      pending: "In Warteschlange belassen",
+      closed: "Ticket schließen",
+    },
+  },
+  buttons: {
+    okAdd: "Hinzufügen",
+    okEdit: "Speichern",
+    cancel: "Abbrechen",
+    attach: "Datei anhängen",
+    add: "Warteschlange hinzufügen",
+    edit: "Warteschlange bearbeiten",
+    addSub: "Unterwarteschlange erstellen",
+  },
         serviceHours: {
           dayWeek: "Wochentag",
           startTimeA: "Startzeit - Schicht A",
@@ -223,6 +322,7 @@ const messages = {
           friday: "Freitag",
           saturday: "Samstag",
           sunday: "Sonntag",
+          dontEnableHours: "Servicezeiten für diese Warteschlange nicht aktivieren",
         },
       },
       userModal: {
@@ -255,10 +355,25 @@ const messages = {
           sentAt: "Sendedatum",
           saveMessage: "Nachricht im Ticket speichern",
         },
+        errorMessages: {
+          tooShort: "Nachricht zu kurz",
+          required: "Erforderlich",
+          sendError: "Fehler beim Senden",
+          default: "Nachricht",
+          unidentifedWhatsapp: "WhatsApp nicht identifiziert",
+          scheduleCheckError: "Fehler bei der Terminprüfung: ",
+        },
         buttons: {
           okAdd: "Hinzufügen",
           okEdit: "Speichern",
           cancel: "Abbrechen",
+        },
+        schedules: {
+          scheduledDispatch: "Geplante Sendung für: ",
+          messageSent: "Geplante Nachricht gesendet an: ",
+        },
+        completionMessages: {
+          default: "Service abgeschlossen",
         },
         success: "Planung erfolgreich gespeichert.",
       },
@@ -307,17 +422,32 @@ const messages = {
           message: "Nachricht von",
         },
         tabs: {
-          open: { title: "Offen" },
-          closed: { title: "Gelöst" },
-          groups: { title: "Gruppen" },
-          search: { title: "Suche" },
+          open: { 
+            title: "Offen" ,
+          },
+          closed: { 
+            title: "Gelöst",
+            close: "Fertig",
+          },
+          groups: { 
+            title: "Gruppen" 
+          },
+          search: { 
+            title: "Suche" 
+          },
         },
         search: {
           placeholder: "Tickets und Nachrichten suchen",
+          filterTags: "Nach Tags filtern",
+          filterUsers: "Nach Benutzer filtern",
         },
         buttons: {
           showAll: "Alle",
         },
+      },
+      task: {
+        title: "Aufgabe",
+        newTask: "Neue Aufgabe",
       },
       transferTicketModal: {
         title: "Ticket übertragen",
@@ -334,8 +464,7 @@ const messages = {
         pendingHeader: "Wartend",
         assignedHeader: "In Bearbeitung",
         noTicketsTitle: "Nichts hier!",
-        noTicketsMessage:
-          "Keine Tickets mit diesem Status oder Suchbegriff gefunden",
+        noTicketsMessage: "Keine Tickets mit diesem Status oder Suchbegriff gefunden",
         buttons: {
           accept: "Akzeptieren",
         },
@@ -366,6 +495,8 @@ const messages = {
           messagesAPI: "API",
           schedules: "Planungen",
           campaigns: "Kampagnen",
+          listing: "Kampagnenliste",
+          contactList: "Kontaktliste",
           annoucements: "Ankündigungen",
           chats: "Interner Chat",
           financeiro: "Finanzen",
@@ -411,8 +542,14 @@ const messages = {
           add: "Neue Antwort",
         },
         dialog: {
-          shortcode: "Abkürzung",
-          message: "Antwort",
+          shortcode: "Verknüpfung",
+          message: "Nachricht",
+          action: "Aktion",
+          deleteRecord: "Schnellnachricht löschen",
+          questionAnswer: "Möchten Sie diese Nachricht wirklich löschen?",
+          notificationAdd: "Nachricht erfolgreich hinzugefügt.",
+          notificationDelete: "Nachricht erfolgreich gelöscht.",
+          notificationUpdate: "Nachricht aktualisiert.",
         },
       },
       kanban: {
@@ -513,6 +650,8 @@ const messages = {
         buttons: {
           add: "Neue Kampagne",
           contactLists: "Kontaktlisten",
+          addVariable: "Variable hinzufügen",
+          saveSetting: "Einstellungen speichern",
         },
         table: {
           name: "Name",
@@ -562,10 +701,20 @@ const messages = {
           deleteMessage: "Diese Aktion kann nicht rückgängig gemacht werden.",
         },
         toasts: {
-          success: "Operation erfolgreich",
+          title: "Intervall",
+          success: "Operation erfolgreich abgeschlossen",
           cancel: "Kampagne abgebrochen",
           restart: "Kampagne neu gestartet",
-          deleted: "Eintrag gelöscht",
+          deleted: "Daten erfolgreich gelöscht",
+          seconds: "Sekunden",
+          messages: "Nachrichten",
+          noInterval: "Ohne Intervall",
+          greaterInterval: "Versand verzögert",
+          longerIntervalAfter: "Versand verzögern nach",
+          notDefined: "Ohne Verzögerung",
+          messageInterval: "Nachrichtenintervall",
+          hotKey: "Verknüpfung",
+          
         },
       },
       announcements: {
@@ -589,11 +738,21 @@ const messages = {
           update: "Ankündigung aktualisieren",
           readonly: "Nur Lesen",
           form: {
-            priority: "Priorität",
+            priority: {
+              title: "Priorität",
+              high: "Hoch",
+              medium: "Mittel",
+              low: "Niedrig",
+            },
             title: "Titel",
             text: "Text",
             mediaPath: "Datei",
-            status: "Status",
+            attach: "Kein Anhang",
+            status: {
+              title: "Status",
+              active: "Aktiv",
+              inactive: "Inaktiv",
+            },
           },
           buttons: {
             add: "Hinzufügen",
@@ -627,10 +786,21 @@ const messages = {
         buttons: {
           add: "Warteschlange hinzufügen",
         },
+        dialog: {
+          name: "Name",
+          company: "Unternehmen",
+          okEdit: "Bearbeiten",
+          okAdd: "Hinzufügen",
+          add: "Hinzufügen",
+          edit: "Bearbeiten",
+          cancel: "Abbrechen",
+        },
+        toasts: {
+          deleted: "Daten erfolgreich gelöscht",
+        },
         confirmationModal: {
           deleteTitle: "Löschen",
-          deleteMessage:
-            "Sind Sie sicher? Diese Aktion kann nicht rückgängig gemacht werden! Die Interaktionen dieser Warteschlange bleiben bestehen, haben jedoch keine zugewiesene Warteschlange mehr.",
+          deleteMessage: "Sind Sie sicher? Diese Aktion kann nicht rückgängig gemacht werden! Die Interaktionen dieser Warteschlange bleiben bestehen, haben jedoch keine zugewiesene Warteschlange mehr.",
         },
       },
       queueSelect: {
@@ -652,8 +822,7 @@ const messages = {
         },
         confirmationModal: {
           deleteTitle: "Löschen",
-          deleteMessage:
-            "Alle Benutzerdaten gehen verloren. Die offenen Tickets dieses Benutzers werden in die Warteschlange verschoben.",
+          deleteMessage: "Alle Benutzerdaten gehen verloren. Die offenen Tickets dieses Benutzers werden in die Warteschlange verschoben.",
         },
       },
       helps: {
@@ -716,15 +885,91 @@ const messages = {
           deleted: "Tag erfolgreich gelöscht.",
         },
       },
+      whitelabel: {
+        primaryColorLight: "Primäre helle Farbe",
+        primaryColorDark: "Primäre dunkle Farbe",
+        lightLogo: "Helles App-Logo",
+        darkLogo: "Dunkles App-Logo",
+        favicon: "App-Favicon",
+        appname: "App-Name",
+        logoHint: "Bevorzugt SVG-Format mit 28:10 Seitenverhältnis",
+        faviconHint: "Bevorzugt quadratisches SVG oder 512x512 PNG",
+      },
       settings: {
         group: {
-          general: "Allgemein",
-          timeouts: "Zeitüberschreitungen",
+          general: {
+            title: "Allgemeine Einstellungen",
+            VoiceAndVideoCalls: {
+              title: "Sprach- und Videoanrufe",
+              options: {
+                enabled: "Ignorieren",
+                disabled: "Nichtverfügbarkeit melden",
+              },
+            },
+            AutomaticChatbotOutput: {
+              title: "Automatische Chatbot-Ausgabe",
+              options: {
+                enabled: "Aktiviert",
+                disabled: "Deaktiviert",
+              },
+            },
+            autoReopenTimeout: "Automatische Wiederöffnungszeit (Minuten)",
+          },
+          rating: {
+            title: "Bewertungseinstellungen",
+            label: "Bewertung",
+            timeout: "Bewertungswartezeit (Minuten)",
+          },
+          noQueue: {
+            title: "Einstellungen für warteschlangenlose Tickets",
+            label: "Timeout für warteschlangenlose Tickets (Minuten)",
+            action: "Aktion für warteschlangenlose Tickets",
+            options: {
+              close: "Ticket schließen",
+              transferTo: "Weiterleiten an",
+            },
+          },
+          ticketInProgress: {
+            title: "Einstellungen für in Bearbeitung befindliche Tickets",
+            label: "Timeout für in Bearbeitung befindliche Tickets (Minuten)",
+            action: "Aktion für offene Tickets",
+            options: {
+              returnToQueue: "Zurück zur Warteschlange",
+              closeService: "Service schließen",
+            },
+          },
+          timeouts: {
+            title: "Wartezeiten",
+            actionforUnassignedTicketTimeout: "Aktion für warteschlangenlose Tickets",
+            actionforOpenTicketTimeout: "Aktion für offene Tickets",
+            transferTo: "Weiterleiten an",
+            timeoutforTicketInProgress: "Timeout für in Bearbeitung befindliche Tickets (Minuten)",
+            timeoutforUnassignedTicket: "Timeout für warteschlangenlose Tickets (Minuten)",
+            returnToQueue: "Zurück zur Warteschlange",
+            closeService: "Service schließen",
+          },
           officeHours: "Bürozeiten",
           groups: "Gruppen",
           confidenciality: "Vertraulichkeit",
           api: "API",
+          externalServices: "Externe Dienste",
           serveradmin: "Serververwaltung",
+          helps: {
+            title: "Titel",
+            videoLink: "Video-Link",
+            description: "Beschreibung",
+            notification: {
+              loadListError: "Liste der Notizen konnte nicht geladen werden",
+              operationSuccess: "Daten erfolgreich gespeichert!",
+              operationDeletedSuccess: "Daten erfolgreich gelöscht!",
+              operationError: "Operation konnte nicht durchgeführt werden. Überprüfen Sie, ob der Name bereits existiert oder ob die Felder korrekt ausgefüllt sind",
+              genericError: "Operation konnte nicht durchgeführt werden",
+            },
+            deleteRecord: {
+              title: "Datenlöschung",
+              confirmationMessage: "Möchten Sie diese Daten wirklich löschen?"
+            },
+          },
         },
         success: "Einstellungen erfolgreich gespeichert.",
         title: "Einstellungen",
@@ -815,8 +1060,14 @@ const messages = {
             disabled: "Deaktiviert",
           },
         },
+        FileUploadLimit: {
+          title: "Datei-Upload-Limit (MB)",
+        },
         FileDownloadLimit: {
           title: "Dateidownload-Limit (MB)",
+        },
+        GracePeriod: {
+          title: "Schonfrist",
         },
         messageVisibility: {
           title: "Nachrichtensichtbarkeit",
@@ -834,6 +1085,10 @@ const messages = {
         },
         WelcomeGreeting: {
           greetings: "Hallo",
+          earlyMorning: "Guten Morgen früh,",
+          morning: "Guten Morgen,",
+          afternoon: "Guten Tag,",
+          evening: "Guten Abend,",
           welcome: "Willkommen bei",
           expirationTime: "Aktiv bis",
         },
@@ -858,6 +1113,20 @@ const messages = {
         PaymentGateways: {
           title: "Zahlungsgateways",
         },
+        AIProvider: {
+          title: "KI-Dienst",
+        },
+        AudioTranscriptions: {
+          title: "Audio-Transkription",
+        },
+        TagsMode: {
+          title: "Tag-Modus",
+          options: {
+            ticket: "Ticket",
+            contact: "Kontakt",
+            both: "Ticket und Kontakt"
+          },
+        },
       },
       messagesList: {
         header: {
@@ -872,15 +1141,16 @@ const messages = {
       },
       messagesInput: {
         placeholderOpen: "Nachricht eingeben",
-        placeholderClosed:
-          "Öffnen oder akzeptieren Sie dieses Ticket, um eine Nachricht zu senden.",
+        placeholderClosed: "Öffnen oder akzeptieren Sie dieses Ticket, um eine Nachricht zu senden.",
         signMessage: "Signieren",
         replying: "Antworten",
         editing: "Bearbeiten",
       },
       message: {
         edited: "Bearbeitet",
+        forwarded: "Weitergeleitet",
       },
+
       contactDrawer: {
         header: "Kontaktdaten",
         buttons: {
@@ -900,8 +1170,7 @@ const messages = {
         },
         confirmationModal: {
           title: "Ticket des Kontakts löschen",
-          message:
-            "Achtung! Alle Nachrichten im Zusammenhang mit dem Ticket gehen verloren.",
+          message: "Achtung! Alle Nachrichten im Zusammenhang mit dem Ticket gehen verloren.",
         },
         buttons: {
           delete: "Löschen",
@@ -966,25 +1235,21 @@ const messages = {
       },
       backendErrors: {
         ERR_NO_OTHER_WHATSAPP: "Es muss mindestens ein Standard-WhatsApp geben.",
-        ERR_NO_DEF_WAPP_FOUND:
-          "Kein Standard-WhatsApp gefunden. Überprüfen Sie die Verbindungsseite.",
-        ERR_WAPP_NOT_INITIALIZED:
-          "Diese WhatsApp-Sitzung wurde nicht initialisiert. Überprüfen Sie die Verbindungsseite.",
-        ERR_WAPP_CHECK_CONTACT:
-          "WhatsApp-Kontakt konnte nicht überprüft werden. Überprüfen Sie die Verbindungsseite",
+        ERR_FORBIDDEN: "Zugriff verweigert. Überprüfen Sie Ihre Berechtigungen.",
+        ERR_CHECK_NUMBER: "Diese Nummer ist bei WhatsApp nicht registriert.",
+        ERR_NO_OTHER_WHATSAPP: "Es muss mindestens ein Standard-WhatsApp vorhanden sein.",
+        ERR_NO_DEF_WAPP_FOUND: "Kein Standard-WhatsApp gefunden. Überprüfen Sie die Verbindungsseite.",
+        ERR_WAPP_NOT_INITIALIZED: "Diese WhatsApp-Sitzung wurde nicht initialisiert. Überprüfen Sie die Verbindungsseite.",
+        ERR_WAPP_CHECK_CONTACT: "WhatsApp-Kontakt konnte nicht überprüft werden. Überprüfen Sie die Verbindungsseite",
         ERR_WAPP_INVALID_CONTACT: "Dies ist keine gültige WhatsApp-Nummer.",
-        ERR_WAPP_DOWNLOAD_MEDIA:
-          "Medien von WhatsApp konnten nicht heruntergeladen werden. Überprüfen Sie die Verbindungsseite.",
-        ERR_INVALID_CREDENTIALS:
-          "Authentifizierungsfehler. Bitte versuchen Sie es erneut.",
-        ERR_SENDING_WAPP_MSG:
-          "Fehler beim Senden der WhatsApp-Nachricht. Überprüfen Sie die Verbindungsseite.",
+        ERR_WAPP_DOWNLOAD_MEDIA: "Medien von WhatsApp konnten nicht heruntergeladen werden. Überprüfen Sie die Verbindungsseite.",
+        ERR_INVALID_CREDENTIALS: "Authentifizierungsfehler. Bitte versuchen Sie es erneut.",
+        ERR_SENDING_WAPP_MSG: "Fehler beim Senden der WhatsApp-Nachricht. Überprüfen Sie die Verbindungsseite.",
         ERR_DELETE_WAPP_MSG: "WhatsApp-Nachricht konnte nicht gelöscht werden.",
         ERR_EDITING_WAPP_MSG: "WhatsApp-Nachricht konnte nicht bearbeitet werden.",
         ERR_OTHER_OPEN_TICKET: "Es gibt bereits ein offenes Ticket für diesen Kontakt.",
         ERR_SESSION_EXPIRED: "Sitzung abgelaufen. Bitte erneut einloggen.",
-        ERR_USER_CREATION_DISABLED:
-          "Die Benutzererstellung wurde vom Administrator deaktiviert.",
+        ERR_USER_CREATION_DISABLED: "Die Benutzererstellung wurde vom Administrator deaktiviert.",
         ERR_NO_PERMISSION: "Sie haben keine Berechtigung, auf diese Funktion zuzugreifen.",
         ERR_DUPLICATED_CONTACT: "Es gibt bereits einen Kontakt mit dieser Nummer.",
         ERR_NO_SETTING_FOUND: "Keine Einstellung mit dieser ID gefunden.",
@@ -994,12 +1259,13 @@ const messages = {
         ERR_NO_WAPP_FOUND: "Kein WhatsApp mit dieser ID gefunden.",
         ERR_CREATING_MESSAGE: "Fehler beim Erstellen der Nachricht in der Datenbank.",
         ERR_CREATING_TICKET: "Fehler beim Erstellen des Tickets in der Datenbank.",
-        ERR_FETCH_WAPP_MSG:
-          "Fehler beim Abrufen der Nachricht auf WhatsApp, möglicherweise ist sie zu alt.",
-        ERR_QUEUE_COLOR_ALREADY_EXISTS:
-          "Diese Farbe wird bereits verwendet, wählen Sie eine andere.",
-        ERR_WAPP_GREETING_REQUIRED:
-          "Die Begrüßungsnachricht ist erforderlich, wenn es mehr als eine Warteschlange gibt.",
+        ERR_FETCH_WAPP_MSG: "Fehler beim Abrufen der Nachricht auf WhatsApp, möglicherweise ist sie zu alt.",
+        ERR_QUEUE_COLOR_ALREADY_EXISTS: "Diese Farbe wird bereits verwendet, wählen Sie eine andere.",
+        ERR_WAPP_GREETING_REQUIRED: "Die Begrüßungsnachricht ist erforderlich, wenn es mehr als eine Warteschlange gibt.",
+        ERR_SUBSCRIPTION_CHECK_FAILED: "Abonnementprüfung fehlgeschlagen.",
+        ERR_WAPP_NOT_FOUND: "Verbindung nicht verfügbar.",
+        ERR_SUBSCRIPTION_EXPIRED: "Ihr Abonnement ist abgelaufen.",
+        ERR_UNKOWN: "Unbekannter Fehler.",
       },
       ticketz: {
         registration: {
@@ -1018,8 +1284,16 @@ const messages = {
           international: "International in US$",
         },
       },
+      owenAd: {
+        title: "Owen Payments unterstützt Ticketz",
+        description1: "Das Startup Owen Payments bietet PIX-Zahlungen zu einem Festpreis von R$ 0,99 pro Transaktion an.",
+        description2: "Ein Teil jedes Transaktionswerts wird an das Ticketz-Projekt weitergeleitet. Durch die Nutzung dieser Zahlungsmethode unterstützen Sie also auch das Projekt.",
+        description3: 'Wählen Sie das Zahlungsgateway "Owen Payments 💎" und beantragen Sie die Eröffnung Ihres Kontos, ohne Ticketz verlassen zu müssen!'
+      },
     },
   },
 };
 
-export { messages };
+export { 
+  messages 
+};

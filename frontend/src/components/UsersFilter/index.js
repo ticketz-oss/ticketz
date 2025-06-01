@@ -3,6 +3,7 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import React, { useEffect, useState } from "react";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
+import { i18n } from "../../translate/i18n.js";
 
 export function UsersFilter({ onFiltered, initialUsers, excludeId }) {
   const [users, setUsers] = useState([]);
@@ -79,7 +80,7 @@ export function UsersFilter({ onFiltered, initialUsers, excludeId }) {
           <TextField
             {...params}
             variant="outlined"
-            placeholder="Filtro por Users"
+            placeholder={i18n.t("tickets.search.filterUsers")}
           />
         )}
       />

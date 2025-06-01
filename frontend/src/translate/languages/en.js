@@ -17,10 +17,11 @@ const messages = {
         email: "Email",
         phone: "Phone",
         company: "Company",
-        user: "User",
         connection: "Connection",
         queue: "Queue",
+        noqueue: "No queue",
         contact: "Contact",
+        user: "User",
         whatsappNumber: "WhatsApp Number",
         dueDate: "Due Date",
         copy: "Copy",
@@ -28,9 +29,15 @@ const messages = {
         proceed: "Proceed",
         enabled: "Enabled",
         disabled: "Disabled",
-        noqueue: "No queue",
         rating: "Rating",
         transferTo: "Transfer to",
+        chat: "Chat",
+        plan: "Plan",
+        status: "Status",
+        clear: "Clear",
+        accessAs: "Access as",
+        createdAt: "Created At",
+        price: "Price",
       },
       signup: {
         title: "Sign Up",
@@ -42,6 +49,12 @@ const messages = {
           name: "Name",
           email: "Email",
           password: "Password",
+          phone: "Phone Number with Country Code (+1)",
+           plan: "Plan",
+          atendentes: "Customer Service",
+          whatsApp: "Number of WhatsApp numbers",
+          queue: "Queue quantity",
+          currency: "$ ",
         },
         buttons: {
           submit: "Sign Up",
@@ -61,12 +74,31 @@ const messages = {
       },
       companies: {
         title: "Register Company",
+        campaigns: "Campaigns",
+        recurrence: {
+          title: "Frequency",
+          monthly: "Monthly",
+          bimonthly: "Bimonthly",
+          quarterly: "Quarterly",
+          semiannual: "Semiannual",
+          annual: "Annual",
+        },
         form: {
           name: "Company Name",
           plan: "Plan",
           token: "Token",
           submit: "Register",
           success: "Company created successfully!",
+        },
+        options: {
+          enabled: "Enabled",
+          disabled: "Disabled",
+        },
+        modal: {
+          titleDeleted: "Data Deletion",
+          titleaccessAs: "Access as",
+          deletedNote: "Are you sure you want to delete this data?",
+          accessAsNote: "Do you want to access the system as this company?",
         },
       },
       auth: {
@@ -102,6 +134,23 @@ const messages = {
         ticketCountersLabels: {
           created: "Created",
           closed: "Closed",
+        },
+        ticketzPro: {
+          title: "Ticketz PRO",
+          features1: "Official Whatsapp - Instagram - Messenger and others",
+          features2: "Exclusive features - Advanced Support - Easy Migration",
+          price: "Subscribe for R$ 199/month",
+          note: "directly in the system",
+          upgrade: "Click for Upgrade instructions",
+          visit: "Click to visit the website!",
+          upgradeInstructions: {
+            title: "Upgrade Instructions",
+            paragraph1: "If you installed the project's provided images on a server or VPS using the simplified instructions, all you need to do is access your server and type the following command:",
+            command: "curl -sSL update.ticke.tz | sudo bash -s pro",
+            paragraph2: "Within moments, Ticketz PRO will be installed with all your data. Now just go to the user menu, click 'Ticketz PRO Subscription' and complete your subscription.",
+            paragraph3: "If your installation is different or you need help installing Ticketz Pro, ",
+            paragraph4: "contact us and we'll help!"
+          },
         },
       },
       connections: {
@@ -156,6 +205,10 @@ const messages = {
       },
       internalChat: {
         title: "Internal Chat",
+        alertChatTitle: "Please fill in the chat title.",
+        alertChatUser: "Please select at least one user.",
+        labelTitle: "Title",
+        labelPlaceholder: "Enter title",
       },
       whatsappModal: {
         title: {
@@ -224,8 +277,21 @@ const messages = {
       },
       queueModal: {
         title: {
-          add: "Add Queue",
-          edit: "Edit Queue",
+          titleNotDefined: "Title not defined",
+          titleTabsQueue: "Queue Data",
+          titleTabsHours: "Service Hours", 
+          optionText: "Enter option text",
+          optionTitle: "Option title"
+        },
+        toasts: {
+          // [toast messages would go here]
+        },
+        confirmationModal: {
+          notificationAdd: "Queue data saved successfully",
+          notificationEdit: "Queue data successfully edited",
+          notificationDeleted: "Queue data successfully deleted",
+          notificationHours: "Click save to save changes",
+          
         },
         form: {
           name: "Name",
@@ -236,12 +302,24 @@ const messages = {
           ratingMessage: "Rating Message",
           transferMessage: "Transfer Message",
           token: "Token",
+          forwardToQueue: "Fordward to queue",
+          options: "Options",
         },
+        outOfHoursAction: {  
+          title: "Out of Hours Action",  
+          options: {  
+            pending: "Leave as pending",  
+            closed: "Close ticket",  
+          },  
+        },  
         buttons: {
           okAdd: "Add",
           okEdit: "Save",
           cancel: "Cancel",
           attach: "Attach File",
+          add: "New Queue",
+          edit: "Edit Queue",
+          addSub: "Create Sub Queue",
         },
         serviceHours: {
           dayWeek: "Day of the week",
@@ -256,6 +334,7 @@ const messages = {
           friday: "Friday",
           saturday: "Saturday",
           sunday: "Sunday",
+          dontEnableHours: "Do not enable Service Hours for this queue",
         },
       },
       userModal: {
@@ -288,10 +367,25 @@ const messages = {
           sentAt: "Sent Date",
           saveMessage: "Save Message in Ticket",
         },
+        errorMessages: {
+          tooShort: "Message too short",
+          required: "Required",
+          sendError: "Failed to send",
+          default: "Message",
+          unidentifedWhatsapp: "WhatsApp not identified",
+          scheduleCheckError: "Failed to check schedule: ",
+        },
         buttons: {
           okAdd: "Add",
           okEdit: "Save",
           cancel: "Cancel",
+        },
+        schedules: {
+          scheduledDispatch: "Scheduled dispatch for: ",
+          messageSent: "Scheduled message sent to: ",
+        },
+        completionMessages: {
+          default: "Service completed",
         },
         success: "Schedule saved successfully.",
       },
@@ -340,17 +434,32 @@ const messages = {
           message: "Message from",
         },
         tabs: {
-          open: { title: "Open" },
-          closed: { title: "Closed" },
-          groups: { title: "Groups" },
-          search: { title: "Search" },
+          open: { 
+            title: "Open" 
+          },
+          closed: { 
+            title: "Closed",
+            close: "Done",
+          },
+          groups: { 
+            title: "Groups" 
+          },
+          search: { 
+            title: "Search" 
+          },
         },
         search: {
           placeholder: "Search for ticket and messages",
+          filterTags: "Filter by Tags",
+          filterUsers: "Filter by User",
         },
         buttons: {
           showAll: "All",
         },
+      },
+      task:{
+        title: "Jobs",
+        newTask: "New Jobs",
       },
       transferTicketModal: {
         title: "Transfer Ticket",
@@ -398,6 +507,8 @@ const messages = {
           messagesAPI: "API",
           schedules: "Schedules",
           campaigns: "Campaigns",
+          listing: "Campaigns List",
+          contactList: "Contacts List", 
           annoucements: "Announcements",
           chats: "Internal Chat",
           financeiro: "Financial",
@@ -415,6 +526,7 @@ const messages = {
             darkmode: "Dark mode",
             lightmode: "Light mode",
             language: "Select language",
+            about: "About",
             logout: "Logout",
           },
         },
@@ -444,6 +556,12 @@ const messages = {
         dialog: {
           shortcode: "Shortcut",
           message: "Response",
+          action: "Action",
+          deleteRecord: "Delete Quick Message",
+          questionAnswer: "Are you sure you want to delete this message?",
+          notificationAdd: "Message successfully added.",
+          notificationDelete: "Message successfully deleted.",
+          notificationUpdate: "Message has been updated."
         },
       },
       kanban: {
@@ -544,6 +662,8 @@ const messages = {
         buttons: {
           add: "New Campaign",
           contactLists: "Contact Lists",
+          addVariable: "Add Variabel",
+          saveSetting:  "Save",
         },
         table: {
           name: "Name",
@@ -593,10 +713,20 @@ const messages = {
           deleteMessage: "This action cannot be undone.",
         },
         toasts: {
+          title: "Interval",
           success: "Operation completed successfully",
           cancel: "Campaign canceled",
           restart: "Campaign restarted",
-          deleted: "Record deleted",
+          deleted: "Data deleted successfully",
+          seconds: "Seconds",
+          messages: "Messages",
+          noInterval: "No interval",
+          greaterInterval: "Sending delayed",
+          longerIntervalAfter: "Delay sending",
+          notDefined: "No delay",
+          messageInterval: "Sending interval",
+          hotKey: "Shortcut"
+
         },
       },
       announcements: {
@@ -620,11 +750,21 @@ const messages = {
           update: "Edit Announcement",
           readonly: "Read-only",
           form: {
-            priority: "Priority",
+            priority: {
+              title: "Priority",
+              high: "High",
+              medium: "Medium",
+              low: "Low",
+            },
             title: "Title",
             text: "Text",
             mediaPath: "File",
-            status: "Status",
+            attach: "No attachment",
+            status: {
+              title: "Status",
+              active: "Active",
+              inactive: "Inactive",
+            },
           },
           buttons: {
             add: "Add",
@@ -655,14 +795,25 @@ const messages = {
           greeting: "Greeting Message",
           actions: "Actions",
         },
-      },
-      buttons: {
-        add: "Add Queue",
-      },
-      confirmationModal: {
-        deleteTitle: "Delete",
-        deleteMessage:
-          "Are you sure? This action cannot be undone! The tickets from this queue will still exist but will no longer be assigned to any queue.",
+        buttons: {
+          add: "Add Queue",
+        },
+        dialog: {
+          name: "Name",
+          company: "Company",
+          okEdit: "Edit",
+          okAdd: "Add",
+          add: "Add",
+          edit: "Edit",
+          cancel: "Cancel"
+        },
+        toasts: {
+          deleted: "Data successfully deleted"
+        },
+        confirmationModal: {
+          deleteTitle: "Delete",
+          deleteMessage: "Are you sure? This action cannot be undone! The tickets from this queue will still exist but will no longer be assigned to any queue.",
+        },
       },
       queueSelect: {
         inputLabel: "Queues",
@@ -683,8 +834,7 @@ const messages = {
         },
         confirmationModal: {
           deleteTitle: "Delete",
-          deleteMessage:
-            "All user data will be lost. Open tickets from this user will be moved to the queue.",
+          deleteMessage: "All user data will be lost. Open tickets from this user will be moved to the queue.",
         },
       },
       helps: {
@@ -758,52 +908,117 @@ const messages = {
         faviconHint: "Prefer square SVG image or 512x512 PNG",
       },
       settings: {
-        group: {
-          general: "General",
-          timeouts: "Timeouts",
-          officeHours: "Office Hours",
-          groups: "Groups",
-          confidenciality: "Confidentiality",
-          api: "API",
-          externalServices: "External Services",
-          serveradmin: "Server Administration",
-        },
-        success: "Setting saved successfully.",
-        copiedToClipboard: "Copied to clipboard",
-        title: "Settings",
-        chatbotTicketTimeout: "Chatbot ticket timeout (minutes)",
-        chatbotTicketTimeoutAction: "Action after chatbot timeout",
-        settings: {
-          userCreation: {
-            name: "User creation",
-            options: {
-              enabled: "Enabled",
-              disabled: "Disabled",
-            },
-          },
-        },
-        validations: {
-          title: "validations",
+    group: {
+      general: {
+        title: "General Settings",
+        VoiceAndVideoCalls: {
+          title: "Voice and video calls",
           options: {
-            enabled: "enabled",
-            disabled: "disabled",
+            enabled: "Ignore",
+            disabled: "Report unavailability",
           },
         },
-        OfficeManagement: {
-          title: "Office Management",
+        AutomaticChatbotOutput: {
+          title: "Automatic chatbot output",
           options: {
-            disabled: "disabled",
-            ManagementByDepartment: "Management By Department",
-            ManagementByCompany: "Management By Company",
+            enabled: "Enabled",
+            disabled: "Disabled",
           },
         },
-        outOfHoursAction: {
-          title: "Out of Hours Action",
-          options: {
-            pending: "Leave as pending",
-            closed: "Close ticket",
-          },
+        autoReopenTimeout: "Auto reopen timeout (minutes)",      
+      },
+      rating: {
+        title: "Rating Settings",
+        label: "Rating",
+        timeout: "Rating timeout (minutes)",
+      },
+      noQueue: {
+        title: "No Queue Ticket Settings",
+        label: "Timeout for tickets without queue (minutes)",
+        action: "Action for no-queue ticket timeout",
+        options: {
+          close: "Close ticket",
+          transferTo: "Transfer to",
         },
+      },
+      ticketInProgress: {
+        title: "Ticket In Progress Settings",
+        label: "Timeout for in-progress tickets (minutes)",
+        action: "Action for open ticket timeout",
+        options: {
+          returnToQueue: "Return to queue",
+          closeService: "Close service",
+        },
+      },
+      timeouts: {
+        title: "Timeouts",
+        actionforUnassignedTicketTimeout: "Action for unassigned ticket timeout",
+        actionforOpenTicketTimeout: "Action for open ticket timeout",
+        transferTo: "Transfer to",
+        timeoutforTicketInProgress: "Timeout for in-progress tickets (minutes)",
+        timeoutforUnassignedTicket: "Timeout for unassigned tickets (minutes)",
+        returnToQueue: "Return to queue",
+        closeService: "Close service",
+      },
+      officeHours: "Office hours",
+      groups: "Groups",
+      confidenciality: "Confidentiality",
+      api: "API",
+      externalServices: "External Services",
+      serveradmin: "Server Administration",
+      helps: {
+        title: "Title",
+        videoLink: "Video Link",
+        description: "Description",
+        notification: {
+          loadListError: "Could not load notes list",
+          operationSuccess: "Data saved successfully!",
+          operationDeletedSuccess: "Data deleted successfully!",
+          operationError: "Could not perform operation. Check if the name already exists or if fields are filled correctly",
+          genericError: "Could not perform operation",
+        },
+        deleteRecord: {
+          title: "Data Deletion",
+          confirmationMessage: "Are you sure you want to delete this data?"
+        },
+      },
+    },
+    success: "Settings saved successfully.",
+    copiedToClipboard: "Copied to clipboard",
+    title: "Settings",
+    chatbotTicketTimeout: "Chatbot timeout (minutes)",
+    chatbotTicketTimeoutAction: "Chatbot timeout action",
+    settings: {
+      userCreation: {
+        name: "User creation",
+        options: {
+          enabled: "Enabled",
+          disabled: "Disabled",
+        },
+      },
+    },
+    validations: {
+      title: "validations",
+      options: {
+        enabled: "enabled",
+        disabled: "disabled",
+      },
+    },
+    OfficeManagement: {
+      title: "Office Management",
+      options: {
+        disabled: "disabled",
+        ManagementByDepartment: "Management By Department",
+        ManagementByCompany: "Management By Company",
+      },
+    },
+    outOfHoursAction: {
+      title: "Out of Hours Action",
+      options: {
+        pending: "Leave as pending",
+        closed: "Close ticket",
+      },
+    },
         IgnoreGroupMessages: {
           title: "Ignore Group Messages",
           options: {
@@ -866,6 +1081,9 @@ const messages = {
         FileDownloadLimit: {
           title: "File Download Limit (MB)",
         },
+        GracePeriod: {
+          title: "Grace Period",
+        },
         "messageVisibility": {
           "title": "Message Visibility",
           "options": {
@@ -882,6 +1100,10 @@ const messages = {
         },
         WelcomeGreeting: {
           greetings: "Hello",
+          earlyMorning: "Good early morning,",
+          morning: "Good morning,",
+          afternoon: "Good afternoon,",
+          evening: "Good evening,",
           welcome: "Welcome to",
           expirationTime: "Active until",
         },
@@ -904,22 +1126,22 @@ const messages = {
           title: "Whitelabel",
         },
         PaymentGateways: {
-          title: "Pasarelas de pago",
+          title: "Payment Gateways",
         },
         AIProvider: {
-          title: "AI Provider",
+          title: "AI Service",
         },
         AudioTranscriptions: {
-          title: "Audio Transcriptions",
+          title: "Audio Transcription",  
         },
         TagsMode: {
-          title: "Tags Mode",
+          title: "Tag Mode",
           options: {
             ticket: "Ticket",
             contact: "Contact",
             both: "Ticket and Contact"
           },
-        },
+        }
       },
       messagesList: {
         header: {
@@ -934,8 +1156,7 @@ const messages = {
       },
       messagesInput: {
         placeholderOpen: "Type a message",
-        placeholderClosed:
-          "Reopen or accept this ticket to send a message.",
+        placeholderClosed: "Reopen or accept this ticket to send a message.",
         signMessage: "Sign",
         replying: "Replying",
         editing: "Editing",
@@ -964,8 +1185,7 @@ const messages = {
         },
         confirmationModal: {
           title: "Delete contact ticket",
-          message:
-            "Attention! All messages related to the ticket will be lost.",
+          message: "Attention! All messages related to the ticket will be lost.",
         },
         buttons: {
           delete: "Delete",
@@ -1080,8 +1300,16 @@ const messages = {
           international: "Donations in USD",
         }
       },
+      owenAd: {
+        title: "Owen Payments supports Ticketz",
+        description1: "The startup Owen Payments offers PIX payments at a fixed cost of R$ 0.99 per transaction.",
+        description2: "A fraction of each transaction's value is reverted to the Ticketz project, so by using this payment method you'll also be supporting the project.",
+        description3: 'Select the "Owen Payments 💎" payment gateway and request to open your account without leaving Ticketz!'
+      },
     },
   },
 };
 
-export { messages };
+export { 
+  messages 
+};
