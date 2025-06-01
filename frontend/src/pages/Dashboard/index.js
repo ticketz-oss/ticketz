@@ -539,30 +539,39 @@ const Dashboard = () => {
                     { !proInstructionsOpen &&
                     <Grid className={classes.ticketzProBox} item xs={12} md={6} sm={12}>
                       <Typography className={classes.ticketzProTitle} component="h3" variant="h5" gutterBottom>
-                        Ticketz PRO
+                        {/* Ticketz PRO */}
+                        {i18n.t("dashboard.ticketzPro.title")}
                       </Typography>
                       <Typography component="h3" variant="h7" gutterBottom>
-                      <ul className={classes.ticketzProFeatures}>
-                        <li>Whatsapp Oficial - Instagram - Messenger e outros</li>
-                        <li>Features exclusivas</li>
-                        <li>Suporte Avançado</li>
-                        <li>Migração Facilitada</li>
-                      </ul>
+                        <ul className={classes.ticketzProFeatures}>
+                          {/* <li>Whatsapp Oficial - Instagram - Messenger e outros</li> */}
+                          {i18n.t("dashboard.ticketzPro.features1")}
+                        </ul>
+                        <ul className={classes.ticketzProFeatures}>
+                          {/* <li>Features exclusivas</li>
+                          <li>Suporte Avançado</li>
+                          <li>Migração Facilitada</li> */}
+                          {i18n.t("dashboard.ticketzPro.features2")}
+                        </ul>
                       </Typography>
                       <Typography component="h3" variant="h5">
-                        Assine por R$ 199/mês
+                        {/* Assine por R$ 199/mês */}
+                        {i18n.t("dashboard.ticketzPro.price")}
                       </Typography>
                       <Typography component="h3" variant="h7" gutterBottom>
-                        direto dentro do sistema
+                        {/* direto dentro do sistema */}
+                        {i18n.t("dashboard.ticketzPro.note")}
                       </Typography>
                       { gitinfo.commitHash && 
                       <Typography component="h3" variant="h5">
-                        Clique para instruções de Upgrade
+                        {/* Clique para instruções de Upgrade */}
+                        {i18n.t("dashboard.ticketzPro.upgrade")}
                       </Typography>
                       }
                       { !gitinfo.commitHash && 
                       <Typography component="h3" variant="h5">
-                        Clique para visitar o site!
+                        {/* Clique para visitar o site! */}
+                        {i18n.t("dashboard.ticketzPro.visit")}
                       </Typography>
                       }
                     </Grid>
@@ -570,26 +579,34 @@ const Dashboard = () => {
                     { proInstructionsOpen &&
                     <Grid className={classes.ticketzProBox} item xs={12} md={8} sm={12}>
                       <Typography className={classes.ticketzProTitle} component="h3" variant="h5" gutterBottom>
-                        Instruções de Upgrade
+                        {/* Instruções de Upgrade */}
+                        {i18n.t("dashboard.ticketzPro.upgradeInstructions.title")}
                       </Typography>
                       <Typography paragraph>
-                        Se você instalou as imagens disponibilizadas pelo projeto em um
+                        {/* Se você instalou as imagens disponibilizadas pelo projeto em um
                         servidor ou VPS utilizando as instruções facilitadas tudo o que
-                        você precisa fazer é acessar seu servidor e digitar o comando abaixo:
+                        você precisa fazer é acessar seu servidor e digitar o comando abaixo: */}
+                        {i18n.t("dashboard.ticketzPro.upgradeInstructions.paragraph1")}
                       </Typography>
                       <Typography className={classes.ticketzProCommand} paragraph>
-                        curl -sSL update.ticke.tz | sudo bash -s pro
+                        {/* curl -sSL update.ticke.tz | sudo bash -s pro */}
+                        {i18n.t("dashboard.ticketzPro.upgradeInstructions.command")}
                       </Typography>
                       <Typography paragraph>
-                        Em instantes o Ticketz PRO estará instalado com todos os teus dados,
+                        {/* Em instantes o Ticketz PRO estará instalado com todos os teus dados,
                         agora só precisa ir até o menu de usuário, clicar em "Assinatura do
-                        Ticketz PRO" e fazer a sua assinatura.
+                        Ticketz PRO" e fazer a sua assinatura. */}
+                        {i18n.t("dashboard.ticketzPro.upgradeInstructions.paragraph2")}
                       </Typography>
                       <Typography paragraph>
-                        Se a tua instalação for diferente ou acredita que precisa
+                        {/* Se a tua instalação for diferente ou acredita que precisa
                         de auxílio para instalar o Ticketz
                         Pro, <a href="https://wa.me/554935670707"> entre
-                        em contato</a> que nós ajudamos!
+                        em contato</a> que nós ajudamos! */}
+                        {i18n.t("dashboard.ticketzPro.upgradeInstructions.paragraph3")}
+                        <ul className={classes.ticketzProFeatures}>
+                          <a href="https://wa.me/554935670707">{i18n.t("dashboard.ticketzPro.upgradeInstructions.paragraph4")}</a>
+                        </ul>
                       </Typography>
                     </Grid>
                     }

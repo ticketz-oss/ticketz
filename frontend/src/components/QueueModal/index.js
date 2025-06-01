@@ -28,6 +28,8 @@ import {
   Tab,
   Tabs,
 } from "@material-ui/core";
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 import { AttachFile, Colorize, DeleteOutline } from "@material-ui/icons";
 import { QueueOptions } from "../QueueOptions";
 import SchedulesForm from "../SchedulesForm";
@@ -96,15 +98,17 @@ const QueueModal = ({ open, onClose, queueId }) => {
   const [confirmationOpen, setConfirmationOpen] = useState(false);
 
   const [schedules, setSchedules] = useState([
-    { weekday: "Segunda-feira",weekdayEn: "monday",startTime: "08:00",endTime: "18:00",},
-    { weekday: "Terça-feira",weekdayEn: "tuesday",startTime: "08:00",endTime: "18:00",},
-    { weekday: "Quarta-feira",weekdayEn: "wednesday",startTime: "08:00",endTime: "18:00",},
-    { weekday: "Quinta-feira",weekdayEn: "thursday",startTime: "08:00",endTime: "18:00",},
-    { weekday: "Sexta-feira", weekdayEn: "friday",startTime: "08:00",endTime: "18:00",},
-    { weekday: "Sábado", weekdayEn: "saturday",startTime: "08:00",endTime: "12:00",},
-    { weekday: "Domingo", weekdayEn: "sunday",startTime: "00:00",endTime: "00:00",},
+    { weekday: i18n.t("queueModal.serviceHours.monday"), weekdayEn: "monday", startTimeA: "", endTimeA: "", startTimeB: "", endTimeB: "", },
+    { weekday: i18n.t("queueModal.serviceHours.tuesday"), weekdayEn: "tuesday", startTimeA: "", endTimeA: "", startTimeB: "", endTimeB: "", },
+    { weekday: i18n.t("queueModal.serviceHours.wednesday"), weekdayEn: "wednesday", startTimeA: "", endTimeA: "", startTimeB: "", endTimeB: "", },
+    { weekday: i18n.t("queueModal.serviceHours.thursday"), weekdayEn: "thursday", startTimeA: "", endTimeA: "", startTimeB: "", endTimeB: "", },
+    { weekday: i18n.t("queueModal.serviceHours.friday"), weekdayEn: "friday", startTimeA: "", endTimeA: "", startTimeB: "", endTimeB: "", },
+    { weekday: i18n.t("queueModal.serviceHours.saturday"), weekdayEn: "saturday", startTimeA: "", endTimeA: "", startTimeB: "", endTimeB: "", },
+    { weekday: i18n.t("queueModal.serviceHours.sunday"), weekdayEn: "sunday", startTimeA: "", endTimeA: "", startTimeB: "", endTimeB: "", },
   ]);
 
+  
+  const [disableSchedules, setDisableSchedules] = useState(false);
   useEffect(() => {
     api.get(`/settings`).then(({ data }) => {
       if (Array.isArray(data)) {
@@ -115,6 +119,11 @@ const QueueModal = ({ open, onClose, queueId }) => {
       }
     });
   }, []);
+  useEffect(() => {
+    if (disableSchedules && tab === 1) {
+      setTab(0);
+    }
+  }, [disableSchedules, tab]);
 
   useEffect(() => {
     (async () => {
@@ -166,22 +175,23 @@ const QueueModal = ({ open, onClose, queueId }) => {
 
   const handleSaveQueue = async (values) => {
     try {
+      const finalSchedules = disableSchedules ? [] : schedules;
       if (queueId) {
-        await api.put(`/queue/${queueId}`, { ...values, schedules });
+        await api.put(`/queue/${queueId}`, { ...values, schedules: finalSchedules });
         if (attachment != null) {
           const formData = new FormData();
           formData.append("file", attachment);
           await api.post(`/queue/${queueId}/media-upload`, formData);
         }
       } else {
-        await api.post("/queue", { ...values, schedules });
+        await api.post("/queue", { ...values, schedules: finalSchedules });
         if (attachment != null) {
           const formData = new FormData();
           formData.append("file", attachment);
           await api.post(`/queue/${queueId}/media-upload`, formData);
         }
       }
-      toast.success("Queue saved successfully");
+      toast.success(i18n.t("queueModal.confirmationModal.notificationAdd"));
       handleClose();
     } catch (err) {
       toastError(err);
@@ -189,7 +199,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
   };
 
   const handleSaveSchedules = async (values) => {
-    toast.success("Clique em salvar para registar as alterações");
+    toast.success(i18n.t("queueModal.confirmationModal.notificationHours"));
     setSchedules(values);
     setTab(0);
   };
@@ -197,12 +207,12 @@ const QueueModal = ({ open, onClose, queueId }) => {
   return (
     <div className={classes.root}>
        <ConfirmationModal
-        title={i18n.t("queueModal.confirmationModal.deleteTitle")}
+        title={i18n.t("queueModal.confirmationModal.123deleteTitle")}
         open={confirmationOpen}
         onClose={() => setConfirmationOpen(false)}
         onConfirm={deleteMedia}
       >
-        {i18n.t("queueModal.confirmationModal.deleteMessage")}
+        {i18n.t("queueModal.confirmationModal.111deleteMessage")}
       </ConfirmationModal>
       <Dialog
         maxWidth="md"
@@ -213,8 +223,8 @@ const QueueModal = ({ open, onClose, queueId }) => {
       >
         <DialogTitle>
           {queueId
-            ? `${i18n.t("queueModal.title.edit")}`
-            : `${i18n.t("queueModal.title.add")}`}
+            ? `${i18n.t("queueModal.buttons.edit")}`
+            : `${i18n.t("queueModal.buttons.add")}`}
            <div style={{ display: "none" }}>
             <input
               type="file"
@@ -230,8 +240,10 @@ const QueueModal = ({ open, onClose, queueId }) => {
           onChange={(_, v) => setTab(v)}
           aria-label="disabled tabs example"
         >
-          <Tab label="Dados da Fila" />
-          {schedulesEnabled && <Tab label="Horários de Atendimento" />}
+          <Tab label={i18n.t("queueModal.title.titleTabsQueue")} />
+          {/* {schedulesEnabled && <Tab label={i18n.t("queueModal.title.titleTabsHours")} />} */}
+          {schedulesEnabled && !disableSchedules && <Tab label={i18n.t("queueModal.title.titleTabsHours")} />}
+          
         </Tabs>
         {tab === 0 && (
           <Paper>
@@ -325,7 +337,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
                             variant="outlined"
                             margin="dense"
                           />
-                        {schedulesEnabled && (
+                        {schedulesEnabled && !disableSchedules && (
                             <Field
                               as={TextField}
                               InputLabelProps={{ shrink: true }}
@@ -368,6 +380,19 @@ const QueueModal = ({ open, onClose, queueId }) => {
                   )}
                   </DialogContent>
                   <DialogActions>
+                    {schedulesEnabled && (
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={disableSchedules}
+                            onChange={(e) => setDisableSchedules(e.target.checked)}
+                            color="primary"
+                          />
+                        }
+                        label={i18n.t("queueModal.serviceHours.dontEnableHours")}
+                        style={{ marginRight: 'auto' }}
+                      />
+                      )}
                     {!attachment && !queue.mediaPath && queueEditable && (
                       <Button
                         color="primary"
@@ -415,7 +440,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
               loading={false}
               onSubmit={handleSaveSchedules}
               initialValues={schedules}
-              labelSaveButton="Adicionar"
+              labelSaveButton={i18n.t("queueModal.buttons.okEdit")}
             />
           </Paper>
         )}

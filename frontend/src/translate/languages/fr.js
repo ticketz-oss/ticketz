@@ -71,6 +71,23 @@ const messages = {
             title: "Interventions aujourd'hui : ",
           },
         },
+        ticketzPro: {
+          title: "Ticketz PRO",
+          features1: "Whatsapp Officiel - Instagram - Messenger et autres",
+          features2: "Fonctionnalités exclusives - Support Avancé - Migration Facile",
+          price: "Abonnez-vous pour R$ 199/mois",
+          note: "directement dans le système",
+          upgrade: "Cliquez pour les instructions de mise à niveau",
+          visit: "Cliquez pour visiter le site !",
+          upgradeInstructions: {
+            title: "Instructions de Mise à Niveau",
+            paragraph1: "Si vous avez installé les images fournies par le projet sur un serveur ou VPS en utilisant les instructions simplifiées, il vous suffit d'accéder à votre serveur et de taper la commande suivante :",
+            command: "curl -sSL update.ticke.tz | sudo bash -s pro",
+            paragraph2: "En quelques instants, Ticketz PRO sera installé avec toutes vos données. Allez simplement dans le menu utilisateur, cliquez sur 'Abonnement Ticketz PRO' et complétez votre abonnement.",
+            paragraph3: "Si votre installation est différente ou si vous avez besoin d'aide pour installer Ticketz Pro, ",
+            paragraph4: "contactez-nous et nous vous aiderons !",
+          },
+        }
       },
       connections: {
         title: "Connexions",
@@ -1018,6 +1035,12 @@ const messages = {
           paypaltitle: "Carte de Crédit",
           international: "International en US$",
         },
+      },
+      owenAd: {
+        title: "Owen Payments soutient Ticketz",
+        description1: "La startup Owen Payments propose des paiements PIX à un coût fixe de R$ 0,99 par transaction.",
+        description2: "Une partie de la valeur de chaque transaction est reversée au projet Ticketz, donc en utilisant ce mode de paiement, vous soutenez également le projet.",
+        description3: 'Sélectionnez la passerelle de paiement "Owen Payments 💎" et demandez l\'ouverture de votre compte sans quitter Ticketz !'
       },
     },
   },

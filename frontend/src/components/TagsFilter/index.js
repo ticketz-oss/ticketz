@@ -3,6 +3,7 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import React, { useEffect, useState } from "react";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
+import { i18n } from "../../translate/i18n.js";
 
 export function TagsFilter({ onFiltered }) {
   const [tags, setTags] = useState([]);
@@ -57,7 +58,7 @@ export function TagsFilter({ onFiltered }) {
           <TextField
             {...params}
             variant="outlined"
-            placeholder="Filtro por Tags"
+            placeholder={i18n.t("tickets.search.filterTags")}
           />
         )}
       />

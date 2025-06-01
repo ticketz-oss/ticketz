@@ -180,6 +180,42 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                   </Grid>
                 </div>
                 <div>
+                  <Typography 
+                    style={{ 
+                      fontSize: "13px",
+                      fontFamily: "monospace",
+                      backgroundColor: "#f5f5f5",
+                      padding: "8px",
+                      borderRadius: "4px",
+                      borderLeft: "3px solid #1976d2"
+                    }}
+                  >
+                    <div style={{ marginBottom: "4px", fontWeight: "bold" }}>Available Variables:</div>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "4px" }}>
+                      <div>
+                        <span style={{ color: "#1976d2" }}>{`{{ms}}`}</span> → Shift
+                      </div>
+                      <div>
+                        <span style={{ color: "#1976d2" }}>{`{{name}}`}</span> → Contact Name
+                      </div>
+                      <div>
+                        <span style={{ color: "#1976d2" }}>{`{{protocol}}`}</span> → Ticket Number
+                      </div>
+                      <div>
+                        <span style={{ color: "#1976d2" }}>{`{{hora}}`}</span> → Time
+                      </div>
+                    </div>
+                    <div style={{ 
+                      marginTop: "6px", 
+                      fontSize: "12px", 
+                      color: "#666",
+                      fontStyle: "italic"
+                    }}>
+                      Use these variables in your message template
+                    </div>
+                  </Typography>
+                </div>
+                <div>
                   <Field
                     as={TextField}
                     label={i18n.t("queueModal.form.greetingMessage")}
@@ -198,13 +234,6 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                     variant="outlined"
                     margin="dense"
                   />
-                </div>
-                <div>
-                 <Typography style={{fontSize: "11px"}}>
-                  {`Variaveis: ( {{ms}}=> Turno, 
-                  {{name}}=> Nome do contato, 
-                  {{protocol}}=> protocolo, {{hora}}=> hora )`}
-                 </Typography>
                 </div>
                 <div>
                   <Field

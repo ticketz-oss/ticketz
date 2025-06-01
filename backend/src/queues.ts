@@ -55,7 +55,7 @@ async function handleSendMessage(job) {
     const whatsapp = await Whatsapp.findByPk(data.whatsappId);
 
     if (whatsapp == null) {
-      throw Error("Whatsapp não identificado");
+      throw Error("Unidentified WhatsApp");
     }
 
     const messageData: MessageData = data.data;
@@ -91,7 +91,7 @@ async function handleVerifySchedules() {
           { schedule },
           { delay: 40000 }
         );
-        logger.info(`Disparo agendado para: ${schedule.contact.name}`);
+        logger.info(`Delivery scheduled for: ${schedule.contact.name}`);
       });
     }
   } catch (e: unknown) {
@@ -155,7 +155,7 @@ async function handleSendScheduledMessage(job) {
       status: "ENVIADA"
     });
 
-    logger.info(`Mensagem agendada enviada para: ${schedule.contact.name}`);
+    logger.info(`Scheduled message sent to: ${schedule.contact.name}`);
     sendScheduledMessages.clean(15000, "completed");
   } catch (e: unknown) {
     Sentry.captureException(e);
@@ -172,12 +172,12 @@ async function handleSendScheduledMessage(job) {
 
 export async function sleep(seconds: number) {
   logger.info(
-    `Sleep de ${seconds} segundos iniciado: ${moment().format("HH:mm:ss")}`
+    `Sleep ${seconds} seconds started: ${moment().format("HH:mm:ss")}`
   );
   return new Promise(resolve => {
     setTimeout(() => {
       logger.info(
-        `Sleep de ${seconds} segundos finalizado: ${moment().format(
+        `Sleep ${seconds} seconds completed: ${moment().format(
           "HH:mm:ss"
         )}`
       );
@@ -195,7 +195,7 @@ async function handleLoginStatus() {
     try {
       const user = await User.findByPk(item.id);
       await user.update({ online: false });
-      logger.info(`Usuário passado para offline: ${item.id}`);
+      logger.info(`User set to offline: ${item.id}`);
     } catch (e: unknown) {
       Sentry.captureException(e);
     }
@@ -214,7 +214,7 @@ async function setRatingExpired(tracking: TicketTraking, threshold: Date) {
   const wbot = getWbot(tracking.whatsapp.id);
 
   const complationMessage =
-    tracking.whatsapp.complationMessage.trim() || "Atendimento finalizado";
+    tracking.whatsapp.complationMessage.trim() || "Service completed";
 
   await wbot.sendMessage(
     `${tracking.ticket.contact.number}@${
@@ -637,7 +637,7 @@ const createInvoices = new CronJob("0 * * * * *", async () => {
 createInvoices.start();
 
 export async function startQueueProcess() {
-  logger.info("Iniciando processamento de filas");
+  logger.info("Starting queue processing");
 
   startCampaignQueues().then(() => {
     logger.info("Campaign processing functions started");

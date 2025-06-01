@@ -402,29 +402,13 @@ export default function Options(props) {
     <>
       <Grid spacing={3} container>
         <Grid item xs={12}>
-          <h2 className={classes.groupTitle}>{i18n.t("settings.group.general")}</h2>
-        </Grid>
-
-        <Grid xs={12} sm={6} md={4} item>
-          <FormControl className={classes.selectContainer}>
-            <InputLabel id="ratings-label">{i18n.t("settings.validations.title")}</InputLabel>
-            <Select
-              labelId="ratings-label"
-              value={userRating}
-              onChange={async (e) => {
-                handleChangeUserRating(e.target.value);
-              }}
-            >
-              <MenuItem value={"disabled"}>{i18n.t("settings.validations.options.disabled")}</MenuItem>
-              <MenuItem value={"enabled"}>{i18n.t("settings.validations.options.enabled")}</MenuItem>
-            </Select>
-          </FormControl>
+          <h2 className={classes.groupTitle}>{i18n.t("settings.group.general.title")}</h2>
         </Grid>
 
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="call-type-label">
-            {i18n.t("settings.VoiceAndVideoCalls.title")}
+            {i18n.t("settings.group.general.VoiceAndVideoCalls.title")}
             </InputLabel>
             <Select
               labelId="call-type-label"
@@ -433,8 +417,8 @@ export default function Options(props) {
                 handleCallType(e.target.value);
               }}
             >
-              <MenuItem value={"disabled"}>{i18n.t("settings.VoiceAndVideoCalls.options.disabled")}</MenuItem>
-              <MenuItem value={"enabled"}>{i18n.t("settings.VoiceAndVideoCalls.options.enabled")}</MenuItem>
+              <MenuItem value={"disabled"}>{i18n.t("settings.group.general.VoiceAndVideoCalls.options.disabled")}</MenuItem>
+              <MenuItem value={"enabled"}>{i18n.t("settings.group.general.VoiceAndVideoCalls.options.enabled")}</MenuItem>
             </Select>
           </FormControl>
         </Grid>
@@ -442,7 +426,7 @@ export default function Options(props) {
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="group-type-label">
-            {i18n.t("settings.AutomaticChatbotOutput.title")}
+            {i18n.t("settings.group.general.AutomaticChatbotOutput.title")}
             </InputLabel>
             <Select
               labelId="chatbot-autoexit"
@@ -451,8 +435,8 @@ export default function Options(props) {
                 handleChatbotAutoExit(e.target.value);
               }}
             >
-              <MenuItem value={"disabled"}>{i18n.t("settings.AutomaticChatbotOutput.options.disabled")}</MenuItem>
-              <MenuItem value={"enabled"}>{i18n.t("settings.AutomaticChatbotOutput.options.enabled")}</MenuItem>
+              <MenuItem value={"disabled"}>{i18n.t("settings.group.general.AutomaticChatbotOutput.options.disabled")}</MenuItem>
+              <MenuItem value={"enabled"}>{i18n.t("settings.group.general.AutomaticChatbotOutput.options.enabled")}</MenuItem>
             </Select>
           </FormControl>
         </Grid>
@@ -512,33 +496,11 @@ export default function Options(props) {
           </FormControl>
         </Grid>
 
-        <Grid item xs={12}>
-          <h2 className={classes.groupTitle}>{i18n.t("settings.group.timeouts")}</h2>
-        </Grid>
-        <Grid xs={12} sm={6} md={4} item>
-          <FormControl className={classes.selectContainer}>
-            <TextField
-              id="ratings-timeout-field"
-              label="Timeout para avaliação (minutos)"
-              variant="standard"
-              name="ratingsTimeout"
-              type="number"
-              value={ratingsTimeout}
-              onChange={(e) => {
-                setRatingsTimeout(e.target.value);
-              }}
-              onBlur={async (_) => {
-                await handleRatingsTimeout(ratingsTimeout);
-              }}
-            />
-          </FormControl>
-        </Grid>
-
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <TextField
               id="autoreopen-timeout-field"
-              label="Timeout para reabertura automática (minutos)"
+              label={i18n.t("settings.group.general.autoReopenTimeout")}
               variant="standard"
               name="autoReopenTimeout"
               type="number"
@@ -553,11 +515,54 @@ export default function Options(props) {
           </FormControl>
         </Grid>
 
-        <Grid xs={12} sm={6} md={4} item>
+        <Grid item xs={12}>
+          <h2 className={classes.groupTitle}>{i18n.t("settings.group.rating.title")}</h2>
+        </Grid>
+
+        <Grid xs={12} sm={6} md={6} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="ratings-label">{i18n.t("settings.group.rating.label")}</InputLabel>
+            <Select
+              labelId="ratings-label"
+              value={userRating}
+              onChange={async (e) => {
+                handleChangeUserRating(e.target.value);
+              }}
+            >
+              <MenuItem value={"disabled"}>{i18n.t("settings.validations.options.disabled")}</MenuItem>
+              <MenuItem value={"enabled"}>{i18n.t("settings.validations.options.enabled")}</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid xs={12} sm={6} md={6} item>
+          <FormControl className={classes.selectContainer}>
+            <TextField
+              id="ratings-timeout-field"
+              label={i18n.t("settings.group.rating.timeout")}
+              variant="standard"
+              name="ratingsTimeout"
+              type="number"
+              value={ratingsTimeout}
+              disabled={userRating === "disabled"}
+              onChange={(e) => {
+                setRatingsTimeout(e.target.value);
+              }}
+              onBlur={async (_) => {
+                await handleRatingsTimeout(ratingsTimeout);
+              }}
+            />
+          </FormControl>
+        </Grid>
+
+        <Grid item xs={12}>
+          <h2 className={classes.groupTitle}>{i18n.t("settings.group.noQueue.title")}</h2>
+        </Grid>
+        
+        <Grid xs={12} sm={6} md={6} item>
           <FormControl className={classes.selectContainer}>
             <TextField
               id="noqueue-timeout-field"
-              label="Timeout para ticket sem fila (minutos)"
+              label={i18n.t("settings.group.noQueue.label")} 
               variant="standard"
               name="noQueueTimeout"
               type="number"
@@ -572,10 +577,11 @@ export default function Options(props) {
           </FormControl>
         </Grid>
 
-        <Grid xs={12} sm={6} md={4} item>
+        <Grid xs={12} sm={6} md={6} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="noqueue-timeout-action-label">
-              Ação para timeout de ticket sem fila
+              {i18n.t("settings.group.noQueue.action")} 
+              {/* Ação para timeout de ticket sem fila */}
             </InputLabel>
             <Select
               labelId="open-timeout-action-label"
@@ -584,22 +590,25 @@ export default function Options(props) {
                 handleSetting("noQueueTimeoutAction", e.target.value, setNoQueueTimeoutAction);
               }}
             >
-              <MenuItem value={"0"}>Fechar</MenuItem>
+              <MenuItem value={"0"}>{i18n.t("settings.group.noQueue.options.close")}</MenuItem>
               {queues.map((queue) => (
                 <MenuItem key={queue.id} value={queue.id}>
-                  Transferir para {queue.name}
+                  {i18n.t("settings.group.noQueue.options.transferTo")} {queue.name}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
         </Grid>
 
+        <Grid item xs={12}>
+          <h2 className={classes.groupTitle}>{i18n.t("settings.group.ticketInProgress.title")}</h2>
+        </Grid>
 
-        <Grid xs={12} sm={6} md={4} item>
+        <Grid xs={12} sm={6} md={6} item>
           <FormControl className={classes.selectContainer}>
             <TextField
               id="openticket-timeout-field"
-              label="Timeout para ticket em atendimento (minutos)"
+              label={i18n.t("settings.group.ticketInProgress.label")}
               variant="standard"
               name="openTicketTimeout"
               type="number"
@@ -614,10 +623,11 @@ export default function Options(props) {
           </FormControl>
         </Grid>
 
-        <Grid xs={12} sm={6} md={4} item>
+        <Grid xs={12} sm={6} md={6} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="opentimeout-action-label">
-              Ação para timeout de ticket aberto
+              {i18n.t("settings.group.ticketInProgress.action")} 
+              {/* Ação para timeout de ticket aberto */}
             </InputLabel>
             <Select
               labelId="open-timeout-action-label"
@@ -626,13 +636,23 @@ export default function Options(props) {
                 handleSetting("openTicketTimeoutAction", e.target.value, setOpenTicketTimeoutAction);
               }}
             >
-              <MenuItem value={"pending"}>Retornar para a fila</MenuItem>
-              <MenuItem value={"closed"}>Fechar atendimento</MenuItem>
+              <MenuItem value={"pending"}>
+                {i18n.t("settings.group.ticketInProgress.options.returnToQueue")} 
+                {/* Retornar para a fila */}
+              </MenuItem>
+              <MenuItem value={"closed"}>
+                {i18n.t("settings.group.ticketInProgress.options.closeService")}
+                {/* Fechar atendimento */}
+              </MenuItem>
             </Select>
           </FormControl>
         </Grid>
+        
+        <Grid item xs={12}>
+          <h2 className={classes.groupTitle}>{i18n.t("settings.group.timeouts.title")}</h2>
+        </Grid>
 
-        <Grid xs={12} sm={6} md={4} item>
+        <Grid xs={12} sm={6} md={6} item>
           <FormControl className={classes.selectContainer}>
             <TextField
               id="chatbot-timeout-field"
@@ -651,7 +671,7 @@ export default function Options(props) {
           </FormControl>
         </Grid>
 
-        <Grid xs={12} sm={6} md={4} item>
+        <Grid xs={12} sm={6} md={6} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="chatbot-ticket-timeout-action-label">
               {i18n.t("settings.chatbotTicketTimeoutAction")}
@@ -676,7 +696,7 @@ export default function Options(props) {
         <Grid item xs={12}>
           <h2 className={classes.groupTitle}>{i18n.t("settings.group.officeHours")}</h2>
         </Grid>
-        <Grid xs={12} sm={6} md={4} item>
+        <Grid xs={12} sm={6} md={6} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="schedule-type-label">
             {i18n.t("settings.OfficeManagement.title")}
@@ -695,7 +715,7 @@ export default function Options(props) {
           </FormControl>
         </Grid>
 
-        <Grid xs={12} sm={6} md={4} item>
+        <Grid xs={12} sm={6} md={6} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="out-of-hours-action-label">
               {i18n.t("settings.outOfHoursAction.title")}
@@ -775,7 +795,7 @@ export default function Options(props) {
           <h2 className={classes.groupTitle}>{i18n.t("settings.group.confidenciality")}</h2>
         </Grid>
 
-        <Grid xs={12} sm={6} md={4} item>
+        <Grid xs={12} sm={6} md={6} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="message-visibility-label">
               {i18n.t("settings.messageVisibility.title")}
@@ -793,7 +813,7 @@ export default function Options(props) {
           </FormControl>
         </Grid>
         
-        <Grid xs={12} sm={6} md={4} item>
+        <Grid xs={12} sm={6} md={6} item>
           <FormControl className={classes.selectContainer}>
             <InputLabel id="keep-queue-and-user-label">
               {i18n.t("settings.keepQueueAndUser.title")}
@@ -891,7 +911,7 @@ export default function Options(props) {
           </FormControl>
         </Grid>
         
-        <Grid xs={12} sm={12} md={8} item>
+        <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.selectContainer}>
             <TextField
               id="openai-key-field"
@@ -1006,7 +1026,6 @@ export default function Options(props) {
                 </FormControl>
               </Grid>
             </>
-
           )}
         />
       </Grid>

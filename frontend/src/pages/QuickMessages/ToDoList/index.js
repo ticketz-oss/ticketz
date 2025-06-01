@@ -97,13 +97,13 @@ const ToDoList = () => {
       <div className={classes.inputContainer}>
         <TextField
           className={classes.input}
-          label="Nova tarefa"
+          label={i18n.t("task.newTask")}
           value={task}
           onChange={handleTaskChange}
           variant="outlined"
         />
         <Button variant="contained" color="primary" onClick={handleAddTask}>
-          {editIndex >= 0 ? 'Salvar' : 'Adicionar'}
+          {editIndex >= 0 ? i18n.t("common.save") : i18n.t("common.add")}
         </Button>
       </div>
       <div className={classes.listContainer}>

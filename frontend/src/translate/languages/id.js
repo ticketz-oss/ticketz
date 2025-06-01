@@ -19,7 +19,25 @@ const messages = {
         company: "Perusahaan",
         connection: "Koneksi",
         queue: "Antrian",
-        contact: "Kontak"
+        noqueue: "Tanpa Antrian",
+        contact: "Kontak",
+        user: "User",
+        whatsappNumber: "Nomor Whatsapp",
+        dueDate: "Jatuh tempo",
+        copy: "Salin",
+        paste: "Tempel",
+        proceed: "Lanjutkan",
+        enabled: "Diaktifkan",
+        disabled: "Dinonaktifkan",
+        rating: "Penilaian",
+        transferTo: "Alihkan ke",
+        chat: "Percakapan",
+        plan: "Paket",
+        status: "Status",
+        clear: "Bersihkan",
+        accessAs: "Akses sebagai",
+        createdAt: "Dibuat Pada",
+        price: "Harga",
       },
       signup: {
         title: "Daftar",
@@ -31,6 +49,12 @@ const messages = {
           name: "Nama",
           email: "Email",
           password: "Kata Sandi",
+          phone: "Nomor Telepon dengan Kode Negara (+62)",
+          plan: "Paket",
+          atendentes: "Customer Service",
+          whatsApp: "Jumlah nomor WA",
+          queue: "Jumlah antrian",
+          currency: "Rp. ",
         },
         buttons: {
           submit: "Daftar",
@@ -50,12 +74,31 @@ const messages = {
       },
       companies: {
         title: "Daftar Perusahaan",
+        campaigns: "Kampanye",
+        recurrence: {
+          title: "Frekuensi",
+          monthly: "Bulanan",
+          bimonthly: "Dua Bulan Sekali",
+          quarterly: "Triwulan",
+          semiannual: "Semester",
+          annual: "Tahunan",
+        },
         form: {
           name: "Nama Perusahaan",
           plan: "Paket",
           token: "Token",
           submit: "Daftar",
           success: "Perusahaan berhasil dibuat!",
+        },
+        options: {
+          enabled: "Aktif",
+          disabled: "Tidak Aktif",
+        },
+        modal:{
+          titleDeleted: "Penghapusan data",
+          titleaccessAs: "Akses sebagai",
+          deletedNote: "Apakah Anda yakin ingin menghapus data ini?",
+          accessAsNote: "Apakah Anda ingin mengakses sistem sebagai perusahaan ini?",
         },
       },
       auth: {
@@ -65,9 +108,48 @@ const messages = {
         token: "Token",
       },
       dashboard: {
-        charts: {
-          perDay: {
-            title: "Interaksi Hari Ini: ",
+        usersOnline: "Pengguna online",
+        ticketsWaiting: "Tiket menunggu",
+        ticketsOpen: "Tiket terbuka",
+        ticketsDone: "Tiket terselesaikan",
+        totalTickets: "Total tiket",
+        newContacts: "Kontak baru",
+        avgServiceTime: "Rata-rata waktu layanan",
+        avgWaitTime: "Rata-rata waktu tunggu",
+        ticketsOnPeriod: "Tiket dalam periode",
+        userCurrentStatus: "Status saat ini",
+        filter: {
+          period: "Periode",
+          custom: "Kustom",
+          last3days: "3 hari terakhir",
+          last7days: "7 hari terakhir",
+          last14days: "14 hari terakhir",
+          last30days: "30 hari terakhir",
+          last90days: "90 hari terakhir"
+        },
+        date: {
+          start: "Tanggal mulai",
+          end: "Tanggal selesai",
+        },
+        ticketCountersLabels: {
+          created: "Dibuat",
+          closed: "Ditutup",
+        },
+        ticketzPro: {
+          title: "Ticketz PRO",
+          features1: "Whatsapp Official - Instagram - Messenger dan lainnya",
+          features2: "Fitur eksklusif - Dukungan Premium - Migrasi Mudah",
+          price: "Berlangganan Rp 199/bulan",
+          note: "langsung dalam sistem",
+          upgrade: "Klik untuk petunjuk Upgrade",
+          visit: "Klik untuk mengunjungi situs!",
+          upgradeInstructions: {
+            title: "Panduan Upgrade",
+            paragraph1: "Jika Anda menginstal image yang disediakan proyek ini di server atau VPS menggunakan panduan instalasi mudah, yang perlu Anda lakukan adalah mengakses server dan menjalankan perintah berikut:",
+            command: "curl -sSL update.ticke.tz | sudo bash -s pro",
+            paragraph2: "Dalam beberapa saat, Ticketz PRO akan terinstal dengan semua data Anda. Sekarang tinggal buka menu pengguna, klik 'Langganan Ticketz PRO' dan lakukan langganan.",
+            paragraph3: "Jika instalasi Anda berbeda atau membutuhkan bantuan untuk menginstal Ticketz Pro, ",
+            paragraph4: "hubungi kami dan kami akan membantu!",
           },
         },
       },
@@ -116,14 +198,17 @@ const messages = {
           name: "Nama",
           status: "Status",
           lastUpdate: "Pembaruan Terakhir",
-          default:
-            "Default",
+          default: "Default",
           actions: "Aksi",
           session: "Sesi",
         },
       },
       internalChat: {
         title: "Obrolan Internal",
+        alertChatTitle: "Harap isi judul percakapan.",
+        alertChatUser: "Harap pilih setidaknya satu pengguna.",
+        labelTitle: "Judul",
+        labelPlaceholder: "Masukkan judul",
       },
       whatsappModal: {
         title: {
@@ -132,8 +217,7 @@ const messages = {
         },
         form: {
           name: "Nama",
-          default:
-            "Default",
+          default: "Default",
         },
         buttons: {
           okAdd: "Tambah",
@@ -193,8 +277,21 @@ const messages = {
       },
       queueModal: {
         title: {
-          add: "Tambah Antrian",
-          edit: "Edit Antrian",
+          titleNotDefined: "Judul tidak ditentukan",
+          titleTabsQueue: "Data Antrian",
+          titleTabsHours: "Jam Layanan",
+          optionText: "Ketik opsi teks",
+          optionTitle: "Judul opsi",
+        },
+        toasts: {
+
+        },
+        confirmationModal: {
+          notificationAdd: "Data antrian berhasil disimpan",
+          notificationEdit: "Data antrian berhasil diubah",
+          notificationDeleted: "Data antrian berhasil dihapus",
+          notificationHours: "Klik simpan untuk menyimpan perubahan",
+
         },
         form: {
           name: "Nama",
@@ -205,11 +302,13 @@ const messages = {
           ratingMessage: "Pesan Penilaian",
           transferMessage: "Pesan Transfer",
           token: "Token",
+          forwardToQueue: "Teruskan ke Antrian",
+          options: "Opsi",
         },
         outOfHoursAction: {
           title: "Tindakan Di Luar Jam Kerja",
           options: {
-            pending: "Biarkan tertunda",
+            pending: "Biarkan di antrian",
             closed: "Tutup tiket",
           },
         },
@@ -218,6 +317,9 @@ const messages = {
           okEdit: "Simpan",
           cancel: "Batal",
           attach: "Lampirkan File",
+          add: "Tambah Antrian",
+          edit: "Edit Antrian",
+          addSub: "Buat Sub Antrian",
         },
         serviceHours: {
           dayWeek: "Hari dalam Minggu",
@@ -232,6 +334,7 @@ const messages = {
           friday: "Jumat",
           saturday: "Sabtu",
           sunday: "Minggu",
+          dontEnableHours: "Jangan aktifkan Jam Layanan pada antrian ini",
         },
       },
       userModal: {
@@ -264,10 +367,25 @@ const messages = {
           sentAt: "Tanggal Terkirim",
           saveMessage: "Simpan Pesan di Tiket",
         },
+        errorMessages: {
+          tooShort: "Pesan terlalu pendek",
+          required: "Wajib diisi",
+          sendError: "Gagal terkirim",
+          default: "Pesan",
+          unidentifedWhatsapp: "WhatsApp tidak teridentifikasi",
+          scheduleCheckError: "Gagal memeriksa jadwal: ",
+        },
         buttons: {
           okAdd: "Tambah",
           okEdit: "Simpan",
           cancel: "Batal",
+        },
+        schedules: {
+          scheduledDispatch: "Jadwal pengiriman untuk: ",
+          messageSent: "Pesan terjadwal terkirim ke: ",
+        },
+        completionMessages: {
+          default: "Layanan selesai",
         },
         success: "Jadwal berhasil disimpan.",
       },
@@ -320,7 +438,8 @@ const messages = {
             title: "Buka"
           },
           closed: {
-            title: "Tutup"
+            title: "Tutup",
+            close: "Selesai"
           },
           groups: {
             title: "Grup"
@@ -331,10 +450,16 @@ const messages = {
         },
         search: {
           placeholder: "Cari tiket dan pesan",
+          filterTags: "Filter berdasarkan Tags",
+          filterUsers: "Filter berdasarkan User",
         },
         buttons: {
           showAll: "Semua",
         },
+      },
+      task:{
+        title: "Tugas",
+        newTask: "Tugas Baru",
       },
       transferTicketModal: {
         title: "Transfer Tiket",
@@ -348,7 +473,7 @@ const messages = {
         },
       },
       ticketsList: {
-        pendingHeader: "Tertunda",
+        pendingHeader: "ANTRIAN",
         assignedHeader: "Ditugaskan",
         noTicketsTitle: "Tidak ada apa-apa di sini!",
         noTicketsMessage: "Tidak ada tiket yang ditemukan dengan status ini atau istilah pencarian",
@@ -382,11 +507,13 @@ const messages = {
           messagesAPI: "API",
           schedules: "Penjadwalan",
           campaigns: "Kampanye",
+          listing: "Daftar Kampanye",
+          contactList: "Daftar Kontak",          
           annoucements: "Pengumuman",
           chats: "Chat Internal",
           financeiro: "Finansial",
-          logout: "Logout",
-          management: "Management",
+          logout: "Keluar",
+          management: "Manajemen",
           kanban: "Kanban"
         },
         appBar: {
@@ -428,7 +555,13 @@ const messages = {
         },
         dialog: {
           shortcode: "Pintasan",
-          message: "Respon",
+          message: "Pesan",
+          action: "Aksi",
+          deleteRecord: "Hapus Pesan Cepat",
+          questionAnswer: "Apakah Anda yakin ingin menghapus pesan ini?",
+          notificationAdd: "Pesan berhasil ditambahhkan.",
+          notificationDelete: "Pesan berhasil dihapus.",
+          notificationUpdate: "Pesan sudah diupdate.",
         },
       },
       kanban: {
@@ -457,33 +590,6 @@ const messages = {
         },
         toasts: {
           deleted: "Jalur berhasil dihapus.",
-        },
-      },
-      queues: {
-        title: "Antrian",
-        table: {
-          name: "Nama",
-          color: "Warna",
-          actions: "Aksi",
-        },
-        buttons: {
-          add: "Daftar Baru",
-        },
-        dialog: {
-          name: "Nama",
-          company: "Perusahaan",
-          okEdit: "Edit",
-          okAdd: "Tambah",
-          add: "Tambah",
-          edit: "Edit",
-          cancel: "Batal",
-        },
-        confirmationModal: {
-          deleteTitle: "Hapus",
-          deleteMessage: "Tindakan ini tidak dapat dibatalkan.",
-        },
-        toasts: {
-          deleted: "Data berhasil dihapus",
         },
       },
       contactLists: {
@@ -556,6 +662,8 @@ const messages = {
         buttons: {
           add: "Kampanye Baru",
           contactLists: "Daftar Kontak",
+          addVariable: "Tambahkan Variabel",
+          saveSetting:  "Simpan Pengaturan",
         },
         table: {
           name: "Nama",
@@ -605,10 +713,20 @@ const messages = {
           deleteMessage: "Tindakan ini tidak dapat dibatalkan.",
         },
         toasts: {
+          title: "Interval",
           success: "Operasi berhasil diselesaikan",
           cancel: "Kampanye dibatalkan",
           restart: "Kampanye dimulai ulang",
           deleted: "Data berhasil dihapus",
+          seconds: "Detik",
+          messages: "Pesan",
+          noInterval: "Tanpa jeda",
+          greaterInterval: "Lama Pengiriman Ditunda",
+          longerIntervalAfter: "Tunda Pengiriman",
+          notDefined: "Tanpa tunda",
+          messageInterval: "Jeda Pengiriman",
+          hotKey: "Pintasan",
+          
         },
       },
       announcements: {
@@ -632,11 +750,21 @@ const messages = {
           update: "Edit Pengumuman",
           readonly: "Hanya-baca",
           form: {
-            priority: "Prioritas",
+            priority: {
+              title: "Prioritas",
+              high: "Tinggi",
+              medium: "Sedang",
+              low: "Rendah",
+            },
             title: "Judul",
             text: "Teks",
             mediaPath: "File",
-            status: "Status",
+            attach: "Tanpa lampiran",
+            status: {
+              title: "Status",
+              active: "Aktif",
+              inactive: "Nonaktif",
+            },
           },
           buttons: {
             add: "Tambah",
@@ -649,7 +777,7 @@ const messages = {
         },
         confirmationModal: {
           deleteTitle: "Hapus",
-          deleteMessage: "Tindakan ini tidak dapat dibatalkan.",
+          deleteMessage: "Aksi ini tidak dapat dibatalkan.",
         },
         toasts: {
           success: "Operasi berhasil diselesaikan",
@@ -669,6 +797,18 @@ const messages = {
         },
         buttons: {
           add: "Tambah Antrian",
+        },
+        dialog: {
+          name: "Nama",
+          company: "Perusahaan",
+          okEdit: "Edit",
+          okAdd: "Tambah",
+          add: "Tambah",
+          edit: "Edit",
+          cancel: "Batal",
+        },
+        toasts: {
+          deleted: "Data berhasil dihapus",
         },
         confirmationModal: {
           deleteTitle: "Hapus",
@@ -764,22 +904,90 @@ const messages = {
         darkLogo: "Logo aplikasi gelap",
         favicon: "Favicon logo aplikasi",
         appname: "Nama aplikasi",
-        logoHint: "Prefer SVG dan aspek 28:10",
-        faviconHint: "Prefer gambar SVG persegi atau PNG 512x512",
+        logoHint: "Lebih disukai format SVG dengan rasio aspek 28:10",
+        faviconHint: "Lebih disukai gambar SVG berbentuk persegi atau PNG berukuran 512x512",
       },
       settings: {
         group: {
-          general: "Umum",
-          timeouts: "Waktu habis",
+          general: {
+            title: "Pengaturan Umum",
+            VoiceAndVideoCalls: {
+              title: "Panggilan suara dan video",
+              options: {
+                enabled: "Abaikan",
+                disabled: "laporan ketidaktersediaan",
+              },
+            },
+            AutomaticChatbotOutput: {
+              title: "Output chatbot otomatis",
+              options: {
+                enabled: "Diaktifkan",
+                disabled: "Dinonaktifkan",
+              },
+            },
+            autoReopenTimeout: "Timeout buka otomatis (menit)",
+          },
+          rating: {
+            title: "Pengaturan Penilaian",
+            label: "Penilaian",
+            timeout: "Waktu tunggu penilaian (menit)",
+          },
+          noQueue: {
+            title: "Pengaturan Tiket Tanpa Antrian",
+            label: "Batas waktu untuk tiket tanpa antrian (menit)",
+            action: "Aksi untuk batas waktu tiket tanpa antrian",
+            options: {
+                close: "Tutup tiket",
+                transferTo: "Transfer ke",
+              },
+          },
+          ticketInProgress: {
+            title: "Pengaturan Tiket Dalam Penanganan",
+            label: "Batas waktu untuk tiket dalam penanganan (menit)",
+            action: "Aksi untuk batas waktu tiket terbuka",
+            options: {
+                returnToQueue: "Kembali ke antrian",
+                closeService: "Tutup layanan",
+              },
+          },
+          timeouts: {
+            title: "Waktu Tunggu",
+            actionforUnassignedTicketTimeout: "Aksi untuk batas waktu tiket tanpa antrian",
+            actionforOpenTicketTimeout: "Aksi untuk batas waktu tiket terbuka",
+            transferTo: "Transfer ke",
+            timeoutforTicketInProgress: "Batas waktu untuk tiket dalam penanganan (menit)",
+            timeoutforUnassignedTicket: "Batas waktu untuk tiket tanpa antrian (menit)",
+            returnToQueue: "Kembali ke antrian",
+            closeService: "Tutup penanganan",
+          },
           officeHours: "Jam kantor",
           groups: "Grup",
           confidenciality: "Kerahasiaan",
           api: "API",
+          externalServices: "Layanan Eksternal",
           serveradmin: "Administrasi Server",
+          helps:{
+            title: "Judul",
+            videoLink: "Link Video",
+            description: "Deskripsi",
+            notification:{
+              loadListError: "Tidak dapat memuat daftar catatan",
+              operationSuccess: "Data berhasil disimpan!",
+              operationDeletedSuccess: "Data berhasil dihapus!",
+              operationError: "Tidak dapat melakukan operasi. Periksa apakah sudah ada nama yang sama atau apakah kolom telah diisi dengan benar",
+              genericError: "Tidak dapat melakukan operasi",
+            },
+            deleteRecord: {
+              title: "Penghapusan Data",
+              confirmationMessage: "Apakah Anda yakin ingin menghapus data ini?"
+            },
+          },
         },
         success: "Pengaturan berhasil disimpan.",
         copiedToClipboard: "Disalin ke clipboard",
         title: "Pengaturan",
+        chatbotTicketTimeout: "Batas waktu chatbot (menit)",
+        chatbotTicketTimeoutAction: "Aksi batas waktu chatbot",
         settings: {
           userCreation: {
             name: "Pembuatan pengguna",
@@ -804,6 +1012,13 @@ const messages = {
             ManagementByCompany: "Manajemen oleh perusahaan",
           },
         },
+        outOfHoursAction: {
+          title: "Aksi Di Luar Jam Kerja",
+          options: {
+            pending: "Biarkan di antrian",
+            closed: "Tutup tiket",
+          },
+        },
         IgnoreGroupMessages: {
           title: "Abaikan pesan grup",
           options: {
@@ -819,24 +1034,24 @@ const messages = {
           },
         },
         groupsTab: {
-          title: "Tab grup",
+          title: "Tab Grup",
           options: {
-            enabled: "Diaktifkan",
-            disabled: "Dinonaktifkan",
+            enabled: "Aktif",
+            disabled: "Nonaktif",
           },
         },
-        VoiceAndVideoCalls: {
-          title: "Panggilan suara dan video",
+        voiceAndVideoCalls: {
+          title: "Panggilan Suara dan Video",
           options: {
-            enabled: "Abaikan.",
-            disabled: "laporan ketidaktersediaan",
+            enabled: "Abaikan",
+            disabled: "Lapor ketidaktersediaan",
           },
         },
-        AutomaticChatbotOutput: {
-          title: "Output chatbot otomatis",
+        automaticChatbotOutput: {
+          title: "Output Chatbot Otomatis",
           options: {
-            enabled: "Diaktifkan",
-            disabled: "Dinonaktifkan",
+            enabled: "Aktif",
+            disabled: "Nonaktif",
           },
         },
         ShowNumericEmoticons: {
@@ -860,8 +1075,14 @@ const messages = {
             disabled: "Dinonaktifkan",
           },
         },
+        FileUploadLimit: {
+          title: "Batas Unggah File (MB)",
+        },
         FileDownloadLimit: {
           title: "Batas unduhan file (MB)",
+        },
+        GracePeriod: {
+          title: "Masa tenggang",
         },
         "messageVisibility": {
           "title": "Visibilitas Pesan",
@@ -871,7 +1092,7 @@ const messages = {
           }
         },
         "keepQueueAndUser": {
-          "title_id": "Simpan antrian dan pengguna pada tiket tertutup",
+          "title": "Simpan antrian dan pengguna pada tiket tertutup",
           "options": {
             enabled: "Diaktifkan",
             disabled: "Dinonaktifkan",
@@ -879,6 +1100,10 @@ const messages = {
         },
         WelcomeGreeting: {
           greetings: "halo",
+          earlyMorning: "Selamat dini hari,",
+          morning: "Selamat pagi,",
+          afternoon: "Selamat siang,",
+          evening: "Selamat malam,",
           welcome: "selamat datang di",
           expirationTime: "Aktif sampai",
         },
@@ -901,7 +1126,21 @@ const messages = {
           title: "Whitelabel",
         },
         PaymentGateways: {
-          title: "Payment Gateways",
+          title: "Platform Pembayaran",
+        },
+        AIProvider: {
+          title: "Layanan AI",
+        },
+        AudioTranscriptions: {
+          title: "Transkripsi Audio",  
+        },
+        TagsMode: {
+          title: "Mode Tag",
+          options: {
+            ticket: "Tiket",
+            contact: "Kontak",
+            both: "Tiket dan Kontak"
+          },
         },
       },
       messagesList: {
@@ -1011,6 +1250,7 @@ const messages = {
         },
       },
       backendErrors: {
+        ERR_UNAUTHORIZED: "Anda tidak memiliki izin untuk mengakses sumber daya ini.",
         ERR_FORBIDDEN: "Akses ditolak. Periksa izin Anda.",
         ERR_CHECK_NUMBER: "Nomor ini tidak terdaftar di WhatsApp.",
         ERR_NO_OTHER_WHATSAPP: "Harus ada setidaknya satu WhatsApp default.",
@@ -1038,6 +1278,10 @@ const messages = {
         ERR_FETCH_WAPP_MSG: "Kesalahan mengambil pesan dari WhatsApp, mungkin terlalu lama.",
         ERR_QUEUE_COLOR_ALREADY_EXISTS: "Warna ini sudah digunakan, pilih yang lain.",
         ERR_WAPP_GREETING_REQUIRED: "Pesan sambutan wajib jika ada lebih dari satu antrian.",
+        ERR_SUBSCRIPTION_CHECK_FAILED: "Pemeriksaan langganan gagal.",
+        ERR_WAPP_NOT_FOUND: "Koneksi tidak tersedia.",
+        ERR_SUBSCRIPTION_EXPIRED: "Langganan Anda telah kedaluwarsa.",
+        ERR_UNKOWN: "Kesalahan tidak diketahui.",
       },
       ticketz: {
         registration: {
@@ -1055,6 +1299,12 @@ const messages = {
           paypaltitle: "Kartu Kredit",
           international: "Donasi dalam USD",
         }
+      },
+      owenAd: {
+        title: "Owen Payments mendukung Ticketz",
+        description1: "Startup Owen Payments menawarkan pembayaran via PIX dengan biaya tetap Rp 0,99 per transaksi.",
+        description2: "Sebagian dari setiap transaksi akan disalurkan ke proyek Ticketz, jadi dengan menggunakan metode pembayaran ini Anda juga turut mendukung proyek ini.",
+        description3: 'Pilih gateway pembayaran "Owen Payments 💎" dan buka akun Anda tanpa perlu keluar dari Ticketz!'
       },
     },
   },

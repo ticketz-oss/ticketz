@@ -238,7 +238,7 @@ export function QueueOptionStepper({ queueId, options, updateOptions }) {
             onChange={(event) => handleOptionChangeTitle(event, index)}
             size="small"
             className={classes.input}
-            placeholder="Título da opção"
+            placeholder={i18n.t("queueModal.title.optionTitle")}
           />
           <div style={{ display: "none" }}>
             <input
@@ -302,7 +302,7 @@ export function QueueOptionStepper({ queueId, options, updateOptions }) {
     return (
       <>
         <Typography>
-          {option.title !== "" ? option.title : "Título não definido"}
+          {option.title !== "" ? option.title : i18n.t("queueModal.title.titleNotDefined")}
           <IconButton
             variant="outlined"
             size="small"
@@ -329,7 +329,7 @@ export function QueueOptionStepper({ queueId, options, updateOptions }) {
             onChange={(event) => handleOptionChangeMessage(event, index)}
             size="small"
             className={classes.input}
-            placeholder="Digite o texto da opção"
+            placeholder={i18n.t("queueModal.title.optionText")}
           />
 
           <Grid spacing={3} container>
@@ -352,7 +352,7 @@ export function QueueOptionStepper({ queueId, options, updateOptions }) {
           <Grid xs={12} sm={12} md={3} item>
             <FormControl className={classes.maxWidth}>
               <InputLabel>
-                Forward to Queue
+                {i18n.t("queueModal.form.forwardToQueue")}
               </InputLabel>
               <Select
                 value={option.forwardQueueId}
@@ -373,10 +373,6 @@ export function QueueOptionStepper({ queueId, options, updateOptions }) {
             </FormControl>
           </Grid>
         </Grid>
-
-
-
-
         </>
       );
     }
@@ -422,7 +418,7 @@ export function QueueOptionStepper({ queueId, options, updateOptions }) {
                 variant="outlined"
                 className={classes.addButton}
               >
-                Adicionar
+                {i18n.t("task.botton")}
               </Button>
             </>
           )}
@@ -515,7 +511,7 @@ export function QueueOptions({ queueId }) {
     <div className={classes.root}>
       <br />
       <Typography>
-        Opções
+        {i18n.t("queueModal.form.options")}
         <Button
           color="primary"
           size="small"
@@ -524,7 +520,7 @@ export function QueueOptions({ queueId }) {
           style={{ marginLeft: 10 }}
           variant="outlined"
         >
-          Adicionar
+          {i18n.t("queueModal.buttons.addSub")}
         </Button>
       </Typography>
       {renderStepper()}

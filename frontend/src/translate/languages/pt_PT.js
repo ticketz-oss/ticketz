@@ -77,6 +77,23 @@ const messages = {
             title: "Atendimentos hoje: ",
           },
         },
+        ticketzPro: {
+          title: "Ticketz PRO",
+          features1: "Whatsapp Oficial - Instagram - Messenger e outros",
+          features2: "Funcionalidades exclusivas - Suporte Avançado - Migração Facilitada",
+          price: "Assine por R$ 199/mês",
+          note: "diretamente no sistema",
+          upgrade: "Clique para instruções de Upgrade",
+          visit: "Clique para visitar o site!",
+          upgradeInstructions: {
+            title: "Instruções de Atualização",
+            paragraph1: "Se instalou as imagens disponibilizadas pelo projeto num servidor ou VPS utilizando as instruções simplificadas, tudo o que precisa fazer é aceder ao seu servidor e digitar o comando abaixo:",
+            command: "curl -sSL update.ticke.tz | sudo bash -s pro",
+            paragraph2: "Em instantes o Ticketz PRO estará instalado com todos os seus dados. Agora só precisa ir até ao menu de utilizador, clicar em 'Subscrição Ticketz PRO' e fazer a sua subscrição.",
+            paragraph3: "Se a sua instalação for diferente ou precisar de ajuda para instalar o Ticketz Pro, ",
+            paragraph4: "contacte-nos que nós ajudamos!",
+          },
+        }
       },
       connections: {
         title: "Conexões",
@@ -1030,6 +1047,12 @@ const messages = {
           paypaltitle: "Cartão de Crédito",
           international: "Internacional em US$",
         },
+      },
+      owenAd: {
+        title: "Owen Payments apoia o Ticketz",
+        description1: "A startup Owen Payments oferece pagamentos via PIX a um custo fixo de R$ 0,99 por operação.",
+        description2: "Uma fração do valor de cada operação é revertida para o projeto Ticketz, pelo que ao utilizar este meio de pagamento estará também a apoiar o projeto.",
+        description3: 'Selecione o gateway de pagamento "Owen Payments 💎" e solicite a abertura da sua conta sem sair do Ticketz!'
       },
     },
   },

@@ -103,7 +103,7 @@ function QuickMessageDialog(props) {
 
     return (
         <Dialog
-            title="Mensagem Rápida"
+            title={i18n.t("quickMessages.title")}
             modalOpen={dialogOpen}
             onClose={handleClose}
         >
@@ -151,10 +151,10 @@ function QuickMessageDialog(props) {
                         </DialogContent>
                         <DialogActions>
                             <Button onClick={handleClose} color="primary">
-                                Cancelar
+                                {i18n.t("common.cancel")}
                             </Button>
                             <ButtonWithSpinner loading={loading} color="primary" type="submit" variant="contained" autoFocus>
-                                Salvar
+                                {i18n.t("common.save")}
                             </ButtonWithSpinner>
                         </DialogActions>
                     </Form>

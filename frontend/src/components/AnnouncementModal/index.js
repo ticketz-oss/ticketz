@@ -237,41 +237,39 @@ const AnnouncementModal = ({ open, onClose, announcementId, reload }) => {
                   <Grid xs={12} item>
                     <FormControl variant="outlined" margin="dense" fullWidth>
                       <InputLabel id="status-selection-label">
-                        {i18n.t("announcements.dialog.form.status")}
+                        {i18n.t("announcements.dialog.form.status.title")}
                       </InputLabel>
                       <Field
                         as={Select}
-                        label={i18n.t("announcements.dialog.form.status")}
-                        placeholder={i18n.t("announcements.dialog.form.status")}
+                        label={i18n.t("announcements.dialog.form.status.title")}
+                        placeholder={i18n.t("announcements.dialog.form.status.title")}
                         labelId="status-selection-label"
                         id="status"
                         name="status"
                         error={touched.status && Boolean(errors.status)}
                       >
-                        <MenuItem value={true}>Ativo</MenuItem>
-                        <MenuItem value={false}>Inativo</MenuItem>
+                        <MenuItem value={true}>{i18n.t("announcements.dialog.form.status.active")}</MenuItem>
+                        <MenuItem value={false}>{i18n.t("announcements.dialog.form.status.inactive")}</MenuItem>
                       </Field>
                     </FormControl>
                   </Grid>
                   <Grid xs={12} item>
                     <FormControl variant="outlined" margin="dense" fullWidth>
                       <InputLabel id="priority-selection-label">
-                        {i18n.t("announcements.dialog.form.priority")}
+                        {i18n.t("announcements.dialog.form.priority.title")}
                       </InputLabel>
                       <Field
                         as={Select}
-                        label={i18n.t("announcements.dialog.form.priority")}
-                        placeholder={i18n.t(
-                          "announcements.dialog.form.priority"
-                        )}
+                        label={i18n.t("announcements.dialog.form.priority.title")}
+                        placeholder={i18n.t("announcements.dialog.form.priority.title")}
                         labelId="priority-selection-label"
                         id="priority"
                         name="priority"
                         error={touched.priority && Boolean(errors.priority)}
                       >
-                        <MenuItem value={1}>Alta</MenuItem>
-                        <MenuItem value={2}>Média</MenuItem>
-                        <MenuItem value={3}>Baixa</MenuItem>
+                        <MenuItem value={1}>{i18n.t("announcements.dialog.form.priority.high")}</MenuItem>
+                        <MenuItem value={2}>{i18n.t("announcements.dialog.form.priority.medium")}</MenuItem>
+                        <MenuItem value={3}>{i18n.t("announcements.dialog.form.priority.low")}</MenuItem>
                       </Field>
                     </FormControl>
                   </Grid>
@@ -317,8 +315,8 @@ const AnnouncementModal = ({ open, onClose, announcementId, reload }) => {
                   className={classes.btnWrapper}
                 >
                   {announcementId
-                    ? `${i18n.t("announcements.dialog.buttons.add")}`
-                    : `${i18n.t("announcements.dialog.buttons.edit")}`}
+                    ? `${i18n.t("announcements.dialog.buttons.edit")}`
+                    : `${i18n.t("announcements.dialog.buttons.add")}`}
                   {isSubmitting && (
                     <CircularProgress
                       size={24}

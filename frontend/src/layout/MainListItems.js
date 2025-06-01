@@ -278,7 +278,7 @@ const MainListItems = (props) => {
             />
       <ListItemLink
         to="/todolist"
-        primary={i18n.t("Tarefas")}
+        primary={i18n.t("task.title")}
         icon={<BorderColorIcon />}
       />
             <ListItemLink
@@ -395,7 +395,7 @@ const MainListItems = (props) => {
                       <ListItemIcon>
                         <ListIcon />
                       </ListItemIcon>
-                      <ListItemText primary="Listagem" />
+                      <ListItemText primary={i18n.t("mainDrawer.listItems.listing")} />
                     </ListItem>
                     <ListItem
                       onClick={() => history.push("/contact-lists")}
@@ -404,7 +404,7 @@ const MainListItems = (props) => {
                       <ListItemIcon>
                         <PeopleIcon />
                       </ListItemIcon>
-                      <ListItemText primary="Listas de Contatos" />
+                      <ListItemText primary={i18n.t("mainDrawer.listItems.contactList")} />
                     </ListItem>
                     <ListItem
                       onClick={() => history.push("/campaigns-config")}
@@ -413,7 +413,7 @@ const MainListItems = (props) => {
                       <ListItemIcon>
                         <SettingsOutlinedIcon />
                       </ListItemIcon>
-                      <ListItemText primary="Configurações" />
+                      <ListItemText primary={i18n.t("mainDrawer.listItems.settings")}  />
                     </ListItem>
                   </List>
                 </Collapse>

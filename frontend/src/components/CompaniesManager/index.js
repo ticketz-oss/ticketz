@@ -33,6 +33,8 @@ import moment from "moment";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
 
+import { i18n } from "../../translate/i18n";
+
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "100%",
@@ -69,6 +71,17 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(1),
   },
 }));
+const translateRecurrence = (value) => {
+    const recurrenceMap = {
+      MENSAL: i18n.t("companies.recurrence.monthly"),
+      BIMESTRAL: i18n.t("companies.recurrence.bimonthly"),
+      TRIMESTRAL: i18n.t("companies.recurrence.quarterly"),
+      SEMESTRAL: i18n.t("companies.recurrence.semiannual"),
+      ANUAL: i18n.t("companies.recurrence.annual"),
+    };
+
+    return recurrenceMap[value] || value;
+  };
 
 export function CompanyForm(props) {
   const { onSubmit, onDelete, onImpersonate, onCancel, initialValue, loading } = props;
@@ -178,7 +191,7 @@ export function CompanyForm(props) {
     }
     setRecord(data);
   };
-
+  
   return (
     <>
       <ModalUsers
@@ -204,7 +217,7 @@ export function CompanyForm(props) {
               <Grid xs={12} sm={6} md={4} item>
                 <Field
                   as={TextField}
-                  label="Nome"
+                  label={i18n.t("common.name")}
                   name="name"
                   variant="outlined"
                   className={classes.fullWidth}
@@ -214,7 +227,7 @@ export function CompanyForm(props) {
               <Grid xs={12} sm={6} md={2} item>
                 <Field
                   as={TextField}
-                  label="E-mail"
+                  label={i18n.t("common.email")}
                   name="email"
                   variant="outlined"
                   className={classes.fullWidth}
@@ -225,7 +238,7 @@ export function CompanyForm(props) {
               <Grid xs={12} sm={6} md={2} item>
                 <Field
                   as={TextField}
-                  label="Telefone"
+                  label={i18n.t("common.phone")}
                   name="phone"
                   variant="outlined"
                   className={classes.fullWidth}
@@ -234,11 +247,11 @@ export function CompanyForm(props) {
               </Grid>
               <Grid xs={12} sm={6} md={2} item>
                 <FormControl margin="dense" variant="outlined" fullWidth>
-                  <InputLabel htmlFor="plan-selection">Plano</InputLabel>
+                  <InputLabel htmlFor="plan-selection">{i18n.t("common.plan")}</InputLabel>
                   <Field
                     as={Select}
                     id="plan-selection"
-                    label="Plano"
+                    label={i18n.t("common.plan")}
                     labelId="plan-selection-label"
                     name="planId"
                     margin="dense"
@@ -254,7 +267,7 @@ export function CompanyForm(props) {
               </Grid>
               <Grid xs={12} sm={6} md={2} item>
                 <FormControl margin="dense" variant="outlined" fullWidth>
-                  <InputLabel htmlFor="status-selection">Status</InputLabel>
+                  <InputLabel htmlFor="status-selection">{i18n.t("common.status")}</InputLabel>
                   <Field
                     as={Select}
                     id="status-selection"
@@ -263,14 +276,14 @@ export function CompanyForm(props) {
                     name="status"
                     margin="dense"
                   >
-                    <MenuItem value={true}>Sim</MenuItem>
-                    <MenuItem value={false}>Não</MenuItem>
+                    <MenuItem value={true}>{i18n.t("companies.options.enabled")}</MenuItem>
+                    <MenuItem value={false}>{i18n.t("companies.options.disabled")}</MenuItem>
                   </Field>
                 </FormControl>
               </Grid>
               <Grid xs={12} sm={6} md={2} item>
                 <FormControl margin="dense" variant="outlined" fullWidth>
-                  <InputLabel htmlFor="status-selection">Campanhas</InputLabel>
+                  <InputLabel htmlFor="status-selection">{i18n.t("companies.campaigns")}</InputLabel>
                   <Field
                     as={Select}
                     id="campaigns-selection"
@@ -279,8 +292,8 @@ export function CompanyForm(props) {
                     name="campaignsEnabled"
                     margin="dense"
                   >
-                    <MenuItem value={true}>Habilitadas</MenuItem>
-                    <MenuItem value={false}>Desabilitadas</MenuItem>
+                    <MenuItem value={true}>{i18n.t("companies.options.enabled")}</MenuItem>
+                    <MenuItem value={false}>{i18n.t("companies.options.disabled")}</MenuItem>
                   </Field>
                 </FormControl>
               </Grid>
@@ -288,7 +301,7 @@ export function CompanyForm(props) {
                 <FormControl variant="outlined" fullWidth>
                   <Field
                     as={TextField}
-                    label="Data de Vencimento"
+                    label={i18n.t("common.dueDate")}
                     type="date"
                     name="dueDate"
                     InputLabelProps={{
@@ -303,7 +316,7 @@ export function CompanyForm(props) {
               <Grid xs={12} sm={6} md={2} item>
                 <FormControl margin="dense" variant="outlined" fullWidth>
                   <InputLabel htmlFor="recorrencia-selection">
-                    Recorrência
+                    {i18n.t("companies.recurrence.title")}
                   </InputLabel>
                   <Field
                     as={Select}
@@ -313,17 +326,17 @@ export function CompanyForm(props) {
                     name="recurrence"
                     margin="dense"
                   >
-                    <MenuItem value="MENSAL">Mensal</MenuItem>
-                    <MenuItem value="BIMESTRAL">Bimestral</MenuItem>
-                    <MenuItem value="TRIMESTRAL">Trimestral</MenuItem>
-                    <MenuItem value="SEMESTRAL">Semestral</MenuItem>
-                    <MenuItem value="ANUAL">Anual</MenuItem>
+                    <MenuItem value="MENSAL">{i18n.t("companies.recurrence.monthly")}</MenuItem>
+                    <MenuItem value="BIMESTRAL">{i18n.t("companies.recurrence.bimonthly")}</MenuItem>
+                    <MenuItem value="TRIMESTRAL">{i18n.t("companies.recurrence.quarterly")}</MenuItem>
+                    <MenuItem value="SEMESTRAL">{i18n.t("companies.recurrence.semiannual")}</MenuItem>
+                    <MenuItem value="ANUAL">{i18n.t("companies.recurrence.annual")}</MenuItem>
                   </Field>
                 </FormControl>
               </Grid>
               <Grid xs={12} item>
                 <Grid justifyContent="flex-end" spacing={1} container>
-                  <Grid xs={4} md={1} item>
+                  <Grid xs={6} md={2} item>
                     <ButtonWithSpinner
                       className={classes.fullWidth}
                       style={{ marginTop: 7 }}
@@ -331,7 +344,7 @@ export function CompanyForm(props) {
                       onClick={() => onCancel()}
                       variant="contained"
                     >
-                      Limpar
+                      {i18n.t("common.clear")}
                     </ButtonWithSpinner>
                   </Grid>
                   {record.id !== undefined ? (
@@ -345,7 +358,7 @@ export function CompanyForm(props) {
                         variant="outlined"
                         color="primary"
                       >
-                        Acessar como
+                        {i18n.t("common.accessAs")}
                       </ButtonWithSpinner>
                     </Grid>
                     <Grid xs={6} md={1} item>
@@ -357,7 +370,7 @@ export function CompanyForm(props) {
                           variant="contained"
                           color="secondary"
                         >
-                          Excluir
+                          {i18n.t("common.delete")}
                         </ButtonWithSpinner>
                       </Grid>
                       <Grid xs={6} md={2} item>
@@ -369,7 +382,7 @@ export function CompanyForm(props) {
                           variant="contained"
                           color="primary"
                         >
-                          + Vencimento
+                          + {i18n.t("common.dueDate")}
                         </ButtonWithSpinner>
                       </Grid>
                       <Grid xs={6} md={1} item>
@@ -381,7 +394,7 @@ export function CompanyForm(props) {
                           variant="contained"
                           color="primary"
                         >
-                          Usuário
+                          {i18n.t("common.user")}
                         </ButtonWithSpinner>
                       </Grid>
                     </>
@@ -395,7 +408,7 @@ export function CompanyForm(props) {
                       variant="contained"
                       color="primary"
                     >
-                      Salvar
+                      {i18n.t("common.save")}
                     </ButtonWithSpinner>
                   </Grid>
                 </Grid>
@@ -465,14 +478,14 @@ export function CompaniesManagerGrid(props) {
             <TableCell align="center" style={{ width: "1%" }}>
               #
             </TableCell>
-            <TableCell align="left">Nome</TableCell>
-            <TableCell align="left">E-mail</TableCell>
-            <TableCell align="left">Telefone</TableCell>
-            <TableCell align="left">Plano</TableCell>
-            <TableCell align="left">Campanhas</TableCell>
-            <TableCell align="left">Status</TableCell>
-            <TableCell align="left">Criada Em</TableCell>
-            <TableCell align="left">Vencimento</TableCell>
+            <TableCell align="left">{i18n.t("common.name")}</TableCell>
+            <TableCell align="left">{i18n.t("common.email")}</TableCell>
+            <TableCell align="left">{i18n.t("common.phone")}</TableCell>
+            <TableCell align="left">{i18n.t("common.plan")}</TableCell>
+            <TableCell align="left">{i18n.t("companies.campaigns")}</TableCell>
+            <TableCell align="left">{i18n.t("common.status")}</TableCell>
+            <TableCell align="left">{i18n.t("common.createdAt")}</TableCell>
+            <TableCell align="left">{i18n.t("common.dueDate")}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -493,7 +506,7 @@ export function CompaniesManagerGrid(props) {
               <TableCell align="left">
                 {dateToClient(row.dueDate)}
                 <br />
-                <span>{row.recurrence}</span>
+                <span>{translateRecurrence(row.recurrence)}</span>
               </TableCell>
             </TableRow>
           ))}
@@ -535,7 +548,7 @@ export default function CompaniesManager() {
       const companyList = await list();
       setRecords(companyList);
     } catch (e) {
-      toast.error("Não foi possível carregar a lista de registros");
+      toast.error(i18n.t("settings.group.helps.notification.loadListError"));
     }
     setLoading(false);
   };
@@ -550,11 +563,9 @@ export default function CompaniesManager() {
       }
       await loadPlans();
       handleCancel();
-      toast.success("Operação realizada com sucesso!");
+      toast.success(i18n.t("settings.group.helps.notification.operationSuccess"));
     } catch (e) {
-      toast.error(
-        "Não foi possível realizar a operação. Verifique se já existe uma empresa com o mesmo nome ou se os campos foram preenchidos corretamente"
-      );
+      toast.error(i18n.t("settings.group.helps.notification.operationError"));
     }
     setLoading(false);
   };
@@ -565,9 +576,9 @@ export default function CompaniesManager() {
       await remove(record.id);
       await loadPlans();
       handleCancel();
-      toast.success("Operação realizada com sucesso!");
+      toast.success(i18n.t("settings.group.helps.notification.operationDeletedSuccess"));
     } catch (e) {
-      toast.error("Não foi possível realizar a operação");
+      toast.error(i18n.t("settings.group.helps.notification.genericError"));
     }
     setLoading(false);
   };
@@ -641,20 +652,21 @@ export default function CompaniesManager() {
         </Grid>
       </Grid>
       <ConfirmationModal
-        title="Exclusão de Registro"
+        title={i18n.t("companies.modal.titleDeleted")}
+        // "Exclusão de Registro"
         open={showConfirmDeleteDialog}
         onClose={() => setShowConfirmDeleteDialog(false)}
         onConfirm={() => handleDelete()}
       >
-        Deseja realmente excluir esse registro?
+        {i18n.t("companies.modal.deletedNote")}
       </ConfirmationModal>
       <ConfirmationModal
-        title="Acessar como"
+        title={i18n.t("companies.modal.titleaccessAs")}
         open={showConfirmImpersonateDialog}
         onClose={() => setShowConfirmImpersonateDialog(false)}
         onConfirm={() => onImpersonate()}
       >
-        Deseja acessar o sistema como esta empresa?
+        {i18n.t("companies.modal.accessAsNote")}
       </ConfirmationModal>
     </Paper>
   );
