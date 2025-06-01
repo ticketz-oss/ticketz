@@ -114,7 +114,6 @@ export default function Options(props) {
   const [aiProvider, setAiProvider] = useState("openai");
   const [audioTranscriptions, setAudioTranscriptions] = useState("disabled");
   const [uploadLimit, setUploadLimit] = useState("15");
-  const [downloadLimit, setDownloadLimit] = useState("15");
 
   const [messageVisibility, setMessageVisibility] = useState("message");
 
@@ -136,8 +135,6 @@ export default function Options(props) {
 
   const { getCurrentUserInfo } = useAuth();
   const [currentUser, setCurrentUser] = useState({});
-
-  const downloadLimitInput = useRef(null);
 
   const { update } = useSettings();
 
@@ -216,9 +213,6 @@ export default function Options(props) {
 
       const uploadLimit = settings.find((s) => s.key === "uploadLimit");
       setUploadLimit(uploadLimit?.value || "");
-
-      const downloadLimit = settings.find((s) => s.key === "downloadLimit");
-      setDownloadLimit(downloadLimit?.value || "");
       
       const messageVisibility = settings.find((s) => s.key === "messageVisibility");
       setMessageVisibility(messageVisibility?.value || "message");
@@ -319,15 +313,6 @@ export default function Options(props) {
     setAllowSignup(value);
     await update({
       key: "allowSignup",
-      value,
-    });
-    i18nToast.success("settings.success");
-  }
-
-  async function handleDownloadLimit(value) {
-    setDownloadLimit(value);
-    await update({
-      key: "downloadLimit",
       value,
     });
     i18nToast.success("settings.success");
@@ -966,27 +951,7 @@ export default function Options(props) {
                       await handleSetting("uploadLimit", uploadLimit);
                     }}
                   />
-                </FormControl>
-              </Grid>
-
-              <Grid xs={12} sm={6} md={4} item>
-                <FormControl className={classes.selectContainer}>
-                  <TextField
-                    id="appname-field"
-                    label={i18n.t("settings.FileDownloadLimit.title")}
-                    variant="standard"
-                    name="appName"
-                    value={downloadLimit}
-                    inputRef={downloadLimitInput}
-                    onChange={(e) => {
-                      setDownloadLimit(e.target.value);
-                    }}
-                    onBlur={async (_) => {
-                      await handleDownloadLimit(downloadLimit);
-                    }}
-                  />
-                </FormControl>
-              </Grid>
+                </FormControl>              </Grid>
               <Grid xs={12} sm={6} md={4} item>
                 <FormControl className={classes.selectContainer}>
                   <TextField

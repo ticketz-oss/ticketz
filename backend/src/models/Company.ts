@@ -49,6 +49,13 @@ class Company extends Model<Company> {
   recurrence: string;
 
   @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+    defaultValue: 15
+  })
+  downloadLimit: number;
+
+  @Column({
     type: DataType.JSONB
   })
   schedules: [];

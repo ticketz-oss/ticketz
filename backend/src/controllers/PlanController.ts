@@ -25,6 +25,7 @@ type StorePlanData = {
   queues: number | 0;
   value: number;
   isPublic: boolean;
+  downloadLimitMB?: number;
 };
 
 type UpdatePlanData = {
@@ -35,6 +36,7 @@ type UpdatePlanData = {
   queues?: number;
   value?: number;
   isPublic?: boolean;
+  downloadLimitMB?: number;
 };
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
@@ -108,7 +110,7 @@ export const update = async (
     throw new AppError(err.message);
   }
 
-  const { id, name, users, connections, queues, value, isPublic } = planData;
+  const { id, name, users, connections, queues, value, isPublic, downloadLimitMB } = planData;
 
   const plan = await UpdatePlanService({
     id,
@@ -117,7 +119,8 @@ export const update = async (
     connections,
     queues,
     value,
-    isPublic
+    isPublic,
+    downloadLimitMB
   });
 
   // const io = getIO();

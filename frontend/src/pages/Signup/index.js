@@ -82,6 +82,7 @@ const UserSchema = Yup.object().shape({
 		.required("Required"),
 	password: Yup.string().min(5, "Too Short!").max(50, "Too Long!"),
 	email: Yup.string().email("Invalid email").required("Required"),
+	phone: Yup.string().required("Required"),
 });
 
 const SignUp = () => {
@@ -109,7 +110,7 @@ const SignUp = () => {
 		
 		Object.assign(values, { recurrence: "MENSAL" });
 		Object.assign(values, { status: "t" });
-		Object.assign(values, { campaignsEnabled: true });
+		// 🔧 [BUG FIX] Removido campaignsEnabled: true para respeitar configuração do plano
 		try {
 			await openApi.post("/companies/cadastro", values);
 			toast.success(i18n.t("signup.toasts.success"));
@@ -203,8 +204,8 @@ const SignUp = () => {
 										id="phone"
 										label="Telefone com (DDD)"
 										name="phone"
-										error={touched.email && Boolean(errors.email)}
-										helperText={touched.email && errors.email}
+										error={touched.phone && Boolean(errors.phone)}
+										helperText={touched.phone && errors.phone}
 										autoComplete="phone"
 										required
 									/>

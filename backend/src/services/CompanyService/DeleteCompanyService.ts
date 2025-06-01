@@ -17,8 +17,15 @@ const DeleteCompanyService = async (id: string): Promise<void> => {
 
   const companyMediaPath = join(getPublicPath(), "media", id);
 
-  // recursively remove company media folder
-  fs.rmSync(companyMediaPath, { recursive: true });
+  // recursively remove company media folder if it exists
+  try {
+    if (fs.existsSync(companyMediaPath)) {
+      fs.rmSync(companyMediaPath, { recursive: true });
+    }
+  } catch (error) {
+    // Log the error but don't fail the company deletion
+    console.warn(`Warning: Failed to remove company media folder ${companyMediaPath}:`, error);
+  }
 };
 
 export default DeleteCompanyService;
