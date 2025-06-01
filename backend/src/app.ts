@@ -13,8 +13,6 @@ import routes from "./routes";
 import { logger } from "./utils/logger";
 import { messageQueue, sendScheduledMessages } from "./queues";
 
-
-
 Sentry.init({ dsn: process.env.SENTRY_DSN });
 
 const app = express();
@@ -34,6 +32,16 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(Sentry.Handlers.requestHandler());
 app.use("/public", express.static(uploadConfig.directory));
+
+app.use((req, _res, next) => {
+  const { method, url, query, body, headers } = req;
+  logger.trace(
+    { method, url, query, body, headers },
+    `Incoming request: ${req.method} ${req.url}`
+  );
+  next();
+});
+
 app.use(routes);
 
 app.use(Sentry.Handlers.errorHandler());

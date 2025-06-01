@@ -161,6 +161,50 @@ export const initIO = (httpServer: Server): SocketIO => {
       socket.join(`company-${user.companyId}-admin`);
     }
 
+    socket.on("joinBackendlog", () => {
+      if (user.super) {
+        socket.join("backendlog");
+        io.to("backendlog").emit("backendlog", {
+          timestamp: Date.now(),
+          level: 30,
+          logs: [
+            { currentLevel: logger.level },
+            "started transmission of backend logs"
+          ]
+        });
+      } else {
+        logger.info(`User ${user.id} tried to join superlog channel.`);
+      }
+    });
+
+    socket.on("leaveBackendlog", () => {
+      if (user.super) {
+        io.to("backendlog").emit("backendlog", {
+          timestamp: Date.now(),
+          level: 30,
+          logs: ["finished transmission of backend logs"]
+        });
+        socket.leave("backendlog");
+      } else {
+        logger.info(`User ${user.id} tried to leave superlog channel.`);
+      }
+    });
+
+    socket.on("setLoglevel", (level: string) => {
+      if (user.super) {
+        if (logger.level === level) return;
+
+        logger.level = level;
+        io.to("backendlog").emit("backendlog", {
+          timestamp: Date.now(),
+          level: 30,
+          logs: [`Log level changed to ${level}`]
+        });
+      } else {
+        logger.info(`User ${user.id} tried to set log level.`);
+      }
+    });
+
     socket.on("joinChatBox", async (ticketId: string) => {
       if (!ticketId || ticketId === "undefined") {
         return;
