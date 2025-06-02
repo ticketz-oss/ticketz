@@ -1,4 +1,4 @@
-import { downloadContentFromMessage, MediaType } from "@whiskeysockets/baileys";
+import { downloadContentFromMessage, MediaType } from "baileys";
 import { HandleTaskOptions, WorkerHandler } from "./WorkerHandler";
 import saveMediaToFile from "../helpers/saveMediaFile";
 

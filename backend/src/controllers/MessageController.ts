@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import fs from "fs";
-import { WAMessage } from "@whiskeysockets/baileys";
+import { WAMessage } from "baileys";
 import AppError from "../errors/AppError";
 
 import SetTicketMessagesAsRead from "../helpers/SetTicketMessagesAsRead";
