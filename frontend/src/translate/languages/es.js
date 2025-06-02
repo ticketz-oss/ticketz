@@ -889,6 +889,17 @@ const messages = {
         GracePeriod: {
           title: "Período de gracia después del vencimiento (días)",
         },
+        "ticketAcceptedMessage": {
+          "title": "Mensaje de ticket aceptado",
+          "placeholder": "Ingrese su mensaje de ticket aceptado aquí"
+        },
+        "transferMessage": {
+          "title": "Mensaje de transferencia",
+          "placeholder": "Ingrese su mensaje de transferencia aquí"
+        },
+        "mustacheVariables": {
+          "title": "Variables disponibles:",
+        },
         WelcomeGreeting: {
           greetings: "hola",
           welcome: "bienvenido a",

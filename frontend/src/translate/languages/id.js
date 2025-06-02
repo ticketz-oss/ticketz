@@ -880,6 +880,17 @@ const messages = {
         GracePeriod: {
           title: "Periode penundaan langganan berakhir (hari)",
         },
+        "ticketAcceptedMessage": {
+          "title": "Pesan Tiket Diterima",
+          "placeholder": "Masukkan pesan tiket diterima di sini"
+        },
+        "transferMessage": {
+          "title": "Pesan Transfer",
+          "placeholder": "Masukkan pesan transfer di sini"
+        },
+        "mustacheVariables": {
+          "title": "Variabel yang tersedia:"
+        },
         WelcomeGreeting: {
           greetings: "halo",
           welcome: "selamat datang di",
