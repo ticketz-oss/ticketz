@@ -28,6 +28,7 @@ import ModalUsers from "../ModalUsers";
 import api from "../../services/api";
 import { head, isArray, has } from "lodash";
 import { useDate } from "../../hooks/useDate";
+import useSettings from "../../hooks/useSettings";
 
 import moment from "moment";
 
@@ -67,6 +68,15 @@ const useStyles = makeStyles((theme) => ({
   buttonContainer: {
     textAlign: "right",
     padding: theme.spacing(1),
+  },
+  inactive: {
+    color: "gray"
+  },
+  gracePeriod: {
+    color: "orange"
+  },
+  almostDue: {
+    color: theme.mode === "light" ? "blue" : "#38f"
   },
 }));
 
@@ -412,7 +422,17 @@ export function CompaniesManagerGrid(props) {
   const { records, onSelect } = props;
   const classes = useStyles();
   const { dateToClient } = useDate();
-
+  const { getSetting } = useSettings();
+  const [gracePeriod, setGracePeriod] = useState(5);
+  
+  useEffect(() => {
+    getSetting("gracePeriod").then((value) => {
+      if (!isNaN(Number(value))) {
+        setGracePeriod(Number(value));
+      }
+    });
+  }, [getSetting]);
+        
   const renderStatus = (row) => {
     return row.status === false ? "Não" : "Sim";
   };
@@ -435,22 +455,22 @@ export function CompaniesManagerGrid(props) {
     return "Desabilitadas";
   };
 
-  const rowStyle = (record) => {
+  const rowClass = (record) => {
     if (moment(record.dueDate).isValid()) {
       const now = moment();
       const dueDate = moment(record.dueDate);
       const diff = dueDate.diff(now, "days");
-      if (diff === 5) {
-        return { backgroundColor: "#fffead" };
+      if (diff < -gracePeriod) {
+        return classes.inactive;
       }
-      if (diff >= -3 && diff <= 4) {
-        return { backgroundColor: "#f7cc8f" };
+      if (diff < 0) {
+        return classes.gracePeriod;
       }
-      if (diff === -4) {
-        return { backgroundColor: "#fa8c8c" };
+      if (diff < 7) {
+        return classes.almostDue;
       }
     }
-    return {};
+    return classes.active;
   };
 
   return (
@@ -477,20 +497,20 @@ export function CompaniesManagerGrid(props) {
         </TableHead>
         <TableBody>
           {records.map((row, key) => (
-            <TableRow style={rowStyle(row)} key={key}>
+            <TableRow className={rowClass(row)} key={key}>
               <TableCell align="center" style={{ width: "1%" }}>
                 <IconButton onClick={() => onSelect(row)} aria-label="delete">
                   <EditIcon />
                 </IconButton>
               </TableCell>
-              <TableCell align="left">{row.name || "-"}</TableCell>
-              <TableCell align="left">{row.email || "-"}</TableCell>
-              <TableCell align="left">{row.phone || "-"}</TableCell>
-              <TableCell align="left">{renderPlan(row)}</TableCell>
-              <TableCell align="left">{renderCampaignsStatus(row)}</TableCell>
-              <TableCell align="left">{renderStatus(row)}</TableCell>
-              <TableCell align="left">{dateToClient(row.createdAt)}</TableCell>
-              <TableCell align="left">
+              <TableCell align="left" style={{ color: "unset" }}>{row.name || "-"}</TableCell>
+              <TableCell align="left" style={{ color: "unset" }}>{row.email || "-"}</TableCell>
+              <TableCell align="left" style={{ color: "unset" }}>{row.phone || "-"}</TableCell>
+              <TableCell align="left" style={{ color: "unset" }}>{renderPlan(row)}</TableCell>
+              <TableCell align="left" style={{ color: "unset" }}>{renderCampaignsStatus(row)}</TableCell>
+              <TableCell align="left" style={{ color: "unset" }}>{renderStatus(row)}</TableCell>
+              <TableCell align="left" style={{ color: "unset" }}>{dateToClient(row.createdAt)}</TableCell>
+              <TableCell align="left" style={{ color: "unset" }}>
                 {dateToClient(row.dueDate)}
                 <br />
                 <span>{row.recurrence}</span>
