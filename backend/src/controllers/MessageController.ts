@@ -362,8 +362,7 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
               data: {
                 ...messageData,
                 number,
-                body:
-                  (Array.isArray(body) ? body[i] : body) || media.originalname,
+                caption: (Array.isArray(body) ? body[i] : body) || undefined,
                 mediaPath: media.path
               }
             },

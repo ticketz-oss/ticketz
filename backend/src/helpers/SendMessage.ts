@@ -43,6 +43,7 @@ export const SendMessage = async (
     let message: proto.WebMessageInfo;
 
     const body = `${messageData.body}`;
+    const caption = messageData.caption || undefined;
 
     if (messageData.mediaPath) {
       // get filesize
@@ -86,7 +87,8 @@ export const SendMessage = async (
       }
       if (options) {
         message = await wbot.sendMessage(chatId, {
-          ...options
+          ...options,
+          caption
         });
       }
     } else if (messageData.mimeType && body.startsWith("http")) {
