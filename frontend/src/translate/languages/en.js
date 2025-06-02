@@ -881,6 +881,9 @@ const messages = {
             "disabled": "Disabled"
           }
         },
+        GracePeriod: {
+          title: "Subscription Grace Period (days)",
+        },
         WelcomeGreeting: {
           greetings: "Hello",
           welcome: "Welcome to",

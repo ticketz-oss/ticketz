@@ -838,6 +838,9 @@ const messages = {
             disabled: "Desativado",
           },
         },
+        GracePeriod: {
+          title: "Carência após vencimento (dias)",
+        },
         WelcomeGreeting: {
           greetings: "Olá",
           welcome: "Bem-vindo a",

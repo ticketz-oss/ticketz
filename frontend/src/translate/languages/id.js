@@ -877,6 +877,9 @@ const messages = {
             disabled: "Dinonaktifkan",
           }
         },
+        GracePeriod: {
+          title: "Periode penundaan langganan berakhir (hari)",
+        },
         WelcomeGreeting: {
           greetings: "halo",
           welcome: "selamat datang di",
