@@ -1392,6 +1392,8 @@ const handleChartbot = async (
         const body = formatBody(`${whatsapp.transferMessage}`, ticket);
         await SendWhatsAppMessage({ body, ticket });
       }
+    } else {
+      await sendMenu(wbot, ticket, queue);
     }
   }
 
