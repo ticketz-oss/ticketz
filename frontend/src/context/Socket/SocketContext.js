@@ -193,6 +193,9 @@ const socketManager = {
       })
       
       this.currentSocket.onAny((event, ...args) => {
+        if (event === "backendlog") {
+          return;
+        }
         console.debug("Event: ", { socket: this.currentSocket, event, args });
       });
       

@@ -571,6 +571,48 @@ export default function Options(props) {
           </FormControl>
         </Grid>
 
+        <Grid xs={12} sm={12} md={6} item>
+          <FormControl className={classes.selectContainer}>
+            <TextField
+              id="ticket-accepted-message-field"
+              label={i18n.t("settings.ticketAcceptedMessage.title")}
+              placeholder={i18n.t("settings.ticketAcceptedMessage.placeholder")}
+              variant="standard"
+              multiline
+              rows={4}
+              value={ticketAcceptedMessage}
+              onChange={(e) => {
+                setTicketAcceptedMessage(e.target.value);
+              }}
+              onBlur={(e) => {
+                handleSetting("ticketAcceptedMessage", ticketAcceptedMessage);
+              }}
+            />
+            <span>{i18n.t("settings.mustacheVariables.title")} {'{{firstname}} {{name}} {{user}} {{queue}}'}</span>
+          </FormControl>
+        </Grid>
+
+        <Grid xs={12} sm={12} md={6} item>
+          <FormControl className={classes.selectContainer}>
+            <TextField
+              id="transfer-message-field"
+              label={i18n.t("settings.transferMessage.title")}
+              placeholder={i18n.t("settings.transferMessage.placeholder")}
+              variant="standard"
+              multiline
+              rows={4}
+              value={transferMessage}
+              onChange={(e) => {
+                setTransferMessage(e.target.value);
+              }}
+              onBlur={(e) => {
+                handleSetting("transferMessage", transferMessage);
+              }}
+            />
+            <span>{i18n.t("settings.mustacheVariables.title")} {'{{firstname}} {{name}} {{user}} {{queue}}'}</span>
+          </FormControl>
+        </Grid>
+
         <Grid item xs={12}>
           <h2 className={classes.groupTitle}>{i18n.t("settings.group.timeouts")}</h2>
         </Grid>
@@ -1162,53 +1204,6 @@ export default function Options(props) {
         />
       </Grid>
         
-      <Grid spacing={3} container>
-        <Grid xs={12} sm={6} md={6} item>
-          <FormControl className={classes.selectContainer}>
-            <TextField
-              id="ticket-accepted-message-field"
-              label={i18n.t("settings.ticketAcceptedMessage.title")}
-              placeholder={i18n.t("settings.ticketAcceptedMessage.placeholder")}
-              variant="standard"
-              multiline
-              rows={4}
-              ref={ticketAcceptedMessageRef}
-              value={ticketAcceptedMessage}
-              onChange={(e) => {
-                setTicketAcceptedMessage(e.target.value);
-              }}
-              onBlur={(e) => {
-                handleSetting("ticketAcceptedMessage", ticketAcceptedMessage);
-              }}
-            />
-            <span>{i18n.t("settings.mustacheVariables.title")} {'{{firstname}} {{name}} {{user}} {{queue}}'}</span>
-          </FormControl>
-        </Grid>
-
-        <Grid xs={12} sm={6} md={6} item>
-          <FormControl className={classes.selectContainer}>
-            <TextField
-              id="transfer-message-field"
-              label={i18n.t("settings.transferMessage.title")}
-              placeholder={i18n.t("settings.transferMessage.placeholder")}
-              variant="standard"
-              multiline
-              rows={4}
-              ref={transferMessageRef}
-              value={transferMessage}
-              onChange={(e) => {
-                setTransferMessage(e.target.value);
-              }}
-              onBlur={(e) => {
-                handleSetting("transferMessage", transferMessage);
-              }}
-            />
-            <span>{i18n.t("settings.mustacheVariables.title")} {'{{firstname}} {{name}} {{user}} {{queue}}'}</span>
-          </FormControl>
-        </Grid>
-
-      </Grid>
-      
       <OnlyForSuperUser
         user={currentUser}
         yes={() => (

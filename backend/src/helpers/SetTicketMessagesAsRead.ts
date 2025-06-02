@@ -1,4 +1,4 @@
-import { WASocket, proto } from "@whiskeysockets/baileys";
+import { WASocket, proto } from "baileys";
 import { cacheLayer } from "../libs/cache";
 import { getIO } from "../libs/socket";
 import Message from "../models/Message";

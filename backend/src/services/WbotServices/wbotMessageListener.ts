@@ -15,7 +15,7 @@ import {
   Chat,
   Contact as WAContact,
   MediaType
-} from "@whiskeysockets/baileys";
+} from "baileys";
 import { Mutex } from "async-mutex";
 import { Op } from "sequelize";
 import { Sequelize } from "sequelize-typescript";
@@ -976,83 +976,10 @@ const sendMenu = async (
   currentOption: Queue | QueueOption,
   sendBackToMain = true
 ) => {
-  const { companyId } = ticket;
-  const buttonActive = await Setting.findOne({
-    where: {
-      key: "chatBotType",
-      companyId
-    }
-  });
-
   const message =
     currentOption instanceof Queue
       ? (currentOption as Queue).greetingMessage
       : (currentOption as QueueOption).message;
-
-  const botList = async () => {
-    const sectionsRows = [];
-
-    currentOption.options.forEach(option => {
-      sectionsRows.push({
-        title: option.title,
-        rowId: `${option.option}`
-      });
-    });
-    if (sendBackToMain) {
-      sectionsRows.push({
-        title: "Voltar Menu Inicial",
-        rowId: "#"
-      });
-    }
-    const sections = [
-      {
-        rows: sectionsRows
-      }
-    ];
-
-    const listMessage = {
-      text: formatBody(`${message}`, ticket),
-      buttonText: "Escolha uma opção",
-      sections
-    };
-
-    const sendMsg = await wbot.sendMessage(
-      `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-      listMessage
-    );
-
-    await verifyMessage(sendMsg, ticket, ticket.contact);
-  };
-
-  const botButton = async () => {
-    const buttons = [];
-    currentOption.options.forEach(option => {
-      buttons.push({
-        buttonId: `${option.option}`,
-        buttonText: { displayText: option.title },
-        type: 4
-      });
-    });
-    if (sendBackToMain) {
-      buttons.push({
-        buttonId: "#",
-        buttonText: { displayText: "Voltar Menu Inicial" },
-        type: 4
-      });
-    }
-    const buttonMessage = {
-      text: formatBody(`${message}`, ticket),
-      buttons,
-      headerType: 4
-    };
-
-    const sendMsg = await wbot.sendMessage(
-      `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-      buttonMessage
-    );
-
-    await verifyMessage(sendMsg, ticket, ticket.contact);
-  };
 
   const botText = async () => {
     const showNumericIcons =
@@ -1090,22 +1017,7 @@ const sendMenu = async (
     await verifyMessage(sendMsg, ticket, ticket.contact);
   };
 
-  switch (buttonActive.value) {
-    case "list":
-      botList();
-      break;
-    case "button":
-      if (QueueOption.length > 4) {
-        botText();
-      } else {
-        botButton();
-      }
-      break;
-    case "text":
-      botText();
-      break;
-    default:
-  }
+  botText();
 };
 
 const getTicketJid = (ticket: Ticket) => {
@@ -1730,6 +1642,8 @@ const handleChartbot = async (
         const body = formatBody(`${whatsapp.transferMessage}`, ticket);
         await SendWhatsAppMessage({ body, ticket });
       }
+    } else {
+      await sendMenu(wbot, ticket, queue);
     }
   }
 
@@ -2410,7 +2324,7 @@ const filterMessages = (msg: WAMessage): boolean => {
       WAMessageStubType.E2E_DEVICE_CHANGED,
       WAMessageStubType.E2E_IDENTITY_CHANGED,
       WAMessageStubType.CIPHERTEXT
-    ].includes(msg.messageStubType as WAMessageStubType)
+    ].includes(msg.messageStubType)
   )
     return false;
 
@@ -2423,6 +2337,7 @@ const wbotMessageListener = async (
 ): Promise<void> => {
   try {
     wbot.ev.on("messages.upsert", async (messageUpsert: ImessageUpsert) => {
+      logger.trace({ messageUpsert }, "wbotMessageListener: messages.upsert");
       const messages = messageUpsert.messages
         .filter(filterMessages)
         .map(msg => msg);
@@ -2444,6 +2359,7 @@ const wbotMessageListener = async (
     });
 
     wbot.ev.on("messages.update", (messageUpdate: WAMessageUpdate[]) => {
+      logger.trace({ messageUpdate }, "wbotMessageListener: messages.update");
       if (messageUpdate.length === 0) return;
       messageUpdate.forEach(async (message: WAMessageUpdate) => {
         (wbot as WASocket)!.readMessages([message.key]);

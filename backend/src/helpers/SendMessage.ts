@@ -2,7 +2,7 @@ import {
   AnyMediaMessageContent,
   AnyMessageContent,
   proto
-} from "@whiskeysockets/baileys";
+} from "baileys";
 import fs from "fs";
 import mime from "mime-types";
 import iconv from "iconv-lite";
@@ -51,6 +51,7 @@ export const SendMessage = async (
     let message: proto.WebMessageInfo;
 
     const body = `${messageData.body}`;
+    const caption = messageData.caption || undefined;
 
     if (messageData.mediaPath) {
       // get filesize
@@ -94,7 +95,8 @@ export const SendMessage = async (
       }
       if (options) {
         message = await wbot.sendMessage(chatId, {
-          ...options
+          ...options,
+          caption
         });
       }
     } else if (messageData.mimeType && body.startsWith("http")) {
@@ -154,6 +156,7 @@ export const SendMessage = async (
         Number(messageData.saveOnTicket) || null
       );
     } else {
+      wbot.cacheMessage(message);
       await OutOfTicketMessage.create({
         id: message.key.id,
         dataJson: JSON.stringify(message),

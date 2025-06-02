@@ -44,7 +44,7 @@ import { instrument } from "@socket.io/admin-ui";
 import { Server } from "http";
 import { verify } from "jsonwebtoken";
 import AppError from "../errors/AppError";
-import { logger } from "../utils/logger";
+import { logger, socketSendBuffer } from "../utils/logger";
 import User from "../models/User";
 import Queue from "../models/Queue";
 import Ticket from "../models/Ticket";
@@ -160,6 +160,51 @@ export const initIO = (httpServer: Server): SocketIO => {
     if (user.profile === "admin") {
       socket.join(`company-${user.companyId}-admin`);
     }
+
+    socket.on("joinBackendlog", () => {
+      if (user.super) {
+        socket.join("backendlog");
+        io.to("backendlog").emit("backendlog", {
+          timestamp: Date.now(),
+          level: 30,
+          logs: [
+            { currentLevel: logger.level },
+            "started transmission of backend logs"
+          ]
+        });
+        socketSendBuffer();
+      } else {
+        logger.info(`User ${user.id} tried to join superlog channel.`);
+      }
+    });
+
+    socket.on("leaveBackendlog", () => {
+      if (user.super) {
+        io.to("backendlog").emit("backendlog", {
+          timestamp: Date.now(),
+          level: 30,
+          logs: ["finished transmission of backend logs"]
+        });
+        socket.leave("backendlog");
+      } else {
+        logger.info(`User ${user.id} tried to leave superlog channel.`);
+      }
+    });
+
+    socket.on("setLoglevel", (level: string) => {
+      if (user.super) {
+        if (logger.level === level) return;
+
+        logger.level = level;
+        io.to("backendlog").emit("backendlog", {
+          timestamp: Date.now(),
+          level: 30,
+          logs: [`Log level changed to ${level}`]
+        });
+      } else {
+        logger.info(`User ${user.id} tried to set log level.`);
+      }
+    });
 
     socket.on("joinChatBox", async (ticketId: string) => {
       if (!ticketId || ticketId === "undefined") {

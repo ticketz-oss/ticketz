@@ -6,6 +6,7 @@ const messages = {
       },
       common: {
         search: "Search",
+        filter: "Filter",
         edit: "Edit",
         delete: "Delete",
         cancel: "Cancel",

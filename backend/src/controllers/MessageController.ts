@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import fs from "fs";
-import { WAMessage } from "@whiskeysockets/baileys";
+import { WAMessage } from "baileys";
 import AppError from "../errors/AppError";
 
 import SetTicketMessagesAsRead from "../helpers/SetTicketMessagesAsRead";
@@ -362,8 +362,7 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
               data: {
                 ...messageData,
                 number,
-                body:
-                  (Array.isArray(body) ? body[i] : body) || media.originalname,
+                caption: (Array.isArray(body) ? body[i] : body) || undefined,
                 mediaPath: media.path
               }
             },

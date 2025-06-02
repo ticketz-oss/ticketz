@@ -3,6 +3,7 @@ const messages = {
     translations: {
       common: {
         search: "Pesquisar",
+        filter: "Filtrar",
         edit: "Editar",
         delete: "Eliminar",
         cancel: "Cancelar",
@@ -836,6 +837,20 @@ const messages = {
             enabled: "Ativado",
             disabled: "Desativado",
           },
+        },
+        GracePeriod: {
+          title: "Carência após vencimento (dias)",
+        },
+        "ticketAcceptedMessage": {
+          "title": "Mensagem de ticket aceito",
+          "placeholder": "Digite sua mensagem de ticket aceito aqui"
+        },
+        "transferMessage": {
+          "title": "Mensagem de transferência",
+          "placeholder": "Digite sua mensagem de transferência aqui"
+        },
+        "mustacheVariables": {
+          "title": "Variáveis disponíveis:"
         },
         WelcomeGreeting: {
           greetings: "Olá",

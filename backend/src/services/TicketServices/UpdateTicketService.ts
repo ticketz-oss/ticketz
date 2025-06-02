@@ -477,26 +477,10 @@ const UpdateTicketService = async ({
       !isGroup &&
       !ticket.chatbot &&
       !ticket.contact.disableBot &&
-      !fromChatbot
+      !fromChatbot &&
+      !dontRunChatbot
     ) {
-      if (oldQueueId && ticket.queueId && oldQueueId !== ticket.queueId) {
-        const whatsapp = await ShowWhatsAppService(
-          ticket.whatsappId,
-          companyId
-        );
-        const systemTransferMessage = await GetCompanySetting(
-          companyId,
-          "transferMessage",
-          ""
-        );
-        const transferMessage =
-          whatsapp.transferMessage || systemTransferMessage;
-
-        if (transferMessage) {
-          await sendFormattedMessage(transferMessage, ticket);
-        }
-      }
-
+      let accepted = false;
       if (
         ticket.userId &&
         ticket.status === "open" &&
@@ -511,6 +495,30 @@ const UpdateTicketService = async ({
         if (acceptedMessage) {
           const acceptUser = await User.findByPk(userId);
           await sendFormattedMessage(acceptedMessage, ticket, acceptUser);
+          accepted = true;
+        }
+      }
+
+      if (
+        !accepted &&
+        oldQueueId &&
+        ticket.queueId &&
+        oldQueueId !== ticket.queueId
+      ) {
+        const whatsapp = await ShowWhatsAppService(
+          ticket.whatsappId,
+          companyId
+        );
+        const systemTransferMessage = await GetCompanySetting(
+          companyId,
+          "transferMessage",
+          ""
+        );
+        const transferMessage =
+          whatsapp.transferMessage || systemTransferMessage;
+
+        if (transferMessage) {
+          await sendFormattedMessage(transferMessage, ticket);
         }
       }
     }
