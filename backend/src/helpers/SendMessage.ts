@@ -1,4 +1,4 @@
-import { AnyMessageContent, proto } from "@whiskeysockets/baileys";
+import { AnyMessageContent, proto } from "baileys";
 import fs from "fs";
 import mime from "mime-types";
 import iconv from "iconv-lite";
@@ -101,6 +101,7 @@ export const SendMessage = async (
         Number(messageData.saveOnTicket) || null
       );
     } else {
+      wbot.cacheMessage(message);
       await OutOfTicketMessage.create({
         id: message.key.id,
         dataJson: JSON.stringify(message),

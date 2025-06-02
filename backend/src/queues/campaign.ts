@@ -3,7 +3,7 @@ import moment from "moment";
 import { QueryTypes } from "sequelize";
 import { isEmpty, isNil, isArray } from "lodash";
 import path from "path";
-import { AnyMessageContent } from "@whiskeysockets/baileys";
+import { AnyMessageContent } from "baileys";
 import Campaign from "../models/Campaign";
 import ContactList from "../models/ContactList";
 import ContactListItem from "../models/ContactListItem";
@@ -364,6 +364,7 @@ async function sendCampaignMessage(
 ) {
   try {
     const message = await wbot.sendMessage(jid, content);
+    wbot.cacheMessage(message);
     OutOfTicketMessage.create({
       id: message.key.id,
       dataJson: JSON.stringify(message),

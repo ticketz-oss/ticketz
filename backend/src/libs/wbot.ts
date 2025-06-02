@@ -8,7 +8,7 @@ import makeWASocket, {
   WAMessageKey,
   WAMessageContent,
   proto
-} from "@whiskeysockets/baileys";
+} from "baileys";
 
 import { Boom } from "@hapi/boom";
 // import MAIN_LOGGER from "@whiskeysockets/baileys/lib/Utils/logger";

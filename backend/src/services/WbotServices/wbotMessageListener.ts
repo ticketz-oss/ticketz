@@ -13,9 +13,9 @@ import {
   MessageUpsertType,
   proto,
   WAMessage,
-  WAMessageStubType,
-  WAMessageUpdate
-} from "@whiskeysockets/baileys";
+  WAMessageUpdate,
+  WAMessageStubType
+} from "baileys";
 import { Mutex } from "async-mutex";
 import { Op } from "sequelize";
 import moment from "moment";
@@ -453,7 +453,7 @@ const downloadMedia = async (
       text: `*Mensagem Automática*:\nNosso sistema aceita apenas arquivos com no máximo ${fileLimit} MiB`
     };
 
-    if (!ticket.isGroup) {
+    if (!ticket.isGroup && !msg.key?.fromMe) {
       const sendMsg = await wbot.sendMessage(
         `${ticket.contact.number}@s.whatsapp.net`,
         fileLimitMessage
@@ -2029,7 +2029,7 @@ const filterMessages = (msg: WAMessage): boolean => {
       WAMessageStubType.E2E_DEVICE_CHANGED,
       WAMessageStubType.E2E_IDENTITY_CHANGED,
       WAMessageStubType.CIPHERTEXT
-    ].includes(msg.messageStubType as WAMessageStubType)
+    ].includes(msg.messageStubType)
   )
     return false;
 
@@ -2104,6 +2104,7 @@ const wbotMessageListener = async (
 ): Promise<void> => {
   try {
     wbot.ev.on("messages.upsert", async (messageUpsert: ImessageUpsert) => {
+      logger.trace({ messageUpsert }, "wbotMessageListener: messages.upsert");
       const messages = messageUpsert.messages
         .filter(filterMessages)
         .map(msg => msg);
@@ -2125,6 +2126,7 @@ const wbotMessageListener = async (
     });
 
     wbot.ev.on("messages.update", (messageUpdate: WAMessageUpdate[]) => {
+      logger.trace({ messageUpdate }, "wbotMessageListener: messages.update");
       if (messageUpdate.length === 0) return;
       messageUpdate.forEach(async (message: WAMessageUpdate) => {
         (wbot as WASocket)!.readMessages([message.key]);

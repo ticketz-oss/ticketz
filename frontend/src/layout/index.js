@@ -23,6 +23,7 @@ import CachedIcon from "@material-ui/icons/Cached";
 
 import MainListItems from "./MainListItems";
 import NotificationsPopOver from "../components/NotificationsPopOver";
+import { Backendlogs } from "../components/Backendlogs";
 import NotificationsVolume from "../components/NotificationsVolume";
 import UserModal from "../components/UserModal";
 import AboutModal from "../components/AboutModal";
@@ -426,6 +427,8 @@ const LoggedInLayout = ({ children, themeToggle }) => {
             )}
           </Typography>
 
+          <Backendlogs />
+          
           <NotificationsVolume
             setVolume={setVolume}
             volume={volume}

@@ -3,6 +3,7 @@ const messages = {
     translations: {
       common: {
         search: "Search",
+        filter: "Filter",
         edit: "Edit",
         delete: "Delete",
         cancel: "Cancel",

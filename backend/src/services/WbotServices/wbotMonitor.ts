@@ -1,4 +1,4 @@
-import { BinaryNode, Contact as BContact } from "@whiskeysockets/baileys";
+import { BinaryNode, Contact as BContact } from "baileys";
 import * as Sentry from "@sentry/node";
 
 import { Mutex } from "async-mutex";
