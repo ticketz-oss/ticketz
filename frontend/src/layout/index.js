@@ -427,7 +427,11 @@ const LoggedInLayout = ({ children, themeToggle }) => {
             )}
           </Typography>
 
-          <Backendlogs />
+          <OnlyForSuperUser
+            user={currentUser}
+            yes={() => (
+              <Backendlogs />
+            )} />
           
           <NotificationsVolume
             setVolume={setVolume}
