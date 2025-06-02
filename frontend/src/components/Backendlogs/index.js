@@ -290,10 +290,18 @@ export function Backendlogs() {
     setIsOpen(false);
   };
 
+  const handleClearLogs = () => {
+    setLogs([]);
+    if (consoleRef.current) {
+      consoleRef.current.scrollTop = 0;
+    }
+  };
+
   const handleLoggingToggle = (event) => {
     const socket = socketManager.GetSocket();
 
     if (event.target.checked) {
+      handleClearLogs();
       socket.emit("joinBackendlog");
       setIsLoggingEnabled(true);
     } else {
@@ -326,7 +334,7 @@ export function Backendlogs() {
       reader.readAsText(file);
     };
     input.click();
-  }
+  };
   
   const handleExport = () => {
     const dataStr = JSON.stringify(logs, null, 2);
@@ -340,8 +348,8 @@ export function Backendlogs() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  }
-
+  };
+  
   return (
     <>
       <IconButton
@@ -404,12 +412,7 @@ export function Backendlogs() {
             />
             <IconButton
               className={classes.noShadow}
-              onClick={() => {
-                setLogs([]);
-                if (consoleRef.current) {
-                  consoleRef.current.scrollTop = 0;
-                }
-              }}
+              onClick={handleClearLogs}
               aria-label="Clear Logs"
             >
               <FontAwesomeIcon icon={faTrash} />
