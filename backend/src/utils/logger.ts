@@ -79,6 +79,26 @@ function addSubsystem(inputArgs, subsystem) {
   }
 }
 
+export function initLogger(subsystem: string, level: string) {
+  return pino({
+    level,
+    transport: {
+      target: "pino-pretty",
+      options: {
+        levelFirst: true,
+        translateTime: true,
+        colorize: true
+      }
+    },
+    hooks: {
+      logMethod(inputArgs, method) {
+        addSubsystem(inputArgs, subsystem);
+        method.apply(this, inputArgs);
+      }
+    }
+  });
+}
+
 export const logger = pino({
   level: process.env.LOG_LEVEL ?? "info",
   transport: {
