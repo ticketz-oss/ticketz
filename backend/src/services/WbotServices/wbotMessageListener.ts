@@ -2114,6 +2114,13 @@ const wbotMessageListener = async (
       if (!messages) return;
 
       messages.forEach(async (message: proto.IWebMessageInfo) => {
+        if (!message?.message) {
+          logger.warn(
+            { message },
+            "wbotMessageListener: messages.upsert without supported content"
+          );
+          return;
+        }
         const messageExists = await Message.count({
           where: { id: message.key.id!, companyId }
         });
