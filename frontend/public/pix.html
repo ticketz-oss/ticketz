@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickPix Viewer</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    #qrcode {
+      margin: 20px auto;
+    }
+
+    #countdown {
+      font-size: 1.5em;
+      color: red;
+    }
+
+    #paid {
+      font-size: 1.5em;
+      color: green;
+    }
+
+    .pixcode {
+      font-family: monospace;
+      background-color: #f4f4f4;
+      padding: 10px;
+      border: 1px solid #ccc;
+      display: block;
+      max-width: 400px;
+      overflow: auto;
+      margin: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="instructions">
+    <p id="instruction-text"></p>
+  </div>
+  <div id="qrcode"></div>
+  <div id="countdown"></div>
+  <div id="paid"></div>
+
+  <script>
+    const translations = {
+      en: {
+        missingKey: 'Key parameter "k" is missing!',
+        failedConfig: 'Failed to load configuration',
+        failedFetch: 'Failed to fetch QuickPix data',
+        alreadyPaid: 'This QuickPix is already paid!',
+        expired: 'Expired!',
+        expiresIn: 'Expires in: {minutes}m {seconds}s',
+        copySuccess: 'Pixcode copied to clipboard!',
+        copyFail: 'Failed to copy pixcode: {error}',
+        instructions: 'Pay using the QRCode or copy the code and use the PIX COPY AND PASTE function in your banking app.',
+        copyButton: 'Copy'
+      },
+      pt: {
+        missingKey: 'Parâmetro de chave "k" está ausente!',
+        failedConfig: 'Falha ao carregar a configuração',
+        failedFetch: 'Falha ao buscar os dados do QuickPix',
+        alreadyPaid: 'Este QuickPix já está pago!',
+        expired: 'Expirado!',
+        expiresIn: 'Expira em: {minutes}m {seconds}s',
+        copySuccess: 'Código Pix copiado para a área de transferência!',
+        copyFail: 'Falha ao copiar o código Pix: {error}',
+        instructions: 'Pague pelo QRCode ou copie o código e use a função PIX COPIA E COLA do seu aplicativo bancário.',
+        copyButton: 'Copiar'
+      },
+      es: {
+        missingKey: '¡Falta el parámetro de clave "k"!',
+        failedConfig: 'Error al cargar la configuración',
+        failedFetch: 'Error al obtener los datos de QuickPix',
+        alreadyPaid: '¡Este QuickPix ya está pagado!',
+        copySuccess: '¡Código Pix copiado al portapapeles!',
+        copyFail: 'Error al copiar el código Pix: {error}',
+        instructions: 'Pague usando el código QR o copie el código y use la función PIX COPIA Y PEGA en su aplicación bancaria.',
+        copyButton: 'Copiar'
+      }
+    };
+
+    function getTranslation(key, replacements = {}) {
+      const lang = navigator.language.slice(0, 2);
+      const translation = translations[lang] || translations.en;
+      let text = translation[key] || key;
+
+      for (const [placeholder, value] of Object.entries(replacements)) {
+        text = text.replace(`{${placeholder}}`, value);
+      }
+
+      return text;
+    }
+
+    async function loadConfig() {
+      try {
+        const response = await fetch('/config.json');
+        if (!response.ok) {
+          throw new Error(getTranslation('failedConfig'));
+        }
+        return await response.json();
+      } catch (error) {
+        alert(error.message);
+        throw error;
+      }
+    }
+
+    async function checkPaymentStatus(baseUrl, key) {
+      try {
+        const response = await fetch(`${baseUrl}/quickpix/k/${key}`);
+        if (!response.ok) {
+          throw new Error(getTranslation('failedFetch'));
+        }
+
+        const quickPix = await response.json();
+        const { isPaid } = quickPix;
+
+        if (isPaid) {
+          document.getElementById('paid').textContent = getTranslation('alreadyPaid');
+          document.getElementById('instructions').innerHTML = '';
+          document.getElementById('qrcode').innerHTML = '';
+          clearInterval(paymentCheckInterval);
+        }
+      } catch (error) {
+        console.error(error.message);
+      }
+    }    
+     
+    async function loadQuickPix() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const key = urlParams.get('k');
+      if (!key) {
+        alert(getTranslation('missingKey'));
+        return;
+      }
+
+      try {
+        const config = await loadConfig();
+        const baseUrl = `${config.BACKEND_PROTOCOL || "https"}://${config.BACKEND_HOST || "localhost"}:${config.BACKEND_PORT || 443}${config.BACKEND_PATH || ""}`;
+
+        const response = await fetch(`${baseUrl}/quickpix/k/${key}`);
+        if (!response.ok) {
+          throw new Error(getTranslation('failedFetch'));
+        }
+
+        const quickPix = await response.json();
+        const {pixcode, expiration, isPaid} = quickPix;
+
+        // Check if already paid
+        if (isPaid) {
+          document.getElementById('paid').textContent = getTranslation('alreadyPaid');
+          return;
+        }
+
+        // Display QR code
+        const qrcodeContainer = document.getElementById('qrcode');
+
+        // Create a canvas element
+        const canvas = document.createElement('canvas');
+        qrcodeContainer.appendChild(canvas);
+
+        // Generate the QR code on the canvas
+        QRCode.toCanvas(canvas, pixcode, { width: 200 });
+
+        // Add <pre> tag with pixcode
+        const pre = document.createElement('pre');
+        pre.className = 'pixcode';
+        pre.textContent = pixcode;
+        qrcodeContainer.appendChild(pre);
+
+        // Add copy button
+        const copyButton = document.createElement('button');
+        copyButton.textContent = getTranslation('copyButton');
+        copyButton.onclick = () => {
+          navigator.clipboard.writeText(pixcode).then(() => {
+            alert(getTranslation('copySuccess'));
+          }).catch(err => {
+            alert(getTranslation('copyFail', { error: err }));
+          });
+        };
+        qrcodeContainer.appendChild(copyButton);
+
+        // show instructions
+        const instructionText = document.getElementById('instruction-text');
+        instructionText.textContent = getTranslation('instructions');
+        
+        // Countdown to expiration
+        const expirationTime = new Date(expiration).getTime();
+        const countdownElement = document.getElementById('countdown');
+
+        function updateCountdown() {
+          const now = Date.now();
+          const timeLeft = expirationTime - now;
+
+          if (timeLeft <= 0) {
+            countdownElement.textContent = getTranslation('expired');
+            clearInterval(interval);
+
+            // Clear other elements
+            document.getElementById('instructions').innerHTML = '';
+            document.getElementById('qrcode').innerHTML = '';
+            document.getElementById('paid').textContent = '';
+            return;
+          }
+
+          const minutes = Math.floor(timeLeft / 60000);
+          const seconds = Math.floor((timeLeft % 60000) / 1000);
+          countdownElement.textContent = getTranslation('expiresIn', { minutes, seconds });
+        }
+
+        const interval = setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        if (!isPaid) {
+          const expirationTime = new Date(expiration).getTime();
+          const now = Date.now();
+
+          if (expirationTime > now) {
+            paymentCheckInterval = setInterval(() => checkPaymentStatus(baseUrl, key), 10000);
+          }
+        }        
+      
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    loadQuickPix();
+  </script>
+</body>
+</html>

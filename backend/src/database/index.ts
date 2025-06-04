@@ -41,6 +41,7 @@ import OutOfTicketMessage from "../models/OutOfTicketMessages";
 import Integration from "../models/Integration";
 import IntegrationSession from "../models/IntegrationSession";
 import NotificamehubIdMapping from "../models/NotificamehubIdMapping";
+import QuickPix from "../models/QuickPix";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const dbConfig = require("../config/database");
@@ -86,6 +87,7 @@ const models = [
   ChatMessage,
   Invoices,
   OutOfTicketMessage,
+  QuickPix,
   Subscriptions,
   Integration,
   IntegrationSession,
