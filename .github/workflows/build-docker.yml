@@ -11,8 +11,8 @@ on:
       - 'v*.*.*'
 env:
   REGISTRY: ghcr.io
-  IMAGE_BACKEND: ticketz-oss/ticketz-backend
-  IMAGE_FRONTEND: ticketz-oss/ticketz-frontend
+  IMAGE_BACKEND: tutujaru/botconversa-backend
+  IMAGE_FRONTEND: tutujaru/botconversa-frontend
 
 jobs:
   build-and-push-images:
