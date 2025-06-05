@@ -693,7 +693,7 @@ export const verifyMediaMessage = async (
     mediaType,
     thumbnailUrl,
     quotedMsgId: quotedMsg?.id,
-    ack: msg.status,
+    ack: msg.status || 0,
     remoteJid: msg.key.remoteJid,
     participant: msg.key.participant,
     dataJson: JSON.stringify(msg)
@@ -759,7 +759,7 @@ export const verifyMessage = async (
     mediaType: msg.message.reactionMessage ? "reactionMessage" : null,
     read: msg.key.fromMe,
     quotedMsgId: quotedMsg?.id,
-    ack: msg.status,
+    ack: msg.status || 0,
     remoteJid: msg.key.remoteJid,
     participant: msg.key.participant,
     dataJson: JSON.stringify(msg),
