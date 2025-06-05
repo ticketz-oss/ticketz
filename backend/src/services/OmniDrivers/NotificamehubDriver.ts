@@ -712,6 +712,13 @@ export class NotificamehubDriver implements OmniDriver {
 
     const connection = await Whatsapp.findByPk(ticket.whatsappId);
 
+    if (!this.sessions[connection.id]) {
+      await this.startService(connection);
+      if (!this.sessions[connection.id]) {
+        throw new Error("notificamehub:sendMessage: Session not initialized");
+      }
+    }
+
     let content: TextContent | ReplyContent | ReactionContent;
     const promises = [];
 
