@@ -49,6 +49,7 @@ import { FindOrCreateTicketOptions } from "../TicketServices/FindOrCreateTicketS
 import Queue from "../../models/Queue";
 import { chatbotHandler } from "./ChatbotServices";
 import { multerPassthrough } from "../../helpers/multerPassthrough";
+import { checkRating } from "../TicketServices/TicketRatingServices";
 
 export type OmniMessage = {
   type: "text" | "image" | "video" | "audio" | "document" | "reaction";
@@ -190,6 +191,16 @@ export class OmniServices {
       const contact = await driver.findOrCreateContact(connection, data);
       if (!contact) {
         throw new Error("Contact not found or created");
+      }
+
+      const bodyMessage = await driver.getMessageText(data);
+
+      if (
+        bodyMessage &&
+        !contact.isGroup &&
+        (await checkRating(bodyMessage, contact, connection))
+      ) {
+        return;
       }
 
       let defaultQueue: Queue;
