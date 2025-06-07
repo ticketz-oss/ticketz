@@ -11,6 +11,9 @@ import Whatsapp from "../../models/Whatsapp";
 import User from "../../models/User";
 import Queue from "../../models/Queue";
 import { updateTicket } from "./UpdateTicketService";
+import { OmniServices } from "../OmniServices/OmniServices";
+
+const omniServices = OmniServices.getInstance();
 
 async function handleRating(
   rate: number,
@@ -108,6 +111,12 @@ export async function checkRating(
         { ticketTracking },
         `start handling tracking rating for ticket ${ticketTracking.ticketId}`
       );
+
+      const omniDriver = omniServices.getOmniDriver(ticketTracking?.ticket);
+
+      if (omniDriver && !omniDriver.allowChatbot(ticketTracking.ticket)) {
+        return false;
+      }
 
       const rate = Number(message);
 
