@@ -59,6 +59,10 @@ export type OmniMessage = {
   quotedMsg?: Message;
 };
 
+export type OmniSendMessageOptions = {
+  dontSaveOnTicket?: boolean;
+};
+
 export interface OmniDriver {
   getName(): string;
   getDescription(): string;
@@ -77,7 +81,11 @@ export interface OmniDriver {
     type: string,
     channel: string
   ): (media: Express.Multer.File) => Promise<ProcessedMedia>;
-  sendMessage(ticket: Ticket, message: OmniMessage): Promise<Message[]>;
+  sendMessage(
+    ticket: Ticket,
+    message: OmniMessage,
+    options?: OmniSendMessageOptions
+  ): Promise<Message[]>;
   processStatus(data: any): Promise<Message>;
   allowChatbot(ticket: Ticket): Promise<boolean>;
 }
@@ -116,8 +124,12 @@ export class OmniServices {
       typeof input === "string"
         ? input
         : input instanceof Ticket
-        ? input.whatsapp?.channel || input.get("whatsapp").channel
+        ? input.whatsapp?.channel
         : input.channel;
+
+    if (!channel) {
+      throw new Error("Unable to determine the channel");
+    }
 
     const driver = this.drivers[channel];
     if (!driver) {

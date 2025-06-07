@@ -44,7 +44,7 @@ import Ticket from "../../models/Ticket";
 import Whatsapp from "../../models/Whatsapp";
 import { logger } from "../../utils/logger";
 import { IntegrationOptions } from "../IntegrationServices/IntegrationServices";
-import { OmniDriver, OmniMessage } from "../OmniServices/OmniServices";
+import { OmniDriver, OmniMessage, OmniSendMessageOptions } from "../OmniServices/OmniServices";
 import FindOrCreateTicketService from "../TicketServices/FindOrCreateTicketService";
 import CreateMessageService from "../MessageServices/CreateMessageService";
 import { NgrokInstance } from "../../helpers/NgrokInstance";
@@ -707,7 +707,11 @@ export class NotificamehubDriver implements OmniDriver {
     return Promise.all(newMessages);
   }
 
-  async sendMessage(ticket: Ticket, message: OmniMessage): Promise<Message[]> {
+  async sendMessage(
+    ticket: Ticket,
+    message: OmniMessage,
+    options: OmniSendMessageOptions
+  ): Promise<Message[]> {
     logger.debug("notificamehub:sendMessage");
 
     const connection = await Whatsapp.findByPk(ticket.whatsappId);
@@ -781,6 +785,10 @@ export class NotificamehubDriver implements OmniDriver {
           }
 
           logger.debug({ result }, "Message body sent");
+
+          if (options?.dontSaveOnTicket) {
+            return null;
+          }
 
           const sentMessage = await CreateMessageService({
             messageData: {
