@@ -17,17 +17,17 @@ import Company from "./models/Company";
 import Plan from "./models/Plan";
 import TicketTraking from "./models/TicketTraking";
 import { GetCompanySetting } from "./helpers/CheckSettings";
-import { getWbot } from "./libs/wbot";
 import Ticket from "./models/Ticket";
 import QueueModel from "./models/Queue";
 import UpdateTicketService from "./services/TicketServices/UpdateTicketService";
 import { handleMessage } from "./services/WbotServices/wbotMessageListener";
 import Invoices from "./models/Invoices";
-import formatBody, { mustacheFormat } from "./helpers/Mustache";
+import { mustacheFormat } from "./helpers/Mustache";
 import Setting from "./models/Setting";
 import { parseToMilliseconds } from "./helpers/parseToMilliseconds";
 import { startCampaignQueues } from "./queues/campaign";
 import OutOfTicketMessage from "./models/OutOfTicketMessages";
+import { sendFormattedMessage } from "./helpers/sendFormattedMessage";
 
 const connection = process.env.REDIS_URI || "";
 const limiterMax = process.env.REDIS_OPT_LIMITER_MAX || 1;
@@ -211,19 +211,10 @@ async function setRatingExpired(tracking: TicketTraking, threshold: Date) {
     return;
   }
 
-  const wbot = getWbot(tracking.whatsapp.id);
-
   const complationMessage =
     tracking.whatsapp.complationMessage.trim() || "Atendimento finalizado";
 
-  await wbot.sendMessage(
-    `${tracking.ticket.contact.number}@${
-      tracking.ticket.isGroup ? "g.us" : "s.whatsapp.net"
-    }`,
-    {
-      text: formatBody(`\u200e${complationMessage}`, tracking.ticket)
-    }
-  );
+  sendFormattedMessage(complationMessage, tracking.ticket, null, false);
 
   logger.debug({ tracking }, "rating timedout");
 }
@@ -248,6 +239,10 @@ async function handleRatingsTimeout() {
           {
             model: QueueModel,
             as: "queue"
+          },
+          {
+            model: Whatsapp,
+            as: "whatsapp"
           }
         ]
       },

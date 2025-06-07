@@ -34,11 +34,9 @@ import CreateOrUpdateContactService from "../ContactServices/CreateOrUpdateConta
 import FindOrCreateTicketService from "../TicketServices/FindOrCreateTicketService";
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
 import UpdateTicketService, {
-  UpdateTicketData
+  updateTicket
 } from "../TicketServices/UpdateTicketService";
 import formatBody from "../../helpers/Mustache";
-import TicketTraking from "../../models/TicketTraking";
-import UserRating from "../../models/UserRating";
 import SendWhatsAppMessage from "./SendWhatsAppMessage";
 import Queue from "../../models/Queue";
 import QueueOption from "../../models/QueueOption";
@@ -79,6 +77,7 @@ import {
 } from "../../workers/BaileysDownloader";
 import { getPublicPath } from "../../helpers/GetPublicPath";
 import ShowContactService from "../ContactServices/ShowContactService";
+import { checkRating } from "../TicketServices/TicketRatingServices";
 
 export interface ImessageUpsert {
   messages: proto.IWebMessageInfo[];
@@ -431,26 +430,6 @@ const createDeferred = (): DeferredPromise => {
   });
   return { promise, resolve, reject };
 };
-
-/**
- * @description: call UpdateTicketService to update ticket status, if ticketData have a queue id it will not run the chatbot
- * @params {Ticket} ticket - ticket to be updated
- * @params {UpdateTicketData} ticketData - data to be updated
- * @returns {Promise<Ticket>} - updated ticket
- */
-async function updateTicket(
-  ticket: Ticket,
-  ticketData: UpdateTicketData
-): Promise<Ticket> {
-  await UpdateTicketService({
-    ticketData,
-    ticketId: ticket.id,
-    companyId: ticket.companyId,
-    dontRunChatbot: !!ticketData.queueId
-  });
-  await ticket.reload();
-  return ticket;
-}
 
 export const verifyMediaMessage = async (
   msg: proto.IWebMessageInfo,
@@ -870,31 +849,6 @@ const verifyDeleteMessage = async (
       ticket: message.ticket,
       contact: message.ticket.contact
     });
-};
-
-const quickMessage = async (
-  wbot: Session,
-  ticket: Ticket,
-  text: string,
-  saveOnTicket = false
-) => {
-  const debouncedSentMessage = debounce(
-    async () => {
-      const sentMessage = await wbot.sendMessage(
-        `${ticket.contact.number}@s.whatsapp.net"
-        }`,
-        {
-          text: `\u200e${text}`
-        }
-      );
-      if (saveOnTicket) {
-        verifyMessage(sentMessage, ticket, ticket.contact);
-      }
-    },
-    1000,
-    ticket.id
-  );
-  debouncedSentMessage();
 };
 
 const isValidMsg = (msg: proto.IWebMessageInfo): boolean => {
@@ -1414,55 +1368,6 @@ const verifyQueue = async (
   }
 };
 
-const handleRating = async (
-  rate: number,
-  ticket: Ticket,
-  ticketTraking: TicketTraking,
-  wbot: Session
-) => {
-  const whatsapp = await ShowWhatsAppService(
-    ticket.whatsappId,
-    ticket.companyId
-  );
-
-  let finalRate = rate;
-
-  if (rate < 1) {
-    finalRate = 1;
-  }
-  if (rate > 5) {
-    finalRate = 5;
-  }
-
-  await UserRating.create({
-    ticketId: ticketTraking.ticketId,
-    companyId: ticketTraking.companyId,
-    userId: ticketTraking.userId,
-    rate: finalRate
-  });
-
-  const complationMessage =
-    whatsapp.complationMessage.trim() || "Atendimento finalizado";
-
-  const text = formatBody(`\u200e${complationMessage}`, ticket);
-  const jid = `${ticket.contact.number}@${
-    ticket.isGroup ? "g.us" : "s.whatsapp.net"
-  }`;
-
-  wbot
-    .sendMessage(jid, {
-      text
-    })
-    .then(
-      () => {
-        ticketTraking.update({
-          rated: true
-        });
-      },
-      e => logger.error({ e }, "error sending message")
-    );
-};
-
 export const checkIntegration = async (
   source: Message | Ticket,
   wbot: Session
@@ -1846,98 +1751,12 @@ const handleMessage = async (
       return;
     }
 
-    if (!msg.key.fromMe && !contact.isGroup) {
-      const userRatingEnabled =
-        (await GetCompanySetting(companyId, "userRating", "")) === "enabled";
-
-      const ticketTracking =
-        userRatingEnabled &&
-        (await TicketTraking.findOne({
-          where: {
-            whatsappId: whatsapp.id,
-            rated: false,
-            expired: false,
-            ratingAt: { [Op.not]: null }
-          },
-          include: [
-            {
-              model: Ticket,
-              where: {
-                status: "closed",
-                contactId: contact.id
-              },
-              include: [
-                {
-                  model: Contact
-                },
-                {
-                  model: User
-                },
-                {
-                  model: Queue
-                }
-              ]
-            }
-          ]
-        }));
-
-      if (ticketTracking) {
-        try {
-          /**
-           * Tratamento para avaliação do atendente
-           */
-
-          logger.debug(
-            { ticketTracking },
-            `start handling tracking rating for ticket ${ticketTracking.ticketId}`
-          );
-
-          const rate = Number(bodyMessage);
-
-          if (Number.isFinite(rate)) {
-            logger.debug(
-              `received rate ${rate} for ticket ${ticketTracking.ticketId}`
-            );
-            handleRating(rate, ticketTracking.ticket, ticketTracking, wbot);
-            return;
-          }
-          if (bodyMessage.trim() === "!") {
-            // abort rating and reopen ticket
-            logger.debug(
-              `ticket ${ticketTracking.ticketId} reopen by contact request`
-            );
-            ticketTracking.update({
-              ratingAt: null
-            });
-            updateTicket(ticketTracking.ticket, {
-              status: "open",
-              userId: ticketTracking.userId
-            });
-            quickMessage(
-              wbot,
-              ticketTracking.ticket,
-              "Atendimento reaberto",
-              true
-            );
-            return;
-          }
-          // expire rating
-          logger.debug(
-            `tracking of ticket ${ticketTracking.ticketId} expired by wrong rate ${bodyMessage}`
-          );
-          ticketTracking.update({
-            expired: true
-          });
-          quickMessage(wbot, ticketTracking.ticket, "Avaliação cancelada");
-          if (bodyMessage.length < 10) {
-            // short message just stop the processing
-            return;
-          }
-        } catch (e) {
-          Sentry.captureException(e);
-          console.log(e);
-        }
-      }
+    if (
+      !msg.key.fromMe &&
+      !contact.isGroup &&
+      (await checkRating(bodyMessage, contact, whatsapp))
+    ) {
+      return;
     }
 
     const scheduleType = await GetCompanySetting(
