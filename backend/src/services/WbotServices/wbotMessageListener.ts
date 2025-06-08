@@ -1648,7 +1648,8 @@ const handleMessage = async (
   msg: proto.IWebMessageInfo,
   wbot: Session,
   companyId: number,
-  queueId?: number
+  queueId?: number,
+  startChatbot = false
 ): Promise<void> => {
   if (!isValidMsg(msg)) return;
 
@@ -2029,6 +2030,13 @@ const handleMessage = async (
         wbot,
         dontReadTheFirstQuestion
       );
+      return;
+    }
+
+    if (justCreated && queueId && startChatbot) {
+      await startQueue(wbot, ticket);
+      await ticket.reload();
+      await checkIntegration(ticket, wbot);
     }
   } catch (err) {
     console.log(err);
