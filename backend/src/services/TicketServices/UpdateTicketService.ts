@@ -27,6 +27,7 @@ import { OmniServices } from "../OmniServices/OmniServices";
 import { chatbotHandler } from "../OmniServices/ChatbotServices";
 import { logger } from "../../utils/logger";
 import { incrementCounter } from "../CounterServices/IncrementCounter";
+import { sendFormattedMessage } from "../../helpers/sendFormattedMessage";
 
 const integrationServices = IntegrationServices.getInstance();
 const omniServices = OmniServices.getInstance();
@@ -54,32 +55,6 @@ interface Response {
   oldStatus: string;
   oldUserId: number | undefined;
 }
-
-const sendFormattedMessage = async (
-  message: string,
-  ticket: Ticket,
-  user?: User
-) => {
-  const messageText = formatBody(message, ticket, user);
-  const omniDriver = omniServices.getOmniDriver(ticket);
-
-  if (omniDriver) {
-    await omniDriver.sendMessage(ticket, {
-      type: "text",
-      body: messageText
-    });
-    return;
-  }
-
-  const wbot = await GetTicketWbot(ticket);
-  const queueChangedMessage = await wbot.sendMessage(
-    `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-    {
-      text: messageText
-    }
-  );
-  await verifyMessage(queueChangedMessage, ticket, ticket.contact);
-};
 
 export function websocketUpdateTicket(ticket: Ticket, moreChannels?: string[]) {
   const io = getIO();
@@ -206,9 +181,7 @@ const UpdateTicketService = async ({
             ratingMessage?.trim() || "Por favor avalie nosso atendimento";
           const bodyRatingMessage = `${ratingTxt}\n\n*Digite uma nota de 1 a 5*\n\nEnvie *\`!\`* para retornar ao atendimento`;
 
-          if (ticket.channel === "whatsapp") {
-            await SendWhatsAppMessage({ body: bodyRatingMessage, ticket });
-          }
+          await sendFormattedMessage(bodyRatingMessage, ticket);
 
           ticketTraking.ratingAt = moment().toDate();
           await ticketTraking.save();
@@ -552,5 +525,27 @@ const UpdateTicketService = async ({
     throw new AppError("Error updating ticket", 500, err);
   }
 };
+
+/**
+ * @description: call UpdateTicketService to update ticket status, if ticketData have a queue id or parameter dontRunChatbot is true it will not run the chatbot
+ * @params {Ticket} ticket - ticket to be updated
+ * @params {UpdateTicketData} ticketData - data to be updated
+ * @params {boolean} dontRunChatbot - if true, it will not run the chatbot
+ * @returns {Promise<Ticket>} - updated ticket
+ */
+export async function updateTicket(
+  ticket: Ticket,
+  ticketData: UpdateTicketData,
+  dontRunChatbot = false
+): Promise<Ticket> {
+  await UpdateTicketService({
+    ticketData,
+    ticketId: ticket.id,
+    companyId: ticket.companyId,
+    dontRunChatbot: dontRunChatbot || !!ticketData.queueId
+  });
+  await ticket.reload();
+  return ticket;
+}
 
 export default UpdateTicketService;

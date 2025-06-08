@@ -17,17 +17,17 @@ import Company from "./models/Company";
 import Plan from "./models/Plan";
 import TicketTraking from "./models/TicketTraking";
 import { GetCompanySetting } from "./helpers/CheckSettings";
-import { getWbot } from "./libs/wbot";
 import Ticket from "./models/Ticket";
 import QueueModel from "./models/Queue";
 import UpdateTicketService from "./services/TicketServices/UpdateTicketService";
 import { handleMessage } from "./services/WbotServices/wbotMessageListener";
 import Invoices from "./models/Invoices";
-import formatBody, { mustacheFormat } from "./helpers/Mustache";
+import { mustacheFormat } from "./helpers/Mustache";
 import Setting from "./models/Setting";
 import { parseToMilliseconds } from "./helpers/parseToMilliseconds";
 import { startCampaignQueues } from "./queues/campaign";
 import OutOfTicketMessage from "./models/OutOfTicketMessages";
+import { sendFormattedMessage } from "./helpers/sendFormattedMessage";
 
 const connection = process.env.REDIS_URI || "";
 const limiterMax = process.env.REDIS_OPT_LIMITER_MAX || 1;
@@ -211,19 +211,10 @@ async function setRatingExpired(tracking: TicketTraking, threshold: Date) {
     return;
   }
 
-  const wbot = getWbot(tracking.whatsapp.id);
-
   const complationMessage =
     tracking.whatsapp.complationMessage.trim() || "Atendimento finalizado";
 
-  await wbot.sendMessage(
-    `${tracking.ticket.contact.number}@${
-      tracking.ticket.isGroup ? "g.us" : "s.whatsapp.net"
-    }`,
-    {
-      text: formatBody(`\u200e${complationMessage}`, tracking.ticket)
-    }
-  );
+  sendFormattedMessage(complationMessage, tracking.ticket, null, false);
 
   logger.debug({ tracking }, "rating timedout");
 }
@@ -248,6 +239,10 @@ async function handleRatingsTimeout() {
           {
             model: QueueModel,
             as: "queue"
+          },
+          {
+            model: Whatsapp,
+            as: "whatsapp"
           }
         ]
       },
@@ -343,30 +338,20 @@ async function handleNoQueueTimeout(
   const status = action ? "pending" : "closed";
   const queueId = action || null;
 
-  tickets.forEach(ticket => {
+  // eslint-disable-next-line no-restricted-syntax
+  for (const ticket of tickets) {
     logger.trace(
       { ticket: ticket.id, userId: ticket.userId, status, queueId },
       "handleNoQueueTimeout -> UpdateTicketService"
     );
     const userId = status === "pending" ? null : ticket.userId;
-    UpdateTicketService({
+    // eslint-disable-next-line no-await-in-loop
+    await UpdateTicketService({
       ticketId: ticket.id,
       ticketData: { status, userId, queueId },
       companyId: company.id
-    })
-      .then(response => {
-        logger.trace(
-          { response },
-          "handleNoQueueTimeout -> UpdateTicketService"
-        );
-      })
-      .catch(error => {
-        logger.error(
-          { error, message: error?.message },
-          "handleNoQueueTimeout -> UpdateTicketService"
-        );
-      });
-  });
+    });
+  }
 
   logger.trace(
     {
@@ -448,29 +433,19 @@ async function handleChatbotTicketTimeout(
     ticketData.queueId = action;
   }
 
-  tickets.forEach(ticket => {
+  // eslint-disable-next-line no-restricted-syntax
+  for (const ticket of tickets) {
     logger.trace(
       { ...ticketData },
       "handleChatbotTicketTimeout -> UpdateTicketService"
     );
-    UpdateTicketService({
+    // eslint-disable-next-line no-await-in-loop
+    await UpdateTicketService({
       ticketId: ticket.id,
       ticketData,
       companyId: company.id
-    })
-      .then(response => {
-        logger.trace(
-          { response },
-          "handleChatbotTicketTimeout -> UpdateTicketService"
-        );
-      })
-      .catch(error => {
-        logger.error(
-          { error, message: error?.message },
-          "handleNoQueueTimeout -> UpdateTicketService"
-        );
-      });
-  });
+    });
+  }
 
   logger.trace(
     {
@@ -505,8 +480,10 @@ async function handleOpenTicketTimeout(
     }
   });
 
-  tickets.forEach(ticket => {
-    UpdateTicketService({
+  // eslint-disable-next-line no-restricted-syntax
+  for (const ticket of tickets) {
+    // eslint-disable-next-line no-await-in-loop
+    await UpdateTicketService({
       ticketId: ticket.id,
       ticketData: {
         status,
@@ -514,20 +491,8 @@ async function handleOpenTicketTimeout(
         userId: status !== "pending" ? ticket.userId : null
       },
       companyId: company.id
-    })
-      .then(response => {
-        logger.trace(
-          { response },
-          "handleOpenTicketTimeout -> UpdateTicketService"
-        );
-      })
-      .catch(error => {
-        logger.error(
-          { error, message: error?.message },
-          "handleOpenTicketTimeout -> UpdateTicketService"
-        );
-      });
-  });
+    });
+  }
 }
 
 async function handleTicketTimeouts() {
@@ -543,19 +508,11 @@ async function handleTicketTimeouts() {
       const noQueueTimeoutAction = Number(
         await GetCompanySetting(company.id, "noQueueTimeoutAction", "0")
       );
-      handleNoQueueTimeout(company, noQueueTimeout, noQueueTimeoutAction || 0)
-        .then(() => {
-          logger.trace(
-            { companyId: company?.id },
-            "handleTicketTimeouts -> returned from handleNoQueueTimeout"
-          );
-        })
-        .catch(error => {
-          logger.error(
-            { error, message: error?.message },
-            "handleTicketTimeouts -> error on handleNoQueueTimeout"
-          );
-        });
+      await handleNoQueueTimeout(
+        company,
+        noQueueTimeout,
+        noQueueTimeoutAction || 0
+      );
     }
     const openTicketTimeout = Number(
       await GetCompanySetting(company.id, "openTicketTimeout", "0")
@@ -590,9 +547,15 @@ async function handleTicketTimeouts() {
 }
 
 async function handleEveryMinute() {
-  handleLoginStatus();
-  handleRatingsTimeout();
-  handleTicketTimeouts();
+  logger.trace("handleEveryMinute: entering");
+  try {
+    handleLoginStatus();
+    handleRatingsTimeout();
+    handleTicketTimeouts();
+    logger.trace("handleEveryMinute: exiting");
+  } catch (e: unknown) {
+    logger.error(`handleEveryMinute: error received: ${(e as Error).message}`);
+  }
 }
 
 const createInvoices = new CronJob("0 * * * * *", async () => {

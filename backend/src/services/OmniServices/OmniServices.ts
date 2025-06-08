@@ -49,6 +49,7 @@ import { FindOrCreateTicketOptions } from "../TicketServices/FindOrCreateTicketS
 import Queue from "../../models/Queue";
 import { chatbotHandler } from "./ChatbotServices";
 import { multerPassthrough } from "../../helpers/multerPassthrough";
+import { checkRating } from "../TicketServices/TicketRatingServices";
 
 export type OmniMessage = {
   type: "text" | "image" | "video" | "audio" | "document" | "reaction";
@@ -59,6 +60,10 @@ export type OmniMessage = {
   quotedMsg?: Message;
 };
 
+export type OmniSendMessageOptions = {
+  dontSaveOnTicket?: boolean;
+};
+
 export interface OmniDriver {
   getName(): string;
   getDescription(): string;
@@ -67,6 +72,7 @@ export interface OmniDriver {
   getOptions(): IntegrationOptions;
   getConnection(data: any): Promise<Whatsapp>;
   findOrCreateContact(connection: Whatsapp, data: any): Promise<Contact>;
+  getMessageText(data: any): Promise<string>;
   findOrCreateTicket(
     contact: Contact,
     connection: Whatsapp,
@@ -77,7 +83,11 @@ export interface OmniDriver {
     type: string,
     channel: string
   ): (media: Express.Multer.File) => Promise<ProcessedMedia>;
-  sendMessage(ticket: Ticket, message: OmniMessage): Promise<Message[]>;
+  sendMessage(
+    ticket: Ticket,
+    message: OmniMessage,
+    options?: OmniSendMessageOptions
+  ): Promise<Message[]>;
   processStatus(data: any): Promise<Message>;
   allowChatbot(ticket: Ticket): Promise<boolean>;
 }
@@ -116,8 +126,12 @@ export class OmniServices {
       typeof input === "string"
         ? input
         : input instanceof Ticket
-        ? input.whatsapp?.channel || input.get("whatsapp").channel
+        ? input.whatsapp?.channel
         : input.channel;
+
+    if (!channel) {
+      throw new Error("Unable to determine the channel");
+    }
 
     const driver = this.drivers[channel];
     if (!driver) {
@@ -177,6 +191,16 @@ export class OmniServices {
       const contact = await driver.findOrCreateContact(connection, data);
       if (!contact) {
         throw new Error("Contact not found or created");
+      }
+
+      const bodyMessage = await driver.getMessageText(data);
+
+      if (
+        bodyMessage &&
+        !contact.isGroup &&
+        (await checkRating(bodyMessage, contact, connection))
+      ) {
+        return;
       }
 
       let defaultQueue: Queue;
