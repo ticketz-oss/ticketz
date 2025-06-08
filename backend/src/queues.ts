@@ -343,30 +343,20 @@ async function handleNoQueueTimeout(
   const status = action ? "pending" : "closed";
   const queueId = action || null;
 
-  tickets.forEach(ticket => {
+  // eslint-disable-next-line no-restricted-syntax
+  for (const ticket of tickets) {
     logger.trace(
       { ticket: ticket.id, userId: ticket.userId, status, queueId },
       "handleNoQueueTimeout -> UpdateTicketService"
     );
     const userId = status === "pending" ? null : ticket.userId;
-    UpdateTicketService({
+    // eslint-disable-next-line no-await-in-loop
+    await UpdateTicketService({
       ticketId: ticket.id,
       ticketData: { status, userId, queueId },
       companyId: company.id
-    })
-      .then(response => {
-        logger.trace(
-          { response },
-          "handleNoQueueTimeout -> UpdateTicketService"
-        );
-      })
-      .catch(error => {
-        logger.error(
-          { error, message: error?.message },
-          "handleNoQueueTimeout -> UpdateTicketService"
-        );
-      });
-  });
+    });
+  }
 
   logger.trace(
     {
@@ -448,29 +438,19 @@ async function handleChatbotTicketTimeout(
     ticketData.queueId = action;
   }
 
-  tickets.forEach(ticket => {
+  // eslint-disable-next-line no-restricted-syntax
+  for (const ticket of tickets) {
     logger.trace(
       { ...ticketData },
       "handleChatbotTicketTimeout -> UpdateTicketService"
     );
-    UpdateTicketService({
+    // eslint-disable-next-line no-await-in-loop
+    await UpdateTicketService({
       ticketId: ticket.id,
       ticketData,
       companyId: company.id
-    })
-      .then(response => {
-        logger.trace(
-          { response },
-          "handleChatbotTicketTimeout -> UpdateTicketService"
-        );
-      })
-      .catch(error => {
-        logger.error(
-          { error, message: error?.message },
-          "handleNoQueueTimeout -> UpdateTicketService"
-        );
-      });
-  });
+    });
+  }
 
   logger.trace(
     {
@@ -505,8 +485,10 @@ async function handleOpenTicketTimeout(
     }
   });
 
-  tickets.forEach(ticket => {
-    UpdateTicketService({
+  // eslint-disable-next-line no-restricted-syntax
+  for (const ticket of tickets) {
+    // eslint-disable-next-line no-await-in-loop
+    await UpdateTicketService({
       ticketId: ticket.id,
       ticketData: {
         status,
@@ -514,20 +496,8 @@ async function handleOpenTicketTimeout(
         userId: status !== "pending" ? ticket.userId : null
       },
       companyId: company.id
-    })
-      .then(response => {
-        logger.trace(
-          { response },
-          "handleOpenTicketTimeout -> UpdateTicketService"
-        );
-      })
-      .catch(error => {
-        logger.error(
-          { error, message: error?.message },
-          "handleOpenTicketTimeout -> UpdateTicketService"
-        );
-      });
-  });
+    });
+  }
 }
 
 async function handleTicketTimeouts() {
@@ -543,19 +513,11 @@ async function handleTicketTimeouts() {
       const noQueueTimeoutAction = Number(
         await GetCompanySetting(company.id, "noQueueTimeoutAction", "0")
       );
-      handleNoQueueTimeout(company, noQueueTimeout, noQueueTimeoutAction || 0)
-        .then(() => {
-          logger.trace(
-            { companyId: company?.id },
-            "handleTicketTimeouts -> returned from handleNoQueueTimeout"
-          );
-        })
-        .catch(error => {
-          logger.error(
-            { error, message: error?.message },
-            "handleTicketTimeouts -> error on handleNoQueueTimeout"
-          );
-        });
+      await handleNoQueueTimeout(
+        company,
+        noQueueTimeout,
+        noQueueTimeoutAction || 0
+      );
     }
     const openTicketTimeout = Number(
       await GetCompanySetting(company.id, "openTicketTimeout", "0")
@@ -590,9 +552,15 @@ async function handleTicketTimeouts() {
 }
 
 async function handleEveryMinute() {
-  handleLoginStatus();
-  handleRatingsTimeout();
-  handleTicketTimeouts();
+  logger.trace("handleEveryMinute: entering");
+  try {
+    handleLoginStatus();
+    handleRatingsTimeout();
+    handleTicketTimeouts();
+    logger.trace("handleEveryMinute: exiting");
+  } catch (e: unknown) {
+    logger.error(`handleEveryMinute: error received: ${(e as Error).message}`);
+  }
 }
 
 const createInvoices = new CronJob("0 * * * * *", async () => {
