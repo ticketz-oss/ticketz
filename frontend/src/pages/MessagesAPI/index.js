@@ -275,6 +275,13 @@ const MessagesAPI = () => {
               <li><b>numero:</b> Salva a mensagem em um ticket na fila equivalente ao número</li>
             </ul>
           </li>
+          <li>
+              O campo startChatbot aceita boolean, a funcionalidade será acionada apenas se foi informado um id de fila no campo saveOnTicket:
+            <ul>
+              <li><b>true:</b> Inicia o chatbot com a mensagem enviada</li>
+              <li><b>false:</b> Não inicia o chatbot</li>
+            </ul>
+          </li>
         </ul>
       </Typography>
       <Typography variant="h6" color="primary" className={classes.elementMargin}>
@@ -287,7 +294,7 @@ const MessagesAPI = () => {
             <b>Endpoint: </b> {getEndpoint()} <br />
             <b>Método: </b> POST <br />
             <b>Headers: </b> Authorization ("Bearer " + token cadastrado) e Content-Type (application/json) <br />
-            <b>Body: </b> {"{ \"number\": \"558599999999\", \"body\": \"Sua mensagem\", \"saveOnTicket\": true, \"linkPreview\": true }"}
+            <b>Body: </b> {"{ \"number\": \"558599999999\", \"body\": \"Sua mensagem\", \"saveOnTicket\": true, \"linkPreview\": true, \"startChatbot\": true }"}
           </Typography>
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -319,7 +326,10 @@ const MessagesAPI = () => {
                 <b>body: </b> mensagem
               </li>
               <li>
-                <b>saveOnTicket: </b> true
+                <b>saveOnTicket: </b> número da fila
+              </li>
+              <li>
+                <b>startChatbot: </b> true
               </li>
             </ul>
             <p><b>Observações:</b> Os campos <b>medias</b> e <b>body</b> podem ser repetidos
