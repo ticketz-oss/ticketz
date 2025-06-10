@@ -15,6 +15,7 @@ const createTicketMutex = new Mutex();
 
 type FindOrCreateTicketOptions = {
   groupContact?: Contact;
+  incrementUnread?: boolean;
   doNotReopen?: boolean;
   findOnly?: boolean;
   queue?: Queue;
@@ -23,9 +24,14 @@ type FindOrCreateTicketOptions = {
 const internalFindOrCreateTicketService = async (
   contact: Contact,
   whatsappId: number,
-  unreadMessages: number,
   companyId: number,
-  { groupContact, doNotReopen, findOnly, queue }: FindOrCreateTicketOptions = {}
+  {
+    groupContact,
+    incrementUnread,
+    doNotReopen,
+    findOnly,
+    queue
+  }: FindOrCreateTicketOptions = {}
 ): Promise<{ ticket: Ticket; justCreated: boolean }> => {
   let justCreated = false;
   const result = await sequelize.transaction(async () => {
@@ -40,8 +46,9 @@ const internalFindOrCreateTicketService = async (
       order: [["id", "DESC"]]
     });
 
-    if (ticket) {
-      await ticket.update({ unreadMessages });
+    if (ticket && incrementUnread) {
+      await ticket.increment("unreadMessages");
+      ticket = await ticket.reload();
     }
 
     if (!ticket && groupContact) {
@@ -57,7 +64,9 @@ const internalFindOrCreateTicketService = async (
         await ticket.update({
           status: "pending",
           userId: null,
-          unreadMessages,
+          unreadMessages: incrementUnread
+            ? ticket.unreadMessages + 1
+            : ticket.unreadMessages,
           companyId
         });
         await FindOrCreateATicketTrakingService({
@@ -94,7 +103,9 @@ const internalFindOrCreateTicketService = async (
         await ticket.update({
           status: "pending",
           userId: null,
-          unreadMessages,
+          unreadMessages: incrementUnread
+            ? ticket.unreadMessages + 1
+            : ticket.unreadMessages,
           companyId
         });
         await FindOrCreateATicketTrakingService({
@@ -127,7 +138,7 @@ const internalFindOrCreateTicketService = async (
         contactId: groupContact ? groupContact.id : contact.id,
         status: "pending",
         isGroup: !!groupContact,
-        unreadMessages,
+        unreadMessages: incrementUnread ? 1 : 0,
         whatsappId,
         queueId,
         companyId
@@ -158,7 +169,6 @@ const internalFindOrCreateTicketService = async (
 const FindOrCreateTicketService = async (
   contact: Contact,
   whatsappId: number,
-  unreadMessages: number,
   companyId: number,
   options: FindOrCreateTicketOptions = {}
 ): Promise<{ ticket: Ticket; justCreated: boolean }> => {
@@ -168,7 +178,6 @@ const FindOrCreateTicketService = async (
     return await internalFindOrCreateTicketService(
       contact,
       whatsappId,
-      unreadMessages,
       companyId,
       options
     );

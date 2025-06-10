@@ -50,7 +50,6 @@ import CampaignShipping from "../../models/CampaignShipping";
 import { campaignQueue } from "../../queues/campaign";
 import User from "../../models/User";
 import Setting from "../../models/Setting";
-import { cacheLayer } from "../../libs/cache";
 import { debounce } from "../../helpers/Debounce";
 import { getMessageFileOptions } from "./SendWhatsAppMedia";
 import { makeRandomId } from "../../helpers/MakeRandomId";
@@ -1570,42 +1569,6 @@ const handleMessage = async (
     const whatsapp = await ShowWhatsAppService(wbot.id!, companyId);
     const contact = await verifyContact(msgContact, wbot, companyId);
 
-    let unreadMessages = 0;
-
-    if (msg.key.fromMe) {
-      await cacheLayer.set(`contacts:${contact.id}:unreads`, "0");
-    } else {
-      const unreads = await cacheLayer.get(`contacts:${contact.id}:unreads`);
-      unreadMessages = +unreads + 1;
-      await cacheLayer.set(
-        `contacts:${contact.id}:unreads`,
-        `${unreadMessages}`
-      );
-    }
-
-    const lastMessage = await Message.findOne({
-      where: {
-        contactId: contact.id,
-        companyId,
-        "$ticket.whatsappId$": whatsapp.id
-      },
-      include: ["ticket"],
-      order: [["createdAt", "DESC"]]
-    });
-
-    const complationMessage =
-      whatsapp.complationMessage.trim() || "Atendimento finalizado";
-
-    if (
-      lastMessage &&
-      unreadMessages === 0 &&
-      complationMessage &&
-      formatBody(complationMessage, lastMessage.ticket).trim().toLowerCase() ===
-        lastMessage?.body.trim().toLowerCase()
-    ) {
-      return;
-    }
-
     if (!msg.key.fromMe && !contact.isGroup) {
       const userRatingEnabled =
         (await GetCompanySetting(companyId, "userRating", "")) === "enabled";
@@ -1739,10 +1702,10 @@ const handleMessage = async (
     const { ticket, justCreated } = await FindOrCreateTicketService(
       contact,
       wbot.id!,
-      unreadMessages,
       companyId,
       {
         groupContact,
+        incrementUnread: !msg.key.fromMe,
         findOnly,
         queue: queueId
           ? (await Queue.findByPk(queueId)) || defaultQueue
