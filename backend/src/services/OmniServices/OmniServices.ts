@@ -51,6 +51,10 @@ import { multerPassthrough } from "../../helpers/multerPassthrough";
 import { checkRating } from "../TicketServices/TicketRatingServices";
 import { handleChatbot, verifyQueue } from "../QueueService/ChatbotService";
 
+import { SubscriptionService } from "../../ticketzPro/services/subscriptionService";
+
+const subscriptionService = SubscriptionService.getInstance();
+
 export type OmniMessage = {
   type: "text" | "image" | "video" | "audio" | "document" | "reaction";
   body?: string;
@@ -253,6 +257,10 @@ export class OmniServices {
       await ticket.update({
         lastMessage: messages[0].body
       });
+
+      if (!subscriptionService.isValid()) {
+        return;
+      }
 
       if (!(await driver.allowChatbot(ticket)) || !messages[0]) {
         return;

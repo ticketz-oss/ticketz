@@ -32,6 +32,10 @@ import { logger } from "../../utils/logger";
 import { deferredTasks } from "../../helpers/deferredTasks";
 import { getFileDetails } from "../../helpers/fileDetails";
 
+import { SubscriptionService } from "../../ticketzPro/services/subscriptionService";
+
+const subscriptionService = SubscriptionService.getInstance();
+
 const integrationServices = IntegrationServices.getInstance();
 const downloadMediaTasks = deferredTasks();
 
@@ -387,6 +391,10 @@ export async function handleChatbot(
   replyHandler: ReplyHandler,
   dontReadTheFirstQuestion = false
 ) {
+  if (!subscriptionService.isValid()) {
+    return;
+  }
+
   const queue = await Queue.findByPk(ticket.queueId, {
     include: [
       {
