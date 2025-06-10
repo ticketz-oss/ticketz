@@ -8,6 +8,7 @@ import * as MessageController from "../controllers/MessageController";
 import isCompliant from "../middleware/isCompliant";
 import gammuAuth from "../middleware/gammuAuth";
 import isAdmin from "../middleware/isAdmin";
+import apiTokenAuth from "../middleware/apiTokenAuth";
 
 const messageRoutes = Router();
 
@@ -15,6 +16,7 @@ const upload = multer(uploadConfig);
 
 messageRoutes.post(
   "/messages/forward",
+  apiTokenAuth,
   isAuth,
   isCompliant,
   MessageController.forward
@@ -22,6 +24,7 @@ messageRoutes.post(
 
 messageRoutes.get(
   "/messages/history/:contactId/:whatsappId",
+  apiTokenAuth,
   isAuth,
   isAdmin,
   isCompliant,
@@ -30,6 +33,7 @@ messageRoutes.get(
 
 messageRoutes.get(
   "/messages/:ticketId",
+  apiTokenAuth,
   isAuth,
   isCompliant,
   MessageController.index
@@ -37,6 +41,7 @@ messageRoutes.get(
 
 messageRoutes.post(
   "/messages/:ticketId",
+  apiTokenAuth,
   isAuth,
   isCompliant,
   upload.array("medias"),
@@ -45,6 +50,7 @@ messageRoutes.post(
 
 messageRoutes.post(
   "/messages/edit/:messageId",
+  apiTokenAuth,
   isAuth,
   isCompliant,
   MessageController.edit
@@ -52,6 +58,7 @@ messageRoutes.post(
 
 messageRoutes.post(
   "/messages/react/:messageId",
+  apiTokenAuth,
   isAuth,
   isCompliant,
   MessageController.react
@@ -59,6 +66,7 @@ messageRoutes.post(
 
 messageRoutes.delete(
   "/messages/:messageId",
+  apiTokenAuth,
   isAuth,
   isCompliant,
   MessageController.remove
