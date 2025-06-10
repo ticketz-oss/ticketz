@@ -54,6 +54,7 @@ import VerifyCurrentSchedule, {
   ScheduleResult
 } from "../CompanyService/VerifyCurrentSchedule";
 import { GetCompanySetting } from "../../helpers/CheckSettings";
+import { cacheLayer } from "../../libs/cache";
 
 export type OmniMessage = {
   type: "text" | "image" | "video" | "audio" | "document" | "reaction";
@@ -68,6 +69,10 @@ export type OmniSendMessageOptions = {
   dontSaveOnTicket?: boolean;
 };
 
+export type OmniFindOrCreateTicketOptions = FindOrCreateTicketOptions & {
+  unreadMessages?: number;
+};
+
 export interface OmniDriver {
   getName(): string;
   getDescription(): string;
@@ -80,7 +85,7 @@ export interface OmniDriver {
   findOrCreateTicket(
     contact: Contact,
     connection: Whatsapp,
-    options: FindOrCreateTicketOptions
+    options: OmniFindOrCreateTicketOptions
   ): Promise<{ ticket: Ticket; justCreated: boolean }>;
   createMessages(ticket: Ticket, data: any): Promise<Message[]>;
   getMediaProcessor(
@@ -229,7 +234,21 @@ export class OmniServices {
         throw new Error("Contact not found or created");
       }
 
+      const unreadCacheId = `omnicontact:${connection.id}:${contact.id}:unreads`;
+
       const bodyMessage = await driver.getMessageText(data);
+
+      const fromMe = false; // TODO: detect message fromMe
+
+      let unreadMessages = 0;
+
+      if (fromMe) {
+        await cacheLayer.set(unreadCacheId, "0");
+      } else {
+        const unreads = await cacheLayer.get(unreadCacheId);
+        unreadMessages = +unreads + 1;
+        await cacheLayer.set(unreadCacheId, `${unreadMessages}`);
+      }
 
       if (
         bodyMessage &&
@@ -266,7 +285,10 @@ export class OmniServices {
       const { ticket, justCreated } = await driver.findOrCreateTicket(
         contact,
         connection,
-        { queue: defaultQueue }
+        {
+          unreadMessages,
+          queue: defaultQueue
+        }
       );
       if (!ticket) {
         throw new Error("Ticket not found or not created");

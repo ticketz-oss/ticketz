@@ -38,6 +38,7 @@ import {
 import { Op } from "sequelize";
 import { getLinkPreview } from "link-preview-js";
 import { Readable } from "stream";
+import { isNil } from "lodash";
 import Contact from "../../models/Contact";
 import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
@@ -46,6 +47,7 @@ import { logger } from "../../utils/logger";
 import { IntegrationOptions } from "../IntegrationServices/IntegrationServices";
 import {
   OmniDriver,
+  OmniFindOrCreateTicketOptions,
   OmniMessage,
   OmniSendMessageOptions
 } from "../OmniServices/OmniServices";
@@ -65,7 +67,6 @@ import {
   MediaSource,
   ProcessedMedia
 } from "../../helpers/mediaConversion";
-import Queue from "../../models/Queue";
 
 const contactMutex = new Mutex();
 const messageMutex = new Mutex();
@@ -530,16 +531,14 @@ export class NotificamehubDriver implements OmniDriver {
   async findOrCreateTicket(
     contact: Contact,
     connection: Whatsapp,
-    options: {
-      queue?: Queue;
-    } = {}
+    options: OmniFindOrCreateTicketOptions = {}
   ): Promise<{ ticket: Ticket; justCreated: boolean }> {
     logger.debug("notificamehub:findOrCreateTicket");
 
     return FindOrCreateTicketService(
       contact,
       connection.id,
-      1,
+      !isNil(options.unreadMessages) ? options.unreadMessages : 1,
       connection.companyId,
       options
     );
