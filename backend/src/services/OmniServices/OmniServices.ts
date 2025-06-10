@@ -250,6 +250,10 @@ export class OmniServices {
 
       const messages = await driver.createMessages(ticket, data);
 
+      await ticket.update({
+        lastMessage: messages[0].body
+      });
+
       if (!(await driver.allowChatbot(ticket)) || !messages[0]) {
         return;
       }
