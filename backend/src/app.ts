@@ -39,6 +39,11 @@ app.use(express.json());
 app.use(Sentry.Handlers.requestHandler());
 app.get("/public/*", (req, res) => {
   const filePath = path.join(uploadConfig.directory, req.params[0]);
+
+  if (filePath.endsWith(".aac")) {
+    res.setHeader("Content-Type", "audio/aac");
+  }
+
   res.download(filePath, (err: SystemError) => {
     if (err) {
       if (err.code === "ENOENT") {
