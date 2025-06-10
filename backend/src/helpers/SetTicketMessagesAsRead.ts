@@ -1,5 +1,4 @@
 import { WASocket, proto } from "baileys";
-import { cacheLayer } from "../libs/cache";
 import { getIO } from "../libs/socket";
 import Message from "../models/Message";
 import Ticket from "../models/Ticket";
@@ -8,7 +7,6 @@ import GetTicketWbot from "./GetTicketWbot";
 
 const SetTicketMessagesAsRead = async (ticket: Ticket): Promise<void> => {
   await ticket.update({ unreadMessages: 0 }, { silent: true });
-  await cacheLayer.set(`contacts:${ticket.contactId}:unreads`, "0");
   let companyId: number;
 
   try {
