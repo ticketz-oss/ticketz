@@ -26,14 +26,16 @@ export async function sendFormattedMessage(
   const omniDriver = omniServices.getOmniDriver(ticket);
 
   if (omniDriver) {
-    await omniDriver.sendMessage(
-      ticket,
-      {
-        type: "text",
-        body: messageText
-      },
-      { dontSaveOnTicket: !saveOnTicket }
-    );
+    if (await omniDriver.allowChatbot(ticket)) {
+      await omniDriver.sendMessage(
+        ticket,
+        {
+          type: "text",
+          body: messageText
+        },
+        { dontSaveOnTicket: !saveOnTicket }
+      );
+    }
     return;
   }
 

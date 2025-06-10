@@ -62,6 +62,7 @@ import { getMimeByExtension } from "../../helpers/getMimeByExtension";
 import {
   convertAudioToAac,
   convertAudioToOggOpus,
+  MediaSource,
   ProcessedMedia
 } from "../../helpers/mediaConversion";
 import Queue from "../../models/Queue";
@@ -696,14 +697,24 @@ export class NotificamehubDriver implements OmniDriver {
           ? content.type.replace(/^reaction$/, "reactionMessage")
           : undefined;
 
+      const body =
+        content.text ||
+        content.caption ||
+        content.reaction?.emoji ||
+        mediaType ||
+        "";
+
+      await ticket.update({
+        lastMessage: body.substring(0, 255).replace(/\n/g, " ")
+      });
+
       return CreateMessageService({
         messageData: {
           id: message.id,
           quotedMsgId,
           contactId: posterContactId || ticket.contactId,
           ticketId: ticket.id,
-          body:
-            content.text || content.caption || content.reaction?.emoji || "",
+          body,
           channel: ticket.contact.channel,
           mediaType,
           mediaUrl,
@@ -817,6 +828,10 @@ export class NotificamehubDriver implements OmniDriver {
             return null;
           }
 
+          await ticket.update({
+            lastMessage: message.body
+          });
+
           const sentMessage = await CreateMessageService({
             messageData: {
               id: result.id,
@@ -866,6 +881,12 @@ export class NotificamehubDriver implements OmniDriver {
 
           logger.debug({ result }, "Message media sent");
 
+          const mediaType = message.mimetype?.split("/")[0] || message.type;
+
+          await ticket.update({
+            lastMessage: message.body || mediaType || ""
+          });
+
           const sentMessage = await CreateMessageService({
             messageData: {
               id: result.id,
@@ -875,7 +896,7 @@ export class NotificamehubDriver implements OmniDriver {
               quotedMsgId: message.quotedMsg?.id || undefined,
               fromMe: true,
               channel: ticket.contact.channel,
-              mediaType: message.mimetype.split("/")[0],
+              mediaType,
               mediaUrl: message.mediaUrl,
               dataJson: JSON.stringify(message)
             },
@@ -988,7 +1009,7 @@ export class NotificamehubDriver implements OmniDriver {
   getMediaProcessor(
     type: string,
     channel: string
-  ): (media: Express.Multer.File) => Promise<ProcessedMedia> {
+  ): (media: MediaSource) => Promise<ProcessedMedia> {
     const processor =
       audioMediaProcessors[channel] || audioMediaProcessors.default;
 

@@ -7,27 +7,27 @@ import Ticket from "../../models/Ticket";
 import Queue from "../../models/Queue";
 import ShowTicketService, { reloadTicketService } from "./ShowTicketService";
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
-import SendWhatsAppMessage from "../WbotServices/SendWhatsAppMessage";
 import FindOrCreateATicketTrakingService from "./FindOrCreateATicketTrakingService";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
-import {
-  checkIntegration,
-  startQueue,
-  verifyMessage
-} from "../WbotServices/wbotMessageListener";
+import { wbotReplyHandler } from "../WbotServices/wbotMessageListener";
 import AppError from "../../errors/AppError";
 import FindOrCreateTicketService from "./FindOrCreateTicketService";
 import Whatsapp from "../../models/Whatsapp";
 import { GetCompanySetting } from "../../helpers/CheckSettings";
 import { CreateInternalMessageService } from "../MessageServices/CreateInternalMessageService";
 import User from "../../models/User";
-import formatBody from "../../helpers/Mustache";
-import { IntegrationServices } from "../IntegrationServices/IntegrationServices";
-import { OmniServices } from "../OmniServices/OmniServices";
-import { chatbotHandler } from "../OmniServices/ChatbotServices";
+import {
+  IntegrationMessage,
+  IntegrationServices
+} from "../IntegrationServices/IntegrationServices";
+import {
+  getOmniReplyHandler,
+  OmniServices
+} from "../OmniServices/OmniServices";
 import { logger } from "../../utils/logger";
 import { incrementCounter } from "../CounterServices/IncrementCounter";
 import { sendFormattedMessage } from "../../helpers/sendFormattedMessage";
+import { checkIntegration, startQueue } from "../QueueService/ChatbotService";
 
 const integrationServices = IntegrationServices.getInstance();
 const omniServices = OmniServices.getInstance();
@@ -222,13 +222,7 @@ const UpdateTicketService = async ({
         !isNil(complationMessage) &&
         complationMessage !== ""
       ) {
-        const body = formatBody(`${complationMessage}`, ticket);
-
-        if (ticket.channel === "whatsapp" && !isGroup) {
-          const sentMessage = await SendWhatsAppMessage({ body, ticket });
-
-          await verifyMessage(sentMessage, ticket, ticket.contact);
-        }
+        await sendFormattedMessage(complationMessage, ticket);
       }
     }
 
@@ -434,15 +428,17 @@ const UpdateTicketService = async ({
       await integrationServices.endAllSessions(ticket);
 
       const omniDriver = omniServices.getOmniDriver(ticket);
-      if (omniDriver?.allowChatbot(ticket)) {
-        await chatbotHandler(omniDriver, ticket);
-      }
 
-      const wbot = await GetTicketWbot(ticket);
-      if (wbot) {
-        await startQueue(wbot, ticket);
+      const wbot = !omniDriver ? await GetTicketWbot(ticket) : null;
+      const replyHandler = omniDriver
+        ? getOmniReplyHandler(omniDriver)
+        : async (t: Ticket, r: IntegrationMessage) =>
+            wbotReplyHandler(wbot, t, r);
+
+      if (omniDriver?.allowChatbot(ticket) || !omniDriver) {
+        await startQueue(replyHandler, ticket);
         await ticket.reload();
-        await checkIntegration(ticket, wbot);
+        await checkIntegration(ticket, replyHandler);
       }
     }
 
