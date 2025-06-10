@@ -1,5 +1,4 @@
 import { WASocket, proto } from "baileys";
-import { cacheLayer } from "../libs/cache";
 import { getIO } from "../libs/socket";
 import Message from "../models/Message";
 import Ticket from "../models/Ticket";
@@ -8,7 +7,6 @@ import GetTicketWbot from "./GetTicketWbot";
 
 const SetTicketMessagesAsRead = async (ticket: Ticket): Promise<void> => {
   await ticket.update({ unreadMessages: 0 }, { silent: true });
-  await cacheLayer.set(`contacts:${ticket.contactId}:unreads`, "0");
   let companyId: number;
 
   try {
@@ -40,32 +38,39 @@ const SetTicketMessagesAsRead = async (ticket: Ticket): Promise<void> => {
       `Marking ${messageKeys.length} messages of ticket ${ticket.id} as read`
     );
 
-    // Process message keys in batches of 250
-    const batchSize = 250;
-    for (let i = 0; i < messageKeys.length; i += batchSize) {
-      const batch = messageKeys.slice(i, i + batchSize);
-      (wbot as WASocket).readMessages(batch).catch(err => {
-        logger.error(
-          { error: err as Error },
-          `Could not mark messages as read. Err: ${err?.message}`
-        );
-      });
-    }
-
-    const lastMessage: proto.IWebMessageInfo = JSON.parse(messages[0].dataJson);
-    if (lastMessage?.key?.remoteJid && !lastMessage.key.fromMe) {
-      // Asynchronous chatModify call
-      (wbot as WASocket)
-        .chatModify(
-          { markRead: true, lastMessages: [lastMessage] },
-          lastMessage.key.remoteJid
-        )
-        .catch(err => {
+    if (wbot) {
+      // Process message keys in batches of 250
+      const batchSize = 250;
+      for (let i = 0; i < messageKeys.length; i += batchSize) {
+        const batch = messageKeys.slice(i, i + batchSize);
+        try {
+          // eslint-disable-next-line no-await-in-loop
+          await (wbot as WASocket).readMessages(batch);
+        } catch (err) {
           logger.error(
             { error: err as Error },
-            `Could not modify chat. Err: ${err?.message}`
+            `Could not mark messages as read. Err: ${err?.message}`
           );
-        });
+        }
+      }
+
+      const lastMessage: proto.IWebMessageInfo = JSON.parse(
+        messages[0].dataJson
+      );
+      if (lastMessage?.key?.remoteJid && !lastMessage.key.fromMe) {
+        // Asynchronous chatModify call
+        (wbot as WASocket)
+          .chatModify(
+            { markRead: true, lastMessages: [lastMessage] },
+            lastMessage.key.remoteJid
+          )
+          .catch(err => {
+            logger.error(
+              { error: err as Error },
+              `Could not modify chat. Err: ${err?.message}`
+            );
+          });
+      }
     }
 
     await Message.update(

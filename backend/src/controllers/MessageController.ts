@@ -90,9 +90,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   const { channel } = ticket;
   const user = await User.findByPk(Number(req.user.id));
 
-  if (ticket.whatsapp.channel === "whatsapp") {
-    SetTicketMessagesAsRead(ticket);
-  }
+  SetTicketMessagesAsRead(ticket);
 
   if (internal) {
     await CreateInternalMessageService(

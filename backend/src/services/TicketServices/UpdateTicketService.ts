@@ -134,7 +134,7 @@ const UpdateTicketService = async ({
       whatsappId: ticket.whatsappId
     });
 
-    if (ticket.channel === "whatsapp" && status === "open") {
+    if (status === "open") {
       SetTicketMessagesAsRead(ticket);
     }
 
@@ -304,9 +304,8 @@ const UpdateTicketService = async ({
           const { ticket: newTicket } = await FindOrCreateTicketService(
             contact,
             newWhatsapp?.id || whatsapp.id,
-            1,
             companyId,
-            { doNotReopen: true }
+            { doNotReopen: true, incrementUnread: true }
           );
 
           if (!newTicket) {

@@ -49,7 +49,9 @@ import {
   OmniMessage,
   OmniSendMessageOptions
 } from "../OmniServices/OmniServices";
-import FindOrCreateTicketService from "../TicketServices/FindOrCreateTicketService";
+import FindOrCreateTicketService, {
+  FindOrCreateTicketOptions
+} from "../TicketServices/FindOrCreateTicketService";
 import CreateMessageService from "../MessageServices/CreateMessageService";
 import { NgrokInstance } from "../../helpers/NgrokInstance";
 import User from "../../models/User";
@@ -65,7 +67,6 @@ import {
   MediaSource,
   ProcessedMedia
 } from "../../helpers/mediaConversion";
-import Queue from "../../models/Queue";
 
 const contactMutex = new Mutex();
 const messageMutex = new Mutex();
@@ -530,16 +531,13 @@ export class NotificamehubDriver implements OmniDriver {
   async findOrCreateTicket(
     contact: Contact,
     connection: Whatsapp,
-    options: {
-      queue?: Queue;
-    } = {}
+    options: FindOrCreateTicketOptions = {}
   ): Promise<{ ticket: Ticket; justCreated: boolean }> {
     logger.debug("notificamehub:findOrCreateTicket");
 
     return FindOrCreateTicketService(
       contact,
       connection.id,
-      1,
       connection.companyId,
       options
     );

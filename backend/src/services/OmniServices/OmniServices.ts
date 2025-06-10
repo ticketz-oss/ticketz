@@ -54,6 +54,7 @@ import VerifyCurrentSchedule, {
   ScheduleResult
 } from "../CompanyService/VerifyCurrentSchedule";
 import { GetCompanySetting } from "../../helpers/CheckSettings";
+import { cacheLayer } from "../../libs/cache";
 
 import { SubscriptionService } from "../../ticketzPro/services/subscriptionService";
 
@@ -233,7 +234,21 @@ export class OmniServices {
         throw new Error("Contact not found or created");
       }
 
+      const unreadCacheId = `omnicontact:${connection.id}:${contact.id}:unreads`;
+
       const bodyMessage = await driver.getMessageText(data);
+
+      const fromMe = false; // TODO: detect message fromMe
+
+      let unreadMessages = 0;
+
+      if (fromMe) {
+        await cacheLayer.set(unreadCacheId, "0");
+      } else {
+        const unreads = await cacheLayer.get(unreadCacheId);
+        unreadMessages = +unreads + 1;
+        await cacheLayer.set(unreadCacheId, `${unreadMessages}`);
+      }
 
       if (
         bodyMessage &&
@@ -270,7 +285,10 @@ export class OmniServices {
       const { ticket, justCreated } = await driver.findOrCreateTicket(
         contact,
         connection,
-        { queue: defaultQueue }
+        {
+          incrementUnread: !fromMe,
+          queue: defaultQueue
+        }
       );
       if (!ticket) {
         throw new Error("Ticket not found or not created");
