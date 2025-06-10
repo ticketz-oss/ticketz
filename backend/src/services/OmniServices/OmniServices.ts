@@ -44,12 +44,12 @@ import { getIO } from "../../libs/socket";
 import saveMediaToFile from "../../helpers/saveMediaFile";
 import { DebugException } from "../../helpers/DebugException";
 import AppError from "../../errors/AppError";
-import { ProcessedMedia } from "../../helpers/mediaConversion";
+import { MediaSource, ProcessedMedia } from "../../helpers/mediaConversion";
 import { FindOrCreateTicketOptions } from "../TicketServices/FindOrCreateTicketService";
 import Queue from "../../models/Queue";
-import { chatbotHandler } from "./ChatbotServices";
 import { multerPassthrough } from "../../helpers/multerPassthrough";
 import { checkRating } from "../TicketServices/TicketRatingServices";
+import { handleChatbot, verifyQueue } from "../QueueService/ChatbotService";
 
 export type OmniMessage = {
   type: "text" | "image" | "video" | "audio" | "document" | "reaction";
@@ -82,7 +82,7 @@ export interface OmniDriver {
   getMediaProcessor(
     type: string,
     channel: string
-  ): (media: Express.Multer.File) => Promise<ProcessedMedia>;
+  ): (media: MediaSource) => Promise<ProcessedMedia>;
   sendMessage(
     ticket: Ticket,
     message: OmniMessage,
@@ -93,6 +93,36 @@ export interface OmniDriver {
 }
 
 const firstBodyMutex = new Mutex();
+
+export function getOmniReplyHandler(driver: OmniDriver) {
+  return async function replyHandler(
+    ticket: Ticket,
+    reply: IntegrationMessage
+  ) {
+    if (ticket && reply) {
+      let { mediaUrl } = reply;
+      let media: ProcessedMedia;
+      const type = reply.type === "gif" ? "image" : reply.type;
+      if (mediaUrl && type !== "text" && !mediaUrl.startsWith("http")) {
+        const processor =
+          driver.getMediaProcessor(reply.type, ticket.contact.channel) ||
+          multerPassthrough;
+
+        media = await processor(mediaUrl);
+
+        mediaUrl = await saveMediaToFile(media, ticket.companyId, ticket.id);
+      }
+
+      await driver.sendMessage(ticket, {
+        type,
+        body: reply.content || undefined,
+        mediaUrl: mediaUrl || undefined,
+        mimetype: media?.mimetype || undefined,
+        fileName: media?.filename || undefined
+      });
+    }
+  };
+}
 
 export class OmniServices {
   // eslint-disable-next-line no-use-before-define
@@ -220,16 +250,50 @@ export class OmniServices {
 
       const messages = await driver.createMessages(ticket, data);
 
-      if (!(await driver.allowChatbot(ticket))) {
+      if (!(await driver.allowChatbot(ticket)) || !messages[0]) {
         return;
       }
+
+      const replyHandler = getOmniReplyHandler(driver);
 
       if (justCreated) {
         // TODO: checkSchedule(ticket);
       }
 
+      if (
+        !ticket.queueId &&
+        !messages[0].fromMe &&
+        !ticket.userId &&
+        connection.queues.length >= 1
+      ) {
+        await verifyQueue(replyHandler, messages[0].body, ticket, justCreated);
+      }
+
+      const dontReadTheFirstQuestion = justCreated || ticket.queue === null;
+
+      await ticket.reload();
+
+      if (
+        justCreated &&
+        connection.greetingMessage &&
+        !connection.queues.length &&
+        !ticket.userId &&
+        !messages[0].fromMe
+      ) {
+        await replyHandler(ticket, {
+          type: "text",
+          content: formatBody(connection.greetingMessage, ticket)
+        });
+      }
+
       if (ticket.status === "pending" && (ticket.chatbot || justCreated)) {
-        chatbotHandler(driver, ticket, messages[0]);
+        handleChatbot(
+          ticket,
+          messages[0].body,
+          messages[0],
+          replyHandler,
+          dontReadTheFirstQuestion
+        );
       }
     } catch (error) {
       if (error instanceof DebugException) {

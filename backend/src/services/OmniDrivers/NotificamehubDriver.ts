@@ -62,6 +62,7 @@ import { getMimeByExtension } from "../../helpers/getMimeByExtension";
 import {
   convertAudioToAac,
   convertAudioToOggOpus,
+  MediaSource,
   ProcessedMedia
 } from "../../helpers/mediaConversion";
 import Queue from "../../models/Queue";
@@ -875,7 +876,7 @@ export class NotificamehubDriver implements OmniDriver {
               quotedMsgId: message.quotedMsg?.id || undefined,
               fromMe: true,
               channel: ticket.contact.channel,
-              mediaType: message.mimetype.split("/")[0],
+              mediaType: message.mimetype?.split("/")[0] || message.type,
               mediaUrl: message.mediaUrl,
               dataJson: JSON.stringify(message)
             },
@@ -988,7 +989,7 @@ export class NotificamehubDriver implements OmniDriver {
   getMediaProcessor(
     type: string,
     channel: string
-  ): (media: Express.Multer.File) => Promise<ProcessedMedia> {
+  ): (media: MediaSource) => Promise<ProcessedMedia> {
     const processor =
       audioMediaProcessors[channel] || audioMediaProcessors.default;
 
