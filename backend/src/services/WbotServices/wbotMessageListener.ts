@@ -1613,7 +1613,6 @@ const wbotMessageListener = async (
           const { ticket } = await FindOrCreateTicketService(
             contact,
             whatsapp.id,
-            0,
             companyId,
             { history: true, timestamp: Number(msg.messageTimestamp) }
           );

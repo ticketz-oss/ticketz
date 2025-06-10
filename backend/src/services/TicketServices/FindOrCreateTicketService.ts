@@ -68,7 +68,7 @@ const internalFindOrCreateTicketService = async (
           contactId: groupContact ? groupContact.id : contact.id,
           status: "closed",
           isGroup: !!groupContact,
-          unreadMessages,
+          unreadMessages: 0,
           whatsappId,
           companyId,
           createdAt: timestamp ? moment.unix(timestamp).toDate() : undefined,

@@ -69,10 +69,6 @@ export type OmniSendMessageOptions = {
   dontSaveOnTicket?: boolean;
 };
 
-export type OmniFindOrCreateTicketOptions = FindOrCreateTicketOptions & {
-  unreadMessages?: number;
-};
-
 export interface OmniDriver {
   getName(): string;
   getDescription(): string;
@@ -85,7 +81,7 @@ export interface OmniDriver {
   findOrCreateTicket(
     contact: Contact,
     connection: Whatsapp,
-    options: OmniFindOrCreateTicketOptions
+    options: FindOrCreateTicketOptions
   ): Promise<{ ticket: Ticket; justCreated: boolean }>;
   createMessages(ticket: Ticket, data: any): Promise<Message[]>;
   getMediaProcessor(
@@ -286,7 +282,7 @@ export class OmniServices {
         contact,
         connection,
         {
-          unreadMessages,
+          incrementUnread: !fromMe,
           queue: defaultQueue
         }
       );
