@@ -508,11 +508,13 @@ export async function handleChatbot(
     if (currentOption.exitChatbot || currentOption.forwardQueueId) {
       const text = formatBody(`${currentOption.message.trim()}`, ticket);
 
-      await replyHandler(ticket, {
-        type: fileType || "text",
-        mediaUrl: filePath || undefined,
-        content: text || undefined
-      });
+      if (filePath || text) {
+        await replyHandler(ticket, {
+          type: filePath ? fileType : "text",
+          mediaUrl: filePath || undefined,
+          content: text || undefined
+        });
+      }
 
       if (currentOption.exitChatbot) {
         await updateTicket(ticket, {

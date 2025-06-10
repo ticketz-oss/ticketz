@@ -50,6 +50,10 @@ import Queue from "../../models/Queue";
 import { multerPassthrough } from "../../helpers/multerPassthrough";
 import { checkRating } from "../TicketServices/TicketRatingServices";
 import { handleChatbot, verifyQueue } from "../QueueService/ChatbotService";
+import VerifyCurrentSchedule, {
+  ScheduleResult
+} from "../CompanyService/VerifyCurrentSchedule";
+import { GetCompanySetting } from "../../helpers/CheckSettings";
 
 export type OmniMessage = {
   type: "text" | "image" | "video" | "audio" | "document" | "reaction";
@@ -218,6 +222,8 @@ export class OmniServices {
         throw new Error("Connection not found");
       }
 
+      const { companyId } = connection;
+
       const contact = await driver.findOrCreateContact(connection, data);
       if (!contact) {
         throw new Error("Contact not found or created");
@@ -233,8 +239,26 @@ export class OmniServices {
         return;
       }
 
+      const scheduleType = await GetCompanySetting(
+        companyId,
+        "scheduleType",
+        "disabled"
+      );
+
+      let currentSchedule: ScheduleResult = null;
+
+      if (scheduleType === "company") {
+        currentSchedule = await VerifyCurrentSchedule(companyId);
+      }
+
       let defaultQueue: Queue;
-      if (connection.queues && connection.queues.length === 1) {
+
+      if (
+        // msg.key.fromMe ||
+        (contact.disableBot || currentSchedule?.inActivity === false) &&
+        !contact.isGroup &&
+        connection.queues.length === 1
+      ) {
         // eslint-disable-next-line prefer-destructuring
         defaultQueue = connection.queues[0];
       }
