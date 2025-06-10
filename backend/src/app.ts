@@ -7,11 +7,16 @@ import cookieParser from "cookie-parser";
 import * as Sentry from "@sentry/node";
 
 import "./database";
+import path from "path";
 import uploadConfig from "./config/upload";
 import AppError from "./errors/AppError";
 import routes from "./routes";
 import { logger } from "./utils/logger";
 import { messageQueue, sendScheduledMessages } from "./queues";
+
+class SystemError extends Error {
+  code?: string;
+}
 
 Sentry.init({ dsn: process.env.SENTRY_DSN });
 
@@ -25,13 +30,34 @@ app.set("queues", {
 app.use(
   cors({
     credentials: true,
-    origin: process.env.FRONTEND_URL
+    origin: process.env.FRONTEND_URL,
+    exposedHeaders: ["Content-Range", "X-Content-Range"]
   })
 );
 app.use(cookieParser());
 app.use(express.json());
 app.use(Sentry.Handlers.requestHandler());
-app.use("/public", express.static(uploadConfig.directory));
+app.get("/public/*", (req, res) => {
+  const filePath = path.join(uploadConfig.directory, req.params[0]);
+
+  if (filePath.endsWith(".aac")) {
+    res.setHeader("Content-Type", "audio/aac");
+  }
+
+  res.download(filePath, (err: SystemError) => {
+    if (err) {
+      if (err.code === "ENOENT") {
+        res.status(404).end();
+      } else {
+        logger.debug(
+          { err },
+          `Error downloading file ${req.params[0]}: ${err.message}`
+        );
+        res.status(500).end();
+      }
+    }
+  });
+});
 
 app.use((req, _res, next) => {
   const { method, url, query, body, headers } = req;
