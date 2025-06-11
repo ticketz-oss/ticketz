@@ -2001,68 +2001,6 @@ const filterMessages = (msg: WAMessage): boolean => {
   return true;
 };
 
-export const sendMessageImage = async (
-  wbot: Session,
-  contact: Contact,
-  ticket: Ticket,
-  url: string,
-  caption: string
-) => {
-  let sentMessage: proto.IWebMessageInfo;
-  try {
-    sentMessage = await wbot.sendMessage(
-      `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-      {
-        image: url
-          ? { url }
-          : fs.readFileSync(`public/temp/${caption}-${makeid(10)}`),
-        fileName: caption,
-        caption,
-        mimetype: "image/jpeg"
-      }
-    );
-  } catch (error) {
-    sentMessage = await wbot.sendMessage(
-      `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-      {
-        text: formatBody("Não consegui enviar o PDF, tente novamente!", ticket)
-      }
-    );
-  }
-  verifyMessage(sentMessage, ticket, contact);
-};
-
-export const sendMessageLink = async (
-  wbot: Session,
-  contact: Contact,
-  ticket: Ticket,
-  url: string,
-  caption: string
-) => {
-  let sentMessage: proto.IWebMessageInfo;
-  try {
-    sentMessage = await wbot.sendMessage(
-      `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-      {
-        document: url
-          ? { url }
-          : fs.readFileSync(`public/temp/${caption}-${makeid(10)}`),
-        fileName: caption,
-        caption,
-        mimetype: "application/pdf"
-      }
-    );
-  } catch (error) {
-    sentMessage = await wbot.sendMessage(
-      `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-      {
-        text: formatBody("Não consegui enviar o PDF, tente novamente!", ticket)
-      }
-    );
-  }
-  verifyMessage(sentMessage, ticket, contact);
-};
-
 const wbotMessageListener = async (
   wbot: Session,
   companyId: number
