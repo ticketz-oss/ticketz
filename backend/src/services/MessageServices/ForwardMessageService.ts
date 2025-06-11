@@ -12,6 +12,7 @@ import {
 import User from "../../models/User";
 import CheckContactOpenTickets from "../../helpers/CheckContactOpenTickets";
 import CreateTicketService from "../TicketServices/CreateTicketService";
+import { getJidOf } from "../WbotServices/getJidOf";
 
 const ForwardMessageService = async (
   user: User,
@@ -53,11 +54,8 @@ const ForwardMessageService = async (
     try {
       const wbot = getWbot(whatsapp.id);
       const msg = JSON.parse(message.dataJson);
-      const number = contact.isGroup
-        ? `${contact.number}@g.us`
-        : `${contact.number}@s.whatsapp.net`;
 
-      const sentMessage = await wbot.sendMessage(number, {
+      const sentMessage = await wbot.sendMessage(getJidOf(contact), {
         forward: msg
       });
 

@@ -21,7 +21,7 @@ interface Request {
 
 const CreateOrUpdateContactService = async ({
   name,
-  number: rawNumber,
+  number,
   profilePicUrl,
   isGroup,
   email = "",
@@ -30,8 +30,6 @@ const CreateOrUpdateContactService = async ({
   channel = "whatsapp",
   disableBot = false
 }: Request): Promise<Contact> => {
-  const number = isGroup ? rawNumber : rawNumber.replace(/[^0-9]/g, "");
-
   const io = getIO();
   let contact: Contact | null;
 

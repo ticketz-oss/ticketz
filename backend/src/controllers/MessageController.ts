@@ -24,6 +24,7 @@ import Ticket from "../models/Ticket";
 import ForwardMessageService from "../services/MessageServices/ForwardMessageService";
 import { getWbot } from "../libs/wbot";
 import { verifyMessage } from "../services/WbotServices/wbotMessageListener";
+import { getJidOf } from "../services/WbotServices/getJidOf";
 
 type IndexQuery = {
   pageNumber: string;
@@ -121,15 +122,12 @@ export const react = async (req: Request, res: Response): Promise<Response> => {
 
   const msg = JSON.parse(message.dataJson);
 
-  const sentMessage = await wbot.sendMessage(
-    ticket.contact.number + (ticket.isGroup ? "@g.us" : "@s.whatsapp.net"),
-    {
-      react: {
-        text: emoji,
-        key: msg.key
-      }
+  const sentMessage = await wbot.sendMessage(getJidOf(ticket), {
+    react: {
+      text: emoji,
+      key: msg.key
     }
-  );
+  });
 
   if (!sentMessage) {
     throw new AppError("ERR_WHATSAPP_MESSAGE_NOT_SENT", 500);

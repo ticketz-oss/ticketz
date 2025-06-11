@@ -16,6 +16,7 @@ import User from "../../models/User";
 import formatBody from "../../helpers/Mustache";
 import { logger } from "../../utils/logger";
 import { incrementCounter } from "../CounterServices/IncrementCounter";
+import { getJidOf } from "../WbotServices/getJidOf";
 
 export interface UpdateTicketData {
   status?: string;
@@ -48,12 +49,9 @@ const sendFormattedMessage = async (
   const messageText = formatBody(message, ticket, user);
 
   const wbot = await GetTicketWbot(ticket);
-  const queueChangedMessage = await wbot.sendMessage(
-    `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-    {
-      text: messageText
-    }
-  );
+  const queueChangedMessage = await wbot.sendMessage(getJidOf(ticket), {
+    text: messageText
+  });
   await verifyMessage(queueChangedMessage, ticket, ticket.contact);
 };
 

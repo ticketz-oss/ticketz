@@ -8,6 +8,7 @@ import Ticket from "../../models/Ticket";
 import formatBody from "../../helpers/Mustache";
 import { verifyMediaMessage, verifyMessage } from "./wbotMessageListener";
 import User from "../../models/User";
+import { getJidOf } from "./getJidOf";
 
 interface Request {
   body: string;
@@ -26,13 +27,6 @@ const SendWhatsAppMessage = async ({
 
   const wbot = await GetTicketWbot(ticket);
 
-  const number = ticket.isGroup
-    ? `${ticket.contact.number}@g.us`
-    : `${ticket.contact.number}@s.whatsapp.net`;
-  // const number = `${ticket.contact.number.substring(12,0)}-${ticket.contact.number.substring(12)}@${
-
-  //   ticket.isGroup ? "g.us" : "s.whatsapp.net"
-  // }`;
   if (quotedMsg) {
     const chatMessage = await Message.findOne({
       where: {
@@ -56,7 +50,7 @@ const SendWhatsAppMessage = async ({
     const user = userId && (await User.findByPk(userId));
     const formattedBody = formatBody(body, ticket, user);
     const sentMessage = await wbot.sendMessage(
-      number,
+      getJidOf(ticket),
       {
         text: formattedBody
       },

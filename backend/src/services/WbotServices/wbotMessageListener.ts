@@ -62,6 +62,7 @@ import { checkCompanyCompliant } from "../../helpers/CheckCompanyCompliant";
 import { transcriber } from "../../helpers/transcriber";
 import { parseToMilliseconds } from "../../helpers/parseToMilliseconds";
 import { randomValue } from "../../helpers/randomValue";
+import { getJidOf } from "./getJidOf";
 
 export interface ImessageUpsert {
   messages: proto.IWebMessageInfo[];
@@ -77,6 +78,7 @@ const writeFileAsync = promisify(writeFile);
 
 const wbotMutex = new Mutex();
 const ackMutex = new Mutex();
+const lidUpdateMutex = new Mutex();
 
 const groupContactCache = new SimpleObjectCache(1000 * 30, logger);
 const outOfHoursCache = new SimpleObjectCache(1000 * 60 * 5, logger);
@@ -454,7 +456,7 @@ const downloadMedia = async (
 
     if (!ticket.isGroup && !msg.key?.fromMe) {
       const sendMsg = await wbot.sendMessage(
-        `${ticket.contact.number}@s.whatsapp.net`,
+        getJidOf(ticket.contact),
         fileLimitMessage
       );
 
@@ -539,17 +541,64 @@ const verifyContact = async (
     profilePicUrl = `${process.env.FRONTEND_URL}/nopicture.png`;
   }
 
+  const isLid = msgContact.id.includes("@lid");
+  const isGroup = msgContact.id.includes("@g.us");
+
+  const number = isLid
+    ? msgContact.id
+    : msgContact.id.substring(0, msgContact.id.indexOf("@"));
+
   const contactData = {
     name: msgContact?.name || msgContact.id.replace(/\D/g, ""),
-    number: msgContact.id.substring(0, msgContact.id.indexOf("@")),
+    number,
     profilePicUrl,
     isGroup: msgContact.id.includes("g.us"),
     companyId
   };
 
-  const contact = CreateOrUpdateContactService(contactData);
+  return lidUpdateMutex.runExclusive(async () => {
+    const foundContact = await Contact.findOne({
+      where: {
+        companyId,
+        number
+      }
+    });
+    if (!isLid && !isGroup && !foundContact) {
+      const [ow] = await wbot.onWhatsApp(msgContact.id);
+      if (!ow?.exists) {
+        throw new Error("ERR_WAPP_CONTACT_NOT_FOUND");
+      }
+      const { lid } = ow;
 
-  return contact;
+      if (lid) {
+        const lidContact = await Contact.findOne({
+          where: {
+            companyId,
+            number: lid
+          },
+          include: ["tags", "extraInfo"]
+        });
+
+        if (lidContact) {
+          lidContact.update(contactData);
+          lidContact.reload();
+
+          const io = getIO();
+          io.to(`company-${companyId}-mainchannel`).emit(
+            `company-${companyId}-contact`,
+            {
+              action: "update",
+              contact: lidContact
+            }
+          );
+
+          return lidContact;
+        }
+      }
+    }
+
+    return CreateOrUpdateContactService(contactData);
+  });
 };
 
 const verifyQuotedMessage = async (
@@ -929,13 +978,9 @@ const quickMessage = async (
 ) => {
   const debouncedSentMessage = debounce(
     async () => {
-      const sentMessage = await wbot.sendMessage(
-        `${ticket.contact.number}@s.whatsapp.net"
-        }`,
-        {
-          text: `\u200e${text}`
-        }
-      );
+      const sentMessage = await wbot.sendMessage(getJidOf(ticket.contact), {
+        text: `\u200e${text}`
+      });
       if (saveOnTicket) {
         verifyMessage(sentMessage, ticket, ticket.contact);
       }
@@ -1054,10 +1099,7 @@ const sendMenu = async (
       text: formatBody(`${message}\n\n${options}`, ticket)
     };
 
-    const sendMsg = await wbot.sendMessage(
-      `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-      textMessage
-    );
+    const sendMsg = await wbot.sendMessage(getJidOf(ticket), textMessage);
 
     await verifyMessage(sendMsg, ticket, ticket.contact);
   };
@@ -1131,12 +1173,9 @@ export const startQueue = async (
       const outOfHoursMessage =
         queue.outOfHoursMessage?.trim() ||
         "Estamos fora do horário de expediente";
-      const sentMessage = await wbot.sendMessage(
-        `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-        {
-          text: formatBody(outOfHoursMessage, ticket)
-        }
-      );
+      const sentMessage = await wbot.sendMessage(getJidOf(ticket), {
+        text: formatBody(outOfHoursMessage, ticket)
+      });
       await verifyMessage(sentMessage, ticket, contact);
       const outOfHoursAction = await GetCompanySetting(
         companyId,
@@ -1163,30 +1202,25 @@ export const startQueue = async (
       if (filePath) {
         optionsMsg.caption = body;
       } else {
-        const sentMessage = await wbot.sendMessage(
-          `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-          {
-            text: body
-          }
-        );
+        const sentMessage = await wbot.sendMessage(getJidOf(ticket), {
+          text: body
+        });
         await verifyMessage(sentMessage, ticket, contact);
         return;
       }
     }
 
     if (filePath) {
-      const sentMediaMessage = await wbot.sendMessage(
-        `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-        { ...optionsMsg }
-      );
+      const sentMediaMessage = await wbot.sendMessage(getJidOf(ticket), {
+        ...optionsMsg
+      });
       await verifyMediaMessage(sentMediaMessage, ticket, contact);
     }
   } else {
     if (filePath) {
-      const sentMediaMessage = await wbot.sendMessage(
-        `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-        { ...optionsMsg }
-      );
+      const sentMediaMessage = await wbot.sendMessage(getJidOf(ticket), {
+        ...optionsMsg
+      });
       await verifyMediaMessage(sentMediaMessage, ticket, contact);
     }
     sendMenu(wbot, ticket, queue, sendBackToMain);
@@ -1197,7 +1231,7 @@ const verifyQueue = async (
   wbot: Session,
   msg: proto.IWebMessageInfo | null,
   ticket: Ticket,
-  contact: Contact
+  _contact: Contact
 ) => {
   const { queues, greetingMessage } = await ShowWhatsAppService(
     wbot.id!,
@@ -1234,10 +1268,7 @@ const verifyQueue = async (
       text: formatBody(`${greetingMessage}\n\n${options}`, ticket)
     };
 
-    const sendMsg = await wbot.sendMessage(
-      `${contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-      textMessage
-    );
+    const sendMsg = await wbot.sendMessage(getJidOf(ticket), textMessage);
 
     await verifyMessage(sendMsg, ticket, ticket.contact);
   };
@@ -1283,12 +1314,9 @@ const handleRating = async (
     whatsapp.complationMessage.trim() || "Atendimento finalizado";
 
   const text = formatBody(`\u200e${complationMessage}`, ticket);
-  const jid = `${ticket.contact.number}@${
-    ticket.isGroup ? "g.us" : "s.whatsapp.net"
-  }`;
 
   wbot
-    .sendMessage(jid, {
+    .sendMessage(getJidOf(ticket), {
       text
     })
     .then(
@@ -1449,20 +1477,12 @@ const handleChartbot = async (
 
       if (filePath) {
         optionsMsg.caption = text || undefined;
-        const sentMessage = await wbot.sendMessage(
-          `${ticket.contact.number}@${
-            ticket.isGroup ? "g.us" : "s.whatsapp.net"
-          }`,
-          { ...optionsMsg }
-        );
+        const sentMessage = await wbot.sendMessage(getJidOf(ticket), {
+          ...optionsMsg
+        });
         await verifyMediaMessage(sentMessage, ticket, ticket.contact);
       } else if (text) {
-        const sendMsg = await wbot.sendMessage(
-          `${ticket.contact.number}@${
-            ticket.isGroup ? "g.us" : "s.whatsapp.net"
-          }`,
-          { text }
-        );
+        const sendMsg = await wbot.sendMessage(getJidOf(ticket), { text });
         await verifyMessage(sendMsg, ticket, ticket.contact);
       }
 
@@ -1483,12 +1503,9 @@ const handleChartbot = async (
     }
 
     if (filePath) {
-      const sentMessage = await wbot.sendMessage(
-        `${ticket.contact.number}@${
-          ticket.isGroup ? "g.us" : "s.whatsapp.net"
-        }`,
-        { ...optionsMsg }
-      );
+      const sentMessage = await wbot.sendMessage(getJidOf(ticket), {
+        ...optionsMsg
+      });
       await verifyMediaMessage(sentMessage, ticket, ticket.contact);
     }
 
@@ -1778,14 +1795,9 @@ const handleMessage = async (
               const outOfHoursMessage =
                 whatsapp.outOfHoursMessage.trim() ||
                 "Estamos fora do horário de expediente";
-              const sentMessage = await wbot.sendMessage(
-                `${ticket.contact.number}@${
-                  ticket.isGroup ? "g.us" : "s.whatsapp.net"
-                }`,
-                {
-                  text: formatBody(outOfHoursMessage, ticket)
-                }
-              );
+              const sentMessage = await wbot.sendMessage(getJidOf(ticket), {
+                text: formatBody(outOfHoursMessage, ticket)
+              });
               await verifyMessage(sentMessage, ticket, ticket.contact);
             }
             if (ticket.status !== "open") {
@@ -1819,14 +1831,9 @@ const handleMessage = async (
               const outOfHoursMessage =
                 queue.outOfHoursMessage?.trim() ||
                 "Estamos fora do horário de expediente";
-              const sentMessage = await wbot.sendMessage(
-                `${ticket.contact.number}@${
-                  ticket.isGroup ? "g.us" : "s.whatsapp.net"
-                }`,
-                {
-                  text: formatBody(outOfHoursMessage, ticket)
-                }
-              );
+              const sentMessage = await wbot.sendMessage(getJidOf(ticket), {
+                text: formatBody(outOfHoursMessage, ticket)
+              });
               await verifyMessage(sentMessage, ticket, ticket.contact);
             }
             if (ticket.status !== "open") {
@@ -1881,14 +1888,9 @@ const handleMessage = async (
       if (whatsapp.greetingMessage) {
         const debouncedSentMessage = debounce(
           async () => {
-            await wbot.sendMessage(
-              `${ticket.contact.number}@${
-                ticket.isGroup ? "g.us" : "s.whatsapp.net"
-              }`,
-              {
-                text: formatBody(`${whatsapp.greetingMessage}`, ticket)
-              }
-            );
+            await wbot.sendMessage(getJidOf(ticket), {
+              text: formatBody(`${whatsapp.greetingMessage}`, ticket)
+            });
           },
           1000,
           ticket.id

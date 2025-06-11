@@ -28,6 +28,7 @@ import Setting from "./models/Setting";
 import { parseToMilliseconds } from "./helpers/parseToMilliseconds";
 import { startCampaignQueues } from "./queues/campaign";
 import OutOfTicketMessage from "./models/OutOfTicketMessages";
+import { getJidOf } from "./services/WbotServices/getJidOf";
 
 const connection = process.env.REDIS_URI || "";
 const limiterMax = process.env.REDIS_OPT_LIMITER_MAX || 1;
@@ -216,14 +217,9 @@ async function setRatingExpired(tracking: TicketTraking, threshold: Date) {
   const complationMessage =
     tracking.whatsapp.complationMessage.trim() || "Atendimento finalizado";
 
-  await wbot.sendMessage(
-    `${tracking.ticket.contact.number}@${
-      tracking.ticket.isGroup ? "g.us" : "s.whatsapp.net"
-    }`,
-    {
-      text: formatBody(`\u200e${complationMessage}`, tracking.ticket)
-    }
-  );
+  await wbot.sendMessage(getJidOf(tracking.ticket), {
+    text: formatBody(`\u200e${complationMessage}`, tracking.ticket)
+  });
 
   logger.debug({ tracking }, "rating timedout");
 }
