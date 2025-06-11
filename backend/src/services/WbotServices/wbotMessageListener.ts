@@ -30,7 +30,9 @@ import OldMessage from "../../models/OldMessage";
 import { getIO } from "../../libs/socket";
 import CreateMessageService from "../MessageServices/CreateMessageService";
 import { logger } from "../../utils/logger";
-import CreateOrUpdateContactService from "../ContactServices/CreateOrUpdateContactService";
+import CreateOrUpdateContactService, {
+  updateContact
+} from "../ContactServices/CreateOrUpdateContactService";
 import FindOrCreateTicketService from "../TicketServices/FindOrCreateTicketService";
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
 import UpdateTicketService, {
@@ -563,7 +565,29 @@ const verifyContact = async (
         number
       }
     });
-    if (!isLid && !isGroup && !foundContact) {
+
+    if (isLid) {
+      if (foundContact) {
+        return updateContact(foundContact, {
+          profilePicUrl: contactData.profilePicUrl
+        });
+      }
+
+      const partialLidContact = await Contact.findOne({
+        where: {
+          companyId,
+          number: number.substring(0, msgContact.id.indexOf("@"))
+        },
+        include: ["tags", "extraInfo"]
+      });
+
+      if (partialLidContact) {
+        return updateContact(partialLidContact, {
+          number: contactData.number,
+          profilePicUrl: contactData.profilePicUrl
+        });
+      }
+    } else if (!isGroup && !foundContact) {
       const [ow] = await wbot.onWhatsApp(msgContact.id);
       if (!ow?.exists) {
         throw new Error("ERR_WAPP_CONTACT_NOT_FOUND");
@@ -580,19 +604,10 @@ const verifyContact = async (
         });
 
         if (lidContact) {
-          lidContact.update(contactData);
-          lidContact.reload();
-
-          const io = getIO();
-          io.to(`company-${companyId}-mainchannel`).emit(
-            `company-${companyId}-contact`,
-            {
-              action: "update",
-              contact: lidContact
-            }
-          );
-
-          return lidContact;
+          return updateContact(lidContact, {
+            number: contactData.number,
+            profilePicUrl: contactData.profilePicUrl
+          });
         }
       }
     }
