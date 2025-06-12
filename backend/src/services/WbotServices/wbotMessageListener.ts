@@ -592,13 +592,15 @@ const verifyContact = async (
       if (!ow?.exists) {
         throw new Error("ERR_WAPP_CONTACT_NOT_FOUND");
       }
-      const { lid } = ow;
+      const lid = ow.lid as string;
 
       if (lid) {
         const lidContact = await Contact.findOne({
           where: {
             companyId,
-            number: lid
+            number: {
+              [Op.or]: [lid, lid.substring(0, msgContact.id.indexOf("@"))]
+            }
           },
           include: ["tags", "extraInfo"]
         });
