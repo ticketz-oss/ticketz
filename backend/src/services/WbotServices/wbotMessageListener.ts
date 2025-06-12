@@ -855,12 +855,6 @@ ${JSON.stringify(msg?.message)}`);
   }
 };
 
-const getTicketJid = (ticket: Ticket) => {
-  return `${ticket.contact.number}@${
-    ticket.isGroup ? "g.us" : "s.whatsapp.net"
-  }`;
-};
-
 export const wbotReplyHandler = async (
   wbot: Session,
   ticket: Ticket,
@@ -871,7 +865,7 @@ export const wbotReplyHandler = async (
     await new Promise(resolve => {
       setTimeout(resolve, 500);
     });
-    await wbot.sendPresenceUpdate("composing", getTicketJid(ticket));
+    await wbot.sendPresenceUpdate("composing", getJidOf(ticket));
     return;
   }
 
@@ -893,9 +887,9 @@ export const wbotReplyHandler = async (
   }
 
   if (reply.type === "image" && reply.mediaUrl) {
-    await wbot.sendPresenceUpdate("composing", getTicketJid(ticket));
+    await wbot.sendPresenceUpdate("composing", getJidOf(ticket));
     await wbot
-      .sendMessage(getTicketJid(ticket), {
+      .sendMessage(getJidOf(ticket), {
         image: { url: reply.mediaUrl },
         caption: formatBody(reply.content, ticket, null, customTags)
       })
@@ -912,9 +906,9 @@ export const wbotReplyHandler = async (
   }
 
   if (reply.type === "audio" && reply.mediaUrl) {
-    await wbot.sendPresenceUpdate("recording", getTicketJid(ticket));
+    await wbot.sendPresenceUpdate("recording", getJidOf(ticket));
     await wbot
-      .sendMessage(getTicketJid(ticket), {
+      .sendMessage(getJidOf(ticket), {
         audio: { url: reply.mediaUrl },
         ptt: true,
         caption: formatBody(reply.content, ticket, null, customTags)
@@ -932,9 +926,9 @@ export const wbotReplyHandler = async (
   }
 
   if (reply.type === "video" && reply.mediaUrl) {
-    await wbot.sendPresenceUpdate("composing", getTicketJid(ticket));
+    await wbot.sendPresenceUpdate("composing", getJidOf(ticket));
     await wbot
-      .sendMessage(getTicketJid(ticket), {
+      .sendMessage(getJidOf(ticket), {
         video: { url: reply.mediaUrl },
         caption: formatBody(reply.content, ticket, null, customTags)
       })
@@ -951,9 +945,9 @@ export const wbotReplyHandler = async (
   }
 
   if (reply.type === "gif" && reply.mediaUrl) {
-    await wbot.sendPresenceUpdate("composing", getTicketJid(ticket));
+    await wbot.sendPresenceUpdate("composing", getJidOf(ticket));
     await wbot
-      .sendMessage(getTicketJid(ticket), {
+      .sendMessage(getJidOf(ticket), {
         video: { url: reply.mediaUrl },
         gifPlayback: true,
         caption: formatBody(reply.content, ticket, null, customTags)
@@ -971,9 +965,9 @@ export const wbotReplyHandler = async (
   }
 
   if (reply.type === "document" && reply.mediaUrl) {
-    await wbot.sendPresenceUpdate("composing", getTicketJid(ticket));
+    await wbot.sendPresenceUpdate("composing", getJidOf(ticket));
     await wbot
-      .sendMessage(getTicketJid(ticket), {
+      .sendMessage(getJidOf(ticket), {
         document: { url: reply.mediaUrl },
         caption: formatBody(reply.content, ticket, null, customTags),
         fileName,
@@ -991,9 +985,9 @@ export const wbotReplyHandler = async (
     return;
   }
 
-  await wbot.sendPresenceUpdate("composing", getTicketJid(ticket));
+  await wbot.sendPresenceUpdate("composing", getJidOf(ticket));
   await wbot
-    .sendMessage(getTicketJid(ticket), {
+    .sendMessage(getJidOf(ticket), {
       text: formatBody(reply.content, ticket, null, customTags)
     })
     .then(async sentMessage => {
