@@ -12,7 +12,8 @@ import {
   HasMany,
   ForeignKey,
   BelongsTo,
-  BelongsToMany
+  BelongsToMany,
+  HasOne
 } from "sequelize-typescript";
 import ContactCustomField from "./ContactCustomField";
 import Ticket from "./Ticket";
@@ -20,6 +21,7 @@ import Company from "./Company";
 import Schedule from "./Schedule";
 import ContactTag from "./ContactTag";
 import Tag from "./Tag";
+import WhatsappLidMap from "./WhatsappLidMap";
 
 @Table
 class Contact extends Model {
@@ -72,6 +74,9 @@ class Contact extends Model {
 
   @HasMany(() => ContactCustomField)
   extraInfo: ContactCustomField[];
+
+  @HasOne(() => WhatsappLidMap)
+  whatsappLidMap: WhatsappLidMap;
 
   @ForeignKey(() => Company)
   @Column
