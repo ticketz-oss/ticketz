@@ -41,6 +41,10 @@ export async function verifyContact(
     companyId
   };
 
+  if (isGroup) {
+    return CreateOrUpdateContactService(contactData);
+  }
+
   return lidUpdateMutex.runExclusive(async () => {
     const foundContact = await Contact.findOne({
       where: {
@@ -91,7 +95,7 @@ export async function verifyContact(
           profilePicUrl: contactData.profilePicUrl
         });
       }
-    } else if (!isGroup && foundContact) {
+    } else if (foundContact) {
       if (!foundContact.whatsappLidMap) {
         const [ow] = await wbot.onWhatsApp(msgContact.id);
         if (!ow?.exists) {
@@ -109,7 +113,7 @@ export async function verifyContact(
       return updateContact(foundContact, {
         profilePicUrl: contactData.profilePicUrl
       });
-    } else if (!isGroup && !foundContact) {
+    } else {
       const [ow] = await wbot.onWhatsApp(msgContact.id);
       if (!ow?.exists) {
         throw new Error("ERR_WAPP_CONTACT_NOT_FOUND");
