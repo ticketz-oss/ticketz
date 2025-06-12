@@ -30,9 +30,6 @@ import OldMessage from "../../models/OldMessage";
 import { getIO } from "../../libs/socket";
 import CreateMessageService from "../MessageServices/CreateMessageService";
 import { logger } from "../../utils/logger";
-import CreateOrUpdateContactService, {
-  updateContact
-} from "../ContactServices/CreateOrUpdateContactService";
 import FindOrCreateTicketService from "../TicketServices/FindOrCreateTicketService";
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
 import UpdateTicketService, {
@@ -65,7 +62,7 @@ import { transcriber } from "../../helpers/transcriber";
 import { parseToMilliseconds } from "../../helpers/parseToMilliseconds";
 import { randomValue } from "../../helpers/randomValue";
 import { getJidOf } from "./getJidOf";
-import WhatsappLidMap from "../../models/WhatsappLidMap";
+import { verifyContact } from "./verifyContact";
 
 export interface ImessageUpsert {
   messages: proto.IWebMessageInfo[];
@@ -81,7 +78,6 @@ const writeFileAsync = promisify(writeFile);
 
 const wbotMutex = new Mutex();
 const ackMutex = new Mutex();
-const lidUpdateMutex = new Mutex();
 
 const groupContactCache = new SimpleObjectCache(1000 * 30, logger);
 const outOfHoursCache = new SimpleObjectCache(1000 * 60 * 5, logger);
@@ -529,138 +525,6 @@ const downloadMedia = async (
     filename
   };
   return media;
-};
-
-const verifyContact = async (
-  msgContact: IMe,
-  wbot: Session,
-  companyId: number
-): Promise<Contact> => {
-  let profilePicUrl: string;
-  try {
-    profilePicUrl = await wbot.profilePictureUrl(msgContact.id);
-  } catch (e) {
-    Sentry.captureException(e);
-    profilePicUrl = `${process.env.FRONTEND_URL}/nopicture.png`;
-  }
-
-  const isLid = msgContact.id.includes("@lid");
-  const isGroup = msgContact.id.includes("@g.us");
-
-  const number = isLid
-    ? msgContact.id
-    : msgContact.id.substring(0, msgContact.id.indexOf("@"));
-
-  const contactData = {
-    name: msgContact?.name || msgContact.id.replace(/\D/g, ""),
-    number,
-    profilePicUrl,
-    isGroup: msgContact.id.includes("g.us"),
-    companyId
-  };
-
-  return lidUpdateMutex.runExclusive(async () => {
-    const foundContact = await Contact.findOne({
-      where: {
-        companyId,
-        number
-      },
-      include: ["tags", "extraInfo", "whatsappLidMap"]
-    });
-
-    if (isLid) {
-      if (foundContact) {
-        return updateContact(foundContact, {
-          profilePicUrl: contactData.profilePicUrl
-        });
-      }
-
-      const foundMappedContact = await WhatsappLidMap.findOne({
-        where: {
-          companyId,
-          lid: number
-        },
-        include: [
-          {
-            model: Contact,
-            as: "contact",
-            include: ["tags", "extraInfo"]
-          }
-        ]
-      });
-
-      if (foundMappedContact) {
-        return updateContact(foundMappedContact.contact, {
-          profilePicUrl: contactData.profilePicUrl
-        });
-      }
-
-      const partialLidContact = await Contact.findOne({
-        where: {
-          companyId,
-          number: number.substring(0, number.indexOf("@"))
-        },
-        include: ["tags", "extraInfo"]
-      });
-
-      if (partialLidContact) {
-        return updateContact(partialLidContact, {
-          number: contactData.number,
-          profilePicUrl: contactData.profilePicUrl
-        });
-      }
-    } else if (!isGroup && foundContact) {
-      if (!foundContact.whatsappLidMap) {
-        const [ow] = await wbot.onWhatsApp(msgContact.id);
-        if (!ow?.exists) {
-          throw new Error("ERR_WAPP_CONTACT_NOT_FOUND");
-        }
-        const lid = ow.lid as string;
-        if (lid) {
-          await WhatsappLidMap.create({
-            companyId,
-            lid,
-            contactId: foundContact.id
-          });
-        }
-      }
-      return updateContact(foundContact, {
-        profilePicUrl: contactData.profilePicUrl
-      });
-    } else if (!isGroup && !foundContact) {
-      const [ow] = await wbot.onWhatsApp(msgContact.id);
-      if (!ow?.exists) {
-        throw new Error("ERR_WAPP_CONTACT_NOT_FOUND");
-      }
-      const lid = ow.lid as string;
-
-      if (lid) {
-        const lidContact = await Contact.findOne({
-          where: {
-            companyId,
-            number: {
-              [Op.or]: [lid, lid.substring(0, lid.indexOf("@"))]
-            }
-          },
-          include: ["tags", "extraInfo"]
-        });
-
-        if (lidContact) {
-          await WhatsappLidMap.create({
-            companyId,
-            lid,
-            contactId: foundContact.id
-          });
-          return updateContact(lidContact, {
-            number: contactData.number,
-            profilePicUrl: contactData.profilePicUrl
-          });
-        }
-      }
-    }
-
-    return CreateOrUpdateContactService(contactData);
-  });
 };
 
 const verifyQuotedMessage = async (
