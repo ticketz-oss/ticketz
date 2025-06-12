@@ -6,12 +6,74 @@ import CreateOrUpdateContactService, {
   updateContact
 } from "../ContactServices/CreateOrUpdateContactService";
 import WhatsappLidMap from "../../models/WhatsappLidMap";
+import Message from "../../models/Message";
+import Ticket from "../../models/Ticket";
+import UpdateTicketService from "../TicketServices/UpdateTicketService";
 
 const lidUpdateMutex = new Mutex();
 
 interface IMe {
   name: string;
   id: string;
+}
+
+export async function checkAndDedup(
+  contact: Contact,
+  lid: string
+): Promise<void> {
+  const lidContact = await Contact.findOne({
+    where: {
+      companyId: contact.companyId,
+      number: {
+        [Op.or]: [lid, lid.substring(0, lid.indexOf("@"))]
+      }
+    }
+  });
+
+  if (!lidContact) {
+    return;
+  }
+
+  await Message.update(
+    { contactId: contact.id },
+    {
+      where: {
+        contactId: lidContact.id,
+        companyId: contact.companyId
+      }
+    }
+  );
+
+  const notClosedTickets = await Ticket.findAll({
+    where: {
+      contactId: lidContact.id,
+      status: {
+        [Op.not]: "closed"
+      }
+    }
+  });
+
+  // eslint-disable-next-line no-restricted-syntax
+  for (const ticket of notClosedTickets) {
+    // eslint-disable-next-line no-await-in-loop
+    await UpdateTicketService({
+      ticketData: { status: "closed", justClose: true },
+      ticketId: ticket.id,
+      companyId: ticket.companyId
+    });
+  }
+
+  await Ticket.update(
+    { contactId: contact.id },
+    {
+      where: {
+        contactId: lidContact.id,
+        companyId: contact.companyId
+      }
+    }
+  );
+
+  await lidContact.destroy();
 }
 
 export async function verifyContact(
@@ -103,6 +165,7 @@ export async function verifyContact(
         }
         const lid = ow.lid as string;
         if (lid) {
+          await checkAndDedup(foundContact, lid);
           await WhatsappLidMap.create({
             companyId,
             lid,
