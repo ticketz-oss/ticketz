@@ -13,6 +13,7 @@ import Ticket from "../../models/Ticket";
 import { verifyMediaMessage, verifyMessage } from "./wbotMessageListener";
 import CheckSettings from "../../helpers/CheckSettings";
 import saveMediaToFile from "../../helpers/saveMediaFile";
+import { getJidOf } from "./getJidOf";
 
 interface Request {
   media: Express.Multer.File;
@@ -103,10 +104,7 @@ export const sendWhatsappFile = async (
   try {
     const wbot = await GetTicketWbot(ticket);
 
-    const sentMessage = await wbot.sendMessage(
-      `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-      options
-    );
+    const sentMessage = await wbot.sendMessage(getJidOf(ticket), options);
 
     await verifyMediaMessage(sentMessage, ticket, ticket.contact);
 
@@ -125,10 +123,7 @@ export const SendWhatsAppMessage = async (
   try {
     const wbot = await GetTicketWbot(ticket);
 
-    const sentMessage = await wbot.sendMessage(
-      `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-      options
-    );
+    const sentMessage = await wbot.sendMessage(getJidOf(ticket), options);
 
     wbot.cacheMessage(sentMessage);
 

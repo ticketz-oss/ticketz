@@ -5,6 +5,7 @@ import Contact from "../models/Contact";
 import ContactTag from "../models/ContactTag";
 import Ticket from "../models/Ticket";
 import Whatsapp from "../models/Whatsapp";
+import WhatsappLidMap from "../models/WhatsappLidMap";
 import ContactCustomField from "../models/ContactCustomField";
 import Message from "../models/Message";
 import OldMessage from "../models/OldMessage";
@@ -58,6 +59,7 @@ const models = [
   Message,
   OldMessage,
   Whatsapp,
+  WhatsappLidMap,
   ContactCustomField,
   Setting,
   Queue,

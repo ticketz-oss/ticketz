@@ -7,22 +7,39 @@ interface ExtraInfo extends ContactCustomField {
   value: string;
 }
 
-interface Request {
-  name: string;
-  number: string;
-  isGroup: boolean;
+interface ContactData {
+  name?: string;
+  number?: string;
+  isGroup?: boolean;
   email?: string;
   profilePicUrl?: string;
   profileHiresPictureUrl?: string;
-  companyId: number;
+  companyId?: number;
   extraInfo?: ExtraInfo[];
   channel?: string;
   disableBot?: boolean;
 }
 
+export const updateContact = async (
+  contact: Contact,
+  contactData: ContactData
+) => {
+  await contact.update(contactData);
+
+  const io = getIO();
+  io.to(`company-${contact.companyId}-mainchannel`).emit(
+    `company-${contact.companyId}-contact`,
+    {
+      action: "update",
+      contact
+    }
+  );
+  return contact;
+};
+
 const CreateOrUpdateContactService = async ({
   name,
-  number: rawNumber,
+  number,
   profilePicUrl,
   profileHiresPictureUrl,
   isGroup,
@@ -31,9 +48,7 @@ const CreateOrUpdateContactService = async ({
   extraInfo = [],
   channel = "whatsapp",
   disableBot = false
-}: Request): Promise<Contact> => {
-  const number = isGroup ? rawNumber : rawNumber.replace(/[^0-9]/g, "");
-
+}: ContactData): Promise<Contact> => {
   const io = getIO();
   let contact: Contact | null;
 
@@ -73,15 +88,7 @@ const CreateOrUpdateContactService = async ({
       });
 
       if (contact) {
-        contact.update({ profilePicUrl, profileHiresPictureUrl });
-
-        io.to(`company-${companyId}-mainchannel`).emit(
-          `company-${companyId}-contact`,
-          {
-            action: "update",
-            contact
-          }
-        );
+        updateContact(contact, { profilePicUrl, profileHiresPictureUrl });
       }
     } else {
       console.error("Error creating contact:", createError);
