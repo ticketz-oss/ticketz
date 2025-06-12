@@ -24,6 +24,7 @@ export default {
           model: "Contacts",
           key: "id"
         },
+        onDelete: "CASCADE",
         onUpdate: "CASCADE"
       },
       createdAt: {
