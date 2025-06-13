@@ -32,6 +32,7 @@ import { loadJSON } from "../../helpers/loadJSON";
 
 import { SmallPie } from "./SmallPie";
 import { TicketCountersChart } from "./TicketCountersChart";
+import { getTimezoneOffset } from "../../helpers/getTimezoneOffset.js";
 
 import TicketzRegistry from "../../components/TicketzRegistry";
 import api from "../../services/api.js";
@@ -390,7 +391,7 @@ const Dashboard = () => {
   }
   
   async function fetchData() {
-    let params = {};
+    let params = { tz: getTimezoneOffset() };
     
     const days = Number(period);
 
