@@ -17,6 +17,7 @@ type TicketTrackingStatistics = {
 export type DashboardDateRange = {
   date_from?: string;
   date_to?: string;
+  tz?: string;
 };
 
 type TicketsStatisticsData = {
@@ -290,10 +291,11 @@ export async function ticketsStatisticsService(
 ): Promise<TicketsStatisticsData> {
   let start: Date;
   let end = new Date();
+  const tz = params.tz || "Z";
 
   if (params.date_from && params.date_to) {
-    start = new Date(`${params.date_from}T00:00:00Z`);
-    end = new Date(`${params.date_to}T23:59:59Z`);
+    start = new Date(`${params.date_from}T00:00:00${tz}`);
+    end = new Date(`${params.date_to}T23:59:59${tz}`);
   } else {
     throw new Error("Invalid date range");
   }
@@ -322,10 +324,11 @@ export async function usersReportService(
 ): Promise<UserReportData> {
   let start: Date;
   let end = new Date();
+  const tz = params.tz || "Z";
 
   if (params.date_from && params.date_to) {
-    start = new Date(`${params.date_from}T00:00:00Z`);
-    end = new Date(`${params.date_to}T23:59:59Z`);
+    start = new Date(`${params.date_from}T00:00:00${tz}`);
+    end = new Date(`${params.date_to}T23:59:59${tz}`);
   } else {
     throw new Error("Invalid date range");
   }
