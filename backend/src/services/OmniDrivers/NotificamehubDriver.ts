@@ -67,6 +67,9 @@ import {
   MediaSource,
   ProcessedMedia
 } from "../../helpers/mediaConversion";
+import GetDefaultWhatsApp from "../../helpers/GetDefaultWhatsApp";
+import { getWbot } from "../../libs/wbot";
+import { verifyContact } from "../WbotServices/verifyContact";
 
 const contactMutex = new Mutex();
 const messageMutex = new Mutex();
@@ -505,6 +508,27 @@ export class NotificamehubDriver implements OmniDriver {
     }
 
     return contactMutex.runExclusive(async () => {
+      if (channel === "whatsapp") {
+        try {
+          const defaultWhatsapp = await GetDefaultWhatsApp(
+            connection.companyId
+          );
+          const wbot = getWbot(defaultWhatsapp.id);
+          if (wbot) {
+            return verifyContact(
+              { name, id: `${contactAddress}@s.whatsapp.net` },
+              wbot,
+              connection.companyId
+            );
+          }
+        } catch (error) {
+          logger.debug(
+            { message: error.message, companyId: connection.companyId },
+            "notificamehub:findOrCreateContact: Unable to check contact on whatsapp - falling back"
+          );
+        }
+      }
+
       return (
         (await Contact.findOne({
           where: {

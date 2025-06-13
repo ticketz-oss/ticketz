@@ -7,7 +7,8 @@ import makeWASocket, {
   CacheStore,
   WAMessageKey,
   WAMessageContent,
-  proto
+  proto,
+  jidNormalizedUser
 } from "baileys";
 
 import { Boom } from "@hapi/boom";
@@ -325,6 +326,19 @@ export const initWASocket = async (
                 qrcode: "",
                 retries: 0
               });
+
+              logger.debug(
+                {
+                  id: jidNormalizedUser(wsocket.user.id),
+                  name: wsocket.user.name,
+                  lid: wsocket.user?.lid,
+                  notify: wsocket.user?.notify,
+                  verifiedName: wsocket.user?.verifiedName,
+                  imgUrl: wsocket.user?.imgUrl,
+                  status: wsocket.user?.status
+                },
+                `Session ${name} details`
+              );
 
               io.emit(`company-${whatsapp.companyId}-whatsappSession`, {
                 action: "update",

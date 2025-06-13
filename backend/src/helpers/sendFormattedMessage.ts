@@ -1,6 +1,7 @@
 import Ticket from "../models/Ticket";
 import User from "../models/User";
 import { OmniServices } from "../services/OmniServices/OmniServices";
+import { getJidOf } from "../services/WbotServices/getJidOf";
 import { verifyMessage } from "../services/WbotServices/wbotMessageListener";
 import GetTicketWbot from "./GetTicketWbot";
 import formatBody from "./Mustache";
@@ -40,12 +41,9 @@ export async function sendFormattedMessage(
   }
 
   const wbot = await GetTicketWbot(ticket);
-  const queueChangedMessage = await wbot.sendMessage(
-    `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
-    {
-      text: messageText
-    }
-  );
+  const queueChangedMessage = await wbot.sendMessage(getJidOf(ticket), {
+    text: messageText
+  });
 
   if (!saveOnTicket) {
     return;
