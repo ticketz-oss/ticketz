@@ -113,10 +113,11 @@ export async function queuesReportService(
 ): Promise<QueueReportData> {
   let start: Date;
   let end = new Date();
+  const tz = params.tz || "Z";
 
   if (params.date_from && params.date_to) {
-    start = new Date(`${params.date_from}T00:00:00Z`);
-    end = new Date(`${params.date_to}T23:59:59Z`);
+    start = new Date(`${params.date_from}T00:00:00${tz}`);
+    end = new Date(`${params.date_to}T23:59:59${tz}`);
   } else {
     throw new Error("Invalid date range");
   }
