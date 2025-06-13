@@ -198,7 +198,7 @@ export async function verifyContact(
           await WhatsappLidMap.create({
             companyId,
             lid,
-            contactId: foundContact.id
+            contactId: lidContact.id
           });
           return updateContact(lidContact, {
             number: contactData.number,
