@@ -101,8 +101,6 @@ const UpdateTicketService = async ({
     const { justClose, annotation } = ticketData;
     let { status } = ticketData;
     const { queueId, userId } = ticketData;
-    const fromChatbot = ticketData.chatbot || false;
-    let chatbot: boolean | null = fromChatbot;
     let queueOptionId: number | null = ticketData.queueOptionId || null;
 
     if (ticketId < 1 && status === "open") {
@@ -118,6 +116,10 @@ const UpdateTicketService = async ({
     );
 
     let ticket = await ShowTicketService(ticketId, companyId);
+
+    const isFromChatbot = ticket.chatbot || ticketData.chatbot || false;
+    let chatbot: boolean | null = ticketData.chatbot || false;
+
     const isGroup = ticket.contact?.isGroup || ticket.isGroup;
 
     if (user && ticket.status !== "pending") {
@@ -257,7 +259,7 @@ const UpdateTicketService = async ({
 
         const transferToNewTicket =
           !isGroup &&
-          !fromChatbot &&
+          !isFromChatbot &&
           ((await GetCompanySetting(companyId, "transferToNewTicket", "")) ===
             "enabled" ||
             whatsapp.transferToNewTicket);
@@ -445,7 +447,7 @@ const UpdateTicketService = async ({
       !isGroup &&
       !ticket.chatbot &&
       !ticket.contact.disableBot &&
-      !fromChatbot &&
+      !isFromChatbot &&
       !dontRunChatbot
     ) {
       let accepted = false;
