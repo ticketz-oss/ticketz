@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 
 import { WhereOptions } from "sequelize";
-import AppError from "../errors/AppError";
 import User from "../models/User";
 import Setting from "../models/Setting";
+import { logger } from "../utils/logger";
 
 const apiTokenAuth = async (
   req: Request,
@@ -11,7 +11,7 @@ const apiTokenAuth = async (
   next: NextFunction
 ): Promise<any> => {
   try {
-    const token = req.headers.authorization.replace("Bearer ", "");
+    const token = req.headers.authorization?.replace("Bearer ", "");
 
     if (!token) {
       return next();
@@ -61,13 +61,10 @@ const apiTokenAuth = async (
       };
       req.companyId = user.companyId;
     }
-
-    return next();
   } catch (e) {
-    console.log(e);
+    logger.error({ message: e.message }, "apiTokenAuth: Error checking Token");
   }
-
-  throw new AppError("Token inválido", 403);
+  return next();
 };
 
 export default apiTokenAuth;
