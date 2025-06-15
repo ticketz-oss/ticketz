@@ -115,6 +115,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
           if (session.hubToken) {
             data.hubToken = session.hubToken;
             data.hubChannel = session.hubChannel;
+            data.hubWhatsappTemplate = session.hubWhatsappTemplate;
           }
         }
         
@@ -148,7 +149,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
   }, [whatsAppId]);
 
   const handleSaveWhatsApp = async (values) => {
-    const { hubToken, hubChannel } = values;
+    const { hubToken, hubChannel, hubWhatsappTemplate } = values;
     const whatsappData = { ...values, queueIds: selectedQueueIds };
     delete whatsappData["queues"];
     delete whatsappData["session"];
@@ -160,6 +161,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
       whatsappData.session = {
         hubToken,
         hubChannel,
+        hubWhatsappTemplate
       }
       whatsappData.channel = "notificamehub";
     }
@@ -474,6 +476,17 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                     type="hubChannel"
                     fullWidth
                     name="hubChannel"
+                    variant="outlined"
+                    margin="dense"
+                  />
+                </div>
+                <div>
+                  <Field
+                    as={TextField}
+                    label={i18n.t("whatsappModal.form.hubWhatsappTemplate")}
+                    type="hubWhatsappTemplate"
+                    fullWidth
+                    name="hubWhatsappTemplate"
                     variant="outlined"
                     margin="dense"
                   />

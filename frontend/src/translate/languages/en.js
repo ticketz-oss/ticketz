@@ -172,8 +172,9 @@ const messages = {
           default: "Default",
           restrictToQueues: "Restritct to associated queues or queues without association",
           transferToNewTicket: "Force transfer to new ticket",
-          hubToken: "Hub Token",
-          hubChannel: "Hub Channel",
+          hubToken: "Notificamehub Account Token",
+          hubChannel: "Notificamehub Channel Token",
+          hubWhatsappTemplate: "Notificamehub Template for WhatsApp",
         },
         tab: {
           general: "General",
