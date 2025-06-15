@@ -78,6 +78,7 @@ export interface OmniDriver {
   getConnection(data: any): Promise<Whatsapp>;
   findOrCreateContact(connection: Whatsapp, data: any): Promise<Contact>;
   getMessageText(data: any): Promise<string>;
+  startTicket(ticket: Ticket): Promise<void>;
   findOrCreateTicket(
     contact: Contact,
     connection: Whatsapp,
