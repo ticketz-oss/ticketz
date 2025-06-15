@@ -2,6 +2,26 @@ import { Request, Response, NextFunction } from "express";
 
 import AppError from "../errors/AppError";
 import Whatsapp from "../models/Whatsapp";
+import { GetCompanySetting } from "../helpers/CheckSettings";
+
+async function formatWhatsappNumber(
+  companyId: number,
+  number
+): Promise<string> {
+  const countryCode = await GetCompanySetting(
+    companyId,
+    "countryCode",
+    "55",
+    true
+  );
+
+  return number.trim().startsWith("+")
+    ? number
+        .trim()
+        .slice(1)
+        .replace(/[^0-9]/g, "")
+    : `${countryCode}${number.replace(/[^0-9]/g, "")}`;
+}
 
 const gammuAuth = async (
   req: Request,
@@ -15,7 +35,7 @@ const gammuAuth = async (
 
     const { user, pw: token, dest: number, text: body } = req.query;
 
-    if (user !== "token") {
+    if (!user) {
       throw new AppError("Access denied", 401);
     }
 
@@ -44,16 +64,16 @@ const gammuAuth = async (
     } else {
       throw new Error();
     }
+
+    req.body = {
+      number: await formatWhatsappNumber(whatsapp.companyId, number),
+      body: req.query.text
+    };
+
+    return next();
   } catch (err) {
     throw new AppError("Access denied", 401);
   }
-
-  req.body = {
-    number: req.query.dest,
-    body: req.query.text
-  };
-
-  return next();
 };
 
 export default gammuAuth;
