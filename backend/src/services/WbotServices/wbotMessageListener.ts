@@ -1,5 +1,5 @@
 import * as Sentry from "@sentry/node";
-import { isNil, head, keys } from "lodash";
+import { isNil, keys } from "lodash";
 
 import {
   WASocket,
@@ -326,7 +326,8 @@ export const normalizeMediaType = (
 const storeQuotedMessage = async (
   quotedMessage: QuotedMessage,
   ticket: Ticket,
-  wbot: Session
+  wbot: Session,
+  msg: proto.IWebMessageInfo = null
 ): Promise<Message> => {
   const { quotedId, quotedMsg, participant } = quotedMessage;
 
@@ -345,26 +346,75 @@ const storeQuotedMessage = async (
     messageMedia && keys(messageMedia).includes("thumbnailDirectPath")
       ? messageMedia
       : null;
-  const thumbnailMedia =
-    thumbnailMsg && (await downloadThumbnail(thumbnailMsg));
-  const media =
-    messageMedia && (await downloadMedia(quotedMsg, wbot, ticket, fromMe));
 
-  let mediaUrl = null;
-  if (media) {
-    // eslint-disable-next-line no-use-before-define
-    mediaUrl = await saveMediaToFile(media, ticket);
+  const mediaPromises = [];
+
+  if (thumbnailMsg) {
+    const thumbnailDownloadData: BaileysDownloaderTaskData = {
+      mediaKey: thumbnailMsg.mediaKey,
+      directPath: (thumbnailMsg as any).thumbnailDirectPath,
+      mimetype: "image/jpeg",
+      filename: `thumbnail-${makeRandomId(5)}-${new Date().getTime()}.jpg`,
+      url: null,
+      mediaType: messageMedia?.mimetype
+        ? normalizeThumbnailMediaType(messageMedia.mimetype)
+        : "thumbnail-link",
+      companyId: ticket.companyId,
+      ticketId: ticket.id,
+      contactId: ticket.contactId
+    };
+
+    mediaPromises.push(
+      workerManager.runTask("BaileysDownloader", thumbnailDownloadData)
+    );
   }
+
+  let filename = quotedMsg?.documentMessage?.fileName || "";
+
+  if (!filename) {
+    const ext = messageMedia.mimetype.split("/")[1].split(";")[0];
+    filename = `${makeRandomId(5)}-${new Date().getTime()}.${ext}`;
+  }
+
+  const mediaType = quotedMsg?.documentMessage
+    ? "document"
+    : normalizeMediaType(messageMedia.mimetype);
+
+  const mediaDownloadData: BaileysDownloaderTaskData = {
+    mediaKey: messageMedia.mediaKey,
+    directPath: messageMedia.directPath,
+    mimetype: messageMedia.mimetype,
+    filename,
+    url: messageMedia.url,
+    mediaType,
+    companyId: ticket.companyId,
+    ticketId: ticket.id,
+    contactId: ticket.contactId
+  };
+
+  mediaPromises.push(
+    workerManager.runTask("BaileysDownloader", mediaDownloadData)
+  );
 
   let thumbnailUrl = null;
-  if (thumbnailMedia) {
-    // eslint-disable-next-line no-use-before-define
-    thumbnailUrl = await saveMediaToFile(thumbnailMedia, ticket);
+  let mediaUrl = null;
+
+  try {
+    const result = await Promise.all(mediaPromises);
+
+    if (thumbnailMsg && result.length > 0) {
+      const thumbnailResult = result.shift();
+      thumbnailUrl = thumbnailResult.mediaUrl;
+    }
+
+    if (result.length > 0) {
+      mediaUrl = result[0].mediaUrl;
+    }
+  } catch (error) {
+    logger.error({ error }, "Error downloading quoted message media");
   }
 
-  const mediaType = media?.mimetype.split("/")[0];
-
-  const messageData = {
+  const messageData: MessageData = {
     id: `${quotedId}-${ticket.id}`,
     ticketId: ticket.id,
     body,
@@ -375,6 +425,12 @@ const storeQuotedMessage = async (
     read: true,
     dataJson: JSON.stringify(quotedMsg)
   };
+
+  if (msg) {
+    messageData.createdAt = new Date(
+      Number(msg.messageTimestamp) * 1000 - 1000
+    );
+  }
 
   return CreateMessageService({
     messageData,
@@ -406,7 +462,7 @@ const verifyQuotedMessage = async (
   });
 
   if (!dbQuotedMsg) {
-    return storeQuotedMessage(quotedMessage, ticket, wbot);
+    return storeQuotedMessage(quotedMessage, ticket, wbot, msg);
   }
 
   return dbQuotedMsg;
