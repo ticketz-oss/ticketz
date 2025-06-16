@@ -313,6 +313,9 @@ export const normalizeThumbnailMediaType = (mimetype: string): MediaType => {
 export const normalizeMediaType = (
   mimetype: string
 ): "audio" | "video" | "image" | "document" => {
+  if (!mimetype) {
+    return null;
+  }
   const types = ["audio", "video", "image", "document"];
   const type = mimetype.split("/")[0];
 
@@ -369,32 +372,36 @@ const storeQuotedMessage = async (
     );
   }
 
-  let filename = quotedMsg?.documentMessage?.fileName || "";
+  let mediaType: "audio" | "video" | "image" | "document" = null;
 
-  if (!filename) {
-    const ext = messageMedia.mimetype.split("/")[1].split(";")[0];
-    filename = `${makeRandomId(5)}-${new Date().getTime()}.${ext}`;
+  if (messageMedia) {
+    let filename = quotedMsg?.documentMessage?.fileName || "";
+
+    if (!filename) {
+      const ext = messageMedia.mimetype.split("/")[1].split(";")[0];
+      filename = `${makeRandomId(5)}-${new Date().getTime()}.${ext}`;
+    }
+
+    mediaType = quotedMsg?.documentMessage
+      ? "document"
+      : normalizeMediaType(messageMedia.mimetype);
+
+    const mediaDownloadData: BaileysDownloaderTaskData = messageMedia && {
+      mediaKey: messageMedia.mediaKey,
+      directPath: messageMedia.directPath,
+      mimetype: messageMedia.mimetype,
+      filename,
+      url: messageMedia.url,
+      mediaType,
+      companyId: ticket.companyId,
+      ticketId: ticket.id,
+      contactId: ticket.contactId
+    };
+
+    mediaPromises.push(
+      workerManager.runTask("BaileysDownloader", mediaDownloadData)
+    );
   }
-
-  const mediaType = quotedMsg?.documentMessage
-    ? "document"
-    : normalizeMediaType(messageMedia.mimetype);
-
-  const mediaDownloadData: BaileysDownloaderTaskData = {
-    mediaKey: messageMedia.mediaKey,
-    directPath: messageMedia.directPath,
-    mimetype: messageMedia.mimetype,
-    filename,
-    url: messageMedia.url,
-    mediaType,
-    companyId: ticket.companyId,
-    ticketId: ticket.id,
-    contactId: ticket.contactId
-  };
-
-  mediaPromises.push(
-    workerManager.runTask("BaileysDownloader", mediaDownloadData)
-  );
 
   let thumbnailUrl = null;
   let mediaUrl = null;
