@@ -195,13 +195,13 @@ const Announcements = () => {
 
   const translatePriority = (val) => {
     if (val === 1) {
-      return "Alta";
+      return i18n.t("announcements.dialog.form.priority.high");
     }
     if (val === 2) {
-      return "Média";
+      return i18n.t("announcements.dialog.form.priority.medium");
     }
     if (val === 3) {
-      return "Baixa";
+      return i18n.t("announcements.dialog.form.priority.low");
     }
   };
 
@@ -301,10 +301,10 @@ const Announcements = () => {
                     {translatePriority(announcement.priority)}
                   </TableCell>
                   <TableCell align="center">
-                    {announcement.mediaName ?? "Sem anexo"}
+                    {announcement.mediaName ?? i18n.t("announcements.dialog.form.attach")}
                   </TableCell>
                   <TableCell align="center">
-                    {announcement.status ? "ativo" : "inativo"}
+                    {announcement.status ? i18n.t("announcements.dialog.form.status.active")  : i18n.t("announcements.dialog.form.status.inactive")}
                   </TableCell>
                   <TableCell align="center">
                     <IconButton

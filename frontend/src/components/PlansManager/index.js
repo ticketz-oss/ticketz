@@ -28,6 +28,7 @@ import MaskedInput from 'react-text-mask'
 
 import { toast } from "react-toastify";
 import usePlans from "../../hooks/usePlans";
+import { i18n } from "../../translate/i18n";
 
 
 const useStyles = makeStyles(theme => ({
@@ -106,7 +107,7 @@ export function PlanManagerForm(props) {
                         <Grid xs={12} sm={6} md={4} item>
                             <Field
                                 as={TextField}
-                                label="Nome"
+                                label={i18n.t("common.name")}
                                 name="name"
                                 variant="outlined"
                                 className={classes.fullWidth}
@@ -115,7 +116,7 @@ export function PlanManagerForm(props) {
                         </Grid>
                         <Grid xs={12} sm={6} md={4} item>
                         <FormControl margin="dense" variant="outlined" fullWidth>
-                            <InputLabel htmlFor="status-selection">Público</InputLabel>
+                            <InputLabel htmlFor="status-selection">{i18n.t("common.status")}</InputLabel>
                             <Field
                                 as={Select}
                                 id="status-selection"
@@ -124,15 +125,15 @@ export function PlanManagerForm(props) {
                                 name="isPublic"
                                 margin="dense"
                             >
-                                <MenuItem value={true}>Sim</MenuItem>
-                                <MenuItem value={false}>Não</MenuItem>
+                                <MenuItem value={true}>{i18n.t("companies.options.enabled")}</MenuItem>
+                                <MenuItem value={false}>{i18n.t("companies.options.disabled")}</MenuItem>
                             </Field>
                             </FormControl>
                         </Grid>
                         <Grid xs={12} sm={6} md={4} item>
                             <Field
                                 as={TextField}
-                                label="Valor"
+                                label={i18n.t("common.price")}
                                 name="value"
                                 variant="outlined"
                                 className={classes.fullWidth}
@@ -145,7 +146,7 @@ export function PlanManagerForm(props) {
                         <Grid xs={12} sm={6} md={4} item>
                             <Field
                                 as={TextField}
-                                label="Usuários"
+                                label={i18n.t("signup.form.atendentes")}
                                 name="users"
                                 variant="outlined"
                                 className={classes.fullWidth}
@@ -156,7 +157,7 @@ export function PlanManagerForm(props) {
                         <Grid xs={12} sm={6} md={4} item>
                             <Field
                                 as={TextField}
-                                label="Conexões"
+                                label={i18n.t("signup.form.whatsApp")}
                                 name="connections"
                                 variant="outlined"
                                 className={classes.fullWidth}
@@ -167,7 +168,7 @@ export function PlanManagerForm(props) {
                         <Grid xs={12} sm={6} md={4} item>
                             <Field
                                 as={TextField}
-                                label="Filas"
+                                label={i18n.t("signup.form.queue")}
                                 name="queues"
                                 variant="outlined"
                                 className={classes.fullWidth}
@@ -177,21 +178,21 @@ export function PlanManagerForm(props) {
                         </Grid>
                         <Grid xs={12} item>
                             <Grid justifyContent="flex-end" spacing={1} container>
-                                <Grid xs={4} md={1} item>
+                                <Grid xs={4} md={2} item>
                                     <ButtonWithSpinner className={classes.fullWidth} loading={loading} onClick={() => onCancel()} variant="contained">
-                                        Limpar
+                                        {i18n.t("common.clear")}
                                     </ButtonWithSpinner>
                                 </Grid>
                                 {record.id !== undefined ? (
-                                    <Grid xs={4} md={1} item>
+                                    <Grid xs={4} md={2} item>
                                         <ButtonWithSpinner className={classes.fullWidth} loading={loading} onClick={() => onDelete(record)} variant="contained" color="secondary">
-                                            Excluir
+                                            {i18n.t("common.delete")}
                                         </ButtonWithSpinner>
                                     </Grid>
                                 ) : null}
-                                <Grid xs={4} md={1} item>
+                                <Grid xs={4} md={2} item>
                                     <ButtonWithSpinner className={classes.fullWidth} loading={loading} type="submit" variant="contained" color="primary">
-                                        Salvar
+                                        {i18n.t("common.save")}
                                     </ButtonWithSpinner>
                                 </Grid>
                             </Grid>
@@ -214,12 +215,12 @@ export function PlansManagerGrid(props) {
                 <TableHead>
                     <TableRow>
                         <TableCell align="center" style={{ width: '1%' }}>#</TableCell>
-                        <TableCell align="left">Nome</TableCell>
-                        <TableCell align="center">Usuários</TableCell>
-                        <TableCell align="center">Público</TableCell>
-                        <TableCell align="center">Conexões</TableCell>
-                        <TableCell align="center">Filas</TableCell>
-                        <TableCell align="center">Valor</TableCell>
+                        <TableCell align="left">{i18n.t("common.name")}</TableCell>
+                        <TableCell align="center">{i18n.t("signup.form.atendentes")}</TableCell>
+                        <TableCell align="center">{i18n.t("common.status")}</TableCell>
+                        <TableCell align="center">{i18n.t("signup.form.whatsApp")}</TableCell>
+                        <TableCell align="center">{i18n.t("signup.form.queue")}</TableCell>
+                        <TableCell align="center">{i18n.t("common.price")}</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
@@ -232,7 +233,7 @@ export function PlansManagerGrid(props) {
                             </TableCell>
                             <TableCell align="left">{row.name || '-'}</TableCell>
                             <TableCell align="center">{row.users || '-'}</TableCell>
-                            <TableCell align="center">{row.isPublic ? "Sim": "Não" || '-'}</TableCell>
+                            <TableCell align="center">{row.isPublic ? i18n.t("companies.options.enabled"): i18n.t("companies.options.disabled") || '-'}</TableCell>
                             <TableCell align="center">{row.connections || '-'}</TableCell>
                             <TableCell align="center">{row.queues || '-'}</TableCell>
                             <TableCell align="center">{row.value.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }) || '-'}</TableCell>
@@ -274,7 +275,7 @@ export default function PlansManager() {
             console.log(planList)
             setRecords(planList)
         } catch (e) {
-            toast.error('Não foi possível carregar a lista de registros')
+            toast.error(i18n.t("settings.group.helps.notification.loadListError"))
         }
         setLoading(false)
     }
@@ -299,9 +300,9 @@ export default function PlansManager() {
             }
             await loadPlans()
             handleCancel()
-            toast.success('Operação realizada com sucesso!')
+            toast.success(i18n.t("settings.group.helps.notification.operationSuccess"))
         } catch (e) {
-            toast.error('Não foi possível realizar a operação. Verifique se já existe uma plano com o mesmo nome ou se os campos foram preenchidos corretamente')
+            toast.error(i18n.t("settings.group.helps.notification.operationError"))
         }
         setLoading(false)
     }
@@ -312,9 +313,9 @@ export default function PlansManager() {
             await remove(record.id)
             await loadPlans()
             handleCancel()
-            toast.success('Operação realizada com sucesso!')
+            toast.success(i18n.t("settings.group.helps.notification.operationDeletedSuccess"))
         } catch (e) {
-            toast.error('Não foi possível realizar a operação')
+            toast.error(i18n.t("settings.group.helps.notification.genericError"))
         }
         setLoading(false)
     }
@@ -366,12 +367,12 @@ export default function PlansManager() {
                 </Grid>
             </Grid>
             <ConfirmationModal
-                title="Exclusão de Registro"
+                title={i18n.t("settings.group.helps.deleteRecord.title")}
                 open={showConfirmDialog}
                 onClose={() => setShowConfirmDialog(false)}
                 onConfirm={() => handleDelete()}
             >
-                Deseja realmente excluir esse registro?
+                {i18n.t("settings.group.helps.deleteRecord.confirmationMessage")}
             </ConfirmationModal>
         </Paper>
     )

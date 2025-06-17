@@ -129,12 +129,12 @@ export function ContactNotes ({ ticket }) {
     return (
         <>
             <ConfirmationModal
-                title="Excluir Registro"
+                title={i18n.t("quickMessages.dialog.deleteRecord")}
                 open={showOnDeleteDialog}
                 onClose={setShowOnDeleteDialog}
                 onConfirm={handleDelete}
             >
-                Deseja realmente excluir este registro?
+                {i18n.t("quickMessages.dialog.questionAnswer")}
             </ConfirmationModal>
             <Formik
                 initialValues={newNote}

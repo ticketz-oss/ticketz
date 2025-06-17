@@ -103,6 +103,23 @@ const messages = {
           created: "Creado",
           closed: "Cerrado",
         },
+        ticketzPro: {
+          title: "Ticketz PRO",
+          features1: "Whatsapp Oficial - Instagram - Messenger y otros",
+          features2: "Características exclusivas - Soporte Avanzado - Migración Facilitada",
+          price: "Suscríbete por R$ 199/mes",
+          note: "directamente en el sistema",
+          upgrade: "Haz clic para instrucciones de Upgrade",
+          visit: "¡Haz clic para visitar el sitio!",
+          upgradeInstructions: {
+            title: "Instrucciones de Actualización",
+            paragraph1: "Si instalaste las imágenes proporcionadas por el proyecto en un servidor o VPS usando las instrucciones simplificadas, todo lo que necesitas hacer es acceder a tu servidor y escribir el siguiente comando:",
+            command: "curl -sSL update.ticke.tz | sudo bash -s pro",
+            paragraph2: "En unos momentos, Ticketz PRO estará instalado con todos tus datos. Ahora solo ve al menú de usuario, haz clic en 'Suscripción Ticketz PRO' y completa tu suscripción.",
+            paragraph3: "Si tu instalación es diferente o necesitas ayuda para instalar Ticketz Pro, ",
+            paragraph4: "contáctanos y te ayudaremos.",
+          },
+        },
       },
       connections: {
         title: "Conexiones",
@@ -1105,6 +1122,12 @@ const messages = {
           paypaltitle: "Tarjeta de crédito",
           international: "Donaciones en USD",
         }
+      },
+      owenAd: {
+        title: "Owen Payments apoya a Ticketz",
+        description1: "La startup Owen Payments ofrece pagos PIX a un costo fijo de R$ 0,99 por transacción.",
+        description2: "Una parte del valor de cada transacción se destina al proyecto Ticketz, por lo que al utilizar este método de pago también estarás apoyando el proyecto.",
+        description3: '¡Selecciona la pasarela de pago "Owen Payments 💎" y solicita la apertura de tu cuenta sin salir de Ticketz!'
       },
     },
   },
