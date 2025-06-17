@@ -504,6 +504,25 @@ export default function Options(props) {
           </FormControl>
         </Grid>
 
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <TextField
+              id="autoreopen-timeout-field"
+              label={i18n.t("settings.group.general.autoReopenTimeout")}
+              variant="standard"
+              name="autoReopenTimeout"
+              type="number"
+              value={autoReopenTimeout}
+              onChange={(e) => {
+                setAutoReopenTimeout(e.target.value);
+              }}
+              onBlur={async (_) => {
+                await handleAutoReopenTimeout(autoReopenTimeout);
+              }}
+            />
+          </FormControl>
+        </Grid>
+
         <Grid xs={12} sm={12} md={6} item>
           <FormControl className={classes.selectContainer}>
             <TextField
@@ -543,28 +562,6 @@ export default function Options(props) {
               }}
             />
             <span>{i18n.t("settings.mustacheVariables.title")} {'{{firstname}} {{name}} {{user}} {{queue}}'}</span>
-          </FormControl>
-        </Grid>
-
-        <Grid item xs={12}>
-          <h2 className={classes.groupTitle}>{i18n.t("settings.group.timeouts")}</h2>
-        </Grid>
-        <Grid xs={12} sm={6} md={4} item>
-          <FormControl className={classes.selectContainer}>
-            <TextField
-              id="autoreopen-timeout-field"
-              label={i18n.t("settings.group.general.autoReopenTimeout")}
-              variant="standard"
-              name="autoReopenTimeout"
-              type="number"
-              value={autoReopenTimeout}
-              onChange={(e) => {
-                setAutoReopenTimeout(e.target.value);
-              }}
-              onBlur={async (_) => {
-                await handleAutoReopenTimeout(autoReopenTimeout);
-              }}
-            />
           </FormControl>
         </Grid>
 
