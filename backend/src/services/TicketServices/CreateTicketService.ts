@@ -10,6 +10,9 @@ import { incrementCounter } from "../CounterServices/IncrementCounter";
 import Queue from "../../models/Queue";
 import { GetCompanySetting } from "../../helpers/CheckSettings";
 import Whatsapp from "../../models/Whatsapp";
+import { OmniServices } from "../OmniServices/OmniServices";
+
+const omniServices = OmniServices.getInstance();
 
 interface Request {
   contactId: number;
@@ -101,6 +104,15 @@ const CreateTicketService = async ({
   });
 
   incrementCounter(ticket.companyId, "ticket-create");
+
+  const omniDriver =
+    defaultWhatsapp.channel !== "whatsapp"
+      ? omniServices.getOmniDriver(defaultWhatsapp)
+      : null;
+
+  if (omniDriver) {
+    await omniDriver.startTicket(ticket);
+  }
 
   await ticket.reload({
     include: [

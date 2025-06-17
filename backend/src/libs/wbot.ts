@@ -36,6 +36,8 @@ import OutOfTicketMessage from "../models/OutOfTicketMessages";
 
 export type Session = WASocket & {
   id?: number;
+  myJid?: string;
+  myLid?: string;
   cacheMessage?: (msg: proto.IWebMessageInfo) => void;
 };
 
@@ -321,6 +323,9 @@ export const initWASocket = async (
             }
 
             if (connection === "open") {
+              wsocket.myLid = jidNormalizedUser(wsocket.user?.lid);
+              wsocket.myJid = jidNormalizedUser(wsocket.user.id);
+
               await whatsapp.update({
                 status: "CONNECTED",
                 qrcode: "",
@@ -331,7 +336,7 @@ export const initWASocket = async (
                 {
                   id: jidNormalizedUser(wsocket.user.id),
                   name: wsocket.user.name,
-                  lid: wsocket.user?.lid,
+                  lid: jidNormalizedUser(wsocket.user?.lid),
                   notify: wsocket.user?.notify,
                   verifiedName: wsocket.user?.verifiedName,
                   imgUrl: wsocket.user?.imgUrl,

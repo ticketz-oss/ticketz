@@ -1,5 +1,5 @@
 import * as Sentry from "@sentry/node";
-import { isNil } from "lodash";
+import { isNil, keys } from "lodash";
 
 import {
   WASocket,
@@ -53,6 +53,7 @@ import { parseToMilliseconds } from "../../helpers/parseToMilliseconds";
 import { randomValue } from "../../helpers/randomValue";
 import { getJidOf } from "./getJidOf";
 import { verifyContact } from "./verifyContact";
+import GetTicketWbot from "../../helpers/GetTicketWbot";
 
 import { IntegrationMessage } from "../IntegrationServices/IntegrationServices";
 import IntegrationSession from "../../models/IntegrationSession";
@@ -113,39 +114,6 @@ const getTypeEditedMessage = (msg: proto.IMessage): string => {
 
 const subscriptionService = SubscriptionService.getInstance();
 
-const getBodyButton = (msg: proto.IWebMessageInfo): string => {
-  const buttonsMessage =
-    msg?.message?.buttonsMessage ||
-    msg?.message?.viewOnceMessage?.message?.buttonsMessage;
-
-  if (msg.key.fromMe && buttonsMessage?.contentText) {
-    let bodyMessage = `*${buttonsMessage?.contentText}*`;
-
-    buttonsMessage?.buttons.forEach(button => {
-      bodyMessage += `\n\n${button.buttonText?.displayText}`;
-    });
-
-    return bodyMessage;
-  }
-
-  const listMessage =
-    msg?.message?.listMessage ||
-    msg?.message?.viewOnceMessage?.message?.listMessage;
-
-  if (listMessage) {
-    let bodyMessage = `*${listMessage?.description}*`;
-    listMessage?.sections.forEach(button => {
-      button.rows.forEach(rows => {
-        bodyMessage += `\n\n${rows.title}`;
-      });
-    });
-
-    return bodyMessage;
-  }
-
-  return "";
-};
-
 const msgLocation = (
   image:
     | Uint8Array
@@ -173,69 +141,61 @@ export const getBodyFromTemplateMessage = (
   );
 };
 
-const getBodyMessage = (msg: proto.IWebMessageInfo): string | null => {
+export const getBodyMessage = (msg: proto.IMessage): string | null => {
   try {
-    const type = getTypeMessage(msg);
+    if (!msg) {
+      return "";
+    }
+
+    const type = getContentType(msg);
 
     const types = {
-      conversation: msg?.message?.conversation,
+      conversation: msg?.conversation,
       editedMessage:
-        msg?.message?.editedMessage?.message?.protocolMessage?.editedMessage
+        msg?.editedMessage?.message?.protocolMessage?.editedMessage
           ?.conversation,
-      imageMessage: msg.message?.imageMessage?.caption,
-      videoMessage: msg.message?.videoMessage?.caption,
-      extendedTextMessage: msg.message?.extendedTextMessage?.text,
+      imageMessage: msg?.imageMessage?.caption,
+      videoMessage: msg?.videoMessage?.caption,
+      extendedTextMessage: msg?.extendedTextMessage?.text,
       templateMessage:
-        msg.message?.templateMessage &&
-        getBodyFromTemplateMessage(msg.message.templateMessage),
-      buttonsResponseMessage:
-        msg.message?.buttonsResponseMessage?.selectedButtonId,
-      templateButtonReplyMessage:
-        msg.message?.templateButtonReplyMessage?.selectedId,
+        msg?.templateMessage && getBodyFromTemplateMessage(msg.templateMessage),
+      buttonsResponseMessage: msg?.buttonsResponseMessage?.selectedButtonId,
+      templateButtonReplyMessage: msg?.templateButtonReplyMessage?.selectedId,
       messageContextInfo:
-        msg.message?.buttonsResponseMessage?.selectedButtonId ||
-        msg.message?.listResponseMessage?.title,
-      buttonsMessage:
-        getBodyButton(msg) ||
-        msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId,
-      viewOnceMessage:
-        getBodyButton(msg) ||
-        msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId,
+        msg?.buttonsResponseMessage?.selectedButtonId ||
+        msg?.listResponseMessage?.title,
       viewOnceMessageV2:
-        msg.message?.viewOnceMessageV2?.message?.imageMessage?.caption || "",
+        msg?.viewOnceMessageV2?.message?.imageMessage?.caption || "",
       stickerMessage: "sticker",
       contactMessage:
-        msg.message?.contactMessage?.vcard &&
+        msg?.contactMessage?.vcard &&
         JSON.stringify({
           ticketzvCard: [
             {
-              displayName: msg.message.contactMessage.displayName,
-              vcard: msg.message.contactMessage.vcard
+              displayName: msg.contactMessage.displayName,
+              vcard: msg.contactMessage.vcard
             }
           ]
         }),
       contactsArrayMessage:
-        msg.message?.contactsArrayMessage &&
+        msg?.contactsArrayMessage &&
         JSON.stringify({
-          ticketzvCard: msg.message.contactsArrayMessage.contacts
+          ticketzvCard: msg.contactsArrayMessage.contacts
         }),
-      // locationMessage: `Latitude: ${msg.message.locationMessage?.degreesLatitude} - Longitude: ${msg.message.locationMessage?.degreesLongitude}`,
+      // locationMessage: `Latitude: ${msg.locationMessage?.degreesLatitude} - Longitude: ${msg.locationMessage?.degreesLongitude}`,
       locationMessage: msgLocation(
-        msg.message?.locationMessage?.jpegThumbnail,
-        msg.message?.locationMessage?.degreesLatitude,
-        msg.message?.locationMessage?.degreesLongitude
+        msg?.locationMessage?.jpegThumbnail,
+        msg?.locationMessage?.degreesLatitude,
+        msg?.locationMessage?.degreesLongitude
       ),
-      liveLocationMessage: `Latitude: ${msg.message?.liveLocationMessage?.degreesLatitude} - Longitude: ${msg.message?.liveLocationMessage?.degreesLongitude}`,
-      documentMessage: msg.message?.documentMessage?.caption,
+      liveLocationMessage: `Latitude: ${msg?.liveLocationMessage?.degreesLatitude} - Longitude: ${msg?.liveLocationMessage?.degreesLongitude}`,
+      documentMessage: msg?.documentMessage?.caption,
       documentWithCaptionMessage:
-        msg.message?.documentWithCaptionMessage?.message?.documentMessage
-          ?.caption,
+        msg?.documentWithCaptionMessage?.message?.documentMessage?.caption,
       audioMessage: "Áudio",
-      listMessage:
-        getBodyButton(msg) || msg.message?.listResponseMessage?.title,
       listResponseMessage:
-        msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId,
-      reactionMessage: msg.message?.reactionMessage?.text || "reaction"
+        msg?.listResponseMessage?.singleSelectReply?.selectedRowId,
+      reactionMessage: msg?.reactionMessage?.text || "reaction"
     };
 
     const objKey = Object.keys(types).find(key => key === type);
@@ -246,26 +206,40 @@ const getBodyMessage = (msg: proto.IWebMessageInfo): string | null => {
     }
     let body = types[type] || "";
     if (!body && type !== "imageMessage") {
-      logger.debug({ body, key: msg?.key, type }, "Body is empty");
+      logger.debug({ msg, type }, "Body is empty");
     }
     if (typeof body !== "string") {
       body = "unsupported body content";
     }
     return body;
   } catch (error) {
-    Sentry.setExtra("Error getTypeMessage", { msg, BodyMsg: msg.message });
-    Sentry.captureException(error);
     logger.error({ error, msg }, `getBodyMessage: error: ${error?.message}`);
     return null;
   }
 };
 
-const getQuotedMessageId = (msg: proto.IWebMessageInfo) => {
-  const body = extractMessageContent(msg.message)[
+type QuotedMessage = {
+  quotedId: string;
+  quotedMsg: proto.IMessage | undefined;
+  participant: string;
+};
+
+/**
+ * @description: extract quoted message info from a message
+ * @param {proto.IWebMessageInfo} msg - message to extract quoted info from
+ * @return {QuotedMessage} - object containing quotedId and quotedMsg
+ */
+const getQuotedMessage = (msg: proto.IWebMessageInfo): QuotedMessage => {
+  const message = extractMessageContent(msg.message)[
     Object.keys(msg?.message).values().next().value
   ];
 
-  return body?.contextInfo?.stanzaId || msg?.message?.reactionMessage?.key?.id;
+  return {
+    quotedId:
+      message?.contextInfo?.stanzaId || msg?.message?.reactionMessage?.key?.id,
+    quotedMsg: message?.contextInfo?.quotedMessage,
+    participant: message?.contextInfo?.participant
+  };
 };
 
 const getMeSocket = (wbot: Session): IMe => {
@@ -343,6 +317,9 @@ export const normalizeThumbnailMediaType = (mimetype: string): MediaType => {
 export const normalizeMediaType = (
   mimetype: string
 ): "audio" | "video" | "image" | "document" => {
+  if (!mimetype) {
+    return null;
+  }
   const types = ["audio", "video", "image", "document"];
   const type = mimetype.split("/")[0];
 
@@ -353,21 +330,153 @@ export const normalizeMediaType = (
   return type as "audio" | "video" | "image" | "document";
 };
 
+const storeQuotedMessage = async (
+  quotedMessage: QuotedMessage,
+  ticket: Ticket,
+  wbot: Session,
+  msg: proto.IWebMessageInfo = null
+): Promise<Message> => {
+  const { quotedId, quotedMsg, participant } = quotedMessage;
+
+  if (!quotedMsg || !quotedId || !participant) return null;
+
+  if (!wbot) {
+    wbot = await GetTicketWbot(ticket);
+  }
+
+  const body = getBodyMessage(quotedMsg) || "";
+  const fromMe = !!wbot.myJid && participant === wbot.myJid;
+
+  const messageMedia = getMessageMedia(quotedMsg);
+
+  const thumbnailMsg =
+    messageMedia && keys(messageMedia).includes("thumbnailDirectPath")
+      ? messageMedia
+      : null;
+
+  const mediaPromises = [];
+
+  if (thumbnailMsg) {
+    const thumbnailDownloadData: BaileysDownloaderTaskData = {
+      mediaKey: thumbnailMsg.mediaKey,
+      directPath: (thumbnailMsg as any).thumbnailDirectPath,
+      mimetype: "image/jpeg",
+      filename: `thumbnail-${makeRandomId(5)}-${new Date().getTime()}.jpg`,
+      url: null,
+      mediaType: messageMedia?.mimetype
+        ? normalizeThumbnailMediaType(messageMedia.mimetype)
+        : "thumbnail-link",
+      companyId: ticket.companyId,
+      ticketId: ticket.id,
+      contactId: ticket.contactId
+    };
+
+    mediaPromises.push(
+      workerManager.runTask("BaileysDownloader", thumbnailDownloadData)
+    );
+  }
+
+  let mediaType: "audio" | "video" | "image" | "document" = null;
+
+  if (messageMedia) {
+    let filename = quotedMsg?.documentMessage?.fileName || "";
+
+    if (!filename) {
+      const ext = messageMedia.mimetype.split("/")[1].split(";")[0];
+      filename = `${makeRandomId(5)}-${new Date().getTime()}.${ext}`;
+    }
+
+    mediaType = quotedMsg?.documentMessage
+      ? "document"
+      : normalizeMediaType(messageMedia.mimetype);
+
+    const mediaDownloadData: BaileysDownloaderTaskData = messageMedia && {
+      mediaKey: messageMedia.mediaKey,
+      directPath: messageMedia.directPath,
+      mimetype: messageMedia.mimetype,
+      filename,
+      url: messageMedia.url,
+      mediaType,
+      companyId: ticket.companyId,
+      ticketId: ticket.id,
+      contactId: ticket.contactId
+    };
+
+    mediaPromises.push(
+      workerManager.runTask("BaileysDownloader", mediaDownloadData)
+    );
+  }
+
+  let thumbnailUrl = null;
+  let mediaUrl = null;
+
+  try {
+    const result = await Promise.all(mediaPromises);
+
+    if (thumbnailMsg && result.length > 0) {
+      const thumbnailResult = result.shift();
+      thumbnailUrl = thumbnailResult.mediaUrl;
+    }
+
+    if (result.length > 0) {
+      mediaUrl = result[0].mediaUrl;
+    }
+  } catch (error) {
+    logger.error({ error }, "Error downloading quoted message media");
+  }
+
+  const messageData: MessageData = {
+    id: `${quotedId}-${ticket.id}`,
+    ticketId: ticket.id,
+    body,
+    fromMe,
+    mediaType,
+    mediaUrl,
+    thumbnailUrl,
+    read: true,
+    dataJson: JSON.stringify(quotedMsg)
+  };
+
+  if (msg) {
+    messageData.createdAt = new Date(
+      Number(msg.messageTimestamp) * 1000 - 1000
+    );
+  }
+
+  return CreateMessageService({
+    messageData,
+    companyId: ticket.companyId
+  });
+};
+
 const verifyQuotedMessage = async (
-  msg: proto.IWebMessageInfo
+  msg: proto.IWebMessageInfo,
+  ticket: Ticket,
+  wbot?: Session
 ): Promise<Message | null> => {
-  if (!msg?.message) return null;
-  const quoted = getQuotedMessageId(msg);
+  if (!msg) return null;
+  const quotedMessage = getQuotedMessage(msg);
+  const { quotedId } = quotedMessage;
 
-  if (!quoted) return null;
+  if (!quotedId) return null;
 
-  const quotedMsg = await Message.findOne({
-    where: { id: quoted }
+  const quotedTicketId = `${quotedId}-${ticket.id}`;
+
+  // find message for any of quotedId and quotedTicketId
+  const dbQuotedMsg = await Message.findOne({
+    where: {
+      id: {
+        [Op.or]: [quotedId, quotedTicketId]
+      },
+      ticketId: ticket?.id
+    }
   });
 
-  if (!quotedMsg) return null;
+  if (!dbQuotedMsg) {
+    return storeQuotedMessage(quotedMessage, ticket, wbot, msg);
+  }
 
-  return quotedMsg;
+  return dbQuotedMsg;
 };
 
 const downloadMediaTasks = deferredTasks();
@@ -392,13 +501,13 @@ export const verifyMediaMessage = async (
   msg: proto.IWebMessageInfo,
   ticket: Ticket,
   contact: Contact,
-  _wbot = null,
+  wbot: Session = null,
   messageMedia = null,
   userId: number = null
 ): Promise<Message> => {
-  const quotedMsg = await verifyQuotedMessage(msg);
+  const quotedMsg = await verifyQuotedMessage(msg, ticket, wbot);
 
-  const body = getBodyMessage(msg);
+  const body = getBodyMessage(msg.message);
   const unpackedMessage = getUnpackedMessage(msg);
   const msgMedia = getMessageMedia(unpackedMessage);
 
@@ -614,8 +723,8 @@ export const verifyMessage = async (
   contact: Contact,
   userId: number = null
 ): Promise<Message> => {
-  const quotedMsg = await verifyQuotedMessage(msg);
-  const body = getBodyMessage(msg);
+  const quotedMsg = await verifyQuotedMessage(msg, ticket);
+  const body = getBodyMessage(msg?.message);
 
   const messageData: MessageData = {
     id: msg.key.id,
@@ -1042,7 +1151,7 @@ const handleMessage = async (
       }
     }
 
-    const bodyMessage = getBodyMessage(msg);
+    const bodyMessage = getBodyMessage(msg?.message);
     const msgType = getTypeMessage(msg);
 
     const unpackedMessage =
