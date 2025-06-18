@@ -1,7 +1,7 @@
 import * as Sentry from "@sentry/node";
 import Queue from "bull";
 import moment from "moment";
-import { Op, QueryTypes, WhereOptions } from "sequelize";
+import { Op, WhereOptions } from "sequelize";
 import { CronJob } from "cron";
 import { subDays, subMinutes } from "date-fns";
 import { MessageData, SendMessage } from "./helpers/SendMessage";
@@ -11,7 +11,6 @@ import Schedule from "./models/Schedule";
 import Contact from "./models/Contact";
 import GetDefaultWhatsApp from "./helpers/GetDefaultWhatsApp";
 import GetWhatsappWbot from "./helpers/GetWhatsappWbot";
-import sequelize from "./database";
 import User from "./models/User";
 import Company from "./models/Company";
 import Plan from "./models/Plan";
@@ -187,24 +186,8 @@ export async function sleep(seconds: number) {
   });
 }
 
-async function handleLoginStatus() {
-  const users: { id: number }[] = await sequelize.query(
-    'select id from "Users" where "updatedAt" < now() - \'5 minutes\'::interval and online = true',
-    { type: QueryTypes.SELECT }
-  );
-  users.forEach(async item => {
-    try {
-      const user = await User.findByPk(item.id);
-      await user.update({ online: false });
-      logger.info(`Usuário passado para offline: ${item.id}`);
-    } catch (e: unknown) {
-      Sentry.captureException(e);
-    }
-  });
-}
-
 async function setRatingExpired(tracking: TicketTraking, threshold: Date) {
-  tracking.update({
+  await tracking.update({
     expired: true
   });
 
@@ -268,7 +251,7 @@ async function handleRatingsTimeout() {
       ratingThresholds[tracking.companyId] = subMinutes(currentTime, timeout);
     }
     if (tracking.ratingAt < ratingThresholds[tracking.companyId]) {
-      setRatingExpired(tracking, ratingThresholds[tracking.companyId]);
+      await setRatingExpired(tracking, ratingThresholds[tracking.companyId]);
     }
   }
 }
@@ -500,15 +483,19 @@ async function handleTicketTimeouts() {
   logger.trace("handleTicketTimeouts");
   const companies = await Company.findAll();
 
-  companies.forEach(async company => {
+  // eslint-disable-next-line no-restricted-syntax
+  for (const company of companies) {
     logger.trace({ companyId: company?.id }, "handleTicketTimeouts -> company");
     const noQueueTimeout = Number(
+      // eslint-disable-next-line no-await-in-loop
       await GetCompanySetting(company.id, "noQueueTimeout", "0")
     );
     if (noQueueTimeout) {
       const noQueueTimeoutAction = Number(
+        // eslint-disable-next-line no-await-in-loop
         await GetCompanySetting(company.id, "noQueueTimeoutAction", "0")
       );
+      // eslint-disable-next-line no-await-in-loop
       await handleNoQueueTimeout(
         company,
         noQueueTimeout,
@@ -516,43 +503,48 @@ async function handleTicketTimeouts() {
       );
     }
     const openTicketTimeout = Number(
+      // eslint-disable-next-line no-await-in-loop
       await GetCompanySetting(company.id, "openTicketTimeout", "0")
     );
     if (openTicketTimeout) {
+      // eslint-disable-next-line no-await-in-loop
       const openTicketTimeoutAction = await GetCompanySetting(
         company.id,
         "openTicketTimeoutAction",
         "pending"
       );
-      handleOpenTicketTimeout(
+      // eslint-disable-next-line no-await-in-loop
+      await handleOpenTicketTimeout(
         company,
         openTicketTimeout,
         openTicketTimeoutAction
       );
     }
     const chatbotTicketTimeout = Number(
+      // eslint-disable-next-line no-await-in-loop
       await GetCompanySetting(company.id, "chatbotTicketTimeout", "0")
     );
     if (chatbotTicketTimeout) {
       const chatbotTicketTimeoutAction =
         Number(
+          // eslint-disable-next-line no-await-in-loop
           await GetCompanySetting(company.id, "chatbotTicketTimeoutAction", "0")
         ) || 0;
-      handleChatbotTicketTimeout(
+      // eslint-disable-next-line no-await-in-loop
+      await handleChatbotTicketTimeout(
         company,
         chatbotTicketTimeout,
         chatbotTicketTimeoutAction
       );
     }
-  });
+  }
 }
 
 async function handleEveryMinute() {
   logger.trace("handleEveryMinute: entering");
   try {
-    handleLoginStatus();
-    handleRatingsTimeout();
-    handleTicketTimeouts();
+    await handleRatingsTimeout();
+    await handleTicketTimeouts();
     logger.trace("handleEveryMinute: exiting");
   } catch (e: unknown) {
     logger.error(`handleEveryMinute: error received: ${(e as Error).message}`);
