@@ -156,7 +156,7 @@ const internalFindOrCreateTicketService = async (
 
     let queueId = queue?.id || null;
 
-    if (groupContact || contact.channel !== "whatsapp") {
+    if (groupContact) {
       const whatsapp = await Whatsapp.findByPk(whatsappId, {
         include: ["queues"]
       });

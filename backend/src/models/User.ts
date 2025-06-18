@@ -54,9 +54,6 @@ class User extends Model<User> {
   super: boolean;
 
   @Column
-  online: boolean;
-
-  @Column
   hideAdminUI: boolean;
 
   @CreatedAt
