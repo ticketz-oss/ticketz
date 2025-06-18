@@ -118,7 +118,6 @@ export const initIO = (httpServer: Server): SocketIO => {
     if (userId && userId !== "undefined" && userId !== "null") {
       user = await User.findByPk(userId, { include: [Queue] });
       if (user) {
-        user.online = true;
         await user.save();
       } else {
         logger.info(`onConnect: User ${userId} not found`);

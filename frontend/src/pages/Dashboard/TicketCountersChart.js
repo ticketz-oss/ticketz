@@ -12,6 +12,7 @@ import {
 } from "recharts";
 import CustomTooltip from "./CustomTooltip";
 import Title from "./Title";
+import { getTimezoneOffset } from "../../helpers/getTimezoneOffset";
 
 function prepareChartData(emptyData, serie) {
   const ticketCreateData = JSON.parse(JSON.stringify(emptyData));
@@ -42,8 +43,9 @@ export function TicketCountersChart({ ticketCounters, start, end }) {
       timestamp: 30
     }
 
-    const startDate = new Date(`${start}T00:00:00Z`);
-    const endDate = new Date(`${end}T23:59:59Z`);
+    const tz = getTimezoneOffset();
+    const startDate = new Date(`${start}T00:00:00${tz}`);
+    const endDate = new Date(`${end}T23:59:59${tz}`);
     if (endDate > now) {
       endDate.setTime(now.getTime());
     }
