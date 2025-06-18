@@ -53,9 +53,6 @@ class User extends Model<User> {
   @Column
   super: boolean;
 
-  @Column
-  online: boolean;
-
   @CreatedAt
   createdAt: Date;
 
