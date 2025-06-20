@@ -13,12 +13,13 @@ import {
 import CustomTooltip from "./CustomTooltip";
 import Title from "./Title";
 import { getTimezoneOffset } from "../../helpers/getTimezoneOffset";
+import { getISOStringWithTimezone } from "../../helpers/getISOStringWithTimezone";
 
 function prepareChartData(emptyData, serie) {
   const ticketCreateData = JSON.parse(JSON.stringify(emptyData));
   serie.counters.forEach((item) => {
     const date = new Date(item.time);
-    const dateKey = serie.field === "day" ? date.toISOString().split("T")[0] : date.toISOString().split(".")[0];
+    const dateKey = serie.field === "day" ? getISOStringWithTimezone(date).split("T")[0] : getISOStringWithTimezone(date).split(".")[0];
     ticketCreateData[dateKey] = Number(item.counter);
   });
   return ticketCreateData;
@@ -26,6 +27,7 @@ function prepareChartData(emptyData, serie) {
 
 export function TicketCountersChart({ ticketCounters, start, end }) {
   const now = new Date();
+  const tz = getTimezoneOffset();
 	const theme = useTheme();
 	const t = (...params) => i18n.t(...params);
 
@@ -43,7 +45,6 @@ export function TicketCountersChart({ ticketCounters, start, end }) {
       timestamp: 30
     }
 
-    const tz = getTimezoneOffset();
     const startDate = new Date(`${start}T00:00:00${tz}`);
     const endDate = new Date(`${end}T23:59:59${tz}`);
     if (endDate > now) {
@@ -54,16 +55,18 @@ export function TicketCountersChart({ ticketCounters, start, end }) {
     if (field === "day") {
       let currentDate = new Date(startDate);
       while (currentDate <= endDate) {
-        xAxisEmptyData[currentDate.toISOString().split("T")[0]] = 0;
+        xAxisEmptyData[getISOStringWithTimezone(currentDate).split("T")[0]] = 0;
         currentDate.setDate(currentDate.getDate() + 1);
       }
     } else {
       let currentDate = new Date(startDate);
       while (currentDate <= endDate) {
-        xAxisEmptyData[currentDate.toISOString().split(".")[0]] = 0;
+        xAxisEmptyData[getISOStringWithTimezone(currentDate).split(".")[0]] = 0;
         currentDate.setMinutes(currentDate.getMinutes() + step[field]);
       }
     }
+    
+    console.debug({startDate, endDate, field, xAxisEmptyData});
 
     const createData = prepareChartData(xAxisEmptyData, ticketCounters.create);
     const closeData = prepareChartData(xAxisEmptyData, ticketCounters.close);
@@ -75,7 +78,6 @@ export function TicketCountersChart({ ticketCounters, start, end }) {
     }));
     
     setChartData(chartData);
-
   }, [ticketCounters]);
   
 	return (
@@ -97,7 +99,7 @@ export function TicketCountersChart({ ticketCounters, start, end }) {
 					<XAxis
 						dataKey={({time}) => {
               if (time.includes("T")) {
-                const date = new Date(`${time}Z`);
+                const date = new Date(`${time}${tz}`);
                 if (date.getDate() === now.getDate() && date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear()) {
                   return date.toLocaleTimeString(undefined, {
                     hour: "2-digit",
@@ -127,7 +129,7 @@ export function TicketCountersChart({ ticketCounters, start, end }) {
                   minute: "2-digit"
                 }).replace(",", "");
               } else {
-                const date = new Date(`${time}T00:00:00Z`);
+                const date = new Date(`${time}T00:00:00${tz}`);
                 if (date.getFullYear() === now.getFullYear()) {
                   return date.toLocaleDateString(undefined, {
                     month: "short",
