@@ -7,9 +7,6 @@ export async function listCounterSerie(
   start: Date,
   end: Date
 ) {
-  start.setUTCHours(0, 0, 0, 0);
-  end.setUTCHours(23, 59, 59, 999);
-
   const where = {
     companyId,
     serie,
