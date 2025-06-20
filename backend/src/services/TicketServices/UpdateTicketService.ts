@@ -161,11 +161,6 @@ const UpdateTicketService = async ({
     }
 
     if (status !== undefined && ["closed"].indexOf(status) > -1) {
-      const { complationMessage, ratingMessage } = await ShowWhatsAppService(
-        ticket.whatsappId,
-        companyId
-      );
-
       if (!ticketTraking.finishedAt) {
         ticketTraking.finishedAt = moment().toDate();
         ticketTraking.whatsappId = ticket.whatsappId;
@@ -179,14 +174,17 @@ const UpdateTicketService = async ({
         !ticket.contact.disableBot
       ) {
         if (!ticketTraking.ratingAt && !justClose) {
-          const ratingTxt =
-            ratingMessage?.trim() || "Por favor avalie nosso atendimento";
-          const bodyRatingMessage = `${ratingTxt}\n\n*Digite uma nota de 1 a 5*\n\nEnvie *\`!\`* para retornar ao atendimento`;
+          if (ticket.whatsapp && ticket.channel === "whatsapp") {
+            const ratingTxt =
+              ticket.whatsapp.ratingMessage?.trim() ||
+              "Por favor avalie nosso atendimento";
+            const bodyRatingMessage = `${ratingTxt}\n\n*Digite uma nota de 1 a 5*\n\nEnvie *\`!\`* para retornar ao atendimento`;
 
-          await sendFormattedMessage(bodyRatingMessage, ticket);
+            await sendFormattedMessage(bodyRatingMessage, ticket);
 
-          ticketTraking.ratingAt = moment().toDate();
-          await ticketTraking.save();
+            ticketTraking.ratingAt = moment().toDate();
+            await ticketTraking.save();
+          }
 
           await ticket.update({
             chatbot: null,
@@ -221,10 +219,12 @@ const UpdateTicketService = async ({
         !isGroup &&
         !ticket.contact.disableBot &&
         !justClose &&
-        !isNil(complationMessage) &&
-        complationMessage !== ""
+        ticket.whatsapp?.complationMessage.trim()
       ) {
-        await sendFormattedMessage(complationMessage, ticket);
+        await sendFormattedMessage(
+          ticket.whatsapp.complationMessage.trim(),
+          ticket
+        );
       }
     }
 
@@ -243,11 +243,6 @@ const UpdateTicketService = async ({
       });
 
       if (ticket.channel === "whatsapp") {
-        const whatsapp = await ShowWhatsAppService(
-          ticket.whatsappId,
-          companyId
-        );
-
         const restrictTransferConnection =
           !isGroup &&
           ((await GetCompanySetting(
@@ -255,14 +250,14 @@ const UpdateTicketService = async ({
             "restrictTransferConnection",
             ""
           )) === "enabled" ||
-            whatsapp.restrictToQueues);
+            ticket.whatsapp?.restrictToQueues);
 
         const transferToNewTicket =
           !isGroup &&
           !isFromChatbot &&
           ((await GetCompanySetting(companyId, "transferToNewTicket", "")) ===
             "enabled" ||
-            whatsapp.transferToNewTicket);
+            ticket.whatsapp?.transferToNewTicket);
 
         // let oldTicket: Ticket = null;
         let newWhatsapp: Whatsapp = null;
@@ -272,8 +267,8 @@ const UpdateTicketService = async ({
           (queue.whatsappId || queue.whatsapps.length)
         ) {
           const isSameConnection =
-            queue.whatsappId === whatsapp.id ||
-            queue.whatsapps.find(e => e.id === whatsapp.id);
+            queue.whatsappId === ticket.whatsappId ||
+            queue.whatsapps.find(e => e.id === ticket.whatsappId);
 
           if (!isSameConnection) {
             newWhatsapp =
@@ -305,7 +300,7 @@ const UpdateTicketService = async ({
 
           const { ticket: newTicket } = await FindOrCreateTicketService(
             contact,
-            newWhatsapp?.id || whatsapp.id,
+            newWhatsapp?.id || ticket.whatsappId,
             companyId,
             { doNotReopen: true, incrementUnread: true }
           );
@@ -473,19 +468,16 @@ const UpdateTicketService = async ({
         !accepted &&
         oldQueueId &&
         ticket.queueId &&
-        oldQueueId !== ticket.queueId
+        oldQueueId !== ticket.queueId &&
+        ticket.whatsapp
       ) {
-        const whatsapp = await ShowWhatsAppService(
-          ticket.whatsappId,
-          companyId
-        );
         const systemTransferMessage = await GetCompanySetting(
           companyId,
           "transferMessage",
           ""
         );
         const transferMessage =
-          whatsapp.transferMessage || systemTransferMessage;
+          ticket.whatsapp.transferMessage || systemTransferMessage;
 
         if (transferMessage) {
           await sendFormattedMessage(transferMessage, ticket);

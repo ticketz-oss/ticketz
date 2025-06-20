@@ -181,10 +181,12 @@ export const checkIntegration = async (
     return;
   }
 
-  const connection = await ShowWhatsAppService(
-    ticket.whatsappId,
-    ticket.companyId
-  );
+  const connection = await ShowWhatsAppService(ticket.whatsappId);
+
+  if (!connection) {
+    logger.error("checkIntegration: No connection found for ticket", ticket.id);
+    return;
+  }
 
   if (connection.queues.length > 1) {
     await handleQueueMenu(
@@ -207,10 +209,15 @@ async function startQueue(
   const { queue } = ticket;
 
   if (!queue) {
-    const connection = await ShowWhatsAppService(
-      ticket.whatsappId,
-      ticket.companyId
-    );
+    const connection = await ShowWhatsAppService(ticket.whatsappId);
+
+    if (!connection) {
+      logger.error(
+        "QueueChatbot:startQueue - No connection found for ticket",
+        ticket.id
+      );
+      return;
+    }
 
     if (connection.queues.length > 1) {
       await startQueueMenu(driver, ticket, connection);

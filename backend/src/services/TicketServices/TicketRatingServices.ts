@@ -20,10 +20,7 @@ async function handleRating(
   ticket: Ticket,
   ticketTraking: TicketTraking
 ) {
-  const whatsapp = await ShowWhatsAppService(
-    ticket.whatsappId,
-    ticket.companyId
-  );
+  const whatsapp = await ShowWhatsAppService(ticket.whatsappId);
 
   let finalRate = rate;
 

@@ -91,9 +91,11 @@ const UpdateWhatsAppService = async ({
     }
   }
 
-  const whatsapp = await ShowWhatsAppService(whatsappId, companyId);
-  // console.log(transferMessage)
-  console.log(whatsapp);
+  const whatsapp = await ShowWhatsAppService(whatsappId);
+
+  if (!whatsapp) {
+    throw new AppError("ERR_WAPP_NOT_FOUND", 404);
+  }
 
   const oldProxyConfig = whatsapp.proxyConfig;
 

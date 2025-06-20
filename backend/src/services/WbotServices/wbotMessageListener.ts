@@ -1188,7 +1188,12 @@ const handleMessage = async (
       });
     }
 
-    const whatsapp = await ShowWhatsAppService(wbot.id!, companyId);
+    const whatsapp = await ShowWhatsAppService(wbot.id!);
+
+    if (!whatsapp) {
+      throw new Error("ERR_NO_WAPP_FOUND");
+    }
+
     const contact = await verifyContact(msgContact, wbot, companyId);
 
     if (
@@ -1668,7 +1673,7 @@ const wbotMessageListener = async (
             }
             return result;
           });
-          const whatsapp = await ShowWhatsAppService(wbot.id!, companyId);
+          const whatsapp = await ShowWhatsAppService(wbot.id!);
           const { ticket } = await FindOrCreateTicketService(
             contact,
             whatsapp.id,
