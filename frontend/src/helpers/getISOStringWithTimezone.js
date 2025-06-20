@@ -1,6 +1,6 @@
-export function getISOStringWithTimezone(date = new Date()) {
-  const pad = (num,places = 2) => String(num).padStart(places, '0');
+import { numPad as pad } from './numPad';
 
+export function getISOStringWithTimezone(date = new Date()) {
   const year = date.getFullYear();
   const month = pad(date.getMonth() + 1);
   const day = pad(date.getDate());
