@@ -1188,10 +1188,13 @@ const verifyQueue = async (
   ticket: Ticket,
   _contact: Contact
 ) => {
-  const { queues, greetingMessage } = await ShowWhatsAppService(
-    wbot.id!,
-    ticket.companyId
-  );
+  const whatsapp = await ShowWhatsAppService(wbot.id!);
+
+  if (!whatsapp) {
+    throw new Error("ERR_NO_WAPP_FOUND");
+  }
+
+  const { queues, greetingMessage } = whatsapp;
 
   if (queues.length === 1) {
     await startQueue(wbot, ticket, head(queues), false);
@@ -1244,10 +1247,11 @@ const handleRating = async (
   ticketTraking: TicketTraking,
   wbot: Session
 ) => {
-  const whatsapp = await ShowWhatsAppService(
-    ticket.whatsappId,
-    ticket.companyId
-  );
+  const whatsapp = await ShowWhatsAppService(ticket.whatsappId);
+
+  if (!whatsapp) {
+    throw new Error("ERR_NO_WAPP_FOUND");
+  }
 
   let finalRate = rate;
 
@@ -1538,7 +1542,12 @@ const handleMessage = async (
       });
     }
 
-    const whatsapp = await ShowWhatsAppService(wbot.id!, companyId);
+    const whatsapp = await ShowWhatsAppService(wbot.id!);
+
+    if (!whatsapp) {
+      throw new Error("ERR_NO_WAPP_FOUND");
+    }
+
     const contact = await verifyContact(msgContact, wbot, companyId);
 
     if (!msg.key.fromMe && !contact.isGroup) {

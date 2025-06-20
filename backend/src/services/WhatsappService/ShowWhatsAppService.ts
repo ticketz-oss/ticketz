@@ -1,14 +1,16 @@
 import { FindOptions } from "sequelize/types";
 import { Sequelize } from "sequelize-typescript";
 import Whatsapp from "../../models/Whatsapp";
-import AppError from "../../errors/AppError";
 import Queue from "../../models/Queue";
 import QueueOption from "../../models/QueueOption";
 
+type ShowWhatsAppOptions = {
+  hideSession?: boolean;
+};
+
 const ShowWhatsAppService = async (
   id: string | number,
-  companyId: number,
-  session?: any
+  options: ShowWhatsAppOptions = {}
 ): Promise<Whatsapp> => {
   const findOptions: FindOptions = {
     include: [
@@ -29,7 +31,7 @@ const ShowWhatsAppService = async (
             model: QueueOption,
             as: "options",
             required: false,
-            where: { parentId: null },
+            where: { parentId: null }
           }
         ]
       }
@@ -40,21 +42,11 @@ const ShowWhatsAppService = async (
     ]
   };
 
-  if (session !== undefined && session === 0) {
+  if (options.hideSession) {
     findOptions.attributes = { exclude: ["session"] };
   }
 
-  const whatsapp = await Whatsapp.findByPk(id, findOptions);
-
-  if (whatsapp?.companyId !== companyId) {
-    throw new AppError("Não é possível acessar registros de outra empresa");
-  }
-
-  if (!whatsapp) {
-    throw new AppError("ERR_NO_WAPP_FOUND", 404);
-  }
-
-  return whatsapp;
+  return Whatsapp.findByPk(id, findOptions);
 };
 
 export default ShowWhatsAppService;

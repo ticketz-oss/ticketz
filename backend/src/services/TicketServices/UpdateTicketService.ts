@@ -1,11 +1,9 @@
 import moment from "moment";
-import { isNil } from "lodash";
 import CheckContactOpenTickets from "../../helpers/CheckContactOpenTickets";
 import SetTicketMessagesAsRead from "../../helpers/SetTicketMessagesAsRead";
 import { getIO } from "../../libs/socket";
 import Ticket from "../../models/Ticket";
 import ShowTicketService from "./ShowTicketService";
-import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
 import SendWhatsAppMessage from "../WbotServices/SendWhatsAppMessage";
 import FindOrCreateATicketTrakingService from "./FindOrCreateATicketTrakingService";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
@@ -152,11 +150,6 @@ const UpdateTicketService = async ({
     }
 
     if (status !== undefined && ["closed"].indexOf(status) > -1) {
-      const { complationMessage, ratingMessage } = await ShowWhatsAppService(
-        ticket.whatsappId,
-        companyId
-      );
-
       if (!ticketTraking.finishedAt) {
         ticketTraking.finishedAt = moment().toDate();
         ticketTraking.whatsappId = ticket.whatsappId;
@@ -170,11 +163,12 @@ const UpdateTicketService = async ({
         !ticket.contact.disableBot
       ) {
         if (!ticketTraking.ratingAt && !justClose) {
-          const ratingTxt =
-            ratingMessage?.trim() || "Por favor avalie nosso atendimento";
-          const bodyRatingMessage = `${ratingTxt}\n\n*Digite uma nota de 1 a 5*\n\nEnvie *\`!\`* para retornar ao atendimento`;
+          if (ticket.whatsapp && ticket.channel === "whatsapp") {
+            const ratingTxt =
+              ticket.whatsapp.ratingMessage?.trim() ||
+              "Por favor avalie nosso atendimento";
+            const bodyRatingMessage = `${ratingTxt}\n\n*Digite uma nota de 1 a 5*\n\nEnvie *\`!\`* para retornar ao atendimento`;
 
-          if (ticket.channel === "whatsapp") {
             await SendWhatsAppMessage({ body: bodyRatingMessage, ticket });
           }
 
@@ -214,10 +208,12 @@ const UpdateTicketService = async ({
         !isGroup &&
         !ticket.contact.disableBot &&
         !justClose &&
-        !isNil(complationMessage) &&
-        complationMessage !== ""
+        ticket.whatsapp?.complationMessage.trim()
       ) {
-        const body = formatBody(`${complationMessage}`, ticket);
+        const body = formatBody(
+          `${ticket.whatsapp.complationMessage.trim()}`,
+          ticket
+        );
 
         if (ticket.channel === "whatsapp" && !isGroup) {
           const sentMessage = await SendWhatsAppMessage({ body, ticket });
@@ -357,19 +353,16 @@ const UpdateTicketService = async ({
         !accepted &&
         oldQueueId &&
         ticket.queueId &&
-        oldQueueId !== ticket.queueId
+        oldQueueId !== ticket.queueId &&
+        ticket.whatsapp
       ) {
-        const whatsapp = await ShowWhatsAppService(
-          ticket.whatsappId,
-          companyId
-        );
         const systemTransferMessage = await GetCompanySetting(
           companyId,
           "transferMessage",
           ""
         );
         const transferMessage =
-          whatsapp.transferMessage || systemTransferMessage;
+          ticket.whatsapp.transferMessage || systemTransferMessage;
 
         if (transferMessage) {
           await sendFormattedMessage(transferMessage, ticket);

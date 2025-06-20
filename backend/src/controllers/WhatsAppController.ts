@@ -93,7 +93,17 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.user;
   const { session } = req.query;
 
-  const whatsapp = await ShowWhatsAppService(whatsappId, companyId, session);
+  const whatsapp = await ShowWhatsAppService(whatsappId, {
+    hideSession: session === "0"
+  });
+
+  if (whatsapp && whatsapp.companyId !== companyId) {
+    throw new AppError("ERR_FORBIDDEN", 403);
+  }
+
+  if (!whatsapp) {
+    throw new AppError("ERR_NO_WAPP_FOUND", 404);
+  }
 
   return res.status(200).json(whatsapp);
 };
@@ -135,7 +145,15 @@ export const remove = async (
   const { companyId } = req.user;
   const io = getIO();
 
-  const whatsapp = await ShowWhatsAppService(whatsappId, companyId);
+  const whatsapp = await ShowWhatsAppService(whatsappId);
+
+  if (whatsapp && whatsapp.companyId !== companyId) {
+    throw new AppError("ERR_FORBIDDEN", 403);
+  }
+
+  if (!whatsapp) {
+    throw new AppError("ERR_NO_WAPP_FOUND", 404);
+  }
 
   if (whatsapp.channel === "whatsapp") {
     const openTickets: Ticket[] = await whatsapp.$get("tickets", {

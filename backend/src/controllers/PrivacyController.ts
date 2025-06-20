@@ -33,9 +33,8 @@ function checkWhatsapp(whatsapp: Whatsapp) {
 
 export const show = async (req: Request, res: Response): Promise<Response> => {
   const { whatsappId } = req.params;
-  const { companyId } = req.user;
 
-  const whatsapp: Whatsapp = await ShowWhatsAppService(whatsappId, companyId);
+  const whatsapp: Whatsapp = await ShowWhatsAppService(whatsappId);
 
   checkWhatsapp(whatsapp);
 
@@ -48,9 +47,8 @@ export const update = async (
   res: Response
 ): Promise<Response> => {
   const { whatsappId } = req.params;
-  const { companyId } = req.user;
 
-  const whatsapp: Whatsapp = await ShowWhatsAppService(whatsappId, companyId);
+  const whatsapp: Whatsapp = await ShowWhatsAppService(whatsappId);
 
   checkWhatsapp(whatsapp);
 

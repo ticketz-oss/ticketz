@@ -51,7 +51,12 @@ const ShowTicketService = async (
       {
         model: Whatsapp,
         as: "whatsapp",
-        attributes: ["name", "facebookUserToken", "facebookUserId"]
+        attributes: [
+          "name",
+          "ratingMessage",
+          "transferMessage",
+          "complationMessage"
+        ]
       },
       {
         model: Tag,
