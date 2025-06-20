@@ -1665,7 +1665,7 @@ const wbotMessageListener = async (
             }
             return result;
           });
-          const whatsapp = await ShowWhatsAppService(wbot.id!, companyId);
+          const whatsapp = await ShowWhatsAppService(wbot.id!);
           const { ticket } = await FindOrCreateTicketService(
             contact,
             whatsapp.id,

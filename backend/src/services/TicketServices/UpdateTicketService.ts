@@ -1,4 +1,5 @@
 import moment from "moment";
+import { isNil } from "lodash";
 import CheckContactOpenTickets from "../../helpers/CheckContactOpenTickets";
 import SetTicketMessagesAsRead from "../../helpers/SetTicketMessagesAsRead";
 import { getIO } from "../../libs/socket";
@@ -179,10 +180,11 @@ const UpdateTicketService = async ({
               "Por favor avalie nosso atendimento";
             const bodyRatingMessage = `${ratingTxt}\n\n*Digite uma nota de 1 a 5*\n\nEnvie *\`!\`* para retornar ao atendimento`;
 
-          await sendFormattedMessage(bodyRatingMessage, ticket);
+            await sendFormattedMessage(bodyRatingMessage, ticket);
 
-          ticketTraking.ratingAt = moment().toDate();
-          await ticketTraking.save();
+            ticketTraking.ratingAt = moment().toDate();
+            await ticketTraking.save();
+          }
 
           await ticket.update({
             chatbot: null,
@@ -219,7 +221,10 @@ const UpdateTicketService = async ({
         !justClose &&
         ticket.whatsapp?.complationMessage.trim()
       ) {
-        await sendFormattedMessage(ticket.whatsapp.complationMessage.trim(), ticket);
+        await sendFormattedMessage(
+          ticket.whatsapp.complationMessage.trim(),
+          ticket
+        );
       }
     }
 
@@ -238,11 +243,6 @@ const UpdateTicketService = async ({
       });
 
       if (ticket.channel === "whatsapp") {
-        const whatsapp = await ShowWhatsAppService(
-          ticket.whatsappId,
-          companyId
-        );
-
         const restrictTransferConnection =
           !isGroup &&
           ((await GetCompanySetting(
@@ -250,14 +250,14 @@ const UpdateTicketService = async ({
             "restrictTransferConnection",
             ""
           )) === "enabled" ||
-            whatsapp.restrictToQueues);
+            ticket.whatsapp?.restrictToQueues);
 
         const transferToNewTicket =
           !isGroup &&
           !isFromChatbot &&
           ((await GetCompanySetting(companyId, "transferToNewTicket", "")) ===
             "enabled" ||
-            whatsapp.transferToNewTicket);
+            ticket.whatsapp?.transferToNewTicket);
 
         // let oldTicket: Ticket = null;
         let newWhatsapp: Whatsapp = null;
@@ -267,8 +267,8 @@ const UpdateTicketService = async ({
           (queue.whatsappId || queue.whatsapps.length)
         ) {
           const isSameConnection =
-            queue.whatsappId === whatsapp.id ||
-            queue.whatsapps.find(e => e.id === whatsapp.id);
+            queue.whatsappId === ticket.whatsappId ||
+            queue.whatsapps.find(e => e.id === ticket.whatsappId);
 
           if (!isSameConnection) {
             newWhatsapp =
@@ -300,7 +300,7 @@ const UpdateTicketService = async ({
 
           const { ticket: newTicket } = await FindOrCreateTicketService(
             contact,
-            newWhatsapp?.id || whatsapp.id,
+            newWhatsapp?.id || ticket.whatsappId,
             companyId,
             { doNotReopen: true, incrementUnread: true }
           );
