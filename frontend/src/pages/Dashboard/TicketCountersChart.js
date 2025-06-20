@@ -73,8 +73,8 @@ export function TicketCountersChart({ ticketCounters, start, end }) {
     
     const chartData = Object.keys(createData).map((key) => ({
       time: key,
-      created: createData[key],
-      closed: closeData[key]
+      created: createData[key] || 0,
+      closed: closeData[key] || 0
     }));
     
     setChartData(chartData);
