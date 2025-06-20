@@ -91,7 +91,7 @@ const UpdateWhatsAppService = async ({
     }
   }
 
-  const whatsapp = await ShowWhatsAppService(whatsappId, companyId);
+  const whatsapp = await ShowWhatsAppService(whatsappId);
 
   if (!whatsapp) {
     throw new AppError("ERR_WAPP_NOT_FOUND", 404);

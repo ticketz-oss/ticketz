@@ -236,7 +236,7 @@ export async function verifyQueue(
   ignoreMessage = false
 ) {
   const { queues, greetingMessage, transferMessage } =
-    await ShowWhatsAppService(ticket.whatsappId!, ticket.companyId);
+    await ShowWhatsAppService(ticket.whatsappId!);
 
   if (queues.length === 1) {
     await startQueue(replyHandler, ticket, head(queues), false, message);
