@@ -52,7 +52,6 @@ export function TicketCountersChart({ ticketCounters, start, end }) {
     
     const startDate = new Date(`${start}T${numPad(parseInt(firstMinutes/60))}:${numPad(firstMinutes%60)}:00.000${tz}`);
     const endDate = new Date(`${end}T23:59:59.999${tz}`);
-    endDate.setMinutes(endDate.getMinutes()+firstMinutes-offset);
 
     if (endDate > now) {
       endDate.setTime(now.getTime());
@@ -61,20 +60,18 @@ export function TicketCountersChart({ ticketCounters, start, end }) {
     
     if (field === "day") {
       let currentDate = new Date(startDate);
-      while (currentDate <= endDate) {
+      while (currentDate < endDate) {
         xAxisEmptyData[getISOStringWithTimezone(currentDate).split("T")[0]] = 0;
         currentDate.setDate(currentDate.getDate() + 1);
       }
     } else {
       let currentDate = new Date(startDate);
-      while (currentDate <= endDate) {
+      while (currentDate < endDate) {
         xAxisEmptyData[getISOStringWithTimezone(currentDate).split(".")[0]] = 0;
         currentDate.setMinutes(currentDate.getMinutes() + step[field]);
       }
     }
     
-    console.debug({startDate, endDate, field, xAxisEmptyData});
-
     const createData = prepareChartData(xAxisEmptyData, ticketCounters.create);
     const closeData = prepareChartData(xAxisEmptyData, ticketCounters.close);
     
