@@ -14,6 +14,12 @@ integrationsRoutes.get(
 );
 
 integrationsRoutes.get(
+  "/integrations/listQueues",
+  isIntegrationSession,
+  IntegrationController.listQueues
+);
+
+integrationsRoutes.get(
   "/integrations/:driver",
   isAuth,
   isAdmin,
