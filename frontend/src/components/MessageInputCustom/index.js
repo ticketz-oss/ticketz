@@ -48,6 +48,7 @@ import WhatsMarked from "react-whatsmarked";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSignature } from '@fortawesome/free-solid-svg-icons';
 import { isMobile } from "../../helpers/isMobile";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const Mp3Recorder = new MicRecorder({ bitRate: 128 });
 
@@ -363,6 +364,7 @@ const CustomInput = (props) => {
     handleSendMessage,
     handleInputPaste,
     handleChangeMedias,
+    handlePresenceUpdate,
     disableOption,
   } = props;
   const classes = useStyles();
@@ -424,11 +426,13 @@ const CustomInput = (props) => {
   }, [inputMessage]);
 
   const onKeyPress = (e) => {
-    if (loading || e.shiftKey) return;
-    else if (e.key === "Enter" && !isMobile()) {
+    if (loading) return;
+    else if ( !e.shiftKey && e.key === "Enter" && !isMobile()) {
       e.preventDefault();
       handleSendMessage();
+      return;
     }
+    handlePresenceUpdate && handlePresenceUpdate("composing");
   };
 
   const onPaste = (e) => {
@@ -786,6 +790,21 @@ const MessageInputCustom = (props) => {
 
   const [signMessage, setSignMessage] = useLocalStorage("signOption", true);
 
+  const socketManager = useContext(SocketContext);
+  const [socket, setSocket] = useState(null);
+  const [currentPresence, setCurrentPresence] = useState(null);
+  const [presenceTimeout, setPresenceTimeout] = useState(null);
+
+  useEffect(() => {
+    const socket = socketManager.GetSocket();
+    if (socket) {
+      setSocket(socket);
+    }
+    return () => {
+      socket.disconnect();
+    };
+  }, [socketManager]);        
+
   useEffect(() => {
     if (editingMessage) {
       if (signMessage && editingMessage.body.startsWith(`*${user.name}:*\n`)) {
@@ -919,6 +938,42 @@ const MessageInputCustom = (props) => {
 
   }
 
+  const handlePresenceUpdate = (presence) => {
+    if (!socket || currentPresence === presence) return;
+    
+    if (presenceTimeout) {
+      clearTimeout(presenceTimeout);
+      setPresenceTimeout(null);
+    }
+    
+    if (!presence) {
+      setCurrentPresence(null);
+      socket.emit("presenceUpdate", {
+        ticketId,
+        presence: "paused",
+      });
+      return;
+    }
+    
+    setCurrentPresence(presence);
+    socket.emit("presenceUpdate", {
+      ticketId,
+      presence,
+    });
+
+    if (presence === "composing") {
+      setPresenceTimeout(
+        setTimeout(() => {
+          setCurrentPresence(null);
+          socket.emit("presenceUpdate", {
+            ticketId,
+            presence: "paused",
+          });
+        }, 5000)
+      );
+    }
+  }  
+
   const handleSendMessage = async () => {
     if (inputMessage.trim() === "") return;
     //if (disableOption) return
@@ -934,6 +989,8 @@ const MessageInputCustom = (props) => {
       quotedMsg: replyingMessage,
     };
 
+    handlePresenceUpdate(null);
+    
     const url = editingMessage !== null ?
       `/messages/edit/${editingMessage.id}` :
       `/messages/${ticketId}`;
@@ -957,6 +1014,7 @@ const MessageInputCustom = (props) => {
       await Mp3Recorder.start();
       setRecording(true);
       setLoading(false);
+      handlePresenceUpdate("recording");
     } catch (err) {
       toastError(err);
       setLoading(false);
@@ -965,6 +1023,7 @@ const MessageInputCustom = (props) => {
 
   const handleUploadAudio = async () => {
     setLoading(true);
+    handlePresenceUpdate(null);
     try {
       const [, blob] = await Mp3Recorder.stop().getMp3();
       if (blob.size < 10000) {
@@ -989,6 +1048,7 @@ const MessageInputCustom = (props) => {
   };
 
   const handleCancelAudio = async () => {
+    handlePresenceUpdate(null);
     try {
       await Mp3Recorder.stop().getMp3();
       setRecording(false);
@@ -1116,6 +1176,7 @@ const MessageInputCustom = (props) => {
             handleSendMessage={handleSendMessage}
             handleInputPaste={handleInputPaste}
             handleChangeMedias={handleChangeMedias}
+            handlePresenceUpdate={handlePresenceUpdate}
             disableOption={disableOption}
           />
 
