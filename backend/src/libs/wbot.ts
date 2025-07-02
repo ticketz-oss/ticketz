@@ -176,6 +176,11 @@ export const initWASocket = async (
             });
           }
 
+          if (!msg) {
+            logger.debug({ key }, "cacheMessage: not found in database");
+            return undefined;
+          }
+
           try {
             const data = JSON.parse(msg.dataJson);
             logger.debug(
