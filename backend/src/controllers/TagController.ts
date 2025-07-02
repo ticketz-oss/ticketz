@@ -19,7 +19,7 @@ type IndexQuery = {
 };
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
-  const { pageNumber, searchParam, kanban } = req.query as IndexQuery;
+  const { pageNumber, searchParam } = req.query as IndexQuery;
   const { companyId } = req.user;
 
   console.log(searchParam);
@@ -27,8 +27,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   const { tags, count, hasMore } = await ListService({
     searchParam,
     pageNumber,
-    companyId,
-    kanban
+    companyId
   });
 
   return res.json({ tags, count, hasMore });
