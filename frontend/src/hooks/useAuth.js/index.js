@@ -177,6 +177,9 @@ const useAuth = () => {
     setLoading(true);
 
     try {
+      const socket = socketManager.GetSocket();
+      socket.logout();
+
       await api.delete("/auth/logout");
       setIsAuth(false);
       setUser({});
@@ -185,6 +188,7 @@ const useAuth = () => {
       localStorage.removeItem("userId");
       localStorage.removeItem("cshow");
       api.defaults.headers.Authorization = undefined;
+
       setLoading(false);
       history.push("/login");
     } catch (err) {

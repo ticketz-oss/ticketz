@@ -103,6 +103,14 @@ class ManagedSocket {
     }
     this.callbacks = [];
   }
+  
+  logout() {
+    this.disconnect();
+    this.socketManager.currentSocket = null;
+    this.socketManager.currentCompanyId = -1;
+    this.socketManager.currentUserId = -1;
+    this.socketManager.socketReady = false;
+  }
 }
 
 class DummySocket {
@@ -110,6 +118,7 @@ class DummySocket {
   off(..._) {}
   emit(..._) {}
   disconnect() {}
+  logout() {}
 }
 
 const socketManager = {
