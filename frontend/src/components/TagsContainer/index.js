@@ -78,8 +78,10 @@ export function TagsContainer ({ ticket, contact }) {
             if (isArray(value)) {
                 for (let item of value) {
                     if (isString(item)) {
-                        const newTag = await createTag({ name: item })
-                        optionsChanged.push(newTag);
+                        if (item.length > 2) {
+                            const newTag = await createTag({ name: item })
+                            optionsChanged.push(newTag);
+                        }
                     } else {
                         optionsChanged.push(item);
                     }
