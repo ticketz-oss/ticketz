@@ -101,6 +101,7 @@ const Tags = () => {
 
   const [loading, setLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
+  const [needMore, setNeedMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [selectedTag, setSelectedTag] = useState(null);
   const [deletingTag, setDeletingTag] = useState(null);
@@ -116,6 +117,7 @@ const Tags = () => {
       });
       dispatch({ type: "LOAD_TAGS", payload: data.tags, kanban: 0  });
       setHasMore(data.hasMore);
+      setNeedMore(false);
       setLoading(false);
     } catch (err) {
       toastError(err);
@@ -138,19 +140,27 @@ const Tags = () => {
   }, [searchParam, pageNumber, fetchTags]);
 
   useEffect(() => {
+    if (needMore && hasMore && !loading) {
+      setPageNumber((prevPage) => prevPage + 1);
+    }
+  }, [needMore]);
+  
+  useEffect(() => {
     const socket = socketManager.GetSocket(user.companyId);
 
-    const onUser = (data) => {
+    const onTag = (data) => {
+      if (searchParam) { return };
+
       if (data.action === "update" || data.action === "create") {
         dispatch({ type: "UPDATE_TAGS", payload: data.tags });
       }
 
       if (data.action === "delete") {
-        dispatch({ type: "DELETE_USER", payload: +data.tagId });
+        dispatch({ type: "DELETE_TAG", payload: +data.tagId });
       }
     }
     
-    socket.on("user", onUser);
+    socket.on("tag", onTag);
 
     return () => {
       socket.disconnect();
@@ -193,7 +203,7 @@ const Tags = () => {
   };
 
   const loadMore = () => {
-    setPageNumber((prevState) => prevState + 1);
+    setNeedMore(true);
   };
 
   const handleScroll = (e) => {
@@ -258,6 +268,9 @@ const Tags = () => {
               <TableCell align="center">"ID"</TableCell>
               <TableCell align="center">{i18n.t("tags.table.name")}</TableCell>
               <TableCell align="center">
+                {i18n.t("tags.table.contacts")}
+              </TableCell>
+              <TableCell align="center">
                 {i18n.t("tags.table.tickets")}
               </TableCell>
               <TableCell align="center">
@@ -268,7 +281,6 @@ const Tags = () => {
           <TableBody>
             <>
               {tags
-    			.sort((a, b) => b.id - a.id) // Sort the tags array in descending order based on the id
     			.map((tag) => (
                 <TableRow key={tag.id}>
                   <TableCell align="center">{tag.id}</TableCell>
@@ -284,7 +296,8 @@ const Tags = () => {
                       size="small"
                     />
                   </TableCell>
-				  <TableCell align="center">{tag.ticketsCount}</TableCell>
+                  <TableCell align="center">{tag.contactsCount}</TableCell>
+        				  <TableCell align="center">{tag.ticketsCount}</TableCell>
                   <TableCell align="center">
                   <>
                   {((user.profile === "admin" || user.profile === "supervisor")) && (

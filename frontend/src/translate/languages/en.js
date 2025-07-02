@@ -736,7 +736,8 @@ const messages = {
         table: {
           name: "Name",
           color: "Color",
-          tickets: "Records",
+          tickets: "Tickets",
+          contacts: "Contacts",
           actions: "Actions",
           id: "Id",
           kanban: "Kanban",
