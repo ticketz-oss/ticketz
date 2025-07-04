@@ -77,7 +77,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   const ticket = await ShowTicketService(ticketId, companyId);
   const { channel } = ticket;
   if (channel === "whatsapp") {
-    SetTicketMessagesAsRead(ticket);
+    await SetTicketMessagesAsRead(ticket);
   }
 
   if (medias) {
