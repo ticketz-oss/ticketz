@@ -136,9 +136,9 @@ const reducer = (state, action) => {
 
 const MainListItems = (props) => {
   const classes = useStyles();
-  const { drawerClose, drawerOpen} = props;
+  const { drawerClose, drawerOpen } = props;
   const { whatsApps } = useContext(WhatsAppsContext);
-  const { user ,handleLogout} = useContext(AuthContext);
+  const { user, handleLogout } = useContext(AuthContext);
   const [connectionWarning, setConnectionWarning] = useState(false);
   const [openCampaignSubmenu, setOpenCampaignSubmenu] = useState(false);
   const [openKanbanSubmenu, setOpenKanbanSubmenu] = useState(false);
@@ -181,7 +181,7 @@ const MainListItems = (props) => {
 
     socket.on(`company-${companyId}-chat`, onCompanyChatMainListItems);
     return () => {
-	    socket.disconnect();
+      socket.disconnect();
     };
   }, [socketManager]);
 
@@ -255,96 +255,101 @@ const MainListItems = (props) => {
         style={{
           overflowY: "scroll",
         }}
-        no={()=>(
-        <>
-          <ListSubheader 
-          hidden={!drawerOpen}
-        style={{
-          position:"relative",
-          fontSize: "17px",
-          textAlign: "left",
-          paddingLeft: 20
-        }}   
-        inset
-        color="inherit">
-              {i18n.t("mainDrawer.listItems.service")}
-          </ListSubheader>
+        no={() => (
           <>
-            
-            <ListItemLink
-              to="/tickets"
-              primary={i18n.t("mainDrawer.listItems.tickets")}
-              icon={<WhatsAppIcon />}
-            />
-      <ListItemLink
-        to="/todolist"
-        primary={i18n.t("Tarefas")}
-        icon={<BorderColorIcon />}
-      />
-            <ListItemLink
-              to="/quick-messages"
-              primary={i18n.t("mainDrawer.listItems.quickMessages")}
-              icon={<FlashOnIcon />}
-            />
-            <ListItemLink
-              to="/contacts"
-              primary={i18n.t("mainDrawer.listItems.contacts")}
-              icon={<ContactPhoneOutlinedIcon />}
-            />
-            <ListItemLink
-              to="/schedules"
-              primary={i18n.t("mainDrawer.listItems.schedules")}
-              icon={<EventIcon />}
-            />
-            <ListItemLink
-              to="/tags"
-              primary={i18n.t("mainDrawer.listItems.tags")}
-              icon={<LocalOfferIcon />}
-            />
-            <ListItemLink
-              to="/chats"
-              primary={i18n.t("mainDrawer.listItems.chats")}
-              icon={
-                <Badge color="secondary" variant="dot" invisible={invisible}>
-                  <ForumIcon />
-                </Badge>
-              }
-            />
-            <ListItemLink
-              to="/helps"
-              primary={i18n.t("mainDrawer.listItems.helps")}
-              icon={<HelpOutlineIcon />}
-            />
+            <ListSubheader
+              hidden={!drawerOpen}
+              style={{
+                position: "relative",
+                fontSize: "17px",
+                textAlign: "left",
+                paddingLeft: 20
+              }}
+              inset
+              color="inherit">
+              {i18n.t("mainDrawer.listItems.service")}
+            </ListSubheader>
+            <>
+
+              <ListItemLink
+                to="/tickets"
+                primary={i18n.t("mainDrawer.listItems.tickets")}
+                icon={<WhatsAppIcon />}
+              />
+              <ListItemLink
+                to="/todolist"
+                primary={i18n.t("Tarefas")}
+                icon={<BorderColorIcon />}
+              />
+              <ListItemLink
+                to="/tasks"
+                primary={i18n.t("Tarefas")}
+                icon={<EventIcon className={classes.estiloIcones} />}
+              />
+              <ListItemLink
+                to="/quick-messages"
+                primary={i18n.t("mainDrawer.listItems.quickMessages")}
+                icon={<FlashOnIcon />}
+              />
+              <ListItemLink
+                to="/contacts"
+                primary={i18n.t("mainDrawer.listItems.contacts")}
+                icon={<ContactPhoneOutlinedIcon />}
+              />
+              <ListItemLink
+                to="/schedules"
+                primary={i18n.t("mainDrawer.listItems.schedules")}
+                icon={<EventIcon />}
+              />
+              <ListItemLink
+                to="/tags"
+                primary={i18n.t("mainDrawer.listItems.tags")}
+                icon={<LocalOfferIcon />}
+              />
+              <ListItemLink
+                to="/chats"
+                primary={i18n.t("mainDrawer.listItems.chats")}
+                icon={
+                  <Badge color="secondary" variant="dot" invisible={invisible}>
+                    <ForumIcon />
+                  </Badge>
+                }
+              />
+              <ListItemLink
+                to="/helps"
+                primary={i18n.t("mainDrawer.listItems.helps")}
+                icon={<HelpOutlineIcon />}
+              />
+            </>
           </>
-        </>
         )}
       />
 
       <Can
         role={user.profile}
         perform={"drawer-admin-items:view"}
-        yes={()=>(
+        yes={() => (
           <>
-            <Divider/>
-            <ListSubheader 
-            hidden={!drawerOpen}
-            style={{
-              position:"relative",
-              fontSize: "17px",
-              textAlign: "left",
-              paddingLeft: 20
-            }} 
-            inset
-            color="inherit">
+            <Divider />
+            <ListSubheader
+              hidden={!drawerOpen}
+              style={{
+                position: "relative",
+                fontSize: "17px",
+                textAlign: "left",
+                paddingLeft: 20
+              }}
+              inset
+              color="inherit">
               {i18n.t("mainDrawer.listItems.management")}
             </ListSubheader>
             <ListItemLink
-            small
-            to="/"
-            primary="Dashboard"
-            icon={<DashboardOutlinedIcon />}
+              small
+              to="/"
+              primary="Dashboard"
+              icon={<DashboardOutlinedIcon />}
             />
-        </>
+          </>
         )}
       />
       <Can
@@ -353,19 +358,19 @@ const MainListItems = (props) => {
         yes={() => (
           <>
             <Divider />
-            <ListSubheader 
-            hidden={!drawerOpen}
-            style={{
-              position:"relative",
-              fontSize: "17px",
-              textAlign: "left",
-              paddingLeft: 20
-            }} 
-            inset
-            color="inherit">
+            <ListSubheader
+              hidden={!drawerOpen}
+              style={{
+                position: "relative",
+                fontSize: "17px",
+                textAlign: "left",
+                paddingLeft: 20
+              }}
+              inset
+              color="inherit">
               {i18n.t("mainDrawer.listItems.administration")}
             </ListSubheader>
-            
+
             {showCampaigns && (
               <>
                 <ListItem
@@ -450,25 +455,25 @@ const MainListItems = (props) => {
               primary={i18n.t("mainDrawer.listItems.messagesAPI")}
               icon={<CodeRoundedIcon />}
             />
-             <ListItemLink
-                to="/financeiro"
-                primary={i18n.t("mainDrawer.listItems.financeiro")}
-                icon={<LocalAtmIcon />}
-              />
+            <ListItemLink
+              to="/financeiro"
+              primary={i18n.t("mainDrawer.listItems.financeiro")}
+              icon={<LocalAtmIcon />}
+            />
 
             <ListItemLink
               to="/settings"
               primary={i18n.t("mainDrawer.listItems.settings")}
               icon={<SettingsOutlinedIcon />}
             />
-            
-              <Divider />
-              <Typography style={{ fontSize: "12px", padding: "10px", textAlign: "right", fontWeight: "bold" }}>
-                {`${gitinfo.tagName || gitinfo.branchName + " " + gitinfo.commitHash }`} 
-                &nbsp;/&nbsp;
-                {`${gitinfo.buildTimestamp }`}
-              </Typography>
-            
+
+            <Divider />
+            <Typography style={{ fontSize: "12px", padding: "10px", textAlign: "right", fontWeight: "bold" }}>
+              {`${gitinfo.tagName || gitinfo.branchName + " " + gitinfo.commitHash}`}
+              &nbsp;/&nbsp;
+              {`${gitinfo.buildTimestamp}`}
+            </Typography>
+
           </>
         )}
       />
