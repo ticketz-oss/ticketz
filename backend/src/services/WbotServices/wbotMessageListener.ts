@@ -50,7 +50,7 @@ import { campaignQueue } from "../../queues/campaign";
 import User from "../../models/User";
 import Setting from "../../models/Setting";
 import { debounce } from "../../helpers/Debounce";
-import { getMessageFileOptions } from "./SendWhatsAppMedia";
+import { getMessageFileOptions, MediaInfo } from "./SendWhatsAppMedia";
 import { makeRandomId } from "../../helpers/MakeRandomId";
 import CheckSettings, { GetCompanySetting } from "../../helpers/CheckSettings";
 import Whatsapp from "../../models/Whatsapp";
@@ -622,7 +622,8 @@ export const verifyMediaMessage = async (
   contact: Contact,
   wbot: Session = null,
   messageMedia = null,
-  userId: number = null
+  userId: number = null,
+  mediaInfo: MediaInfo = null
 ): Promise<Message> => {
   const io = getIO();
   const quotedMsg = await verifyQuotedMessage(msg, ticket, wbot);
@@ -630,18 +631,20 @@ export const verifyMediaMessage = async (
   const thumbnailMsg = messageMedia || msg?.message?.extendedTextMessage;
   const thumbnailMedia =
     thumbnailMsg && (await downloadThumbnail(thumbnailMsg));
-  const media = await downloadMedia(
-    getUnpackedMessage(msg),
-    wbot,
-    ticket,
-    msg.key?.fromMe
-  );
+  const media =
+    !mediaInfo &&
+    (await downloadMedia(
+      getUnpackedMessage(msg),
+      wbot,
+      ticket,
+      msg.key?.fromMe
+    ));
 
-  if (!media && !thumbnailMedia) {
+  if (!mediaInfo && !media && !thumbnailMedia) {
     throw new Error("ERR_WAPP_DOWNLOAD_MEDIA");
   }
 
-  let mediaUrl = null;
+  let mediaUrl = mediaInfo?.mediaUrl || null;
   if (media) {
     mediaUrl = await saveMediaToFile(media, ticket);
   }
@@ -651,7 +654,9 @@ export const verifyMediaMessage = async (
     thumbnailUrl = await saveMediaToFile(thumbnailMedia, ticket);
   }
 
-  const mediaType = media?.mimetype.split("/")[0];
+  const mimetype = mediaInfo?.mimetype || media?.mimetype || "";
+  const mediaType = mimetype.split("/")[0];
+  const filename = mediaInfo?.filename || media?.filename || "file.bin";
 
   let body = getBodyMessage(msg?.message);
 
@@ -676,7 +681,7 @@ export const verifyMediaMessage = async (
           ? mediaUrl
           : `${getPublicPath()}/${mediaUrl}`,
         { apiKey, provider },
-        media.filename
+        filename
       );
       if (audioTranscription) {
         body = audioTranscription;
@@ -703,7 +708,7 @@ export const verifyMediaMessage = async (
   };
 
   await ticket.update({
-    lastMessage: body || media?.filename ? `📎 ${media?.filename}` : ""
+    lastMessage: body || filename ? `📎 ${filename}` : ""
   });
 
   const newMessage = await CreateMessageService({
