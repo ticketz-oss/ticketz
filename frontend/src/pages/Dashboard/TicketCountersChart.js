@@ -26,7 +26,7 @@ function prepareChartData(emptyData, serie) {
   return ticketCreateData;
 }
 
-export function TicketCountersChart({ ticketCounters, start, end }) {
+export function TicketCountersChart({ ticketCounters, start, end, hour_start, hour_end }) {
   const now = new Date();
   const tz = getTimezoneOffset();
 	const theme = useTheme();
@@ -50,8 +50,8 @@ export function TicketCountersChart({ ticketCounters, start, end }) {
     const interval = step[field];
     const firstMinutes = ( offset + interval ) % interval;
     
-    const startDate = new Date(`${start}T${numPad(parseInt(firstMinutes/60))}:${numPad(firstMinutes%60)}:00.000${tz}`);
-    const endDate = new Date(`${end}T23:59:59.999${tz}`);
+    const startDate = new Date(`${start}T${hour_start || `${numPad(parseInt(firstMinutes/60))}:${numPad(firstMinutes%60)}:00.000`}${tz}`);
+    const endDate = new Date(`${end}T${hour_end || "23:59:59.999"}${tz}`);
 
     if (endDate > now) {
       endDate.setTime(now.getTime());
