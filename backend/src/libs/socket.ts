@@ -52,6 +52,9 @@ import authConfig from "../config/auth";
 import { CounterManager } from "./counter";
 import UserSocketSession from "../models/UserSocketSession";
 import { GetCompanySetting } from "../helpers/CheckSettings";
+import GetTicketWbot from "../helpers/GetTicketWbot";
+import { getJidOf } from "../services/WbotServices/getJidOf";
+import ShowTicketService from "../services/TicketServices/ShowTicketService";
 
 let io: SocketIO;
 
@@ -336,6 +339,27 @@ export const initIO = (httpServer: Server): SocketIO => {
           });
         }
       }
+    });
+
+    socket.on("presenceUpdate", async parameters => {
+      const { ticketId, presence } = parameters;
+      const ticket = await ShowTicketService(ticketId);
+      if (!ticket || ticket.companyId !== user.companyId) {
+        return;
+      }
+
+      const wbot = await GetTicketWbot(ticket);
+      if (!wbot) {
+        return;
+      }
+
+      const jid = getJidOf(ticket);
+
+      if (jid.endsWith("@lid")) {
+        return;
+      }
+
+      wbot.sendPresenceUpdate(presence, jid);
     });
 
     socket.emit("ready");

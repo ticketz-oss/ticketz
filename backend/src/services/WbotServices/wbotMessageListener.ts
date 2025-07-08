@@ -44,6 +44,7 @@ import { campaignQueue } from "../../queues/campaign";
 import User from "../../models/User";
 import Setting from "../../models/Setting";
 import { debounce } from "../../helpers/Debounce";
+import { getMessageFileOptions, MediaInfo } from "./SendWhatsAppMedia";
 import { makeRandomId } from "../../helpers/MakeRandomId";
 import CheckSettings, { GetCompanySetting } from "../../helpers/CheckSettings";
 import { SimpleObjectCache } from "../../helpers/simpleObjectCache";
@@ -499,7 +500,8 @@ export const verifyMediaMessage = async (
   contact: Contact,
   wbot: Session = null,
   messageMedia = null,
-  userId: number = null
+  userId: number = null,
+  mediaInfo: MediaInfo = null
 ): Promise<Message> => {
   const quotedMsg = await verifyQuotedMessage(msg, ticket, wbot);
 

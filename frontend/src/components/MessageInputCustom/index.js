@@ -47,6 +47,7 @@ import WhatsMarked from "react-whatsmarked";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSignature, faNoteSticky } from '@fortawesome/free-solid-svg-icons';
 import { isMobile } from "../../helpers/isMobile";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 import { RecordOggOpus } from "../../helpers/recordOggOpus";
 import { makeRandomId } from "../../helpers/makeRandomId";
@@ -408,6 +409,7 @@ const CustomInput = (props) => {
     handleSendMessage,
     handleInputPaste,
     handleChangeMedias,
+    handlePresenceUpdate,
     disableOption,
     setQuickMessageAttachment,
     setMedias,
@@ -473,11 +475,13 @@ const CustomInput = (props) => {
   }, [inputMessage]);
 
   const onKeyPress = (e) => {
-    if (loading || e.shiftKey) return;
-    else if (e.key === "Enter" && !isMobile()) {
+    if (loading) return;
+    else if ( !e.shiftKey && e.key === "Enter" && !isMobile()) {
       e.preventDefault();
       handleSendMessage(e);
+      return;
     }
+    handlePresenceUpdate && handlePresenceUpdate("composing");
   };
 
   const onPaste = (e) => {
@@ -839,6 +843,12 @@ const MessageInputCustom = (props) => {
   const { user } = useContext(AuthContext);
 
   const [signMessage, setSignMessage] = useLocalStorage("signOption", true);
+
+  const socketManager = useContext(SocketContext);
+  const [socket, setSocket] = useState(null);
+  const [currentPresence, setCurrentPresence] = useState(null);
+  const [presenceTimeout, setPresenceTimeout] = useState(null);
+
   const [annotateMessage, setAnnotateMessage] = useState(false);
   const [quickMessageAttachment, setQuickMessageAttachment] = useState(null);
 
@@ -860,6 +870,15 @@ const MessageInputCustom = (props) => {
   const open = Boolean(anchorEl);
   const id = open ? 'simple-popover' : undefined;
 
+  useEffect(() => {
+    const socket = socketManager.GetSocket();
+    if (socket) {
+      setSocket(socket);
+    }
+    return () => {
+      socket.disconnect();
+    };
+  }, [socketManager]);        
 
   useEffect(() => {
     if (editingMessage) {
@@ -1022,6 +1041,42 @@ const MessageInputCustom = (props) => {
 
   }
 
+  const handlePresenceUpdate = (presence) => {
+    if (!socket || currentPresence === presence) return;
+    
+    if (presenceTimeout) {
+      clearTimeout(presenceTimeout);
+      setPresenceTimeout(null);
+    }
+    
+    if (!presence) {
+      setCurrentPresence(null);
+      socket.emit("presenceUpdate", {
+        ticketId,
+        presence: "paused",
+      });
+      return;
+    }
+    
+    setCurrentPresence(presence);
+    socket.emit("presenceUpdate", {
+      ticketId,
+      presence,
+    });
+
+    if (presence === "composing") {
+      setPresenceTimeout(
+        setTimeout(() => {
+          setCurrentPresence(null);
+          socket.emit("presenceUpdate", {
+            ticketId,
+            presence: "paused",
+          });
+        }, 5000)
+      );
+    }
+  }  
+
   const handleSendMessage = async (e) => {
     if (medias.length > 0) {
       return handleUploadMedia(e);
@@ -1044,6 +1099,8 @@ const MessageInputCustom = (props) => {
     };
     setAnnotateMessage(false);
 
+    handlePresenceUpdate(null);
+    
     const url = editingMessage !== null ?
       `/messages/edit/${editingMessage.id}` :
       `/messages/${ticketId}`;
@@ -1073,6 +1130,7 @@ const MessageInputCustom = (props) => {
         setPastOneSecond(true);
         }, 1000);
       setLoading(false);
+      handlePresenceUpdate("recording");
     } catch (err) {
       toastError(err);
       setRecording(false);
@@ -1082,6 +1140,7 @@ const MessageInputCustom = (props) => {
 
   const handleUploadAudio = async () => {
     setLoading(true);
+    handlePresenceUpdate(null);
     try {
       oggRecorder.export(async (blob) => {
         if (blob.size < 1000) {
@@ -1111,6 +1170,7 @@ const MessageInputCustom = (props) => {
   };
 
   const handleCancelAudio = async () => {
+    handlePresenceUpdate(null);
     try {
       await oggRecorder.stop();
       setRecording(false);
@@ -1326,6 +1386,7 @@ const MessageInputCustom = (props) => {
             handleSendMessage={handleSendMessage}
             handleInputPaste={handleInputPaste}
             handleChangeMedias={handleChangeMedias}
+            handlePresenceUpdate={handlePresenceUpdate}
             disableOption={disableOption}
             setQuickMessageAttachment={setQuickMessageAttachment}
             setMedias={setMedias}

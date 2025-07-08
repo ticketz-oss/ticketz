@@ -267,9 +267,9 @@ const Dashboard = () => {
   const [period, setPeriod] = useState(0);
   const [currentUser, setCurrentUser] = useState({});
   const [dateFrom, setDateFrom] = useState(
-    moment("1", "D").format("YYYY-MM-DD")
+    moment("1", "D").format("YYYY-MM-DDTHH") + ":00"
   );
-  const [dateTo, setDateTo] = useState(moment().format("YYYY-MM-DD"));
+  const [dateTo, setDateTo] = useState(moment().format("YYYY-MM-DDTHH") + ":59");
   const { getCurrentUserInfo } = useAuth();
     
   const [supportBoxOpen, setSupportBoxOpen] = useState(false);
@@ -417,6 +417,7 @@ const Dashboard = () => {
       params = {
         ...params,
         date_from: moment(dateFrom).format("YYYY-MM-DD"),
+        hour_from: moment(dateFrom).format("HH:mm:ss")
       };
     }
 
@@ -424,6 +425,7 @@ const Dashboard = () => {
       params = {
         ...params,
         date_to: moment(dateTo).format("YYYY-MM-DD"),
+        hour_to: moment(dateTo).format("HH:mm:ss")
       };
     }
 
@@ -496,7 +498,7 @@ const Dashboard = () => {
               <Grid item xs={12} sm={6} md={3}>
                 <TextField
                   label={i18n.t("dashboard.date.start")}
-                  type="date"
+                  type="datetime-local"
                   value={dateFrom}
                   onChange={(e) => setDateFrom(e.target.value)}
                   onBlur={fetchData}
@@ -509,7 +511,7 @@ const Dashboard = () => {
               <Grid item xs={12} sm={6} md={3}>
                 <TextField
                   label={i18n.t("dashboard.date.end")}
-                  type="date"
+                  type="datetime-local"
                   value={dateTo}
                   onChange={(e) => setDateTo(e.target.value)}
                   onBlur={fetchData}
@@ -745,6 +747,8 @@ const Dashboard = () => {
                 ticketCounters={ticketsData.ticketCounters}
                 start={ticketsData.start}
                 end={ticketsData.end}
+                hour_start={ticketsData.hour_start}
+                hour_end={ticketsData.hour_end}
                />
             </Paper>
           </Grid>

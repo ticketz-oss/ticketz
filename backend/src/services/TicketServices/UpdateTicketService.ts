@@ -137,7 +137,14 @@ const UpdateTicketService = async ({
     });
 
     if (status === "open") {
-      SetTicketMessagesAsRead(ticket);
+      try {
+        await SetTicketMessagesAsRead(ticket);
+      } catch (err) {
+        logger.error(
+          { ticketId, message: err?.message },
+          "Could not set messages as read."
+        );
+      }
     }
 
     const oldStatus = ticket.status;
@@ -358,13 +365,13 @@ const UpdateTicketService = async ({
 
     if (oldStatus !== status) {
       if (oldStatus === "closed" && status === "open") {
-        incrementCounter(companyId, "ticket-reopen");
+        await incrementCounter(companyId, "ticket-reopen");
       } else if (status === "open") {
-        incrementCounter(companyId, "ticket-accept");
+        await incrementCounter(companyId, "ticket-accept");
       } else if (status === "closed") {
-        incrementCounter(companyId, "ticket-close");
+        await incrementCounter(companyId, "ticket-close");
       } else if (status === "pending" && oldQueueId !== queueId) {
-        incrementCounter(companyId, "ticket-transfer");
+        await incrementCounter(companyId, "ticket-transfer");
       }
     }
 
