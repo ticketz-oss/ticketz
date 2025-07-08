@@ -108,7 +108,7 @@ const authState = async (
     }
   };
 
-  if (whatsapp.session && whatsapp.session !== null) {
+  if (whatsapp.session) {
     const result = JSON.parse(whatsapp.session, BufferJSON.reviver);
     creds = result.creds;
     const { keys } = result;
