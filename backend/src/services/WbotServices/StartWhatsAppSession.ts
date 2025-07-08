@@ -4,11 +4,11 @@ import { wbotMessageListener } from "./wbotMessageListener";
 import { getIO } from "../../libs/socket";
 import wbotMonitor from "./wbotMonitor";
 import { logger } from "../../utils/logger";
-import * as Sentry from "@sentry/node";
 
 export const StartWhatsAppSession = async (
   whatsapp: Whatsapp,
-  companyId: number
+  companyId: number,
+  isRefresh = false
 ): Promise<void> => {
   await whatsapp.update({ status: "OPENING" });
 
@@ -19,11 +19,10 @@ export const StartWhatsAppSession = async (
   });
 
   try {
-    const wbot = await initWASocket(whatsapp);
+    const wbot = await initWASocket(whatsapp, null, isRefresh);
     wbotMessageListener(wbot, companyId);
     wbotMonitor(wbot, whatsapp, companyId);
   } catch (err) {
-    Sentry.captureException(err);
     logger.error(err);
   }
 };
