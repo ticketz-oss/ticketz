@@ -1,12 +1,8 @@
-import { Mutex } from "async-mutex";
 import pino from "pino";
-import { getIO } from "../libs/socket";
 
 const state = {
   io: null
 };
-
-const stateMutex = new Mutex();
 
 const logBuffer = [];
 
@@ -19,19 +15,12 @@ function expireLog() {
   }
 }
 
-async function socketSendLog(level: number, logs: any) {
-  const haveIO = await stateMutex.runExclusive(async () => {
-    if (!state.io) {
-      try {
-        state.io = getIO();
-      } catch (error) {
-        return false;
-      }
-    }
-    return true;
-  });
+export async function setSocketIo(io) {
+  state.io = io;
+}
 
-  if (!haveIO) {
+async function socketSendLog(level: number, logs: any) {
+  if (!state.io) {
     return;
   }
 
@@ -46,18 +35,7 @@ async function socketSendLog(level: number, logs: any) {
 }
 
 export async function socketSendBuffer() {
-  const haveIO = await stateMutex.runExclusive(async () => {
-    if (!state.io) {
-      try {
-        state.io = getIO();
-      } catch (error) {
-        return false;
-      }
-    }
-    return true;
-  });
-
-  if (!haveIO) {
+  if (!state.io) {
     return;
   }
 
