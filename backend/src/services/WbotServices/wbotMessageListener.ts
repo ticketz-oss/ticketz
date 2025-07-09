@@ -44,7 +44,7 @@ import { campaignQueue } from "../../queues/campaign";
 import User from "../../models/User";
 import Setting from "../../models/Setting";
 import { debounce } from "../../helpers/Debounce";
-import { getMessageFileOptions, MediaInfo } from "./SendWhatsAppMedia";
+import { MediaInfo } from "./SendWhatsAppMedia";
 import { makeRandomId } from "../../helpers/MakeRandomId";
 import CheckSettings, { GetCompanySetting } from "../../helpers/CheckSettings";
 import { SimpleObjectCache } from "../../helpers/simpleObjectCache";
@@ -521,7 +521,10 @@ export const verifyMediaMessage = async (
     body: body || "",
     fromMe: msg.key.fromMe,
     read: msg.key.fromMe || ticket.id < 0,
-    mediaType: msgMedia && (overLimit ? "overlimit" : "wait"),
+    mediaUrl: mediaInfo?.mediaUrl || null,
+    mediaType:
+      mediaInfo?.mimetype.split("/")[0] ||
+      (msgMedia && (overLimit ? "overlimit" : "wait")),
     quotedMsgId: quotedMsg?.id,
     ack: msg.status || 0,
     remoteJid: msg.key.remoteJid,
@@ -627,7 +630,7 @@ export const verifyMediaMessage = async (
       });
   }
 
-  if (!msgMedia || overLimit) {
+  if (mediaInfo || !msgMedia || overLimit) {
     return newMessage;
   }
 
