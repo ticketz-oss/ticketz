@@ -31,6 +31,10 @@ import waVersion from "../waversion.json";
 import Message from "../models/Message";
 import OutOfTicketMessage from "../models/OutOfTicketMessages";
 import BaileysKeys from "../models/BaileysKeys";
+import { DecoupledDriverServices } from "../services/DecoupledDriverServices/DecoupledDriverServices";
+import ShowTicketService from "../services/TicketServices/ShowTicketService";
+import GetTicketWbot from "../helpers/GetTicketWbot";
+import { getJidOf } from "../services/WbotServices/getJidOf";
 
 // const loggerBaileys = MAIN_LOGGER.child({});
 // loggerBaileys.level = process.env.BAILEYS_LOG_LEVEL || "error";
@@ -533,3 +537,29 @@ export const initWASocket = async (
     }
   });
 };
+
+const decoupledDriverServices = DecoupledDriverServices.getInstance();
+
+decoupledDriverServices.registerFunction(
+  "presenceUpdate",
+  async (user, parameters) => {
+    const { ticketId, presence } = parameters;
+    const ticket = await ShowTicketService(ticketId);
+    if (!ticket || ticket.companyId !== user.companyId) {
+      return;
+    }
+
+    const wbot = await GetTicketWbot(ticket);
+    if (!wbot) {
+      return;
+    }
+
+    const jid = getJidOf(ticket);
+
+    if (jid.endsWith("@lid")) {
+      return;
+    }
+
+    wbot.sendPresenceUpdate(presence, jid);
+  }
+);
