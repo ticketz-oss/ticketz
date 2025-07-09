@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import fs from "fs";
 import { WAMessage } from "baileys";
+import mime from "mime-types";
 import AppError from "../errors/AppError";
 
 import SetTicketMessagesAsRead from "../helpers/SetTicketMessagesAsRead";
@@ -146,10 +147,16 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
       mediaPath
     );
 
+    const mediaInfo = {
+      mediaUrl: mediaPath,
+      mimetype: mime.lookup(mediaPath) || "application/octet-stream",
+      filename: mediaName
+    };
+
     const caption = formatBody(body, ticket, user);
 
     const msgFileOptions = { ...fileOptions, caption };
-    const message = await sendWhatsappFile(ticket, msgFileOptions);
+    const message = await sendWhatsappFile(ticket, mediaInfo, msgFileOptions);
     verifyMediaMessage(
       message,
       ticket,

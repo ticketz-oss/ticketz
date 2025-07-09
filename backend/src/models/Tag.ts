@@ -9,7 +9,8 @@ import {
   BelongsToMany,
   ForeignKey,
   BelongsTo,
-  HasMany
+  HasMany,
+  DataType
 } from "sequelize-typescript";
 import Company from "./Company";
 import Ticket from "./Ticket";
@@ -44,6 +45,22 @@ class Tag extends Model {
 
   @BelongsToMany(() => Contact, () => ContactTag)
   contacts: Contact[];
+
+  @Column({
+    type: DataType.VIRTUAL,
+    get() {
+      return (this as any).ticketTags?.length || 0;
+    }
+  })
+  ticketsCount: number;
+
+  @Column({
+    type: DataType.VIRTUAL,
+    get() {
+      return (this as any).contactTags?.length || 0;
+    }
+  })
+  contactsCount: number;
 
   @ForeignKey(() => Company)
   @Column

@@ -10,7 +10,8 @@ import { createProxyAgent } from "../../helpers/createProxyAgent";
 
 export const StartWhatsAppSession = async (
   whatsapp: Whatsapp,
-  companyId: number
+  companyId: number,
+  isRefresh = false
 ): Promise<void> => {
   await whatsapp.update({ status: "OPENING" });
 
@@ -25,11 +26,10 @@ export const StartWhatsAppSession = async (
     if (whatsapp.proxyConfig?.enabled) {
       proxy = createProxyAgent(whatsapp.proxyConfig);
     }
-    const wbot = await initWASocket(whatsapp, proxy || undefined);
+    const wbot = await initWASocket(whatsapp, proxy || null, isRefresh);
     wbotMessageListener(wbot, companyId);
     wbotMonitor(wbot, whatsapp, companyId);
   } catch (err) {
-    Sentry.captureException(err);
     logger.error(err);
   }
 };

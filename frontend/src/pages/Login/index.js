@@ -87,7 +87,7 @@ const Login = () => {
 	const { handleLogin } = useContext(AuthContext);
 
 	const handleChangeInput = e => {
-		setUser({ ...user, [e.target.name]: e.target.value });
+		setUser({ ...user, [e.target.name]: e.target.value.trim() });
 	};
 
 	const handlSubmit = e => {

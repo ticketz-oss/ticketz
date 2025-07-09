@@ -772,7 +772,8 @@ const messages = {
         table: {
           name: "Nombre",
           color: "Color",
-          tickets: "Registros",
+          tickets: "Atenciones",
+          contacts: "Contactos",
           actions: "Acciones",
           id: "ID",
           kanban: "Kanban",

@@ -17,12 +17,16 @@ type TicketTrackingStatistics = {
 export type DashboardDateRange = {
   date_from?: string;
   date_to?: string;
+  hour_from?: string;
+  hour_to?: string;
   tz?: string;
 };
 
 type TicketsStatisticsData = {
   start: string;
   end: string;
+  hour_start?: string;
+  hour_end?: string;
   ticketCounters: {
     create: any;
     accept: any;
@@ -294,8 +298,10 @@ export async function ticketsStatisticsService(
   const tz = params.tz || "Z";
 
   if (params.date_from && params.date_to) {
-    start = new Date(`${params.date_from}T00:00:00${tz}`);
-    end = new Date(`${params.date_to}T23:59:59${tz}`);
+    start = new Date(
+      `${params.date_from}T${params?.hour_from || "00:00:00"}${tz}`
+    );
+    end = new Date(`${params.date_to}T${params?.hour_to || "23:59:59"}${tz}`);
   } else {
     throw new Error("Invalid date range");
   }
@@ -303,6 +309,8 @@ export async function ticketsStatisticsService(
   return {
     start: params.date_from,
     end: params.date_to,
+    hour_start: params?.hour_from,
+    hour_end: params?.hour_to,
     ticketCounters: {
       create: await listCounterSerie(companyId, "ticket-create", start, end),
       accept: await listCounterSerie(companyId, "ticket-accept", start, end),

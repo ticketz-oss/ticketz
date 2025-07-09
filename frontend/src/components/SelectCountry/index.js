@@ -10,7 +10,7 @@ const loadCountries = async () => {
     const language = localStorage.getItem("language") || "en";
 
     const countries = data.map(country => {
-      let countryName = country.translations[language] || country.translations[language.slice(0, 2)] || country.name;
+      let countryName = country.translations?.[language] || country.translations?.[language.slice(0, 2)] || country.name;
       return { iso2: country.iso2, phonecode: country.phonecode, name: countryName, emoji: country.emoji };
     }).sort((a, b) => a.name.localeCompare(b.name));
 

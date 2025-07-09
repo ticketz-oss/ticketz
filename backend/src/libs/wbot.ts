@@ -30,6 +30,7 @@ import GetPublicSettingService from "../services/SettingServices/GetPublicSettin
 import waVersion from "../waversion.json";
 import Message from "../models/Message";
 import OutOfTicketMessage from "../models/OutOfTicketMessages";
+import BaileysKeys from "../models/BaileysKeys";
 
 // const loggerBaileys = MAIN_LOGGER.child({});
 // loggerBaileys.level = process.env.BAILEYS_LOG_LEVEL || "error";
@@ -39,6 +40,7 @@ export type Session = WASocket & {
   myJid?: string;
   myLid?: string;
   cacheMessage?: (msg: proto.IWebMessageInfo) => void;
+  isRefreshing?: boolean;
 };
 
 const sessions: Session[] = [];
@@ -76,11 +78,15 @@ export const removeWbot = async (
 
       sessions[sessionIndex].ws.removeAllListeners();
       await sessions[sessionIndex].ws.close();
-
       sessions.splice(sessionIndex, 1);
     }
   } catch (err) {
     logger.error(err);
+  }
+  if (isLogout) {
+    await BaileysKeys.destroy({
+      where: { whatsappId }
+    });
   }
 };
 
@@ -115,7 +121,8 @@ const getProjectWAVersion = async () => {
 
 export const initWASocket = async (
   whatsapp: Whatsapp,
-  proxy?: Agent
+  proxy?: Agent,
+  isRefresh = false
 ): Promise<Session> => {
   return new Promise((resolve, reject) => {
     try {
@@ -174,6 +181,11 @@ export const initWASocket = async (
             msg = await OutOfTicketMessage.findOne({
               where: { id: key.id }
             });
+          }
+
+          if (!msg) {
+            logger.debug({ key }, "cacheMessage: not found in database");
+            return undefined;
           }
 
           try {
@@ -263,6 +275,8 @@ export const initWASocket = async (
           transactionOpts: { maxCommitRetries: 1, delayBetweenTriesMs: 10 }
         });
 
+        wsocket.isRefreshing = isRefresh;
+
         wsocket.cacheMessage = (msg: proto.IWebMessageInfo): void => {
           if (!msg.key.fromMe) return;
 
@@ -281,18 +295,24 @@ export const initWASocket = async (
 
             if (connection === "close") {
               if ((lastDisconnect?.error as Boom)?.output?.statusCode === 403) {
-                await whatsapp.update({ status: "PENDING", session: "" });
+                // disconnected from whatsapp
+                await removeWbot(id);
+                await whatsapp.update({
+                  status: "DISCONNECTED",
+                  session: "",
+                  qrcode: ""
+                });
                 await DeleteBaileysService(whatsapp.id);
                 io.emit(`company-${whatsapp.companyId}-whatsappSession`, {
                   action: "update",
                   session: whatsapp
                 });
-                removeWbot(id, false);
               }
               if (
                 (lastDisconnect?.error as Boom)?.output?.statusCode !==
                 DisconnectReason.loggedOut
               ) {
+                // connection dropped without logging out
                 await whatsapp.update({ status: "PENDING" });
                 io.emit(`company-${whatsapp.companyId}-whatsappSession`, {
                   action: "update",
@@ -302,22 +322,25 @@ export const initWASocket = async (
                   logger.info(`Reconnecting ${name} in 2 seconds`);
                   setTimeout(async () => {
                     await whatsapp.reload();
-                    await StartWhatsAppSession(whatsapp, whatsapp.companyId);
+                    await StartWhatsAppSession(
+                      whatsapp,
+                      whatsapp.companyId,
+                      true
+                    );
                   }, 2000);
                 });
               } else {
-                await whatsapp.update({ status: "PENDING", session: "" });
+                // logged out
+                await removeWbot(id);
+                await whatsapp.update({
+                  status: "DISCONNECTED",
+                  session: "",
+                  qrcode: ""
+                });
                 await DeleteBaileysService(whatsapp.id);
                 io.emit(`company-${whatsapp.companyId}-whatsappSession`, {
                   action: "update",
                   session: whatsapp
-                });
-                removeWbot(id, false).then(() => {
-                  logger.info(`Reconnecting ${name} in 2 seconds`);
-                  setTimeout(async () => {
-                    await whatsapp.reload();
-                    await StartWhatsAppSession(whatsapp, whatsapp.companyId);
-                  }, 2000);
                 });
               }
             }
@@ -358,6 +381,28 @@ export const initWASocket = async (
                 sessions.push(wsocket);
               }
 
+              if (wsocket.isRefreshing) {
+                setTimeout(() => {
+                  wsocket
+                    .resyncAppState(
+                      [
+                        "critical_block",
+                        "critical_unblock_low",
+                        "regular_high",
+                        "regular_low",
+                        "regular"
+                      ],
+                      true
+                    )
+                    .catch(error => {
+                      logger.error(
+                        { message: error.message },
+                        `Error resyncing app state for session ${name}`
+                      );
+                    });
+                }, 5000);
+                wsocket.isRefreshing = false;
+              }
               resolve(wsocket);
             }
 

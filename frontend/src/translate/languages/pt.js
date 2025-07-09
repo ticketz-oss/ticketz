@@ -60,7 +60,7 @@ const messages = {
         },
         buttons: {
           submit: "Entrar",
-          register: "Não tem um conta? Cadastre-se!",
+          register: "Não tem uma conta? Cadastre-se!",
         },
       },
       companies: {
@@ -776,7 +776,8 @@ const messages = {
         table: {
           name: "Nome",
           color: "Cor",
-          tickets: "Registros",
+          tickets: "Tickets",
+          contacts: "Contatos",
           actions: "Ações",
           id: "Id",
           kanban: "Kanban",
