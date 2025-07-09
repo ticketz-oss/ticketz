@@ -1,8 +1,14 @@
+import { logger } from "../../utils/logger";
+
 export class DecoupledDriverServices {
   // eslint-disable-next-line no-use-before-define
   private static instance: DecoupledDriverServices;
 
   private functions: { [key: string]: (...args: any[]) => any } = {};
+
+  private constructor() {
+    logger.debug("DecoupledDriverServices initialized");
+  }
 
   public static getInstance(): DecoupledDriverServices {
     if (!DecoupledDriverServices.instance) {
@@ -13,6 +19,7 @@ export class DecoupledDriverServices {
   }
 
   public registerFunction(name: string, func: (...args: any[]) => any): void {
+    logger.debug(`Registering function: ${name}`);
     this.functions[name] = func;
   }
 
