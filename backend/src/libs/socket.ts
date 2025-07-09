@@ -44,7 +44,7 @@ import { instrument } from "@socket.io/admin-ui";
 import { Server } from "http";
 import { verify } from "jsonwebtoken";
 import AppError from "../errors/AppError";
-import { logger, socketSendBuffer } from "../utils/logger";
+import { logger, setSocketIo, socketSendBuffer } from "../utils/logger";
 import User from "../models/User";
 import Queue from "../models/Queue";
 import Ticket from "../models/Ticket";
@@ -81,6 +81,8 @@ export const initIO = (httpServer: Server): SocketIO => {
       origin: process.env.FRONTEND_URL
     }
   });
+
+  setSocketIo(io);
 
   if (process.env.SOCKET_ADMIN && JSON.parse(process.env.SOCKET_ADMIN)) {
     User.findByPk(1).then(adminUser => {
