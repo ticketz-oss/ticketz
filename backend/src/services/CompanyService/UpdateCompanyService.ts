@@ -35,6 +35,8 @@ const UpdateCompanyService = async (
     throw new AppError("ERR_NO_COMPANY_FOUND", 404);
   }
 
+  const previousPlanId = company.planId;
+
   await company.update({
     name,
     phone,
@@ -70,6 +72,15 @@ const UpdateCompanyService = async (
         dueDate: {
           [Op.lte]: dueDate
         }
+      }
+    });
+  }
+
+  if (planId && previousPlanId !== planId) {
+    await Invoices.destroy({
+      where: {
+        companyId: company.id,
+        status: "open"
       }
     });
   }
