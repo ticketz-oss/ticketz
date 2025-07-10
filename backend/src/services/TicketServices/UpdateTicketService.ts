@@ -135,7 +135,7 @@ const UpdateTicketService = async ({
       whatsappId: ticket.whatsappId
     });
 
-    if (status === "open") {
+    if (status === "open" && !isFromChatbot) {
       try {
         await SetTicketMessagesAsRead(ticket);
       } catch (err) {
