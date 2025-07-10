@@ -1,6 +1,7 @@
 import * as Yup from "yup";
 import { Request, Response } from "express";
-// import { getIO } from "../libs/socket";
+import axios from "axios";
+import moment from "moment";
 import AppError from "../errors/AppError";
 import Company from "../models/Company";
 
@@ -13,10 +14,7 @@ import DeleteCompanyService from "../services/CompanyService/DeleteCompanyServic
 import FindAllCompaniesService from "../services/CompanyService/FindAllCompaniesService";
 import User from "../models/User";
 
-import axios from 'axios';
 import CheckSettings from "../helpers/CheckSettings";
-import moment from "moment";
-
 
 type IndexQuery = {
   searchParam: string;
@@ -27,7 +25,7 @@ type CompanyData = {
   name: string;
   id?: number;
   phone?: string;
-  email?: string; 
+  email?: string;
   status?: boolean;
   planId?: number;
   campaignsEnabled?: boolean;
@@ -38,7 +36,6 @@ type CompanyData = {
 type SchedulesData = {
   schedules: [];
 };
-
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const { searchParam, pageNumber } = req.query as IndexQuery;
@@ -69,21 +66,23 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   return res.status(200).json(company);
 };
 
-
-export const signup = async (req: Request, res: Response): Promise<Response> => {
-  if (await CheckSettings("allowSignup") !== "enabled") {
+export const signup = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  if ((await CheckSettings("allowSignup")) !== "enabled") {
     return res.status(401).json("🙎🏻‍♂️ Signup disabled");
   }
-  
+
   if (process.env.RECAPTCHA_SECRET_KEY) {
     if (!req.body.captchaToken) {
       return res.status(401).json("empty captcha");
     }
     const response = await axios.post(
-         `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${req.body.captchaToken}`
-      );
-      
-      if (!response.data.success) {
+      `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${req.body.captchaToken}`
+    );
+
+    if (!response.data.success) {
       return res.status(401).json("🤖 be gone");
     }
   }
@@ -91,14 +90,14 @@ export const signup = async (req: Request, res: Response): Promise<Response> => 
   req.body.dueDate = moment().add(3, "day").format();
 
   return store(req, res);
-}
+};
 
 export const show = async (req: Request, res: Response): Promise<Response> => {
   const { id } = req.params;
-  
+
   const requestUser = await User.findByPk(req.user.id);
 
-  if ( !requestUser.super && Number.parseInt(id, 10) !== requestUser.companyId ) {
+  if (!requestUser.super && Number.parseInt(id, 10) !== requestUser.companyId) {
     throw new AppError("ERR_FORBIDDEN", 403);
   }
 
@@ -144,7 +143,7 @@ export const updateSchedules = async (
   const { id } = req.params;
   const requestUser = await User.findByPk(req.user.id);
 
-  if ( !requestUser.super && Number.parseInt(id, 10) !== requestUser.companyId ) {
+  if (!requestUser.super && Number.parseInt(id, 10) !== requestUser.companyId) {
     throw new AppError("ERR_FORBIDDEN", 403);
   }
 
