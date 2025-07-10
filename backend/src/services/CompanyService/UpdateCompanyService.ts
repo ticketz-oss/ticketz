@@ -1,5 +1,7 @@
+import { Op } from "sequelize";
 import AppError from "../../errors/AppError";
 import Company from "../../models/Company";
+import Invoices from "../../models/Invoices";
 import Setting from "../../models/Setting";
 
 interface CompanyData {
@@ -58,6 +60,18 @@ const UpdateCompanyService = async (
     if (!created) {
       await setting.update({ value: `${campaignsEnabled}` });
     }
+  }
+
+  if (dueDate && new Date(dueDate) > new Date()) {
+    await Invoices.destroy({
+      where: {
+        companyId: company.id,
+        status: "open",
+        dueDate: {
+          [Op.lte]: dueDate
+        }
+      }
+    });
   }
 
   return company;
