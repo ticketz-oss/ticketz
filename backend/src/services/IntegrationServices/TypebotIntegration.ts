@@ -40,6 +40,7 @@ import {
 import { logger } from "../../utils/logger";
 import IntegrationSession from "../../models/IntegrationSession";
 import { cacheLayer } from "../../libs/cache";
+import { GetCompanySetting } from "../../helpers/CheckSettings";
 
 const integrations = IntegrationServices.getInstance();
 
@@ -336,6 +337,22 @@ export class TypebotIntegration implements IntegrationDriver {
               autoStop = false;
             }
           }
+        }
+
+        if (reply.content === "Invalid message. Please, try again.\n") {
+          const chatbotAutoExit =
+            (await GetCompanySetting(
+              integrationSession.ticket.companyId,
+              "chatbotAutoExit",
+              "disabled",
+              true
+            )) === "enabled";
+          if (chatbotAutoExit) {
+            await integrations.endSession(integrationSession);
+            return;
+          }
+
+          reply.content = "Resposta inválida. Por favor, tente novamente.";
         }
 
         if (reply && !dontReply) {
