@@ -722,7 +722,8 @@ export const verifyMessage = async (
   msg: proto.IWebMessageInfo,
   ticket: Ticket,
   contact: Contact,
-  userId: number = null
+  userId: number = null,
+  dontReopen = false
 ): Promise<Message> => {
   const quotedMsg = await verifyQuotedMessage(msg, ticket);
   const body = getBodyMessage(msg?.message);
@@ -764,7 +765,7 @@ export const verifyMessage = async (
     return newMesssage;
   }
 
-  if (!msg.key.fromMe && ticket.status === "closed") {
+  if (!msg.key.fromMe && !dontReopen && ticket.status === "closed") {
     await updateTicket(ticket, { status: "pending" });
     await ticket.reload({
       include: [
