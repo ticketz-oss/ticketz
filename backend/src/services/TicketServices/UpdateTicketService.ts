@@ -7,7 +7,6 @@ import Ticket from "../../models/Ticket";
 import Queue from "../../models/Queue";
 import ShowTicketService, { reloadTicketService } from "./ShowTicketService";
 import FindOrCreateATicketTrakingService from "./FindOrCreateATicketTrakingService";
-import GetTicketWbot from "../../helpers/GetTicketWbot";
 import { wbotReplyHandler } from "../WbotServices/wbotMessageListener";
 import AppError from "../../errors/AppError";
 import FindOrCreateTicketService from "./FindOrCreateTicketService";
@@ -244,6 +243,11 @@ const UpdateTicketService = async ({
           {
             model: Whatsapp,
             as: "whatsapps"
+          },
+          {
+            model: Whatsapp,
+            as: "whatsapp",
+            required: false
           }
         ]
       });
@@ -278,8 +282,12 @@ const UpdateTicketService = async ({
 
           if (!isSameConnection) {
             newWhatsapp =
-              (await queue.$get("whatsapp")) ||
-              queue.whatsapps.find(e => e.status === "CONNECTED");
+              (queue.whatsapp?.channel === "whatsapp" &&
+                queue.whatsapp.status === "CONNECTED" &&
+                queue.whatsapp) ||
+              queue.whatsapps.find(
+                e => e.channel === "whatsapp" && e.status === "CONNECTED"
+              );
 
             if (!newWhatsapp) {
               throw new AppError("ERR_WAPP_NOT_FOUND", 404);
@@ -431,11 +439,9 @@ const UpdateTicketService = async ({
 
       const omniDriver = omniServices.getOmniDriver(ticket);
 
-      const wbot = !omniDriver ? await GetTicketWbot(ticket) : null;
       const replyHandler = omniDriver
         ? getOmniReplyHandler(omniDriver)
-        : async (t: Ticket, r: IntegrationMessage) =>
-            wbotReplyHandler(wbot, t, r);
+        : async (t: Ticket, r: IntegrationMessage) => wbotReplyHandler(t, r);
 
       if (omniDriver?.allowChatbot(ticket) || !omniDriver) {
         await startQueue(replyHandler, ticket);
