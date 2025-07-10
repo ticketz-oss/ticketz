@@ -150,12 +150,9 @@ export async function checkRating(
       ticketTracking.update({
         expired: true
       });
-      sendFormattedMessage(
-        "Avaliação cancelada",
-        ticketTracking.ticket,
-        null,
-        false
-      );
+      sendFormattedMessage("Avaliação cancelada", ticketTracking.ticket, {
+        dontSaveOnTicket: true
+      });
       if (message.length < 10) {
         return true;
       }

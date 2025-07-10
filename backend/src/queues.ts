@@ -197,7 +197,9 @@ async function setRatingExpired(tracking: TicketTraking, threshold: Date) {
   const complationMessage =
     tracking.whatsapp.complationMessage.trim() || "Atendimento finalizado";
 
-  sendFormattedMessage(complationMessage, tracking.ticket, null, false);
+  sendFormattedMessage(complationMessage, tracking.ticket, {
+    dontSaveOnTicket: true
+  });
 
   logger.debug({ tracking }, "rating timedout");
 }

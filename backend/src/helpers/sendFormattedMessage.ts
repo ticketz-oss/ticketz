@@ -9,19 +9,30 @@ import formatBody from "./Mustache";
 const omniServices = OmniServices.getInstance();
 
 /**
+ * Options for sending a formatted message to a ticket's contact.
+ * @typedef {Object} SendFormattedMessageOptions
+ * @property {User|null} [user=null] - The user sending the message (optional).
+ * @property {boolean} [dontSaveOnTicket=false] - Whether to prevent saving the message on the ticket.
+ * @property {boolean} [dontReopen=false] - Whether to prevent reopening the ticket after sending the message.
+ */
+type SendFormattedMessageOptions = {
+  user?: User | null;
+  dontSaveOnTicket?: boolean;
+  dontReopen?: boolean;
+};
+
+/**
  * Sends a formatted message to a ticket's contact using the appropriate Omni driver or WhatsApp bot.
  * @param {string} message - The message to be sent.
  * @param {Ticket} ticket - The ticket to which the message is associated.
- * @param {User} [user] - The user sending the message (optional).
- * @param {boolean} [saveOnTicket=false] - Whether to save the message on the ticket.
+ * @param {SendFormattedMessageOptions} [options={}] - Options for sending the message.
  * @return {Promise<void>} - A promise that resolves when the message has been sent.
  * @throws {Error} - If the Omni driver is not found or if sending the message fails.
  */
 export async function sendFormattedMessage(
   message: string,
   ticket: Ticket,
-  user?: User,
-  saveOnTicket = false
+  { user, dontSaveOnTicket, dontReopen }: SendFormattedMessageOptions = {}
 ): Promise<void> {
   const messageText = formatBody(message, ticket, user);
   const omniDriver = omniServices.getOmniDriver(ticket);
@@ -34,7 +45,7 @@ export async function sendFormattedMessage(
           type: "text",
           body: messageText
         },
-        { dontSaveOnTicket: !saveOnTicket }
+        { dontSaveOnTicket, dontReopen }
       );
     }
     return;
@@ -45,9 +56,15 @@ export async function sendFormattedMessage(
     text: messageText
   });
 
-  if (!saveOnTicket) {
+  if (dontSaveOnTicket) {
     return;
   }
 
-  await verifyMessage(queueChangedMessage, ticket, ticket.contact);
+  await verifyMessage(
+    queueChangedMessage,
+    ticket,
+    ticket.contact,
+    user.id,
+    dontReopen
+  );
 }

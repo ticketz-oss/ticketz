@@ -6,7 +6,6 @@ import { getIO } from "../../libs/socket";
 import Ticket from "../../models/Ticket";
 import Queue from "../../models/Queue";
 import ShowTicketService, { reloadTicketService } from "./ShowTicketService";
-import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
 import FindOrCreateATicketTrakingService from "./FindOrCreateATicketTrakingService";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
 import { wbotReplyHandler } from "../WbotServices/wbotMessageListener";
@@ -466,7 +465,9 @@ const UpdateTicketService = async ({
 
         if (acceptedMessage) {
           const acceptUser = await User.findByPk(userId);
-          await sendFormattedMessage(acceptedMessage, ticket, acceptUser);
+          await sendFormattedMessage(acceptedMessage, ticket, {
+            user: acceptUser
+          });
           accepted = true;
         }
       }

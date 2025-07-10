@@ -71,6 +71,7 @@ export type OmniMessage = {
 
 export type OmniSendMessageOptions = {
   dontSaveOnTicket?: boolean;
+  dontReopen?: boolean;
 };
 
 export interface OmniDriver {
