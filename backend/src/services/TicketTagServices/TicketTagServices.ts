@@ -28,7 +28,7 @@ export async function ticketTagAdd(
     throw new AppError("ERR_NOT_FOUND", 404);
   }
 
-  const ticketTag = await TicketTag.create({
+  const [ticketTag] = await TicketTag.upsert({
     ticketId,
     tagId
   });
