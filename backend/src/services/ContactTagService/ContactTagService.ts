@@ -27,7 +27,7 @@ export async function contactTagAdd(
     throw new AppError("ERR_NOT_FOUND", 404);
   }
 
-  const contactTag = await ContactTag.create({
+  const [contactTag] = await ContactTag.upsert({
     contactId,
     tagId
   });
