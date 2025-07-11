@@ -1,5 +1,7 @@
+import { Op } from "sequelize";
 import AppError from "../../errors/AppError";
 import Company from "../../models/Company";
+import Invoices from "../../models/Invoices";
 import Setting from "../../models/Setting";
 
 interface CompanyData {
@@ -33,6 +35,8 @@ const UpdateCompanyService = async (
     throw new AppError("ERR_NO_COMPANY_FOUND", 404);
   }
 
+  const previousPlanId = company.planId;
+
   await company.update({
     name,
     phone,
@@ -58,6 +62,27 @@ const UpdateCompanyService = async (
     if (!created) {
       await setting.update({ value: `${campaignsEnabled}` });
     }
+  }
+
+  if (dueDate && new Date(dueDate) > new Date()) {
+    await Invoices.destroy({
+      where: {
+        companyId: company.id,
+        status: "open",
+        dueDate: {
+          [Op.lte]: dueDate
+        }
+      }
+    });
+  }
+
+  if (planId && previousPlanId !== planId) {
+    await Invoices.destroy({
+      where: {
+        companyId: company.id,
+        status: "open"
+      }
+    });
   }
 
   return company;

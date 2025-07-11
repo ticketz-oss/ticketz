@@ -64,7 +64,7 @@ export async function sendFormattedMessage(
     queueChangedMessage,
     ticket,
     ticket.contact,
-    user.id,
+    user?.id,
     dontReopen
   );
 }

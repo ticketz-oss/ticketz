@@ -46,7 +46,14 @@ const include = [
   {
     model: Whatsapp,
     as: "whatsapp",
-    attributes: ["id", "name", "channel", "companyId"]
+    attributes: [
+      "id",
+      "name",
+      "channel",
+      "companyId",
+      "restrictToQueues",
+      "transferToNewTicket"
+    ]
   },
   {
     model: Whatsapp,

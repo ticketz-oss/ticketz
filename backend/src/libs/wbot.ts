@@ -257,6 +257,7 @@ export const initWASocket = async (
           logger: loggerBaileys,
           printQRInTerminal: false,
           emitOwnEvents: false,
+          markOnlineOnConnect: false,
           browser: [clientName, "Desktop", appVersion],
           auth: {
             creds: state.creds,

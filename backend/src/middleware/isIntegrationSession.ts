@@ -59,7 +59,7 @@ const isIntegrationSession = async (
       throw new AppError("No connection driver found");
     }
     req.replyHandler = async (ticket: Ticket, message: IntegrationMessage) => {
-      await wbotReplyHandler(wbot, ticket, message);
+      await wbotReplyHandler(ticket, message);
     };
   }
 

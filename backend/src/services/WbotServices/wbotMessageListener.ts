@@ -975,13 +975,13 @@ ${JSON.stringify(msg?.message)}`);
 };
 
 export const wbotReplyHandler = async (
-  wbot: Session,
   ticket: Ticket,
   reply: IntegrationMessage
 ) => {
   const customTags: [string, string] = ["<<", ">>"];
   const jid = getJidOf(ticket);
   const isLid = jid.endsWith("@lid");
+  const wbot = await GetTicketWbot(ticket);
 
   if (!reply?.content && !reply?.mediaUrl) {
     await new Promise(resolve => {
@@ -1127,11 +1127,6 @@ export const wbotReplyHandler = async (
         `Error sending integration reply: ${error.message}`
       );
     });
-};
-
-const getReplyHandler = (wbot: Session) => {
-  return async (t: Ticket, r: IntegrationMessage) =>
-    wbotReplyHandler(wbot, t, r);
 };
 
 const handleMessage = async (
@@ -1300,7 +1295,7 @@ const handleMessage = async (
         chatbot: false,
         queueId: null
       });
-      await verifyQueue(getReplyHandler(wbot), null, ticket, true);
+      await verifyQueue(wbotReplyHandler, null, ticket, true);
       return;
     }
 
@@ -1429,12 +1424,7 @@ const handleMessage = async (
       !ticket.userId &&
       whatsapp.queues.length >= 1
     ) {
-      await verifyQueue(
-        getReplyHandler(wbot),
-        bodyMessage,
-        ticket,
-        isNewTicket
-      );
+      await verifyQueue(wbotReplyHandler, bodyMessage, ticket, isNewTicket);
     }
 
     const dontReadTheFirstQuestion = isNewTicket || ticket.queue === null;
@@ -1480,16 +1470,16 @@ const handleMessage = async (
         ticket,
         bodyMessage,
         newMessage,
-        getReplyHandler(wbot),
+        wbotReplyHandler,
         dontReadTheFirstQuestion
       );
       return;
     }
 
     if (justCreated && queueId && startChatbot) {
-      await startQueue(getReplyHandler(wbot), ticket);
+      await startQueue(wbotReplyHandler, ticket);
       await ticket.reload();
-      await checkIntegration(ticket, getReplyHandler(wbot));
+      await checkIntegration(ticket, wbotReplyHandler);
     }
   } catch (err) {
     console.log(err);
