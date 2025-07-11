@@ -871,6 +871,21 @@ const MessageInputCustom = (props) => {
   const id = open ? 'simple-popover' : undefined;
 
   useEffect(() => {
+    if (!inputMessage) {
+      sessionStorage.removeItem("messageDraft-" + ticketId);
+      return;
+    }
+    sessionStorage.setItem("messageDraft-" + ticketId, inputMessage);
+  }, [inputMessage]);
+
+  useEffect(() => {
+    const draftMessage = sessionStorage.getItem("messageDraft-" + ticketId);
+    if (draftMessage) {
+      setInputMessage(draftMessage);
+    }
+  }, [ticketId]);
+
+  useEffect(() => {
     const socket = socketManager.GetSocket();
     if (socket) {
       setSocket(socket);
