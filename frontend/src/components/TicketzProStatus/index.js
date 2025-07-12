@@ -97,7 +97,7 @@ export default function TicketzProStatus(props) {
   
 	return (
     <Grid item xs={12}>
-      { proStatus && !proStatus.subscriptionData?.id ?
+      { proStatus?.subscriptionData && !proStatus.subscriptionData?.id ?
       <Paper
         className={classes.callToSubscribe}
         onClick={() => setSubscriptionModalOpen(true)}
