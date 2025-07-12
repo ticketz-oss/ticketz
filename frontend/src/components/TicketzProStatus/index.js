@@ -89,6 +89,12 @@ export default function TicketzProStatus(props) {
 
     const ticketz = await ticketzStatus();
     setStatus(ticketz);
+    
+    if (ticketzPro.status?.loading) {
+      setTimeout(() => {
+        checkSubscription();
+      }, 30000);
+    }
   }
 
   useEffect (() => {
@@ -97,7 +103,7 @@ export default function TicketzProStatus(props) {
   
 	return (
     <Grid item xs={12}>
-      { proStatus?.subscriptionData && !proStatus.subscriptionData?.id ?
+      { proStatus && !proStatus.loading && !proStatus.subscriptionData?.id ?
       <Paper
         className={classes.callToSubscribe}
         onClick={() => setSubscriptionModalOpen(true)}
@@ -181,7 +187,7 @@ export default function TicketzProStatus(props) {
                 proStatus?.success ?
                   (proStatus?.subscriptionData?.next_payment_date ? "Válida até " + moment(proStatus.subscriptionData.next_payment_date).format("LL") : "OK")
                   :
-                  "Erro: " + proStatus?.message
+                  proStatus?.loading ? "Carregando, aguarde" : `Erro: ${proStatus?.message}`
               }
             </Typography>
           </Grid>
