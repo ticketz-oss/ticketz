@@ -22,7 +22,8 @@ type SubscriptionRequestData = {
 const gitInfo = GitInfo;
 
 // code built from source will use test endpoints
-const FAAS_SUFFIX = gitInfo.commitHash ? "" : "-test";
+const FAAS_TEST = !gitInfo.commitHash;
+const FAAS_SUFFIX = FAAS_TEST ? "-test" : "";
 const FAAS_URL =
   "https://m7afmggvk2xe7xakjkth4scpia.apigateway.sa-saopaulo-1.oci.customer-oci.com/mps";
 
@@ -94,8 +95,9 @@ export class SubscriptionService {
     }
 
     const data = {
+      debug: FAAS_TEST,
       id: ticketzProKey,
-      domain: getDomain(process.env.FRONTEND_URL),
+      domain: FAAS_TEST ? "test.null" : getDomain(process.env.FRONTEND_URL),
       challenge: makeRandomId(32)
     };
 
@@ -218,7 +220,8 @@ export class SubscriptionService {
     const url = `${FAAS_URL}/subscribe${FAAS_SUFFIX}`;
 
     const data: SubscriptionRequestData = {
-      domain: getDomain(process.env.FRONTEND_URL),
+      debug: FAAS_TEST,
+      domain: FAAS_TEST ? "test.null" : getDomain(process.env.FRONTEND_URL),
       paymentService,
       customerData,
       addressData,
