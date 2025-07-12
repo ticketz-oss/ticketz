@@ -9,10 +9,24 @@ import { i18n } from "../../translate/i18n";
 import WhatsMarked from "react-whatsmarked";
 import QRCode from "qrcode.react";
 import { copyToClipboard } from "../../helpers/copyToClipboard";
+import { TicketzProSubscriptionModal } from "../TicketzProSubscriptionModal";
 
 moment.locale("pt-br");
 
 const useStyles = makeStyles((theme) => ({
+  callToSubscribe: {
+    padding: theme.spacing(2),
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    backgroundColor: theme.palette.secondary.main,
+    color: theme.palette.secondary.contrastText,
+    cursor: "pointer",
+    ...theme.scrollbarStyles,
+    "&:hover": {
+      backgroundColor: theme.palette.secondary.dark,
+    },
+  },
   ticketzProPaper: {
     padding: theme.spacing(2),
     display: "flex",
@@ -21,6 +35,23 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.primary.contrastText,
     ...theme.scrollbarStyles,
+  },
+  subscriptionStatus: {
+    padding: theme.spacing(2),
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    backgroundColor: theme.palette.primary.dark,
+    color: theme.palette.primary.contrastText,
+    cursor: "pointer",
+    borderRadius: "10px",
+    borderColor: theme.palette.primary.main,
+    borderWidth: "3px",
+    borderStyle: "solid",
+    padding: "15px",
+    "&:hover": {
+      backgroundColor: theme.palette.primary.light,
+    },
   },
   ticketzProBox: {
     backgroundColor: theme.palette.primary.light,
@@ -48,6 +79,7 @@ export default function TicketzProStatus(props) {
   const [proStatus, setProStatus] = useState(null);
   const [loadingStatus, setLoadingStatus] = useState(false);
   const [status, setStatus] = useState(null);
+  const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
 
   async function checkSubscription(recheck) {
     setLoadingStatus(true);
@@ -65,6 +97,16 @@ export default function TicketzProStatus(props) {
   
 	return (
     <Grid item xs={12}>
+      { proStatus && !proStatus.subscriptionData?.id ?
+      <Paper
+        className={classes.callToSubscribe}
+        onClick={() => setSubscriptionModalOpen(true)}
+      >
+        <Typography component="h2" variant="h6" gutterBottom>
+          {i18n.t("ticketz.pro.callToSubscribe")}
+        </Typography>
+      </Paper>
+      :
       <Paper className={classes.ticketzProPaper}>
         <Typography component="h2" variant="h6" gutterBottom>
           Ticketz PRO
@@ -128,18 +170,30 @@ export default function TicketzProStatus(props) {
               </Grid>
           </Grid>
           }
+          <Grid className={classes.subscriptionStatus }
+            onClick={() => setSubscriptionModalOpen(true)}
+            item xs={12} md={12} sm={12}
+          >
+            <Typography
+              component="h2" variant="h6">
+              Status da assinatura:&nbsp;
+              {
+                proStatus?.success ?
+                  (proStatus?.subscriptionData?.next_payment_date ? "Válida até " + moment(proStatus.subscriptionData.next_payment_date).format("LL") : "OK")
+                  :
+                  "Erro: " + proStatus?.message
+              }
+            </Typography>
+          </Grid>
         </Grid>
-        <Typography component="h2" variant="h6">
-          Status da assinatura:&nbsp;
-          {
-            proStatus?.success ?
-              (proStatus?.subscriptionData?.next_payment_date ? "Válida até " + moment(proStatus.subscriptionData.next_payment_date).format("LL") : "OK")
-              :
-              "Erro: " + proStatus?.message
-          }
-        </Typography>
-
       </Paper>
+      }
+      <TicketzProSubscriptionModal
+        open={subscriptionModalOpen}
+        onClose={() => {
+          setSubscriptionModalOpen(false);
+          checkSubscription();
+        }} />
     </Grid>
 	);
 }
