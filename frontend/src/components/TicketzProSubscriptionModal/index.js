@@ -647,35 +647,44 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
             {!loading && activeStep === 4 && (
               proStatus?.success ?
                 <>
-                  {proStatus?.subscriptionData?.next_payment_date && 
-                    <CheckCircleIcon className={classes.okIcon} />}
-                  {proStatus?.subscriptionData?.cancel_date && 
-                    <WarningIcon className={classes.warningIcon} />}
+                  {
+                    proStatus?.subscriptionData?.cancel_date ?
+                      <WarningIcon className={classes.warningIcon} /> :
+                      proStatus?.subscriptionData?.next_payment_date ?
+                        <CheckCircleIcon className={classes.okIcon} /> :
+                        <></>
+                  }
                   <Typography variant="h5" align="center">
-                    {proStatus?.subscriptionData?.next_payment_date && i18n.t("ticketz.pro.renewAt") + " " + moment(proStatus.subscriptionData.next_payment_date).format("LL")}
-                    {proStatus?.subscriptionData?.cancel_date && i18n.t("ticketz.pro.willCancelAt") + " " + moment(proStatus.subscriptionData.cancel_date).format("LL")}
+                    {
+                      proStatus?.subscriptionData?.cancel_date ?
+                        i18n.t("ticketz.pro.willCancelAt") + " " + moment(proStatus.subscriptionData.cancel_date).format("LL")
+                        :
+                        proStatus?.subscriptionData?.next_payment_date ? i18n.t("ticketz.pro.renewAt") + " " + moment(proStatus.subscriptionData.next_payment_date).format("LL")
+                          : <></>
+                    }
                   </Typography>
 
-                  {proStatus?.subscriptionData?.next_payment_date &&
-                    !ticketzProKey.startsWith("wwGo:") &&
-                    <Button
-                      className={classes.center}
-                      variant="contained"
-                      color="secondary"
-                      onClick={() => setOpenCancelSubscription(true)}>
-                      {i18n.t("ticketz.pro.cancelSubscription")}
-                    </Button>
-                  }
-
-                  {(proStatus?.subscriptionData?.cancel_date ||
-                    ticketzProKey.startsWith("wwGo:")) &&
-                    <Button
-                      className={classes.center}
-                      variant="contained"
-                      color="secondary"
-                      onClick={() => setOpenResetLicense(true)}>
-                      {i18n.t("ticketz.pro.resetLicense")}
-                    </Button>
+                  {
+                    (proStatus?.subscriptionData?.cancel_date ||
+                      ticketzProKey.startsWith("wwGo:")) ?
+                      <Button
+                        className={classes.center}
+                        variant="contained"
+                        color="secondary"
+                        onClick={() => setOpenResetLicense(true)}>
+                        {i18n.t("ticketz.pro.resetLicense")}
+                      </Button>
+                      :
+                      proStatus?.subscriptionData?.next_payment_date ?
+                        <Button
+                          className={classes.center}
+                          variant="contained"
+                          color="secondary"
+                          onClick={() => setOpenCancelSubscription(true)}>
+                          {i18n.t("ticketz.pro.cancelSubscription")}
+                        </Button>
+                        :
+                        <></>
                   }
 
                   <Dialog
