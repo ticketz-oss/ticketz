@@ -687,67 +687,6 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
                         <></>
                   }
 
-                  <Dialog
-                    open={openCancelSubscription}
-                    onClose={() => setOpenCancelSubscription(false)}
-                    aria-labelledby="alert-dialog-title"
-                    aria-describedby="alert-dialog-description"
-                  >
-                    <DialogTitle id="alert-dialog-title">{i18n.t("ticketz.pro.cancelSubscriptionQuestion")}</DialogTitle>
-                    <DialogContent>
-                      <DialogContentText id="alert-dialog-description">
-                        <WhatsMarked>
-                          {i18n.t("ticketz.pro.cancelSubscriptionDetails")}
-                        </WhatsMarked>
-                      </DialogContentText>
-                    </DialogContent>
-                    <DialogActions>
-                      <Button onClick={() => setOpenCancelSubscription(false)} variant="contained" color="primary" autofocus>
-                        {i18n.t("ticketz.pro.back")}
-                      </Button>
-                      <Button onClick={
-                        () => {
-                          setOpenCancelSubscription(false);
-                          handleCancelSubscription();
-                        }
-                      }
-                        variant="contained" color="secondary">
-                        {i18n.t("ticketz.pro.cancelSubscription")}
-                      </Button>
-                    </DialogActions>
-                  </Dialog>
-
-                  <Dialog
-                    open={openResetLicense}
-                    onClose={() => setOpenResetLicense(false)}
-                    aria-labelledby="alert-dialog-title"
-                    aria-describedby="alert-dialog-description"
-                  >
-                    <DialogTitle id="alert-dialog-title">{i18n.t("ticketz.pro.resetLicenseQuestion")}</DialogTitle>
-                    <DialogContent>
-                      <DialogContentText id="alert-dialog-description">
-                        <WhatsMarked>
-                          {i18n.t("ticketz.pro.resetLicenseDetails")}
-                        </WhatsMarked>
-                      </DialogContentText>
-                    </DialogContent>
-                    <DialogActions>
-                      <Button onClick={() => setOpenResetLicense(false)} variant="contained" color="primary" autofocus>
-                        {i18n.t("ticketz.pro.back")}
-                      </Button>
-                      <Button onClick={
-                        () => {
-                          setOpenResetLicense(false);
-                          setTicketzProKey("");
-                          handleTicketzProKey("");
-                          setActiveStep(0);
-                        }
-                      }
-                        variant="contained" color="secondary">
-                        {i18n.t("ticketz.pro.resetLicense")}
-                      </Button>
-                    </DialogActions>
-                  </Dialog>
                 </>
                 :
                 <Typography variant="h5" align="center">
@@ -760,6 +699,68 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
                 { errorMessage }
               </div>
             }
+
+            <Dialog
+              open={openCancelSubscription}
+              onClose={() => setOpenCancelSubscription(false)}
+              aria-labelledby="alert-dialog-title"
+              aria-describedby="alert-dialog-description"
+            >
+              <DialogTitle id="alert-dialog-title">{i18n.t("ticketz.pro.cancelSubscriptionQuestion")}</DialogTitle>
+              <DialogContent>
+                <DialogContentText id="alert-dialog-description">
+                  <WhatsMarked>
+                    {i18n.t("ticketz.pro.cancelSubscriptionDetails")}
+                  </WhatsMarked>
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={() => setOpenCancelSubscription(false)} variant="contained" color="primary" autofocus>
+                  {i18n.t("ticketz.pro.back")}
+                </Button>
+                <Button onClick={
+                  () => {
+                    setOpenCancelSubscription(false);
+                    handleCancelSubscription();
+                  }
+                }
+                  variant="contained" color="secondary">
+                  {i18n.t("ticketz.pro.cancelSubscription")}
+                </Button>
+              </DialogActions>
+            </Dialog>
+
+            <Dialog
+              open={openResetLicense}
+              onClose={() => setOpenResetLicense(false)}
+              aria-labelledby="alert-dialog-title"
+              aria-describedby="alert-dialog-description"
+            >
+              <DialogTitle id="alert-dialog-title">{i18n.t("ticketz.pro.resetLicenseQuestion")}</DialogTitle>
+              <DialogContent>
+                <DialogContentText id="alert-dialog-description">
+                  <WhatsMarked>
+                    {i18n.t("ticketz.pro.resetLicenseDetails")}
+                  </WhatsMarked>
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={() => setOpenResetLicense(false)} variant="contained" color="primary" autofocus>
+                  {i18n.t("ticketz.pro.back")}
+                </Button>
+                <Button onClick={
+                  () => {
+                    setOpenResetLicense(false);
+                    setTicketzProKey("");
+                    handleTicketzProKey("");
+                    setActiveStep(0);
+                  }
+                }
+                  variant="contained" color="secondary">
+                  {i18n.t("ticketz.pro.resetLicense")}
+                </Button>
+              </DialogActions>
+            </Dialog>
             
           </DialogContent>
 
@@ -770,8 +771,19 @@ export function TicketzProSubscriptionModal({ open, onClose }) {
               </Button>
             }
   
-            {activeStep > 0 && activeStep < 4 && !loading &&
+            {activeStep > 0 && activeStep < 3 && !loading &&
               <Button onClick={handleBack}>{i18n.t("ticketz.pro.back")}</Button>
+            }
+
+            {activeStep === 3 && !loading &&
+              (errorMessage ? 
+              <Button onClick={handleBack}>{i18n.t("ticketz.pro.back")}</Button>
+              :
+              <Button
+                color="secondary"
+                onClick={() => setOpenCancelSubscription(true)}>
+                {i18n.t("ticketz.pro.cancelSubscription")}
+              </Button>)
             }
 
             {activeStep === 0 &&
