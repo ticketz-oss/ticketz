@@ -44,7 +44,7 @@ export class SubscriptionService {
 
   private lastSuccessfulRun: Date | null = null;
 
-  private taskStatus: any = {};
+  private taskStatus: any = { loading: true };
 
   // eslint-disable-next-line no-useless-constructor
   private constructor() {
