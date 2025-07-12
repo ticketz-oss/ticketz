@@ -1179,6 +1179,7 @@ const messages = {
           markProEnd: "usado apenas para marcar a posição do fim das strings exclusivas do PRO",
           markSubscriptionStart: "usado para marcar a posição do início das strings exclusivas de assinatura",
           subscriptionTitle: "Assinatura Ticketz PRO",
+          callToSubscribe: "Clique aqui para assinar o Ticketz PRO",
           stepperStart: "Iniciar",
           stepperCustomer: "Dados do Cliente",
           stepperPayment: "Método de Pagamento",

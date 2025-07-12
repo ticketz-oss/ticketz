@@ -1175,6 +1175,7 @@ const messages = {
           markProEnd: "usado solo para marcar la posición del final de las cadenas exclusivas de PRO",
           markSubscriptionStart: "usado para marcar la posición del inicio de las cadenas exclusivas de suscripción",
           subscriptionTitle: "Suscripción Ticketz PRO",
+          callToSubscribe: "Haz clic aquí para suscribirte a Ticketz PRO",
           stepperStart: "Comenzar",
           stepperCustomer: "Datos del Cliente",
           stepperPayment: "Método de Pago",
