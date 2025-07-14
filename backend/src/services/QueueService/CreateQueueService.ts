@@ -11,6 +11,8 @@ interface QueueData {
   name: string;
   color: string;
   companyId: number;
+  visibleToIntegrations?: boolean;
+  description?: string;
   greetingMessage?: string;
   outOfHoursMessage?: string;
   schedules?: unknown[];

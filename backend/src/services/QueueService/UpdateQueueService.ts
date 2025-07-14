@@ -9,6 +9,8 @@ import sequelize from "../../database";
 interface QueueData {
   name?: string;
   color?: string;
+  visibleToIntegrations?: boolean;
+  description?: string;
   greetingMessage?: string;
   outOfHoursMessage?: string;
   schedules?: any[];
