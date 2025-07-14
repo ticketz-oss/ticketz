@@ -774,7 +774,11 @@ export class NotificamehubDriver implements OmniDriver {
         const filename =
           overrideFilename ||
           content.fileName ||
-          `${new Date().getTime()}.${mimetype.split("/").pop()}`;
+          `${new Date().getTime()}.${mimetype
+            .split(";")
+            .shift()
+            .split("/")
+            .pop()}`;
 
         finalContent.fileMimeType = mimetype;
         finalContent.fileName = filename;
