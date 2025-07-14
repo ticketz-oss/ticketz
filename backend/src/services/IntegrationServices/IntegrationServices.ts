@@ -148,6 +148,18 @@ export interface IntegrationDriver {
   endSession(integrationSession: IntegrationSession): Promise<void>;
 }
 
+type DebouncerItem = {
+  message: IntegrationMessage;
+  metadata: IntegrationMessageMetadata;
+};
+
+type DebouncerData = {
+  messages: DebouncerItem[];
+  timeout: NodeJS.Timeout;
+};
+
+const debouncerMap = new Map<string, DebouncerData>();
+
 const reloadIntegrationSession = async (
   integrationSession: IntegrationSession
 ) => {
@@ -252,7 +264,7 @@ export class IntegrationServices {
     return { token, data };
   }
 
-  public async continueSession(
+  async processMessage(
     integrationSession: IntegrationSession,
     message: IntegrationMessage,
     metadata: IntegrationMessageMetadata,
@@ -275,6 +287,87 @@ export class IntegrationServices {
       metadata,
       replyHandler
     );
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  async continueSession(
+    integrationSession: IntegrationSession,
+    message: IntegrationMessage,
+    metadata: IntegrationMessageMetadata,
+    replyHandler: ReplyHandler
+  ): Promise<void> {
+    const debouncerTimeout =
+      Number(integrationSession.integration.configuration.debouncetime) || 0;
+
+    if (!debouncerTimeout) {
+      this.processMessage(integrationSession, message, metadata, replyHandler);
+      return;
+    }
+
+    const task = () => {
+      const bufferedMessages = debouncerMap.get(
+        `is-${integrationSession.id}`
+      )?.messages;
+
+      if (!bufferedMessages) {
+        return;
+      }
+
+      debouncerMap.delete(`is-${integrationSession.id}`);
+
+      if (bufferedMessages.length === 1) {
+        this.processMessage(
+          integrationSession,
+          message,
+          metadata,
+          replyHandler
+        );
+      } else {
+        let content = "";
+        const bufferedMetadata: IntegrationMessageMetadata[] =
+          bufferedMessages.map(msg => msg.metadata);
+
+        bufferedMessages.forEach(msg => {
+          content += `${msg.message.content}\n\n`;
+        });
+        const lastMessage = bufferedMessages[bufferedMessages.length - 1];
+        const newMetadata = bufferedMetadata[bufferedMetadata.length - 1];
+        const customPayload = bufferedMetadata.map(md => md.customPayload);
+        newMetadata.customPayload = customPayload;
+
+        const newMessage = { ...lastMessage.message, content };
+
+        this.processMessage(
+          integrationSession,
+          newMessage,
+          newMetadata,
+          replyHandler
+        );
+      }
+    };
+
+    const debouncerData = debouncerMap.get(`is-${integrationSession.id}`);
+    const debouncerMessages = debouncerData?.messages || [];
+
+    debouncerMessages.push({ message, metadata });
+
+    if (debouncerData) {
+      clearTimeout(debouncerData.timeout);
+    }
+
+    if (message.type !== "text") {
+      task();
+      return;
+    }
+
+    if (debouncerData) {
+      debouncerData.timeout = setTimeout(task, debouncerTimeout * 1000);
+    } else {
+      debouncerMap.set(`is-${integrationSession.id}`, {
+        messages: debouncerMessages,
+        timeout: setTimeout(task, debouncerTimeout * 1000)
+      });
+    }
   }
 
   public async endSession(
