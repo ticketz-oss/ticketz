@@ -1,10 +1,15 @@
+/**
+ * Encodes a string for use in a URL, while preserving certain characters.
+ * This function encodes the string using encodeURIComponent,
+ * but then replaces specific encoded characters
+ * to ensure they remain intact.
+ *
+ * @param {string} str - The string to encode.
+ * @return {string} - The encoded string with specific characters preserved.
+ */
 export function URLCharEncoder(str) {
-  return str.split('').map(char => {
-    // Do not encode alphanumerics, colon, or slash
-    if (/^[a-zA-Z0-9]$/.test(char) || char === ':' || char === '/') {
-      return char;
-    }
-    // Encode all other characters
-    return '%' + char.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0');
-  }).join('');
+  return encodeURIComponent(str)
+    .replace(/%2F/g, '/')
+    .replace(/%3A/g, ':')
+    .replace(/%2E/g, '.');
 }
