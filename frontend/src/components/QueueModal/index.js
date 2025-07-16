@@ -30,6 +30,7 @@ import {
   MenuItem,
   Paper,
   Select,
+  Switch,
   Tab,
   Tabs,
 } from "@material-ui/core";
@@ -95,6 +96,8 @@ const QueueModal = ({ open, onClose, queueId }) => {
   const initialState = {
     name: "",
     color: "",
+    visibleToIntegrations: false,
+    description: "",
     greetingMessage: "",
     outOfHoursMessage: "",
   };
@@ -394,6 +397,44 @@ const QueueModal = ({ open, onClose, queueId }) => {
                           </Select>
                         </FormControl>
                       </Grid>
+                      
+                      <Grid xs={12} sm={6} md={4} item>
+                        <FormControlLabel
+                          control={
+                            <Field
+                              as={Switch}
+                              name="visibleToIntegrations"
+                              color="primary"
+                              checked={!!values.visibleToIntegrations}
+                            />
+                          }
+                          label={i18n.t("queueModal.form.visibleToIntegrations")}
+                        />
+                      </Grid>
+                      
+                      { /* description */ }
+                      <Grid xs={12} item>
+                        <Field
+                          as={TextField}
+                          label={i18n.t("queueModal.form.description")}
+                          type="description"
+                          multiline
+                          rows={3}
+                          fullWidth
+                          name="description"
+                          spellCheck={true}
+                          error={
+                            touched.description && Boolean(errors.description)
+                          }
+                          helperText={
+                            touched.description && errors.description
+                          }
+                          variant="outlined"
+                          margin="dense"
+                          value={values.description || ""}
+                        />
+                      </Grid>
+
                     </Grid>
 
                     <Grid container spacing={2}>

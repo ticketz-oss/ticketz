@@ -252,6 +252,8 @@ const messages = {
             selectTitle: "WhatsApp Connection",
           },
           name: "Name",
+          description: "Description",
+          visibleToIntegrations: "Visible to Integrations",
           color: "Color",
           greetingMessage: "Greeting Message",
           complationMessage: "Completion Message",

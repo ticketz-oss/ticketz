@@ -167,6 +167,15 @@ export class TypebotIntegration implements IntegrationDriver {
         },
         null,
         {
+          name: "debouncetime",
+          title: "Debounce Time (seconds)",
+          description: "Time to wait before sending to typebot (in seconds)",
+          type: "text",
+          lgWidth: 4,
+          required: false
+        },
+        null,
+        {
           name: "typebotExtraParams",
           title: "Extra Parameters (JSON)",
           description: "Extra parameters formatted in JSON",

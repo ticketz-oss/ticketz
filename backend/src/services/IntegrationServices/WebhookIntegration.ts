@@ -101,6 +101,15 @@ export class WebhookIntegration implements IntegrationDriver {
         },
         null,
         {
+          name: "debouncetime",
+          title: "Debounce Time (seconds)",
+          description: "Time to wait before sending the webhook (in seconds)",
+          type: "text",
+          lgWidth: 4,
+          required: false
+        },
+        null,
+        {
           name: "webhookFileB64",
           title: "Use base64 for file",
           description: "Use base64 for file",

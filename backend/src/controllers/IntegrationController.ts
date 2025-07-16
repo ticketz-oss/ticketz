@@ -50,9 +50,10 @@ export const listQueues = async (
   try {
     const queues = await Queue.findAll({
       where: {
-        companyId: integrationSession.ticket.companyId
+        companyId: integrationSession.ticket.companyId,
+        visibleToIntegrations: true
       },
-      attributes: ["id", "name", "greetingMessage"]
+      attributes: ["id", "name", "description"]
     });
     return res.json(queues);
   } catch (error) {

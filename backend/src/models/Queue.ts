@@ -44,6 +44,19 @@ class Queue extends Model {
   @Column
   color: string;
 
+  @Column({
+    type: DataType.BOOLEAN,
+    allowNull: true,
+    defaultValue: false
+  })
+  visibleToIntegrations: boolean;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true
+  })
+  description: string;
+
   @Default("")
   @Column
   greetingMessage: string;
