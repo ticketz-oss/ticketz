@@ -129,7 +129,6 @@ const useStyles = makeStyles((theme) => ({
     position: "relative",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#eee",
     borderTop: "1px solid rgba(0, 0, 0, 0.12)",
   },
 
