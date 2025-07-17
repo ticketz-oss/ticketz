@@ -1550,7 +1550,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
               className={[clsx(classes.messageContainer, classes.messageRight, {
                 [classes.messageMediaSticker]: isSticker,
               })]}
-              title={message.queueId && message.queue?.name}
+              title={(message.user?.name || "") + "\n" + (message.queueId && message.queue?.name)}
             >
               <IconButton
                 variant="contained"
