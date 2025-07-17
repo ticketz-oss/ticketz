@@ -127,7 +127,10 @@ export function Html5AudioPlayer({ src, children }) {
   thisPlayerControllers = { pauseAudio };
 
   useEffect(() => {
-    audioRef.current.addEventListener('loadedmetadata', () => setDuration(audioRef.current.duration));
+    audioRef.current.addEventListener(
+      'loadedmetadata',
+      () => setDuration(audioRef.current?.duration || 0)
+    );
     audioRef.current.addEventListener('ended', () => setIsPlaying(false));
 
     const updateProgress = () => {
