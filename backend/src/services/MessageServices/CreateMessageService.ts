@@ -3,6 +3,7 @@ import { getIO } from "../../libs/socket";
 import Contact from "../../models/Contact";
 import Message from "../../models/Message";
 import OldMessage from "../../models/OldMessage";
+import Queue from "../../models/Queue";
 import Ticket from "../../models/Ticket";
 import User from "../../models/User";
 import Whatsapp from "../../models/Whatsapp";
@@ -92,6 +93,11 @@ const CreateMessageService = async ({
         ]
       },
       {
+        model: Queue,
+        as: "queue",
+        attributes: ["id", "name", "color"]
+      },
+      {
         model: User,
         attributes: { exclude: ["passwordHash"] },
         required: false
@@ -113,6 +119,7 @@ const CreateMessageService = async ({
 
   if (message.ticket.queueId !== null && message.queueId === null) {
     await message.update({ queueId: message.ticket.queueId });
+    await message.reload();
   }
 
   if (!(await checkCompanyCompliant(companyId))) {

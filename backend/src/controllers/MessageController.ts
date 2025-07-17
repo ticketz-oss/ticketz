@@ -128,6 +128,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
             ticket,
             ticket.contact,
             null,
+            null,
             Number(req.user.id) || null
           );
         })

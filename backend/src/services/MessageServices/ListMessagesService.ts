@@ -232,6 +232,11 @@ const ListMessagesService = async ({
       {
         model: Queue,
         as: "queue"
+      },
+      {
+        model: User,
+        as: "user",
+        attributes: ["id", "name"]
       }
     ],
     offset,
