@@ -92,9 +92,25 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   }
 
   if (!newContact.isGroup) {
-    const validNumber = await CheckContactNumber(newContact.number, companyId);
-    const number = validNumber.jid.replace(/\D/g, "");
-    newContact.number = number;
+    try {
+      const validNumber = await CheckContactNumber(
+        newContact.number,
+        companyId
+      );
+      const number = validNumber.jid.replace(/\D/g, "");
+      newContact.number = number;
+    } catch (error) {
+      if (
+        (await GetCompanySetting(
+          companyId,
+          "enforceNumberCheck",
+          "enabled",
+          true
+        )) === "enabled"
+      ) {
+        throw new AppError("ERR_CHECK_NUMBER", 400);
+      }
+    }
   }
 
   /**
@@ -151,9 +167,25 @@ export const update = async (
   }
 
   if (!contactData.isGroup) {
-    const validNumber = await CheckContactNumber(contactData.number, companyId);
-    const number = validNumber.jid.replace(/\D/g, "");
-    contactData.number = number;
+    try {
+      const validNumber = await CheckContactNumber(
+        contactData.number,
+        companyId
+      );
+      const number = validNumber.jid.replace(/\D/g, "");
+      contactData.number = number;
+    } catch (error) {
+      if (
+        (await GetCompanySetting(
+          companyId,
+          "enforceNumberCheck",
+          "enabled",
+          true
+        )) === "enabled"
+      ) {
+        throw new AppError("ERR_CHECK_NUMBER", 400);
+      }
+    }
   }
 
   const { contactId } = req.params;
