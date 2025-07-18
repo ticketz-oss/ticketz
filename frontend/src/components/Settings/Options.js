@@ -142,6 +142,7 @@ export default function Options(props) {
   const [transferMessage, setTransferMessage] = useState("");
   
   const [s3ConfigData, setS3ConfigData] = useState({});
+  const [enforceNumberCheck, setEnforceNumberCheck] = useState("enabled");
 
   const ticketAcceptedMessageRef = useRef(null);
   const transferMessageRef = useRef(null);
@@ -293,6 +294,9 @@ export default function Options(props) {
       } catch (e) {
         setS3ConfigData({});
       }
+      
+      const enforceNumberCheck = settings.find((s) => s.key === "enforceNumberCheck");
+      setEnforceNumberCheck(enforceNumberCheck?.value || "enabled");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
@@ -569,6 +573,27 @@ export default function Options(props) {
               <MenuItem value={"enabled"}>{i18n.t("common.enabled")}</MenuItem>
             </Select>
           </FormControl>
+        </Grid>
+        
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="enforce-number-check-label">
+              {i18n.t("settings.enforceNumberCheck")}
+            </InputLabel>
+            <Select
+              labelId="enforce-number-check-label"
+              value={enforceNumberCheck}
+              onChange={async (e) => {
+                await handleSetting("enforceNumberCheck", e.target.value, setEnforceNumberCheck);
+              }}
+            >
+              <MenuItem value={"enabled"}>{i18n.t("common.enabled")}</MenuItem>
+              <MenuItem value={"disabled"}>{i18n.t("common.disabled")}</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+        
+        <Grid xs={8} sm={6} md={4} item>
         </Grid>
 
         <Grid xs={12} sm={12} md={6} item>

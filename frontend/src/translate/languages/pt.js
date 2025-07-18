@@ -812,6 +812,7 @@ const messages = {
         title: "Configurações",
         chatbotTicketTimeout: "Timeout do chatbot (minutos)",
         chatbotTicketTimeoutAction: "Ação do timeout do chatbot",
+        enforceNumberCheck: "Forçar verificação de número",
         settings: {
           userCreation: {
             name: "Criação de usuário",

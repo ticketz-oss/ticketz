@@ -807,6 +807,7 @@ const messages = {
         title: "Settings",
         chatbotTicketTimeout: "Chatbot ticket timeout (minutes)",
         chatbotTicketTimeoutAction: "Action after chatbot timeout",
+        enforceNumberCheck: "Enforce number check",
         settings: {
           userCreation: {
             name: "User creation",
