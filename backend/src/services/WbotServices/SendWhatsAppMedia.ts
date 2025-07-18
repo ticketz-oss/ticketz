@@ -15,6 +15,7 @@ import saveMediaToFile from "../../helpers/saveMediaFile";
 import { getJidOf } from "./getJidOf";
 import { getPublicPath } from "../../helpers/GetPublicPath";
 import { logger } from "../../utils/logger";
+import { URLCharEncoder } from "../../helpers/URLCharEncoder";
 
 interface Request {
   media: Express.Multer.File;
@@ -190,18 +191,16 @@ export const SendWhatsAppMedia = async ({
     );
     readableFile.destroy();
 
-    let fileUrl = encodeURI(savedPath);
-
     const mediaInfo = {
-      mediaUrl: fileUrl,
+      mediaUrl: savedPath,
       mimetype: media.mimetype,
       filename: fileName || media.originalname
     };
 
     if (media.size > fileLimit * 1024 * 1024) {
-      if (!fileUrl.startsWith("http")) {
-        fileUrl = `${process.env.BACKEND_URL}/public/${fileUrl}`;
-      }
+      const fileUrl = savedPath.startsWith("http")
+        ? savedPath
+        : `${process.env.BACKEND_URL}/public/${URLCharEncoder(savedPath)}`;
       return SendWhatsAppMessage(ticket, {
         text: `📎 *${fileName}*\n\n🔗 ${fileUrl}`
       });
