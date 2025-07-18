@@ -156,6 +156,7 @@ type DebouncerItem = {
 type DebouncerData = {
   messages: DebouncerItem[];
   timeout: NodeJS.Timeout;
+  fresh: boolean;
 };
 
 const debouncerMap = new Map<string, DebouncerData>();
@@ -346,13 +347,23 @@ export class IntegrationServices {
       }
     };
 
-    const debouncerData = debouncerMap.get(`is-${integrationSession.id}`);
-    const debouncerMessages = debouncerData?.messages || [];
+    const debouncerData = debouncerMap.get(`is-${integrationSession.id}`) || {
+      messages: [],
+      timeout: null,
+      fresh: true
+    };
+    const debouncerMessages = debouncerData.messages;
 
     debouncerMessages.push({ message, metadata });
 
-    if (debouncerData) {
-      clearTimeout(debouncerData.timeout);
+    if (!debouncerData.fresh) {
+      if (debouncerData.timeout) {
+        clearTimeout(debouncerData.timeout);
+        debouncerData.timeout = null;
+      }
+    } else {
+      debouncerData.fresh = false;
+      debouncerMap.set(`is-${integrationSession.id}`, debouncerData);
     }
 
     if (message.type !== "text") {
@@ -360,14 +371,7 @@ export class IntegrationServices {
       return;
     }
 
-    if (debouncerData) {
-      debouncerData.timeout = setTimeout(task, debouncerTimeout * 1000);
-    } else {
-      debouncerMap.set(`is-${integrationSession.id}`, {
-        messages: debouncerMessages,
-        timeout: setTimeout(task, debouncerTimeout * 1000)
-      });
-    }
+    debouncerData.timeout = setTimeout(task, debouncerTimeout * 1000);
   }
 
   public async endSession(

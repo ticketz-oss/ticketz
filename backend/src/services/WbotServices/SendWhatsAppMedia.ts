@@ -13,12 +13,13 @@ import { verifyMediaMessage, verifyMessage } from "./wbotMessageListener";
 import CheckSettings from "../../helpers/CheckSettings";
 import saveMediaToFile from "../../helpers/saveMediaFile";
 import { getJidOf } from "./getJidOf";
-import { getPublicPath } from "../../helpers/GetPublicPath";
 import { logger } from "../../utils/logger";
+import { URLCharEncoder } from "../../helpers/URLCharEncoder";
 
 interface Request {
   media: Express.Multer.File;
   ticket: Ticket;
+  userId?: number;
   caption?: string;
   ptt?: boolean;
 }
@@ -108,6 +109,7 @@ export const getMessageFileOptions = async (
 
 export const sendWhatsappFile = async (
   ticket: Ticket,
+  userId: number,
   mediaInfo: MediaInfo,
   options: AnyMediaMessageContent
 ): Promise<WAMessage> => {
@@ -122,7 +124,7 @@ export const sendWhatsappFile = async (
       ticket.contact,
       null,
       null,
-      null,
+      userId,
       mediaInfo
     );
 
@@ -135,6 +137,7 @@ export const sendWhatsappFile = async (
 
 export const SendWhatsAppMessage = async (
   ticket: Ticket,
+  userId: number,
   options: AnyMessageContent
 ): Promise<WAMessage> => {
   try {
@@ -144,7 +147,7 @@ export const SendWhatsAppMessage = async (
 
     wbot.cacheMessage(sentMessage);
 
-    await verifyMessage(sentMessage, ticket, ticket.contact);
+    await verifyMessage(sentMessage, ticket, ticket.contact, userId);
 
     return sentMessage;
   } catch (error) {
@@ -156,6 +159,7 @@ export const SendWhatsAppMessage = async (
 export const SendWhatsAppMedia = async ({
   media,
   ticket,
+  userId,
   caption,
   ptt
 }: Request): Promise<WAMessage> => {
@@ -190,20 +194,18 @@ export const SendWhatsAppMedia = async ({
     );
     readableFile.destroy();
 
-    let fileUrl = encodeURI(savedPath);
-
     const mediaInfo = {
-      mediaUrl: fileUrl,
+      mediaUrl: savedPath,
       mimetype: media.mimetype,
       filename: fileName || media.originalname
     };
 
     if (media.size > fileLimit * 1024 * 1024) {
-      if (!fileUrl.startsWith("http")) {
-        fileUrl = `${process.env.BACKEND_URL}/public/${fileUrl}`;
-      }
-      return SendWhatsAppMessage(ticket, {
-        text: `📎 *${fileName}*\n\n🔗 ${fileUrl}`
+      const fileUrl = savedPath.startsWith("http")
+        ? savedPath
+        : `${process.env.BACKEND_URL}/public/${savedPath}`;
+      return SendWhatsAppMessage(ticket, userId, {
+        text: `📎 *${fileName}*\n\n🔗 ${URLCharEncoder(fileUrl)}`
       });
     }
 
@@ -213,7 +215,7 @@ export const SendWhatsAppMedia = async ({
       media.mimetype,
       ptt
     );
-    return sendWhatsappFile(ticket, mediaInfo, {
+    return sendWhatsappFile(ticket, userId, mediaInfo, {
       caption: caption || undefined,
       fileName,
       ...options

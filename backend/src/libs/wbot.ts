@@ -561,6 +561,18 @@ decoupledDriverServices.registerFunction(
       return;
     }
 
-    wbot.sendPresenceUpdate(presence, jid);
+    wbot.sendPresenceUpdate(presence, jid).catch(err => {
+      logger.error(
+        {
+          message: err.message,
+          jid,
+          presence,
+          ticketId: ticket.id,
+          companyId: ticket.companyId,
+          connection: ticket.whatsapp?.name
+        },
+        "Error sending presence update"
+      );
+    });
   }
 );

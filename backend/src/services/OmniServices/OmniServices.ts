@@ -67,6 +67,7 @@ export type OmniMessage = {
   mediaUrl?: string;
   mimetype?: string;
   quotedMsg?: Message;
+  userId?: number;
 };
 
 export type OmniSendMessageOptions = {
@@ -440,7 +441,8 @@ export class OmniServices {
             mimetype: media.mimetype,
             fileName: media.filename,
             body,
-            quotedMsg
+            quotedMsg,
+            userId: user.id
           };
 
           await driver.sendMessage(ticket, messageData);
@@ -452,7 +454,8 @@ export class OmniServices {
       const messageData: OmniMessage = {
         type: req.body.emoji ? "reaction" : "text",
         body: messageBody,
-        quotedMsg
+        quotedMsg,
+        userId: user.id
       };
       try {
         await driver.sendMessage(ticket, messageData);

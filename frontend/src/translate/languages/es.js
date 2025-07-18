@@ -813,6 +813,7 @@ const messages = {
         title: "Configuraciones",
         chatbotTicketTimeout: "Tiempo de espera del ticket del chatbot (minutos)",
         chatbotTicketTimeoutAction: "Acción después del tiempo de espera",
+        enforceNumberCheck: "Forzar verificación de número de WhatsApp",
         settings: {
           userCreation: {
             name: "Creación de usuario",

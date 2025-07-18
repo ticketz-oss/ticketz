@@ -71,6 +71,7 @@ import {
 import GetDefaultWhatsApp from "../../helpers/GetDefaultWhatsApp";
 import { getWbot } from "../../libs/wbot";
 import { verifyContact } from "../WbotServices/verifyContact";
+import Queue from "../../models/Queue";
 
 const contactMutex = new Mutex();
 const messageMutex = new Mutex();
@@ -979,6 +980,7 @@ export class NotificamehubDriver implements OmniDriver {
               id: result.id,
               contactId: ticket.contactId,
               ticketId: ticket.id,
+              userId: message.userId,
               body: message.body,
               mediaType:
                 message.type === "reaction" ? "reactionMessage" : undefined,
@@ -1034,6 +1036,7 @@ export class NotificamehubDriver implements OmniDriver {
               id: result.id,
               contactId: ticket.contactId,
               ticketId: ticket.id,
+              userId: message.userId,
               body: message.body || "",
               quotedMsgId: message.quotedMsg?.id || undefined,
               fromMe: true,
@@ -1064,6 +1067,12 @@ export class NotificamehubDriver implements OmniDriver {
         model: User,
         attributes: { exclude: ["passwordHash"] },
         required: false
+      },
+      {
+        model: Queue,
+        as: "queue",
+        required: false,
+        attributes: ["id", "name", "color"]
       },
       {
         model: Message,

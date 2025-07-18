@@ -130,7 +130,7 @@ export function OggAudioPlayer({ src, children }) {
     const ogvPlayer = new ogv.OGVPlayer();
     ogvPlayer.src = src;
     ogvPlayer.load();
-    ogvPlayer.addEventListener('loadedmetadata', () => setDuration(ogvPlayer.duration));
+    ogvPlayer.addEventListener('loadedmetadata', () => setDuration(ogvPlayer.duration || 0));
     ogvPlayer.addEventListener('ended', () => setIsPlaying(false));
 
     setPlayer(ogvPlayer);
