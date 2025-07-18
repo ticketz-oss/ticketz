@@ -220,6 +220,7 @@ export class TypebotIntegration implements IntegrationDriver {
       pushName: metadata.from.name,
       firstMessage: metadata.firstMessage,
       ticketId: metadata.ticketId,
+      ticketUuid: ticket.uuid,
       metadata: JSON.stringify(metadata),
       ...jsonParams
     };
