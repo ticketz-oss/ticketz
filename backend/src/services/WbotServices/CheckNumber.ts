@@ -2,6 +2,7 @@ import AppError from "../../errors/AppError";
 import GetDefaultWhatsApp from "../../helpers/GetDefaultWhatsApp";
 import { getWbot, Session } from "../../libs/wbot";
 import Whatsapp from "../../models/Whatsapp";
+import { logger } from "../../utils/logger";
 
 interface IOnWhatsapp {
   jid: string;
@@ -12,6 +13,12 @@ interface IOnWhatsapp {
 const checker = async (number: string, wbot: Session) => {
   const jid = number.includes("@") ? number : `${number}@s.whatsapp.net`;
   const [validNumber] = await wbot.onWhatsApp(jid);
+
+  if (!validNumber) {
+    logger.error({ number }, "Failed to check number on whatsapp");
+    throw new AppError("ERR_INVALID_NUMBER", 400);
+  }
+
   return {
     jid: validNumber.jid,
     exists: !!validNumber.exists,

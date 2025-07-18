@@ -203,9 +203,9 @@ export const SendWhatsAppMedia = async ({
     if (media.size > fileLimit * 1024 * 1024) {
       const fileUrl = savedPath.startsWith("http")
         ? savedPath
-        : `${process.env.BACKEND_URL}/public/${URLCharEncoder(savedPath)}`;
+        : `${process.env.BACKEND_URL}/public/${savedPath}`;
       return SendWhatsAppMessage(ticket, userId, {
-        text: `📎 *${fileName}*\n\n🔗 ${fileUrl}`
+        text: `📎 *${fileName}*\n\n🔗 ${URLCharEncoder(fileUrl)}`
       });
     }
 
