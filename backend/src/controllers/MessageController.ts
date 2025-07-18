@@ -28,10 +28,7 @@ import Contact from "../models/Contact";
 import Ticket from "../models/Ticket";
 import ForwardMessageService from "../services/MessageServices/ForwardMessageService";
 import { getWbot } from "../libs/wbot";
-import {
-  verifyMessage,
-  verifyMediaMessage
-} from "../services/WbotServices/wbotMessageListener";
+import { verifyMessage } from "../services/WbotServices/wbotMessageListener";
 import { CreateInternalMessageService } from "../services/MessageServices/CreateInternalMessageService";
 import QuickMessage from "../models/QuickMessage";
 import formatBody from "../helpers/Mustache";
@@ -116,21 +113,14 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
         medias.map(async (media: Express.Multer.File) => {
           const caption = first ? formatBody(body, ticket, user) : null;
           first = false;
-          const message = await SendWhatsAppMedia({
+          await SendWhatsAppMedia({
             media,
             ticket,
+            userId,
             caption,
             ptt
           });
           fs.unlinkSync(media.path);
-          verifyMediaMessage(
-            message,
-            ticket,
-            ticket.contact,
-            null,
-            null,
-            Number(req.user.id) || null
-          );
         })
       );
     }
@@ -157,15 +147,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     const caption = formatBody(body, ticket, user);
 
     const msgFileOptions = { ...fileOptions, caption };
-    const message = await sendWhatsappFile(ticket, mediaInfo, msgFileOptions);
-    verifyMediaMessage(
-      message,
-      ticket,
-      ticket.contact,
-      null,
-      Number(req.user.id) || null
-    );
-  } else if (channel === "whatsapp") {
+    sendWhatsappFile(ticket, userId, mediaInfo, msgFileOptions);
+  } else {
     await SendWhatsAppMessage({ body, ticket, userId, quotedMsg });
   }
 
@@ -195,7 +178,7 @@ export const react = async (req: Request, res: Response): Promise<Response> => {
     return omniServices.sendMessageFromRequest(ticket, req, res);
   }
 
-  const wbot = await getWbot(ticket.whatsappId);
+  const wbot = getWbot(ticket.whatsappId);
 
   if (!wbot) {
     throw new AppError("ERR_WHATSAPP_NOT_FOUND", 500);

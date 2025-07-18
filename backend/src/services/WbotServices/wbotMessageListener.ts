@@ -1490,6 +1490,11 @@ const handleMsgAck = async (msg: WAMessage, ack: number) => {
       include: [
         "contact",
         {
+          model: Queue,
+          as: "queue",
+          attributes: ["id", "name", "color"]
+        },
+        {
           model: User,
           attributes: { exclude: ["passwordHash"] },
           required: false
