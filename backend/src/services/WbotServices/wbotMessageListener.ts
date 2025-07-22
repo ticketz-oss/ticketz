@@ -1,6 +1,4 @@
-import path, { join } from "path";
-import { promisify } from "util";
-import fs, { writeFile } from "fs";
+import path from "path";
 import * as Sentry from "@sentry/node";
 import { isNil, head, keys } from "lodash";
 
@@ -64,6 +62,7 @@ import { randomValue } from "../../helpers/randomValue";
 import { getJidOf } from "./getJidOf";
 import { verifyContact } from "./verifyContact";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
+import saveMediaToFile from "../../helpers/saveMediaFile";
 
 export interface ImessageUpsert {
   messages: proto.IWebMessageInfo[];
@@ -74,8 +73,6 @@ interface IMe {
   name: string;
   id: string;
 }
-
-const writeFileAsync = promisify(writeFile);
 
 const wbotMutex = new Mutex();
 const ackMutex = new Mutex();
@@ -465,10 +462,6 @@ const downloadMedia = async (
   if (!filename) {
     const ext = message.mimetype.split("/")[1].split(";")[0];
     filename = `${makeRandomId(5)}-${new Date().getTime()}.${ext}`;
-  } else {
-    filename = `${filename.split(".").slice(0, -1).join(".")}.${makeRandomId(
-      5
-    )}.${filename.split(".").slice(-1)}`;
   }
 
   const media = {
@@ -509,13 +502,23 @@ const storeQuotedMessage = async (
   let mediaUrl = null;
   if (media) {
     // eslint-disable-next-line no-use-before-define
-    mediaUrl = await saveMediaToFile(media, ticket);
+    mediaUrl = await saveMediaToFile(
+      media,
+      ticket.companyId,
+      ticket.id,
+      ticket.contactId
+    );
   }
 
   let thumbnailUrl = null;
   if (thumbnailMedia) {
     // eslint-disable-next-line no-use-before-define
-    thumbnailUrl = await saveMediaToFile(thumbnailMedia, ticket);
+    thumbnailUrl = await saveMediaToFile(
+      thumbnailMedia,
+      ticket.companyId,
+      ticket.id,
+      ticket.contactId
+    );
   }
 
   const mediaType = media?.mimetype.split("/")[0];
@@ -568,34 +571,6 @@ const verifyQuotedMessage = async (
   return dbQuotedMsg;
 };
 
-const saveMediaToFile = async (media, ticket: Ticket): Promise<string> => {
-  if (!media.filename) {
-    const ext = media.mimetype.split("/")[1].split(";")[0];
-    media.filename = `${new Date().getTime()}.${ext}`;
-  }
-
-  const filePath = getPublicPath();
-  const randomId = makeRandomId(10);
-
-  const relativePath = `media/${ticket.companyId}/${ticket.contactId}/${ticket.id}/${randomId}`;
-
-  try {
-    // create folders inside filepath if not exists
-    await fs.promises.mkdir(join(filePath, relativePath), { recursive: true });
-
-    await writeFileAsync(
-      join(filePath, relativePath, media.filename),
-      media.data,
-      "base64"
-    );
-  } catch (err) {
-    Sentry.captureException(err);
-    logger.error(err);
-  }
-
-  return `${relativePath}/${media.filename}`;
-};
-
 /**
  * @description: call UpdateTicketService to update ticket status, if ticketData have a queue id it will not run the chatbot
  * @params {Ticket} ticket - ticket to be updated
@@ -646,12 +621,22 @@ export const verifyMediaMessage = async (
 
   let mediaUrl = mediaInfo?.mediaUrl || null;
   if (media) {
-    mediaUrl = await saveMediaToFile(media, ticket);
+    mediaUrl = await saveMediaToFile(
+      media,
+      ticket.companyId,
+      ticket.id,
+      ticket.contactId
+    );
   }
 
   let thumbnailUrl = null;
   if (thumbnailMedia) {
-    thumbnailUrl = await saveMediaToFile(thumbnailMedia, ticket);
+    thumbnailUrl = await saveMediaToFile(
+      thumbnailMedia,
+      ticket.companyId,
+      ticket.id,
+      ticket.contactId
+    );
   }
 
   const mimetype = mediaInfo?.mimetype || media?.mimetype || "";
