@@ -38,7 +38,8 @@ export default async function saveMediaToFile(
   try {
     await storage.write(mediaPath, media.data);
   } catch (error) {
-    logger.error({ error }, "Error saving media file");
+    logger.error({ message: error.message }, "Error saving media file");
+    throw new Error("Failed to save media file");
   }
 
   return mediaPath;
