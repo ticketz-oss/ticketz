@@ -1,5 +1,6 @@
 import { FileContents, FileStorage } from "@flystorage/file-storage";
 import { LocalStorageAdapter } from "@flystorage/local-fs";
+import mime from "mime-types";
 import { getPublicPath } from "./GetPublicPath";
 import { logger } from "../utils/logger";
 import { S3Storage } from "./S3Storage";
@@ -16,7 +17,8 @@ export default async function saveMediaToFile(
   contactId?: number
 ): Promise<string> {
   if (!media.filename) {
-    const ext = media.mimetype.split("/")[1].split(";")[0];
+    const rawMimetype = media.mimetype.split(";")[0];
+    const ext = mime.extension(rawMimetype) || "bin";
     media.filename = `${new Date().getTime()}.${ext}`;
   }
 
@@ -44,7 +46,8 @@ export default async function saveMediaToFile(
   try {
     await storage.write(mediaPath, media.data);
   } catch (error) {
-    logger.error({ error }, "Error saving media file");
+    logger.error({ message: error.message }, "Error saving media file");
+    throw new Error("Failed to save media file");
   }
 
   return fileStorage.storage?.publicUrl(mediaPath) || mediaPath;

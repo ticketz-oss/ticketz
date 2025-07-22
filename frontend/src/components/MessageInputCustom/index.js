@@ -1022,9 +1022,6 @@ const MessageInputCustom = (props) => {
               (event.loaded * 100) / event.total
             );
             setPercentLoading(progress);
-            console.log(
-              `A imagem  está ${progress}% carregada... `
-            );
           },
         })
           .then((response) => {
@@ -1036,16 +1033,12 @@ const MessageInputCustom = (props) => {
             setMedias([]);
             setQuickMessageAttachment(null);
             setPercentLoading(0);
-            console.log(
-              `A imagem á foi enviada para o servidor!`
-
-            );
           })
           .catch((err) => {
-            console.error(
-              `Houve um problema ao realizar o upload da imagem.`
-            );
-            console.log(err);
+            setLoading(false);
+            setMedias([]);
+            setPercentLoading(0);
+            toastError(err);
           });
       } catch (err) {
         toastError(err);
