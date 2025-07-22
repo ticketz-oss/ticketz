@@ -31,6 +31,9 @@ export class BaileysDownloader extends WorkerHandler {
     { logger }: HandleTaskOptions
   ): void {
     logger.debug({ taskData }, "Downloading media");
+    if (taskData.directPath && taskData.url) {
+      taskData.url = null;
+    }
     downloadContentFromMessage(taskData, taskData.mediaType)
       .then(stream => {
         logger.debug({ taskData }, "Media downloaded");
