@@ -184,7 +184,7 @@ export const SendWhatsAppMedia = async ({
       {
         data: readableFile,
         mimetype: media.mimetype,
-        filename: media.originalname
+        filename: fileName || media.originalname
       },
       ticket.companyId,
       ticket.id
