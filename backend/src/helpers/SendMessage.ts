@@ -64,8 +64,6 @@ export const SendMessage = async (
                 mime.lookup(originalFilename) || "application/octet-stream",
               filename: messageData.mediaPath.split("/").pop() || "file.bin"
             },
-            undefined,
-            undefined,
             whatsapp.companyId
           )
         );

@@ -13,7 +13,6 @@ import { verifyMediaMessage, verifyMessage } from "./wbotMessageListener";
 import CheckSettings from "../../helpers/CheckSettings";
 import saveMediaToFile from "../../helpers/saveMediaFile";
 import { getJidOf } from "./getJidOf";
-import { getPublicPath } from "../../helpers/GetPublicPath";
 import { logger } from "../../utils/logger";
 import { URLCharEncoder } from "../../helpers/URLCharEncoder";
 
@@ -186,8 +185,7 @@ export const SendWhatsAppMedia = async ({
         mimetype: media.mimetype,
         filename: fileName || media.originalname
       },
-      ticket.companyId,
-      ticket.id
+      ticket
     );
     readableFile.destroy();
 
