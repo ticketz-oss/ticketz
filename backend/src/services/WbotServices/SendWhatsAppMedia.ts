@@ -189,8 +189,7 @@ export const SendWhatsAppMedia = async ({
         mimetype: media.mimetype,
         filename: fileName || media.originalname
       },
-      ticket.companyId,
-      ticket.id
+      ticket
     );
     readableFile.destroy();
 
