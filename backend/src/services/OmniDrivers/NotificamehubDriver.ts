@@ -325,8 +325,6 @@ async function downloadAndSaveMedia(url: string, companyId: number) {
       mimetype,
       filename
     },
-    null,
-    null,
     companyId
   );
 }
@@ -346,8 +344,6 @@ async function downloadProfileImage(
       mimetype: "image/jpeg",
       filename: `${message.from || makeRandomId(10)}-profile.jpeg`
     },
-    null,
-    null,
     companyId
   );
 }
@@ -790,8 +786,7 @@ export class NotificamehubDriver implements OmniDriver {
             mimetype,
             filename
           },
-          ticket.companyId,
-          ticket.id
+          ticket
         );
       }
 
@@ -816,8 +811,7 @@ export class NotificamehubDriver implements OmniDriver {
               mimetype: getMimeByExtension(fileExtension),
               filename
             },
-            ticket.companyId,
-            ticket.id
+            ticket
           );
         }
       }

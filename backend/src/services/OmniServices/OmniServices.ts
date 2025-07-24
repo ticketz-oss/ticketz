@@ -118,7 +118,7 @@ export function getOmniReplyHandler(driver: OmniDriver) {
 
         media = await processor(mediaUrl);
 
-        mediaUrl = await saveMediaToFile(media, ticket.companyId, ticket.id);
+        mediaUrl = await saveMediaToFile(media, ticket);
       }
 
       await driver.sendMessage(ticket, {
@@ -411,11 +411,7 @@ export class OmniServices {
 
           const media = await processor(originalMedia);
 
-          const mediaUrl = await saveMediaToFile(
-            media,
-            ticket.companyId,
-            ticket.id
-          );
+          const mediaUrl = await saveMediaToFile(media, ticket);
 
           fs.unlink(originalMedia.path, err => {
             if (err) {

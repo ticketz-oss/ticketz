@@ -13,7 +13,9 @@ export default async function saveMediaToFile(
     mimetype: string;
     filename: string;
   },
-  destination: Ticket | number
+  destination: Ticket | number,
+  ticketId?: number,
+  contactId?: number
 ): Promise<string> {
   if (!media || !media.data || !media.mimetype || !destination) {
     logger.error("saveMediaToFile: Invalid media or destination provided");
@@ -30,9 +32,15 @@ export default async function saveMediaToFile(
 
   const companyId =
     typeof destination === "number" ? destination : destination.companyId;
-  const contactId =
-    typeof destination === "number" ? undefined : destination.contactId;
-  const ticketId = typeof destination === "number" ? undefined : destination.id;
+
+  if (!contactId) {
+    contactId =
+      typeof destination === "number" ? undefined : destination.contactId;
+  }
+
+  if (!ticketId) {
+    ticketId = typeof destination === "number" ? undefined : destination.id;
+  }
 
   let relativePath = `media/${companyId}/`;
 
