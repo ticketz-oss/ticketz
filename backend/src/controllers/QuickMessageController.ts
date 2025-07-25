@@ -1,6 +1,8 @@
 import * as Yup from "yup";
 import { Request, Response } from "express";
 import { head } from "lodash";
+import iconv from "iconv-lite";
+import fs from "fs";
 import { getIO } from "../libs/socket";
 
 import ListService from "../services/QuickMessageService/ListService";
@@ -13,6 +15,8 @@ import FindService from "../services/QuickMessageService/FindService";
 import QuickMessage from "../models/QuickMessage";
 
 import AppError from "../errors/AppError";
+import { logger } from "../utils/logger";
+import saveMediaToFile from "../helpers/saveMediaFile";
 
 type IndexQuery = {
   searchParam: string;
@@ -53,8 +57,27 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   const mediaData: MediaData = {};
 
   if (file) {
-    mediaData.mediaName = file.originalname;
-    mediaData.mediaPath = file.path;
+    let filename;
+
+    try {
+      filename = iconv.decode(Buffer.from(file.originalname, "binary"), "utf8");
+    } catch (error) {
+      logger.error(
+        { message: error.message },
+        "Error converting filename to UTF-8:"
+      );
+    }
+
+    mediaData.mediaName = filename || file.originalname || "file.bin";
+    const readableFile = fs.createReadStream(file.path);
+    mediaData.mediaPath = await saveMediaToFile(
+      {
+        data: readableFile,
+        mimetype: file.mimetype,
+        filename: mediaData.mediaName
+      },
+      companyId
+    );
   }
 
   const schema = Yup.object().shape({

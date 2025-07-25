@@ -5,6 +5,7 @@ import { getPublicPath } from "./GetPublicPath";
 import { logger } from "../utils/logger";
 import { S3Storage } from "./S3Storage";
 import { makeRandomId } from "./MakeRandomId";
+import Ticket from "../models/Ticket";
 
 export default async function saveMediaToFile(
   media: {
@@ -12,10 +13,15 @@ export default async function saveMediaToFile(
     mimetype: string;
     filename: string;
   },
-  companyId: number,
+  destination: Ticket | number,
   ticketId?: number,
   contactId?: number
 ): Promise<string> {
+  if (!media || !media.data || !media.mimetype || !destination) {
+    logger.error("saveMediaToFile: Invalid media or destination provided");
+    throw new Error("Invalid media or destination provided");
+  }
+
   if (!media.filename) {
     const rawMimetype = media.mimetype.split(";")[0];
     const ext = mime.extension(rawMimetype) || "bin";
@@ -23,13 +29,23 @@ export default async function saveMediaToFile(
   }
 
   const randomId = makeRandomId(10);
-  let relativePath = `media/${companyId}/`;
-  if (contactId) {
-    relativePath += `${contactId}/`;
+
+  const companyId =
+    typeof destination === "number" ? destination : destination.companyId;
+
+  if (!contactId) {
+    contactId =
+      typeof destination === "number" ? undefined : destination.contactId;
   }
 
-  if (ticketId) {
-    relativePath += `${ticketId}/`;
+  if (!ticketId) {
+    ticketId = typeof destination === "number" ? undefined : destination.id;
+  }
+
+  let relativePath = `media/${companyId}/`;
+
+  if (contactId && ticketId) {
+    relativePath += `${contactId}/${ticketId}/`;
   }
 
   relativePath += `${randomId}`;
