@@ -24,7 +24,6 @@ import {
 } from "../OmniServices/OmniServices";
 import { logger } from "../../utils/logger";
 import { incrementCounter } from "../CounterServices/IncrementCounter";
-import Queue from "../../models/Queue";
 
 import { sendFormattedMessage } from "../../helpers/sendFormattedMessage";
 import { checkIntegration, startQueue } from "../QueueService/ChatbotService";
