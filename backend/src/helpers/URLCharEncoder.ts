@@ -9,7 +9,7 @@
  */
 export function URLCharEncoder(str) {
   return encodeURIComponent(str)
-    .replace(/%2F/g, '/')
-    .replace(/%3A/g, ':')
-    .replace(/%2E/g, '.');
+    .replace(/%2F/g, "/")
+    .replace(/%3A/g, ":")
+    .replace(/%2E/g, ".");
 }
