@@ -15,6 +15,7 @@ import formatBody from "../../helpers/Mustache";
 import { logger } from "../../utils/logger";
 import { incrementCounter } from "../CounterServices/IncrementCounter";
 import { getJidOf } from "../WbotServices/getJidOf";
+import Queue from "../../models/Queue";
 
 export interface UpdateTicketData {
   status?: string;
@@ -112,6 +113,16 @@ const UpdateTicketService = async ({
 
     const ticket = await ShowTicketService(ticketId, companyId);
     const isGroup = ticket.contact?.isGroup || ticket.isGroup;
+
+    if (queueId && queueId !== ticket.queueId) {
+      const newQueue = await Queue.findByPk(queueId);
+      if (!newQueue) {
+        throw new AppError("Queue not found", 404);
+      }
+      if (newQueue.companyId !== ticket.companyId) {
+        throw new AppError("Queue does not belong to the same company", 403);
+      }
+    }
 
     if (user && ticket.status !== "pending") {
       if (user.profile !== "admin" && ticket.userId !== user.id) {
