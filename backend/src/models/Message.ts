@@ -17,7 +17,14 @@ import Company from "./Company";
 import Queue from "./Queue";
 import OldMessage from "./OldMessage";
 import User from "./User";
-import { URLCharEncoder } from "../helpers/URLCharEncoder";
+
+// need to be local because of webpack
+function URLCharEncoder(str) {
+  return encodeURIComponent(str)
+    .replace(/%2F/g, "/")
+    .replace(/%3A/g, ":")
+    .replace(/%2E/g, ".");
+}
 
 @Table
 class Message extends Model {
