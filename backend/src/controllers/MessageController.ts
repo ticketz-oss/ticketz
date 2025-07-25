@@ -34,6 +34,9 @@ import QuickMessage from "../models/QuickMessage";
 import formatBody from "../helpers/Mustache";
 import { OmniServices } from "../services/OmniServices/OmniServices";
 import { getJidOf } from "../services/WbotServices/getJidOf";
+import { URLCharEncoder } from "../helpers/URLCharEncoder";
+import { getMediaPath } from "../helpers/GetMediaPath";
+import { getPublicPath } from "../helpers/GetPublicPath";
 
 type IndexQuery = {
   pageNumber: string;
@@ -133,14 +136,21 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
     const { mediaPath, mediaName } = quickMessage;
 
+    const filepath = getMediaPath(mediaPath);
+
     const fileOptions = await getMessageFileOptions(
-      mediaName || "file",
-      mediaPath
+      mediaName || "file.bin",
+      filepath
     );
 
     const mediaInfo = {
-      mediaUrl: mediaPath,
-      mimetype: mime.lookup(mediaPath) || "application/octet-stream",
+      mediaUrl: mediaPath.match(/^https?:\/\//)
+        ? URLCharEncoder(mediaPath)
+        : mediaPath.replace(getPublicPath(), ""),
+      mimetype:
+        fileOptions.mimetype ||
+        mime.lookup(mediaPath) ||
+        "application/octet-stream",
       filename: mediaName
     };
 
