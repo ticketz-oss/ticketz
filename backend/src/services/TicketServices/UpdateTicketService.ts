@@ -24,6 +24,8 @@ import {
 } from "../OmniServices/OmniServices";
 import { logger } from "../../utils/logger";
 import { incrementCounter } from "../CounterServices/IncrementCounter";
+import Queue from "../../models/Queue";
+
 import { sendFormattedMessage } from "../../helpers/sendFormattedMessage";
 import { checkIntegration, startQueue } from "../QueueService/ChatbotService";
 
@@ -119,6 +121,16 @@ const UpdateTicketService = async ({
     let chatbot: boolean | null = ticketData.chatbot || false;
 
     const isGroup = ticket.contact?.isGroup || ticket.isGroup;
+
+    if (queueId && queueId !== ticket.queueId) {
+      const newQueue = await Queue.findByPk(queueId);
+      if (!newQueue) {
+        throw new AppError("Queue not found", 404);
+      }
+      if (newQueue.companyId !== ticket.companyId) {
+        throw new AppError("Queue does not belong to the same company", 403);
+      }
+    }
 
     if (user && ticket.status !== "pending") {
       if (user.profile !== "admin" && ticket.userId !== user.id) {
