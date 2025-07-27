@@ -30,6 +30,7 @@ import ticketTagRoutes from "./ticketTagRoutes";
 import pwaRoutes from "./pwaRoutes";
 import versionRoutes from "./versionRoutes";
 import ticketzOSSRoutes from "./ticketzOSSRoutes";
+import i18nRoutes from "./i18nRoutes";
 
 const routes = Router();
 
@@ -64,5 +65,6 @@ routes.use(ticketTagRoutes);
 routes.use(pwaRoutes);
 routes.use(versionRoutes);
 routes.use(ticketzOSSRoutes);
+routes.use(i18nRoutes);
 
 export default routes;

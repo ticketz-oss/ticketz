@@ -63,6 +63,9 @@ class Contact extends Model {
   @Column
   presence: string;
 
+  @Column
+  language: string;
+
   @CreatedAt
   createdAt: Date;
 

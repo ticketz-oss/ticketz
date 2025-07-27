@@ -39,6 +39,7 @@ import Subscriptions from "../models/Subscriptions";
 import BaileysKeys from "../models/BaileysKeys";
 import UserSocketSession from "../models/UserSocketSession";
 import OutOfTicketMessage from "../models/OutOfTicketMessages";
+import Translation from "../models/Translation";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const dbConfig = require("../config/database");
@@ -85,7 +86,8 @@ const models = [
   ChatMessage,
   Invoices,
   OutOfTicketMessage,
-  Subscriptions
+  Subscriptions,
+  Translation
 ];
 
 sequelize.addModels(models);
