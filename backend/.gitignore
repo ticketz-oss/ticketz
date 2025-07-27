@@ -8,3 +8,4 @@
 /.settings/
 /private/*
 !/private/index.html
+/src/generated
