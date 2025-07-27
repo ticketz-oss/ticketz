@@ -6,6 +6,7 @@ import Queue from "../../models/Queue";
 import Tag from "../../models/Tag";
 import Whatsapp from "../../models/Whatsapp";
 import UserSocketSession from "../../models/UserSocketSession";
+import Company from "../../models/Company";
 
 const ShowTicketService = async (
   id: string | number,
@@ -26,7 +27,8 @@ const ShowTicketService = async (
           "email",
           "profilePicUrl",
           "presence",
-          "disableBot"
+          "disableBot",
+          "language"
         ],
         include: ["tags", "extraInfo"]
       },
@@ -56,8 +58,14 @@ const ShowTicketService = async (
           "status",
           "ratingMessage",
           "transferMessage",
-          "complationMessage"
+          "complationMessage",
+          "language"
         ]
+      },
+      {
+        model: Company,
+        as: "company",
+        attributes: ["id", "name", "language"]
       },
       {
         model: Tag,

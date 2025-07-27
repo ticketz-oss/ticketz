@@ -17,6 +17,7 @@ interface ContactData {
   extraInfo?: ExtraInfo[];
   channel?: string;
   disableBot?: boolean;
+  language?: string;
 }
 
 export const updateContact = async (
@@ -45,7 +46,8 @@ const CreateOrUpdateContactService = async ({
   companyId,
   extraInfo = [],
   channel = "whatsapp",
-  disableBot = false
+  disableBot = false,
+  language
 }: ContactData): Promise<Contact> => {
   const io = getIO();
   let contact: Contact | null;
@@ -60,7 +62,8 @@ const CreateOrUpdateContactService = async ({
       extraInfo,
       companyId,
       channel,
-      disableBot
+      disableBot,
+      language
     });
 
     await contact.reload({

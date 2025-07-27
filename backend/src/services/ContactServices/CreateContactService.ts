@@ -15,6 +15,7 @@ interface Request {
   companyId: number;
   extraInfo?: ExtraInfo[];
   disableBot?: boolean;
+  language?: string;
 }
 
 const CreateContactService = async ({
@@ -23,7 +24,8 @@ const CreateContactService = async ({
   email = "",
   companyId,
   extraInfo = [],
-  disableBot = false
+  disableBot = false,
+  language
 }: Request): Promise<Contact> => {
   const numberExists = await Contact.findOne({
     where: { number, companyId }
@@ -40,7 +42,8 @@ const CreateContactService = async ({
       email,
       extraInfo,
       companyId,
-      disableBot
+      disableBot,
+      language
     },
     {
       include: ["extraInfo"]

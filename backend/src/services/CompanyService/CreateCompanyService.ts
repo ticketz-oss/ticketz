@@ -14,6 +14,7 @@ interface CompanyData {
   campaignsEnabled?: boolean;
   dueDate?: string;
   recurrence?: string;
+  language?: string;
 }
 
 const CreateCompanyService = async (
@@ -28,7 +29,8 @@ const CreateCompanyService = async (
     password,
     campaignsEnabled,
     dueDate,
-    recurrence
+    recurrence,
+    language
   } = companyData;
 
   const companySchema = Yup.object().shape({
@@ -64,14 +66,15 @@ const CreateCompanyService = async (
     status,
     planId,
     dueDate,
-    recurrence
+    recurrence,
+    language
   });
   const [user, created] = await User.findOrCreate({
     where: { name, email },
     defaults: {
-      name: name,
-      email: email,
-      password: password || "mudar123",
+      name,
+      email,
+      password: password || "123456",
       profile: "admin",
       companyId: company.id
     }
@@ -90,75 +93,10 @@ const CreateCompanyService = async (
       companyId: company.id,
       key: "asaas",
       value: ""
-    },
+    }
   });
 
-  //tokenixc
-  await Setting.findOrCreate({
-    where: {
-      companyId: company.id,
-      key: "tokenixc"
-    },
-    defaults: {
-      companyId: company.id,
-      key: "tokenixc",
-      value: ""
-    },
-  });
-
-  //ipixc
-  await Setting.findOrCreate({
-    where: {
-      companyId: company.id,
-      key: "ipixc"
-    },
-    defaults: {
-      companyId: company.id,
-      key: "ipixc",
-      value: ""
-    },
-  });
-
-  //ipmkauth
-  await Setting.findOrCreate({
-    where: {
-      companyId: company.id,
-      key: "ipmkauth"
-    },
-    defaults: {
-      companyId: company.id,
-      key: "ipmkauth",
-      value: ""
-    },
-  });
-
-  //clientsecretmkauth
-  await Setting.findOrCreate({
-    where: {
-      companyId: company.id,
-      key: "clientsecretmkauth"
-    },
-    defaults: {
-      companyId: company.id,
-      key: "clientsecretmkauth",
-      value: ""
-    },
-  });
-
-  //clientidmkauth
-  await Setting.findOrCreate({
-    where: {
-      companyId: company.id,
-      key: "clientidmkauth"
-    },
-    defaults: {
-      companyId: company.id,
-      key: "clientidmkauth",
-      value: ""
-    },
-  });
-
-  //CheckMsgIsGroup
+  // CheckMsgIsGroup
   await Setting.findOrCreate({
     where: {
       companyId: company.id,
@@ -168,10 +106,10 @@ const CreateCompanyService = async (
       companyId: company.id,
       key: "enabled",
       value: ""
-    },
+    }
   });
 
-  //CheckMsgIsGroup
+  // CheckMsgIsGroup
   await Setting.findOrCreate({
     where: {
       companyId: company.id,
@@ -181,10 +119,10 @@ const CreateCompanyService = async (
       companyId: company.id,
       key: "call",
       value: "disabled"
-    },
+    }
   });
 
-  //scheduleType
+  // scheduleType
   await Setting.findOrCreate({
     where: {
       companyId: company.id,
@@ -194,10 +132,10 @@ const CreateCompanyService = async (
       companyId: company.id,
       key: "scheduleType",
       value: "disabled"
-    },
+    }
   });
 
-  //userRating
+  // userRating
   await Setting.findOrCreate({
     where: {
       companyId: company.id,
@@ -207,24 +145,11 @@ const CreateCompanyService = async (
       companyId: company.id,
       key: "userRating",
       value: "disabled"
-    },
-  });
-
-  //userRating
-  await Setting.findOrCreate({
-    where: {
-      companyId: company.id,
-      key: "chatBotType"
-    },
-    defaults: {
-      companyId: company.id,
-      key: "chatBotType",
-      value: "text"
-    },
+    }
   });
 
   if (companyData.campaignsEnabled !== undefined) {
-    const [setting, created] = await Setting.findOrCreate({
+    const [setting, settingCreated] = await Setting.findOrCreate({
       where: {
         companyId: company.id,
         key: "campaignsEnabled"
@@ -233,10 +158,9 @@ const CreateCompanyService = async (
         companyId: company.id,
         key: "campaignsEnabled",
         value: `${campaignsEnabled}`
-      },
-
+      }
     });
-    if (!created) {
+    if (!settingCreated) {
       await setting.update({ value: `${campaignsEnabled}` });
     }
   }
