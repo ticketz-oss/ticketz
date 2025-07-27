@@ -63,6 +63,7 @@ import { getJidOf } from "./getJidOf";
 import { verifyContact } from "./verifyContact";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
 import saveMediaToFile from "../../helpers/saveMediaFile";
+import { _t } from "../TranslationServices/i18nService";
 
 export interface ImessageUpsert {
   messages: proto.IWebMessageInfo[];
@@ -87,17 +88,6 @@ const getTypeMessage = (msg: proto.IWebMessageInfo): string => {
 const getTypeEditedMessage = (msg: proto.IMessage): string => {
   return getContentType(msg);
 };
-
-export function makeid(length: number) {
-  let result = "";
-  const characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  const charactersLength = characters.length;
-  for (let i = 0; i < length; i += 1) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-  return result;
-}
 
 const msgLocation = (
   image:
@@ -177,7 +167,7 @@ export const getBodyMessage = (msg: proto.IMessage): string | null => {
       documentMessage: msg?.documentMessage?.caption,
       documentWithCaptionMessage:
         msg?.documentWithCaptionMessage?.message?.documentMessage?.caption,
-      audioMessage: "Áudio",
+      audioMessage: "🔊",
       listResponseMessage:
         msg?.listResponseMessage?.singleSelectReply?.selectedRowId,
       reactionMessage: msg?.reactionMessage?.text || "reaction"
@@ -400,8 +390,14 @@ const downloadMedia = async (
     message?.fileLength &&
     +message.fileLength > fileLimit * 1024 * 1024
   ) {
+    const autoMessage = _t("*Automated message*", ticket);
+    const limitMessage = _t("Our system only accepts files up to ", ticket);
+    const limitInstructions = _t(
+      "We received a file beyond the size limit, If necessary, it can be obtained in the WhatsApp application.",
+      ticket
+    );
     const fileLimitMessage = {
-      text: `*Mensagem Automática*:\nNosso sistema aceita apenas arquivos com no máximo ${fileLimit} MiB`
+      text: `${autoMessage}: ${limitMessage} ${fileLimit} MiB`
     };
 
     if (!ticket.isGroup && !fromMe) {
@@ -410,8 +406,7 @@ const downloadMedia = async (
         fileLimitMessage
       );
 
-      sendMsg.message.extendedTextMessage.text =
-        "*Mensagem do sistema*:\nArquivo recebido além do limite de tamanho do sistema, se for necessário ele pode ser obtido no aplicativo do whatsapp.";
+      sendMsg.message.extendedTextMessage.text = `${autoMessage}: ${limitInstructions}.`;
 
       // eslint-disable-next-line no-use-before-define
       await verifyMessage(sendMsg, ticket, ticket.contact);
@@ -1015,9 +1010,10 @@ const sendMenu = async (
     });
 
     if (sendBackToMain) {
-      options += showNumericIcons
-        ? "\n#️⃣ - Voltar Menu Inicial"
-        : "\n*[ # ]* - Voltar Menu Inicial";
+      options += `\n${showNumericIcons ? "#️⃣" : "[ # ]"} - ${_t(
+        "Back to Main Menu",
+        ticket
+      )}`;
     }
 
     const textMessage = {
@@ -1240,7 +1236,7 @@ const handleRating = async (
   });
 
   const complationMessage =
-    whatsapp.complationMessage.trim() || "Atendimento finalizado";
+    whatsapp.complationMessage.trim() || _t("Service completed", ticket);
 
   const text = formatBody(`\u200e${complationMessage}`, ticket);
 
@@ -1590,7 +1586,7 @@ const handleMessage = async (
             quickMessage(
               wbot,
               ticketTracking.ticket,
-              "Atendimento reaberto",
+              _t("Service reopened", ticketTracking.ticket),
               true
             );
             return;
@@ -1602,7 +1598,11 @@ const handleMessage = async (
           ticketTracking.update({
             expired: true
           });
-          quickMessage(wbot, ticketTracking.ticket, "Avaliação cancelada");
+          quickMessage(
+            wbot,
+            ticketTracking.ticket,
+            _t("Rating Cancelled", ticketTracking.ticket)
+          );
           if (bodyMessage.length < 10) {
             // short message just stop the processing
             return;
@@ -1728,7 +1728,7 @@ const handleMessage = async (
               outOfHoursCache.set(`ticket-${ticket.id}`, true);
               const outOfHoursMessage =
                 whatsapp.outOfHoursMessage.trim() ||
-                "Estamos fora do horário de expediente";
+                _t("We are out of office hours right now", ticket);
               const sentMessage = await wbot.sendMessage(getJidOf(ticket), {
                 text: formatBody(outOfHoursMessage, ticket)
               });
@@ -1764,7 +1764,7 @@ const handleMessage = async (
               outOfHoursCache.set(`ticket-${ticket.id}`, true);
               const outOfHoursMessage =
                 queue.outOfHoursMessage?.trim() ||
-                "Estamos fora do horário de expediente";
+                _t("We are out of office hours right now", ticket);
               const sentMessage = await wbot.sendMessage(getJidOf(ticket), {
                 text: formatBody(outOfHoursMessage, ticket)
               });

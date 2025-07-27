@@ -9,6 +9,7 @@ import {
   checkOpenInvoices,
   payGatewayInitialize
 } from "./services/PaymentGatewayServices/PaymentGatewayServices";
+import { i18nReady } from "./services/TranslationServices/i18nService";
 
 // Environment Variable Validation
 if (!process.env.PORT) {
@@ -49,24 +50,28 @@ async function startServer() {
   }
 }
 
-// Create and start the server
-const server = app.listen(process.env.PORT, async () => {
-  logger.info(`Server is listening on port: ${process.env.PORT}`);
-  await startServer();
-});
+// wait for i18n initialization before starting the server
+i18nReady.then(() => {
+  // Create and start the server
+  const server = app.listen(process.env.PORT, async () => {
+    logger.info(`Server is listening on port: ${process.env.PORT}`);
 
-initIO(server);
+    await startServer();
+  });
 
-// Graceful Shutdown Setup
-gracefulShutdown(server, {
-  signals: "SIGINT SIGTERM",
-  timeout: 30000,
-  onShutdown: async () => {
-    logger.info("Shutdown initiated. Cleaning up...");
-  },
-  finally: () => {
-    logger.info("Server has shut down.");
-  }
+  initIO(server);
+
+  // Graceful Shutdown Setup
+  gracefulShutdown(server, {
+    signals: "SIGINT SIGTERM",
+    timeout: 30000,
+    onShutdown: async () => {
+      logger.info("Shutdown initiated. Cleaning up...");
+    },
+    finally: () => {
+      logger.info("Server has shut down.");
+    }
+  });
 });
 
 // Global Exception Handlers

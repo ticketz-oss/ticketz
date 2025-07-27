@@ -16,6 +16,7 @@ import { logger } from "../../utils/logger";
 import { incrementCounter } from "../CounterServices/IncrementCounter";
 import { getJidOf } from "../WbotServices/getJidOf";
 import Queue from "../../models/Queue";
+import { _t } from "../TranslationServices/i18nService";
 
 export interface UpdateTicketData {
   status?: string;
@@ -126,9 +127,7 @@ const UpdateTicketService = async ({
 
     if (user && ticket.status !== "pending") {
       if (user.profile !== "admin" && ticket.userId !== user.id) {
-        throw new AppError(
-          "Apenas o usuário ativo do ticket ou o Admin podem fazer alterações no ticket"
-        );
+        throw new AppError("ERR_FORBIDDEN", 403);
       }
     }
 
@@ -184,8 +183,10 @@ const UpdateTicketService = async ({
           if (ticket.whatsapp && ticket.channel === "whatsapp") {
             const ratingTxt =
               ticket.whatsapp.ratingMessage?.trim() ||
-              "Por favor avalie nosso atendimento";
-            const bodyRatingMessage = `${ratingTxt}\n\n*Digite uma nota de 1 a 5*\n\nEnvie *\`!\`* para retornar ao atendimento`;
+              _t("Please rate our service", ticket);
+            const rateInstructions = _t("Send a rating from 1 to 5", ticket);
+            const rateReturn = _t("Send *`!`* to return to the service", ticket);
+            const bodyRatingMessage = `${ratingTxt}\n\n*${rateInstructions}*\n\n${rateReturn}`;
 
             await SendWhatsAppMessage({ body: bodyRatingMessage, ticket });
           }
