@@ -53,6 +53,7 @@ const ShowTicketService = async (
         as: "whatsapp",
         attributes: [
           "name",
+          "status",
           "ratingMessage",
           "transferMessage",
           "complationMessage"
