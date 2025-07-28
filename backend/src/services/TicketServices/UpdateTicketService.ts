@@ -235,7 +235,8 @@ const UpdateTicketService = async ({
         !isGroup &&
         !ticket.contact.disableBot &&
         !justClose &&
-        ticket.whatsapp?.complationMessage.trim()
+        ticket.whatsapp?.complationMessage.trim() &&
+        ticket.whatsapp.status === "CONNECTED"
       ) {
         await sendFormattedMessage(
           ticket.whatsapp.complationMessage.trim(),

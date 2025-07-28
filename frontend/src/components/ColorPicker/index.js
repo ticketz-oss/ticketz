@@ -1,5 +1,6 @@
 import { Button, Dialog, DialogActions, Input } from "@material-ui/core";
 import React, { useState, useEffect } from "react";
+import { i18nToast } from "../../helpers/i18nToast";
 
 import { ColorBox } from "material-ui-color";
 
@@ -47,6 +48,10 @@ const ColorPicker = ({ onChange, currentColor, handleClose, open }) => {
         <Button
           color="primary"
           onClick={() => {
+            if (!/^#[0-9A-Fa-f]{6}$/.test(selectedColor)) {
+              i18nToast.error("common.error");
+              return;
+            }
             handleClose();
             onChange(selectedColor);
           }}
