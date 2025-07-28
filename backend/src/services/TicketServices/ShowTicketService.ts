@@ -61,6 +61,7 @@ const include = [
     attributes: [
       "id",
       "name",
+      "status",
       "channel",
       "companyId",
       "ratingMessage",
