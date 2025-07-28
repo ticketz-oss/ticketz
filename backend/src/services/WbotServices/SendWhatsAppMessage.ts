@@ -9,6 +9,7 @@ import formatBody from "../../helpers/Mustache";
 import { verifyMediaMessage, verifyMessage } from "./wbotMessageListener";
 import User from "../../models/User";
 import { getJidOf } from "./getJidOf";
+import Whatsapp from "../../models/Whatsapp";
 
 interface Request {
   body: string;
@@ -24,6 +25,16 @@ const SendWhatsAppMessage = async ({
   quotedMsg
 }: Request): Promise<WAMessage> => {
   let options = {};
+
+  const connection = await Whatsapp.findByPk(ticket.whatsappId);
+
+  if (!connection) {
+    throw new AppError("ERR_WAPP_NOT_FOUND");
+  }
+
+  if (connection.status !== "CONNECTED") {
+    throw new AppError("ERR_WAPP_NOT_INITIALIZED");
+  }
 
   const wbot = await GetTicketWbot(ticket);
 
