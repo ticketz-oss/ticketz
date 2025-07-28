@@ -57,7 +57,7 @@ class Message extends Model {
     const value = this.getDataValue("mediaUrl");
     if (value) {
       return value.match(/^https?:\/\//)
-        ? value
+        ? URLCharEncoder(value)
         : `${process.env.BACKEND_URL}/public/${URLCharEncoder(value)}`;
     }
     return null;
@@ -68,7 +68,7 @@ class Message extends Model {
     const value = this.getDataValue("thumbnailUrl");
     if (value) {
       return value.match(/^https?:\/\//)
-        ? value
+        ? URLCharEncoder(value)
         : `${process.env.BACKEND_URL}/public/${URLCharEncoder(value)}`;
     }
     return null;
