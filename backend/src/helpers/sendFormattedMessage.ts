@@ -1,5 +1,6 @@
 import Ticket from "../models/Ticket";
 import User from "../models/User";
+import Whatsapp from "../models/Whatsapp";
 import { OmniServices } from "../services/OmniServices/OmniServices";
 import { getJidOf } from "../services/WbotServices/getJidOf";
 import { verifyMessage } from "../services/WbotServices/wbotMessageListener";
@@ -36,6 +37,16 @@ export async function sendFormattedMessage(
 ): Promise<void> {
   const messageText = formatBody(message, ticket, user);
   const omniDriver = omniServices.getOmniDriver(ticket);
+
+  const connection = await Whatsapp.findByPk(ticket.whatsappId);
+
+  if (!connection) {
+    throw new Error("Connection not found for the ticket.");
+  }
+
+  if (connection.status !== "CONNECTED") {
+    throw new Error("Connection is not connected.");
+  }
 
   if (omniDriver) {
     if (await omniDriver.allowChatbot(ticket)) {
