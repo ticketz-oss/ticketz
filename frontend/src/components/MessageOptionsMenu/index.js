@@ -16,7 +16,6 @@ import { useStyles } from "./style";
 
 import 'emoji-mart/css/emoji-mart.css'
 import { Picker } from "emoji-mart";
-import { URLCharEncoder } from "../../helpers/URLCharEncoder";
 
 const mostUsedEmojis = ["👍", "❤️", "😂", "🎉", "😮", "😢", "🙏"];
 
@@ -85,7 +84,7 @@ const MessageOptionsMenu = ({ message, data, menuOpen, handleClose, anchorEl }) 
 
   const handleDownload = () => {
     const link = document.createElement('a');
-    link.href = URLCharEncoder(message.mediaUrl);
+    link.href = message.mediaUrl;
     link.download = message.mediaUrl.substring(message.mediaUrl.lastIndexOf('/')+1);
     link.style.display = 'none';
 

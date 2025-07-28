@@ -41,7 +41,6 @@ import { SocketContext } from "../../context/Socket/SocketContext";
 import { i18n } from "../../translate/i18n";
 import vCard from "vcard-parser";
 import { generateColor } from "../../helpers/colorGenerator";
-import { URLCharEncoder } from "../../helpers/URLCharEncoder";
 import { getInitials } from "../../helpers/getInitials";
 import { Mutex } from "async-mutex";
 import { Html5AudioPlayer } from "../Html5AudioPlayer";
@@ -1023,7 +1022,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
               color="primary"
               variant="outlined"
               target="_blank"
-              href={URLCharEncoder(message.mediaUrl)}
+              href={message.mediaUrl}
             >
              { document?.fileName || data?.fileName || message.body}
             </Button>
