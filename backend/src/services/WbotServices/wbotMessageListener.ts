@@ -1956,16 +1956,11 @@ const wbotMessageListener = async (
           );
           return;
         }
-        const messageExists = await Message.count({
-          where: { id: message.key.id!, companyId }
-        });
 
-        if (!messageExists) {
-          if (await verifyRecentCampaign(message, companyId)) {
-            return;
-          }
-          await handleMessage(message, wbot, companyId);
+        if (await verifyRecentCampaign(message, companyId)) {
+          return;
         }
+        await handleMessage(message, wbot, companyId);
       });
     });
 
