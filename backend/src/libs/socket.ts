@@ -71,8 +71,8 @@ const joinTicketChannel = async (
   logger.debug(`joinChatbox[${c}]: Channel: ${ticketId} by user ${user.id}`);
 };
 
-const notifyOnlineChange = (companyId: number) => {
-  io.to("super").to(`company-${companyId}-admin`).emit("userOnlineChange");
+const notifyOnlineChange = (companyId: number, userId: number, online) => {
+  io.to("super").to(`company-${companyId}-admin`).emit("userOnlineChange", { userId, online });
 };
 
 export const initIO = (httpServer: Server): SocketIO => {
@@ -141,16 +141,19 @@ export const initIO = (httpServer: Server): SocketIO => {
       active: true
     }).then(_ => {
       logger.debug(`started session ${socket.id} for user ${userId}`);
-      notifyOnlineChange(user.companyId);
+      notifyOnlineChange(user.companyId, user.id, true);
     });
 
     socket.on("disconnect", async () => {
       UserSocketSession.update(
         { active: false },
         { where: { id: socket.id } }
-      ).then(() => {
+      ).then(async () => {
         logger.debug(`finished session ${socket.id} for user ${userId}`);
-        notifyOnlineChange(user.companyId);
+        const activeSessionsCount = await UserSocketSession.count({
+          where: { userId, active: true }
+        });
+        notifyOnlineChange(user.companyId, user.id, activeSessionsCount > 0);
       });
     });
 
