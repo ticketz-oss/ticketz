@@ -1,13 +1,14 @@
-import React from "react";
+import React, { useEffect, useState, useContext } from 'react'
 
-import Paper from "@material-ui/core/Paper";
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import Skeleton from "@material-ui/lab/Skeleton";
+import Paper from '@material-ui/core/Paper'
+import Table from '@material-ui/core/Table'
+import TableBody from '@material-ui/core/TableBody'
+import TableCell from '@material-ui/core/TableCell'
+import TableContainer from '@material-ui/core/TableContainer'
+import TableHead from '@material-ui/core/TableHead'
+import TableRow from '@material-ui/core/TableRow'
+import Skeleton from '@material-ui/lab/Skeleton'
+import { SocketContext } from '../../context/Socket/SocketContext.js'
 
 import { makeStyles } from "@material-ui/core/styles";
 import { green, red } from '@material-ui/core/colors';
@@ -46,8 +47,35 @@ export function RatingBox ({ rating }) {
 }
 
 export default function TableAttendantsStatus(props) {
-    const { loading, attendants } = props
-	const classes = useStyles();
+    const { loading, attendants: loadedAttendants } = props
+    const classes = useStyles()
+    const socketManager = useContext(SocketContext)
+    const [attendants, setAttendants] = useState(loadedAttendants || [])
+
+    const updateStatus = (data) => {
+      const { userId, online } = data
+      setAttendants((prevAttendants) =>
+        prevAttendants.map((attendant) =>
+          attendant.id === userId ? { ...attendant, online } : attendant
+        )
+      )
+    }
+
+    useEffect(() => {
+      if (loadedAttendants) {
+        setAttendants(loadedAttendants)
+      }
+    }, [loadedAttendants])
+
+    useEffect(() => {
+      const socket = socketManager.GetSocket()
+
+      socket.on('userOnlineChange', updateStatus)
+
+      return () => {
+        socket.disconnect()
+      }
+    }, [socketManager])
 
     function renderList () {
         return attendants.map(a => (
