@@ -85,7 +85,8 @@ const models = [
   ChatMessage,
   Invoices,
   OutOfTicketMessage,
-  Subscriptions
+  Subscriptions,
+  Tasks,
 ];
 
 sequelize.addModels(models);
