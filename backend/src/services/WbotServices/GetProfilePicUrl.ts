@@ -19,7 +19,7 @@ const GetProfilePicUrl = async (
     }
 
     profilePicUrl = await wbot.profilePictureUrl(`${number}`, "image", 300);
-    await cacheLayer.set(redisKey, profilePicUrl, "EX", 60 * 60 * 24);
+    await cacheLayer.set(redisKey, profilePicUrl, "EX", 60 * 60 * 24 * 5); // Cache for 5 days
   } catch (error) {
     profilePicUrl = `${process.env.FRONTEND_URL}/nopicture.png`;
   }
