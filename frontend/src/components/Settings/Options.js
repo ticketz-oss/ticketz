@@ -140,7 +140,8 @@ export default function Options(props) {
   const [closedTicketVisibility, setClosedTicketVisibility] = useState("User");
   const [ticketAcceptedMessage, setTicketAcceptedMessage] = useState("");
   const [transferMessage, setTransferMessage] = useState("");
-  
+  const [allowSilentlyClose, setAllowSilentlyClose] = useState("enabled");
+
   const [s3ConfigData, setS3ConfigData] = useState({});
   const [enforceNumberCheck, setEnforceNumberCheck] = useState("enabled");
 
@@ -297,6 +298,9 @@ export default function Options(props) {
       
       const enforceNumberCheck = settings.find((s) => s.key === "enforceNumberCheck");
       setEnforceNumberCheck(enforceNumberCheck?.value || "enabled");
+      
+      const allowSilentlyClose = settings.find((s) => s.key === "allowSilentlyClose");
+      setAllowSilentlyClose(allowSilentlyClose?.value || "enabled");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
@@ -593,7 +597,27 @@ export default function Options(props) {
           </FormControl>
         </Grid>
         
-        <Grid xs={8} sm={6} md={4} item>
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="allow-silentlyclose-label">
+              {i18n.t("settings.AllowSilentlyClose.title")}
+            </InputLabel>
+            <Select
+              labelId="allow-silentlyclose-label"
+              value={allowSilentlyClose || "enabled"}
+              onChange={async (e) => {
+                setAllowSilentlyClose(e.target.value);
+                await handleSetting("allowSilentlyClose", e.target.value, setAllowSilentlyClose);
+                i18nToast.success("settings.success");
+              }}
+            >
+              <MenuItem value={"disabled"}>{i18n.t("common.disabled")}</MenuItem>
+              <MenuItem value={"enabled"}>{i18n.t("common.enabled")}</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+
+        <Grid xs={4} sm={6} md={4} item>
         </Grid>
 
         <Grid xs={12} sm={12} md={6} item>

@@ -41,6 +41,7 @@ import { generateColor } from "../../helpers/colorGenerator";
 import { getInitials } from "../../helpers/getInitials";
 import pastRelativeDate from "../../helpers/pastRelativeDate";
 import TagsLine from "../TagsLine";
+import useSettings from "../../hooks/useSettings";
 
 const useStyles = makeStyles((theme) => ({
   ticket: {
@@ -195,6 +196,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
   const history = useHistory();
   const [ticketUser, setTicketUser] = useState(null);
   const [whatsAppName, setWhatsAppName] = useState(null);
+  const [allowClose, setAllowClose] = useState(false);
 
   const [openTicketMessageDialog, setOpenTicketMessageDialog] = useState(false);
   const [showActions, setShowActions] = useState(false);
@@ -203,6 +205,13 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
   const { setCurrentTicket } = useContext(TicketsContext);
   const { user } = useContext(AuthContext);
   const { profile } = user;
+  const { getCachedSetting } = useSettings();
+  
+  useEffect(() => {
+    getCachedSetting("allowSilentlyClose", "enabled").then((res) => {
+      setAllowClose(user.profile === "admin" || res === "enabled");
+    });
+  }, [getCachedSetting, user.profile]);
 
   useEffect(() => {
     if (ticket.userId && ticket.user) {
@@ -263,7 +272,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
       >
         { showActions && (
           <>
-        {["open","pending"].includes(ticket.status) && (groupActionButtons || !ticket.isGroup) && (
+        {["open","pending"].includes(ticket.status) && (groupActionButtons || !ticket.isGroup) && allowClose && (
           <Tooltip title="Fechar Conversa">
             <ClearOutlinedIcon
               onClick={() => handleCloseTicket(ticket.id)}
