@@ -10,6 +10,7 @@ import { logger } from "../../utils/logger";
 import createOrUpdateBaileysService from "../BaileysServices/CreateOrUpdateBaileysService";
 import CreateMessageService from "../MessageServices/CreateMessageService";
 import { Session } from "../../libs/wbot";
+import { cacheLayer } from "../../libs/cache";
 
 const contactMutex = new Mutex();
 
@@ -87,6 +88,17 @@ const wbotMonitor = async (
         await createOrUpdateBaileysService({
           whatsappId: whatsapp.id,
           contacts
+        });
+      });
+    });
+
+    wbot.ev.on("contacts.update", async (contacts: Partial<BContact[]>) => {
+      logger.debug({ contacts }, "contacts.update");
+      contactMutex.runExclusive(async () => {
+        contacts.map(async (c: BContact) => {
+          if (["changed", "removed"].includes(c.imgUrl)) {
+            cacheLayer.del(`profilePicUrl:${c.id}`);
+          }
         });
       });
     });

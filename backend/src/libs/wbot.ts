@@ -79,6 +79,7 @@ export const removeWbot = async (
       sessions[sessionIndex].ev.removeAllListeners("groups.update");
       sessions[sessionIndex].ev.removeAllListeners("group-participants.update");
       sessions[sessionIndex].ev.removeAllListeners("contacts.upsert");
+      sessions[sessionIndex].ev.removeAllListeners("contacts.update");
       sessions[sessionIndex].end(null);
 
       sessions[sessionIndex].ws.removeAllListeners();
