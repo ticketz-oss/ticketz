@@ -173,7 +173,21 @@ const useStyles = makeStyles((theme) => ({
     color: theme.mode === 'light' ? "green" : "lightgreen",
     fontWeight: "bold",
   },
-  
+  userAndConnection: {
+    height: 18,
+    padding: 5,
+    position: "inherit",
+    borderRadius: 7,
+    fontSize: 12,
+    fontWeight: "bold",
+    top: -6,
+    marginRight: 3,
+    maxWidth: "45%",
+    display: "inline-block",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap"
+  },
   ticketActions: {
     position: "absolute",
     right: -12,
@@ -182,13 +196,24 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     borderWidth: 1,
     borderStyle: "solid",
-    borderRadius: 16,
-    padding: 2,
+    borderRadius: 22,
+    padding: 4,
     minWidth: 23,
     cursor: "default",
     transition: "max-width 0.5s ease",
     overflow: "hidden",
-  }
+    backgroundColor: theme.palette.background.paper,
+  },
+  actionButton: {
+    padding: 2,
+    marginLeft: 3,
+    marginRight: 6,
+    height: 35,
+    width: 35,
+    fontSize: 12,
+    cursor: "pointer",
+    borderRadius: 50,
+  },
 }));
 
 const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
@@ -265,7 +290,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
     return (
       <div
         className={classes.ticketActions}
-        style={{ maxWidth: showActions ? "200px" : "28px" }}
+        style={{ maxWidth: showActions ? "200px" : "44px" }}
         onMouseOver={() => setShowActions(true)}
         onMouseLeave={() => setShowActions(false)}
         onClick={(e) => e.stopPropagation()}
@@ -277,17 +302,10 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
             <ClearOutlinedIcon
               onClick={() => handleCloseTicket(ticket.id)}
               fontSize="small"
+              className={classes.actionButton}
               style={{
                 color: '#fff',
                 backgroundColor: red[700],
-                cursor: "pointer",
-                //margin: '0 5 0 5',
-                padding: 2,
-                marginLeft: 3,
-                height: 23,
-                width: 23,
-                fontSize: 12,
-                borderRadius: 50,
               }}
             />
           </Tooltip>
@@ -300,16 +318,10 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
                 setOpenTicketMessageDialog(true)
               }}
               fontSize="small"
+              className={classes.actionButton}
               style={{
-                padding: 2,
-                marginLeft: 3,
-                height: 23,
-                width: 23,
-                fontSize: 12,
                 color: '#fff',
-                cursor: "pointer",
                 backgroundColor: blue[700],
-                borderRadius: 50,
               }}
             />
           </Tooltip>
@@ -319,17 +331,10 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
             <DoneIcon
               onClick={() => handleAcceptTicket(ticket.id)}
               fontSize="small"
+              className={classes.actionButton}
               style={{
                 color: '#fff',
                 backgroundColor: green[700],
-                cursor: "pointer",
-                //margin: '0 5 0 5',
-                padding: 2,
-                marginLeft: 3,
-                height: 23,
-                width: 23,
-                fontSize: 12,
-                borderRadius: 50,
               }}
             />
           </Tooltip>
@@ -343,8 +348,8 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
             position: "absolute",
             right: 0,
             bottom: 0,
-            width: 26,
-            height: 28,
+            width: 38,
+            height: 43,
              }}></span>
         </>
         )}
@@ -359,9 +364,9 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
                 cursor: "pointer",
                 //margin: '0 5 0 5',
                 padding: 2,
-                height: 23,
-                width: 23,
-                fontSize: 12,
+                height: 35,
+                width: 35,
+                fontSize: 18,
                 borderRadius: 50,
               }}
             />
@@ -375,31 +380,13 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
     if (ticketUser && ticket.status !== "pending") {
       return (
         <>
-          <span style={{
-            height: 18,
-            padding: 5,
-            position: "inherit",
-            borderRadius: 7,
-            fontSize: 12,
-            fontWeight: "bold",
-            top: -6,
-            marginRight: 3
-          }}>
+          <span className={classes.userAndConnection}>
             <PersonIcon style={{ height: 14, marginBottom: -2, width: 14 }} />
             {ticketUser}
           </span>
 
           {ticket.whatsappId && (
-            <span style={{
-              height: 18,
-              padding: 5,
-              position: "inherit",
-              borderRadius: 7,
-              fontSize: 12,
-              fontWeight: "bold",
-              top: -6,
-              marginRight: 3
-            }}>
+            <span className={classes.userAndConnection}>
               <SyncAltIcon style={{ height: 14, marginBottom: -2, width: 14 }} />
               {whatsAppName}
             </span>
@@ -423,16 +410,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
         <>
 
           {ticket.whatsappId && (
-            <span style={{
-              height: 18,
-              padding: 5,
-              position: "inherit",
-              borderRadius: 7,
-              fontSize: 12,
-              fontWeight: "bold",
-              top: -6,
-              marginRight: 3
-            }}>
+            <span className={classes.userAndConnection}>
               <SyncAltIcon style={{ height: 14, marginBottom: -2, width: 14 }} />
               {whatsAppName}
             </span>
