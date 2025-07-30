@@ -9,6 +9,7 @@ import WhatsappLidMap from "../../models/WhatsappLidMap";
 import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
 import UpdateTicketService from "../TicketServices/UpdateTicketService";
+import GetProfilePicUrl from "./GetProfilePicUrl";
 
 const lidUpdateMutex = new Mutex();
 
@@ -83,7 +84,7 @@ export async function verifyContact(
 ): Promise<Contact> {
   let profilePicUrl: string;
   try {
-    profilePicUrl = await wbot.profilePictureUrl(msgContact.id);
+    profilePicUrl = await GetProfilePicUrl(msgContact.id, companyId);
   } catch (e) {
     profilePicUrl = `${process.env.FRONTEND_URL}/nopicture.png`;
   }
