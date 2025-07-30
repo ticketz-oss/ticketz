@@ -936,6 +936,9 @@ const messages = {
             user: "User",
           },
         },
+        "AllowSilentlyClose": {
+          "title": "Allow Close Ticket Silently",
+        },
         "ticketAcceptedMessage": {
           "title": "Ticket Accepted Message",
           "placeholder": "Enter your ticket accepted message here"

@@ -941,6 +941,9 @@ const messages = {
             user: "Usuário",
           },
         },
+        "AllowSilentlyClose": {
+          "title": "Permitir fechar ticket silenciosamente",
+        },
         "ticketAcceptedMessage": {
           "title": "Mensagem de ticket aceito",
           "placeholder": "Digite sua mensagem de ticket aceito aqui"
