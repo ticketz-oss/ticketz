@@ -1,4 +1,7 @@
 import api, { openApi } from "../../services/api";
+import { Mutex } from 'async-mutex';
+
+const cachedSettingsMutex = new Mutex();
 
 const useSettings = () => {
 
@@ -33,13 +36,39 @@ const useSettings = () => {
         url: `/settings/${key}`,
         method: 'GET'
       });
-      return data || defaultValue;
+
+      if (!data) {
+        return defaultValue;
+      }
+            
+      sessionStorage.setItem(key, JSON.stringify(data));
+      sessionStorage.setItem(`${key}_timestamp`, Date.now());
+      
+      return data;
+    }
+    
+    const getCachedSetting = async (key, defaultValue = "") => {
+      return await cachedSettingsMutex.runExclusive(() => {
+        const cached = sessionStorage.getItem(key);
+        const timestamp = sessionStorage.getItem(`${key}_timestamp`);
+        if (cached) {
+          // check if timestamp is older than 10 minutes
+          if (timestamp && (Date.now() - timestamp > 10 * 60 * 1000)) {
+            sessionStorage.removeItem(key);
+            sessionStorage.removeItem(`${key}_timestamp`);
+          } else {
+            return JSON.parse(cached);
+          }
+        }
+        return getSetting(key, defaultValue);
+      });
     }
 
     return {
 		  getAll,
 		  getPublicSetting,
 		  getSetting,
+      getCachedSetting,
       update
     }
 }
