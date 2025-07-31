@@ -896,7 +896,7 @@ const MessageInputCustom = (props) => {
             // The third parameter is required for server
             //formData.append('file', result, result.name);
 
-            formData.append("medias", media);
+            formData.append("medias", media, media.name);
             formData.append("body", media.name);
 
           },
