@@ -16,6 +16,7 @@ import { Boom } from "@hapi/boom";
 import NodeCache from "node-cache";
 import { Op } from "sequelize";
 import { Agent } from "https";
+import { Mutex } from "async-mutex";
 import Whatsapp from "../models/Whatsapp";
 import { logger, loggerBaileys } from "../utils/logger";
 import authState from "../helpers/authState";
@@ -110,6 +111,14 @@ function getGreaterVersion(a, b) {
   return a;
 }
 
+const waVersionCache = new NodeCache({
+  stdTTL: 60 * 60 * 24, // 24 hours
+  checkperiod: 60 * 30, // 30 minutes
+  useClones: false
+});
+
+const waVersionMutex = new Mutex();
+
 const getProjectWAVersion = async () => {
   try {
     const res = await fetch(
@@ -141,7 +150,23 @@ export const initWASocket = async (
 
         const { id, name, provider } = whatsappUpdate;
 
-        const autoVersion = await getProjectWAVersion();
+        const autoVersion = await waVersionMutex.runExclusive(async () => {
+          let wv = waVersionCache.get("waVersion");
+
+          if (!wv) {
+            wv = await getProjectWAVersion();
+
+            if (!wv) {
+              // anything will be greater
+              return [2, 2300, 0];
+            }
+
+            waVersionCache.set("waVersion", wv);
+          }
+
+          return wv;
+        });
+
         const isLegacy = provider === "stable";
 
         const version = getGreaterVersion(autoVersion, waVersion);
