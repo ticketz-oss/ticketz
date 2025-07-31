@@ -99,7 +99,6 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 export const react = async (req: Request, res: Response): Promise<Response> => {
   const { messageId } = req.params;
   const { companyId } = req.user;
-  const userId = Number(req.user.id) || null;
   const { ticketId, emoji } = req.body;
 
   const message = await Message.findOne({
@@ -114,7 +113,7 @@ export const react = async (req: Request, res: Response): Promise<Response> => {
   }
 
   const ticket = await ShowTicketService(ticketId, companyId);
-  const wbot = await getWbot(ticket.whatsappId);
+  const wbot = getWbot(ticket.whatsappId);
 
   if (!wbot) {
     throw new AppError("ERR_WHATSAPP_NOT_FOUND", 500);
