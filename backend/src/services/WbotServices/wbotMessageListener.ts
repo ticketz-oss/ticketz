@@ -1957,6 +1957,8 @@ const wbotMessageListener = async (
           return;
         }
 
+        await wbot.sendReceipts([message.key], undefined);
+
         if (await verifyRecentCampaign(message, companyId)) {
           return;
         }
