@@ -154,10 +154,7 @@ export const update = async (
 
   const schema = Yup.object().shape({
     name: Yup.string(),
-    number: Yup.string().matches(
-      /^\d+$/,
-      "Invalid number format. Only numbers is allowed."
-    )
+    number: Yup.string().matches(/^\d+(@lid)?$/, "ERR_CHECK_NUMBER")
   });
 
   try {
@@ -166,7 +163,7 @@ export const update = async (
     throw new AppError(err.message);
   }
 
-  if (!contactData.isGroup) {
+  if (!contactData.isGroup && contactData.number.match(/^\d+$/)) {
     try {
       const validNumber = await CheckContactNumber(
         contactData.number,
