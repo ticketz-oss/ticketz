@@ -15,10 +15,10 @@ import { green, red } from "@material-ui/core/colors";
 
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import ErrorIcon from "@material-ui/icons/Error";
-import moment from "moment";
 
 import Rating from "@material-ui/lab/Rating";
 import { i18n } from "../../translate/i18n";
+import { formatTimeInterval } from "../../helpers/formatTimeInterval.js";
 
 const useStyles = makeStyles(theme => ({
 	on: {
@@ -87,8 +87,8 @@ export default function TableAttendantsStatus(props) {
                 <TableCell align="center">{a.totalTickets}</TableCell>
                 <TableCell align="center">{a.openTickets}</TableCell>
                 <TableCell align="center">{a.closedTickets}</TableCell>
-                <TableCell align="center">{formatTime(a.avgWaitTime, 2)}</TableCell>
-                <TableCell align="center">{formatTime(a.avgServiceTime, 2)}</TableCell>
+                <TableCell align="center">{formatTimeInterval(a.avgWaitTime, 2)}</TableCell>
+                <TableCell align="center">{formatTimeInterval(a.avgServiceTime, 2)}</TableCell>
                 <TableCell align="center">
                     { a.online ?
                         <CheckCircleIcon className={classes.on} />
@@ -98,10 +98,6 @@ export default function TableAttendantsStatus(props) {
             </TableRow>
         ))
     }
-
-	function formatTime(minutes){
-		return moment().startOf('day').add(minutes, 'minutes').format('HH[h] mm[m]');
-	}
 
     return ( !loading ?
         <TableContainer component={Paper}>
