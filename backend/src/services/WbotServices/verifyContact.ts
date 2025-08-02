@@ -83,6 +83,8 @@ export async function verifyContact(
   companyId: number
 ): Promise<Contact> {
   let profilePicUrl: string;
+  let profileHiresPictureUrl: string | undefined;
+
   const noPicture = `${process.env.FRONTEND_URL}/nopicture.png`;
 
   try {
@@ -90,6 +92,13 @@ export async function verifyContact(
       (await GetProfilePicUrl(msgContact.id, "preview", wbot)) || noPicture;
   } catch (error) {
     profilePicUrl = noPicture;
+  }
+
+  try {
+    profileHiresPictureUrl =
+      (await GetProfilePicUrl(msgContact.id, "image", wbot)) || noPicture;
+  } catch (error) {
+    profileHiresPictureUrl = null;
   }
 
   const isLid = msgContact.id.includes("@lid");
@@ -103,6 +112,7 @@ export async function verifyContact(
     name: msgContact?.name || msgContact.id.replace(/\D/g, ""),
     number,
     profilePicUrl,
+    profileHiresPictureUrl,
     isGroup: msgContact.id.includes("g.us"),
     companyId
   };
@@ -123,7 +133,8 @@ export async function verifyContact(
     if (isLid) {
       if (foundContact) {
         return updateContact(foundContact, {
-          profilePicUrl: contactData.profilePicUrl
+          profilePicUrl: contactData.profilePicUrl,
+          profileHiresPictureUrl: contactData.profileHiresPictureUrl
         });
       }
 
@@ -143,7 +154,8 @@ export async function verifyContact(
 
       if (foundMappedContact) {
         return updateContact(foundMappedContact.contact, {
-          profilePicUrl: contactData.profilePicUrl
+          profilePicUrl: contactData.profilePicUrl,
+          profileHiresPictureUrl: contactData.profileHiresPictureUrl
         });
       }
 
@@ -158,7 +170,8 @@ export async function verifyContact(
       if (partialLidContact) {
         return updateContact(partialLidContact, {
           number: contactData.number,
-          profilePicUrl: contactData.profilePicUrl
+          profilePicUrl: contactData.profilePicUrl,
+          profileHiresPictureUrl: contactData.profileHiresPictureUrl
         });
       }
     } else if (foundContact) {
@@ -178,7 +191,8 @@ export async function verifyContact(
         }
       }
       return updateContact(foundContact, {
-        profilePicUrl: contactData.profilePicUrl
+        profilePicUrl: contactData.profilePicUrl,
+        profileHiresPictureUrl: contactData.profileHiresPictureUrl
       });
     } else {
       const [ow] = await wbot.onWhatsApp(msgContact.id);
@@ -206,7 +220,8 @@ export async function verifyContact(
           });
           return updateContact(lidContact, {
             number: contactData.number,
-            profilePicUrl: contactData.profilePicUrl
+            profilePicUrl: contactData.profilePicUrl,
+            profileHiresPictureUrl: contactData.profileHiresPictureUrl
           });
         }
       }

@@ -13,7 +13,7 @@ const GetProfilePicUrl = async (
     return profilePicUrl;
   }
 
-  return wbot.profilePictureUrl(`${number}`, type).then(pic => {
+  return wbot.profilePictureUrl(`${number}`, type, 1000).then(pic => {
     cacheLayer.set(redisKey, pic, "EX", 60 * 60 * 24 * 5);
   });
 };
