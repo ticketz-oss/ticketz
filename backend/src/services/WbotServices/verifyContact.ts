@@ -83,10 +83,13 @@ export async function verifyContact(
   companyId: number
 ): Promise<Contact> {
   let profilePicUrl: string;
+  const noPicture = `${process.env.FRONTEND_URL}/nopicture.png`;
+
   try {
-    profilePicUrl = await GetProfilePicUrl(msgContact.id, companyId);
-  } catch (e) {
-    profilePicUrl = `${process.env.FRONTEND_URL}/nopicture.png`;
+    profilePicUrl =
+      (await GetProfilePicUrl(msgContact.id, "preview", wbot)) || noPicture;
+  } catch (error) {
+    profilePicUrl = noPicture;
   }
 
   const isLid = msgContact.id.includes("@lid");
