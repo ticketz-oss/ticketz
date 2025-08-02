@@ -1,4 +1,4 @@
-import { subMinutes } from "date-fns";
+import { subDays, subMinutes } from "date-fns";
 import { Op, WhereOptions } from "sequelize";
 import { Mutex } from "async-mutex";
 import moment from "moment";
@@ -11,6 +11,10 @@ import sequelize from "../../database";
 import Whatsapp from "../../models/Whatsapp";
 import Queue from "../../models/Queue";
 import { incrementCounter } from "../CounterServices/IncrementCounter";
+import Message from "../../models/Message";
+import CampaignShipping from "../../models/CampaignShipping";
+import Campaign from "../../models/Campaign";
+import { CreateInternalMessageService } from "../MessageServices/CreateInternalMessageService";
 
 const createTicketMutex = new Mutex();
 
@@ -192,6 +196,48 @@ const internalFindOrCreateTicketService = async (
     }
 
     ticket = await ShowTicketService(ticket.id, companyId);
+
+    if (justCreated) {
+      const lastMessage = await Message.findOne({
+        where: {
+          contactId: contact.id,
+          isDeleted: false
+        },
+        include: [
+          {
+            model: Ticket,
+            where: { whatsappId },
+            required: true
+          }
+        ],
+        order: [["createdAt", "DESC"]]
+      });
+
+      const campaignMessages = await CampaignShipping.findAll({
+        where: {
+          number: contact.number,
+          deliveredAt: {
+            [Op.gt]: lastMessage
+              ? lastMessage.createdAt
+              : subDays(new Date(), 7)
+          }
+        },
+        include: [
+          {
+            model: Campaign,
+            where: { whatsappId },
+            required: true
+          }
+        ],
+        order: [["createdAt", "DESC"]]
+      });
+
+      // eslint-disable-next-line no-restricted-syntax
+      for await (const campaignMessage of campaignMessages) {
+        // eslint-disable-next-line no-await-in-loop
+        await CreateInternalMessageService(ticket, campaignMessage.message);
+      }
+    }
 
     return { ticket, justCreated };
   });

@@ -85,6 +85,7 @@ const MessageOptionsMenu = ({ message, data, menuOpen, handleClose, anchorEl }) 
   const handleDownload = () => {
     const link = document.createElement('a');
     link.href = message.mediaUrl;
+    link.target = '_blank';
     link.download = message.mediaUrl.substring(message.mediaUrl.lastIndexOf('/')+1);
     link.style.display = 'none';
 
