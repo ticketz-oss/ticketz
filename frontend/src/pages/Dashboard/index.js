@@ -37,6 +37,7 @@ import { getTimezoneOffset } from "../../helpers/getTimezoneOffset.js";
 import TicketzRegistry from "../../components/TicketzRegistry";
 import api from "../../services/api.js";
 import { SocketContext } from "../../context/Socket/SocketContext.js";
+import { formatTimeInterval } from "../../helpers/formatTimeInterval.js";
 
 const gitinfo = loadJSON('/gitinfo.json');
 
@@ -446,13 +447,6 @@ const Dashboard = () => {
 
   const companyId = localStorage.getItem("companyId");
 
-  function formatTime(minutes) {
-    return moment()
-      .startOf("day")
-      .add(minutes, "minutes")
-      .format("HH[h] mm[m]");
-  }
-
   function renderFilters() {
       return (
         <>
@@ -700,14 +694,14 @@ const Dashboard = () => {
           {/* T.M. DE ATENDIMENTO */}
           <InfoCard
             title={i18n.t("dashboard.avgServiceTime")}
-            value={formatTime(ticketsData.ticketStatistics?.avgServiceTime)}
+            value={formatTimeInterval(ticketsData.ticketStatistics?.avgServiceTime)}
             icon={<TimerIcon style={{ fontSize: 100 }} />}
           />
 
           {/* T.M. DE ESPERA */}
           <InfoCard
             title={i18n.t("dashboard.avgWaitTime")}
-            value={formatTime(ticketsData.ticketStatistics?.avgWaitTime)}
+            value={formatTimeInterval(ticketsData.ticketStatistics?.avgWaitTime)}
             icon={<HourglassEmptyIcon style={{ fontSize: 100 }} />}
           />
 
