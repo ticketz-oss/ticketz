@@ -23,6 +23,7 @@ import { i18n } from "../../translate/i18n";
 
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
+import { SelectLanguage } from "../SelectLanguage";
 import { TagsContainer } from "../TagsContainer";
 import useSettings from "../../hooks/useSettings";
 
@@ -73,6 +74,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 		name: "",
 		number: "",
 		email: "",
+    language: localStorage.getItem("language") || "",
 		disableBot: false
 	};
 
@@ -186,6 +188,16 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 										variant="outlined"
 									/>
 								</div>
+                <div>
+                  <Field
+                    as={SelectLanguage}
+                    name="language"
+                    fullWidth
+                    margin="dense"
+                    variant="outlined"
+                  >
+                  </Field>
+                </div>
 								<>
 								<FormControlLabel
 									label={i18n.t("contactModal.form.disableBot")}

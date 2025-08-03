@@ -31,6 +31,8 @@ import toastError from "../../errors/toastError";
 import QueueSelect from "../QueueSelect";
 import HelpOutlineOutlinedIcon from "@material-ui/icons/HelpOutlineOutlined";
 
+import { SelectLanguage } from "../SelectLanguage";
+
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
@@ -77,6 +79,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
     isDefault: false,
     token: "",
     provider: "beta",
+    language: localStorage.getItem("language") || "",
   };
   const [whatsApp, setWhatsApp] = useState(initialState);
   const [selectedQueueIds, setSelectedQueueIds] = useState([]);
@@ -302,6 +305,16 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                   selectedQueueIds={selectedQueueIds}
                   onChange={(selectedIds) => setSelectedQueueIds(selectedIds)}
                 />
+                <div>
+                  <Field
+                    as={SelectLanguage}
+                    name="language"
+                    label={i18n.t("whatsappModal.form.language")}
+                    fullWidth
+                    variant="outlined"
+                    margin="dense"
+                  />
+                </div>
               </DialogContent>
               <DialogActions>
                 <Button
