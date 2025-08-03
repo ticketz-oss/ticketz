@@ -55,6 +55,7 @@ import { randomValue } from "../../helpers/randomValue";
 import { getJidOf } from "./getJidOf";
 import { verifyContact } from "./verifyContact";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
+import { _t } from "../TranslationServices/i18nService";
 
 import { IntegrationMessage } from "../IntegrationServices/IntegrationServices";
 import IntegrationSession from "../../models/IntegrationSession";
