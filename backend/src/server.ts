@@ -78,43 +78,39 @@ integrationServices.registerIntegration(new TypebotIntegration());
 const omniServices = OmniServices.getInstance();
 omniServices.registerOmniDriver(new NotificamehubDriver());
 
-// Create and start the server
-const server = app.listen(process.env.PORT, async () => {
-  if (process.env.NGROK_AUTH_TOKEN) {
-    logger.info("initializing ngrok...");
-    try {
-      const url = await ngrok.connect({
-        authtoken: process.env.NGROK_AUTH_TOKEN,
-        addr: process.env.PORT
-      });
-      if (url) {
-        NgrokInstance.getInstance().setUrl(url);
+// wait for i18n initialization before starting the server
+i18nReady.then(() => {
+  // Create and start the server
+  const server = app.listen(process.env.PORT, async () => {
+    if (process.env.NGROK_AUTH_TOKEN) {
+      logger.info("initializing ngrok...");
+      try {
+        const url = await ngrok.connect({
+          authtoken: process.env.NGROK_AUTH_TOKEN,
+          addr: process.env.PORT
+        });
+        if (url) {
+          NgrokInstance.getInstance().setUrl(url);
+        }
+        logger.info(`Server is publicly accessible at: ${url}`);
+      } catch (error) {
+        logger.error(`Error initializing ngrok: ${error.message}`);
       }
-      logger.info(`Server is publicly accessible at: ${url}`);
-    } catch (error) {
-      logger.error(`Error initializing ngrok: ${error.message}`);
     }
-  }
-  // wait for i18n initialization before starting the server
-  i18nReady.then(() => {
-    // Create and start the server
-    const server = app.listen(process.env.PORT, async () => {
-      logger.info(`Server is listening on port: ${process.env.PORT}`);
 
-      await startServer();
-    });
-});
-
-// Allow user to download media from messages the server failed to downloadit
-Message.update({ mediaType: "overlimit" }, { where: { mediaType: "wait" } })
-  .then(result => {
-    logger.debug(`Changed ${result[0]} media type 'wait' to 'overlimit'`);
-  })
-  .catch(error => {
-    logger.error(
-      `Error updating media type 'wait' to 'overlimit': ${error.message}`
-    );
+    await startServer();
   });
+
+  // Allow user to download media from messages the server failed to downloadit
+  Message.update({ mediaType: "overlimit" }, { where: { mediaType: "wait" } })
+    .then(result => {
+      logger.debug(`Changed ${result[0]} media type 'wait' to 'overlimit'`);
+    })
+    .catch(error => {
+      logger.error(
+        `Error updating media type 'wait' to 'overlimit': ${error.message}`
+      );
+    });
 
   initIO(server);
 
