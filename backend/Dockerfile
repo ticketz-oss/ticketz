@@ -7,7 +7,7 @@ WORKDIR /usr/src/app
 COPY . .
 
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci && npm run build
+    npm ci && npm run generate:i18nkeys && npm run build
 
 # Stage 2: Create the final image without source files
 FROM ghcr.io/ticketz-oss/node

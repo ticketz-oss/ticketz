@@ -29,6 +29,7 @@ import api from "../../services/api";
 import { head, isArray, has } from "lodash";
 import { useDate } from "../../hooks/useDate";
 import useSettings from "../../hooks/useSettings";
+import { SelectLanguage } from "../SelectLanguage";
 
 import moment from "moment";
 
@@ -91,6 +92,7 @@ export function CompanyForm(props) {
     name: "",
     email: "",
     phone: "",
+    language: "",
     planId: "",
     status: true,
     campaignsEnabled: false,
@@ -221,7 +223,7 @@ export function CompanyForm(props) {
                   margin="dense"
                 />
               </Grid>
-              <Grid xs={12} sm={6} md={2} item>
+              <Grid xs={12} sm={6} md={4} item>
                 <Field
                   as={TextField}
                   label="E-mail"
@@ -239,6 +241,15 @@ export function CompanyForm(props) {
                   name="phone"
                   variant="outlined"
                   className={classes.fullWidth}
+                  margin="dense"
+                />
+              </Grid>
+              <Grid xs={12} sm={6} md={2} item>
+                <Field
+                  as={SelectLanguage}
+                  name="language"
+                  fullWidth
+                  variant="outlined"
                   margin="dense"
                 />
               </Grid>
@@ -535,6 +546,7 @@ export default function CompaniesManager() {
     name: "",
     email: "",
     phone: "",
+    language: "",
     planId: "",
     status: true,
     campaignsEnabled: false,
@@ -610,6 +622,7 @@ export default function CompaniesManager() {
       name: "",
       email: "",
       phone: "",
+      language: "",
       planId: "",
       status: true,
       campaignsEnabled: false,
@@ -634,6 +647,7 @@ export default function CompaniesManager() {
       id: data.id,
       name: data.name || "",
       phone: data.phone || "",
+      language: data.language || "",
       email: data.email || "",
       planId: data.planId || "",
       status: data.status === false ? false : true,

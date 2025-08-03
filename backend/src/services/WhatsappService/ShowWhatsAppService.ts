@@ -3,6 +3,7 @@ import { Sequelize } from "sequelize-typescript";
 import Whatsapp from "../../models/Whatsapp";
 import Queue from "../../models/Queue";
 import QueueOption from "../../models/QueueOption";
+import Company from "../../models/Company";
 
 type ShowWhatsAppOptions = {
   hideSession?: boolean;
@@ -34,6 +35,11 @@ const ShowWhatsAppService = async (
             where: { parentId: null }
           }
         ]
+      },
+      {
+        model: Company,
+        as: "company",
+        attributes: ["id", "name", "language"]
       }
     ],
     order: [

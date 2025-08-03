@@ -39,6 +39,8 @@ import Subscriptions from "../models/Subscriptions";
 import BaileysKeys from "../models/BaileysKeys";
 import UserSocketSession from "../models/UserSocketSession";
 import OutOfTicketMessage from "../models/OutOfTicketMessages";
+import Translation from "../models/Translation";
+
 import Integration from "../models/Integration";
 import IntegrationSession from "../models/IntegrationSession";
 import NotificamehubIdMapping from "../models/NotificamehubIdMapping";
@@ -91,6 +93,7 @@ const models = [
   OutOfTicketMessage,
   QuickPix,
   Subscriptions,
+  Translation,
   Integration,
   IntegrationSession,
   NotificamehubIdMapping
