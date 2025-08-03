@@ -17,6 +17,7 @@ const messages = {
         name: "Nome",
         email: "Email",
         phone: "Telefone",
+        language: "Idioma",
         company: "Empresa",
         user: "Usuário",
         connection: "Conexão",
