@@ -6,6 +6,7 @@ import Queue from "../../models/Queue";
 import Tag from "../../models/Tag";
 import Whatsapp from "../../models/Whatsapp";
 import UserSocketSession from "../../models/UserSocketSession";
+import Company from "../../models/Company";
 
 const include = [
   {
@@ -21,7 +22,8 @@ const include = [
       "profilePicUrl",
       "profileHiresPictureUrl",
       "presence",
-      "disableBot"
+      "disableBot",
+      "language"
     ],
     include: ["tags", "extraInfo"]
   },
@@ -52,7 +54,8 @@ const include = [
       "channel",
       "companyId",
       "restrictToQueues",
-      "transferToNewTicket"
+      "transferToNewTicket",
+      "language"
     ]
   },
   {
@@ -66,7 +69,8 @@ const include = [
       "companyId",
       "ratingMessage",
       "transferMessage",
-      "complationMessage"
+      "complationMessage",
+      "language"
     ]
   },
   {

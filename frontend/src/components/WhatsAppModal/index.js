@@ -34,6 +34,8 @@ import toastError from "../../errors/toastError";
 import QueueSelect from "../QueueSelect";
 import HelpOutlineOutlinedIcon from "@material-ui/icons/HelpOutlineOutlined";
 
+import { SelectLanguage } from "../SelectLanguage";
+
 import { DynamicForm } from "../DynamicForm";
 import proxyConfigSchema from "./proxyConfigSchema";
 
@@ -89,6 +91,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
     isDefault: false,
     token: "",
     provider: "beta",
+    language: localStorage.getItem("language") || "",
     restrictToQueues: false,
     transferToNewTicket: false,
     hubToken: "",
@@ -404,6 +407,16 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                 </>)}
                 {tabIndex === 2 && (
                 <>
+                <div>
+                  <Field
+                    as={SelectLanguage}
+                    name="language"
+                    label={i18n.t("whatsappModal.form.language")}
+                    fullWidth
+                    variant="outlined"
+                    margin="dense"
+                  />
+                </div>
                 <div>
                   <Field
                     as={TextField}

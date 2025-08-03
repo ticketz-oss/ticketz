@@ -20,6 +20,7 @@ const messages = {
         name: "Nombre",
         email: "Correo electrónico",
         phone: "Teléfono",
+        language: "Idioma",
         company: "Empresa",
         user: "Usuario",
         connection: "Conexión",

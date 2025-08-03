@@ -10,6 +10,8 @@ import {
   checkOpenInvoices,
   payGatewayInitialize
 } from "./services/PaymentGatewayServices/PaymentGatewayServices";
+import { i18nReady } from "./services/TranslationServices/i18nService";
+
 import { IntegrationServices } from "./services/IntegrationServices/IntegrationServices";
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 import { DummyIntegration } from "./services/IntegrationServices/DummyIntegration";
@@ -93,8 +95,14 @@ const server = app.listen(process.env.PORT, async () => {
       logger.error(`Error initializing ngrok: ${error.message}`);
     }
   }
-  logger.info(`Server is listening on port: ${process.env.PORT}`);
-  await startServer();
+  // wait for i18n initialization before starting the server
+  i18nReady.then(() => {
+    // Create and start the server
+    const server = app.listen(process.env.PORT, async () => {
+      logger.info(`Server is listening on port: ${process.env.PORT}`);
+
+      await startServer();
+    });
 });
 
 // Allow user to download media from messages the server failed to downloadit
@@ -108,18 +116,19 @@ Message.update({ mediaType: "overlimit" }, { where: { mediaType: "wait" } })
     );
   });
 
-initIO(server);
+  initIO(server);
 
-// Graceful Shutdown Setup
-gracefulShutdown(server, {
-  signals: "SIGINT SIGTERM",
-  timeout: 30000,
-  onShutdown: async () => {
-    logger.info("Shutdown initiated. Cleaning up...");
-  },
-  finally: () => {
-    logger.info("Server has shut down.");
-  }
+  // Graceful Shutdown Setup
+  gracefulShutdown(server, {
+    signals: "SIGINT SIGTERM",
+    timeout: 30000,
+    onShutdown: async () => {
+      logger.info("Shutdown initiated. Cleaning up...");
+    },
+    finally: () => {
+      logger.info("Server has shut down.");
+    }
+  });
 });
 
 // Global Exception Handlers

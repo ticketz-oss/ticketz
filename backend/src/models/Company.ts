@@ -60,6 +60,9 @@ class Company extends Model<Company> {
   @BelongsTo(() => Plan)
   plan: Plan;
 
+  @Column
+  language: string;
+
   @CreatedAt
   createdAt: Date;
 

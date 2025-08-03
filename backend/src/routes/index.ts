@@ -31,6 +31,8 @@ import pwaRoutes from "./pwaRoutes";
 import versionRoutes from "./versionRoutes";
 import quickPixRoutes from "./quickPixRoutes";
 import ticketzOSSRoutes from "./ticketzOSSRoutes";
+import i18nRoutes from "./i18nRoutes";
+
 import binlistRoutes from "./binlistRoutes";
 import integrationsRoutes from "./integrationsRoutes";
 import notificameHubRoutes from "./notificameHubRoutes";
@@ -71,6 +73,7 @@ routes.use(quickPixRoutes);
 routes.use(pwaRoutes);
 routes.use(versionRoutes);
 routes.use(ticketzOSSRoutes);
+routes.use(i18nRoutes);
 
 routes.use(binlistRoutes);
 routes.use(integrationsRoutes);

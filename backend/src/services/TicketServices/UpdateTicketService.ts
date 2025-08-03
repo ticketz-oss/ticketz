@@ -24,6 +24,7 @@ import {
 } from "../OmniServices/OmniServices";
 import { logger } from "../../utils/logger";
 import { incrementCounter } from "../CounterServices/IncrementCounter";
+import { _t } from "../TranslationServices/i18nService";
 
 import { sendFormattedMessage } from "../../helpers/sendFormattedMessage";
 import { checkIntegration, startQueue } from "../QueueService/ChatbotService";
@@ -144,9 +145,7 @@ const UpdateTicketService = async ({
 
     if (user && ticket.status !== "pending") {
       if (user.profile !== "admin" && ticket.userId !== user.id) {
-        throw new AppError(
-          "Apenas o usuário ativo do ticket ou o Admin podem fazer alterações no ticket"
-        );
+        throw new AppError("ERR_FORBIDDEN", 403);
       }
     }
 
@@ -204,8 +203,10 @@ const UpdateTicketService = async ({
           if (ticket.whatsapp && ticket.channel === "whatsapp") {
             const ratingTxt =
               ticket.whatsapp.ratingMessage?.trim() ||
-              "Por favor avalie nosso atendimento";
-            const bodyRatingMessage = `${ratingTxt}\n\n*Digite uma nota de 1 a 5*\n\nEnvie *\`!\`* para retornar ao atendimento`;
+              _t("Please rate our service", ticket);
+            const rateInstructions = _t("Send a rating from 1 to 5", ticket);
+            const rateReturn = _t("Send *`!`* to return to the service", ticket);
+            const bodyRatingMessage = `${ratingTxt}\n\n*${rateInstructions}*\n\n${rateReturn}`;
 
             await sendFormattedMessage(bodyRatingMessage, ticket);
 

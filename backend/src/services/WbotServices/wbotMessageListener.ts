@@ -55,6 +55,7 @@ import { randomValue } from "../../helpers/randomValue";
 import { getJidOf } from "./getJidOf";
 import { verifyContact } from "./verifyContact";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
+import { _t } from "../TranslationServices/i18nService";
 
 import { IntegrationMessage } from "../IntegrationServices/IntegrationServices";
 import IntegrationSession from "../../models/IntegrationSession";
@@ -1359,7 +1360,7 @@ const handleMessage = async (
               outOfHoursCache().set(`ticket-${ticket.id}`, true);
               const outOfHoursMessage =
                 whatsapp.outOfHoursMessage.trim() ||
-                "Estamos fora do horário de expediente";
+                _t("We are out of office hours right now", ticket);
               const sentMessage = await wbot.sendMessage(getJidOf(ticket), {
                 text: formatBody(outOfHoursMessage, ticket)
               });
@@ -1395,7 +1396,7 @@ const handleMessage = async (
               outOfHoursCache().set(`ticket-${ticket.id}`, true);
               const outOfHoursMessage =
                 queue.outOfHoursMessage?.trim() ||
-                "Estamos fora do horário de expediente";
+                _t("We are out of office hours right now", ticket);
               const sentMessage = await wbot.sendMessage(getJidOf(ticket), {
                 text: formatBody(outOfHoursMessage, ticket)
               });

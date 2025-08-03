@@ -9,7 +9,7 @@ COPY . .
 RUN npm -g install javascript-obfuscator webpack webpack-cli
 
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci && npm run build
+    npm ci && npm run generate:i18nkeys && npm run build
 
 RUN webpack
 RUN webpack --config webpack.config.worker.js

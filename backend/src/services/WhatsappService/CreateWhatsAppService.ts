@@ -26,6 +26,7 @@ interface Request {
   channel?: string;
   session?: string;
   facebookPageUserId?: string;
+  language?: string;
   proxyConfig?: ProxyConfig;
 }
 
@@ -52,6 +53,7 @@ const CreateWhatsAppService = async ({
   facebookPageUserId,
   tokenMeta,
   channel = "whatsapp",
+  language,
   session,
   proxyConfig
 }: Request): Promise<Response> => {
@@ -163,6 +165,7 @@ const CreateWhatsAppService = async ({
       facebookUserToken,
       facebookPageUserId,
       tokenMeta,
+      language,
       proxyConfig
     },
     { include: ["queues"] }

@@ -22,6 +22,7 @@ export interface WhatsappData {
   queueIds?: number[];
   companyId?: number;
   token?: string;
+  language?: string;
   restrictToQueues?: boolean;
   transferToNewTicket?: boolean;
   proxyConfig?: ProxyConfig;
@@ -61,6 +62,7 @@ const UpdateWhatsAppService = async ({
     transferMessage,
     queueIds = [],
     token,
+    language,
     restrictToQueues,
     transferToNewTicket,
     proxyConfig
@@ -111,6 +113,7 @@ const UpdateWhatsAppService = async ({
     companyId,
     token,
     transferMessage,
+    language,
     restrictToQueues,
     transferToNewTicket,
     proxyConfig
