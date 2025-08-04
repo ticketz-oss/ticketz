@@ -35,6 +35,7 @@ import { TicketCountersChart } from "./TicketCountersChart";
 import { getTimezoneOffset } from "../../helpers/getTimezoneOffset.js";
 
 import TicketzRegistry from "../../components/TicketzRegistry";
+import { copyToClipboard } from "../../helpers/copyToClipboard.js";
 import api from "../../services/api.js";
 import { SocketContext } from "../../context/Socket/SocketContext.js";
 import { formatTimeInterval } from "../../helpers/formatTimeInterval.js";
@@ -58,12 +59,12 @@ const useStyles = makeStyles((theme) => ({
     fontSize: "9pt",
   },
   paymentimg: {
-    maxWidth: "100%",
-    marginTop: "30px",
+    maxWidth: "75%",
+    marginTop: 10,
   },
   paymentpix: {
     maxWidth: "100%",
-    maxHeight: "150px",
+    maxHeight: 130,
     padding: "5px",
     backgroundColor: "white",
     borderColor: "black",
@@ -74,7 +75,8 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(2),
     display: "flex",
     flexDirection: "column",
-    overflowY: "auto",
+    overflowY: "clip",
+    height: 300,
     backgroundColor: theme.palette.secondary.main,
     color: theme.palette.secondary.contrastText,
     ...theme.scrollbarStyles,
@@ -86,6 +88,8 @@ const useStyles = makeStyles((theme) => ({
     borderColor: theme.palette.secondary.main,
     borderWidth: "3px",
     borderStyle: "solid",
+    transition: "max-height 0.5s ease",
+    overflow: "clip"
   },
   cardAvatar: {
     fontSize: "55px",
@@ -151,6 +155,7 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     flexDirection: "column",
     overflowY: "auto",
+    minHeight: 300,
     backgroundColor: theme.palette.ticketzproad.main,
     color: theme.palette.ticketzproad.contrastText,
     ...theme.scrollbarStyles,
@@ -267,7 +272,8 @@ const Dashboard = () => {
   const [dateTo, setDateTo] = useState(moment().format("YYYY-MM-DDTHH") + ":59");
   const { getCurrentUserInfo } = useAuth();
     
-  const [supportBoxOpen, setSupportBoxOpen] = useState(false);
+  const [supportPix, setSupportPix] = useState(false);
+  const [supportIsBr, setSupportIsBr] = useState(false);
   const [registered, setRegistered] = useState(false);
   const [proInstructionsOpen, setProInstructionsOpen] = useState(false);
   
@@ -293,6 +299,17 @@ const Dashboard = () => {
     
     window.open("https://pro.ticke.tz", "_blank");
   }
+  
+  useEffect(() => {
+    fetch('https://ipapi.co/json/')
+      .then(res => res.json())
+      .then(data => {
+        if (data.country === 'BR') {
+          setSupportPix(true);
+          setSupportIsBr(true);
+        }
+      });
+  }, []);
   
   useEffect(() => {
     const socket = socketManager.GetSocket(companyId);
@@ -518,12 +535,15 @@ const Dashboard = () => {
           { !localStorage.getItem("hideAds") && <OnlyForSuperUser
             user={currentUser}
             yes={() => (
+              <>
               <Grid item xs={12}>
                 {!registered &&
                   <Paper className={classes.ticketzRegistryPaper}>
                     <TicketzRegistry onRegister={setRegistered} />
                   </Paper>
                 }
+              </Grid>
+              <Grid item lg={8} sm={12}>
                 <Paper className={clsx(classes.ticketzProPaper, {
                   [classes.clickpointer]: !proInstructionsOpen,
                 })} onClick={() => showProInstructions()}>
@@ -593,56 +613,68 @@ const Dashboard = () => {
                   </Grid>
                 </Paper>
               </Grid>
+              </>
             )} />
           }
 
           { !localStorage.getItem("hideAds") && <OnlyForSuperUser
             user={currentUser}
             yes={() => (
-              <Grid item xs={12}>
-                <Paper className={clsx(classes.supportPaper, {
-                  [classes.clickpointer]: !supportBoxOpen,
-                })} onClick={() => setSupportBoxOpen(true)}>
-                  <Typography component="h2" variant="h6" gutterBottom>
+              <Grid item lg={4} sm={12}>
+                <Paper className={classes.supportPaper}>
+                  <Typography style={{ overflow: "hidden" }} component="h2" variant="h6" gutterBottom>
                     {i18n.t("ticketz.support.title")}
                   </Typography>
-                  {supportBoxOpen &&
                     <Grid container justifyContent="flex-end">
-                      <Grid className={classes.supportBox} item xs={12} md={4} sm={12}>
-                        <Typography component="h3" variant="h6" gutterBottom>
+                      <Grid className={classes.supportBox} style={{maxHeight: supportPix ? 300 : 35} } item xs={12}>
+                        <Typography
+                          className={classes.clickpointer}
+                          component="h3" variant="h6"
+                          gutterBottom onClick={() => setSupportPix(true)}>
                           PIX
                         </Typography>
-                        <div>
-                          <img className={classes.paymentpix} src="/ticketzpix.png" />
+                        <div
+                          className={classes.clickpointer}
+                          onClick={() => {
+                            copyToClipboard("1ab11506-9480-4303-8e1e-988e7c49ed4d");
+                            toast.success("Chave PIX copiada");
+                          }
+                          }>
+                          <div>
+                            <img className={classes.paymentpix} src="/ticketzpix.png" />
+                          </div>
+                          <Typography className={classes.pixkey} component="body2" paragraph>
+                            Clique para copiar a chave PIX
+                          </Typography>
                         </div>
-                        <Typography className={classes.pixkey} component="body2" paragraph>
-                          1ab11506-9480-4303-8e1e-988e7c49ed4d
-                        </Typography>
                       </Grid>
-                      <Grid className={classes.supportBox} item xs={12} md={4} sm={12}>
-                        <Typography component="h3" variant="h6" gutterBottom>
+                      <Grid className={classes.supportBox}  style={{maxHeight: supportPix ? 35 : 300 }} item xs={12} onClick={() => setSupportPix(false)}>
+                        <Typography
+                          className={classes.clickpointer}
+                          component="h3" variant="h6"
+                          gutterBottom onClick={() => setSupportPix(true)}>
                           {i18n.t("ticketz.support.mercadopagotitle")}
                         </Typography>
-                        <Typography component="body2" paragraph>
-                          {i18n.t("ticketz.support.recurringbrl")}
-                        </Typography>
-                        <div><a href="https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=2c9380848f1b8ed1018f2b011f90061f" target="_blank">
-                          <img className={classes.paymentimg} src="/mercadopago.png" />
-                        </a></div>
-                      </Grid>
-                      <Grid className={classes.supportBox} item xs={12} md={4} sm={12}>
-                        <Typography component="h3" variant="h6" gutterBottom>
-                          {i18n.t("ticketz.support.paypaltitle")}
-                        </Typography>
-                        <Typography component="body2" paragraph>
-                          {i18n.t("ticketz.support.international")}
-                        </Typography>
-                        <div><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=X6XHVCPMRQEL4" target="_blank">
-                          <img className={classes.paymentimg} src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" />
-                        </a></div>
+                        { supportPix || <> 
+                        {supportIsBr && <>
+                          <Typography component="body2" paragraph>
+                            {i18n.t("ticketz.support.recurringbrl")}
+                          </Typography>
+                          <div><a href="https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=2c9380848f1b8ed1018f2b011f90061f" target="_blank">
+                            <img className={classes.paymentimg} src="/mercadopago.png" />
+                          </a></div>
+                        </>}
+                        {!supportIsBr && <>
+                          <Typography component="body2" paragraph>
+                            {i18n.t("ticketz.support.international")}
+                          </Typography>
+                          <div><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=X6XHVCPMRQEL4" target="_blank">
+                            <img className={classes.paymentimg} src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" />
+                          </a></div>
+                        </>}
+                        </> }
                       </Grid>
                     </Grid>
-                  }
                 </Paper>
               </Grid>
             )} /> }
