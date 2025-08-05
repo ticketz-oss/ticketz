@@ -860,6 +860,9 @@ const messages = {
         PaymentGateways: {
           title: "Gateway di pagamento",
         },
+        i18nSettings: {
+          title: "Traduzioni",
+        },
       },
       messagesList: {
         header: {
