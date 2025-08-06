@@ -8,10 +8,18 @@ interface Request {
 }
 
 const ListWhatsAppsService = async ({
-  session,
   companyId
 }: Request): Promise<Whatsapp[]> => {
   const options: FindOptions = {
+    attributes: [
+      "id",
+      "name",
+      "channel",
+      "status",
+      "qrcode",
+      "isDefault",
+      "updatedAt"
+    ],
     where: {
       companyId
     },
@@ -23,10 +31,6 @@ const ListWhatsAppsService = async ({
       }
     ]
   };
-
-  if (session !== undefined && session == 0) {
-    options.attributes = { exclude: ["session"] };
-  }
 
   const whatsapps = await Whatsapp.findAll(options);
 

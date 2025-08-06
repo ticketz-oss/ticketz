@@ -1,9 +1,9 @@
 import { initWASocket } from "../../libs/wbot";
 import Whatsapp from "../../models/Whatsapp";
 import { wbotMessageListener } from "./wbotMessageListener";
-import { getIO } from "../../libs/socket";
 import wbotMonitor from "./wbotMonitor";
 import { logger } from "../../utils/logger";
+import { sendWhatsappUpdate } from "../WhatsappService/SocketSendWhatsappUpdate";
 
 export const StartWhatsAppSession = async (
   whatsapp: Whatsapp,
@@ -12,11 +12,7 @@ export const StartWhatsAppSession = async (
 ): Promise<void> => {
   await whatsapp.update({ status: "OPENING" });
 
-  const io = getIO();
-  io.emit("whatsappSession", {
-    action: "update",
-    session: whatsapp
-  });
+  sendWhatsappUpdate(whatsapp);
 
   try {
     const wbot = await initWASocket(whatsapp, null, isRefresh);

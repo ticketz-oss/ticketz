@@ -14,6 +14,7 @@ import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService
 import UpdateWhatsAppService from "../services/WhatsappService/UpdateWhatsAppService";
 import AppError from "../errors/AppError";
 import Ticket from "../models/Ticket";
+import { sendWhatsappUpdate } from "../services/WhatsappService/SocketSendWhatsappUpdate";
 
 interface WhatsappData {
   name: string;
@@ -36,6 +37,11 @@ interface QueryParams {
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.user;
   const { session } = req.query as QueryParams;
+
+  if (req.user.profile !== "admin") {
+    return res.status(200).json([]);
+  }
+
   const whatsapps = await ListWhatsAppsService({ companyId, session });
 
   return res.status(200).json(whatsapps);
@@ -70,20 +76,13 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     token
   });
 
-  StartWhatsAppSession(whatsapp, companyId);
-
-  const io = getIO();
-  io.emit(`company-${companyId}-whatsapp`, {
-    action: "update",
-    whatsapp
-  });
+  sendWhatsappUpdate(whatsapp);
 
   if (oldDefaultWhatsapp) {
-    io.emit(`company-${companyId}-whatsapp`, {
-      action: "update",
-      whatsapp: oldDefaultWhatsapp
-    });
+    sendWhatsappUpdate(oldDefaultWhatsapp);
   }
+
+  StartWhatsAppSession(whatsapp, companyId);
 
   return res.status(200).json(whatsapp);
 };
@@ -121,17 +120,10 @@ export const update = async (
     companyId
   });
 
-  const io = getIO();
-  io.emit(`company-${companyId}-whatsapp`, {
-    action: "update",
-    whatsapp
-  });
+  sendWhatsappUpdate(whatsapp);
 
   if (oldDefaultWhatsapp) {
-    io.emit(`company-${companyId}-whatsapp`, {
-      action: "update",
-      whatsapp: oldDefaultWhatsapp
-    });
+    sendWhatsappUpdate(oldDefaultWhatsapp);
   }
 
   return res.status(200).json(whatsapp);
@@ -173,7 +165,7 @@ export const remove = async (
     await cacheLayer.delFromPattern(`sessions:${whatsappId}:*`);
     removeWbot(+whatsappId);
 
-    io.emit(`company-${companyId}-whatsapp`, {
+    io.to(`company-${companyId}-admin`).emit(`company-${companyId}-whatsapp`, {
       action: "delete",
       whatsappId: +whatsappId
     });
@@ -195,10 +187,13 @@ export const remove = async (
     });
 
     getAllSameToken.forEach(w => {
-      io.emit(`company-${companyId}-whatsapp`, {
-        action: "delete",
-        whatsappId: w.id
-      });
+      io.to(`company-${companyId}-admin`).emit(
+        `company-${companyId}-whatsapp`,
+        {
+          action: "delete",
+          whatsappId: w.id
+        }
+      );
     });
   }
 
