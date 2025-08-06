@@ -28,7 +28,7 @@ interface WhatsappData {
   isDefault?: boolean;
   token?: string;
   channel?: string;
-  session?: any;
+  extraParameters?: Record<string, any>;
 }
 
 interface QueryParams {
@@ -62,7 +62,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     queueIds,
     token,
     channel,
-    session
+    extraParameters
   }: WhatsappData = req.body;
   const { companyId } = req.user;
 
@@ -79,7 +79,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     companyId,
     token,
     channel,
-    session: JSON.stringify(session)
+    extraParameters
   });
 
   const sendEvent = async () => {
