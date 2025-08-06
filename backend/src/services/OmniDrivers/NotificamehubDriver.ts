@@ -172,6 +172,12 @@ export type NotificamehubStatusMessage = {
   messageStatus: NotificamehubMessageStatus;
 };
 
+type NotificameHubParameters = {
+  hubChannel: string;
+  hubToken: string;
+  hubWhatsappTemplate?: string;
+};
+
 const statusAck = {
   REJECTED: -1,
   PENDING: 1,
@@ -233,14 +239,8 @@ export type NotificamehubSession = {
 async function initializeWebhook(
   whatsapp: Whatsapp
 ): Promise<NotificamehubSession> {
-  let session: { hubToken: string; hubChannel: string };
-  try {
-    session = JSON.parse(whatsapp.session);
-  } catch (e) {
-    throw new Error("ERR_INVALID_SESSION");
-  }
-
-  const { hubToken, hubChannel } = session;
+  const { hubToken, hubChannel } =
+    whatsapp.extraParameters as NotificameHubParameters;
   if (!hubToken || !hubChannel) {
     throw new Error("ERR_INVALID_SESSION");
   }
@@ -582,7 +582,8 @@ export class NotificamehubDriver implements OmniDriver {
       throw new Error("notificamehub:startTicket: Connection not found");
     }
 
-    const { hubWhatsappTemplate } = JSON.parse(connection.session || "{}");
+    const { hubWhatsappTemplate } =
+      connection.extraParameters as NotificameHubParameters;
     if (!hubWhatsappTemplate) {
       throw new Error(
         "notificamehub:startTicket: Hub Whatsapp Template not found"
