@@ -1197,7 +1197,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
                 </span>
               )}
 
-              {message.thumbnailUrl && (
+              {message.thumbnailUrl && !message.mediaUrl && (
                 <img className={classes.previewThumbnail} src={message.thumbnailUrl} />
               )}
 
@@ -1277,7 +1277,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
                 </span>
               )}
 
-              {message.thumbnailUrl && (
+              {message.thumbnailUrl && !message.mediaUrl && (
                 <img className={classes.previewThumbnail} src={message.thumbnailUrl} />
               )}                                
 
