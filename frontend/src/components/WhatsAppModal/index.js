@@ -94,8 +94,11 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
     language: localStorage.getItem("language") || "",
     restrictToQueues: false,
     transferToNewTicket: false,
-    hubToken: "",
-    hubChannel: "",
+    extraParameters: {
+      hubToken: "",
+      hubChannel: "",
+      hubWhatsappTemplate: "",
+    }
   };
   const [whatsApp, setWhatsApp] = useState(initialState);
   const [settings, setSettings] = useState({});
@@ -113,14 +116,6 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 
       try {
         const { data } = await api.get(`whatsapp/${whatsAppId}?session=0`);
-        if (data.session) {
-          const session = JSON.parse(data.session);
-          if (session.hubToken) {
-            data.hubToken = session.hubToken;
-            data.hubChannel = session.hubChannel;
-            data.hubWhatsappTemplate = session.hubWhatsappTemplate;
-          }
-        }
         
         if (data.proxyConfig) {
           setProxyConfigData(data.proxyConfig);
@@ -152,20 +147,14 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
   }, [whatsAppId]);
 
   const handleSaveWhatsApp = async (values) => {
-    const { hubToken, hubChannel, hubWhatsappTemplate } = values;
     const whatsappData = { ...values, queueIds: selectedQueueIds };
     delete whatsappData["queues"];
-    delete whatsappData["session"];
-    delete whatsappData["hubToken"];
-    delete whatsappData["hubChannel"];
     delete whatsappData["proxyConfig"];
     
-    if (hubToken || hubChannel) {
-      whatsappData.session = {
-        hubToken,
-        hubChannel,
-        hubWhatsappTemplate
-      }
+    if (
+      whatsappData.extraParameters?.hubToken ||
+      whatsappData.extraParameters?.hubChannel
+    ) {
       whatsappData.channel = "notificamehub";
     }
     
@@ -475,9 +464,9 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                   <Field
                     as={TextField}
                     label={i18n.t("whatsappModal.form.hubToken")}
-                    type="hubToken"
+                    type="text"
                     fullWidth
-                    name="hubToken"
+                    name="extraParameters.hubToken"
                     variant="outlined"
                     margin="dense"
                   />
@@ -486,9 +475,9 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                   <Field
                     as={TextField}
                     label={i18n.t("whatsappModal.form.hubChannel")}
-                    type="hubChannel"
+                    type="text"
                     fullWidth
-                    name="hubChannel"
+                    name="extraParameters.hubChannel"
                     variant="outlined"
                     margin="dense"
                   />
@@ -497,9 +486,9 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                   <Field
                     as={TextField}
                     label={i18n.t("whatsappModal.form.hubWhatsappTemplate")}
-                    type="hubWhatsappTemplate"
+                    type="text"
                     fullWidth
-                    name="hubWhatsappTemplate"
+                    name="extraParameters.hubWhatsappTemplate"
                     variant="outlined"
                     margin="dense"
                   />
