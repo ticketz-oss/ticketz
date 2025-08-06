@@ -316,9 +316,9 @@ export const normalizeThumbnailMediaType = (
   mimetype: string
 ): "thumbnail-video" | "thumbnail-image" | "thumbnail-document" => {
   const types = ["thumbnail-video", "thumbnail-image", "thumbnail-document"];
-  const type = mimetype.split("/")[0];
+  const type = `thumbnail-${mimetype.split("/")[0]}`;
 
-  if (!types.includes(`thumbnail-${type}`)) {
+  if (!types.includes(type)) {
     return "thumbnail-document";
   }
 
@@ -334,9 +334,13 @@ const downloadThumbnail = async ({
     return null;
   }
 
+  const mediaType = mimetype
+    ? normalizeThumbnailMediaType(mimetype)
+    : "thumbnail-link";
+
   const stream = await downloadContentFromMessage(
     { mediaKey, directPath },
-    mimetype ? normalizeThumbnailMediaType(mimetype) : "thumbnail-link"
+    mediaType
   );
 
   if (!stream) {
