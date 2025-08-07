@@ -24,6 +24,7 @@ import { generateSecureToken } from "../../helpers/generateSecureToken";
 import { copyToClipboard } from "../../helpers/copyToClipboard";
 import useQueues from "../../hooks/useQueues";
 import { i18n } from "../../translate/i18n.js";
+import { SelectLanguage } from "../SelectLanguage";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -103,6 +104,7 @@ export default function Options(props) {
   const [outOfHoursAction, setOutOfHoursAction] = useState("pending");
   const [callType, setCallType] = useState("enabled");
   const [quickMessages, setQuickMessages] = useState("");
+  const [defaultLanguage, setDefaultLanguage] = useState("");
   const [allowSignup, setAllowSignup] = useState("disabled");
   const [chatbotAutoExit, setChatbotAutoExit] = useState("disabled");
   const [showNumericIcons, setShowNumericIcons] = useState("disabled");
@@ -194,6 +196,9 @@ export default function Options(props) {
       const showNumericIcons = settings.find((s) => s.key === "showNumericIcons");
       setShowNumericIcons(showNumericIcons?.value || "disabled");
 
+      const defaultLanguage = settings.find((s) => s.key === "defaultLanguage");
+      setDefaultLanguage(defaultLanguage?.value);
+        
       const allowSignup = settings.find((s) => s.key === "allowSignup");
       if (allowSignup) {
         setAllowSignup(allowSignup.value);
@@ -983,6 +988,18 @@ export default function Options(props) {
               <Grid item xs={12}>
                 <h2 className={classes.groupTitle}>{i18n.t("settings.group.serveradmin")}</h2>
               </Grid>
+              
+              <Grid xs={12} sm={6} md={4} item>
+                <SelectLanguage
+                  className={classes.selectContainer}
+                  fullWidth
+                  value={defaultLanguage}
+                  onChange={async (e) => {
+                    handleSetting("defaultLanguage", e.target.value, setDefaultLanguage);
+                  }}
+                />
+              </Grid>
+                    
               <Grid xs={12} sm={6} md={4} item>
                 <FormControl className={classes.selectContainer}>
                   <InputLabel id="group-type-label">
