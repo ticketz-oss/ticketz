@@ -309,7 +309,7 @@ export const normalizeThumbnailMediaType = (mimetype: string): MediaType => {
     return "thumbnail-document";
   }
 
-  return `thumbnail-${type}` as MediaType;
+  return type as MediaType;
 };
 
 export const normalizeMediaType = (
