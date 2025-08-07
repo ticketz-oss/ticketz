@@ -28,6 +28,7 @@ interface Request {
   facebookPageUserId?: string;
   language?: string;
   proxyConfig?: ProxyConfig;
+  extraParameters?: Record<string, any>;
 }
 
 interface Response {
@@ -54,8 +55,8 @@ const CreateWhatsAppService = async ({
   tokenMeta,
   channel = "whatsapp",
   language,
-  session,
-  proxyConfig
+  proxyConfig,
+  extraParameters
 }: Request): Promise<Response> => {
   const company = await Company.findOne({
     where: {
@@ -160,13 +161,13 @@ const CreateWhatsAppService = async ({
       token,
       provider,
       channel,
-      session,
       facebookUserId,
       facebookUserToken,
       facebookPageUserId,
       tokenMeta,
       language,
-      proxyConfig
+      proxyConfig,
+      extraParameters
     },
     { include: ["queues"] }
   );

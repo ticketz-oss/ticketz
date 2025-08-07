@@ -13,6 +13,7 @@ import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService
 import UpdateWhatsAppService from "../services/WhatsappService/UpdateWhatsAppService";
 import AppError from "../errors/AppError";
 import Ticket from "../models/Ticket";
+import { sendWhatsappUpdate } from "../services/WhatsappService/SocketSendWhatsappUpdate";
 import { OmniServices } from "../services/OmniServices/OmniServices";
 
 interface WhatsappData {
@@ -28,7 +29,7 @@ interface WhatsappData {
   isDefault?: boolean;
   token?: string;
   channel?: string;
-  session?: any;
+  extraParameters?: Record<string, any>;
 }
 
 interface QueryParams {
@@ -38,12 +39,15 @@ interface QueryParams {
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.user;
-  const { session, queueId } = req.query as QueryParams;
+  const { queueId } = req.query as QueryParams;
+
+  if (req.user.profile !== "admin" && !queueId) {
+    return res.status(200).json([]);
+  }
 
   const whatsapps = await ListWhatsAppsService({
     companyId,
-    queueId: Number(queueId),
-    session
+    queueId: Number(queueId)
   });
 
   return res.status(200).json(whatsapps);
@@ -62,7 +66,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     queueIds,
     token,
     channel,
-    session
+    extraParameters
   }: WhatsappData = req.body;
   const { companyId } = req.user;
 
@@ -79,23 +83,14 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     companyId,
     token,
     channel,
-    session: JSON.stringify(session)
+    extraParameters
   });
 
   const sendEvent = async () => {
-    const io = getIO();
-    await whatsapp.reload();
-
-    io.emit(`company-${companyId}-whatsapp`, {
-      action: "update",
-      whatsapp
-    });
+    sendWhatsappUpdate(whatsapp);
 
     if (oldDefaultWhatsapp) {
-      io.emit(`company-${companyId}-whatsapp`, {
-        action: "update",
-        whatsapp: oldDefaultWhatsapp
-      });
+      sendWhatsappUpdate(oldDefaultWhatsapp);
     }
   };
 
@@ -106,6 +101,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     const omniService = OmniServices.getInstance();
     omniService.startService(whatsapp).then(sendEvent);
   }
+
+  StartWhatsAppSession(whatsapp, companyId);
 
   return res.status(200).json(whatsapp);
 };
@@ -148,17 +145,10 @@ export const update = async (
     companyId
   });
 
-  const io = getIO();
-  io.emit(`company-${companyId}-whatsapp`, {
-    action: "update",
-    whatsapp
-  });
+  sendWhatsappUpdate(whatsapp);
 
   if (oldDefaultWhatsapp) {
-    io.emit(`company-${companyId}-whatsapp`, {
-      action: "update",
-      whatsapp: oldDefaultWhatsapp
-    });
+    sendWhatsappUpdate(oldDefaultWhatsapp);
   }
 
   return res.status(200).json(whatsapp);
@@ -202,7 +192,7 @@ export const remove = async (
 
   await DeleteWhatsAppService(whatsappId);
 
-  io.emit(`company-${companyId}-whatsapp`, {
+  io.to(`company-${companyId}-admin`).emit(`company-${companyId}-whatsapp`, {
     action: "delete",
     whatsappId: +whatsappId
   });

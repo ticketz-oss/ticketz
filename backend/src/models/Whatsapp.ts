@@ -126,6 +126,11 @@ class Whatsapp extends Model<Whatsapp> {
   @Column(DataType.TEXT)
   channel: string;
 
+  @Default({})
+  @AllowNull
+  @Column(DataType.JSONB)
+  extraParameters: object;
+
   @Default(false)
   @AllowNull
   @Column

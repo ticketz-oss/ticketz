@@ -334,10 +334,13 @@ export const initWASocket = async (
                   qrcode: ""
                 });
                 await DeleteBaileysService(whatsapp.id);
-                io.emit(`company-${whatsapp.companyId}-whatsappSession`, {
-                  action: "update",
-                  session: whatsapp
-                });
+                io.to(`company-${whatsapp.companyId}-admin`).emit(
+                  `company-${whatsapp.companyId}-whatsappSession`,
+                  {
+                    action: "update",
+                    session: whatsapp
+                  }
+                );
               }
               if (
                 (lastDisconnect?.error as Boom)?.output?.statusCode !==
@@ -345,10 +348,13 @@ export const initWASocket = async (
               ) {
                 // connection dropped without logging out
                 await whatsapp.update({ status: "PENDING" });
-                io.emit(`company-${whatsapp.companyId}-whatsappSession`, {
-                  action: "update",
-                  session: whatsapp
-                });
+                io.to(`company-${whatsapp.companyId}-admin`).emit(
+                  `company-${whatsapp.companyId}-whatsappSession`,
+                  {
+                    action: "update",
+                    session: whatsapp
+                  }
+                );
                 removeWbot(id, false).then(() => {
                   logger.info(`Reconnecting ${name} in 2 seconds`);
                   setTimeout(async () => {
@@ -369,10 +375,13 @@ export const initWASocket = async (
                   qrcode: ""
                 });
                 await DeleteBaileysService(whatsapp.id);
-                io.emit(`company-${whatsapp.companyId}-whatsappSession`, {
-                  action: "update",
-                  session: whatsapp
-                });
+                io.to(`company-${whatsapp.companyId}-admin`).emit(
+                  `company-${whatsapp.companyId}-whatsappSession`,
+                  {
+                    action: "update",
+                    session: whatsapp
+                  }
+                );
               }
             }
 
@@ -399,10 +408,13 @@ export const initWASocket = async (
                 `Session ${name} details`
               );
 
-              io.emit(`company-${whatsapp.companyId}-whatsappSession`, {
-                action: "update",
-                session: whatsapp
-              });
+              io.to(`company-${whatsapp.companyId}-admin`).emit(
+                `company-${whatsapp.companyId}-whatsappSession`,
+                {
+                  action: "update",
+                  session: whatsapp
+                }
+              );
 
               const sessionIndex = sessions.findIndex(
                 s => s.id === whatsapp.id
@@ -470,10 +482,13 @@ export const initWASocket = async (
                   sessions.push(wsocket);
                 }
 
-                io.emit(`company-${whatsapp.companyId}-whatsappSession`, {
-                  action: "update",
-                  session: whatsapp
-                });
+                io.to(`company-${whatsapp.companyId}-admin`).emit(
+                  `company-${whatsapp.companyId}-whatsappSession`,
+                  {
+                    action: "update",
+                    session: whatsapp
+                  }
+                );
               }
             }
           }

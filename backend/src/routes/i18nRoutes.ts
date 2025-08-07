@@ -1,9 +1,27 @@
 import express from "express";
-import { getLanguages } from "../controllers/I18nController";
 import isAuth from "../middleware/isAuth";
+import isSuper from "../middleware/isSuper";
+import * as I18nController from "../controllers/I18nController";
 
-const i18nRoutes = express.Router();
+const translationRoutes = express.Router();
 
-i18nRoutes.get("/i18n/languages", isAuth, getLanguages);
+translationRoutes.get(
+  "/translations/languages",
+  isAuth,
+  isSuper,
+  I18nController.listLanguages
+);
+translationRoutes.get(
+  "/translations",
+  isAuth,
+  isSuper,
+  I18nController.getKeysAndValues
+);
+translationRoutes.post(
+  "/translations",
+  isAuth,
+  isSuper,
+  I18nController.upsertTranslation
+);
 
-export default i18nRoutes;
+export default translationRoutes;

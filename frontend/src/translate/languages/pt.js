@@ -990,6 +990,9 @@ const messages = {
         PaymentGateways: {
           title: "Payment gateways",
         },
+        i18nSettings: {
+          title: "Traduções",
+        },
         AIProvider: {
           title: "Serviço de IA",
         },

@@ -307,9 +307,9 @@ const getMessageMedia = (message: proto.IMessage) => {
 
 export const normalizeThumbnailMediaType = (mimetype: string): MediaType => {
   const types = ["thumbnail-video", "thumbnail-image", "thumbnail-document"];
-  const type = mimetype.split("/")[0];
+  const type = `thumbnail-${mimetype.split("/")[0]}`;
 
-  if (!types.includes(`thumbnail-${type}`)) {
+  if (!types.includes(type)) {
     return "thumbnail-document";
   }
 

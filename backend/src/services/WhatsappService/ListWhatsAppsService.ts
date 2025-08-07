@@ -6,15 +6,24 @@ import { GetCompanySetting } from "../../helpers/CheckSettings";
 interface Request {
   companyId: number;
   queueId?: number;
-  session?: number | string;
 }
 
 const ListWhatsAppsService = async ({
-  session,
   queueId,
   companyId
 }: Request): Promise<Whatsapp[]> => {
+  const qrcodeAttribute = queueId ? [] : ["qrcode"];
+
   const options: FindOptions = {
+    attributes: [
+      "id",
+      "name",
+      "channel",
+      "status",
+      ...qrcodeAttribute,
+      "isDefault",
+      "updatedAt"
+    ],
     where: {
       companyId
     },
@@ -55,10 +64,6 @@ const ListWhatsAppsService = async ({
       ];
       options.include[0].required = false;
     }
-  }
-
-  if (session !== undefined && session === 0) {
-    options.attributes = { exclude: ["session"] };
   }
 
   const whatsapps = await Whatsapp.findAll(options);

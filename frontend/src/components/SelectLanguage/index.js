@@ -7,6 +7,7 @@ const languageOptions = {
   pt: "Portuguese 🇧🇷",
   "pt-PT": "Portuguese 🇵🇹",
   es: "Spanish",
+  it: "Italian",
   id: "Indonesian",
 };
 
