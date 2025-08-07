@@ -12,13 +12,15 @@ const ListWhatsAppsService = async ({
   queueId,
   companyId
 }: Request): Promise<Whatsapp[]> => {
+  const qrcodeAttribute = queueId ? [] : ["qrcode"];
+
   const options: FindOptions = {
     attributes: [
       "id",
       "name",
       "channel",
       "status",
-      "qrcode",
+      ...qrcodeAttribute,
       "isDefault",
       "updatedAt"
     ],
