@@ -4,7 +4,6 @@ import Whatsapp from "../../models/Whatsapp";
 
 interface Request {
   companyId: number;
-  session?: number | string;
 }
 
 const ListWhatsAppsService = async ({

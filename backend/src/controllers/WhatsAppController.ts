@@ -30,19 +30,14 @@ interface WhatsappData {
   token?: string;
 }
 
-interface QueryParams {
-  session?: number | string;
-}
-
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.user;
-  const { session } = req.query as QueryParams;
 
   if (req.user.profile !== "admin") {
     return res.status(200).json([]);
   }
 
-  const whatsapps = await ListWhatsAppsService({ companyId, session });
+  const whatsapps = await ListWhatsAppsService({ companyId });
 
   return res.status(200).json(whatsapps);
 };
