@@ -568,7 +568,7 @@ const Dashboard = () => {
                   </Grid>
                 }
               </Grid>
-              <Grid item lg={8} sm={12}>
+              <Grid item lg={8} sm={12} style={{ display: "none" }}>
                 <Paper className={clsx(classes.ticketzProPaper, {
                   [classes.clickpointer]: !proInstructionsOpen,
                 })} onClick={() => showProInstructions()}>
@@ -642,7 +642,7 @@ const Dashboard = () => {
             )} />
           }
 
-          { !localStorage.getItem("hideAds") && <OnlyForSuperUser
+          { false && !localStorage.getItem("hideAds") && <OnlyForSuperUser
             user={currentUser}
             yes={() => (
               <Grid item lg={4} sm={12}>
