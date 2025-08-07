@@ -1,5 +1,6 @@
 import AppError from "../../errors/AppError";
 import Setting from "../../models/Setting";
+import { updateDefaultLanguage } from "../TranslationServices/i18nService";
 
 interface Request {
   key: string;
@@ -16,7 +17,7 @@ const UpdateSettingService = async ({
     where: {
       key,
       companyId
-    }, 
+    },
     defaults: {
       key,
       value,
@@ -33,6 +34,10 @@ const UpdateSettingService = async ({
   }
 
   await setting.update({ value });
+
+  if (setting.key === "defaultLanguage" && companyId === 1) {
+    updateDefaultLanguage(value);
+  }
 
   return setting;
 };
