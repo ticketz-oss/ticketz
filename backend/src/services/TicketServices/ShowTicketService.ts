@@ -51,27 +51,21 @@ const include = [
     attributes: [
       "id",
       "name",
+      "status",
       "channel",
       "companyId",
       "restrictToQueues",
       "transferToNewTicket",
-      "language"
-    ]
-  },
-  {
-    model: Whatsapp,
-    as: "whatsapp",
-    attributes: [
-      "id",
-      "name",
-      "status",
-      "channel",
-      "companyId",
       "ratingMessage",
       "transferMessage",
       "complationMessage",
       "language"
     ]
+  },
+  {
+    model: Company,
+    as: "company",
+    attributes: ["id", "name", "language"]
   },
   {
     model: Tag,
