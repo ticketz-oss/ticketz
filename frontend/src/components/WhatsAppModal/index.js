@@ -309,7 +309,6 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                   <Field
                     as={SelectLanguage}
                     name="language"
-                    label={i18n.t("whatsappModal.form.language")}
                     fullWidth
                     variant="outlined"
                     margin="dense"
