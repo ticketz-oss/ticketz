@@ -1,13 +1,13 @@
-import * as Sentry from "@sentry/node";
 import { OmniServices } from "../OmniServices/OmniServices";
-import ListWhatsAppsService from "../WhatsappService/ListWhatsAppsService";
+import Whatsapp from "../../models/Whatsapp";
+import { logger } from "../../utils/logger";
 import { StartWhatsAppSession } from "./StartWhatsAppSession";
 
 export const StartAllWhatsAppsSessions = async (
   companyId: number
 ): Promise<void> => {
   try {
-    const whatsapps = await ListWhatsAppsService({ companyId, });
+    const whatsapps = await Whatsapp.findAll({ where: { companyId } });
     if (whatsapps.length > 0) {
       whatsapps.forEach(whatsapp => {
         if (whatsapp.channel === "whatsapp") {
@@ -19,6 +19,9 @@ export const StartAllWhatsAppsSessions = async (
       });
     }
   } catch (e) {
-    Sentry.captureException(e);
+    logger.error(
+      { message: e.message, stack: e.stack },
+      "Error starting WhatsApp sessions"
+    );
   }
 };

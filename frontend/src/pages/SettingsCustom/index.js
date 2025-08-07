@@ -13,6 +13,7 @@ import HelpsManager from "../../components/HelpsManager";
 import Options from "../../components/Settings/Options";
 import Whitelabel from "../../components/Settings/Whitelabel";
 import PaymentGateway from "../../components/Settings/PaymentGateway";
+import I18nSettings from "../../components/Settings/I18nSettings";
 
 import { i18n } from "../../translate/i18n.js";
 import { toast } from "react-toastify";
@@ -172,6 +173,7 @@ const SettingsCustom = () => {
           {isSuper() ? <Tab label={i18n.t("settings.Help.title")} value={"helps"} /> : null}
           {isSuper() ? <Tab label={i18n.t("settings.Whitelabel.title")} value={"whitelabel"} /> : null}
           {isSuper() ? <Tab label={i18n.t("settings.PaymentGateways.title")} value={"paymentGateway"} /> : null}
+          {isSuper() ? <Tab label={i18n.t("settings.i18nSettings.title")} value={"i18n"} /> : null}
         </Tabs>
         <Paper className={classes.paper} elevation={0}>
           <TabPanel
@@ -206,6 +208,13 @@ const SettingsCustom = () => {
                   <PaymentGateway
                     settings={settings}
                   />
+              </TabPanel>
+              <TabPanel
+                className={classes.container}
+                value={tab}
+                name={"i18n"}
+              >
+                <I18nSettings />
               </TabPanel>
               <TabPanel
                 className={classes.container}

@@ -1,6 +1,4 @@
 import { useState, useEffect, useReducer, useContext } from "react";
-import toastError from "../../errors/toastError";
-
 import api from "../../services/api";
 import { SocketContext } from "../../context/Socket/SocketContext";
 
@@ -63,7 +61,7 @@ const useWhatsApps = () => {
     setLoading(true);
     const fetchSession = async () => {
       try {
-        const { data } = await api.get("/whatsapp/?session=0");
+        const { data } = await api.get("/whatsapp");
         dispatch({ type: "LOAD_WHATSAPPS", payload: data });
         setLoading(false);
       } catch (_) {

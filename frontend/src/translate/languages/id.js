@@ -937,6 +937,9 @@ const messages = {
         PaymentGateways: {
           title: "Payment Gateways",
         },
+        i18nSettings: {
+          title: "Terjemahan",
+        },
       },
       messagesList: {
         header: {

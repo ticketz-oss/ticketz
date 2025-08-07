@@ -3,9 +3,10 @@ import * as Sentry from "@sentry/node";
 import { initWASocket } from "../../libs/wbot";
 import Whatsapp from "../../models/Whatsapp";
 import { wbotMessageListener } from "./wbotMessageListener";
-import { getIO } from "../../libs/socket";
 import wbotMonitor from "./wbotMonitor";
 import { logger } from "../../utils/logger";
+import { sendWhatsappUpdate } from "../WhatsappService/SocketSendWhatsappUpdate";
+
 import { createProxyAgent } from "../../helpers/createProxyAgent";
 
 export const StartWhatsAppSession = async (
@@ -15,11 +16,7 @@ export const StartWhatsAppSession = async (
 ): Promise<void> => {
   await whatsapp.update({ status: "OPENING" });
 
-  const io = getIO();
-  io.emit("whatsappSession", {
-    action: "update",
-    session: whatsapp
-  });
+  sendWhatsappUpdate(whatsapp);
 
   try {
     let proxy: Agent;
