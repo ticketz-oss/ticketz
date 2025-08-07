@@ -558,7 +558,7 @@ const Dashboard = () => {
                       <Typography className={classes.ticketzProTitle} component="h3" variant="h5" gutterBottom>
                         Ticketz PRO
                       </Typography>
-                      <Typography component="h3" variant="h7" gutterBottom>
+                      <Typography component="h4" variant="h7" gutterBottom>
                       <ul className={classes.ticketzProFeatures}>
                         <li>Whatsapp Oficial - Instagram - Messenger e outros</li>
                         <li>Features exclusivas</li>
@@ -573,7 +573,7 @@ const Dashboard = () => {
                         direto dentro do sistema
                       </Typography>
                       { gitinfo.commitHash && 
-                      <Typography component="h3" variant="h5">
+                      <Typography component="h4" variant="h6">
                         Clique para instruções de Upgrade
                       </Typography>
                       }
