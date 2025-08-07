@@ -6,7 +6,6 @@ import { GetCompanySetting } from "../../helpers/CheckSettings";
 interface Request {
   companyId: number;
   queueId?: number;
-  session?: number | string;
 }
 
 const ListWhatsAppsService = async ({
