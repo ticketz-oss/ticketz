@@ -707,7 +707,7 @@ const messages = {
         buttonclose: "Fechar",
         title: "Sobre o ticketz",
         abouttitle: "Origem e melhorias",
-        aboutdetail: "O ticketz é derivado indireto do projeto Whaticket com melhorias compartilhadas pelos desenvolvedores do sistema EquipeChat através do canal VemFazer no youtube, posteriormente melhoradas por Claudemir Todo Bom",
+        aboutdetail: "O CRM CNRO foi desenvolvido por Glecson Mendes, do departamento de Desenvolvimento Web ",
         aboutauthorsite: "Site do autor",
         aboutwhaticketsite: "Site do Whaticket Community no Github",
         aboutvemfazersite: "Site do canal Vem Fazer no Github",
