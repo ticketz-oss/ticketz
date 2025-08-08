@@ -27,7 +27,10 @@ import { SocketContext } from "../../context/Socket/SocketContext";
 import { getBackendURL } from "../../services/config";
 
 const useStyles = makeStyles((theme) => ({
-contend:{minWidth: 300,maxWidth: 500,},
+  contend: {
+    minWidth: 300,
+    maxWidth: 500,
+  },
   mainPaper: {
     flex: 1,
     maxHeight: 300,
@@ -36,17 +39,35 @@ contend:{minWidth: 300,maxWidth: 500,},
     overflowY: "scroll",
     ...theme.scrollbarStyles,
   },
+  imageContainer: {
+    border: "1px solid #f1f1f1",
+    margin: "0 auto 20px",
+    textAlign: "center",
+    width: "90%",
+    height: 300,
+    backgroundRepeat: "no-repeat",
+    backgroundSize: "contain",
+    backgroundPosition: "center",
+  },
+  priorityBorder: (priority) => ({
+    borderLeft: 
+      priority === 1 ? "4px solid #b81111" :
+      priority === 2 ? "4px solid orange" :
+      priority === 3 ? "4px solid grey" : "none"
+  }),
 }));
 
 function AnnouncementDialog({ announcement, open, handleClose }) {
- const classes=useStyles()
+  const classes = useStyles();
+  
   const getMediaPath = (filename) => {
-    return `${getBackendURL()}}/public/${filename}`;
+    return `${getBackendURL()}/public/${filename}`;
   };
+
   return (
     <Dialog
       open={open}
-      onClose={() => handleClose()}
+      onClose={handleClose}
       aria-labelledby="alert-dialog-title"
       aria-describedby="alert-dialog-description"
     >
@@ -54,25 +75,18 @@ function AnnouncementDialog({ announcement, open, handleClose }) {
       <DialogContent className={classes.contend}>
         {announcement.mediaPath && (
           <div
+            className={classes.imageContainer}
             style={{
-              border: "1px solid #f1f1f1",
-              margin: "0 auto 20px",
-              textAlign: "center",
-              width: "90%",
-              height: 300,
               backgroundImage: `url(${getMediaPath(announcement.mediaPath)})`,
-              backgroundRepeat: "no-repeat",
-              backgroundSize: "contain",
-              backgroundPosition: "center",
             }}
-          ></div>
+          />
         )}
         <DialogContentText id="alert-dialog-description">
           {announcement.text}
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => handleClose()} color="primary" autoFocus>
+        <Button onClick={handleClose} color="primary" autoFocus>
           Fechar
         </Button>
       </DialogActions>
@@ -161,7 +175,7 @@ export default function AnnouncementsPopover() {
     const companyId = localStorage.getItem("companyId");
     const socket = socketManager.GetSocket(companyId);
 
-	const onCompanyAnnouncement = (data) => {
+    const onCompanyAnnouncement = (data) => {
       if (data.action === "update" || data.action === "create") {
         dispatch({ type: "UPDATE_ANNOUNCEMENTS", payload: data.record });
         setInvisible(false);
@@ -174,7 +188,7 @@ export default function AnnouncementsPopover() {
     socket.on(`company-announcement`, onCompanyAnnouncement);
 
     return () => {
-      socket.disconnect();
+      socket.off(`company-announcement`, onCompanyAnnouncement);
     };
   }, [socketManager]);
 
@@ -210,18 +224,6 @@ export default function AnnouncementsPopover() {
 
   const handleClose = () => {
     setAnchorEl(null);
-  };
-
-  const borderPriority = (priority) => {
-    if (priority === 1) {
-      return "4px solid #b81111";
-    }
-    if (priority === 2) {
-      return "4px solid orange";
-    }
-    if (priority === 3) {
-      return "4px solid grey";
-    }
   };
 
   const getMediaPath = (filename) => {
@@ -281,15 +283,17 @@ export default function AnnouncementsPopover() {
             aria-label="main mailbox folders"
             style={{ minWidth: 300 }}
           >
-            {isArray(announcements) &&
+            {isArray(announcements) && announcements.length > 0 ? (
               announcements.map((item, key) => (
                 <ListItem
                   key={key}
                   style={{
-                    // background: key % 2 === 0 ? "#ededed" : "white",
                     border: "1px solid #eee",
-                    borderLeft: borderPriority(item.priority),
                     cursor: "pointer",
+                    borderLeft: 
+                      item.priority === 1 ? "4px solid #b81111" :
+                      item.priority === 2 ? "4px solid orange" :
+                      item.priority === 3 ? "4px solid grey" : "none"
                   }}
                   onClick={() => handleShowAnnouncementDialog(item)}
                 >
@@ -316,9 +320,11 @@ export default function AnnouncementsPopover() {
                     }
                   />
                 </ListItem>
-              ))}
-            {isArray(announcements) && announcements.length === 0 && (
-              <ListItemText primary="Nenhum registro" />
+              ))
+            ) : (
+              <ListItem>
+                <ListItemText primary="Nenhum anúncio disponível" />
+              </ListItem>
             )}
           </List>
         </Paper>
