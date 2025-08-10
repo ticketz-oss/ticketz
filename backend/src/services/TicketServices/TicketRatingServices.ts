@@ -13,8 +13,6 @@ import Queue from "../../models/Queue";
 import { updateTicket } from "./UpdateTicketService";
 import { OmniServices } from "../OmniServices/OmniServices";
 
-const omniServices = OmniServices.getInstance();
-
 async function handleRating(
   rate: number,
   ticket: Ticket,
@@ -109,7 +107,9 @@ export async function checkRating(
         `start handling tracking rating for ticket ${ticketTracking.ticketId}`
       );
 
-      const omniDriver = omniServices.getOmniDriver(ticketTracking?.ticket);
+      const omniDriver = OmniServices.getInstance().getOmniDriver(
+        ticketTracking?.ticket
+      );
 
       if (omniDriver && !omniDriver.allowChatbot(ticketTracking.ticket)) {
         return false;

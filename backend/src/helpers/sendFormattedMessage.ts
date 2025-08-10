@@ -7,8 +7,6 @@ import { verifyMessage } from "../services/WbotServices/wbotMessageListener";
 import GetTicketWbot from "./GetTicketWbot";
 import formatBody from "./Mustache";
 
-const omniServices = OmniServices.getInstance();
-
 /**
  * Options for sending a formatted message to a ticket's contact.
  * @typedef {Object} SendFormattedMessageOptions
@@ -36,7 +34,8 @@ export async function sendFormattedMessage(
   { user, dontSaveOnTicket, dontReopen }: SendFormattedMessageOptions = {}
 ): Promise<void> {
   const messageText = formatBody(message, ticket, user);
-  const omniDriver = omniServices.getOmniDriver(ticket);
+
+  const omniDriver = OmniServices.getInstance().getOmniDriver(ticket);
 
   const connection = await Whatsapp.findByPk(ticket.whatsappId);
 
