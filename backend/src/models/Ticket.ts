@@ -12,10 +12,12 @@ import {
   Default,
   BeforeCreate,
   BelongsToMany,
-  HasOne
+  HasOne,
+  AfterFind
 } from "sequelize-typescript";
 import { v4 as uuidv4 } from "uuid";
 
+import { QueryTypes } from "sequelize";
 import Contact from "./Contact";
 import Message from "./Message";
 import Queue from "./Queue";
@@ -129,6 +131,39 @@ class Ticket extends Model<Ticket> {
     hooks: true
   })
   integrationSession: IntegrationSession;
+
+  get lastContactMessageAt(): Date | null {
+    return this.getDataValue("lastContactMessageAt");
+  }
+
+  // After find hook to populate the virtual field using a query.
+  @AfterFind
+  static async attachLastContactMessageAt(found: Ticket | Ticket[] | null) {
+    if (!found || Array.isArray(found)) return;
+    // Normalize to array.
+    const { whatsappId } = found;
+    if (!whatsappId) return;
+
+    // Run raw query to get the max createdAt for messages (from contact) with matching whatsappId.
+    const query = `
+      SELECT MAX(m."createdAt") AS "lastContactMessageAt"
+      FROM "Messages" m
+      JOIN "Tickets" t ON m."ticketId" = t."id"
+      WHERE m."fromMe" = false
+        AND t."whatsappId" = :whatsappId
+    `;
+    const results: Array<{ lastContactMessageAt: Date }> =
+      await Ticket.sequelize!.query(query, {
+        replacements: { whatsappId },
+        type: QueryTypes.SELECT
+      });
+
+    // Assign computed value to each ticket.
+    found.setDataValue(
+      "lastContactMessageAt",
+      results[0]?.lastContactMessageAt || null
+    );
+  }
 }
 
 export default Ticket;
