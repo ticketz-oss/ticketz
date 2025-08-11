@@ -26,7 +26,7 @@ import MicIcon from "@material-ui/icons/Mic";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import CameraAltIcon from "@material-ui/icons/CameraAlt";
-import { FormControlLabel, Switch, Tooltip, InputAdornment, Typography } from "@material-ui/core";
+import { FormControlLabel, Switch, Tooltip, InputAdornment, Typography, Menu, MenuItem } from "@material-ui/core";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { isString, isEmpty, isObject, has } from "lodash";
 
@@ -45,7 +45,7 @@ import Compressor from 'compressorjs';
 import LinearWithValueLabel from "./ProgressBarCustom";
 import WhatsMarked from "react-whatsmarked";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSignature, faNoteSticky } from '@fortawesome/free-solid-svg-icons';
+import { faSignature, faNoteSticky, faBolt } from '@fortawesome/free-solid-svg-icons';
 import { isMobile } from "../../helpers/isMobile";
 import { SocketContext } from "../../context/Socket/SocketContext";
 
@@ -858,6 +858,7 @@ const MessageInputCustom = (props) => {
   
   const [pastOneSecond, setPastOneSecond] = useState(false);
   const [receivingDrop, setReceivingDrop] = useState(false);
+  const [templateAnchorEl, setTemplateAnchorEl] = React.useState(null);
   
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -1186,9 +1187,36 @@ const MessageInputCustom = (props) => {
       toastError(err);
     }
   };
+  
+  const handleOmniAction = async (action) => {
+    api.post(`/omni/executeTicketAction/${ticketId}/${action}`, {}).catch((err) => {
+      toastError(err);
+    });
+  }
+  
+  const checkOmniDisabled = () => {
+    if (!ticket?.omniData) return false;
+    
+    if (["whatsapp_business_account", "instagram", "messenger"].includes(ticket.omniData.info.channel)) {
+      if (!ticket.lastContactMessageAt) {
+        return true;
+      }
+      
+      const lastMessageDate = new Date(ticket.lastContactMessageAt);
+      // return true if last message was sent more than 24 hours ago
+      const now = new Date();
+      const diffHours = Math.abs(now - lastMessageDate) / 36e5;
+      if (diffHours > 24) {
+        return true;
+      }
+    }
+    
+    return false;
+  };
 
   const isGroup = showTabGroups && ticket.isGroup;
-  const disableOption = !isGroup && loading || recording || ticketStatus === "closed";
+  
+  const disableOption = checkOmniDisabled() || !isGroup && loading || recording || ticketStatus === "closed";
 
   const renderReplyingMessage = (message) => {
     return (
@@ -1383,6 +1411,63 @@ const MessageInputCustom = (props) => {
               />
             </>
           )}
+
+          {
+            ticket.omniData?.actions?.filter(action => action.action?.startsWith("sendTemplate:")).length > 0 &&
+            <>
+              <Tooltip title="templates">
+                <IconButton
+                  onClick={(e) => setTemplateAnchorEl(e.currentTarget)}
+                >
+                  <FontAwesomeIcon icon={faBolt} />
+                </IconButton>
+              </Tooltip>
+              <Popover
+                id="templates-popover"
+                open={templateAnchorEl !== null}
+                anchorEl={templateAnchorEl}
+                onClose={() => setTemplateAnchorEl(null)}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'center',
+                }}
+                transformOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'center',
+                }}
+              >
+                <Menu
+                  id="templates-menu"
+                  anchorEl={templateAnchorEl}
+                  open={Boolean(templateAnchorEl)}
+                  onClose={() => setTemplateAnchorEl(null)}
+                  anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'center',
+                  }}
+                  transformOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'center',
+                  }}
+                >
+                  {ticket.omniData.actions
+                    .filter(action => action.action.startsWith("sendTemplate:"))
+                    .map((action, index) => (
+                      <MenuItem
+                        key={index}
+                        onClick={() => {
+                          setTemplateAnchorEl(null);
+                          handleOmniAction(action.action);
+                        }}
+                      >
+                        {action.name}
+                      </MenuItem>
+                    ))}
+                </Menu>
+              </Popover>
+            </>
+          }
+          
           <CustomInput
             loading={loading}
             recording={recording}
