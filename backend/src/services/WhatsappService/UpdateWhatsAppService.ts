@@ -119,7 +119,7 @@ const UpdateWhatsAppService = async ({
     restrictToQueues,
     transferToNewTicket,
     proxyConfig,
-    extraParameters
+    extraParameters: { ...whatsapp.extraParameters, ...extraParameters }
   });
 
   await AssociateWhatsappQueue(whatsapp, queueIds);
