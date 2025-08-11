@@ -1197,7 +1197,7 @@ const MessageInputCustom = (props) => {
   const checkOmniDisabled = () => {
     if (!ticket?.omniData) return false;
     
-    if (["whatsapp_business_account", "instagram", "messenger"].includes(ticket.omniData.info.channel)) {
+    if (["whatsapp_business_account", "instagram", "messenger"].includes(ticket.omniData.info?.channel)) {
       if (!ticket.lastContactMessageAt) {
         return true;
       }

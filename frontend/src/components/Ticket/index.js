@@ -184,7 +184,7 @@ const Ticket = () => {
   const renderTicketWarning = () => {
   if (!ticket?.omniData) return <></>;
 
-  if (["whatsapp_business_account", "instagram", "messenger"].includes(ticket.omniData.info.channel)) {
+  if (["whatsapp_business_account", "instagram", "messenger"].includes(ticket.omniData.info?.channel)) {
     if (!ticket.lastContactMessageAt) {
       return <WarningBand message={i18n.t("omni.serviceWindowNotOpen")} />;
     }
