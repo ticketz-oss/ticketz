@@ -55,6 +55,8 @@ import VerifyCurrentSchedule, {
 } from "../CompanyService/VerifyCurrentSchedule";
 import { GetCompanySetting } from "../../helpers/CheckSettings";
 import { cacheLayer } from "../../libs/cache";
+import ShowTicketService from "../TicketServices/ShowTicketService";
+import { websocketUpdateTicket } from "../TicketServices/UpdateTicketService";
 
 export type OmniMessage = {
   type: "text" | "image" | "video" | "audio" | "document" | "reaction";
@@ -71,6 +73,13 @@ export type OmniSendMessageOptions = {
   dontReopen?: boolean;
 };
 
+export type OmniAction = {
+  action: string;
+  name: string;
+  description: string;
+  parameters?: IntegrationOptions[];
+};
+
 export interface OmniDriver {
   getName(): string;
   getDescription(): string;
@@ -80,6 +89,24 @@ export interface OmniDriver {
   getConnection(data: any): Promise<Whatsapp>;
   findOrCreateContact(connection: Whatsapp, data: any): Promise<Contact>;
   getMessageText(data: any): Promise<string>;
+  getConnectionDetails(connection: Whatsapp): Promise<Record<string, any>>;
+  availableChannelActions(
+    connection: Whatsapp,
+    req: Request
+  ): Promise<OmniAction[]>;
+  availableTicketActions(ticket: Ticket, req: Request): Promise<OmniAction[]>;
+  executeChannelAction(
+    connection: Whatsapp,
+    action: string,
+    req: Request,
+    parameters?: any
+  ): Promise<any>;
+  executeTicketAction(
+    ticket: Ticket,
+    action: string,
+    req: Request,
+    parameters?: any
+  ): Promise<any>;
   startTicket(ticket: Ticket): Promise<void>;
   findOrCreateTicket(
     contact: Contact,
@@ -299,6 +326,8 @@ export class OmniServices {
         lastMessage: messages[0].body
       });
 
+      websocketUpdateTicket(ticket);
+
       if (!(await driver.allowChatbot(ticket)) || !messages[0]) {
         return;
       }
@@ -471,5 +500,40 @@ export class OmniServices {
     };
 
     return omniMessage;
+  }
+
+  public async executeTicketAction(
+    req: Request,
+    res: Response
+  ): Promise<Response> {
+    logger.debug("OmniServices:executeTicketAction");
+
+    const { ticketId, action } = req.params;
+    const ticket = await ShowTicketService(ticketId, req.user.companyId);
+
+    if (req.user.profile !== "admin" && ticket.userId !== Number(req.user.id)) {
+      return res.status(403).send("ERR_FORBIDDEN");
+    }
+
+    const driver = this.getOmniDriver(ticket);
+    if (!driver) {
+      return res.status(404).send("OmniDriver not found");
+    }
+
+    try {
+      const result = await driver.executeTicketAction(
+        ticket,
+        action,
+        req,
+        req.body
+      );
+      return res.json(result);
+    } catch (error) {
+      if (error instanceof AppError) {
+        return res.status(error.statusCode).send(error.message);
+      }
+      logger.error(error);
+      return res.status(500).send("Internal server error");
+    }
   }
 }

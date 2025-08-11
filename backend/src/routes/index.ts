@@ -36,6 +36,7 @@ import i18nRoutes from "./i18nRoutes";
 import binlistRoutes from "./binlistRoutes";
 import integrationsRoutes from "./integrationsRoutes";
 import notificameHubRoutes from "./notificameHubRoutes";
+import omniRoutes from "./omniRoutes";
 
 const routes = Router();
 
@@ -76,5 +77,6 @@ routes.use(i18nRoutes);
 routes.use(binlistRoutes);
 routes.use(integrationsRoutes);
 routes.use(notificameHubRoutes);
+routes.use(omniRoutes);
 
 export default routes;
