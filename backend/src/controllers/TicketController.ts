@@ -12,6 +12,7 @@ import UpdateTicketService from "../services/TicketServices/UpdateTicketService"
 import ListTicketsServiceKanban from "../services/TicketServices/ListTicketsServiceKanban";
 import { makeRandomId } from "../helpers/MakeRandomId";
 import { logger } from "../utils/logger";
+import { OmniServices } from "../services/OmniServices/OmniServices";
 
 type IndexQuery = {
   isSearch?: string;
@@ -193,7 +194,21 @@ export const showFromUUID = async (
 
   const ticket: Ticket = await ShowTicketUUIDService(uuid);
 
-  return res.status(200).json(ticket);
+  const omniData: any = {};
+  if (ticket.whatsapp.channel !== "whatsapp") {
+    const omniDriver = OmniServices.getInstance().getOmniDriver(
+      ticket.whatsapp
+    );
+
+    if (omniDriver) {
+      omniData.actions = await omniDriver.availableTicketActions(ticket, req);
+      omniData.info = await omniDriver.getConnectionDetails(ticket.whatsapp);
+    }
+  }
+
+  return res
+    .status(200)
+    .json({ ...JSON.parse(JSON.stringify(ticket)), omniData });
 };
 
 export const update = async (

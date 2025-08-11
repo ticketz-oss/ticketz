@@ -56,7 +56,10 @@ interface Response {
   oldUserId: number | undefined;
 }
 
-export function websocketUpdateTicket(ticket: Ticket, moreChannels?: string[]) {
+export async function websocketUpdateTicket(
+  ticket: Ticket,
+  moreChannels?: string[]
+) {
   const io = getIO();
   let ioStack = io
     .to(ticket.id.toString())
@@ -72,9 +75,21 @@ export function websocketUpdateTicket(ticket: Ticket, moreChannels?: string[]) {
     });
   }
 
+  const omniData: any = {};
+  if (ticket.whatsapp.channel !== "whatsapp") {
+    const omniDriver = OmniServices.getInstance().getOmniDriver(
+      ticket.whatsapp
+    );
+
+    if (omniDriver) {
+      omniData.actions = await omniDriver.availableTicketActions(ticket, null);
+      omniData.info = await omniDriver.getConnectionDetails(ticket.whatsapp);
+    }
+  }
+
   ioStack.emit(`company-${ticket.companyId}-ticket`, {
     action: "update",
-    ticket
+    ticket: { ...JSON.parse(JSON.stringify(ticket)), omniData }
   });
 }
 

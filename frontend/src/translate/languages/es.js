@@ -480,6 +480,11 @@ const messages = {
           message: "Respuesta",
         },
       },
+      omni: {
+        serviceWindowNotOpen: "La ventana de servicio no está abierta",
+        serviceWindowExpiredAt: "La ventana de servicio expiró el",
+        serviceWindowExpiresAt: "La ventana de servicio expira el",
+      },
       kanban: {
         title: "Kanban",
         searchPlaceholder: "Búsqueda",

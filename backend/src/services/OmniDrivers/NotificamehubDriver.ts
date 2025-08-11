@@ -39,6 +39,8 @@ import {
 import { Op } from "sequelize";
 import { getLinkPreview } from "link-preview-js";
 import { Readable } from "stream";
+import axios from "axios";
+import { Request } from "express";
 import Contact from "../../models/Contact";
 import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
@@ -46,6 +48,7 @@ import Whatsapp from "../../models/Whatsapp";
 import { logger } from "../../utils/logger";
 import { IntegrationOptions } from "../IntegrationServices/IntegrationServices";
 import {
+  OmniAction,
   OmniDriver,
   OmniMessage,
   OmniSendMessageOptions
@@ -72,6 +75,9 @@ import GetDefaultWhatsApp from "../../helpers/GetDefaultWhatsApp";
 import { getWbot } from "../../libs/wbot";
 import { verifyContact } from "../WbotServices/verifyContact";
 import Queue from "../../models/Queue";
+import { CloudAPITemplate } from "./CloudAPI";
+import { _t } from "../TranslationServices/i18nService";
+import formatBody, { mustacheValues } from "../../helpers/Mustache";
 
 const contactMutex = new Mutex();
 const messageMutex = new Mutex();
@@ -111,6 +117,7 @@ export type NotificamehubMessageContext = {
 export type NotificamehubContent = {
   type:
     | "text"
+    | "button"
     | "photo"
     | "image"
     | "video"
@@ -121,6 +128,10 @@ export type NotificamehubContent = {
     | "reaction";
   id?: string;
   text?: string;
+  button?: {
+    payload: string;
+    text: string;
+  };
   media?: NotificamehubContentMedia;
   fileUrl?: string;
   fileMimeType?: string;
@@ -176,6 +187,7 @@ type NotificameHubParameters = {
   hubChannel: string;
   hubToken: string;
   hubWhatsappTemplate?: string;
+  whatsappTemplates?: CloudAPITemplate[];
 };
 
 const statusAck = {
@@ -234,6 +246,7 @@ function getBackendUrl() {
 export type NotificamehubSession = {
   client: Client;
   hubChannel: string;
+  channel: string;
 };
 
 async function initializeWebhook(
@@ -243,6 +256,25 @@ async function initializeWebhook(
     whatsapp.extraParameters as NotificameHubParameters;
   if (!hubToken || !hubChannel) {
     throw new Error("ERR_INVALID_SESSION");
+  }
+
+  const headers = { "X-Api-Token": hubToken };
+
+  const channelInfo = await axios.get(
+    `https://api.notificame.com.br/v1/channels/${hubChannel}`,
+    { headers }
+  );
+
+  const whatsappTemplates = [];
+
+  const channel = channelInfo.data?.[0]?.channel;
+
+  if (channel?.startsWith("whatsapp")) {
+    const templatesResponse = await axios.get(
+      `https://api.notificame.com.br/v1/templates/${hubChannel}`,
+      { headers }
+    );
+    whatsappTemplates.push(...(templatesResponse.data?.data || []));
   }
 
   const client = new Client(hubToken);
@@ -270,7 +302,8 @@ async function initializeWebhook(
   await Whatsapp.update(
     {
       status: "CONNECTED",
-      qrcode: hubChannel
+      qrcode: hubChannel,
+      extraParameters: { ...whatsapp.extraParameters, whatsappTemplates }
     },
     {
       where: {
@@ -279,7 +312,7 @@ async function initializeWebhook(
     }
   );
 
-  return { client, hubChannel };
+  return { client, hubChannel, channel };
 }
 
 function normalizeChannel(channel: string): string {
@@ -446,6 +479,10 @@ export class NotificamehubDriver implements OmniDriver {
       return content.text || null;
     }
 
+    if (content?.type === "button") {
+      return content.button.text;
+    }
+
     return null;
   }
 
@@ -570,6 +607,193 @@ export class NotificamehubDriver implements OmniDriver {
       connection.companyId,
       options
     );
+  }
+
+  async getConnectionDetails(
+    connection: Whatsapp
+  ): Promise<{ [key: string]: any }> {
+    return {
+      channel: this.sessions[connection.id]?.channel
+    };
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  async availableChannelActions(
+    _connection: Whatsapp,
+    _req: Request
+  ): Promise<OmniAction[]> {
+    return [];
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  async availableTicketActions(
+    ticket: Ticket,
+    _req: Request
+  ): Promise<OmniAction[]> {
+    const whatsapp = await Whatsapp.findByPk(ticket.whatsappId);
+    const { whatsappTemplates } =
+      whatsapp.extraParameters as NotificameHubParameters;
+    return (
+      whatsappTemplates
+        ?.filter(template => template.status === "APPROVED")
+        .map(template => ({
+          action: `sendTemplate:${template.name}`,
+          name: template.name,
+          description: `${_t("Send Template:", ticket)} ${template.name}`
+        })) || []
+    );
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  async executeChannelAction(
+    _connection: Whatsapp,
+    _action: string,
+    _req: Request,
+    _parameters?: any
+  ): Promise<any> {
+    return null;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  async executeTicketAction(
+    ticket: Ticket,
+    action: string,
+    req: Request,
+    _parameters?: any
+  ): Promise<any> {
+    if (!action.startsWith("sendTemplate:")) {
+      throw new Error("notificamehub:executeTicketAction: Invalid action");
+    }
+
+    const contact = await Contact.findByPk(ticket.contactId);
+
+    if (contact.channel !== "whatsapp") {
+      return;
+    }
+
+    const connection = await Whatsapp.findByPk(ticket.whatsappId);
+    const { client } = this.sessions[connection.id];
+
+    if (!client) {
+      return;
+    }
+
+    const templateName = action.replace("sendTemplate:", "").trim();
+    const { whatsappTemplates } =
+      connection.extraParameters as NotificameHubParameters;
+
+    const template = whatsappTemplates.find(
+      t => t.name === templateName && t.status === "APPROVED"
+    );
+
+    if (!template) {
+      throw new Error(
+        `notificamehub:executeTicketAction: Template ${templateName} not found`
+      );
+    }
+
+    const user = await User.findByPk(req.user.id);
+
+    const availableParameters = mustacheValues(ticket, ticket.contact, user);
+
+    const components = [];
+
+    let body = "";
+
+    template.components.forEach(component => {
+      if (
+        component.type === "BODY" &&
+        component.example.body_text_named_params.length
+      ) {
+        body = component.text;
+        const bodyParameters = component.example.body_text_named_params.map(
+          param => ({
+            type: "text",
+            parameter_name: param.param_name,
+            text:
+              availableParameters[param.param_name] || `{{${param.param_name}}}`
+          })
+        );
+        components.push({
+          type: "body",
+          parameters: bodyParameters
+        });
+      } else if (
+        component.type === "HEADER" &&
+        component.example.header_text_named_params.length
+      ) {
+        const headerParameters = component.example.header_text_named_params.map(
+          param => ({
+            type: "text",
+            parameter_name: param.param_name,
+            text:
+              availableParameters[param.param_name] || `{{${param.param_name}}}`
+          })
+        );
+        components.push({
+          type: "header",
+          parameters: headerParameters
+        });
+      }
+    });
+
+    const content = new TemplateContent({
+      name: templateName,
+      components,
+      language: { code: template.language }
+    });
+
+    const channel = client.setChannel(contact.channel);
+
+    if (content) {
+      messageMutex.runExclusive(async () => {
+        try {
+          const result = await channel.sendMessage(
+            connection.qrcode,
+            contact.number,
+            content
+          );
+          if (!result) {
+            logger.error(
+              { channel: connection.qrcode, ticket, contact, content },
+              "Failed to send message"
+            );
+            throw new Error("Failed to send message");
+          }
+
+          logger.debug({ result }, "Message body sent");
+
+          await ticket.update({
+            lastMessage: `template: ${templateName}`
+          });
+
+          await CreateMessageService({
+            messageData: {
+              id: `template:${templateName}${makeRandomId(10)}`,
+              contactId: ticket.contactId,
+              ticketId: ticket.id,
+              body: `*template:* ${templateName}\n\n${formatBody(
+                body,
+                ticket,
+                user
+              )}`,
+              fromMe: true,
+              channel: "internal",
+              dataJson: JSON.stringify(result)
+            },
+            companyId: ticket.companyId
+          });
+        } catch (error) {
+          logger.error(
+            { error: error.message, ticket, contact, content },
+            "notificamehub:executeTicketAction: Error sending template message"
+          );
+          throw new Error(
+            `notificamehub:executeTicketAction: Error sending template message: ${error.message}`
+          );
+        }
+      });
+    }
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -836,6 +1060,7 @@ export class NotificamehubDriver implements OmniDriver {
           : undefined;
 
       const body =
+        content.button?.text ||
         content.text ||
         content.caption ||
         content.reaction?.emoji ||
@@ -876,6 +1101,7 @@ export class NotificamehubDriver implements OmniDriver {
             "notificamehub:createMessage: Error creating NotificamehubIdMapping"
           );
         });
+
         return newMessage;
       });
     });

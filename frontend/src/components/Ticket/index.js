@@ -12,7 +12,9 @@ import TicketHeader from "../TicketHeader";
 import TicketInfo from "../TicketInfo";
 import TicketActionButtons from "../TicketActionButtonsCustom";
 import MessagesList from "../MessagesList";
+import WarningBand from "../WarningBand";
 import api from "../../services/api";
+import { i18n } from "../../translate/i18n";
 import { ReplyMessageProvider } from "../../context/ReplyingMessage/ReplyingMessageContext";
 import { EditMessageProvider } from "../../context/EditingMessage/EditingMessageContext";
 import toastError from "../../errors/toastError";
@@ -179,9 +181,37 @@ const Ticket = () => {
     }
   };
 
+  const renderTicketWarning = () => {
+  if (!ticket?.omniData) return <></>;
+
+  if (["whatsapp_business_account", "instagram", "messenger"].includes(ticket.omniData.info?.channel)) {
+    if (!ticket.lastContactMessageAt) {
+      return <WarningBand message={i18n.t("omni.serviceWindowNotOpen")} />;
+    }
+    
+    const lastMessageDate = new Date(ticket.lastContactMessageAt);
+    // expiration is 24 hours after the last contact message
+    const expireDate = new Date(lastMessageDate.getTime() + 24 * 60 * 60 * 1000); 
+    const now = new Date();
+    if (expireDate < now) {
+      return <WarningBand
+        message={`${i18n.t("omni.serviceWindowExpiredAt")} ${expireDate.toLocaleString()}}`}
+      />;
+    } else {
+      return <WarningBand
+        message={`${i18n.t("omni.serviceWindowExpiresAt")} ${expireDate.toLocaleString()}`}
+        backgroundColor="lightblue"
+      />;
+    }
+  }
+
+  return <></>;
+}
+  
   const renderMessagesList = () => {
     return (
       <>
+        { renderTicketWarning() }
         <MessagesList
           ticket={ticket}
           ticketId={ticket.id}
