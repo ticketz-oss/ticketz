@@ -96,8 +96,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
     transferToNewTicket: false,
     extraParameters: {
       hubToken: "",
-      hubChannel: "",
-      hubWhatsappTemplate: "",
+      hubChannel: ""
     }
   };
   const [whatsApp, setWhatsApp] = useState(initialState);
@@ -477,17 +476,6 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                     type="text"
                     fullWidth
                     name="extraParameters.hubChannel"
-                    variant="outlined"
-                    margin="dense"
-                  />
-                </div>
-                <div>
-                  <Field
-                    as={TextField}
-                    label={i18n.t("whatsappModal.form.hubWhatsappTemplate")}
-                    type="text"
-                    fullWidth
-                    name="extraParameters.hubWhatsappTemplate"
                     variant="outlined"
                     margin="dense"
                   />
