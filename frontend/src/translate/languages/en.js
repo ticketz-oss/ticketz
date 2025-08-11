@@ -479,6 +479,11 @@ const messages = {
           message: "Response",
         },
       },
+      omni: {
+        serviceWindowNotOpen: "Service window not open",
+        serviceWindowExpiredAt: "Service window expired at",
+        serviceWindowExpiresAt: "Service window expires at",
+      },
       kanban: {
         title: "Kanban",
         searchPlaceholder: "Search",

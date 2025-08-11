@@ -484,6 +484,11 @@ const messages = {
           message: "Resposta",
         },
       },
+      omni: {
+        serviceWindowNotOpen: "Janela de atendimento não está aberta",
+        serviceWindowExpiredAt: "Janela de atendimento expirou em",
+        serviceWindowExpiresAt: "Janela de atendimento expira em",
+      },
       kanban: {
         title: "Kanban",
         searchPlaceholder: "Pesquisa",
