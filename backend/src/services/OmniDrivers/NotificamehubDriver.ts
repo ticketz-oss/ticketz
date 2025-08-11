@@ -117,6 +117,7 @@ export type NotificamehubMessageContext = {
 export type NotificamehubContent = {
   type:
     | "text"
+    | "button"
     | "photo"
     | "image"
     | "video"
@@ -127,6 +128,10 @@ export type NotificamehubContent = {
     | "reaction";
   id?: string;
   text?: string;
+  button?: {
+    payload: string;
+    text: string;
+  };
   media?: NotificamehubContentMedia;
   fileUrl?: string;
   fileMimeType?: string;
@@ -472,6 +477,10 @@ export class NotificamehubDriver implements OmniDriver {
 
     if (content?.type === "text") {
       return content.text || null;
+    }
+
+    if (content?.type === "button") {
+      return content.button.text;
     }
 
     return null;
@@ -1051,6 +1060,7 @@ export class NotificamehubDriver implements OmniDriver {
           : undefined;
 
       const body =
+        content.button?.text ||
         content.text ||
         content.caption ||
         content.reaction?.emoji ||
