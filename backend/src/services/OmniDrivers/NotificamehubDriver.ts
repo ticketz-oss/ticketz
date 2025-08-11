@@ -186,7 +186,6 @@ export type NotificamehubStatusMessage = {
 type NotificameHubParameters = {
   hubChannel: string;
   hubToken: string;
-  hubWhatsappTemplate?: string;
   whatsappTemplates?: CloudAPITemplate[];
 };
 
@@ -418,13 +417,6 @@ export class NotificamehubDriver implements OmniDriver {
           description: "Channel ID to access the Notificamehub API",
           type: "text",
           required: true
-        },
-        {
-          name: "hubDefaultTemplate",
-          title: "Default Message Template",
-          description: "Default template name for first contact messages",
-          type: "text",
-          required: false
         }
       ]
     };
@@ -804,104 +796,6 @@ export class NotificamehubDriver implements OmniDriver {
 
     if (!connection) {
       throw new Error("notificamehub:startTicket: Connection not found");
-    }
-
-    const { hubWhatsappTemplate } =
-      connection.extraParameters as NotificameHubParameters;
-    if (!hubWhatsappTemplate) {
-      throw new Error(
-        "notificamehub:startTicket: Hub Whatsapp Template not found"
-      );
-    }
-
-    const contact = await Contact.findByPk(ticket.contactId);
-
-    if (contact.channel !== "whatsapp") {
-      return;
-    }
-
-    const { client } = this.sessions[connection.id];
-
-    if (!client) {
-      return;
-    }
-
-    const user = await User.findByPk(ticket.userId);
-
-    const channel = client.setChannel(contact.channel);
-
-    const parameters = {
-      name: contact.name || contact.number,
-      user: user?.name || "Atendant",
-      protocol: `${ticket.createdAt
-        .toISOString()
-        .split("T")[0]
-        .replace(/[^0-9]/g, "")}-${ticket.id}`
-    };
-
-    const content = new TemplateContent({
-      name: hubWhatsappTemplate,
-      components: [
-        {
-          type: "body",
-          parameters: [
-            {
-              type: "text",
-              parameter_name: "name",
-              text: parameters.name
-            },
-            {
-              type: "text",
-              parameter_name: "user",
-              text: parameters.user
-            },
-            {
-              type: "text",
-              parameter_name: "protocol",
-              text: parameters.protocol
-            }
-          ]
-        }
-      ],
-      language: {
-        code: "pt_BR"
-      }
-    });
-
-    if (content) {
-      messageMutex.runExclusive(async () => {
-        const result = await channel.sendMessage(
-          connection.qrcode,
-          contact.number,
-          content
-        );
-        if (!result) {
-          logger.error(
-            { channel: connection.qrcode, ticket, contact, content },
-            "Failed to send message"
-          );
-          throw new Error("Failed to send message");
-        }
-
-        logger.debug({ result }, "Message body sent");
-
-        await ticket.update({
-          lastMessage: `template: ${hubWhatsappTemplate}`
-        });
-
-        await CreateMessageService({
-          messageData: {
-            id: `template:${hubWhatsappTemplate}${makeRandomId(10)}`,
-            contactId: ticket.contactId,
-            ticketId: ticket.id,
-            body: `*template:* ${hubWhatsappTemplate}\n*protocol:* ${parameters.protocol}\n*name:* ${parameters.name}`,
-            fromMe: true,
-            channel: "internal",
-            dataJson: JSON.stringify(result)
-          },
-          companyId: ticket.companyId
-        });
-      });
     }
   }
 
