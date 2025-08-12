@@ -28,8 +28,8 @@ export const genGreeting = (lngSource: Ticket | Contact | Company): string => {
 
 export function mustacheValues(
   ticket: Ticket,
-  contact: Contact | ContactListItem,
-  currentUser: User
+  contact?: Contact | ContactListItem,
+  currentUser?: User
 ): Record<string, any> {
   contact = contact || ticket?.contact;
 
