@@ -30,7 +30,13 @@ ticketRoutes.get(
   TicketController.showFromUUID
 );
 
-ticketRoutes.post("/tickets", isAuth, isCompliant, TicketController.store);
+ticketRoutes.post(
+  "/tickets",
+  apiTokenAuth,
+  isAuth,
+  isCompliant,
+  TicketController.store
+);
 
 ticketRoutes.put(
   "/tickets/:ticketId",
