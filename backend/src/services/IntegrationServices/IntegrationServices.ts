@@ -46,6 +46,7 @@ import {
   contactTagRemove,
   contactTagRemoveAll
 } from "../ContactTagService/ContactTagService";
+import { mustacheValues } from "../../helpers/Mustache";
 
 export type IntegrationOptions = {
   fields: {
@@ -119,6 +120,7 @@ export type IntegrationMessageMetadata = {
   ticketId: number;
   customPayload?: any;
   firstMessage?: string;
+  mustacheValues?: Record<string, any>;
   extraParams?: any;
 };
 
@@ -285,7 +287,10 @@ export class IntegrationServices {
     return driver.continueSession(
       integrationSession,
       message,
-      metadata,
+      {
+        mustacheValues: mustacheValues(integrationSession.ticket),
+        ...metadata
+      },
       replyHandler
     );
   }

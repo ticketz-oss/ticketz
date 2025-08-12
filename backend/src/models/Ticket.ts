@@ -141,20 +141,22 @@ class Ticket extends Model<Ticket> {
   static async attachLastContactMessageAt(found: Ticket | Ticket[] | null) {
     if (!found || Array.isArray(found)) return;
     // Normalize to array.
-    const { whatsappId } = found;
-    if (!whatsappId) return;
+    const { contactId, whatsappId } = found;
+    if (!contactId || !whatsappId) return;
 
     // Run raw query to get the max createdAt for messages (from contact) with matching whatsappId.
     const query = `
       SELECT MAX(m."createdAt") AS "lastContactMessageAt"
       FROM "Messages" m
       JOIN "Tickets" t ON m."ticketId" = t."id"
-      WHERE m."fromMe" = false
+      WHERE m."contactId" = :contactId
+        AND m."fromMe" = false
+        AND t."contactId" = m."contactId"
         AND t."whatsappId" = :whatsappId
     `;
     const results: Array<{ lastContactMessageAt: Date }> =
       await Ticket.sequelize!.query(query, {
-        replacements: { whatsappId },
+        replacements: { contactId, whatsappId },
         type: QueryTypes.SELECT
       });
 

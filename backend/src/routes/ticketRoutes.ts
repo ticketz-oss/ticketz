@@ -37,6 +37,7 @@ ticketRoutes.get(
 
 ticketRoutes.post(
   "/tickets",
+  apiTokenAuth,
   isAuth,
   checkSubscription,
   isCompliant,

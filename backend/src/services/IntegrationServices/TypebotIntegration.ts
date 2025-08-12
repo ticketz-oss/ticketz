@@ -41,6 +41,7 @@ import { logger } from "../../utils/logger";
 import IntegrationSession from "../../models/IntegrationSession";
 import { cacheLayer } from "../../libs/cache";
 import { GetCompanySetting } from "../../helpers/CheckSettings";
+import { mustacheValues } from "../../helpers/Mustache";
 
 const integrations = IntegrationServices.getInstance();
 
@@ -213,7 +214,12 @@ export class TypebotIntegration implements IntegrationDriver {
       // do nothing
     }
 
+    const mValues = mustacheValues(ticket);
+    delete mValues.extraInfo;
+
     const prefilledVariables = {
+      ...mValues,
+      ...jsonParams,
       token,
       backendURL: process.env.BACKEND_URL,
       number: metadata.from.number,
@@ -221,8 +227,7 @@ export class TypebotIntegration implements IntegrationDriver {
       firstMessage: metadata.firstMessage,
       ticketId: metadata.ticketId,
       ticketUuid: ticket.uuid,
-      metadata: JSON.stringify(metadata),
-      ...jsonParams
+      metadata: JSON.stringify(metadata)
     };
 
     const response = await axios.post(
