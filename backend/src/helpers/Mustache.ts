@@ -60,6 +60,7 @@ export function mustacheValues(
   }
 
   const view = {
+    ...extraInfo,
     name,
     firstname,
     email,
@@ -80,6 +81,20 @@ export function mustacheValues(
   return view;
 }
 
+function placeholderVariables(template: string): Record<string, string> {
+  const tokens = Mustache.parse(template);
+
+  const placeholder: Record<string, string> = {};
+
+  tokens.forEach(token => {
+    if (token[0] === "name") {
+      placeholder[token[1]] = `{{${token[1]}}}`;
+    }
+  });
+
+  return placeholder;
+}
+
 export function mustacheFormat({
   body,
   ticket,
@@ -93,7 +108,12 @@ export function mustacheFormat({
 
   const view = mustacheValues(ticket, contact, currentUser);
 
-  return Mustache.render(body, view, null, customTags);
+  return Mustache.render(
+    body,
+    { ...placeholderVariables(body), ...view },
+    null,
+    customTags
+  );
 }
 
 export function formatBody(
