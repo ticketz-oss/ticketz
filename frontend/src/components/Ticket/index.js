@@ -195,7 +195,7 @@ const Ticket = () => {
     const now = new Date();
     if (expireDate < now) {
       return <WarningBand
-        message={`${i18n.t("omni.serviceWindowExpiredAt")} ${expireDate.toLocaleString()}}`}
+        message={`${i18n.t("omni.serviceWindowExpiredAt")} ${expireDate.toLocaleString()}`}
       />;
     } else {
       return <WarningBand

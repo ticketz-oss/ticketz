@@ -10,7 +10,7 @@ export default {
     `);
   },
 
-  down: () => {
+  down: async () => {
     // no-op
   }
 };
