@@ -695,7 +695,7 @@ export class NotificamehubDriver implements OmniDriver {
     template.components.forEach(component => {
       if (
         component.type === "BODY" &&
-        component.example.body_text_named_params.length
+        component.example?.body_text_named_params.length
       ) {
         body = component.text;
         const bodyParameters = component.example.body_text_named_params.map(
@@ -712,7 +712,7 @@ export class NotificamehubDriver implements OmniDriver {
         });
       } else if (
         component.type === "HEADER" &&
-        component.example.header_text_named_params.length
+        component.example?.header_text_named_params.length
       ) {
         const headerParameters = component.example.header_text_named_params.map(
           param => ({
