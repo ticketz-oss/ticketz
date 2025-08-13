@@ -57,9 +57,11 @@ interface Response {
 }
 
 export async function websocketUpdateTicket(
-  ticket: Ticket,
+  origTicket: Ticket,
   moreChannels?: string[]
 ) {
+  const ticket = await ShowTicketService(origTicket.id);
+
   const io = getIO();
   let ioStack = io
     .to(ticket.id.toString())
@@ -220,7 +222,10 @@ const UpdateTicketService = async ({
               ticket.whatsapp.ratingMessage?.trim() ||
               _t("Please rate our service", ticket);
             const rateInstructions = _t("Send a rating from 1 to 5", ticket);
-            const rateReturn = _t("Send *`!`* to return to the service", ticket);
+            const rateReturn = _t(
+              "Send *`!`* to return to the service",
+              ticket
+            );
             const bodyRatingMessage = `${ratingTxt}\n\n*${rateInstructions}*\n\n${rateReturn}`;
 
             await sendFormattedMessage(bodyRatingMessage, ticket);
