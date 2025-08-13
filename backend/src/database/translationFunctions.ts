@@ -1,27 +1,28 @@
-import { QueryInterface } from "sequelize";
+import { Op, QueryInterface } from "sequelize";
 
 export type TranslationsMap = {
   [language: string]: { [key: string]: string };
 };
 
 export async function translationsDown(
-  translationsMap: TranslationsMap,
+  translationsMap: { [language: string]: { [key: string]: string } },
   queryInterface: QueryInterface
 ) {
   const transaction = await queryInterface.sequelize.transaction();
   try {
-    // Get a unique list of all keys from translationsMap.
-    const keys = Object.values(translationsMap).reduce<string[]>(
-      (acc, translation) => {
-        return acc.concat(Object.keys(translation));
-      },
-      []
+    const deletionCriteria = Object.entries(translationsMap).map(
+      ([language, keys]) => ({
+        language,
+        key: { [Op.in]: Object.keys(keys) }
+      })
     );
-    const uniqueKeys = Array.from(new Set(keys));
 
     await queryInterface.bulkDelete(
       "Translations",
-      { namespace: "backend", key: uniqueKeys },
+      {
+        namespace: "backend",
+        [Op.or]: deletionCriteria
+      },
       { transaction }
     );
     await transaction.commit();
