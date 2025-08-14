@@ -12,7 +12,7 @@ const i18n = i18next.use(TranslationsSequelize);
 
 let defaultLanguage = "en";
 
-GetCompanySetting(1, "systemDefaultLanguage", "en").then(setting => {
+GetCompanySetting(1, "defaultLanguage", "en").then(setting => {
   defaultLanguage = setting || "en";
   logger.trace({ defaultLanguage }, "i18n: Default language set");
 });
@@ -33,7 +33,7 @@ export async function getUniqueLanguages() {
 export async function initializeI18n() {
   defaultLanguage = await GetCompanySetting(
     1,
-    "systemDefaultLanguage",
+    "defaultLanguage",
     process.env.DEFAULT_LANGUAGE || "en"
   );
   const languages = await getUniqueLanguages();
