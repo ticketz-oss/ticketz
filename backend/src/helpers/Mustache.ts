@@ -14,7 +14,9 @@ type MustacheFormatProps = {
   customTags?: [string, string];
 };
 
-export const genGreeting = (lngSource: Ticket | Contact | Company): string => {
+export const genGreeting = (
+  lngSource: Ticket | Contact | Company | string
+): string => {
   const greetings = [
     _t("Hello", lngSource),
     _t("Good morning", lngSource),
@@ -36,7 +38,10 @@ export function mustacheValues(
   const name = contact?.name || contact?.number || "{{name}}";
   const firstname = name.trim().split(" ")[0] || "{{firstname}}";
   const greeting = genGreeting(
-    ticket || (contact instanceof Contact ? contact : contact.company)
+    ticket ||
+      ((contact as Contact)?.language !== undefined
+        ? (contact as Contact)
+        : (contact as ContactListItem)?.company)
   );
   const queue = ticket?.queue?.name || "{{queue}}";
   const user = currentUser?.name || ticket?.user?.name || "{{user}}";
