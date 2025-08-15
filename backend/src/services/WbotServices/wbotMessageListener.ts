@@ -1015,7 +1015,7 @@ const sendMenu = async (
 
     if (sendBackToMain) {
       options += `\n${showNumericIcons ? "#️⃣" : "[ # ]"} - ${_t(
-        "Back to Main Menu",
+        "VOLTAR",
         ticket
       )}`;
     }
