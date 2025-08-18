@@ -12,7 +12,15 @@ const i18n = i18next.use(TranslationsSequelize);
 
 let defaultLanguage = "en";
 
-GetCompanySetting(1, "systemDefaultLanguage", "en").then(setting => {
+type ModelWithLanguage = {
+  language: string;
+};
+
+type ModelWithCompany = {
+  company: Company;
+};
+
+GetCompanySetting(1, "defaultLanguage", "en").then(setting => {
   defaultLanguage = setting || "en";
   logger.trace({ defaultLanguage }, "i18n: Default language set");
 });
@@ -33,7 +41,7 @@ export async function getUniqueLanguages() {
 export async function initializeI18n() {
   defaultLanguage = await GetCompanySetting(
     1,
-    "systemDefaultLanguage",
+    "defaultLanguage",
     process.env.DEFAULT_LANGUAGE || "en"
   );
   const languages = await getUniqueLanguages();
@@ -64,7 +72,14 @@ export async function reloadTranslations() {
 // eslint-disable-next-line no-underscore-dangle
 export function _t(
   key: string,
-  lngSource: Ticket | Contact | Whatsapp | Company | string
+  lngSource:
+    | Ticket
+    | Contact
+    | Whatsapp
+    | Company
+    | ModelWithLanguage
+    | ModelWithCompany
+    | string
 ) {
   let lng: string;
 
@@ -80,7 +95,9 @@ export function _t(
   } else if (lngSource instanceof Contact) {
     lng = lngSource.language || lngSource.company?.language;
   } else {
-    lng = lngSource.language;
+    lng =
+      (lngSource as ModelWithLanguage)?.language ||
+      (lngSource as ModelWithCompany)?.company?.language;
   }
 
   if (!lng) {

@@ -1,15 +1,13 @@
 import React from "react";
 import { FormControl, InputLabel, Select, MenuItem } from "@material-ui/core";
 import { i18n } from "../../translate/i18n";
+import { messages } from "../../translate/languages";
 
-const languageOptions = {
-  en: "English",
-  pt: "Portuguese 🇧🇷",
-  "pt-PT": "Portuguese 🇵🇹",
-  es: "Spanish",
-  it: "Italian",
-  id: "Indonesian",
-};
+const languageOptions = {};
+
+Object.keys(messages).forEach((key) => {
+  languageOptions[key] = messages[key].translations.mainDrawer.appBar.i18n.language;
+});
 
 export function SelectLanguage({ className, label, value, name, onChange, field, form, variant, margin, fullWidth }) {
   const handleChange = (event) => {
