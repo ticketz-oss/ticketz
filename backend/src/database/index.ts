@@ -40,6 +40,7 @@ import BaileysKeys from "../models/BaileysKeys";
 import UserSocketSession from "../models/UserSocketSession";
 import OutOfTicketMessage from "../models/OutOfTicketMessages";
 import Translation from "../models/Translation";
+import Wavoip from "../models/Wavoip";
 
 import Integration from "../models/Integration";
 import IntegrationSession from "../models/IntegrationSession";
@@ -94,6 +95,7 @@ const models = [
   QuickPix,
   Subscriptions,
   Translation,
+  Wavoip,
   Integration,
   IntegrationSession,
   NotificamehubIdMapping
