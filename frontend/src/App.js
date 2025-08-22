@@ -7,6 +7,7 @@ import { ptBR } from "@material-ui/core/locale";
 import { createTheme, ThemeProvider } from "@material-ui/core/styles";
 import { useMediaQuery } from "@material-ui/core";
 import ColorModeContext from "./layout/themeContext";
+import { PhoneCallProvider } from "./context/PhoneCall/PhoneCallContext";
 import { SocketContext, socketManager } from './context/Socket/SocketContext';
 import useSettings from "./hooks/useSettings";
 import Favicon from "react-favicon";
@@ -193,6 +194,7 @@ const App = () => {
     <>
     <Favicon url={ ((appLogoFavicon) ? theme.appLogoFavicon : defaultLogoFavicon ) } />
     <ColorModeContext.Provider value={{ colorMode }}>
+      <PhoneCallProvider>
       <ThemeProvider theme={theme}>
         <QueryClientProvider client={queryClient}>
           <SocketContext.Provider value={socketManager}>
@@ -200,6 +202,7 @@ const App = () => {
           </SocketContext.Provider>
         </QueryClientProvider>
       </ThemeProvider>
+      </PhoneCallProvider>
     </ColorModeContext.Provider>
     </>
   );
