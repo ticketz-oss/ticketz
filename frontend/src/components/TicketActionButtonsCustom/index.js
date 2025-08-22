@@ -14,9 +14,11 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 import { TicketsContext } from "../../context/Tickets/TicketsContext";
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import UndoRoundedIcon from '@material-ui/icons/UndoRounded';
+import { Call, CallEnd } from "@material-ui/icons";
 import Tooltip from '@material-ui/core/Tooltip';
 import { green } from '@material-ui/core/colors';
-
+import { PhoneCallContext } from "../../context/PhoneCall/PhoneCallContext";
+import { wavoipCall } from "../../helpers/wavoipCallManager";
 
 const useStyles = makeStyles(theme => ({
 	actionButtons: {
@@ -38,6 +40,7 @@ const TicketActionButtonsCustom = ({ ticket, showTabGroups }) => {
 	const ticketOptionsMenuOpen = Boolean(anchorEl);
 	const { user } = useContext(AuthContext);
 	const { setCurrentTicket } = useContext(TicketsContext);
+  const phoneContext = useContext(PhoneCallContext);
 
 	const customTheme = createTheme({
 		palette: {
@@ -73,7 +76,26 @@ const TicketActionButtonsCustom = ({ ticket, showTabGroups }) => {
 			toastError(err);
 		}
 	};
-
+  
+  const handleCall = async () => {
+    wavoipCall(ticket, () => {
+      phoneContext.disconnect();
+    })
+      .then((wavoipInstance) => {
+        phoneContext.updateCurrentCall({
+          contact: ticket.contact,
+          whatsapp: ticket.whatsapp,
+          disconnect: () => {
+            window.wavoipCallingSound.stop();
+            wavoipInstance.endCall();
+          }
+        });
+      })
+      .catch(err => {
+        toastError(err);
+      });
+  };
+     
 	return (
 		<div className={classes.actionButtons}>
 			{ticket.status === "closed" && (!showTabGroups || !ticket.isGroup) && (
@@ -88,6 +110,34 @@ const TicketActionButtonsCustom = ({ ticket, showTabGroups }) => {
 			)}
 			{(ticket.status === "open" || (showTabGroups && ticket.isGroup ) ) && (
 				<>
+          {
+            phoneContext &&
+            !phoneContext.currentCall &&
+            ticket.whatsapp.wavoip?.token &&
+            !ticket.contact.isGroup &&
+            < Tooltip title={i18n.t("messagesList.header.buttons.call")}>
+              <IconButton
+                onClick={handleCall}
+              >
+               <Call />
+              </IconButton>
+            </Tooltip>
+          }
+  
+          {
+            phoneContext &&
+            phoneContext.currentCall &&
+            phoneContext.currentCall.contact.id === ticket.contact.id &&
+            phoneContext.currentCall.whatsapp.id === ticket.whatsapp.id &&
+            <Tooltip title={i18n.t("messagesList.header.buttons.endCall")}>
+              <IconButton
+                onClick={phoneContext.disconnect}
+              >
+                <CallEnd />
+              </IconButton>
+            </Tooltip>
+          }
+          
           {(!showTabGroups || !ticket.isGroup) &&
             <>
               <Tooltip title={i18n.t("messagesList.header.buttons.return")}>
@@ -104,24 +154,8 @@ const TicketActionButtonsCustom = ({ ticket, showTabGroups }) => {
               </ThemeProvider>
             </>
           }
-					{/* <ButtonWithSpinner
-						loading={loading}
-						startIcon={<Replay />}
-						size="small"
-						onClick={e => handleUpdateTicketStatus(e, "pending", null)}
-					>
-						{i18n.t("messagesList.header.buttons.return")}
-					</ButtonWithSpinner>
-					<ButtonWithSpinner
-						loading={loading}
-						size="small"
-						variant="contained"
-						color="primary"
-						onClick={e => handleUpdateTicketStatus(e, "closed", user?.id)}
-					>
-						{i18n.t("messagesList.header.buttons.resolve")}
-					</ButtonWithSpinner> */}
-					<IconButton onClick={handleOpenTicketOptionsMenu}>
+
+          <IconButton onClick={handleOpenTicketOptionsMenu}>
 						<MoreVert />
 					</IconButton>
 					<TicketOptionsMenu
