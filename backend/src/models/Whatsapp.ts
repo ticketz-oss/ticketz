@@ -13,13 +13,15 @@ import {
   Unique,
   BelongsToMany,
   ForeignKey,
-  BelongsTo
+  BelongsTo,
+  HasOne
 } from "sequelize-typescript";
 import Queue from "./Queue";
 import Ticket from "./Ticket";
 import WhatsappQueue from "./WhatsappQueue";
 import Company from "./Company";
 import { ProxyConfig } from "../helpers/createProxyAgent";
+import Wavoip from "./Wavoip";
 
 @Table
 class Whatsapp extends Model<Whatsapp> {
@@ -122,6 +124,9 @@ class Whatsapp extends Model<Whatsapp> {
 
   @Column(DataType.TEXT)
   tokenMeta: string;
+
+  @HasOne(() => Wavoip)
+  wavoip: Wavoip;
 
   @Column(DataType.TEXT)
   channel: string;

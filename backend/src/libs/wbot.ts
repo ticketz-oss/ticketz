@@ -8,7 +8,8 @@ import makeWASocket, {
   WAMessageKey,
   WAMessageContent,
   proto,
-  jidNormalizedUser
+  jidNormalizedUser,
+  BinaryNode
 } from "baileys";
 
 import { Boom } from "@hapi/boom";
@@ -17,6 +18,12 @@ import NodeCache from "node-cache";
 import { Op } from "sequelize";
 import { Agent } from "https";
 import { Mutex } from "async-mutex";
+import useVoiceCallsBaileys from "voice-calls-baileys";
+import {
+  ClientToServerEvents,
+  ServerToClientEvents
+} from "voice-calls-baileys/lib/services/transport.type";
+import { Socket } from "socket.io-client";
 import Whatsapp from "../models/Whatsapp";
 import { logger, loggerBaileys } from "../utils/logger";
 import authState from "../helpers/authState";
@@ -306,6 +313,14 @@ export const initWASocket = async (
           transactionOpts: { maxCommitRetries: 1, delayBetweenTriesMs: 10 }
         });
 
+        wsocket.ev.on("call", async event => {
+          logger.trace({ event }, "Received call event");
+        });
+
+        wsocket.ws.on("CB:call", async (node: BinaryNode) => {
+          logger.trace({ node }, "Received raw call node");
+        });
+
         wsocket.isRefreshing = isRefresh;
 
         wsocket.cacheMessage = (msg: proto.IWebMessageInfo): void => {
@@ -386,6 +401,39 @@ export const initWASocket = async (
             }
 
             if (connection === "open") {
+              await whatsapp.reload({
+                include: ["wavoip"]
+              });
+              if (whatsapp.wavoip) {
+                useVoiceCallsBaileys(
+                  whatsapp.wavoip.token,
+                  wsocket,
+                  "open",
+                  true
+                )
+                  .then(
+                    (
+                      wavoipSocket: Socket<
+                        ServerToClientEvents,
+                        ClientToServerEvents
+                      >
+                    ) => {
+                      wavoipSocket.onAny((event, ...args) => {
+                        logger.trace(
+                          { event, args },
+                          `Wavoip event received: ${event}`
+                        );
+                      });
+                    }
+                  )
+                  .catch(error => {
+                    logger.error(
+                      { message: error.message },
+                      `Error initializing Wavoip for session ${name}`
+                    );
+                  });
+              }
+
               wsocket.myLid = jidNormalizedUser(wsocket.user?.lid);
               wsocket.myJid = jidNormalizedUser(wsocket.user.id);
 

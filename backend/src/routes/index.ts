@@ -32,6 +32,7 @@ import versionRoutes from "./versionRoutes";
 import quickPixRoutes from "./quickPixRoutes";
 import ticketzOSSRoutes from "./ticketzOSSRoutes";
 import i18nRoutes from "./i18nRoutes";
+import wavoipRoutes from "./wavoipRoutes";
 
 import binlistRoutes from "./binlistRoutes";
 import integrationsRoutes from "./integrationsRoutes";
@@ -75,6 +76,7 @@ routes.use(pwaRoutes);
 routes.use(versionRoutes);
 routes.use(ticketzOSSRoutes);
 routes.use(i18nRoutes);
+routes.use(wavoipRoutes);
 
 routes.use(binlistRoutes);
 routes.use(integrationsRoutes);
