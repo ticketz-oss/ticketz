@@ -59,6 +59,7 @@
     "uuid": "^9.0.1",
     "validations-br": "^1.4.0",
     "vcard-parser": "^1.0.0",
+    "wavoip-api": "^3.1.24",
     "yup": "^1.4.0"
   },
   "scripts": {
