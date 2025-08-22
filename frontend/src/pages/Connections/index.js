@@ -47,6 +47,8 @@ import PrivacyModal from "../../components/PrivacyModal";
 import { i18n } from "../../translate/i18n";
 import { WhatsAppsContext } from "../../context/WhatsApp/WhatsAppsContext";
 import toastError from "../../errors/toastError";
+import wavoipIcon from "../../assets/wavoip.webp";
+import WavoipModal from "../../components/WavoipModal";
 
 const useStyles = makeStyles(theme => ({
 	mainPaper: {
@@ -118,6 +120,7 @@ const Connections = () => {
 	const [confirmModalInfo, setConfirmModalInfo] = useState(
 		confirmationModalInitialState
 	);
+  const [wavoipModalOpen, setWavoipModalOpen] = useState(false);
 
 	const handleStartWhatsAppSession = async whatsAppId => {
 		try {
@@ -211,7 +214,18 @@ const Connections = () => {
 
 		setConfirmModalInfo(confirmationModalInitialState);
 	};
-  
+
+  // Add a handler to open the WavoipModal
+  const handleOpenWavoipModal = whatsApp => {
+    setSelectedWhatsApp(whatsApp);
+    setWavoipModalOpen(true);
+  };
+
+  const handleCloseWavoipModal = useCallback(() => {
+    setWavoipModalOpen(false);
+    setSelectedWhatsApp(null);
+  }, [setWavoipModalOpen, setSelectedWhatsApp]);
+
   const refreshWhatsApp = async whatsApp => {
     try {
       await api.get(`/whatsappsession/refresh/${whatsApp.id}`);
@@ -358,6 +372,11 @@ const Connections = () => {
 				onClose={handleClosePrivacyWhatsAppModal}
 				whatsAppId={!qrModalOpen && !whatsAppModalOpen && selectedWhatsApp?.id}
 			/>
+      <WavoipModal
+        open={wavoipModalOpen}
+        onClose={handleCloseWavoipModal}
+        whatsappId={selectedWhatsApp?.id}
+      />
 			<MainHeader>
 				<Title>{i18n.t("connections.title")}</Title>
 				<MainHeaderButtonsWrapper>
@@ -436,6 +455,19 @@ const Connections = () => {
 													</IconButton>
 												)}
 
+                        {whatsApp.channel === "whatsapp" && (
+                          <IconButton
+                            size="small"
+                            onClick={() => handleOpenWavoipModal(whatsApp)}
+                          >
+                            <img
+                              src={wavoipIcon}
+                              alt="Wavoip"
+                              style={{ width: 20, height: 20 }}
+                            />
+                          </IconButton>
+                        )}
+                        
 												<IconButton
 													size="small"
 													onClick={e => {
