@@ -46,6 +46,7 @@ import Integration from "../models/Integration";
 import IntegrationSession from "../models/IntegrationSession";
 import NotificamehubIdMapping from "../models/NotificamehubIdMapping";
 import QuickPix from "../models/QuickPix";
+import WebpushSubscription from "../models/WebpushSubscription";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const dbConfig = require("../config/database");
@@ -98,7 +99,8 @@ const models = [
   Wavoip,
   Integration,
   IntegrationSession,
-  NotificamehubIdMapping
+  NotificamehubIdMapping,
+  WebpushSubscription
 ];
 
 sequelize.addModels(models);
