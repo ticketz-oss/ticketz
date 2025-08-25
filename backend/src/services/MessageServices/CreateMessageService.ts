@@ -9,6 +9,7 @@ import User from "../../models/User";
 import Whatsapp from "../../models/Whatsapp";
 import { logger } from "../../utils/logger";
 import { AudioTranscriptionService } from "./AudioTranscriptionService";
+import { sendWebpushNotifications } from "./sendWebpushNotifications";
 
 export interface MessageData {
   id: string;
@@ -60,7 +61,11 @@ const CreateMessageService = async ({
           },
           "queue",
           "tags",
-          "user",
+          {
+            model: User,
+            attributes: { exclude: ["passwordHash"] },
+            required: false
+          },
           {
             model: Whatsapp,
             as: "whatsapp",
@@ -125,6 +130,10 @@ const CreateMessageService = async ({
   if (!(await checkCompanyCompliant(companyId))) {
     return message;
   }
+
+  sendWebpushNotifications(message).catch(err => {
+    logger.error({ error: err.message }, "Error sending webpush notification");
+  });
 
   const io = getIO();
   io.to(message.ticketId.toString())
