@@ -37,18 +37,15 @@ export async function sendWebpushNotifications(message: Message) {
     }
   }
 
-  const messageBody = message.body.startsWith('{"ticketzvCard"')
+  const body = message.body.startsWith('{"ticketzvCard"')
     ? "🪪"
-    : message.body;
-
-  const body = `${message.contact.name}:\n\n${
-    messageBody || message.mediaType
-  }`;
+    : message.body || message.mediaType;
 
   const payload = JSON.stringify({
     body,
+    senderName: message.contact.name || message.contact.number,
     profileImage: message.contact.profilePicUrl || null,
-    url: `${process.env.FRONTEND_URL}/tickets/${message.ticket.uuid}`
+    ticketUuid: message.ticket.uuid
   });
 
   subscriptions.forEach(subscription => {
