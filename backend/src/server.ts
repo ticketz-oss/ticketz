@@ -21,6 +21,7 @@ import { NgrokInstance } from "./helpers/NgrokInstance";
 import { OmniServices } from "./services/OmniServices/OmniServices";
 import { NotificamehubDriver } from "./services/OmniDrivers/NotificamehubDriver";
 import Message from "./models/Message";
+import { initializeWebPush } from "./helpers/initializeWebPush";
 
 // Environment Variable Validation
 if (!process.env.PORT) {
@@ -90,6 +91,9 @@ i18nReady.then(() => {
         logger.error(`Error initializing ngrok: ${error.message}`);
       }
     }
+
+    // Initialize web-push
+    await initializeWebPush();
 
     await startServer();
   });
