@@ -14,9 +14,7 @@ self.addEventListener('notificationclick', event => {
       clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientsList => {
         if (clientsList.length > 0) {
           const client = clientsList[0];
-          const parsedUrl = new URL(url);
-          const path = parsedUrl.pathname + parsedUrl.search + parsedUrl.hash;
-          client.postMessage({ type: 'navigate', path });
+          client.postMessage({ type: 'navigate', url });
           return client.focus();
         } else {
           return clients.openWindow(url);
@@ -41,13 +39,30 @@ self.addEventListener('push', event => {
       const manifest = await getManifest();
       const appName = manifest?.name || 'Chat App';
       const payload = event.data ? event.data.json() : {};
-      const icon = payload.profileImage || manifest?.icons?.[0]?.src || '/favicon.ico';
-      const data = payload.url && { url: payload.url } || undefined;
-      const body = payload.body || 'You have a new message';
+      const icon = payload.profileImage || manifest?.icons?.[0]?.src || undefined;
+      const tag = payload.ticketUuid;
+      
+      let payloadBody = payload.body;
+      const existingNotifications = await self.registration.getNotifications({ tag });
+      if (existingNotifications.length) {
+        const existingBody = existingNotifications[0].data.body;
+        payloadBody = `${existingBody}\n${payload.body}`;
+        existingNotifications.forEach(notification => notification.close());
+      }
+
+      const data = {
+        sender: payload.sender,
+        body: payloadBody,
+        url: `/tickets/${payload.ticketUuid}`
+      };
+
+      const body = `${payload.senderName}:\n\n${data.body}` || 'You have a new message';
+
       self.registration.showNotification(appName, {
         body,
         icon,
-        data
+        data,
+        tag: payload.ticketUuid || undefined,
       });
     })()
   );
