@@ -11,9 +11,11 @@ import { SerializeUser } from "../helpers/SerializeUser";
 import { createAccessToken, createRefreshToken } from "../helpers/CreateTokens";
 import Company from "../models/Company";
 import Setting from "../models/Setting";
+import WebpushSubscription from "../models/WebpushSubscription";
+import { logger } from "../utils/logger";
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
-  const { email, password } = req.body;
+  const { email, password, pushSubscription } = req.body;
 
   const { token, serializedUser, refreshToken } = await AuthUserService({
     email,
@@ -34,6 +36,18 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
       }
     }
   );
+
+  if (pushSubscription) {
+    WebpushSubscription.create({
+      userId: serializedUser.id,
+      subscriptionData: pushSubscription
+    }).catch(err => {
+      logger.error(
+        { message: err.message },
+        "Error saving web push subscription"
+      );
+    });
+  }
 
   return res.status(200).json({
     token,
