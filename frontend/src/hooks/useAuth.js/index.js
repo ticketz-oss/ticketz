@@ -10,6 +10,7 @@ import toastError from "../../errors/toastError";
 import { SocketContext } from "../../context/Socket/SocketContext";
 import moment from "moment";
 import { decodeToken } from "react-jwt";
+import { clearPushSubscription, ensureSubscribed } from "../../helpers/pushSubscriptions";
 
 const useAuth = () => {
   const history = useHistory();
@@ -154,6 +155,9 @@ const useAuth = () => {
     setLoading(true);
 
     try {
+      const vapidPublicKey = await api.get("/public-settings/vapidPublicKey");
+      await clearPushSubscription();
+      userData.pushSubscription = await ensureSubscribed(vapidPublicKey.data);
       const { data } = await api.post("/auth/login", userData);
       posLogin(data);
       setLoading(false);
@@ -167,6 +171,7 @@ const useAuth = () => {
     setLoading(true);
 
     try {
+      await clearPushSubscription();
       const { data } = await api.get(`/auth/impersonate/${companyId}`);
       posLogin(data, true);
       setLoading(false);
@@ -181,6 +186,7 @@ const useAuth = () => {
     setLoading(true);
 
     try {
+      await clearPushSubscription();
       const socket = socketManager.GetSocket();
       socket.logout();
 
