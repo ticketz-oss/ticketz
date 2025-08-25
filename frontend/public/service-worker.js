@@ -6,6 +6,14 @@ async function getManifest() {
   return null;
 }
 
+self.addEventListener('install', event => {
+  event.waitUntil(self.skipWaiting());
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(self.clients.claim());
+});
+
 self.addEventListener('notificationclick', event => {
   event.notification.close();
   const url = event.notification?.data?.url;
@@ -41,7 +49,7 @@ self.addEventListener('push', event => {
       const payload = event.data ? event.data.json() : {};
       const icon = payload.profileImage || manifest?.icons?.[0]?.src || undefined;
       const tag = payload.ticketUuid;
-      
+
       let payloadBody = payload.body;
       const existingNotifications = await self.registration.getNotifications({ tag });
       if (existingNotifications.length) {
