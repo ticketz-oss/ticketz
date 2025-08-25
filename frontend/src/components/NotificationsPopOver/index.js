@@ -171,7 +171,7 @@ const NotificationsPopOver = (props) => {
 
         if (shouldNotNotificate) return;
 
-        handleNotifications(data);
+        // handleNotifications(data);
       }
     }
 
@@ -183,6 +183,18 @@ const NotificationsPopOver = (props) => {
       socket.disconnect();
     };
   }, [user, profile, queues, soundGroupNotifications, socketManager]);
+
+  useEffect(() => {
+     const handleServiceWorkerMessage = (event) => {
+       if (event.data && event.data.type === 'navigate' && event.data.path) {
+         history.push(event.data.path);
+       }
+     };
+     navigator.serviceWorker.addEventListener('message', handleServiceWorkerMessage);
+     return () => {
+       navigator.serviceWorker.removeEventListener('message', handleServiceWorkerMessage);
+     };
+   }, [history]);
 
   const handleNotifications = (data) => {
     const { message, contact, ticket } = data;
