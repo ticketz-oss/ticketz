@@ -5,7 +5,7 @@ import User from "../../models/User";
 import WebpushSubscription from "../../models/WebpushSubscription";
 
 export async function sendWebpushNotifications(message: Message) {
-  if (message.fromMe) {
+  if (message.fromMe || message.mediaType === "wait") {
     return;
   }
 
@@ -44,7 +44,8 @@ export async function sendWebpushNotifications(message: Message) {
   const payload = JSON.stringify({
     body,
     senderName: message.contact.name || message.contact.number,
-    profileImage: message.contact.profilePicUrl || null,
+    profileImage: message.contact.profilePicUrl || undefined,
+    image: message.mediaType === "image" ? message.mediaUrl : undefined,
     ticketUuid: message.ticket.uuid
   });
 

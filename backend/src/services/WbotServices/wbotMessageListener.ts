@@ -75,6 +75,7 @@ import {
 } from "../QueueService/ChatbotService";
 import { outOfHoursCache } from "../../helpers/outOfHoursCache";
 import { deferredTasks } from "../../helpers/deferredTasks";
+import { sendWebpushNotifications } from "../MessageServices/sendWebpushNotifications";
 
 export interface ImessageUpsert {
   messages: proto.IWebMessageInfo[];
@@ -699,6 +700,9 @@ export const verifyMediaMessage = async (
         mediaType,
         body: transcriptionText || undefined
       });
+
+      sendWebpushNotifications(newMessage);
+
       io.to(ticket.id.toString()).emit(`company-${ticket.companyId}-media`, {
         action: "update",
         ticketId: ticket.id,
