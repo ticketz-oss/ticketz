@@ -48,6 +48,8 @@ self.addEventListener('push', event => {
       const appName = manifest?.name || 'Chat App';
       const payload = event.data ? event.data.json() : {};
       const icon = payload.profileImage || manifest?.icons?.[0]?.src || undefined;
+      const image = payload.image || undefined;
+      const badge = manifest?.icons?.[0]?.src || undefined;
       const tag = payload.ticketUuid;
 
       let payloadBody = payload.body;
@@ -69,6 +71,8 @@ self.addEventListener('push', event => {
       self.registration.showNotification(appName, {
         body,
         icon,
+        image,
+        badge,
         data,
         tag: payload.ticketUuid || undefined,
       });
