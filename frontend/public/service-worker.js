@@ -14,6 +14,14 @@ self.addEventListener('activate', event => {
   event.waitUntil(self.clients.claim());
 });
 
+self.addEventListener('message', event => {
+  if (event.data === 'clear-notifications') {
+    self.registration.getNotifications().then(notifications => {
+      notifications.forEach(notification => notification.close());
+    });
+  }
+});
+
 self.addEventListener('notificationclick', event => {
   event.notification.close();
   const url = event.notification?.data?.url;
@@ -32,50 +40,78 @@ self.addEventListener('notificationclick', event => {
   }
 });
 
+const pendingNotifications = {};
+const notificationTimers = {};
+
 self.addEventListener('push', event => {
-  event.waitUntil(
-    (async () => {
-      const clientList = await self.clients.matchAll({
-        type: 'window',
-        includeUncontrolled: true
+  event.waitUntil((async () => {
+    const clientList = await self.clients.matchAll({
+      type: 'window',
+      includeUncontrolled: true
+    });
+    const isFocused = clientList.some(client => client.focused);
+    if (isFocused) {
+      // Do not show notification if a window client is focused.
+      return;
+    }
+
+    const manifest = await getManifest();
+    if (!event.data) {
+      return;
+    }
+    
+    const appName = manifest?.short_name || manifest?.name || undefined;
+    
+    const payload = event.data.json();
+    const title = `${payload.senderName}${appName ? ` | ${appName}` : ''}`;
+    const icon = payload.profileImage || manifest?.icons?.[0]?.src || undefined;
+    const image = payload.image || undefined;
+    const badge = manifest?.icons?.[0]?.src || undefined;
+    const tag = payload.ticketUuid;
+    const timestamp = payload.timestamp || undefined;
+
+    // Prepare notification options.
+    const dataUrl = `/tickets/${payload.ticketUuid}`;
+    const newNotification = {
+      body: payload.body || 'You have a new message',
+      icon,
+      image,
+      badge,
+      data: {
+        body: payload.body || 'You have a new message',
+        url: dataUrl
+      },
+      tag,
+      timestamp
+    };
+
+    // If there's an existing scheduled notification for this tag, update its body.
+    if (pendingNotifications[tag]) {
+      pendingNotifications[tag].body += '\n' + newNotification.body;
+      pendingNotifications[tag].data.body = pendingNotifications[tag].body;
+      pendingNotifications[tag].image = image || pendingNotifications[tag].image;
+      pendingNotifications[tag].timestamp = timestamp;
+    } else {
+      pendingNotifications[tag] = newNotification;
+    }
+
+    // Clear any previous timer and schedule a new one.
+    if (notificationTimers[tag]) {
+      clearTimeout(notificationTimers[tag]);
+    }
+    notificationTimers[tag] = setTimeout(() => {
+      self.registration.getNotifications({ tag }).then(existingNotifications => {
+        if (existingNotifications.length) {
+          const existingBody = existingNotifications[0].data.body;
+          existingNotifications.forEach(notification => notification.close());
+          pendingNotifications[tag].body = existingBody + '\n' + pendingNotifications[tag].body;
+          pendingNotifications[tag].data.body = pendingNotifications[tag].body;
+        }
+
+        self.registration.showNotification(title, pendingNotifications[tag]);
+        delete pendingNotifications[tag];
+        delete notificationTimers[tag];
       });
-      const isFocused = clientList.some(client => client.focused);
-      if (isFocused) {
-        // Do not show notification if a window client is focused.
-        return;
-      }
-      const manifest = await getManifest();
-      const appName = manifest?.name || 'Chat App';
-      const payload = event.data ? event.data.json() : {};
-      const icon = payload.profileImage || manifest?.icons?.[0]?.src || undefined;
-      const image = payload.image || undefined;
-      const badge = manifest?.icons?.[0]?.src || undefined;
-      const tag = payload.ticketUuid;
-
-      let payloadBody = payload.body;
-      const existingNotifications = await self.registration.getNotifications({ tag });
-      if (existingNotifications.length) {
-        const existingBody = existingNotifications[0].data.body;
-        payloadBody = `${existingBody}\n${payload.body}`;
-        existingNotifications.forEach(notification => notification.close());
-      }
-
-      const data = {
-        sender: payload.sender,
-        body: payloadBody,
-        url: `/tickets/${payload.ticketUuid}`
-      };
-
-      const body = `${payload.senderName}:\n\n${data.body}` || 'You have a new message';
-
-      self.registration.showNotification(appName, {
-        body,
-        icon,
-        image,
-        badge,
-        data,
-        tag: payload.ticketUuid || undefined,
-      });
-    })()
-  );
+    }, 500);
+  })());
 });
