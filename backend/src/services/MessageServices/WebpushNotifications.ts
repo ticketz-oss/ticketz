@@ -3,24 +3,21 @@ import Message from "../../models/Message";
 import Queue from "../../models/Queue";
 import User from "../../models/User";
 import WebpushSubscription from "../../models/WebpushSubscription";
+import Ticket from "../../models/Ticket";
 
-export async function sendWebpushNotifications(message: Message) {
-  if (message.fromMe || message.mediaType === "wait") {
-    return;
-  }
-
+async function getTicketSubscriptions(ticket: Ticket) {
   const subscriptions: WebpushSubscription[] = [];
 
-  if (message.ticket.userId) {
+  if (ticket.userId) {
     subscriptions.push(
       ...(await WebpushSubscription.findAll({
-        where: { userId: message.ticket.userId }
+        where: { userId: ticket.userId }
       }))
     );
-  } else if (message.ticket.queueId) {
+  } else if (ticket.queueId) {
     const queue =
-      message.ticket.queue ||
-      (await Queue.findByPk(message.ticket.queueId, {
+      ticket.queue ||
+      (await Queue.findByPk(ticket.queueId, {
         include: [
           {
             model: User,
@@ -36,6 +33,15 @@ export async function sendWebpushNotifications(message: Message) {
       });
     }
   }
+  return subscriptions;
+}
+
+export async function sendWebpushNotifications(message: Message) {
+  if (message.fromMe || message.mediaType === "wait") {
+    return;
+  }
+
+  const subscriptions = await getTicketSubscriptions(message.ticket);
 
   const body = message.body.startsWith('{"ticketzvCard"')
     ? "🪪"
@@ -46,8 +52,33 @@ export async function sendWebpushNotifications(message: Message) {
     senderName: message.contact.name || message.contact.number,
     profileImage: message.contact.profilePicUrl || undefined,
     image: message.mediaType === "image" ? message.mediaUrl : undefined,
-    ticketUuid: message.ticket.uuid
+    tag: message.ticket.uuid,
+    timestamp: message.createdAt.getTime()
   });
+
+  subscriptions.forEach(subscription => {
+    webpush
+      .sendNotification(
+        subscription.subscriptionData as PushSubscription,
+        payload
+      )
+      .catch((error: any) => {
+        if ([404, 410].includes(error.statusCode)) {
+          WebpushSubscription.destroy({
+            where: { id: subscription.id }
+          });
+        }
+      });
+  });
+}
+
+export async function clearWebpushNotifications(ticket: Ticket) {
+  const payload = JSON.stringify({
+    action: "clear-notifications",
+    tag: ticket.uuid
+  });
+
+  const subscriptions = await getTicketSubscriptions(ticket);
 
   subscriptions.forEach(subscription => {
     webpush

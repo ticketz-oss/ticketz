@@ -9,7 +9,7 @@ import User from "../../models/User";
 import Whatsapp from "../../models/Whatsapp";
 import { logger } from "../../utils/logger";
 import { AudioTranscriptionService } from "./AudioTranscriptionService";
-import { sendWebpushNotifications } from "./sendWebpushNotifications";
+import { sendWebpushNotifications } from "./WebpushNotifications";
 
 export interface MessageData {
   id: string;

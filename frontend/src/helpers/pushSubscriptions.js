@@ -11,8 +11,24 @@ function urlBase64ToUint8Array(base64String) {
   return outputArray;
 }
 
+async function serviceWorkerRegistration(timeout = 1000) {
+  return Promise.race([
+    navigator.serviceWorker.ready,
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Service worker ready timeout')), timeout)
+    )
+  ]).catch(() => {
+    return null;
+  });
+}
+
 export async function clearPushSubscription() {
-  const registration = await navigator.serviceWorker.ready;
+  const registration = await serviceWorkerRegistration();
+  
+  if (!registration) {
+    return null;
+  }
+  
   const subscription = await registration.pushManager.getSubscription();
 
   if (subscription) {
@@ -22,7 +38,12 @@ export async function clearPushSubscription() {
 }
 
 export async function ensureSubscribed(vapidPublicKey) {
-  const registration = await navigator.serviceWorker.ready;
+  const registration = await serviceWorkerRegistration();
+  
+  if (!registration) {
+    throw new Error('Service worker registration not found');
+  }
+
   let subscription = await registration.pushManager.getSubscription();
 
   if (!subscription) {

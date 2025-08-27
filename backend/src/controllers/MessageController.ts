@@ -74,7 +74,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     user
   });
 
-  if (ticket.channel === "whatsapp" && markAsRead === "true") {
+  if (markAsRead === "true") {
     SetTicketMessagesAsRead(ticket);
   }
 

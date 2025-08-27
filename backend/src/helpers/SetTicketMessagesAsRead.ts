@@ -4,9 +4,11 @@ import Message from "../models/Message";
 import Ticket from "../models/Ticket";
 import { logger } from "../utils/logger";
 import GetTicketWbot from "./GetTicketWbot";
+import { clearWebpushNotifications } from "../services/MessageServices/WebpushNotifications";
 
 const SetTicketMessagesAsRead = async (ticket: Ticket): Promise<void> => {
   await ticket.update({ unreadMessages: 0 }, { silent: true });
+
   let companyId: number;
 
   try {
@@ -99,6 +101,13 @@ const SetTicketMessagesAsRead = async (ticket: Ticket): Promise<void> => {
         ticketId: ticket.id
       });
   }
+
+  clearWebpushNotifications(ticket).catch(err => {
+    logger.error(
+      { error: err as Error },
+      `Could not clear webpush notifications. Err: ${err?.message}`
+    );
+  });
 };
 
 export default SetTicketMessagesAsRead;

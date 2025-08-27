@@ -4,6 +4,11 @@ export function registerServiceWorker() {
       navigator.serviceWorker.register('/service-worker.js')
         .then(registration => {
           console.log('ServiceWorker registered:', registration);
+          window.addEventListener('focus', () => {
+            if (registration.active) {
+              registration.active.postMessage('clear-notifications');
+            }
+          });
         })
         .catch(error => {
           console.error('ServiceWorker registration failed:', error);

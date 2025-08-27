@@ -14,6 +14,14 @@ self.addEventListener('activate', event => {
   event.waitUntil(self.clients.claim());
 });
 
+self.addEventListener('message', event => {
+  if (event.data === 'clear-notifications') {
+    self.registration.getNotifications().then(notifications => {
+      notifications.forEach(notification => notification.close());
+    });
+  }
+});
+
 self.addEventListener('notificationclick', event => {
   event.notification.close();
   const url = event.notification?.data?.url;
@@ -32,50 +40,87 @@ self.addEventListener('notificationclick', event => {
   }
 });
 
+const pendingNotifications = {};
+const notificationTimers = {};
+
 self.addEventListener('push', event => {
-  event.waitUntil(
-    (async () => {
-      const clientList = await self.clients.matchAll({
-        type: 'window',
-        includeUncontrolled: true
+  event.waitUntil((async () => {
+    if (!event.data) {
+      return;
+    }
+    const payload = event.data.json();
+    
+    if (payload.action === 'clear-notifications') {
+      self.registration.getNotifications({ tag: payload.tag }).then(notifications => {
+        notifications.forEach(notification => notification.close());
       });
-      const isFocused = clientList.some(client => client.focused);
-      if (isFocused) {
-        // Do not show notification if a window client is focused.
-        return;
-      }
-      const manifest = await getManifest();
-      const appName = manifest?.name || 'Chat App';
-      const payload = event.data ? event.data.json() : {};
-      const icon = payload.profileImage || manifest?.icons?.[0]?.src || undefined;
-      const image = payload.image || undefined;
-      const badge = manifest?.icons?.[0]?.src || undefined;
-      const tag = payload.ticketUuid;
+      return;
+    }
+      
+    const clientList = await self.clients.matchAll({
+      type: 'window',
+      includeUncontrolled: true
+    });
+    
+    const isFocused = clientList.some(client => client.focused);
+    if (isFocused) {
+      // Do not show notification if a window client is focused.
+      return;
+    }
 
-      let payloadBody = payload.body;
-      const existingNotifications = await self.registration.getNotifications({ tag });
-      if (existingNotifications.length) {
-        const existingBody = existingNotifications[0].data.body;
-        payloadBody = `${existingBody}\n${payload.body}`;
-        existingNotifications.forEach(notification => notification.close());
-      }
+    const manifest = await getManifest();
+    
+    const appName = manifest?.short_name || manifest?.name || undefined;
+    
+    const title = `${payload.senderName}${appName ? ` | ${appName}` : ''}`;
+    const icon = payload.profileImage || manifest?.icons?.[0]?.src || undefined;
+    const image = payload.image || undefined;
+    const badge = manifest?.icons?.[0]?.src || undefined;
+    const tag = payload.tag;
+    const timestamp = payload.timestamp || undefined;
 
-      const data = {
-        sender: payload.sender,
-        body: payloadBody,
-        url: `/tickets/${payload.ticketUuid}`
-      };
+    // Prepare notification options.
+    const dataUrl = `/tickets/${payload.ticketUuid}`;
+    const newNotification = {
+      body: payload.body || 'You have a new message',
+      icon,
+      image,
+      badge,
+      data: {
+        body: payload.body || 'You have a new message',
+        url: dataUrl
+      },
+      tag,
+      timestamp
+    };
 
-      const body = `${payload.senderName}:\n\n${data.body}` || 'You have a new message';
+    // If there's an existing scheduled notification for this tag, update its body.
+    if (pendingNotifications[tag]) {
+      pendingNotifications[tag].body += '\n' + newNotification.body;
+      pendingNotifications[tag].data.body = pendingNotifications[tag].body;
+      pendingNotifications[tag].image = image || pendingNotifications[tag].image;
+      pendingNotifications[tag].timestamp = timestamp;
+    } else {
+      pendingNotifications[tag] = newNotification;
+    }
 
-      self.registration.showNotification(appName, {
-        body,
-        icon,
-        image,
-        badge,
-        data,
-        tag: payload.ticketUuid || undefined,
+    // Clear any previous timer and schedule a new one.
+    if (notificationTimers[tag]) {
+      clearTimeout(notificationTimers[tag]);
+    }
+    notificationTimers[tag] = setTimeout(() => {
+      self.registration.getNotifications({ tag }).then(existingNotifications => {
+        if (existingNotifications.length) {
+          const existingBody = existingNotifications[0].data.body;
+          existingNotifications.forEach(notification => notification.close());
+          pendingNotifications[tag].body = existingBody + '\n' + pendingNotifications[tag].body;
+          pendingNotifications[tag].data.body = pendingNotifications[tag].body;
+        }
+
+        self.registration.showNotification(title, pendingNotifications[tag]);
+        delete pendingNotifications[tag];
+        delete notificationTimers[tag];
       });
-    })()
-  );
+    }, 500);
+  })());
 });
