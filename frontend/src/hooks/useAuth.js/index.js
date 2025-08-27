@@ -157,7 +157,11 @@ const useAuth = () => {
     try {
       const vapidPublicKey = await api.get("/public-settings/vapidPublicKey");
       await clearPushSubscription();
-      userData.pushSubscription = await ensureSubscribed(vapidPublicKey.data);
+      try {
+        userData.pushSubscription = await ensureSubscribed(vapidPublicKey.data);
+      } catch (err) {
+        toastError(err);
+      }
       const { data } = await api.post("/auth/login", userData);
       posLogin(data);
       setLoading(false);
