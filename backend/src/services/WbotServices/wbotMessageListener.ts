@@ -75,7 +75,7 @@ import {
 } from "../QueueService/ChatbotService";
 import { outOfHoursCache } from "../../helpers/outOfHoursCache";
 import { deferredTasks } from "../../helpers/deferredTasks";
-import { sendWebpushNotifications } from "../MessageServices/sendWebpushNotifications";
+import { sendWebpushNotifications } from "../MessageServices/WebpushNotifications";
 
 export interface ImessageUpsert {
   messages: proto.IWebMessageInfo[];
