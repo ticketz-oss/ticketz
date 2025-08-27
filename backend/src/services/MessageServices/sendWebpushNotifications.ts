@@ -46,7 +46,8 @@ export async function sendWebpushNotifications(message: Message) {
     senderName: message.contact.name || message.contact.number,
     profileImage: message.contact.profilePicUrl || undefined,
     image: message.mediaType === "image" ? message.mediaUrl : undefined,
-    ticketUuid: message.ticket.uuid
+    ticketUuid: message.ticket.uuid,
+    timestamp: message.createdAt.getTime()
   });
 
   subscriptions.forEach(subscription => {
