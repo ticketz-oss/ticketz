@@ -45,10 +45,23 @@ const notificationTimers = {};
 
 self.addEventListener('push', event => {
   event.waitUntil((async () => {
+    if (!event.data) {
+      return;
+    }
+    const payload = event.data.json();
+    
+    if (payload.action === 'clear-notifications') {
+      self.registration.getNotifications({ tag: payload.tag }).then(notifications => {
+        notifications.forEach(notification => notification.close());
+      });
+      return;
+    }
+      
     const clientList = await self.clients.matchAll({
       type: 'window',
       includeUncontrolled: true
     });
+    
     const isFocused = clientList.some(client => client.focused);
     if (isFocused) {
       // Do not show notification if a window client is focused.
@@ -56,18 +69,14 @@ self.addEventListener('push', event => {
     }
 
     const manifest = await getManifest();
-    if (!event.data) {
-      return;
-    }
     
     const appName = manifest?.short_name || manifest?.name || undefined;
     
-    const payload = event.data.json();
     const title = `${payload.senderName}${appName ? ` | ${appName}` : ''}`;
     const icon = payload.profileImage || manifest?.icons?.[0]?.src || undefined;
     const image = payload.image || undefined;
     const badge = manifest?.icons?.[0]?.src || undefined;
-    const tag = payload.ticketUuid;
+    const tag = payload.tag;
     const timestamp = payload.timestamp || undefined;
 
     // Prepare notification options.
