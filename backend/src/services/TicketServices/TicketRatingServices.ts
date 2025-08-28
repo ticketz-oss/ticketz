@@ -97,11 +97,11 @@ export async function checkRating(
       ]
     }));
 
-  const ticket = await Ticket.findByPk(ticketTracking.ticketId, {
-    include: ["contact", "company", "whatsapp"]
-  });
-
   if (ticketTracking) {
+    const ticket = await Ticket.findByPk(ticketTracking.ticketId, {
+      include: ["contact", "company", "whatsapp"]
+    });
+
     try {
       /**
        * Tratamento para avaliação do atendente

@@ -160,7 +160,7 @@ const useStyles = makeStyles((theme) => ({
     overflow: "auto",
     position: "absolute",
     top: "68px",
-    bottom: "0px",
+    bottom: "calc(100vh - var(--vh))",
     right: "0px",
     left: "72px",
     marginLeft: "0px",
