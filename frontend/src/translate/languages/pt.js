@@ -1102,6 +1102,11 @@ const messages = {
         ERR_SUBSCRIPTION_EXPIRED: "Assinatura expirada",
         ERR_UNKOWN: "Erro desconhecido",
       },
+      wavoipModal: {
+        title: "Insira o token da sua conexão no Wavoip",
+        instructions: "Acessando o endereço abaixo você pode criar uma conta com 50 ligações gratuitas para teste",
+        coupon: "Ao contratar o serviço use o cupom TICKETZ para ganhar um desconto!",
+      },
       ticketz: {
         registration: {
           header: "Cadastre-se na base de usuários do Ticketz",
