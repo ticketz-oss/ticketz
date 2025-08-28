@@ -143,6 +143,7 @@ export default function Options(props) {
   const [ticketAcceptedMessage, setTicketAcceptedMessage] = useState("");
   const [transferMessage, setTransferMessage] = useState("");
   const [allowSilentlyClose, setAllowSilentlyClose] = useState("enabled");
+  const [desktopActionIconZoom, setDesktopActionIconZoom] = useState(0.6);
 
   const [s3ConfigData, setS3ConfigData] = useState({});
   const [enforceNumberCheck, setEnforceNumberCheck] = useState("enabled");
@@ -306,6 +307,9 @@ export default function Options(props) {
       
       const allowSilentlyClose = settings.find((s) => s.key === "allowSilentlyClose");
       setAllowSilentlyClose(allowSilentlyClose?.value || "enabled");
+      
+      const desktopActionIconZoom = settings.find((s) => s.key === "desktopActionIconZoom");
+      setDesktopActionIconZoom(desktopActionIconZoom?.value || 0.6);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
@@ -621,8 +625,26 @@ export default function Options(props) {
             </Select>
           </FormControl>
         </Grid>
-
-        <Grid xs={4} sm={6} md={4} item>
+        
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="desktop-action-icon-zoom-label">
+              {i18n.t("settings.DesktopActionIconZoom.title")}
+            </InputLabel>
+            <Select
+              labelId="desktop-action-icon-zoom-label"
+              name="desktopActionIconZoom"
+              value={desktopActionIconZoom}
+              onChange={async (e) => {
+                setDesktopActionIconZoom(e.target.value);
+                await handleSetting("desktopActionIconZoom", e.target.value);
+              }}
+            >
+              <MenuItem value={1.0}>{i18n.t("common.large")}</MenuItem>
+              <MenuItem value={0.8}>{i18n.t("common.medium")}</MenuItem>
+              <MenuItem value={0.6}>{i18n.t("common.small")}</MenuItem>
+            </Select>
+          </FormControl>
         </Grid>
 
         <Grid xs={12} sm={12} md={6} item>

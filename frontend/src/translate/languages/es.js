@@ -36,6 +36,9 @@ const messages = {
         noqueue: "Sin cola",
         rating: "Calificación",
         transferTo: "Transferir a",
+        small: "Pequeño",
+        medium: "Mediano",
+        large: "Grande", 
       },
       signup: {
         title: "Registrarse",
@@ -945,6 +948,9 @@ const messages = {
         },
         "AllowSilentlyClose": {
           "title": "Permitir cerrar ticket silenciosamente",
+        },
+        "DesktopActionIconZoom": {
+          "title": "Tamaño del icono de acción del ticket",
         },
         "ticketAcceptedMessage": {
           "title": "Mensaje de ticket aceptado",
