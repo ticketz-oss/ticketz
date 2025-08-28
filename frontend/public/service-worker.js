@@ -111,10 +111,12 @@ self.addEventListener('push', event => {
     notificationTimers[tag] = setTimeout(() => {
       self.registration.getNotifications({ tag }).then(existingNotifications => {
         if (existingNotifications.length) {
-          const existingBody = existingNotifications[0].data.body;
-          existingNotifications.forEach(notification => notification.close());
-          pendingNotifications[tag].body = existingBody + '\n' + pendingNotifications[tag].body;
-          pendingNotifications[tag].data.body = pendingNotifications[tag].body;
+          existingNotifications.forEach(notification => {
+            if (notification.tag !== tag) return;
+            pendingNotifications[tag].body = notification.data.body + '\n' + pendingNotifications[tag].body;
+            pendingNotifications[tag].data.body = pendingNotifications[tag].body;
+            notification.close();
+          });
         }
 
         self.registration.showNotification(title, pendingNotifications[tag]);
