@@ -20,6 +20,31 @@ const defaultLogoLight = "/vector/logo.svg";
 const defaultLogoDark = "/vector/logo-dark.svg";
 const defaultLogoFavicon = "/vector/favicon.svg";
 
+function useViewportHeight() {
+  useEffect(() => {
+    const setVh = () => {
+      const h = window.visualViewport?.height || window.innerHeight;
+      document.documentElement.style.setProperty("--vh", `${h}px`);
+    };
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", setVh);
+      window.visualViewport.addEventListener("scroll", setVh);
+    }
+    window.addEventListener("resize", setVh);
+
+    setVh(); // initial
+
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener("resize", setVh);
+        window.visualViewport.removeEventListener("scroll", setVh);
+      }
+      window.removeEventListener("resize", setVh);
+    };
+  }, []);
+}
+
 const App = () => {
   const [locale, setLocale] = useState();
 
@@ -189,6 +214,8 @@ const App = () => {
       .catch((error) => { console.log("Error reading setting", error); setAppName("whitelabel chat") });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useViewportHeight();
 
   return (
     <>
