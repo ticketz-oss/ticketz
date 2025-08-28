@@ -41,6 +41,7 @@
 
 import { Request, Response } from "express";
 import axios from "axios";
+import { createHmac } from "crypto";
 import GetSuperSettingService from "../SettingServices/GetSuperSettingService";
 import { logger } from "../../utils/logger";
 import { getIO } from "../../libs/socket";
@@ -52,7 +53,7 @@ import {
   processInvoicePaid
 } from "./PaymentGatewayServices";
 
-const owenBaseURL = "https://api.apipix.me/v1";
+const owenBaseURL = "https://pixpdv.com.br/api/v1";
 
 interface OwenConfig {
   user: string;
@@ -62,10 +63,19 @@ interface OwenConfig {
 
 const owenLoadConfig = async (): Promise<OwenConfig> => {
   return {
-    user: await GetSuperSettingService({ key: "_owenCnpj" }),
+    user: (await GetSuperSettingService({ key: "_owenCnpj" })).replace(
+      /\D/g,
+      ""
+    ),
     password: await GetSuperSettingService({ key: "_owenToken" }),
     secretkey: await GetSuperSettingService({ key: "_owenSecretKey" })
   };
+};
+
+const generateHmac = (data: any, secret: string): string => {
+  const hmac = createHmac("sha256", secret);
+  hmac.update(JSON.stringify(data));
+  return hmac.digest("hex");
 };
 
 export const owenWebhook = async (
@@ -121,9 +131,14 @@ export const owenCheckStatus = async (
     }
 
     const txDetail = await axios.get(`${owenBaseURL}/qrstatus`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Basic ${Buffer.from(
+          `${owenConfig.user}:${owenConfig.password}`
+        ).toString("base64")}`
+      },
       params: {
-        qrcodeId: invoice.txId,
-        ...owenConfig
+        qrcodeId: invoice.txId
       }
     });
 
@@ -192,12 +207,10 @@ export const owenCreateSubscription = async (
   const owenConfig: OwenConfig = await owenLoadConfig();
 
   const qrData = {
-    params: {
-      valor: price.toFixed([2]),
-      minutos: 5,
-      mensagem: `#Fatura:${invoiceId}`,
-      ...owenConfig
-    }
+    valor: price.toFixed([2]),
+    minutos: 5,
+    mensagem: `#Fatura:${invoiceId}`,
+    imagem: false
   };
 
   try {
@@ -205,7 +218,15 @@ export const owenCreateSubscription = async (
     if (!invoice) {
       throw new Error("Invoice not found");
     }
-    const qrResult = await axios.get(`${owenBaseURL}/qrdinamico`, qrData);
+    const qrResult = await axios.post(`${owenBaseURL}/qrdinamico`, qrData, {
+      headers: {
+        "Content-Type": "application/json",
+        "Json-Hash": generateHmac(qrData, owenConfig.secretkey),
+        Authorization: `Basic ${Buffer.from(
+          `${owenConfig.user}:${owenConfig.password}`
+        ).toString("base64")}`
+      }
+    });
     invoice.update({
       value: price,
       txId: qrResult.data.data.qrcodeId,
