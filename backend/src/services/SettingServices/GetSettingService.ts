@@ -11,12 +11,13 @@ interface Request {
 
 // keys that can be accessed by non-admin users
 // with respective default values
-const safeSettingsKeys = {
+export const safeSettingsKeys = {
   groupsTab: "disabled",
   CheckMsgIsGroup: "disabled",
   soundGroupNotifications: "disabled",
   tagsMode: "ticket",
-  allowSilentlyClose: "enabled"
+  allowSilentlyClose: "enabled",
+  desktopActionIconZoom: 0.6
 };
 
 export const GetSettingService = async ({
