@@ -1,13 +1,35 @@
 import React, { useState, useEffect } from "react";
-import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, CircularProgress } from "@material-ui/core";
+import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, CircularProgress, Typography, makeStyles } from "@material-ui/core";
 import { toast } from "react-toastify";
 import api from "../../services/api";
 import { i18n } from "../../translate/i18n";
+
+const useStyles = makeStyles((theme) => ({
+  wavoipTitle: {
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: theme.spacing(2),
+  },
+  wavoipInstructions: {
+    textAlign: 'center',
+    marginBottom: theme.spacing(2),
+  },
+  wavoipLink: {
+    textDecoration: 'none',
+    color: theme.palette.primary.main,
+    cursor: 'pointer',
+    '&:hover': {
+      textDecoration: 'underline',
+    },
+    marginBottom: theme.spacing(2),
+  },
+}));
 
 const WavoipModal = ({ open, onClose, whatsappId }) => {
   const [token, setToken] = useState("");
   const [loading, setLoading] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
+  const classes = useStyles();
 
   useEffect(() => {
     if (open && whatsappId) {
@@ -68,13 +90,38 @@ const WavoipModal = ({ open, onClose, whatsappId }) => {
         {loading && initialLoad ? (
           <CircularProgress />
         ) : (
-          <TextField
-            label="Token"
-            value={token || ""}
-            onChange={e => setToken(e.target.value)}
-            fullWidth
-            variant="outlined"
-          />
+          <>
+            <Typography
+              className={classes.wavoipTitle}
+              variant="body2" gutterBottom>
+              {i18n.t("wavoipModal.title")}<br />
+            </Typography>
+            <Typography
+              className={classes.wavoipInstructions}
+              variant="body2" gutterBottom>
+              {i18n.t("wavoipModal.instructions")}
+            </Typography>
+            <Typography
+              className={classes.wavoipInstructions}
+              variant="body2" gutterBottom>
+              <a className={classes.wavoipLink}
+                href="https://wavoip.com" target="_blank">
+                wavoip.com.br
+              </a>
+            </Typography>
+            <Typography
+              className={classes.wavoipInstructions}
+              variant="body2" gutterBottom>
+              {i18n.t("wavoipModal.coupon")}
+            </Typography>
+            <TextField
+              label="Token"
+              value={token || ""}
+              onChange={e => setToken(e.target.value)}
+              fullWidth
+              variant="outlined"
+            />
+          </>
         )}
       </DialogContent>
       <DialogActions>
