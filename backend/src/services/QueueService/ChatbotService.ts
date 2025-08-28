@@ -31,6 +31,7 @@ import IntegrationSession from "../../models/IntegrationSession";
 import { logger } from "../../utils/logger";
 import { deferredTasks } from "../../helpers/deferredTasks";
 import { getFileDetails } from "../../helpers/fileDetails";
+import { _t } from "../TranslationServices/i18nService";
 
 const integrationServices = IntegrationServices.getInstance();
 const downloadMediaTasks = deferredTasks();
@@ -65,9 +66,10 @@ export async function sendMenu(
     });
 
     if (sendBackToMain) {
+      const mainMenuPhrase = _t("Back to Main Menu", ticket);
       options += showNumericIcons
-        ? "\n#️⃣ - Voltar Menu Inicial"
-        : "\n*[ # ]* - Voltar Menu Inicial";
+        ? `\n#️⃣ - ${mainMenuPhrase}`
+        : `\n*[ # ]* - ${mainMenuPhrase}`;
     }
 
     const textMessage = {
