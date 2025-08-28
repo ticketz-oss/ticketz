@@ -39,6 +39,7 @@ import SyncAltIcon from '@material-ui/icons/SyncAlt';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import { generateColor } from "../../helpers/colorGenerator";
 import { getInitials } from "../../helpers/getInitials";
+import { isMobile } from "../../helpers/isMobile";
 import pastRelativeDate from "../../helpers/pastRelativeDate";
 import TagsLine from "../TagsLine";
 import useSettings from "../../hooks/useSettings";
@@ -222,6 +223,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
   const [ticketUser, setTicketUser] = useState(null);
   const [whatsAppName, setWhatsAppName] = useState(null);
   const [allowClose, setAllowClose] = useState(false);
+  const [desktopActionIconZoom, setDesktopActionIconZoom] = useState(0.6);
 
   const [openTicketMessageDialog, setOpenTicketMessageDialog] = useState(false);
   const [showActions, setShowActions] = useState(false);
@@ -235,6 +237,9 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
   useEffect(() => {
     getCachedSetting("allowSilentlyClose", "enabled").then((res) => {
       setAllowClose(user.profile === "admin" || res === "enabled");
+    });
+    getCachedSetting("desktopActionIconZoom", "0.6").then((res) => {
+      setDesktopActionIconZoom(parseFloat(res));
     });
   }, [getCachedSetting, user.profile]);
 
@@ -290,7 +295,10 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
     return (
       <div
         className={classes.ticketActions}
-        style={{ maxWidth: showActions ? "200px" : "44px" }}
+        style={{
+           maxWidth: showActions ? "200px" : "44px",
+           zoom: !isMobile() ? desktopActionIconZoom || 0.6 : 1
+         }}
         onMouseOver={() => setShowActions(true)}
         onMouseLeave={() => setShowActions(false)}
         onClick={(e) => e.stopPropagation()}

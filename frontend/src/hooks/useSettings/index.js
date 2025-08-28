@@ -1,10 +1,11 @@
+import { useContext, useEffect } from "react";
 import api, { openApi } from "../../services/api";
 import { Mutex } from 'async-mutex';
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const cachedSettingsMutex = new Mutex();
 
 const useSettings = () => {
-
     const get = async (key) => {
         const { data } = await api.request({
             url: `/settings/${key}`,
@@ -72,6 +73,24 @@ const useSettings = () => {
       });
     }
 
+    const socketManager = useContext(SocketContext);
+
+    useEffect(() => {
+      if (!socketManager) return;
+
+      const socket = socketManager.GetSocket();
+      
+      socket.on(`settings`, (data) => {
+        if (data.key && data.value) {
+          sessionStorage.setItem(data.key, JSON.stringify(data.value));
+        }
+      });
+  
+      return () => {
+        socket.disconnect();
+      };
+    }, [socketManager]);
+    
     return {
       get,
 		  getAll,

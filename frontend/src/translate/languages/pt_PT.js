@@ -27,7 +27,10 @@ const messages = {
         dueDate: "Data de vencimento",
         copy: "Copiar",
         paste: "Colar",
-        proceed: "Prosseguir",        
+        proceed: "Prosseguir",
+        small: "Pequeno",
+        medium: "Médio",
+        large: "Grande",        
       },
       signup: {
         title: "Registar",

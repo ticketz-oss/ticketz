@@ -36,6 +36,9 @@ const messages = {
         noqueue: "No queue",
         rating: "Rating",
         transferTo: "Transfer to",
+        small: "Small",
+        medium: "Medium",
+        large: "Large",
       },
       signup: {
         title: "Sign Up",
@@ -949,6 +952,9 @@ const messages = {
         },
         "AllowSilentlyClose": {
           "title": "Allow Close Ticket Silently",
+        },
+        "DesktopActionIconZoom": {
+          "title": "Ticket action icon size",
         },
         "ticketAcceptedMessage": {
           "title": "Ticket Accepted Message",
