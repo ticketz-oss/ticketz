@@ -12,6 +12,7 @@ import User from "../../models/User";
 import Queue from "../../models/Queue";
 import { updateTicket } from "./UpdateTicketService";
 import { OmniServices } from "../OmniServices/OmniServices";
+import { _t } from "../TranslationServices/i18nService";
 
 async function handleRating(
   rate: number,
@@ -96,6 +97,10 @@ export async function checkRating(
       ]
     }));
 
+  const ticket = await Ticket.findByPk(ticketTracking.ticketId, {
+    include: ["contact", "company", "whatsapp"]
+  });
+
   if (ticketTracking) {
     try {
       /**
@@ -140,7 +145,10 @@ export async function checkRating(
           },
           true
         );
-        sendFormattedMessage("Atendimento reaberto", ticketTracking.ticket);
+        sendFormattedMessage(
+          _t("Service reopened", ticket),
+          ticketTracking.ticket
+        );
         return true;
       }
       // cancel rating
@@ -150,9 +158,13 @@ export async function checkRating(
       ticketTracking.update({
         expired: true
       });
-      sendFormattedMessage("Avaliação cancelada", ticketTracking.ticket, {
-        dontSaveOnTicket: true
-      });
+      sendFormattedMessage(
+        _t("Rating Cancelled", ticket),
+        ticketTracking.ticket,
+        {
+          dontSaveOnTicket: true
+        }
+      );
       if (message.length < 10) {
         return true;
       }

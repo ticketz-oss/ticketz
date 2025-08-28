@@ -16,7 +16,7 @@ const checker = async (number: string, wbot: Session) => {
 
   if (!validNumber) {
     logger.error({ number }, "Failed to check number on whatsapp");
-    throw new Error("ERR_CHECK_NUMBER");
+    throw new AppError("ERR_CHECK_NUMBER", 400);
   }
 
   return {

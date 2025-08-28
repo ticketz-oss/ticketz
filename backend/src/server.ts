@@ -133,9 +133,16 @@ i18nReady.then(() => {
 
 // Global Exception Handlers
 process.on("uncaughtException", err => {
-  logger.error({ err }, `Uncaught Exception: ${err.message}`);
+  logger.error(
+    { err, stack: err?.stack },
+    `Uncaught Exception: ${err.message}`
+  );
   // eslint-disable-next-line dot-notation
   if (err["code"] === "ERR_OSSL_BAD_DECRYPT") {
+    return;
+  }
+  // eslint-disable-next-line dot-notation
+  if (err["code"] === "ENAMETOOLONG") {
     return;
   }
   process.exit(1);
