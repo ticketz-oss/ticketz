@@ -1018,6 +1018,7 @@ const messages = {
             resolve: "Resolver",
             reopen: "Reabrir",
             accept: "Aceptar",
+            call: "Llamar"
           },
         },
       },
@@ -1087,7 +1088,7 @@ const messages = {
       presence: {
         unavailable: "Indisponible",
         available: "Disponible",
-        composing: "Escrebiendo",
+        composing: "Escribiendo",
         recording: "Grabando",
         paused: "Pausado",
       },
@@ -1184,6 +1185,9 @@ const messages = {
         "addressLine2": "Línea de Dirección 2",
         "city": "Ciudad",
         "state": "Estado o Región"
+      },
+      phoneCall: {
+        hangup: "Cortar",
       },
       wavoipModal: {
         title: "Ingrese el token de su conexión en Wavoip",
