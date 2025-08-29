@@ -62,3 +62,7 @@ export async function wavoipCall(ticket, disconnect) {
 
   return wavoipInstance;
 };
+
+export function wavoipAvailable() {
+  return window.location.protocol === "https:" || window.location.hostname === "localhost";
+}

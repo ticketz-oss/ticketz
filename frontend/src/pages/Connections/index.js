@@ -49,6 +49,7 @@ import { WhatsAppsContext } from "../../context/WhatsApp/WhatsAppsContext";
 import toastError from "../../errors/toastError";
 import wavoipIcon from "../../assets/wavoip.webp";
 import WavoipModal from "../../components/WavoipModal";
+import { wavoipAvailable } from "../../helpers/wavoipCallManager";
 
 const useStyles = makeStyles(theme => ({
 	mainPaper: {
@@ -455,7 +456,7 @@ const Connections = () => {
 													</IconButton>
 												)}
 
-                        {whatsApp.channel === "whatsapp" && (
+                        {whatsApp.channel === "whatsapp" && wavoipAvailable() && (
                           <IconButton
                             size="small"
                             onClick={() => handleOpenWavoipModal(whatsApp)}
