@@ -42,7 +42,7 @@ async function handleRating(
   });
 
   const complationMessage =
-    whatsapp.complationMessage.trim() || "Atendimento finalizado";
+    whatsapp.complationMessage.trim() || _t("Service finished", ticket);
 
   sendFormattedMessage(complationMessage, ticket);
 }
