@@ -18,7 +18,7 @@ import { Call, CallEnd } from "@material-ui/icons";
 import Tooltip from '@material-ui/core/Tooltip';
 import { green } from '@material-ui/core/colors';
 import { PhoneCallContext } from "../../context/PhoneCall/PhoneCallContext";
-import { wavoipCall } from "../../helpers/wavoipCallManager";
+import { wavoipAvailable, wavoipCall } from "../../helpers/wavoipCallManager";
 
 const useStyles = makeStyles(theme => ({
 	actionButtons: {
@@ -111,6 +111,7 @@ const TicketActionButtonsCustom = ({ ticket, showTabGroups }) => {
 			{(ticket.status === "open" || (showTabGroups && ticket.isGroup ) ) && (
 				<>
           {
+            wavoipAvailable() &&
             phoneContext &&
             !phoneContext.currentCall &&
             ticket.whatsapp.wavoip?.token &&
@@ -125,6 +126,7 @@ const TicketActionButtonsCustom = ({ ticket, showTabGroups }) => {
           }
   
           {
+            wavoipAvailable() &&
             phoneContext &&
             phoneContext.currentCall &&
             phoneContext.currentCall.contact.id === ticket.contact.id &&

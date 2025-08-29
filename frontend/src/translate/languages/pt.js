@@ -1027,6 +1027,7 @@ const messages = {
             resolve: "Resolver",
             reopen: "Reabrir",
             accept: "Aceitar",
+            call: "Chamar",
           },
         },
       },
@@ -1193,6 +1194,9 @@ const messages = {
         "addressLine2": "Complemento",
         "city": "Cidade",
         "state": "Estado ou Região"
+      },
+      phoneCall: {
+        hangup: "Desligar",
       },
       wavoipModal: {
         title: "Insira o token da sua conexão no Wavoip",

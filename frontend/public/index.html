@@ -16,7 +16,23 @@
 		/>
 		
 	  <style>
+			html, body {
+			  height: var(--vh, 100vh);
+			  margin: 0;
+			  padding: 0;
+			  overflow: hidden;
+			}
 
+			#root {
+		    position: fixed;
+		    top: 0;
+		    left: 0;
+		    width: 100%;
+		    height: var(--vh, 100vh);
+		    overflow-y: auto;
+		    -webkit-overflow-scrolling: touch;
+			}
+    
       :root {
         --background: #999;
         --splash: #777;
@@ -119,7 +135,8 @@
 		</script>
 	</head>
 	<body>
-	  <div id="splash-background">
+    <div id="pixelAnchor" style="position:absolute; top:0; left:0; width:1px; height:1px; opacity:0;"></div>
+    <div id="splash-background">
 		  <div id="splash-screen">
 		    <div class="app-logo-div" id="app-logo-div">
 		       <img id="app-logo" alt="logo" />
@@ -131,6 +148,38 @@
 	  </div>
 	  <div id="root"></div>
 	<script>
+		window.addEventListener("focusin", () => {
+			  setTimeout(() => window.scrollTo(0, 0), 0);
+			});
+
+ 		window.visualViewport.addEventListener("scroll", () => {
+		  if (window.visualViewport.pageTop) {
+        const anchor = document.getElementById("pixelAnchor");
+         anchor.scrollIntoView({ block: "start", inline: "nearest" });
+		  }
+		});
+
+		if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      function handleFocus(e) {
+        const root = document.getElementById("root");
+        const anchor = document.getElementById("pixelAnchor");
+        const el = e.target;
+        if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
+          setTimeout(() => {
+            el.scrollIntoView({
+              block: "center",
+              behavior: "auto",
+            });
+            setTimeout(() => {
+              anchor.scrollIntoView({ block: "start", inline: "nearest" });
+            }, 200);
+          }, 100);
+        }
+      }
+
+      root.addEventListener("focusin", handleFocus);
+		}
+		
 		// Simulate progress update
 		progress = 0;
 		const themes = {
