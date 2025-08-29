@@ -58,6 +58,7 @@ const drawerWidth = 240;
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
+    overflow: "hidden",
     height: "var(--vh)",
     backgroundColor: theme.palette.fancyBackground,
     '& .MuiButton-outlinedPrimary': {
