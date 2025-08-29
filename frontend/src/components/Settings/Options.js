@@ -143,7 +143,7 @@ export default function Options(props) {
   const [ticketAcceptedMessage, setTicketAcceptedMessage] = useState("");
   const [transferMessage, setTransferMessage] = useState("");
   const [allowSilentlyClose, setAllowSilentlyClose] = useState("enabled");
-  const [desktopActionIconZoom, setDesktopActionIconZoom] = useState(0.6);
+  const [desktopActionIconZoom, setDesktopActionIconZoom] = useState(0.8);
 
   const [s3ConfigData, setS3ConfigData] = useState({});
   const [enforceNumberCheck, setEnforceNumberCheck] = useState("enabled");
@@ -309,7 +309,7 @@ export default function Options(props) {
       setAllowSilentlyClose(allowSilentlyClose?.value || "enabled");
       
       const desktopActionIconZoom = settings.find((s) => s.key === "desktopActionIconZoom");
-      setDesktopActionIconZoom(desktopActionIconZoom?.value || 0.6);
+      setDesktopActionIconZoom(desktopActionIconZoom?.value || 0.8);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
