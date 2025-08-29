@@ -1061,7 +1061,7 @@ const messages = {
       backendErrors: {
         ERR_UNAUTHORIZED: "Você não está autorizado a acessar este recurso.",
         ERR_FORBIDDEN: "Você não tem permissão para acessar este recurso.",
-        ERR_CHECK_NUMBER: "Verifique o número e tente novamente.",
+        ERR_CHECK_NUMBER: "Número não encontrado no Whatsapp.",
         ERR_NO_OTHER_WHATSAPP: "Deve haver pelo menos um WhatsApp padrão.",
         ERR_NO_DEF_WAPP_FOUND:
           "Nenhum WhatsApp padrão encontrado. Verifique a página de conexões.",
@@ -1101,6 +1101,11 @@ const messages = {
         ERR_WAPP_NOT_FOUND: "Conexão indisponível",
         ERR_SUBSCRIPTION_EXPIRED: "Assinatura expirada",
         ERR_UNKOWN: "Erro desconhecido",
+      },
+      wavoipModal: {
+        title: "Insira o token da sua conexão no Wavoip",
+        instructions: "Acessando o endereço abaixo você pode criar uma conta com 50 ligações gratuitas para teste",
+        coupon: "Ao contratar o serviço use o cupom TICKETZ para ganhar um desconto!",
       },
       ticketz: {
         registration: {

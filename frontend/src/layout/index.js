@@ -24,6 +24,7 @@ import CachedIcon from "@material-ui/icons/Cached";
 import MainListItems from "./MainListItems";
 import NotificationsPopOver from "../components/NotificationsPopOver";
 import { Backendlogs } from "../components/Backendlogs";
+import { PhoneCall } from "../components/PhoneCall";
 import NotificationsVolume from "../components/NotificationsVolume";
 import UserModal from "../components/UserModal";
 import AboutModal from "../components/AboutModal";
@@ -57,7 +58,7 @@ const drawerWidth = 240;
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
-    height: "100vh",
+    height: "var(--vh)",
     backgroundColor: theme.palette.fancyBackground,
     '& .MuiButton-outlinedPrimary': {
       color: theme.palette.primary,
@@ -432,6 +433,8 @@ const LoggedInLayout = ({ children, themeToggle }) => {
             yes={() => (
               <Backendlogs />
             )} />
+            
+          <PhoneCall />
           
           <NotificationsVolume
             setVolume={setVolume}

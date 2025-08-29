@@ -40,6 +40,7 @@ import BaileysKeys from "../models/BaileysKeys";
 import UserSocketSession from "../models/UserSocketSession";
 import OutOfTicketMessage from "../models/OutOfTicketMessages";
 import Translation from "../models/Translation";
+import Wavoip from "../models/Wavoip";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const dbConfig = require("../config/database");
@@ -87,7 +88,8 @@ const models = [
   Invoices,
   OutOfTicketMessage,
   Subscriptions,
-  Translation
+  Translation,
+  Wavoip
 ];
 
 sequelize.addModels(models);

@@ -60,6 +60,7 @@ const NotificationsPopOver = (props) => {
   const [soundGroupNotifications, setSoundGroupNotifications] = useState(false);
   const [showTabGroups, setShowTabGroups] = useState(false);
   const { profile, queues } = user;
+  const [ queueIds, setQueueIds ] = useState(queues.map(q => q.id));
 
   const [, setDesktopNotifications] = useState([]);
 
@@ -128,10 +129,12 @@ const NotificationsPopOver = (props) => {
 	}, [ticketIdUrl]);
 
   useEffect(() => {
+    setQueueIds(queues.map(q => q.id));
+  }, [queues]);
+  
+  useEffect(() => {
     const companyId = localStorage.getItem("companyId");
     const socket = socketManager.GetSocket(companyId);
-
-    const queueIds = queues.map((q) => q.id);
 
     const onConnectNotificationsPopover = () => {
       socket.emit("joinNotification");
@@ -152,7 +155,10 @@ const NotificationsPopOver = (props) => {
       if (
         data.action === "create" &&
         !data.message.read &&
-        (data.ticket.userId === user?.id || !data.ticket.userId)
+        (
+          data.ticket.userId === user?.id ||
+          (!data.ticket.userId && queueIds.includes(data.ticket.queueId))
+        )
       ) {
         setNotifications(prevState => {
           const ticketIndex = prevState.findIndex(t => t.id === data.ticket.id);

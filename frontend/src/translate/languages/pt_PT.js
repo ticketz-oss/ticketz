@@ -989,7 +989,7 @@ const messages = {
       backendErrors: {
         ERR_UNAUTHORIZED: "Não autorizado. Por favor, faça o login novamente.",
         ERR_FORBIDDEN: "Acesso negado. Você não tem permissão para acessar este recurso.",
-        ERR_CHECK_NUMBER: "Erro ao verificar o número do WhatsApp.",
+        ERR_CHECK_NUMBER: "Número não encontrado no Whatsapp.",
         ERR_NO_OTHER_WHATSAPP: "Deve haver pelo menos um WhatsApp padrão.",
         ERR_NO_DEF_WAPP_FOUND:
           "Nenhum WhatsApp padrão encontrado. Verifique a página de conexões.",

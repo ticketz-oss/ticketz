@@ -63,7 +63,7 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
     width: "100%",
     minWidth: 300,
-    minHeight: 200,
+    minHeight: 150,
   },
 
   messagesList: {

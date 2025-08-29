@@ -1020,7 +1020,7 @@ const messages = {
       presence: {
         unavailable: "Indisponible",
         available: "Disponible",
-        composing: "Componiendo",
+        composing: "Escrebiendo",
         recording: "Grabando",
         paused: "Pausado",
       },
@@ -1093,6 +1093,11 @@ const messages = {
           "Este color ya está en uso, elija otro.",
         ERR_WAPP_GREETING_REQUIRED:
           "El mensaje de saludo es obligatorio cuando hay más de una cola.",
+      },
+      wavoipModal: {
+        title: "Ingrese el token de su conexión en Wavoip",
+        instructions: "Accediendo a la siguiente dirección puede crear una cuenta con 50 llamadas gratuitas para prueba",
+        coupon: "¡Al contratar el servicio use el cupón TICKETZ para ganar un descuento!",
       },
       ticketz: {
         registration: {

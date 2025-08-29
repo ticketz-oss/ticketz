@@ -7,6 +7,7 @@ import { ptBR } from "@material-ui/core/locale";
 import { createTheme, ThemeProvider } from "@material-ui/core/styles";
 import { useMediaQuery } from "@material-ui/core";
 import ColorModeContext from "./layout/themeContext";
+import { PhoneCallProvider } from "./context/PhoneCall/PhoneCallContext";
 import { SocketContext, socketManager } from './context/Socket/SocketContext';
 import useSettings from "./hooks/useSettings";
 import Favicon from "react-favicon";
@@ -18,6 +19,31 @@ const queryClient = new QueryClient();
 const defaultLogoLight = "/vector/logo.svg";
 const defaultLogoDark = "/vector/logo-dark.svg";
 const defaultLogoFavicon = "/vector/favicon.svg";
+
+function useViewportHeight() {
+  useEffect(() => {
+    const setVh = () => {
+      const h = window.visualViewport?.height || window.innerHeight;
+      document.documentElement.style.setProperty("--vh", `${h}px`);
+    };
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", setVh);
+      window.visualViewport.addEventListener("scroll", setVh);
+    }
+    window.addEventListener("resize", setVh);
+
+    setVh(); // initial
+
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener("resize", setVh);
+        window.visualViewport.removeEventListener("scroll", setVh);
+      }
+      window.removeEventListener("resize", setVh);
+    };
+  }, []);
+}
 
 const App = () => {
   const [locale, setLocale] = useState();
@@ -189,10 +215,13 @@ const App = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useViewportHeight();
+
   return (
     <>
     <Favicon url={ ((appLogoFavicon) ? theme.appLogoFavicon : defaultLogoFavicon ) } />
     <ColorModeContext.Provider value={{ colorMode }}>
+      <PhoneCallProvider>
       <ThemeProvider theme={theme}>
         <QueryClientProvider client={queryClient}>
           <SocketContext.Provider value={socketManager}>
@@ -200,6 +229,7 @@ const App = () => {
           </SocketContext.Provider>
         </QueryClientProvider>
       </ThemeProvider>
+      </PhoneCallProvider>
     </ColorModeContext.Provider>
     </>
   );
