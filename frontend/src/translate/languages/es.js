@@ -954,6 +954,7 @@ const messages = {
             resolve: "Resolver",
             reopen: "Reabrir",
             accept: "Aceptar",
+            call: "Llamar"
           },
         },
       },
@@ -1020,7 +1021,7 @@ const messages = {
       presence: {
         unavailable: "Indisponible",
         available: "Disponible",
-        composing: "Escrebiendo",
+        composing: "Escribiendo",
         recording: "Grabando",
         paused: "Pausado",
       },
@@ -1093,6 +1094,9 @@ const messages = {
           "Este color ya está en uso, elija otro.",
         ERR_WAPP_GREETING_REQUIRED:
           "El mensaje de saludo es obligatorio cuando hay más de una cola.",
+      },
+      phoneCall: {
+        hangup: "Cortar",
       },
       wavoipModal: {
         title: "Ingrese el token de su conexión en Wavoip",

@@ -949,6 +949,7 @@ const messages = {
             resolve: "Resolve",
             reopen: "Reopen",
             accept: "Accept",
+            call: "Call",
           },
         },
       },
@@ -1082,6 +1083,9 @@ const messages = {
         ERR_WAPP_NOT_FOUND: "Connection unavailable.",
         ERR_SUBSCRIPTION_EXPIRED: "Your subscription has expired.",
         ERR_UNKOWN: "Unknown error.",
+      },
+      phoneCall: {
+        hangup: "Hang up",
       },
       wavoipModal: {
         title: "Enter your Wavoip connection token",

@@ -958,6 +958,7 @@ const messages = {
             resolve: "Resolver",
             reopen: "Reabrir",
             accept: "Aceitar",
+            call: "Chamar",
           },
         },
       },
@@ -1101,6 +1102,9 @@ const messages = {
         ERR_WAPP_NOT_FOUND: "Conexão indisponível",
         ERR_SUBSCRIPTION_EXPIRED: "Assinatura expirada",
         ERR_UNKOWN: "Erro desconhecido",
+      },
+      phoneCall: {
+        hangup: "Desligar",
       },
       wavoipModal: {
         title: "Insira o token da sua conexão no Wavoip",
