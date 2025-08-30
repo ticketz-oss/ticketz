@@ -12,7 +12,8 @@ import {
   proto,
   WAMessage,
   WAMessageUpdate,
-  WAMessageStubType
+  WAMessageStubType,
+  WAGenericMediaMessage
 } from "baileys";
 import { Mutex } from "async-mutex";
 import { Op } from "sequelize";
@@ -26,7 +27,9 @@ import Message from "../../models/Message";
 import OldMessage from "../../models/OldMessage";
 
 import { getIO } from "../../libs/socket";
-import CreateMessageService, { websocketCreateMessage } from "../MessageServices/CreateMessageService";
+import CreateMessageService, {
+  websocketCreateMessage
+} from "../MessageServices/CreateMessageService";
 import { logger } from "../../utils/logger";
 import FindOrCreateTicketService from "../TicketServices/FindOrCreateTicketService";
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
@@ -580,15 +583,28 @@ async function updateTicket(
   return ticket;
 }
 
+type VerifyMessageOptions = {
+  userId?: number;
+  skipWebsocket?: boolean;
+};
+
+type VerifyMediaMessageOptions = VerifyMessageOptions & {
+  messageMedia?: WAGenericMediaMessage | null;
+  mediaInfo?: MediaInfo | null;
+  wbot?: Session | null;
+};
+
 export const verifyMediaMessage = async (
   msg: proto.IWebMessageInfo,
   ticket: Ticket,
   contact: Contact,
-  wbot: Session = null,
-  messageMedia = null,
-  userId: number = null,
-  mediaInfo: MediaInfo = null,
-  skipWebsocket = false
+  {
+    wbot,
+    messageMedia,
+    userId,
+    mediaInfo,
+    skipWebsocket
+  }: VerifyMediaMessageOptions = {}
 ): Promise<Message> => {
   const io = getIO();
   const quotedMsg = await verifyQuotedMessage(msg, ticket, wbot);
@@ -717,8 +733,7 @@ export const verifyMessage = async (
   msg: proto.IWebMessageInfo,
   ticket: Ticket,
   contact: Contact,
-  userId: number = null,
-  skipWebsocket = false
+  { userId, skipWebsocket }: VerifyMessageOptions = {}
 ) => {
   const io = getIO();
   const quotedMsg = await verifyQuotedMessage(msg, ticket);
@@ -1694,16 +1709,11 @@ const handleMessage = async (
       messageMedia ||
       msg?.message?.extendedTextMessage?.thumbnailDirectPath
     ) {
-      newMessage = await verifyMediaMessage(
-        msg,
-        ticket,
-        contact,
+      newMessage = await verifyMediaMessage(msg, ticket, contact, {
         wbot,
         messageMedia,
-        null,
-        null,
-        justCreated
-      );
+        skipWebsocket: justCreated
+      });
     } else if (
       msg.message?.editedMessage?.message?.protocolMessage?.editedMessage
     ) {
@@ -1723,7 +1733,9 @@ const handleMessage = async (
     } else if (msg.message?.protocolMessage?.type === 0) {
       await verifyDeleteMessage(msg.message.protocolMessage, ticket);
     } else {
-      newMessage = await verifyMessage(msg, ticket, contact, null, justCreated);
+      newMessage = await verifyMessage(msg, ticket, contact, {
+        skipWebsocket: justCreated
+      });
     }
 
     if (isGroup || contact.disableBot) {
