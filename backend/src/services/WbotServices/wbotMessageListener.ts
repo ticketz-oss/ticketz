@@ -14,7 +14,8 @@ import {
   WAGenericMediaMessage,
   Chat,
   Contact as WAContact,
-  MediaType
+  MediaType,
+  WATextMessage
 } from "baileys";
 import { Mutex } from "async-mutex";
 import { Op } from "sequelize";
@@ -501,6 +502,7 @@ const createDeferred = (): DeferredPromise => {
 type VerifyMessageOptions = {
   userId?: number;
   skipWebsocket?: boolean;
+  dontReopen?: boolean;
 };
 
 type VerifyMediaMessageOptions = VerifyMessageOptions & {
@@ -613,10 +615,10 @@ export const verifyMediaMessage = async (
 
   const thumbnailMsg = messageMedia || msg?.message?.extendedTextMessage;
 
-  if (thumbnailMsg?.thumbnailDirectPath) {
+  if ((thumbnailMsg as WATextMessage)?.thumbnailDirectPath) {
     const thumbnailDownloadData: BaileysDownloaderTaskData = {
       mediaKey: thumbnailMsg.mediaKey,
-      directPath: thumbnailMsg.thumbnailDirectPath,
+      directPath: (thumbnailMsg as WATextMessage).thumbnailDirectPath,
       mimetype: "image/jpeg",
       filename: `thumbnail-${makeRandomId(5)}-${new Date().getTime()}.jpg`,
       url: null,
@@ -1349,7 +1351,8 @@ const handleMessage = async (
     } else {
       newMessage = await verifyMessage(msg, ticket, contact, {
         skipWebsocket: justCreated
-      });    }
+      });
+    }
 
     if (isGroup || contact.disableBot) {
       if (justCreated && newMessage) {
@@ -1733,11 +1736,12 @@ const wbotMessageListener = async (
           messageMedia ||
           msg?.message?.extendedTextMessage?.thumbnailDirectPath
         ) {
-          verifyMediaMessage(msg, ticket, contact, wbot, messageMedia).catch(
-            err => {
-              logger.error({ msg, err }, "Error handling media message");
-            }
-          );
+          verifyMediaMessage(msg, ticket, contact, {
+            wbot,
+            messageMedia
+          }).catch(err => {
+            logger.error({ msg, err }, "Error handling media message");
+          });
         } else {
           verifyMessage(msg, ticket, contact).catch(err => {
             logger.error({ msg, err }, "Error handling message");

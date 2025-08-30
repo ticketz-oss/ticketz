@@ -73,16 +73,14 @@ const SendWhatsAppMessage = async ({
     wbot.cacheMessage(sentMessage);
 
     if (sentMessage?.message?.extendedTextMessage?.thumbnailDirectPath) {
-      await verifyMediaMessage(
-        sentMessage,
-        ticket,
-        ticket.contact,
+      await verifyMediaMessage(sentMessage, ticket, ticket.contact, {
         wbot,
-        null,
-        user.id
-      );
+        userId: user.id
+      });
     } else {
-      await verifyMessage(sentMessage, ticket, ticket.contact, user.id);
+      await verifyMessage(sentMessage, ticket, ticket.contact, {
+        userId: user.id
+      });
     }
     return sentMessage;
   } catch (err) {

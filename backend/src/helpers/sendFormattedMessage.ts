@@ -70,11 +70,8 @@ export async function sendFormattedMessage(
     return;
   }
 
-  await verifyMessage(
-    queueChangedMessage,
-    ticket,
-    ticket.contact,
-    user?.id,
+  await verifyMessage(queueChangedMessage, ticket, ticket.contact, {
+    userId: user?.id,
     dontReopen
-  );
+  });
 }
