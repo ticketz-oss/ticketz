@@ -39,6 +39,10 @@ interface Request {
 }
 
 export const websocketCreateMessage = (message: Message) => {
+  sendWebpushNotifications(message).catch(err => {
+    logger.error({ error: err.message }, "Error sending webpush notification");
+  });
+
   const io = getIO();
   io.to(message.ticketId.toString())
     .to(`company-${message.companyId}-${message.ticket.status}`)
@@ -148,16 +152,12 @@ const CreateMessageService = async ({
     return message;
   }
 
-  sendWebpushNotifications(message).catch(err => {
-    logger.error({ error: err.message }, "Error sending webpush notification");
-  });
-
   const io = getIO();
 
   if (!skipWebsocket) {
     websocketCreateMessage(message);
   }
-  
+
   io.to(`company-${companyId}-mainchannel`).emit(
     `company-${companyId}-contact`,
     {
