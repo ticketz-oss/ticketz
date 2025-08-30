@@ -223,7 +223,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
   const [ticketUser, setTicketUser] = useState(null);
   const [whatsAppName, setWhatsAppName] = useState(null);
   const [allowClose, setAllowClose] = useState(false);
-  const [desktopActionIconZoom, setDesktopActionIconZoom] = useState(0.6);
+  const [desktopActionIconZoom, setDesktopActionIconZoom] = useState(0.8);
 
   const [openTicketMessageDialog, setOpenTicketMessageDialog] = useState(false);
   const [showActions, setShowActions] = useState(false);
@@ -297,7 +297,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
         className={classes.ticketActions}
         style={{
            maxWidth: showActions ? "200px" : "44px",
-           zoom: !isMobile() ? desktopActionIconZoom || 0.6 : 1
+           zoom: !isMobile() ? desktopActionIconZoom || 0.8 : 1
          }}
         onMouseOver={() => setShowActions(true)}
         onMouseLeave={() => setShowActions(false)}

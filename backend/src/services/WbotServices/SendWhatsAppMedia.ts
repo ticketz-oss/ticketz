@@ -122,15 +122,10 @@ export const sendWhatsappFile = async (
 
     const sentMessage = await wbot.sendMessage(getJidOf(ticket), options);
 
-    await verifyMediaMessage(
-      sentMessage,
-      ticket,
-      ticket.contact,
-      null,
-      null,
+    await verifyMediaMessage(sentMessage, ticket, ticket.contact, {
       userId,
       mediaInfo
-    );
+    });
 
     return sentMessage;
   } catch (error) {
@@ -151,7 +146,7 @@ export const SendWhatsAppMessage = async (
 
     wbot.cacheMessage(sentMessage);
 
-    await verifyMessage(sentMessage, ticket, ticket.contact, userId);
+    await verifyMessage(sentMessage, ticket, ticket.contact, { userId });
 
     return sentMessage;
   } catch (error) {

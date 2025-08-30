@@ -157,7 +157,10 @@ const NotificationsPopOver = (props) => {
         !data.message.read &&
         (
           data.ticket.userId === user?.id ||
-          (!data.ticket.userId && queueIds.includes(data.ticket.queueId))
+          (!data.ticket.userId && (
+            queueIds.includes(data.ticket.queueId) ||
+            (!data.ticket.queueId && profile === "admin")
+          ))
         )
       ) {
         setNotifications(prevState => {
@@ -177,6 +180,7 @@ const NotificationsPopOver = (props) => {
 
         if (shouldNotNotificate) return;
 
+        soundAlertRef.current();
         // handleNotifications(data);
       }
     }

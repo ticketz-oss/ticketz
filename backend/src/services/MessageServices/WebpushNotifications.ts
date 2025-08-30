@@ -14,24 +14,33 @@ async function getTicketSubscriptions(ticket: Ticket) {
         where: { userId: ticket.userId }
       }))
     );
-  } else if (ticket.queueId) {
-    const queue =
-      ticket.queue ||
-      (await Queue.findByPk(ticket.queueId, {
-        include: [
-          {
-            model: User,
-            as: "users",
-            include: ["webpushSubscriptions"]
-          }
-        ]
-      }));
+  } else if (ticket.status === "pending" && ticket.queueId) {
+    const queue = await Queue.findByPk(ticket.queueId, {
+      include: [
+        {
+          model: User,
+          as: "users",
+          include: ["webpushSubscriptions"]
+        }
+      ]
+    });
 
     if (queue) {
       queue.users.forEach(user => {
         subscriptions.push(...user.webpushSubscriptions);
       });
     }
+  } else if (ticket.status === "pending") {
+    const users = await User.findAll({
+      where: {
+        companyId: ticket.companyId,
+        profile: "admin"
+      },
+      include: ["webpushSubscriptions"]
+    });
+    users.forEach(user => {
+      subscriptions.push(...user.webpushSubscriptions);
+    });
   }
   return subscriptions;
 }
