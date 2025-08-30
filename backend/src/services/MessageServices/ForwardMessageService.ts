@@ -60,15 +60,13 @@ const ForwardMessageService = async (
       });
 
       const newMessage = message.mediaUrl
-        ? await verifyMediaMessage(
-            sentMessage,
-            ticket,
-            ticket.contact,
+        ? await verifyMediaMessage(sentMessage, ticket, ticket.contact, {
             wbot,
-            null,
-            user.id
-          )
-        : await verifyMessage(sentMessage, ticket, ticket.contact, user.id);
+            userId: user.id
+          })
+        : await verifyMessage(sentMessage, ticket, ticket.contact, {
+            userId: user.id
+          });
 
       return newMessage;
     } catch (err) {

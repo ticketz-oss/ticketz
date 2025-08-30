@@ -120,15 +120,9 @@ export const sendWhatsappFile = async (
 
     const sentMessage = await wbot.sendMessage(getJidOf(ticket), options);
 
-    await verifyMediaMessage(
-      sentMessage,
-      ticket,
-      ticket.contact,
-      null,
-      null,
-      null,
+    await verifyMediaMessage(sentMessage, ticket, ticket.contact, {
       mediaInfo
-    );
+    });
 
     return sentMessage;
   } catch (error) {
