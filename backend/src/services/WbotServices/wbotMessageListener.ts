@@ -26,7 +26,7 @@ import Message from "../../models/Message";
 import OldMessage from "../../models/OldMessage";
 
 import { getIO } from "../../libs/socket";
-import CreateMessageService from "../MessageServices/CreateMessageService";
+import CreateMessageService, { websocketCreateMessage } from "../MessageServices/CreateMessageService";
 import { logger } from "../../utils/logger";
 import FindOrCreateTicketService from "../TicketServices/FindOrCreateTicketService";
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
@@ -587,7 +587,8 @@ export const verifyMediaMessage = async (
   wbot: Session = null,
   messageMedia = null,
   userId: number = null,
-  mediaInfo: MediaInfo = null
+  mediaInfo: MediaInfo = null,
+  skipWebsocket = false
 ): Promise<Message> => {
   const io = getIO();
   const quotedMsg = await verifyQuotedMessage(msg, ticket, wbot);
@@ -677,7 +678,8 @@ export const verifyMediaMessage = async (
 
   const newMessage = await CreateMessageService({
     messageData,
-    companyId: ticket.companyId
+    companyId: ticket.companyId,
+    skipWebsocket
   });
 
   if (!msg.key.fromMe && ticket.status === "closed") {
@@ -715,7 +717,8 @@ export const verifyMessage = async (
   msg: proto.IWebMessageInfo,
   ticket: Ticket,
   contact: Contact,
-  userId: number = null
+  userId: number = null,
+  skipWebsocket = false
 ) => {
   const io = getIO();
   const quotedMsg = await verifyQuotedMessage(msg, ticket);
@@ -744,7 +747,8 @@ export const verifyMessage = async (
 
   const newMessage = await CreateMessageService({
     messageData,
-    companyId: ticket.companyId
+    companyId: ticket.companyId,
+    skipWebsocket
   });
 
   if (!msg.key.fromMe && ticket.status === "closed") {
@@ -1684,11 +1688,22 @@ const handleMessage = async (
       return;
     }
 
+    let newMessage: Message;
+
     if (
       messageMedia ||
       msg?.message?.extendedTextMessage?.thumbnailDirectPath
     ) {
-      await verifyMediaMessage(msg, ticket, contact, wbot, messageMedia);
+      newMessage = await verifyMediaMessage(
+        msg,
+        ticket,
+        contact,
+        wbot,
+        messageMedia,
+        null,
+        null,
+        justCreated
+      );
     } else if (
       msg.message?.editedMessage?.message?.protocolMessage?.editedMessage
     ) {
@@ -1708,10 +1723,13 @@ const handleMessage = async (
     } else if (msg.message?.protocolMessage?.type === 0) {
       await verifyDeleteMessage(msg.message.protocolMessage, ticket);
     } else {
-      await verifyMessage(msg, ticket, contact);
+      newMessage = await verifyMessage(msg, ticket, contact, null, justCreated);
     }
 
     if (isGroup || contact.disableBot) {
+      if (justCreated && newMessage) {
+        websocketCreateMessage(newMessage);
+      }
       return;
     }
 
@@ -1798,6 +1816,11 @@ const handleMessage = async (
       whatsapp.queues.length >= 1
     ) {
       await verifyQueue(wbot, msg, ticket, ticket.contact);
+    }
+
+    if (justCreated && newMessage) {
+      await newMessage.reload();
+      websocketCreateMessage(newMessage);
     }
 
     const dontReadTheFirstQuestion = ticket.queue === null;
