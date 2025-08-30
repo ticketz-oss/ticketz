@@ -180,6 +180,7 @@ const NotificationsPopOver = (props) => {
 
         if (shouldNotNotificate) return;
 
+        soundAlertRef.current();
         // handleNotifications(data);
       }
     }
