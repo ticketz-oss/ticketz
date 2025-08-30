@@ -11,6 +11,7 @@ import {
   WAMessage,
   WAMessageStubType,
   WAMessageUpdate,
+  WAGenericMediaMessage,
   Chat,
   Contact as WAContact,
   MediaType
@@ -25,6 +26,7 @@ import OldMessage from "../../models/OldMessage";
 
 import { getIO } from "../../libs/socket";
 import CreateMessageService, {
+  websocketCreateMessage,
   MessageData
 } from "../MessageServices/CreateMessageService";
 import { logger } from "../../utils/logger";
@@ -496,14 +498,28 @@ const createDeferred = (): DeferredPromise => {
   return { promise, resolve, reject };
 };
 
+type VerifyMessageOptions = {
+  userId?: number;
+  skipWebsocket?: boolean;
+};
+
+type VerifyMediaMessageOptions = VerifyMessageOptions & {
+  messageMedia?: WAGenericMediaMessage | null;
+  mediaInfo?: MediaInfo | null;
+  wbot?: Session | null;
+};
+
 export const verifyMediaMessage = async (
   msg: proto.IWebMessageInfo,
   ticket: Ticket,
   contact: Contact,
-  wbot: Session = null,
-  messageMedia = null,
-  userId: number = null,
-  mediaInfo: MediaInfo = null
+  {
+    wbot,
+    messageMedia,
+    userId,
+    mediaInfo,
+    skipWebsocket
+  }: VerifyMediaMessageOptions = {}
 ): Promise<Message> => {
   const quotedMsg = await verifyQuotedMessage(msg, ticket, wbot);
 
@@ -557,7 +573,8 @@ export const verifyMediaMessage = async (
 
   const newMessage = await CreateMessageService({
     messageData,
-    companyId: ticket.companyId
+    companyId: ticket.companyId,
+    skipWebsocket
   });
 
   if (ticket.id < 0) {
@@ -727,8 +744,7 @@ export const verifyMessage = async (
   msg: proto.IWebMessageInfo,
   ticket: Ticket,
   contact: Contact,
-  userId: number = null,
-  dontReopen = false
+  { userId, skipWebsocket, dontReopen }: VerifyMessageOptions = {}
 ): Promise<Message> => {
   const quotedMsg = await verifyQuotedMessage(msg, ticket);
   const body = getBodyMessage(msg?.message);
@@ -763,7 +779,8 @@ export const verifyMessage = async (
 
   const newMesssage = await CreateMessageService({
     messageData,
-    companyId: ticket.companyId
+    companyId: ticket.companyId,
+    skipWebsocket
   });
 
   if (ticket.id < 0) {
@@ -1300,19 +1317,17 @@ const handleMessage = async (
       return;
     }
 
-    let newMessage: Message = null;
+    let newMessage: Message;
 
     if (
       messageMedia ||
       msg?.message?.extendedTextMessage?.thumbnailDirectPath
     ) {
-      newMessage = await verifyMediaMessage(
-        msg,
-        ticket,
-        contact,
+      newMessage = await verifyMediaMessage(msg, ticket, contact, {
         wbot,
-        messageMedia
-      );
+        messageMedia,
+        skipWebsocket: justCreated
+      });
     } else if (
       msg.message?.editedMessage?.message?.protocolMessage?.editedMessage
     ) {
@@ -1332,10 +1347,14 @@ const handleMessage = async (
     } else if (msg.message?.protocolMessage?.type === 0) {
       await verifyDeleteMessage(msg.message.protocolMessage, ticket);
     } else {
-      newMessage = await verifyMessage(msg, ticket, contact);
-    }
+      newMessage = await verifyMessage(msg, ticket, contact, {
+        skipWebsocket: justCreated
+      });    }
 
     if (isGroup || contact.disableBot) {
+      if (justCreated && newMessage) {
+        websocketCreateMessage(newMessage);
+      }
       return;
     }
 
@@ -1422,6 +1441,11 @@ const handleMessage = async (
       whatsapp.queues.length >= 1
     ) {
       await verifyQueue(wbotReplyHandler, bodyMessage, ticket, isNewTicket);
+    }
+
+    if (justCreated && newMessage) {
+      await newMessage.reload();
+      websocketCreateMessage(newMessage);
     }
 
     const dontReadTheFirstQuestion = isNewTicket || ticket.queue === null;

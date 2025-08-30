@@ -130,7 +130,7 @@ export const sendWhatsappFile = async (
       null,
       userId,
       mediaInfo
-    );
+    });
 
     return sentMessage;
   } catch (error) {
