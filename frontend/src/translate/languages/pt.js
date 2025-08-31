@@ -30,9 +30,12 @@ const messages = {
         proceed: "Prosseguir",
         enabled: "Ativado",
         disabled: "Desativado",
+        yes: "Sim",
+        no: "Não",
         noqueue: "Sem fila",
         rating: "Avaliação",
         transferTo: "Transferir para",
+        value: "Valor",
       },
       signup: {
         title: "Cadastre-se",
@@ -922,6 +925,10 @@ const messages = {
         },
         Plans: {
           title: "Planos",
+          public: "Público",
+          usersLimit: "Limite de usuários",
+          connectionsLimit: "Limite de conexões",
+          queuesLimit: "Limite de filas",
         },
         Help: {
           title: "Ajuda",

@@ -30,9 +30,12 @@ const messages = {
         proceed: "Proceed",
         enabled: "Enabled",
         disabled: "Disabled",
+        yes: "Yes",
+        no: "No",
         noqueue: "No queue",
         rating: "Rating",
         transferTo: "Transfer to",
+        value: "Value",
       },
       signup: {
         title: "Sign Up",
@@ -913,6 +916,10 @@ const messages = {
         },
         Plans: {
           title: "Plans",
+          public: "Public",
+          usersLimit: "Users limit",
+          connectionsLimit: "Connections limit",
+          queuesLimit: "Queues limit",
         },
         Help: {
           title: "Help",
