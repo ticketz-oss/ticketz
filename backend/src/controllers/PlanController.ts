@@ -1,6 +1,5 @@
 import * as Yup from "yup";
 import { Request, Response } from "express";
-// import { getIO } from "../libs/socket";
 import AppError from "../errors/AppError";
 import Plan from "../models/Plan";
 
@@ -40,13 +39,11 @@ type UpdatePlanData = {
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const { searchParam, pageNumber, listPublic } = req.query as IndexQuery;
 
-
   const { plans, count, hasMore } = await ListPlansService({
     searchParam,
     pageNumber,
     listPublic
   });
-  console.log(plans)
   return res.json({ plans, count, hasMore });
 };
 
@@ -55,7 +52,10 @@ export const list = async (req: Request, res: Response): Promise<Response> => {
   return res.status(200).json(plans);
 };
 
-export const listPublic = async (req: Request, res: Response): Promise<Response> => {
+export const listPublic = async (
+  _req: Request,
+  res: Response
+): Promise<Response> => {
   const plans: Plan[] = await FindAllPlanService(true);
   return res.status(200).json(plans);
 };
@@ -74,12 +74,6 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   }
 
   const plan = await CreatePlanService(newPlan);
-
-  // const io = getIO();
-  // io.emit("plan", {
-  //   action: "create",
-  //   plan
-  // });
 
   return res.status(200).json(plan);
 };
@@ -119,12 +113,6 @@ export const update = async (
     value,
     isPublic
   });
-
-  // const io = getIO();
-  // io.emit("plan", {
-  //   action: "update",
-  //   plan
-  // });
 
   return res.status(200).json(plan);
 };
