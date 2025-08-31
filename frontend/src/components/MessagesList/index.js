@@ -732,10 +732,10 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
               [classes.textContentItemDeleted]: message.isDeleted,
               [classes.textContentItem]: !message.isDeleted,
             }),]}>
-              {data?.message?.imageMessage?.caption &&
+              {message.body &&
                 <>
                   <WhatsMarked>
-                    {data.message.imageMessage.caption}
+                    {message.body}
                   </WhatsMarked>
                 </>
               }
