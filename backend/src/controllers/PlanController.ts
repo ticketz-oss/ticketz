@@ -23,6 +23,7 @@ type StorePlanData = {
   connections: number | 0;
   queues: number | 0;
   value: number;
+  currency?: string;
   isPublic: boolean;
 };
 
@@ -33,6 +34,7 @@ type UpdatePlanData = {
   connections?: number;
   queues?: number;
   value?: number;
+  currency?: string;
   isPublic?: boolean;
 };
 
@@ -102,7 +104,8 @@ export const update = async (
     throw new AppError(err.message);
   }
 
-  const { id, name, users, connections, queues, value, isPublic } = planData;
+  const { id, name, users, connections, queues, value, currency, isPublic } =
+    planData;
 
   const plan = await UpdatePlanService({
     id,
@@ -111,6 +114,7 @@ export const update = async (
     connections,
     queues,
     value,
+    currency,
     isPublic
   });
 
