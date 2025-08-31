@@ -88,10 +88,6 @@ const getTypeMessage = (msg: proto.IWebMessageInfo): string => {
   return getContentType(msg.message);
 };
 
-const getTypeEditedMessage = (msg: proto.IMessage): string => {
-  return getContentType(msg);
-};
-
 const msgLocation = (
   image:
     | Uint8Array
@@ -802,36 +798,15 @@ export const verifyEditedMessage = async (
   ticket: Ticket,
   msgId: string
 ) => {
-  const editedType = getTypeEditedMessage(msg);
+  const editedText =
+    msg.conversation ||
+    msg.extendedTextMessage?.text ||
+    msg.imageMessage?.caption ||
+    msg.videoMessage?.caption ||
+    msg.documentMessage.caption ||
+    msg.documentWithCaptionMessage?.message.documentMessage.caption;
 
-  let editedText: string;
-
-  switch (editedType) {
-    case "conversation": {
-      editedText = msg.conversation;
-      break;
-    }
-    case "extendedTextMessage": {
-      editedText = msg.extendedTextMessage.text;
-      break;
-    }
-    case "imageMessage": {
-      editedText = msg.imageMessage.caption;
-      break;
-    }
-    case "documentMessage": {
-      editedText = msg.documentMessage.caption;
-      break;
-    }
-    case "documentWithCaptionMessage": {
-      editedText =
-        msg.documentWithCaptionMessage.message.documentMessage.caption;
-      break;
-    }
-    default: {
-      return;
-    }
-  }
+  if (!editedText) return;
 
   const editedMsg = await Message.findByPk(msgId);
   const messageData = {
