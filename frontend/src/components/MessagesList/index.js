@@ -245,6 +245,10 @@ const useStyles = makeStyles((theme) => ({
     overflowWrap: "break-word",
     padding: "3px 120px 6px 6px",
   },
+  messageMediaDeleted: {
+    filter: "grayscale(1)",
+    opacity: 0.4
+  },  
 
   messageVideo: {
     width: 250,
@@ -760,11 +764,27 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
 
     if (!document || message.mediaType === "video") {
       return (
-        <video
-          className={classes.messageVideo}
-          src={message.mediaUrl}
-          controls
-        />
+        <>
+          <video
+            className={[clsx(classes.messageVideo, {
+              [classes.messageMediaDeleted]: message.isDeleted
+            })]}
+            src={message.mediaUrl}
+            controls
+          />
+          <div className={[clsx({
+            [classes.textContentItemDeleted]: message.isDeleted,
+            [classes.textContentItem]: !message.isDeleted,
+          }),]}>
+            {message.body &&
+              <>
+                <WhatsMarked>
+                  {message.body}
+                </WhatsMarked>
+              </>
+            }
+          </div>
+        </>
       );
     } else {
       return (
