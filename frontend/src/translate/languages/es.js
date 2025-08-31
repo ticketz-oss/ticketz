@@ -926,6 +926,7 @@ const messages = {
           usersLimit: "Límite de usuarios",
           connectionsLimit: "Límite de conexiones",
           queuesLimit: "Límite de colas",
+          currencyCode: "Código de moneda (ISO 4217)",
         },
         Help: {
           title: "Ayuda",

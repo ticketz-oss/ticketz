@@ -920,6 +920,7 @@ const messages = {
           usersLimit: "Users limit",
           connectionsLimit: "Connections limit",
           queuesLimit: "Queues limit",
+          currencyCode: "Currency code (ISO 4217)",
         },
         Help: {
           title: "Help",

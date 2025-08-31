@@ -28,6 +28,7 @@ import MaskedInput from 'react-text-mask'
 
 import { toast } from "react-toastify";
 import usePlans from "../../hooks/usePlans";
+import { safeValueFormat } from "../../helpers/safeValueFormat";
 import { i18n } from "../../translate/i18n";
 
 
@@ -78,6 +79,7 @@ export function PlanManagerForm(props) {
         connections: 0,
         queues: 0,
         value: 0,
+        currency: "",
         isPublic: true
     });
 
@@ -104,7 +106,7 @@ export function PlanManagerForm(props) {
             {(values) => (
                 <Form className={classes.fullWidth}>
                     <Grid spacing={2} justifyContent="flex-end" container>
-                        <Grid xs={12} sm={6} md={4} item>
+                        <Grid xs={12} sm={6} md={3} item>
                             <Field
                                 as={TextField}
                                 label={i18n.t('common.name')}
@@ -114,8 +116,8 @@ export function PlanManagerForm(props) {
                                 margin="dense"
                             />
                         </Grid>
-                        <Grid xs={12} sm={6} md={4} item>
-                        <FormControl margin="dense" variant="outlined" fullWidth>
+                        <Grid xs={12} sm={6} md={3} item>
+                          <FormControl margin="dense" variant="outlined" fullWidth>
                             <InputLabel htmlFor="status-selection">{i18n.t("settings.Plans.public")}</InputLabel>
                             <Field
                                 as={Select}
@@ -128,9 +130,22 @@ export function PlanManagerForm(props) {
                                 <MenuItem value={true}>{i18n.t("common.yes")}</MenuItem>
                                 <MenuItem value={false}>{i18n.t("common.no")}</MenuItem>
                             </Field>
-                            </FormControl>
+                          </FormControl>
                         </Grid>
-                        <Grid xs={12} sm={6} md={4} item>
+
+                        <Grid xs={12} sm={6} md={3} item>
+                          <Field
+                            as={TextField}
+                            label={i18n.t('settings.Plans.currencyCode')}
+                            name="currency"
+                            variant="outlined"
+                            className={classes.fullWidth}
+                            margin="dense"
+                            type="text"
+                          />
+                        </Grid>
+                                
+                        <Grid xs={12} sm={6} md={3} item>
                             <Field
                                 as={TextField}
                                 label={i18n.t('common.value')}
@@ -236,7 +251,7 @@ export function PlansManagerGrid(props) {
                             <TableCell align="center">{row.isPublic ? "Sim": "Não" || '-'}</TableCell>
                             <TableCell align="center">{row.connections || '-'}</TableCell>
                             <TableCell align="center">{row.queues || '-'}</TableCell>
-                            <TableCell align="center">{row.value.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }) || '-'}</TableCell>
+                            <TableCell align="center">{safeValueFormat(row.value, row.currency)}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
@@ -257,7 +272,8 @@ export default function PlansManager() {
         users: 0,
         connections: 0,
         queues: 0,
-        value: 0
+        value: 0,
+        currency: "",
     })
 
     useEffect(() => {
@@ -288,6 +304,7 @@ export default function PlansManager() {
             queues: data.queues,
             users: data.users,
             value: data.value.replace(",", "."),
+            currency: data.currency,
             isPublic: data.isPublic
         }
         console.log(datanew)
@@ -331,6 +348,7 @@ export default function PlansManager() {
             connections: 0,
             queues: 0,
             value: 0,
+            currency: "",
             isPublic: true
         })
     }
@@ -343,6 +361,7 @@ export default function PlansManager() {
             connections: data.connections || 0,
             queues: data.queues || 0,
             value: data.value.toLocaleString('pt-br', { minimumFractionDigits: 2 }) || 0,
+            currency: data.currency || '',
             isPublic: data.isPublic
         })
     }
