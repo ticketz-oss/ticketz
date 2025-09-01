@@ -13,7 +13,7 @@ import Title from "../../components/Title";
 import SubscriptionModal from "../../components/SubscriptionModal";
 import api from "../../services/api";
 import TableRowSkeleton from "../../components/TableRowSkeleton";
-
+import { safeValueFormat } from "../../helpers/safeValueFormat";
 import toastError from "../../errors/toastError";
 
 import moment from "moment";
@@ -194,8 +194,10 @@ const Invoices = () => {
                 <TableRow style={rowStyle(invoices)} key={invoices.id}>
                   <TableCell align="center">{invoices.id}</TableCell>
                   <TableCell align="center">{invoices.detail}</TableCell>
-                  <TableCell style={{ fontWeight: 'bold' }} align="center">{invoices.value.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</TableCell>
-                  <TableCell align="center">{moment(invoices.dueDate).format("DD/MM/YYYY")}</TableCell>
+                  <TableCell style={{ fontWeight: 'bold' }} align="center">{safeValueFormat(invoices.value, invoices.currency)}</TableCell>
+                  <TableCell align="center">
+                    {moment(invoices.dueDate).locale(navigator.language).format("L")}
+                  </TableCell>
                   <TableCell style={{ fontWeight: 'bold' }} align="center">{rowStatus(invoices)}</TableCell>
                   <TableCell align="center">
                     {rowStatus(invoices) !== "Pago" ?
