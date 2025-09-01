@@ -27,7 +27,7 @@ import MicIcon from "@material-ui/icons/Mic";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import CameraAltIcon from "@material-ui/icons/CameraAlt";
-import { FormControlLabel, Switch, Tooltip, InputAdornment, Typography } from "@material-ui/core";
+import { FormControlLabel, Switch, Tooltip, InputAdornment, Typography, Popper } from "@material-ui/core";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { isString, isEmpty, isObject, has } from "lodash";
 
@@ -354,6 +354,19 @@ const ActionButtons = (props) => {
   }
 };
 
+function UpwardPopper(props) {
+  return (
+    <Popper
+      {...props}
+      placement="top-start" // force always upwards
+      modifiers={{
+        flip: { enabled: false },            // disable flipping
+        preventOverflow: { enabled: false }, // disable overflow adjustment
+      }}
+    />
+  );
+}
+
 const CustomInput = (props) => {
   const {
     loading,
@@ -599,13 +612,14 @@ const CustomInput = (props) => {
       }, 0);
     }
   };
-  
+
   return (
     <div className={classes.messageInputWrapper}>
       <Autocomplete
         disabled={disableOption}
         freeSolo
         open={popupOpen}
+        PopperComponent={UpwardPopper}
         id="grouped-demo"
         value={inputMessage}
         options={options}
