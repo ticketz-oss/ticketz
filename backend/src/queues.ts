@@ -582,6 +582,7 @@ const createInvoices = new CronJob("0 * * * * *", async () => {
           detail: plan.name,
           status: "open",
           value: plan.value,
+          currency: plan.currency || "",
           dueDate: dueDate.toISOString().split("T")[0],
           companyId: c.id
         });
