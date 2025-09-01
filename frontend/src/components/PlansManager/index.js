@@ -30,7 +30,7 @@ import { toast } from "react-toastify";
 import usePlans from "../../hooks/usePlans";
 import { safeValueFormat } from "../../helpers/safeValueFormat";
 import { i18n } from "../../translate/i18n";
-
+import cc from 'currency-codes'
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -134,29 +134,54 @@ export function PlanManagerForm(props) {
                         </Grid>
 
                         <Grid xs={12} sm={6} md={3} item>
+                          <FormControl margin="dense" variant="outlined" fullWidth>
+                            <InputLabel id="currency-select-label">{i18n.t('settings.Plans.currencyCode')}</InputLabel>
+                            <Field
+                              as={Select}
+                              labelId="currency-select-label"
+                              id="currency-select"
+                              name="currency"
+                              label={i18n.t('settings.Plans.currencyCode')}
+                              margin="dense"
+                            >
+                              {cc.codes().map(code => {
+                                const currencyInfo = cc.code(code);
+                                if (currencyInfo && currencyInfo.countries && currencyInfo.countries.length > 0) {
+                                  if (currencyInfo.countries.length > 1) {
+                                    return  (
+                                      <MenuItem key={code} value={code}>
+                                        {`${code} - ${currencyInfo.currency}`}
+                                      </MenuItem>
+                                    );
+                                  } else {
+                                    return (
+                                      <MenuItem key={code} value={code}>
+                                        {code} - {currencyInfo.countries[0]} - {currencyInfo.currency}
+                                      </MenuItem>
+                                    );
+                                  }
+                                } else {
+                                  return (
+                                    <MenuItem key={code} value={code}>
+                                      {code}
+                                    </MenuItem>
+                                  );
+                                }
+                              })}
+                            </Field>
+                          </FormControl>
+                        </Grid>
+          
+                        <Grid xs={12} sm={6} md={3} item>
                           <Field
                             as={TextField}
-                            label={i18n.t('settings.Plans.currencyCode')}
-                            name="currency"
-                            variant="outlined"
-                            className={classes.fullWidth}
-                            margin="dense"
-                            type="text"
-                          />
-                        </Grid>
-                                
-                        <Grid xs={12} sm={6} md={3} item>
-                            <Field
-                                as={TextField}
-                                label={i18n.t('common.value')}
-                                name="value"
-                                variant="outlined"
-                                className={classes.fullWidth}
-                                margin="dense"
-                                type="text"
-                            />
-
-
+                                  label={i18n.t('common.value')}
+                                  name="value"
+                                  variant="outlined"
+                                  className={classes.fullWidth}
+                                  margin="dense"
+                                  type="text"
+                              />
                         </Grid>
                         <Grid xs={12} sm={6} md={4} item>
                             <Field
