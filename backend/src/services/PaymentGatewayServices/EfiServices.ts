@@ -261,9 +261,7 @@ export const efiCreateSubscription = async (
       expiracao: 300
     },
     valor: {
-      original: price
-        .toLocaleString("pt-br", { minimumFractionDigits: 2 })
-        .replace(",", ".")
+      original: (Number(price) || 0).toFixed(2)
     },
     chave: await GetSuperSettingService({ key: "_efiPixKey" }),
     solicitacaoPagador: `#Fatura:${invoiceId}`
