@@ -967,6 +967,7 @@ const messages = {
             reopen: "Reabrir",
             accept: "Aceitar",
             call: "Chamar",
+            endCall: "Encerrar Chamada",
           },
         },
       },
