@@ -15,6 +15,7 @@
     "bootstrap": "^5.2.3",
     "compressorjs": "^1.2.1",
     "context": "^4.0.0",
+    "currency-codes": "^2.2.0",
     "date-fns": "^2.16.1",
     "emoji-mart": "^3.0.0",
     "formik": "^2.2.0",
@@ -59,7 +60,7 @@
     "uuid": "^9.0.1",
     "validations-br": "^1.4.0",
     "vcard-parser": "^1.0.0",
-    "wavoip-api": "^3.1.24",
+    "wavoip-api": "https://github.com/ticketz-oss/wavoip-api#nossl-error",
     "yup": "^1.4.0"
   },
   "scripts": {

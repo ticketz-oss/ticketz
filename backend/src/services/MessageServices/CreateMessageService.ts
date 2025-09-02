@@ -24,11 +24,28 @@ interface MessageData {
 interface Request {
   messageData: MessageData;
   companyId: number;
+  skipWebsocket?: boolean;
 }
+
+export const websocketCreateMessage = (message: Message) => {
+  const io = getIO();
+  io.to(message.ticketId.toString())
+    .to(`company-${message.companyId}-${message.ticket.status}`)
+    .to(`company-${message.companyId}-notification`)
+    .to(`queue-${message.ticket.queueId}-${message.ticket.status}`)
+    .to(`queue-${message.ticket.queueId}-notification`)
+    .emit(`company-${message.companyId}-appMessage`, {
+      action: "create",
+      message,
+      ticket: message.ticket,
+      contact: message.ticket.contact
+    });
+};
 
 const CreateMessageService = async ({
   messageData,
-  companyId
+  companyId,
+  skipWebsocket
 }: Request): Promise<Message> => {
   await Message.upsert({ ...messageData, companyId });
 
@@ -94,18 +111,11 @@ const CreateMessageService = async ({
   }
 
   const io = getIO();
-  io.to(message.ticketId.toString())
-    .to(`company-${companyId}-${message.ticket.status}`)
-    .to(`company-${companyId}-notification`)
-    .to(`queue-${message.ticket.queueId}-${message.ticket.status}`)
-    .to(`queue-${message.ticket.queueId}-notification`)
-    .emit(`company-${companyId}-appMessage`, {
-      action: "create",
-      message,
-      ticket: message.ticket,
-      contact: message.ticket.contact
-    });
 
+  if (!skipWebsocket) {
+    websocketCreateMessage(message);
+  }
+  
   io.to(`company-${companyId}-mainchannel`).emit(
     `company-${companyId}-contact`,
     {

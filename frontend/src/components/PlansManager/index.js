@@ -28,7 +28,9 @@ import MaskedInput from 'react-text-mask'
 
 import { toast } from "react-toastify";
 import usePlans from "../../hooks/usePlans";
-
+import { safeValueFormat } from "../../helpers/safeValueFormat";
+import { i18n } from "../../translate/i18n";
+import cc from 'currency-codes'
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -77,6 +79,7 @@ export function PlanManagerForm(props) {
         connections: 0,
         queues: 0,
         value: 0,
+        currency: "",
         isPublic: true
     });
 
@@ -103,49 +106,87 @@ export function PlanManagerForm(props) {
             {(values) => (
                 <Form className={classes.fullWidth}>
                     <Grid spacing={2} justifyContent="flex-end" container>
-                        <Grid xs={12} sm={6} md={4} item>
+                        <Grid xs={12} sm={6} md={3} item>
                             <Field
                                 as={TextField}
-                                label="Nome"
+                                label={i18n.t('common.name')}
                                 name="name"
                                 variant="outlined"
                                 className={classes.fullWidth}
                                 margin="dense"
                             />
                         </Grid>
-                        <Grid xs={12} sm={6} md={4} item>
-                        <FormControl margin="dense" variant="outlined" fullWidth>
-                            <InputLabel htmlFor="status-selection">Público</InputLabel>
+                        <Grid xs={12} sm={6} md={3} item>
+                          <FormControl margin="dense" variant="outlined" fullWidth>
+                            <InputLabel htmlFor="status-selection">{i18n.t("settings.Plans.public")}</InputLabel>
                             <Field
                                 as={Select}
                                 id="status-selection"
-                                label="isPublic"
+                                label={i18n.t("settings.Plans.public")}
                                 labelId="status-selection-label"
                                 name="isPublic"
                                 margin="dense"
                             >
-                                <MenuItem value={true}>Sim</MenuItem>
-                                <MenuItem value={false}>Não</MenuItem>
+                                <MenuItem value={true}>{i18n.t("common.yes")}</MenuItem>
+                                <MenuItem value={false}>{i18n.t("common.no")}</MenuItem>
                             </Field>
-                            </FormControl>
+                          </FormControl>
+                        </Grid>
+
+                        <Grid xs={12} sm={6} md={3} item>
+                          <FormControl margin="dense" variant="outlined" fullWidth>
+                            <InputLabel id="currency-select-label">{i18n.t('settings.Plans.currencyCode')}</InputLabel>
+                            <Field
+                              as={Select}
+                              labelId="currency-select-label"
+                              id="currency-select"
+                              name="currency"
+                              label={i18n.t('settings.Plans.currencyCode')}
+                              margin="dense"
+                            >
+                              {cc.codes().map(code => {
+                                const currencyInfo = cc.code(code);
+                                if (currencyInfo && currencyInfo.countries && currencyInfo.countries.length > 0) {
+                                  if (currencyInfo.countries.length > 1) {
+                                    return  (
+                                      <MenuItem key={code} value={code}>
+                                        {`${code} - ${currencyInfo.currency}`}
+                                      </MenuItem>
+                                    );
+                                  } else {
+                                    return (
+                                      <MenuItem key={code} value={code}>
+                                        {code} - {currencyInfo.countries[0]} - {currencyInfo.currency}
+                                      </MenuItem>
+                                    );
+                                  }
+                                } else {
+                                  return (
+                                    <MenuItem key={code} value={code}>
+                                      {code}
+                                    </MenuItem>
+                                  );
+                                }
+                              })}
+                            </Field>
+                          </FormControl>
+                        </Grid>
+          
+                        <Grid xs={12} sm={6} md={3} item>
+                          <Field
+                            as={TextField}
+                                  label={i18n.t('common.value')}
+                                  name="value"
+                                  variant="outlined"
+                                  className={classes.fullWidth}
+                                  margin="dense"
+                                  type="text"
+                              />
                         </Grid>
                         <Grid xs={12} sm={6} md={4} item>
                             <Field
                                 as={TextField}
-                                label="Valor"
-                                name="value"
-                                variant="outlined"
-                                className={classes.fullWidth}
-                                margin="dense"
-                                type="text"
-                            />
-
-
-                        </Grid>
-                        <Grid xs={12} sm={6} md={4} item>
-                            <Field
-                                as={TextField}
-                                label="Usuários"
+                                label={i18n.t('settings.Plans.usersLimit')}
                                 name="users"
                                 variant="outlined"
                                 className={classes.fullWidth}
@@ -156,7 +197,7 @@ export function PlanManagerForm(props) {
                         <Grid xs={12} sm={6} md={4} item>
                             <Field
                                 as={TextField}
-                                label="Conexões"
+                                label={i18n.t('settings.Plans.connectionsLimit')}
                                 name="connections"
                                 variant="outlined"
                                 className={classes.fullWidth}
@@ -167,7 +208,7 @@ export function PlanManagerForm(props) {
                         <Grid xs={12} sm={6} md={4} item>
                             <Field
                                 as={TextField}
-                                label="Filas"
+                                label={i18n.t('settings.Plans.queuesLimit')}
                                 name="queues"
                                 variant="outlined"
                                 className={classes.fullWidth}
@@ -179,19 +220,19 @@ export function PlanManagerForm(props) {
                             <Grid justifyContent="flex-end" spacing={1} container>
                                 <Grid xs={4} md={1} item>
                                     <ButtonWithSpinner className={classes.fullWidth} loading={loading} onClick={() => onCancel()} variant="contained">
-                                        Limpar
+                                        {i18n.t('common.cancel')}
                                     </ButtonWithSpinner>
                                 </Grid>
                                 {record.id !== undefined ? (
                                     <Grid xs={4} md={1} item>
                                         <ButtonWithSpinner className={classes.fullWidth} loading={loading} onClick={() => onDelete(record)} variant="contained" color="secondary">
-                                            Excluir
+                                            {i18n.t('common.delete')}
                                         </ButtonWithSpinner>
                                     </Grid>
                                 ) : null}
                                 <Grid xs={4} md={1} item>
                                     <ButtonWithSpinner className={classes.fullWidth} loading={loading} type="submit" variant="contained" color="primary">
-                                        Salvar
+                                        {i18n.t('common.save')}
                                     </ButtonWithSpinner>
                                 </Grid>
                             </Grid>
@@ -214,12 +255,12 @@ export function PlansManagerGrid(props) {
                 <TableHead>
                     <TableRow>
                         <TableCell align="center" style={{ width: '1%' }}>#</TableCell>
-                        <TableCell align="left">Nome</TableCell>
-                        <TableCell align="center">Usuários</TableCell>
-                        <TableCell align="center">Público</TableCell>
-                        <TableCell align="center">Conexões</TableCell>
-                        <TableCell align="center">Filas</TableCell>
-                        <TableCell align="center">Valor</TableCell>
+                        <TableCell align="left">{i18n.t("common.name")}</TableCell>
+                        <TableCell align="center">{i18n.t("settings.Plans.usersLimit")}</TableCell>
+                        <TableCell align="center">{i18n.t("settings.Plans.public")}</TableCell>
+                        <TableCell align="center">{i18n.t("settings.Plans.connectionsLimit")}</TableCell>
+                        <TableCell align="center">{i18n.t("settings.Plans.queuesLimit")}</TableCell>
+                        <TableCell align="center">{i18n.t("common.value")}</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
@@ -235,7 +276,7 @@ export function PlansManagerGrid(props) {
                             <TableCell align="center">{row.isPublic ? "Sim": "Não" || '-'}</TableCell>
                             <TableCell align="center">{row.connections || '-'}</TableCell>
                             <TableCell align="center">{row.queues || '-'}</TableCell>
-                            <TableCell align="center">{row.value.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' }) || '-'}</TableCell>
+                            <TableCell align="center">{safeValueFormat(row.value, row.currency)}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
@@ -256,7 +297,8 @@ export default function PlansManager() {
         users: 0,
         connections: 0,
         queues: 0,
-        value: 0
+        value: 0,
+        currency: "",
     })
 
     useEffect(() => {
@@ -287,6 +329,7 @@ export default function PlansManager() {
             queues: data.queues,
             users: data.users,
             value: data.value.replace(",", "."),
+            currency: data.currency,
             isPublic: data.isPublic
         }
         console.log(datanew)
@@ -330,6 +373,7 @@ export default function PlansManager() {
             connections: 0,
             queues: 0,
             value: 0,
+            currency: "",
             isPublic: true
         })
     }
@@ -342,6 +386,7 @@ export default function PlansManager() {
             connections: data.connections || 0,
             queues: data.queues || 0,
             value: data.value.toLocaleString('pt-br', { minimumFractionDigits: 2 }) || 0,
+            currency: data.currency || '',
             isPublic: data.isPublic
         })
     }

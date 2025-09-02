@@ -1,6 +1,5 @@
 import * as Yup from "yup";
 import { Request, Response } from "express";
-// import { getIO } from "../libs/socket";
 import AppError from "../errors/AppError";
 import Plan from "../models/Plan";
 
@@ -24,6 +23,7 @@ type StorePlanData = {
   connections: number | 0;
   queues: number | 0;
   value: number;
+  currency?: string;
   isPublic: boolean;
 };
 
@@ -34,19 +34,18 @@ type UpdatePlanData = {
   connections?: number;
   queues?: number;
   value?: number;
+  currency?: string;
   isPublic?: boolean;
 };
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const { searchParam, pageNumber, listPublic } = req.query as IndexQuery;
 
-
   const { plans, count, hasMore } = await ListPlansService({
     searchParam,
     pageNumber,
     listPublic
   });
-  console.log(plans)
   return res.json({ plans, count, hasMore });
 };
 
@@ -55,7 +54,10 @@ export const list = async (req: Request, res: Response): Promise<Response> => {
   return res.status(200).json(plans);
 };
 
-export const listPublic = async (req: Request, res: Response): Promise<Response> => {
+export const listPublic = async (
+  _req: Request,
+  res: Response
+): Promise<Response> => {
   const plans: Plan[] = await FindAllPlanService(true);
   return res.status(200).json(plans);
 };
@@ -74,12 +76,6 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   }
 
   const plan = await CreatePlanService(newPlan);
-
-  // const io = getIO();
-  // io.emit("plan", {
-  //   action: "create",
-  //   plan
-  // });
 
   return res.status(200).json(plan);
 };
@@ -108,7 +104,8 @@ export const update = async (
     throw new AppError(err.message);
   }
 
-  const { id, name, users, connections, queues, value, isPublic } = planData;
+  const { id, name, users, connections, queues, value, currency, isPublic } =
+    planData;
 
   const plan = await UpdatePlanService({
     id,
@@ -117,14 +114,9 @@ export const update = async (
     connections,
     queues,
     value,
+    currency,
     isPublic
   });
-
-  // const io = getIO();
-  // io.emit("plan", {
-  //   action: "update",
-  //   plan
-  // });
 
   return res.status(200).json(plan);
 };

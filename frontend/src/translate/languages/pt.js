@@ -30,9 +30,12 @@ const messages = {
         proceed: "Prosseguir",
         enabled: "Ativado",
         disabled: "Desativado",
+        yes: "Sim",
+        no: "Não",
         noqueue: "Sem fila",
         rating: "Avaliação",
         transferTo: "Transferir para",
+        value: "Valor",
       },
       signup: {
         title: "Cadastre-se",
@@ -922,6 +925,11 @@ const messages = {
         },
         Plans: {
           title: "Planos",
+          public: "Público",
+          usersLimit: "Limite de usuários",
+          connectionsLimit: "Limite de conexões",
+          queuesLimit: "Limite de filas",
+          currencyCode: "Código da Moeda (ISO 4217)",
         },
         Help: {
           title: "Ajuda",
@@ -958,6 +966,7 @@ const messages = {
             resolve: "Resolver",
             reopen: "Reabrir",
             accept: "Aceitar",
+            call: "Chamar",
           },
         },
       },
@@ -1101,6 +1110,9 @@ const messages = {
         ERR_WAPP_NOT_FOUND: "Conexão indisponível",
         ERR_SUBSCRIPTION_EXPIRED: "Assinatura expirada",
         ERR_UNKOWN: "Erro desconhecido",
+      },
+      phoneCall: {
+        hangup: "Desligar",
       },
       wavoipModal: {
         title: "Insira o token da sua conexão no Wavoip",
