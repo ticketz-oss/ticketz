@@ -82,15 +82,8 @@ export async function verifyContact(
   wbot: Session,
   companyId: number
 ): Promise<Contact> {
-  let profilePicUrl: string;
-  const noPicture = `${process.env.FRONTEND_URL}/nopicture.png`;
-
-  try {
-    profilePicUrl =
-      (await GetProfilePicUrl(msgContact.id, "preview", wbot)) || noPicture;
-  } catch (error) {
-    profilePicUrl = noPicture;
-  }
+  
+  const profilePicUrl = await GetProfilePicUrl(msgContact.id, "preview", wbot);
 
   const isLid = msgContact.id.includes("@lid");
   const isGroup = msgContact.id.includes("@g.us");
