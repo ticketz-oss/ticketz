@@ -25,6 +25,7 @@ import { isArray } from "lodash";
 import moment from "moment";
 import { SocketContext } from "../../context/Socket/SocketContext";
 import { getBackendURL } from "../../services/config";
+import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles((theme) => ({
 contend:{minWidth: 300,maxWidth: 500,},
@@ -318,7 +319,7 @@ export default function AnnouncementsPopover() {
                 </ListItem>
               ))}
             {isArray(announcements) && announcements.length === 0 && (
-              <ListItemText primary="Nenhum registro" />
+              <ListItemText primary={i18n.t("tickets.notification.nomessages")} />
             )}
           </List>
         </Paper>

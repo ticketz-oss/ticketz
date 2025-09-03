@@ -1,6 +1,7 @@
 import { Box, Chip, TextField } from "@material-ui/core";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import React, { useEffect, useState } from "react";
+import { i18n } from "../../translate/i18n";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 
@@ -79,7 +80,7 @@ export function UsersFilter({ onFiltered, initialUsers, excludeId }) {
           <TextField
             {...params}
             variant="outlined"
-            placeholder="Filtro por Users"
+            placeholder={i18n.t("tickets.search.filterByUsers")}
           />
         )}
       />
