@@ -33,20 +33,6 @@ import toastError from "../../errors/toastError";
 import ReCAPTCHA from "react-google-recaptcha";
 import config from "../../services/config";
 import useSettings from "../../hooks/useSettings";
-import { getBackendURL } from "../../services/config";
-
-const Copyright = () => {
-	return (
-		<Typography variant="body2" color="textSecondary" align="center">
-			{"Copyright © "}
-			<Link color="inherit" href="#">
-				PLW
-			</Link>{" "}
-		   {new Date().getFullYear()}
-			{"."}
-		</Typography>
-	);
-};
 
 const useStyles = makeStyles(theme => ({
 	paper: {
