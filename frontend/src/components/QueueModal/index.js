@@ -181,7 +181,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
           await api.post(`/queue/${queueId}/media-upload`, formData);
         }
       }
-      toast.success("Queue saved successfully");
+      toast.success(i18n.t("queueModal.toasts.saved"));
       handleClose();
     } catch (err) {
       toastError(err);

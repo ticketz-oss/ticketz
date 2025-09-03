@@ -1,7 +1,7 @@
 import { Button, Dialog, DialogActions, Input } from "@material-ui/core";
 import React, { useState, useEffect } from "react";
 import { i18nToast } from "../../helpers/i18nToast";
-
+import { i18n } from "../../translate/i18n";
 import { ColorBox } from "material-ui-color";
 
 const ColorPicker = ({ onChange, currentColor, handleClose, open }) => {
@@ -44,7 +44,7 @@ const ColorPicker = ({ onChange, currentColor, handleClose, open }) => {
         inputProps={{ maxLength: 7 }}
       />
       <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
+        <Button onClick={handleClose}>{i18n.t("common.cancel")}</Button>
         <Button
           color="primary"
           onClick={() => {
@@ -56,7 +56,7 @@ const ColorPicker = ({ onChange, currentColor, handleClose, open }) => {
             onChange(selectedColor);
           }}
         >
-          Save
+        {i18n.t("common.save")}
         </Button>
       </DialogActions>
     </Dialog>

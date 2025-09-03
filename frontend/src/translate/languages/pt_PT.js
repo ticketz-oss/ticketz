@@ -7,7 +7,7 @@ const messages = {
         edit: "Editar",
         delete: "Eliminar",
         cancel: "Cancelar",
-        save: "Guardar",
+        save: "Salvar",
         confirm: "Confirmar",
         close: "Fechar",
         error: "Erro",
@@ -211,6 +211,9 @@ const messages = {
           transferMessage: "Mensagem de Transferência",
           token: "Token",
         },
+        toasts: {
+          saved: "Fila salva com sucesso",
+        },
         buttons: {
           okAdd: "Adicionar",
           okEdit: "Salvar",
@@ -237,6 +240,10 @@ const messages = {
           add: "Adicionar utilizador",
           edit: "Editar utilizador",
         },
+        listItems:{
+          adminProfile: "Administrador",
+          userProfile: "Usuário",
+        },
         form: {
           name: "Nome",
           email: "Email",
@@ -248,6 +255,7 @@ const messages = {
           okEdit: "Salvar",
           cancel: "Cancelar",
         },
+        
         success: "Utilizador salvo com sucesso.",
       },
       scheduleModal: {
@@ -298,6 +306,16 @@ const messages = {
           titleFileList: "Lista de ficheiros",
         },
       },
+      todolist: {
+        title: "Lista de tarefas",
+        form: {
+          name: "Nome da tarefa",
+        },
+        buttons: {
+          add: "Adicionar",
+          save: "Salvar",
+        },
+      },
       ticketsManager: {
         buttons: {
           newTicket: "Novo",
@@ -312,6 +330,7 @@ const messages = {
         },
         notification: {
           message: "Mensagem de",
+          nomessages: "Sem novas mensagens",
         },
         tabs: {
           open: { title: "Abertos" },
@@ -321,6 +340,8 @@ const messages = {
         },
         search: {
           placeholder: "Buscar atendimento e mensagens",
+          filterByTags: "Filtro por tags",
+          filterByUsers: "Filtro por usuários",
         },
         buttons: {
           showAll: "Todos",
@@ -379,6 +400,7 @@ const messages = {
           logout: "Sair",
           management: "Gestão",
           kanban: "Kanban",
+          tasks: "Tarefas"
         },
         appBar: {
           i18n: {
@@ -630,6 +652,9 @@ const messages = {
           color: "Cor",
           greeting: "Mensagem de saudação",
           actions: "Ações",
+        },
+        toasts: {
+          deleted: "Fila removida com sucesso",
         },
         buttons: {
           add: "Adicionar fila",

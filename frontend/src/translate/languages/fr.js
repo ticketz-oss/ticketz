@@ -205,6 +205,9 @@ const messages = {
           transferMessage: "Message de transfert",
           token: "Jeton",
         },
+         toasts: {
+          saved: "File d'attente enregistrée avec succès",
+        },
         buttons: {
           okAdd: "Ajouter",
           okEdit: "Enregistrer",
@@ -292,6 +295,16 @@ const messages = {
           titleFileList: "Liste des fichiers",
         },
       },
+       todolist: {
+        title: "Liste des tâches",
+        form: {
+          name: "Nom de la tâche",
+        },
+        buttons: {
+          add: "Ajouter",
+          save: "Enregistrer",
+        },
+      },
       ticketsManager: {
         buttons: {
           newTicket: "Nouveau",
@@ -306,6 +319,7 @@ const messages = {
         },
         notification: {
           message: "Message de",
+          nomessages: "Aucun message",
         },
         tabs: {
           open: { title: "Ouverts" },
@@ -373,6 +387,7 @@ const messages = {
           logout: "Déconnexion",
           management: "Gestion",
           kanban: "Kanban",
+          tasks: "Tâches",
         },
         appBar: {
           i18n: {
@@ -624,6 +639,9 @@ const messages = {
           color: "Couleur",
           greeting: "Message de bienvenue",
           actions: "Actions",
+        },
+        toasts: {
+          deleted: "File d'attente supprimée avec succès",
         },
         buttons: {
           add: "Ajouter une file d'attente",

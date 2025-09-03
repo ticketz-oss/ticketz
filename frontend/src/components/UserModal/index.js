@@ -188,10 +188,12 @@ const UserModal = ({ open, onClose, userId }) => {
 										variant="outlined"
 										className={classes.formControl}
 										margin="dense"
+										fullWidth
 									>
 										<Can
 											role={loggedInUser.profile}
 											perform="user-modal:editProfile"
+											
 											yes={() => (
 												<>
 													<InputLabel id="profile-selection-input-label">
@@ -206,8 +208,8 @@ const UserModal = ({ open, onClose, userId }) => {
 														id="profile-selection"
 														required
 													>
-														<MenuItem value="admin">Admin</MenuItem>
-														<MenuItem value="user">User</MenuItem>
+														<MenuItem value="admin">{i18n.t("userModal.listItems.adminProfile")}</MenuItem>
+														<MenuItem value="user">{i18n.t("userModal.listItems.userProfile")}</MenuItem>
 													</Field>
 												</>
 											)}

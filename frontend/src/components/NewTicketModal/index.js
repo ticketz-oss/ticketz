@@ -228,7 +228,7 @@ const NewTicketModal = ({ modalOpen, onClose, initialContact }) => {
 								}}
 								renderValue={() => {
 									if (selectedQueue === "") {
-										return "Selecione uma fila"
+										return i18n.t("transferTicketModal.fieldQueuePlaceholder")
 									}
 									const queue = user.queues.find(q => q.id === selectedQueue)
 									return queue.name

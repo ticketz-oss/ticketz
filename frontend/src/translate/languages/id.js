@@ -213,6 +213,9 @@ const messages = {
             closed: "Tutup tiket",
           },
         },
+        toasts: {
+          deleted: "Antrean berhasil disimpan",
+        },
         buttons: {
           okAdd: "Tambah",
           okEdit: "Simpan",
@@ -300,6 +303,16 @@ const messages = {
           titleFileList: "Daftar file(s)"
         },
       },
+      todolist: {
+        title: "Daftar tugas",
+        form: {
+          name: "Nama tugas",
+        },
+        buttons: {
+          add: "Tambah",
+          save: "GuaSimpanrdar",
+        },
+      },
       ticketsManager: {
         buttons: {
           newTicket: "Baru",
@@ -314,6 +327,7 @@ const messages = {
         },
         notification: {
           message: "Pesan dari",
+          nomessages: "Tidak ada pesan",
         },
         tabs: {
           open: {
@@ -387,7 +401,8 @@ const messages = {
           financeiro: "Finansial",
           logout: "Logout",
           management: "Management",
-          kanban: "Kanban"
+          kanban: "Kanban",
+          tasks: "Tugas",
         },
         appBar: {
           i18n: {
@@ -465,6 +480,9 @@ const messages = {
           name: "Nama",
           color: "Warna",
           actions: "Aksi",
+        },
+        toasts: {
+          deleted: "Antrian berhasil dihapus",
         },
         buttons: {
           add: "Daftar Baru",

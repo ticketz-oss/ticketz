@@ -204,6 +204,9 @@ const messages = {
           transferMessage: "Übertragungsnachricht",
           token: "Token",
         },
+        toasts: {
+          saved: "Warteschlange erfolgreich gespeichert",
+        },
         buttons: {
           okAdd: "Hinzufügen",
           okEdit: "Speichern",
@@ -291,6 +294,16 @@ const messages = {
           titleFileList: "Dateiliste",
         },
       },
+      todolist: {
+        title: "Aufgabenliste",
+        form: {
+          name: "Aufgabenname",
+        },
+        buttons: {
+          add: "Hinzufügen",
+          save: "Speichern",
+        },
+      },
       ticketsManager: {
         buttons: {
           newTicket: "Neu",
@@ -305,6 +318,7 @@ const messages = {
         },
         notification: {
           message: "Nachricht von",
+          nomessages: "Keine Nachricht",
         },
         tabs: {
           open: { title: "Offen" },
@@ -372,6 +386,7 @@ const messages = {
           logout: "Abmelden",
           management: "Management",
           kanban: "Kanban",
+          tasks: "Aufgaben",
         },
         appBar: {
           i18n: {
@@ -623,6 +638,9 @@ const messages = {
           color: "Farbe",
           greeting: "Begrüßungsnachricht",
           actions: "Aktionen",
+        },
+        toasts: {
+          deleted: "Warteschlange erfolgreich entfernt",
         },
         buttons: {
           add: "Warteschlange hinzufügen",

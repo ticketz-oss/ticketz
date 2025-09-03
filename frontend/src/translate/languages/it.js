@@ -206,6 +206,9 @@ const messages = {
           transferMessage: "Messaggio di trasferimento",
           token: "Token",
         },
+        toasts: {
+          saved: "Coda salvata con successo",
+        },
         buttons: {
           okAdd: "Aggiungi",
           okEdit: "Salva",
@@ -293,6 +296,16 @@ const messages = {
           titleFileList: "Lista dei file",
         },
       },
+       todolist: {
+        title: "Elenco attività",
+        form: {
+          name: "Nome attività",
+        },
+        buttons: {
+          add: "Aggiungi",
+          save: "Salva",
+        },
+      },
       ticketsManager: {
         buttons: {
           newTicket: "Nuovo",
@@ -307,6 +320,7 @@ const messages = {
         },
         notification: {
           message: "Messaggio da",
+          nomessages: "Nessun messaggio",
         },
         tabs: {
           open: { title: "Aperti" },
@@ -374,6 +388,7 @@ const messages = {
           logout: "Esci",
           management: "Gestione",
           kanban: "Kanban",
+          tasks: "Compiti",
         },
         appBar: {
           i18n: {
@@ -625,6 +640,9 @@ const messages = {
           color: "Colore",
           greeting: "Messaggio di benvenuto",
           actions: "Azioni",
+        },
+        toasts: {
+          deleted: "Coda rimossa con successo",
         },
         buttons: {
           add: "Aggiungi coda",

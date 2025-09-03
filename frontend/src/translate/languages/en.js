@@ -242,6 +242,9 @@ const messages = {
           transferMessage: "Transfer Message",
           token: "Token",
         },
+        toasts: {
+          saved: "Queue saved successfully",
+        },
         buttons: {
           okAdd: "Add",
           okEdit: "Save",
@@ -329,6 +332,16 @@ const messages = {
           titleFileList: "List of file(s)"
         },
       },
+      todolist: {
+        title: "Tasks list",
+        form: {
+          name: "Task name",
+        },
+        buttons: {
+          add: "Add",
+          save: "Save",
+        },
+      },
       ticketsManager: {
         buttons: {
           newTicket: "New",
@@ -343,6 +356,7 @@ const messages = {
         },
         notification: {
           message: "Message from",
+          nomessages: "No messages",
         },
         tabs: {
           open: { title: "Open" },
@@ -352,6 +366,8 @@ const messages = {
         },
         search: {
           placeholder: "Search for ticket and messages",
+          filterByTags: "Filter by tags",
+          filterByUsers: "Filter by users",
         },
         buttons: {
           showAll: "All",
@@ -408,7 +424,8 @@ const messages = {
           financeiro: "Financial",
           logout: "Logout",
           management: "Management",
-          kanban: "Kanban"
+          kanban: "Kanban",
+          tasks: "Tasks",
         },
         appBar: {
           i18n: {
@@ -660,14 +677,17 @@ const messages = {
           greeting: "Greeting Message",
           actions: "Actions",
         },
-      },
-      buttons: {
-        add: "Add Queue",
-      },
-      confirmationModal: {
-        deleteTitle: "Delete",
-        deleteMessage:
-          "Are you sure? This action cannot be undone! The tickets from this queue will still exist but will no longer be assigned to any queue.",
+        toasts: {
+          deleted: "Queue removed successfully",
+        },
+        buttons: {
+          add: "Add Queue",
+        },
+        confirmationModal: {
+          deleteTitle: "Delete",
+          deleteMessage:
+            "Are you sure? This action cannot be undone! The tickets from this queue will still exist but will no longer be assigned to any queue.",
+        },
       },
       queueSelect: {
         inputLabel: "Queues",

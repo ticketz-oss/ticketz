@@ -26,6 +26,7 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 
 import notifySound from "../../assets/chat_notify.mp3";
 import useSound from "use-sound";
+import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles((theme) => ({
   mainPaper: {
@@ -281,7 +282,7 @@ export default function ChatPopover() {
                 </ListItem>
               ))}
             {isArray(chats) && chats.length === 0 && (
-              <ListItemText primary="Nenhum registro" />
+              <ListItemText primary={i18n.t("tickets.notification.nomessages")} />
             )}
           </List>
         </Paper>
