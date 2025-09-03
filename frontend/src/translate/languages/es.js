@@ -963,7 +963,8 @@ const messages = {
             resolve: "Resolver",
             reopen: "Reabrir",
             accept: "Aceptar",
-            call: "Llamar"
+            call: "Llamar",
+            endCall: "Cortar",
           },
         },
       },
