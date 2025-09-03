@@ -5,17 +5,27 @@ const GetProfilePicUrl = async (
   number: string,
   type: "preview" | "image",
   wbot: Session
-): Promise<string | void> => {
+): Promise<string> => {
   const redisKey = `picurl_${type}:${number}`;
+  const noPicture = `${process.env.FRONTEND_URL}/nopicture.png`;
 
   const profilePicUrl = await cacheLayer.get(redisKey);
   if (profilePicUrl) {
     return profilePicUrl;
   }
 
-  return wbot.profilePictureUrl(`${number}`, type).then(pic => {
-    cacheLayer.set(redisKey, pic, "EX", 60 * 60 * 24 * 5);
-  });
+  try {
+    const url = await wbot.profilePictureUrl(`${number}`, type);
+
+    await cacheLayer.set(redisKey, url, "EX", 60 * 60 * 24 * 4);
+    
+    return url;
+  } catch (error) {
+
+    await cacheLayer.set(redisKey, noPicture, "EX", 60 * 60 * 24 * 1);
+    
+    return noPicture;
+  }
 };
 
 export default GetProfilePicUrl;
