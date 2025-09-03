@@ -958,6 +958,7 @@ const messages = {
             reopen: "Reopen",
             accept: "Accept",
             call: "Call",
+            endCall: "End Call",
           },
         },
       },
