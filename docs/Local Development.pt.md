@@ -39,7 +39,7 @@ npm -v
 Você precisa clonar este repositório no seu computador antes de realizar qualquer outro passo:
 
 ```bash
-git clone https://github.com/ticketz-oss/ticketz
+git clone https://github.com/tutujaru/botconversa
 ```
 
 Qualquer comando a seguir deverá ser executado dentro do diretório clonado, a menos que especificado de outra forma:
