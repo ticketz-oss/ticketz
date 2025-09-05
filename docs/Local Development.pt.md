@@ -45,7 +45,7 @@ git clone https://github.com/tutujaru/botconversa
 Qualquer comando a seguir deverá ser executado dentro do diretório clonado, a menos que especificado de outra forma:
 
 ```bash
-cd ticketz
+cd botconversa
 ```
 
 ## Executar postgres e redis com Docker
