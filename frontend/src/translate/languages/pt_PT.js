@@ -90,6 +90,7 @@ const messages = {
           disconnectTitle: "Desconectar",
           disconnectMessage:
             "Tem a certeza? Terá de ler o QR Code novamente.",
+          closetTickets: "Fechar todos os atendimentos abertos desta conexão",
         },
         buttons: {
           add: "Adicionar WhatsApp",

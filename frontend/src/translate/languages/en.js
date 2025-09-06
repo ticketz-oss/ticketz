@@ -119,6 +119,7 @@ const messages = {
           deleteMessage: "Are you sure? This action cannot be undone.",
           disconnectTitle: "Disconnect",
           disconnectMessage: "Are you sure? You will need to scan the QR Code again.",
+          closeTickets: "Close all open tickets from this connection",
         },
         buttons: {
           add: "Add WhatsApp",

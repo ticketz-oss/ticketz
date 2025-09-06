@@ -119,6 +119,7 @@ const messages = {
           disconnectTitle: "Desconectar",
           disconnectMessage:
             "¿Estás seguro? Tendrás que escanear el código QR nuevamente.",
+          closeTickets: "Cerrar todas las atenciones de esta conexión",
         },
         buttons: {
           add: "Agregar WhatsApp",
