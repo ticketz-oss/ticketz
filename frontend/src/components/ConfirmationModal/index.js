@@ -7,6 +7,7 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import Typography from "@material-ui/core/Typography";
 
 import { i18n } from "../../translate/i18n";
+import { FormControlLabel, Switch } from "@material-ui/core";
 
 /** ConfirmationModal
  * @param {string} title - Title of the modal
@@ -30,7 +31,9 @@ import { i18n } from "../../translate/i18n";
  * />
  * */
 
-const ConfirmationModal = ({ title, children, open, onClose, onConfirm, rawChildren, okEnabled=true }) => {
+const ConfirmationModal = ({ title, children, open, onClose, onConfirm, rawChildren, okEnabled=true, checkbox }) => {
+  const [checked, setChecked] = React.useState(false);
+
   return (
     <Dialog
       open={open}
@@ -40,6 +43,20 @@ const ConfirmationModal = ({ title, children, open, onClose, onConfirm, rawChild
       <DialogTitle id="confirm-dialog">{title}</DialogTitle>
       <DialogContent dividers>
         {rawChildren ? children : <Typography>{children}</Typography>}
+        {checkbox && (
+          <FormControlLabel
+            control={
+              <Switch
+                checked={checked}
+                onChange={(e) => setChecked(e.target.checked)}
+                name="confirmSwitch"
+                color="primary"
+              />
+            }
+            label={checkbox}
+            style={{ marginTop: 16 }}
+          />
+        )}
       </DialogContent>
       <DialogActions>
         <Button
@@ -54,7 +71,7 @@ const ConfirmationModal = ({ title, children, open, onClose, onConfirm, rawChild
           variant="contained"
           onClick={() => {
             onClose(false);
-            onConfirm();
+            onConfirm(checked);
           }}
           color="secondary"
         >
