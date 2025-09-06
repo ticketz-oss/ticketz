@@ -54,7 +54,7 @@ const UpdateWhatsAppService = async ({
     outOfHoursMessage,
     ratingMessage,
     transferMessage,
-    queueIds = [],
+    queueIds,
     token,
     language
   } = whatsappData;
@@ -65,7 +65,7 @@ const UpdateWhatsAppService = async ({
     throw new AppError((err as Error).message);
   }
 
-  if (queueIds.length > 1 && !greetingMessage) {
+  if (queueIds?.length > 1 && !greetingMessage) {
     throw new AppError("ERR_WAPP_GREETING_REQUIRED");
   }
 
@@ -105,7 +105,9 @@ const UpdateWhatsAppService = async ({
     language
   });
 
-  await AssociateWhatsappQueue(whatsapp, queueIds);
+  if (queueIds) {
+    await AssociateWhatsappQueue(whatsapp, queueIds);
+  }
 
   return { whatsapp, oldDefaultWhatsapp };
 };
