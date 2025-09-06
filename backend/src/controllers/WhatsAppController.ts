@@ -3,7 +3,6 @@ import { Op } from "sequelize";
 import { cacheLayer } from "../libs/cache";
 import { getIO } from "../libs/socket";
 import { removeWbot } from "../libs/wbot";
-import Whatsapp from "../models/Whatsapp";
 import DeleteBaileysService from "../services/BaileysServices/DeleteBaileysService";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
 
@@ -130,6 +129,8 @@ export const remove = async (
 ): Promise<Response> => {
   const { whatsappId } = req.params;
   const { companyId } = req.user;
+  const { closeTickets } = req.query;
+
   const io = getIO();
 
   const whatsapp = await ShowWhatsAppService(whatsappId);
@@ -142,7 +143,30 @@ export const remove = async (
     throw new AppError("ERR_NO_WAPP_FOUND", 404);
   }
 
-  if (whatsapp.channel === "whatsapp") {
+  if (closeTickets === "true") {
+    const closedTickets = (
+      await Ticket.update(
+        { status: "closed" },
+        {
+          where: {
+            whatsappId,
+            status: { [Op.or]: ["open", "pending"] }
+          },
+          returning: true
+        }
+      )
+    )[1];
+
+    closedTickets.forEach(ticket => {
+      io.to(`company-${companyId}-mainchannel`).emit(
+        `company-${companyId}-ticket`,
+        {
+          action: "delete",
+          ticketId: ticket.id
+        }
+      );
+    });
+  } else {
     const openTickets: Ticket[] = await whatsapp.$get("tickets", {
       where: {
         status: { [Op.or]: ["open", "pending"] }
@@ -154,43 +178,20 @@ export const remove = async (
         "Não é possível remover conexão que contém tickets não resolvidos"
       );
     }
+  }
 
+  if (whatsapp.channel === "whatsapp") {
     await DeleteBaileysService(whatsappId);
-    await DeleteWhatsAppService(whatsappId);
     await cacheLayer.delFromPattern(`sessions:${whatsappId}:*`);
     removeWbot(+whatsappId);
-
-    io.to(`company-${companyId}-admin`).emit(`company-${companyId}-whatsapp`, {
-      action: "delete",
-      whatsappId: +whatsappId
-    });
   }
 
-  if (whatsapp.channel === "facebook" || whatsapp.channel === "instagram") {
-    const { facebookUserToken } = whatsapp;
+  await DeleteWhatsAppService(whatsappId);
 
-    const getAllSameToken = await Whatsapp.findAll({
-      where: {
-        facebookUserToken
-      }
-    });
-
-    await Whatsapp.destroy({
-      where: {
-        facebookUserToken
-      }
-    });
-
-    getAllSameToken.forEach(w => {
-      io.to(`company-${companyId}-admin`).emit(
-        `company-${companyId}-whatsapp`,
-        {
-          action: "delete",
-          whatsappId: w.id
-        }
-      );
-    });
-  }
+  io.to(`company-${companyId}-admin`).emit(`company-${companyId}-whatsapp`, {
+    action: "delete",
+    whatsappId: +whatsappId
+  });
 
   return res.status(200).json({ message: "Session disconnected." });
 };
