@@ -25,7 +25,9 @@ import {
   Facebook,
   Instagram,
   Description,
-  Forward
+  Forward,
+  Launch,
+  Reply
 } from "@material-ui/icons";
 
 import WhatsMarked from "react-whatsmarked";
@@ -508,6 +510,12 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: 5,
     borderLeft: "5px solid",
     borderColor: theme.mode === 'light' ? "#000" : "#fff",
+  },
+  messageButton: {
+    display: "flex",
+    width: "100%",
+    textTransform: "none",
+    margin: "auto",
   }
 }));
 
@@ -566,7 +574,7 @@ const reducer = (state, action) => {
   }
 };
 
-const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
+const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, allowReplyButtons }) => {
   const classes = useStyles();
 
   const [messagesList, dispatch] = useReducer(reducer, []);
@@ -1021,6 +1029,60 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
     );
   };
 
+  const sendReply = async (body) => {
+    const message = {
+      read: 1,
+      fromMe: true,
+      mediaUrl: "",
+      body
+    };
+
+    api.post(`/messages/${ticketId}`, message).catch((err) => {
+      toastError(err);
+    });
+  };
+
+  const renderTemplateButtons = (hydratedButtons) => {
+    if (!hydratedButtons) return (<></>);
+
+    return hydratedButtons.map((button, index) => {
+      if (button.urlButton) {
+        return (
+          <Button
+            className={classes.messageButton}
+            key={index}
+            color="primary"
+            startIcon={button.urlButton.displayText === 'Facebook' ? <Facebook /> : button.urlButton.displayText === 'Instagram' ? <Instagram /> : <Launch />}
+          >
+            <a href={button.urlButton.url} target="_blank" style={{ textDecoration: 'none', color: 'inherit' }}>
+              {button.urlButton.displayText}
+            </a>
+          </Button>
+        );
+      } else if (button.quickReplyButton) {
+        return (
+          <Button
+            className={classes.messageButton}
+            key={index}
+            color="primary"
+            startIcon={<Reply />}
+            disabled={!(allowReplyButtons || false)}
+            onClick={() => {
+              if (allowReplyButtons) {
+                sendReply(button.quickReplyButton.displayText);
+              };
+            }
+            }
+          >
+            {button.quickReplyButton.displayText}
+          </Button>
+        );
+      }
+      return (<></>);
+    }
+    );
+  };
+  
   const formatVCardN = (n) => {
     return(
       (n[3] ? n[3] + " " : "") +
@@ -1265,6 +1327,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead }) => {
                     </span>
                   </div>)}
                   {message.mediaUrl && !data?.message?.extendedTextMessage && checkMessageMedia(message, data)}
+                  {renderTemplateButtons(data?.message?.templateMessage?.hydratedTemplate?.hydratedButtons)}
                   {renderReplies(message.replies)}
             </div>
           </React.Fragment>
