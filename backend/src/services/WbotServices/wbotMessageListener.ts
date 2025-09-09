@@ -131,6 +131,8 @@ export const getBodyMessage = (msg: proto.IMessage): string | null => {
       imageMessage: msg?.imageMessage?.caption,
       videoMessage: msg?.videoMessage?.caption,
       extendedTextMessage: msg?.extendedTextMessage?.text,
+      buttonsMessage: msg?.buttonsMessage?.contentText,
+      listMessage: msg?.listMessage?.description,
       templateMessage:
         msg?.templateMessage && getBodyFromTemplateMessage(msg.templateMessage),
       buttonsResponseMessage: msg?.buttonsResponseMessage?.selectedButtonId,
