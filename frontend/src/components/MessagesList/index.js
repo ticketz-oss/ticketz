@@ -1042,7 +1042,32 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, allowReplyButtons
     });
   };
 
-  const renderButtons = (objects) => {
+  const renderReplyButton = (text) => {
+    return (
+      <Button
+        className={classes.messageButton}
+        color="primary"
+        startIcon={<Reply />}
+        disabled={!(allowReplyButtons || false)}
+        onClick={() => {
+          if (allowReplyButtons) {
+            sendReply(text);
+          };
+        }
+        }
+      >
+        {text}
+      </Button>
+    );
+  }
+  
+  const renderButtons = (message) => {
+    const objects = 
+      message?.buttonsMessage?.buttons ||
+      message?.listMessage?.sections ||
+      message?.templateMessage?.hydratedTemplate?.hydratedButtons ||
+      message?.templateMessage?.interactiveMessageTemplate?.nativeFlowMessage?.buttons
+
     if (!objects) return (<></>);
 
     return objects.map((item, index) => {
@@ -1060,60 +1085,17 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, allowReplyButtons
           </Button>
         );
       } else if (item.quickReplyButton) {
-        return (
-          <Button
-            className={classes.messageButton}
-            key={index}
-            color="primary"
-            startIcon={<Reply />}
-            disabled={!(allowReplyButtons || false)}
-            onClick={() => {
-              if (allowReplyButtons) {
-                sendReply(item.quickReplyButton.displayText);
-              };
-            }
-            }
-          >
-            {item.quickReplyButton.displayText}
-          </Button>
-        );
+        return renderReplyButton(item.quickReplyButton.displayText);
       } else if (item.type === "RESPONSE" && item.buttonText) {
-        return (
-          <Button
-            className={classes.messageButton}
-            key={index}
-            color="primary"
-            startIcon={<Reply />}
-            disabled={!(allowReplyButtons || false)}
-            onClick={() => {
-              if (allowReplyButtons) {
-                sendReply(item.buttonText.displayText);
-              };
-            }
-            }
-          >
-            {item.buttonText.displayText}
-          </Button>
-        );
+        return renderReplyButton(item.buttonText.displayText);
+      } else if (item.buttonParamsJson) {
+        const params = JSON.parse(item.buttonParamsJson);
+        if (params?.displayText) {
+          return renderReplyButton(params.displayText);
+        }
       } else if (item.rows) {
-        return item.rows.map((row, rowIndex) => {
-          return (
-            <Button
-              className={classes.messageButton}
-              key={rowIndex}
-              color="primary"
-              startIcon={<Reply />}
-              disabled={!(allowReplyButtons || false)}
-              onClick={() => {
-                if (allowReplyButtons) {
-                  sendReply(row.title);
-                };
-              }
-              }
-            >
-              {row.title}
-            </Button>
-          );
+        return item.rows.map((row) => {
+          return renderReplyButton(row.title);
         });
       }
          
@@ -1366,11 +1348,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, allowReplyButtons
                     </span>
                   </div>)}
                   {message.mediaUrl && !data?.message?.extendedTextMessage && checkMessageMedia(message, data)}
-                  {renderButtons(
-                    data?.message?.templateMessage?.hydratedTemplate?.hydratedButtons ||
-                    data?.message?.buttonsMessage?.buttons ||
-                    data?.message?.listMessage?.sections
-                  )}
+                  {renderButtons(data?.message)}
                   {renderReplies(message.replies)}
             </div>
           </React.Fragment>
