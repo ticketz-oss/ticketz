@@ -110,7 +110,7 @@ export const getBodyFromTemplateMessage = (
 ) => {
   return (
     templateMessage.hydratedTemplate?.hydratedContentText ||
-    templateMessage.interactiveMessageTemplate?.body ||
+    templateMessage.interactiveMessageTemplate?.body?.text ||
     "unsupported templateMessage"
   );
 };
@@ -275,6 +275,13 @@ const getMessageMedia = (message: proto.IMessage) => {
     message?.videoMessage ||
     message?.stickerMessage ||
     message?.documentMessage ||
+    message?.documentWithCaptionMessage?.message?.documentMessage ||
+    message?.templateMessage?.interactiveMessageTemplate?.header
+      ?.imageMessage ||
+    message?.templateMessage?.interactiveMessageTemplate?.header
+      ?.videoMessage ||
+    message?.templateMessage?.interactiveMessageTemplate?.header
+      ?.documentMessage ||
     null
   );
 };
