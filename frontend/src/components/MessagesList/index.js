@@ -1090,8 +1090,8 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, allowReplyButtons
         return renderReplyButton(item.buttonText.displayText);
       } else if (item.buttonParamsJson) {
         const params = JSON.parse(item.buttonParamsJson);
-        if (params?.displayText) {
-          return renderReplyButton(params.displayText);
+        if (params?.display_text) {
+          return renderReplyButton(params.display_text);
         }
       } else if (item.rows) {
         return item.rows.map((row) => {
