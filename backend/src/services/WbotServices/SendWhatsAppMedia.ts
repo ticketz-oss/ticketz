@@ -1,4 +1,4 @@
-import { WAMessage, AnyMediaMessageContent, AnyMessageContent } from "baileys";
+import { WAMessage, AnyMediaMessageContent, AnyMessageContent } from "libzapitu-rf";
 import fs from "fs";
 import { exec } from "child_process";
 import path from "path";

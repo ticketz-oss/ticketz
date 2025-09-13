@@ -1,4 +1,4 @@
-import { proto, WASocket } from "baileys";
+import { proto, WASocket } from "libzapitu-rf";
 import AppError from "../../errors/AppError";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
 import GetWbotMessage from "../../helpers/GetWbotMessage";

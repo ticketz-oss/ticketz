@@ -1,4 +1,4 @@
-import { Chat, Contact } from "baileys";
+import { Chat, Contact } from "libzapitu-rf";
 import { isArray } from "lodash";
 import Baileys from "../../models/Baileys";
 

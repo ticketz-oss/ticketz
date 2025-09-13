@@ -5,7 +5,7 @@ import {
   SignalDataTypeMap,
   initAuthCreds,
   BufferJSON
-} from "baileys";
+} from "libzapitu-rf";
 import Whatsapp from "../models/Whatsapp";
 import { cacheLayer } from "../libs/cache";
 import { logger } from "../utils/logger";

@@ -14,7 +14,7 @@ import {
   WAMessageUpdate,
   WAMessageStubType,
   WAGenericMediaMessage
-} from "baileys";
+} from "libzapitu-rf";
 import { Mutex } from "async-mutex";
 import { Op } from "sequelize";
 import moment from "moment";

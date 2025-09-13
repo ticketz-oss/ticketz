@@ -2,7 +2,6 @@ import * as Sentry from "@sentry/node";
 import makeWASocket, {
   WASocket,
   DisconnectReason,
-  makeCacheableSignalKeyStore,
   isJidBroadcast,
   CacheStore,
   WAMessageKey,
@@ -10,7 +9,7 @@ import makeWASocket, {
   proto,
   jidNormalizedUser,
   BinaryNode
-} from "baileys";
+} from "libzapitu-rf";
 
 import { Boom } from "@hapi/boom";
 // import MAIN_LOGGER from "@whiskeysockets/baileys/lib/Utils/logger";
@@ -18,7 +17,7 @@ import NodeCache from "node-cache";
 import { Op } from "sequelize";
 import { Agent } from "https";
 import { Mutex } from "async-mutex";
-import useVoiceCallsBaileys from "voice-calls-baileys";
+import useVoiceCallsZapitu from "voice-calls-zapitu";
 import {
   ClientToServerEvents,
   ServerToClientEvents
@@ -294,7 +293,7 @@ export const initWASocket = async (
           browser: [clientName, "Desktop", appVersion],
           auth: {
             creds: state.creds,
-            keys: makeCacheableSignalKeyStore(state.keys, loggerBaileys)
+            keys: state.keys
           },
           version,
           defaultQueryTimeoutMs: 60000,
@@ -405,7 +404,7 @@ export const initWASocket = async (
                 include: ["wavoip"]
               });
               if (whatsapp.wavoip) {
-                useVoiceCallsBaileys(
+                useVoiceCallsZapitu(
                   whatsapp.wavoip.token,
                   wsocket,
                   "open",

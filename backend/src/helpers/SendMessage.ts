@@ -1,4 +1,4 @@
-import { AnyMessageContent, proto } from "baileys";
+import { AnyMessageContent, proto } from "libzapitu-rf";
 import fs from "fs";
 import mime from "mime-types";
 import iconv from "iconv-lite";
