@@ -21,7 +21,7 @@ import useVoiceCallsZapitu from "voice-calls-zapitu";
 import {
   ClientToServerEvents,
   ServerToClientEvents
-} from "voice-calls-baileys/lib/services/transport.type";
+} from "voice-calls-zapitu/lib/services/transport.type";
 import { Socket } from "socket.io-client";
 import Whatsapp from "../models/Whatsapp";
 import { logger, loggerBaileys } from "../utils/logger";
