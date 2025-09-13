@@ -89,10 +89,7 @@ const getTypeMessage = (msg: proto.IWebMessageInfo): string => {
 };
 
 const msgLocation = (
-  image:
-    | Uint8Array
-    | ArrayBuffer
-    | { valueOf(): ArrayBuffer | SharedArrayBuffer },
+  image: Uint8Array,
   latitude: number,
   longitude: number
 ) => {
