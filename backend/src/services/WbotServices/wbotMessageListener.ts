@@ -105,11 +105,22 @@ const msgLocation = (
 export const getBodyFromTemplateMessage = (
   templateMessage: proto.Message.ITemplateMessage
 ) => {
-  return (
+  let body = "";
+
+  body += templateMessage.hydratedTemplate?.hydratedTitleText
+    ? `*${templateMessage.hydratedTemplate.hydratedTitleText.trim()}*\n\n`
+    : "";
+
+  body +=
     templateMessage.hydratedTemplate?.hydratedContentText ||
     templateMessage.interactiveMessageTemplate?.body?.text ||
-    "unsupported templateMessage"
-  );
+    "";
+
+  body += templateMessage.hydratedTemplate?.hydratedFooterText
+    ? `\n\n_${templateMessage.hydratedTemplate.hydratedFooterText.trim()}_`
+    : "";
+
+  return body;
 };
 
 export const getBodyMessage = (msg: proto.IMessage): string | null => {
