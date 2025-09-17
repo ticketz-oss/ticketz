@@ -267,9 +267,6 @@ const getUnpackedMessage = (msg: proto.IWebMessageInfo) => {
     msg.message?.viewOnceMessage?.message ||
     msg.message?.viewOnceMessageV2?.message ||
     msg.message?.ephemeralMessage?.message ||
-    msg.message?.templateMessage?.hydratedTemplate ||
-    msg.message?.templateMessage?.hydratedFourRowTemplate ||
-    msg.message?.templateMessage?.fourRowTemplate ||
     msg.message?.interactiveMessage?.header ||
     msg.message?.highlyStructuredMessage?.hydratedHsm?.hydratedTemplate ||
     msg.message
@@ -1489,8 +1486,7 @@ const handleMessage = async (
     const bodyMessage = getBodyMessage(msg?.message);
     const msgType = getTypeMessage(msg);
 
-    const unpackedMessage =
-      msgType !== "templateMessage" && getUnpackedMessage(msg);
+    const unpackedMessage = getUnpackedMessage(msg);
     const messageMedia = unpackedMessage && getMessageMedia(unpackedMessage);
     if (msg.key.fromMe) {
       if (bodyMessage?.startsWith("\u200e")) return;
