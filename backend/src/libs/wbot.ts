@@ -245,7 +245,6 @@ export const initWASocket = async (
         const { state, saveState } = await authState(whatsapp);
 
         const msgRetryCounterCache = new NodeCache();
-        const userDevicesCache: CacheStore = new NodeCache();
         const internalGroupCache = new NodeCache({
           stdTTL: 5 * 60,
           useClones: false
@@ -302,7 +301,6 @@ export const initWASocket = async (
           msgRetryCounterCache,
           // syncFullHistory: true,
           generateHighQualityLinkPreview: true,
-          userDevicesCache,
           getMessage,
           agent: proxy,
           fetchAgent: proxy,
