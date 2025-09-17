@@ -63,7 +63,7 @@ const authState = async (
       whatsappId,
       type,
       key,
-      value: JSON.stringify(value)
+      value: JSON.stringify(value, BufferJSON.replacer)
     });
   };
 
@@ -82,7 +82,9 @@ const authState = async (
       );
     }
 
-    return baileysKey?.value ? JSON.parse(baileysKey.value) : null;
+    return baileysKey?.value
+      ? JSON.parse(baileysKey.value, BufferJSON.reviver)
+      : null;
   };
 
   const removeKey = async (type: string, key: string) => {
