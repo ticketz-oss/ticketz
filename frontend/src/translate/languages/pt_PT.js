@@ -1013,6 +1013,11 @@ const messages = {
           disappearing: "Para atualizar o Modo de Desaparecimento Padrão",
         },
       },
+      frontendErrors: {
+        ERR_CONFIG_ERROR: "Erro de configuração. Por favor, contacte o suporte.",
+        ERR_CLOCK_OUT_OF_SYNC: "Relógio fora de sincronização. Verifique as configurações de data e hora do seu dispositivo.",
+        ERR_BACKEND_UNREACHABLE: "Backend inacessível. Por favor, tente novamente mais tarde.",
+      },
       backendErrors: {
         ERR_UNAUTHORIZED: "Não autorizado. Por favor, faça o login novamente.",
         ERR_FORBIDDEN: "Acesso negado. Você não tem permissão para acessar este recurso.",

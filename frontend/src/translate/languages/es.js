@@ -1085,6 +1085,11 @@ const messages = {
             "Para actualizar el modo de desaparición predeterminado",
         },
       },
+      frontendErrors: {
+        ERR_CONFIG_ERROR: "Error de configuración. Por favor, contacte al soporte.",
+        ERR_CLOCK_OUT_OF_SYNC: "Reloj fuera de sincronización. Por favor, verifique la configuración de fecha y hora de su dispositivo.",
+        ERR_BACKEND_UNREACHABLE: "Backend inalcanzable. Por favor, intente nuevamente más tarde.",
+      },
       backendErrors: {
         ERR_FORBIDDEN: "No tienes permisos para acceder a este recurso.",
         ERR_CHECK_NUMBER: "No se pudo verificar el número de WhatsApp.",
