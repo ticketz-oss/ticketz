@@ -105,22 +105,24 @@ const msgLocation = (
 export const getBodyFromTemplateMessage = (
   templateMessage: proto.Message.ITemplateMessage
 ) => {
-  let body = "";
+  const title =
+    templateMessage.interactiveMessageTemplate?.header?.title?.trim() ||
+    templateMessage.hydratedTemplate?.hydratedTitleText?.trim();
 
-  body += templateMessage.hydratedTemplate?.hydratedTitleText
-    ? `*${templateMessage.hydratedTemplate.hydratedTitleText.trim()}*\n\n`
-    : "";
-
-  body +=
-    templateMessage.hydratedTemplate?.hydratedContentText ||
-    templateMessage.interactiveMessageTemplate?.body?.text ||
+  const body =
+    templateMessage.interactiveMessageTemplate?.body?.text?.trim() ||
+    templateMessage.hydratedTemplate?.hydratedContentText?.trim() ||
     "";
 
-  body += templateMessage.hydratedTemplate?.hydratedFooterText
-    ? `\n\n_${templateMessage.hydratedTemplate.hydratedFooterText.trim()}_`
-    : "";
+  const footer =
+    templateMessage.interactiveMessageTemplate?.footer?.text?.trim() ||
+    templateMessage.hydratedTemplate?.hydratedFooterText?.trim();
 
-  return body;
+  return (
+    (title ? `*${title}*\n\n` : "") +
+    (body || "") +
+    (footer ? `\n\n⣿${footer}⣿` : "")
+  );
 };
 
 export const getBodyMessage = (msg: proto.IMessage): string | null => {
