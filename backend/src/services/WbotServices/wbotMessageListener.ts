@@ -289,6 +289,9 @@ const getMessageMedia = (message: proto.IMessage) => {
       ?.videoMessage ||
     message?.templateMessage?.interactiveMessageTemplate?.header
       ?.documentMessage ||
+    message?.templateMessage?.hydratedTemplate?.imageMessage ||
+    message?.templateMessage?.hydratedTemplate?.videoMessage ||
+    message?.templateMessage?.hydratedTemplate?.documentMessage ||
     null
   );
 };
