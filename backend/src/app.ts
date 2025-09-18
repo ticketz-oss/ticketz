@@ -31,7 +31,7 @@ app.use(
   cors({
     credentials: true,
     origin: process.env.FRONTEND_URL,
-    exposedHeaders: ["Content-Range", "X-Content-Range"]
+    exposedHeaders: ["Content-Range", "X-Content-Range", "Date"]
   })
 );
 app.use(cookieParser());
