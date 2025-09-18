@@ -199,6 +199,9 @@ const Queues = () => {
           <TableHead>
             <TableRow>
               <TableCell align="center">
+                ID
+              </TableCell>
+              <TableCell align="center">
                 {i18n.t("queues.table.name")}
               </TableCell>
               <TableCell align="center">
@@ -216,6 +219,7 @@ const Queues = () => {
             <>
               {queues.map((queue) => (
                 <TableRow key={queue.id}>
+                  <TableCell align="center">{queue.id}</TableCell>
                   <TableCell align="center">{queue.name}</TableCell>
                   <TableCell align="center">
                     <div className={classes.customTableCell}>
