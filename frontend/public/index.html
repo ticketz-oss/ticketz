@@ -205,47 +205,73 @@
       root.style.setProperty('--splash', themes[theme].splash);
       root.style.setProperty('--primary', themes[theme].primary);
 		}
+		
+		const renderError = (message) => {
+			const splashScreen = document.getElementById('splash-screen');
+      splashScreen.innerHTML = `
+            <div style="color: var(--primary); text-align: center;">
+            <h2>Error</h2>
+            <p>${message}</p>
+            </div>
+        `;
+      progress = 0;
+		}
 
-		const backendUrl = window.location.hostname === "localhost" ? "http://localhost:8080" : "/backend";
-		const settingsBaseUrl = backendUrl + "/public-settings";
+    const configureSplash = async (config) => {
+      const protocol = config.BACKEND_PROTOCOL || "https";
+      const hostname = config.BACKEND_HOST || window.location.hostname;
+      const port = config.BACKEND_PORT ? `:${config.BACKEND_PORT}` : 443;
+      const path = config.BACKEND_PATH || "";
+    	
+	    const backendUrl = `${protocol}://${hostname}${port}${path}`;
+	    const settingsBaseUrl = backendUrl + "/public-settings";
+	    
+	    fetch(settingsBaseUrl + "/primaryColor" + (theme === "dark" ? "Dark" : "Light"))
+	        .then(response => response.json())
+	        .then(data => {
+	          const root = document.documentElement;
+	          
+	          if (data) {
+	            root.style.setProperty('--primary', data);
+	            return;
+	          }
+	          
+	          root.style.setProperty('--primary', theme === "dark" ? "#39ACE7" : "#00f");
+	        });
+	    
+	    Promise.all([
+	        fetch(settingsBaseUrl + "/appLogoDark"),
+	        fetch(settingsBaseUrl + "/appLogoLight")
+	        ]).then(async responses => {
+	          const appLogo = document.getElementById('app-logo');
+	          
+	          const logoSrc =
+	            await (theme === "dark" ? responses[0] : responses[1]).json() ||
+	            await (theme === "dark" ? responses[1] : responses[0]).json();
+	          
+	          if (!logoSrc) {
+	            appLogo.src = `/vector/logo${theme === "dark" ? "-dark" : ""}.svg`;
+	          } else {
+	            appLogo.src = backendUrl + "/public/" + (logoSrc || logoAltSrc);
+	          }
+	          const appLogoDiv = document.getElementById('app-logo-div');
+	          appLogoDiv.style.display = "block";
+	        });
+	    
+	    fetch(settingsBaseUrl + "/appName")
+	        .then(response => response.json())
+	        .then(data => {
+	          document.title = data || "ticketz";
+	        });
+    };
 		
-		fetch(settingsBaseUrl + "/primaryColor" + (theme === "dark" ? "Dark" : "Light"))
-		    .then(response => response.json())
-        .then(data => {
-          const root = document.documentElement;
-          
-          if (data) {
-            root.style.setProperty('--primary', data);
-            return;
-          }
-          
-          root.style.setProperty('--primary', theme === "dark" ? "#39ACE7" : "#00f");
-        });
-		
-		Promise.all([
-				fetch(settingsBaseUrl + "/appLogoDark"),
-				fetch(settingsBaseUrl + "/appLogoLight")
-				]).then(async responses => {
-					const appLogo = document.getElementById('app-logo');
-					
-					const logoSrc =
-						await (theme === "dark" ? responses[0] : responses[1]).json() ||
-						await (theme === "dark" ? responses[1] : responses[0]).json();
-					
-					if (!logoSrc) {
-            appLogo.src = `/vector/logo${theme === "dark" ? "-dark" : ""}.svg`;
-          } else {
-        	  appLogo.src = backendUrl + "/public/" + (logoSrc || logoAltSrc);
-          }
-					const appLogoDiv = document.getElementById('app-logo-div');
-					appLogoDiv.style.display = "block";
-				});
-		
-		fetch(settingsBaseUrl + "/appName")
-        .then(response => response.json())
-        .then(data => {
-          document.title = data || "ticketz";
-        });
+		const settings = fetch("/config.json")
+        .then(async (response) => {
+          let config = {};
+        	response.json().then(config => {
+        		  configureSplash(config);
+        	});
+        })
 		
 		const progressBar = document.getElementById('progress-bar');
 		const interval = setInterval(() => {
