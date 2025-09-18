@@ -125,6 +125,7 @@ const waVersionCache = new NodeCache({
 });
 
 const waVersionMutex = new Mutex();
+const checkWbotDuplicity = new Mutex();
 
 const getProjectWAVersion = async () => {
   try {
@@ -468,6 +469,28 @@ export const initWASocket = async (
                 wsocket.id = whatsapp.id;
                 sessions.push(wsocket);
               }
+
+              await checkWbotDuplicity.runExclusive(async () => {
+                const anotherSameJid = sessions.find(
+                  s =>
+                    s.id !== whatsapp.id &&
+                    (s.myJid === wsocket.myJid || s.myLid === wsocket.myLid)
+                );
+
+                if (anotherSameJid) {
+                  logger.warn(
+                    {
+                      id: anotherSameJid.id,
+                      jid: anotherSameJid.myJid,
+                      lid: anotherSameJid.myLid
+                    },
+                    "Another session with the same jid/lid detected"
+                  );
+                  const duplicatedWbot = getWbot(anotherSameJid.id);
+                  duplicatedWbot.logout();
+                  duplicatedWbot.ws.close();
+                }
+              });
 
               if (wsocket.isRefreshing) {
                 setTimeout(() => {
