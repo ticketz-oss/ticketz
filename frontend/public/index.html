@@ -206,14 +206,16 @@
       root.style.setProperty('--primary', themes[theme].primary);
 		}
 		
-		const renderError = (message) => {
+		window.renderError = (message) => {
 			const splashScreen = document.getElementById('splash-screen');
       splashScreen.innerHTML = `
             <div style="color: var(--primary); text-align: center;">
-            <h2>Error</h2>
+            <h1>⚠️</h1>
             <p>${message}</p>
             </div>
         `;
+      const root = document.documentElement;
+      root.style.setProperty('--primary', "#f44");
       progress = 0;
 		}
 
