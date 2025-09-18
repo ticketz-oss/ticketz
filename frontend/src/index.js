@@ -13,8 +13,8 @@ if (!config) {
 } else {
   const protocol = config.BACKEND_PROTOCOL || "https";
   const hostname = config.BACKEND_HOST || window.location.hostname;
-  const port = config.BACKEND_PORT ? `:${config.BACKEND_PORT}` : 443;
-  const path = config.BACKEND_PATH || hostname === "localhost" ? "" : "/backend";
+  const port = config.BACKEND_PORT ? `:${config.BACKEND_PORT}` : "";
+  const path = config.BACKEND_PATH || (hostname === "localhost" ? "" : "/backend");
 
   const backendUrl = `${protocol}://${hostname}${port}${path}`;
 
