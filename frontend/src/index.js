@@ -14,7 +14,7 @@ if (!config) {
   const protocol = config.BACKEND_PROTOCOL || "https";
   const hostname = config.BACKEND_HOST || window.location.hostname;
   const port = config.BACKEND_PORT ? `:${config.BACKEND_PORT}` : "";
-  const path = config.BACKEND_PATH || (hostname === "localhost" ? "" : "/backend");
+  const path = config.BACKEND_PATH || ((hostname === "localhost" || hostname !== window.location.hostname) ? "" : "/backend");
 
   const backendUrl = `${protocol}://${hostname}${port}${path}/`;
 
