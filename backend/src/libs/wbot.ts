@@ -462,27 +462,24 @@ export const initWASocket = async (
                 }
               );
 
-              const sessionIndex = sessions.findIndex(
-                s => s.id === whatsapp.id
-              );
-              if (sessionIndex === -1) {
-                wsocket.id = whatsapp.id;
-                sessions.push(wsocket);
-              }
-
               await checkWbotDuplicity.runExclusive(async () => {
+                const sessionIndex = sessions.findIndex(
+                  s => s.id === whatsapp.id
+                );
+                if (sessionIndex === -1) {
+                  wsocket.id = whatsapp.id;
+                  sessions.push(wsocket);
+                }
+
                 const anotherSameJid = sessions.find(
-                  s =>
-                    s.id !== whatsapp.id &&
-                    (s.myJid === wsocket.myJid || s.myLid === wsocket.myLid)
+                  s => s.id !== whatsapp.id && s.myJid === wsocket.myJid
                 );
 
                 if (anotherSameJid) {
                   logger.warn(
                     {
                       id: anotherSameJid.id,
-                      jid: anotherSameJid.myJid,
-                      lid: anotherSameJid.myLid
+                      jid: anotherSameJid.myJid
                     },
                     "Another session with the same jid/lid detected"
                   );
