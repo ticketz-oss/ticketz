@@ -26,7 +26,11 @@ if (!config) {
       const diff = Math.abs(serverDate - clientDate);
       const diffMinutes = Math.floor((diff / 1000) / 60);
       if (diffMinutes > 5) {
-        window.renderError(i18n.t("frontendErrors.ERR_CLOCK_OUT_OF_SYNC"));
+        let message = i18n.t("frontendErrors.ERR_CLOCK_OUT_OF_SYNC");
+        message += `<br><br>Server time: ${serverDate.toISOString()}`;
+        message += `<br>Client time: ${clientDate.toISOString()}`;
+        message += `<br>difference: ${diffMinutes} minute(s)`;
+        window.renderError(message);
         return;
       }
 
