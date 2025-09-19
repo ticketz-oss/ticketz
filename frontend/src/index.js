@@ -16,7 +16,7 @@ if (!config) {
   const port = config.BACKEND_PORT ? `:${config.BACKEND_PORT}` : "";
   const path = config.BACKEND_PATH || (hostname === "localhost" ? "" : "/backend");
 
-  const backendUrl = `${protocol}://${hostname}${port}${path}`;
+  const backendUrl = `${protocol}://${hostname}${port}${path}/`;
 
   axios.get(backendUrl)
     .then((response) => {
