@@ -16,7 +16,7 @@ if (!config) {
   const port = config.BACKEND_PORT ? `:${config.BACKEND_PORT}` : "";
   const path = config.BACKEND_PATH || ((hostname === "localhost" || hostname !== window.location.hostname) ? "" : "/backend");
 
-  const backendUrl = `${protocol}://${hostname}${port}${path}/`;
+  const backendUrl = `${protocol}://${hostname}${port}${path}/?cb=${Date.now()}`;
 
   axios.get(backendUrl)
     .then((response) => {
@@ -27,8 +27,8 @@ if (!config) {
       const diffMinutes = Math.floor((diff / 1000) / 60);
       if (diffMinutes > 5) {
         let message = i18n.t("frontendErrors.ERR_CLOCK_OUT_OF_SYNC");
-        message += `<br><br>Server time: ${serverDate.toISOString()}`;
-        message += `<br>Client time: ${clientDate.toISOString()}`;
+        message += `<br><br>Server time: ${serverDate.toLocaleString()}`;
+        message += `<br>Client time: ${clientDate.toLocaleString()}`;
         message += `<br>difference: ${diffMinutes} minute(s)`;
         window.renderError(message);
         return;
