@@ -187,7 +187,11 @@ export const forward = async (
     include: [{ model: Queue, as: "queues" }]
   });
 
-  if (user.profile !== "admin" && !user.queues.find(q => q.id === queueId)) {
+  if (
+    user.profile !== "admin" &&
+    queueId &&
+    !user.queues.find(q => q.id === queueId)
+  ) {
     throw new AppError("ERR_FORBIDDEN", 403);
   }
 
@@ -224,16 +228,16 @@ export const forward = async (
     throw new AppError("ERR_CONTACT_NOT_FOUND", 404);
   }
 
-  const queue = await Queue.findByPk(queueId);
+  const queue = queueId && (await Queue.findByPk(queueId));
 
-  if (!queue) {
+  if (queueId && !queue) {
     throw new AppError("ERR_QUEUE_NOT_FOUND", 404);
   }
 
   if (
     message.companyId !== companyId ||
     contact.companyId !== companyId ||
-    queue.companyId !== companyId
+    (queue && queue.companyId !== companyId)
   ) {
     throw new AppError("ERR_ACCESS_DENIED", 403);
   }
