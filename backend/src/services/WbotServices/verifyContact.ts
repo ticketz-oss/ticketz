@@ -16,12 +16,10 @@ const lidUpdateMutex = new Mutex();
 interface IMe {
   name: string;
   id: string;
+  lid?: string;
 }
 
-export async function checkAndDedup(
-  contact: Contact,
-  lid: string
-): Promise<void> {
+async function checkAndDedup(contact: Contact, lid: string): Promise<void> {
   const lidContact = await Contact.findOne({
     where: {
       companyId: contact.companyId,
@@ -75,6 +73,19 @@ export async function checkAndDedup(
   );
 
   await lidContact.destroy();
+}
+
+async function getLid(msgContact: IMe, wbot: Session): Promise<string> {
+  if (msgContact.lid) {
+    return msgContact.lid;
+  }
+
+  const [ow] = await wbot.onWhatsApp(msgContact.id);
+  if (!ow?.exists) {
+    throw new Error("ERR_WAPP_CONTACT_NOT_FOUND");
+  }
+
+  return (ow.lid as string) || null;
 }
 
 export async function verifyContact(
@@ -162,12 +173,18 @@ export async function verifyContact(
         });
       }
     } else if (foundContact) {
-      if (!foundContact.whatsappLidMap) {
-        const [ow] = await wbot.onWhatsApp(msgContact.id);
-        if (!ow?.exists) {
-          throw new Error("ERR_WAPP_CONTACT_NOT_FOUND");
-        }
-        const lid = ow.lid as string;
+      const lid = await getLid(msgContact, wbot);
+      let recreateLidMap = false;
+      if (
+        foundContact.whatsappLidMap &&
+        lid !== foundContact.whatsappLidMap.lid
+      ) {
+        await WhatsappLidMap.destroy({
+          where: { id: foundContact.whatsappLidMap.id }
+        });
+        recreateLidMap = true;
+      }
+      if (recreateLidMap || !foundContact.whatsappLidMap) {
         if (lid) {
           await checkAndDedup(foundContact, lid);
           await WhatsappLidMap.create({
@@ -181,11 +198,7 @@ export async function verifyContact(
         profilePicUrl: contactData.profilePicUrl
       });
     } else {
-      const [ow] = await wbot.onWhatsApp(msgContact.id);
-      if (!ow?.exists) {
-        throw new Error("ERR_WAPP_CONTACT_NOT_FOUND");
-      }
-      const lid = ow.lid as string;
+      const lid = await getLid(msgContact, wbot);
 
       if (lid) {
         const lidContact = await Contact.findOne({
