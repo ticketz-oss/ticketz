@@ -248,7 +248,7 @@ const getSenderMessage = (
   return senderId && jidNormalizedUser(senderId);
 };
 
-const getContactMessage = async (msg: proto.IWebMessageInfo, wbot: Session) => {
+const getContactMessage = async (msg: WAMessage, wbot: Session) => {
   const isGroup = msg.key.remoteJid.includes("g.us");
   const rawNumber = msg.key.remoteJid.replace(/\D/g, "");
   return isGroup
@@ -258,6 +258,7 @@ const getContactMessage = async (msg: proto.IWebMessageInfo, wbot: Session) => {
       }
     : {
         id: msg.key.remoteJid,
+        lid: msg?.key?.sender_lid,
         name: msg.key.fromMe ? rawNumber : msg.pushName
       };
 };
@@ -1458,7 +1459,7 @@ const handleChartbot = async (
 };
 
 const handleMessage = async (
-  msg: proto.IWebMessageInfo,
+  msg: WAMessage,
   wbot: Session,
   companyId: number,
   queueId?: number
