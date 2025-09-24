@@ -44,35 +44,32 @@ const ForwardMessageService = async (
       companyId: contact.companyId,
       queueId: queue?.id
     });
-  }
-
-  if (!ticket) {
-    throw new AppError("ERR_CREATING_TICKET", 500);
-  }
-
-  if (whatsapp.channel === "whatsapp") {
-    try {
-      const wbot = getWbot(whatsapp.id);
-      const msg = JSON.parse(message.dataJson);
-
-      const sentMessage = await wbot.sendMessage(getJidOf(contact), {
-        forward: msg
-      });
-
-      const newMessage = message.mediaUrl
-        ? await verifyMediaMessage(sentMessage, ticket, ticket.contact, {
-            wbot,
-            userId: user.id
-          })
-        : await verifyMessage(sentMessage, ticket, ticket.contact, {
-            userId: user.id
-          });
-
-      return newMessage;
-    } catch (err) {
-      logger.error(err);
-      throw new AppError("ERR_SENDING_WAPP_MSG", 500);
+    if (!ticket) {
+      throw new AppError("ERR_CREATING_TICKET", 500);
     }
+  }
+
+  try {
+    const wbot = getWbot(whatsapp.id);
+    const msg = JSON.parse(message.dataJson);
+
+    const sentMessage = await wbot.sendMessage(getJidOf(contact), {
+      forward: msg
+    });
+
+    const newMessage = message.mediaUrl
+      ? await verifyMediaMessage(sentMessage, ticket, ticket.contact, {
+          wbot,
+          userId: user.id
+        })
+      : await verifyMessage(sentMessage, ticket, ticket.contact, {
+          userId: user.id
+        });
+
+    return newMessage;
+  } catch (err) {
+    logger.error(err);
+    throw new AppError("ERR_SENDING_WAPP_MSG", 500);
   }
   return null;
 };
