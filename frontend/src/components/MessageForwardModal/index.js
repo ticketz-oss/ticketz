@@ -25,7 +25,6 @@ const MessageForwardModal = ({ modalOpen, onClose, ticketId, messageId, initialC
   const [loading, setLoading] = useState(false);
   const [searchParam, setSearchParam] = useState("");
   const [selectedContact, setSelectedContact] = useState(null);
-  const [queues, setQueues] = useState([]);
   const [selectedQueue, setSelectedQueue] = useState(null);
   const { user } = useContext(AuthContext);
 
@@ -61,19 +60,6 @@ const MessageForwardModal = ({ modalOpen, onClose, ticketId, messageId, initialC
     return () => clearTimeout(delayDebounceFn);
   }, [searchParam, modalOpen]);
 
-  useEffect(() => {
-    const fetchQueues = async () => {
-      try {
-        const { data } = await api.get("/queue");
-        setQueues(data);
-      } catch (err) {
-        toastError(err);
-      }
-    };
-
-    fetchQueues();
-  }, []);
-
   const handleClose = () => {
     onClose();
     setSearchParam("");
@@ -81,15 +67,15 @@ const MessageForwardModal = ({ modalOpen, onClose, ticketId, messageId, initialC
     setSelectedQueue(null);
   };
 
-  const handleForwardMessage = async (contactId, queueId) => {
-    if (!contactId || !queueId) return;
+  const handleForwardMessage = async (contact, queue) => {
+    if (!contact || (!queue && !contact.isGroup)) return;
     setLoading(true);
     try {
       await api.post("/messages/forward", {
-        contactId: selectedContact.id,
+        contactId: contact.id,
         ticketId,
         messageId,
-        queueId: selectedQueue.id
+        queueId: queue?.id
       });
 
       onClose();
@@ -146,12 +132,6 @@ const MessageForwardModal = ({ modalOpen, onClose, ticketId, messageId, initialC
                   variant="outlined"
                   autoFocus
                   onChange={e => setSearchParam(e.target.value)}
-                  onKeyPress={e => {
-                    if (loading || !selectedContact || !selectedQueue) return;
-                    else if (e.key === "Enter") {
-                      handleForwardMessage(selectedContact.id, selectedQueue.id);
-                    }
-                  }}
                   InputProps={{
                     ...params.InputProps,
                     endAdornment: (
@@ -167,21 +147,23 @@ const MessageForwardModal = ({ modalOpen, onClose, ticketId, messageId, initialC
               )}
             />
           </Grid>
-          <Grid xs={12} item>
-            <Autocomplete
-              fullWidth
-              options={queues}
-              getOptionLabel={option => option.name}
-              onChange={(e, newValue) => setSelectedQueue(newValue)}
-              renderInput={params => (
-                <TextField
-                  {...params}
-                  label={i18n.t("transferTicketModal.fieldQueuePlaceholder")}
-                  variant="outlined"
-                />
-              )}
-            />
-          </Grid>
+          {selectedContact && !selectedContact.isGroup &&
+            <Grid xs={12} item>
+              <Autocomplete
+                fullWidth
+                options={user.queues}
+                getOptionLabel={option => option.name}
+                onChange={(e, newValue) => setSelectedQueue(newValue)}
+                renderInput={params => (
+                  <TextField
+                    {...params}
+                    label={i18n.t("transferTicketModal.fieldQueuePlaceholder")}
+                    variant="outlined"
+                  />
+                )}
+              />
+            </Grid>
+          }
         </Grid>
       </DialogContent>
       <DialogActions>
@@ -196,8 +178,8 @@ const MessageForwardModal = ({ modalOpen, onClose, ticketId, messageId, initialC
         <Button
           variant="contained"
           type="button"
-          disabled={!selectedContact || !selectedQueue}
-          onClick={() => handleForwardMessage(selectedContact.id, selectedQueue.id)}
+          disabled={!selectedContact || (!selectedQueue && !selectedContact.isGroup)}
+          onClick={() => handleForwardMessage(selectedContact, selectedQueue)}
           color="primary"
           loading={loading}
         >
