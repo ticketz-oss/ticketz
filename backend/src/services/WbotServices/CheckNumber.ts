@@ -1,10 +1,12 @@
 import AppError from "../../errors/AppError";
 import GetDefaultWhatsApp from "../../helpers/GetDefaultWhatsApp";
 import { getWbot, Session } from "../../libs/wbot";
+import Contact from "../../models/Contact";
 import Whatsapp from "../../models/Whatsapp";
 import { logger } from "../../utils/logger";
+import { verifyContact } from "./verifyContact";
 
-interface IOnWhatsapp {
+export interface IOnWhatsapp {
   jid: string;
   exists: boolean;
   lid: string;
@@ -34,12 +36,37 @@ const CheckContactNumber = async (
   const defaultWhatsapp = whatsapp || (await GetDefaultWhatsApp(companyId));
 
   const wbot = getWbot(defaultWhatsapp.id);
-  const isNumberExit = await checker(number, wbot);
+  const checked = await checker(number, wbot);
 
-  if (!isNumberExit?.exists) {
+  if (!checked?.exists) {
     throw new AppError("ERR_CHECK_NUMBER", 404);
   }
-  return isNumberExit;
+  return checked;
+};
+
+export const CheckNumberAndCreateContact = async (
+  number: string,
+  name: string,
+  companyId: number,
+  whatsapp: Whatsapp = null
+): Promise<Contact> => {
+  const defaultWhatsapp = whatsapp || (await GetDefaultWhatsApp(companyId));
+
+  const wbot = getWbot(defaultWhatsapp.id);
+
+  if (!wbot) return null;
+
+  const checked = await checker(number, wbot);
+
+  if (!checked?.exists) {
+    throw new AppError("ERR_CHECK_NUMBER", 404);
+  }
+
+  return verifyContact(
+    { id: checked.jid, lid: checked.lid, name },
+    wbot,
+    companyId
+  );
 };
 
 export default CheckContactNumber;
