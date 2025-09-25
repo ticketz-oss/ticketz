@@ -25,6 +25,8 @@ import ForwardMessageService from "../services/MessageServices/ForwardMessageSer
 import { getWbot } from "../libs/wbot";
 import { verifyMessage } from "../services/WbotServices/wbotMessageListener";
 import { getJidOf } from "../services/WbotServices/getJidOf";
+import ShowContactService from "../services/ContactServices/ShowContactService";
+import { verifyContact } from "../services/WbotServices/verifyContact";
 
 type IndexQuery = {
   pageNumber: string;
@@ -78,6 +80,17 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   const { channel } = ticket;
   if (channel === "whatsapp") {
     await SetTicketMessagesAsRead(ticket);
+    if (!ticket.isGroup) {
+      const contact = await ShowContactService(ticket.contactId, companyId);
+      if (!contact.whatsappLidMap) {
+        await verifyContact(
+          { id: `${contact.number}@s.whatsapp.net`, name: contact.name },
+          getWbot(ticket.whatsappId),
+          companyId
+        );
+        await ticket.reload();
+      }
+    }
   }
 
   if (medias) {
