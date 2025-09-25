@@ -11,7 +11,10 @@ import UpdateContactService from "../services/ContactServices/UpdateContactServi
 import DeleteContactService from "../services/ContactServices/DeleteContactService";
 import GetContactService from "../services/ContactServices/GetContactService";
 
-import CheckContactNumber from "../services/WbotServices/CheckNumber";
+import CheckContactNumber, {
+  CheckNumberAndCreateContact,
+  IOnWhatsapp
+} from "../services/WbotServices/CheckNumber";
 import AppError from "../errors/AppError";
 import SimpleListService, {
   SearchContactParams
@@ -21,6 +24,10 @@ import ContactCustomField from "../models/ContactCustomField";
 import { logger } from "../utils/logger";
 import Contact from "../models/Contact";
 import { GetCompanySetting } from "../helpers/CheckSettings";
+import WhatsappLidMap from "../models/WhatsappLidMap";
+import { verifyContact } from "../services/WbotServices/verifyContact";
+import { getWbot } from "../libs/wbot";
+import GetDefaultWhatsApp from "../helpers/GetDefaultWhatsApp";
 
 type IndexQuery = {
   searchParam: string;
@@ -91,22 +98,19 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     throw new AppError(err.message);
   }
 
+  let contact: Contact;
   if (!newContact.isGroup) {
-    const validNumber = await CheckContactNumber(newContact.number, companyId);
-    const number = validNumber.jid.replace(/\D/g, "");
-    newContact.number = number;
+    contact = await CheckNumberAndCreateContact(
+      newContact.number,
+      newContact.name,
+      companyId
+    );
+  } else {
+    contact = await CreateContactService({
+      ...newContact,
+      companyId
+    });
   }
-
-  /**
-   * Código desabilitado por demora no retorno
-   */
-  // const profilePicUrl = await GetProfilePicUrl(validNumber.jid, companyId);
-
-  const contact = await CreateContactService({
-    ...newContact,
-    // profilePicUrl,
-    companyId
-  });
 
   const io = getIO();
   io.to(`company-${companyId}-mainchannel`).emit(
@@ -147,9 +151,10 @@ export const update = async (
     throw new AppError(err.message);
   }
 
+  let checked: IOnWhatsapp;
   if (!contactData.isGroup && contactData.number.match(/^\d+$/)) {
-    const validNumber = await CheckContactNumber(contactData.number, companyId);
-    const number = validNumber.jid.replace(/\D/g, "");
+    checked = await CheckContactNumber(contactData.number, companyId);
+    const number = checked.jid.replace(/\D/g, "");
     contactData.number = number;
   }
 
@@ -160,6 +165,19 @@ export const update = async (
     contactId,
     companyId
   });
+
+  if (checked) {
+    await WhatsappLidMap.destroy({
+      where: { contactId: contact.id }
+    });
+    const defaultWhatsapp = await GetDefaultWhatsApp(companyId);
+    const wbot = getWbot(defaultWhatsapp.id);
+    await verifyContact(
+      { id: checked.jid, lid: checked.lid, name: contact.name },
+      wbot,
+      companyId
+    );
+  }
 
   const io = getIO();
   io.to(`company-${companyId}-mainchannel`).emit(
