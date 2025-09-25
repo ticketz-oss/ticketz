@@ -82,7 +82,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     await SetTicketMessagesAsRead(ticket);
     if (!ticket.isGroup) {
       const contact = await ShowContactService(ticket.contactId, companyId);
-      if (!contact.whatsappLidMap) {
+      if (!contact.number.includes("@") && !contact.whatsappLidMap) {
         await verifyContact(
           { id: `${contact.number}@s.whatsapp.net`, name: contact.name },
           getWbot(ticket.whatsappId),
