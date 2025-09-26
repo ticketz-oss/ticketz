@@ -30,7 +30,7 @@ const CheckSettings = async (
 export const GetCompanySetting = async (
   companyId: number,
   key: string,
-  defaultValue: string = null
+  defaultValue: string = undefined
 ): Promise<string> => {
   const setting = await Setting.findOne({
     where: {
@@ -39,11 +39,11 @@ export const GetCompanySetting = async (
     }
   });
 
-  if (!setting && defaultValue === null) {
+  if (!setting && defaultValue === undefined) {
     throw new AppError("ERR_NO_SETTING_FOUND", 404);
   }
 
-  return setting?.value || defaultValue;
+  return setting ? setting.value : defaultValue;
 };
 
 export default CheckSettings;
