@@ -89,13 +89,20 @@ const UpdateContactService = async ({
     );
   }
 
-  await contact.update({
-    name,
-    number,
-    email,
-    disableBot,
-    language
-  });
+  try {
+    await contact.update({
+      name,
+      number,
+      email,
+      disableBot,
+      language
+    });
+  } catch (e) {
+    if (e.original?.constraint === "number_companyid_unique") {
+      throw new AppError("ERR_DUPLICATED_CONTACT");
+    }
+    throw e;
+  }
 
   await contact.reload({
     attributes: ["id", "name", "number", "email", "profilePicUrl", "language"],
