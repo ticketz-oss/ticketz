@@ -761,7 +761,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, allowReplyButtons
           </audio>
           {
             message.body &&
-            !message.body.startsWith("Áudio") &&
+            !["🔊","Áudio"].includes(message.body) &&
             <div className={classes.mediaDescription}>
               {message.body}
             </div>
