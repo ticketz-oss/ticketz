@@ -673,15 +673,22 @@ export const verifyMediaMessage = async (
     );
 
     if (apiKey) {
-      const audioTranscription = await transcriber(
-        mediaUrl.startsWith("http")
-          ? mediaUrl
-          : `${getPublicPath()}/${mediaUrl}`,
-        { apiKey, provider },
-        filename
-      );
-      if (audioTranscription) {
-        body = audioTranscription;
+      try {
+        const audioTranscription = await transcriber(
+          mediaUrl.startsWith("http")
+            ? mediaUrl
+            : `${getPublicPath()}/${mediaUrl}`,
+          { apiKey, provider },
+          filename
+        );
+        if (audioTranscription) {
+          body = audioTranscription;
+        }
+      } catch (error) {
+        logger.error(
+          { message: error?.message },
+          "Error transcribing audio message"
+        );
       }
     }
   }
