@@ -71,10 +71,10 @@ const useStyles = makeStyles((_) => ({
 }));
 
 
-export default function OwenSettings(props) {
+export default function PixTicketzSettings(props) {
   const { settings } = props;
   const classes = useStyles();
-  const [owenSettings, setOwenSettings] = useState({});
+  const [pixTicketzSettings, setPixTicketzSettings] = useState({});
   const { update } = useSettings();
 
   useEffect(() => {
@@ -85,7 +85,7 @@ export default function OwenSettings(props) {
           newSettings[setting.key.substring(1)] = setting.value;
         }
       });
-      setOwenSettings(newSettings);
+      setPixTicketzSettings(newSettings);
       console.debug(newSettings);
     }
   }, [settings]);
@@ -98,10 +98,10 @@ export default function OwenSettings(props) {
   }
 
   async function handleSaveSetting(key) {
-    if (typeof owenSettings[key] !== "string") {
+    if (typeof pixTicketzSettings[key] !== "string") {
       return;
     }
-    storeSetting(`_${key}`, owenSettings[key]);
+    storeSetting(`_${key}`, pixTicketzSettings[key]);
     toast.success("Operação atualizada com sucesso.");
   }
   
@@ -116,11 +116,11 @@ export default function OwenSettings(props) {
               label="CNPJ"
               variant="standard"
               name="owenCnpj"
-              value={owenSettings.owenCnpj || ""}
+              value={pixTicketzSettings.owenCnpj || ""}
               onChange={(e) => {
-                const newSettings = { ...owenSettings };
+                const newSettings = { ...pixTicketzSettings };
                 newSettings.owenCnpj = e.target.value;
-                setOwenSettings(newSettings);
+                setPixTicketzSettings(newSettings);
               }}
               onBlur={async (_) => {
                 await handleSaveSetting("owenCnpj");
@@ -135,11 +135,11 @@ export default function OwenSettings(props) {
               label="Token"
               variant="standard"
               name="owenToken"
-              value={owenSettings.owenToken || ""}
+              value={pixTicketzSettings.owenToken || ""}
               onChange={(e) => {
-                const newSettings = { ...owenSettings };
+                const newSettings = { ...pixTicketzSettings };
                 newSettings.owenToken = e.target.value;
-                setOwenSettings(newSettings);
+                setPixTicketzSettings(newSettings);
               }}
               onBlur={async (_) => {
                 await handleSaveSetting("owenToken");
@@ -154,11 +154,11 @@ export default function OwenSettings(props) {
               label="Secret Key"
               variant="standard"
               name="owenSecretKey"
-              value={owenSettings.owenSecretKey || ""}
+              value={pixTicketzSettings.owenSecretKey || ""}
               onChange={(e) => {
-                const newSettings = { ...owenSettings };
+                const newSettings = { ...pixTicketzSettings };
                 newSettings.owenSecretKey = e.target.value;
-                setOwenSettings(newSettings);
+                setPixTicketzSettings(newSettings);
               }}
               onBlur={async (_) => {
                 await handleSaveSetting("owenSecretKey");
