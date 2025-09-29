@@ -27,7 +27,8 @@ import {
   Description,
   Forward,
   Launch,
-  Reply
+  Reply,
+  LocationOn
 } from "@material-ui/icons";
 
 import WhatsMarked from "react-whatsmarked";
@@ -235,7 +236,21 @@ const useStyles = makeStyles((theme) => ({
     overflowWrap: "break-word",
     padding: "3px 80px 6px 6px",
   },
+  
+  messageLocation: {
+    display: 'flex',
+    padding: 5,
+    cursor: 'pointer',
+  },
 
+  messageLocationText: {
+    verticalAlign: "middle",
+    paddingLeft: 5,
+    minWidth: 200,
+    marginTop: "auto",
+    marginBottom: "auto",
+  },
+  
   textContentItemDeleted: {
     fontStyle: "italic",
     color: "rgba(0, 0, 0, 0.36)",
@@ -347,8 +362,9 @@ const useStyles = makeStyles((theme) => ({
   },
   imageLocation: {
     position: 'relative',
-    width: '100%',
-    height: 80,
+    color: 'red',
+    width: 100,
+    height: 100,
     borderRadius: 5
   },
 
@@ -1219,15 +1235,49 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, allowReplyButtons
 
     });
   };
+  
+  const convertToDMS = (degrees) => {
+    const deg = Math.floor(degrees);
+    const minFloat = (degrees - deg) * 60;
+    const min = Math.floor(minFloat);
+    const sec = Math.floor((minFloat - min) * 60);
+    const frac = ((minFloat - min) * 60 - sec).toFixed(2).substring(1);
+    return `${deg}°${min}'${sec}${frac}"`;
+  }
+  
+  const convertCoordinates = (lat, lon) => {
+    const latitude = convertToDMS(Math.abs(lat)) + (lat >= 0 ? " N" : " S");
+    const longitude = convertToDMS(Math.abs(lon)) + (lon >= 0 ? " E" : " W");
+    return `${latitude}, ${longitude}`;
+  }
 
-  const messageLocation = (message, createdAt) => {
+  const messageLocation = (data, createdAt) => {
+    const location = data?.message?.locationMessage;
+    if (!location) {
+      return (<></>);
+    }
+
+    const mapUrl = `https://www.google.com/maps?q=${location?.degreesLatitude},${location?.degreesLongitude}`;
+
     return (
-      <div className={[classes.textContentItem, { display: 'flex', padding: 5 }]}>
-        <img src={message.split('|')[0]} className={classes.imageLocation} />
-        <a
-          style={{ fontWeight: '700', color: 'gray' }}
-          target="_blank"
-          href={message.split('|')[1]}> Clique para ver localização</a>
+      <div onClick={
+        () => {
+          window.open(mapUrl, '_blank');
+        }
+      } className={[clsx(classes.textContentItem, classes.messageLocation)]}>
+        <div>
+        { location?.jpegThumbnail ? 
+        <img src={`data:image/png;base64, ${location.jpegThumbnail}`} className={classes.imageLocation} />
+        :
+        <LocationOn className={classes.imageLocation} fontSize="large" color="red" />
+        }
+        </div>
+        <div className={classes.messageLocationText}>
+           { location.name ? <><b>{location.name}</b><br /></> : "" }
+           { location.url ? <><a href={location.url} target="_blank" rel="noreferrer">{location.url}</a><br /></> : "" }
+           { location.address ? <>{location.address}<br /></> : "" }
+           { convertCoordinates(location.degreesLatitude, location.degreesLongitude) }
+        </div>
         <span className={classes.timestamp}>
           {format(parseISO(createdAt), "HH:mm")}
         </span>
@@ -1304,7 +1354,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, allowReplyButtons
                 <img className={classes.previewThumbnail} src={message.thumbnailUrl} />
               )}
 
-              {message.body.includes('data:image') ? messageLocation(message.body, message.createdAt)
+              {data?.message?.locationMessage ? messageLocation(data, message.createdAt)
                 :
                 isVCard(message.body) ?
                   <div
@@ -1399,7 +1449,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, allowReplyButtons
                   />
                 )}
 
-                {message.body.includes('data:image') ? messageLocation(message.body, message.createdAt)
+                { data?.message?.locationMessage ? messageLocation(data, message.createdAt)
                   :
                   isVCard(message.body) ?
                     <div className={[classes.textContentItem]}>
