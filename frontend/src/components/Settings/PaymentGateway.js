@@ -50,7 +50,7 @@ import useSettings from "../../hooks/useSettings";
 import { toast } from 'react-toastify';
 import { makeStyles } from "@material-ui/core/styles";
 import EfiSettings from "../PaymentGateways/Efi/EfiSettings";
-import OwenSettings from "../PaymentGateways/Owen/OwenSettings";
+import PixTicketzSettings from "../PaymentGateways/PixTicketz/PixTicketzSettings";
 
 const useStyles = makeStyles((_) => ({
   fieldContainer: {
@@ -98,7 +98,7 @@ export default function PaymentGateway(props) {
               }}
             >
               <MenuItem value={""}>None</MenuItem>
-              <MenuItem value={"owen"}>PixPDV</MenuItem>
+              <MenuItem value={"pixTicketz"}>Pix Ticketz 💎</MenuItem>
               <MenuItem value={"efi"}>Efí</MenuItem>
             </Select>
           </FormControl>
@@ -107,8 +107,8 @@ export default function PaymentGateway(props) {
       { paymentGateway === "efi" && 
         <EfiSettings settings={settings} />
       }
-      { paymentGateway === "owen" && 
-        <OwenSettings settings={settings} />
+      { paymentGateway === "pixTicketz" && 
+        <PixTicketzSettings settings={settings} />
       }
     </>
   );
