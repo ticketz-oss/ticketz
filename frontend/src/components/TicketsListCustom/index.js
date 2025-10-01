@@ -222,9 +222,11 @@ const TicketsListCustom = (props) => {
     const companyId = localStorage.getItem("companyId");
     const socket = socketManager.GetSocket(companyId);
 
-    const shouldUpdateTicket = (ticket) =>
-      (!ticket.userId || ticket.userId === user?.id || showAll) &&
-      (!ticket.queueId || selectedQueueIds.indexOf(ticket.queueId) > -1);
+    const shouldUpdateTicket = (ticket) => {
+      return (!isSearch || !searchParam) &&
+        (!ticket.userId || ticket.userId === user?.id || showAll) &&
+        (!ticket.queueId || selectedQueueIds.indexOf(ticket.queueId) > -1);
+    };
 
     const notBelongsToUserQueues = (ticket) =>
       ticket.queueId && selectedQueueIds.indexOf(ticket.queueId) === -1;
@@ -333,7 +335,7 @@ const TicketsListCustom = (props) => {
       socket.disconnect();
     };
     
-  }, [status, showAll, groups, showTabGroups, user, selectedQueueIds, tags, users, profile, queues, socketManager]);
+  }, [status, isSearch, searchParam, showAll, groups, showTabGroups, user, selectedQueueIds, tags, users, profile, queues, socketManager]);
 
   useEffect(() => {
     if (typeof updateCount === "function") {
