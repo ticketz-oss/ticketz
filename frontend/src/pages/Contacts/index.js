@@ -183,7 +183,7 @@ const Contacts = () => {
     const socket = socketManager.GetSocket(companyId);
 
     const onContact = (data) => {
-      if (data.action === "update" || data.action === "create") {
+      if (!searchParam && ["update", "create"].includes(data.action)) {
         dispatch({ type: "UPDATE_CONTACTS", payload: data.contact });
       }
 
@@ -197,7 +197,7 @@ const Contacts = () => {
     return () => {
       socket.disconnect();
     };
-  }, [socketManager]);
+  }, [socketManager, searchParam]);
 
   const handleSearch = (event) => {
     setSearchParam(event.target.value.toLowerCase());
