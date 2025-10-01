@@ -272,6 +272,10 @@ const messages = {
           add: "Add User",
           edit: "Edit User",
         },
+        listItems:{
+          adminProfile: "Administrator",
+          userProfile: "User",
+        },
         form: {
           name: "Name",
           email: "Email",
