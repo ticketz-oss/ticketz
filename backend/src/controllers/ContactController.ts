@@ -28,6 +28,7 @@ import WhatsappLidMap from "../models/WhatsappLidMap";
 import { verifyContact } from "../services/WbotServices/verifyContact";
 import { getWbot } from "../libs/wbot";
 import GetDefaultWhatsApp from "../helpers/GetDefaultWhatsApp";
+import { csvDetectDelimiter } from "../helpers/csvDetectDelimiter";
 
 type IndexQuery = {
   searchParam: string;
@@ -275,63 +276,68 @@ export const importCsv = async (
     throw new AppError("ERR_NO_FILE", 400);
   }
 
-  const parser = csvParser(
-    { delimiter: ",", columns: true },
-    async (err, data) => {
-      if (err) {
-        throw new AppError("ERR_INVALID_CSV", 400);
+  let delimiter = ",";
+  try {
+    const firstLine = fs.readFileSync(file.path, "utf8").split("\n")[0];
+    delimiter = firstLine.includes(";") ? ";" : ",";
+  } catch (error) {
+    throw new AppError("ERR_INVALID_CSV", 400);
+  }
+
+  const parser = csvParser({ delimiter, columns: true }, async (err, data) => {
+    if (err) {
+      throw new AppError("ERR_INVALID_CSV", 400);
+    }
+
+    data.forEach(async (record: any) => {
+      let extraInfo: any[];
+      try {
+        extraInfo = JSON.parse(record.ExtraInfo);
+      } catch (error) {
+        extraInfo = [];
       }
 
-      data.forEach(async (record: any) => {
-        let extraInfo;
-        try {
-          extraInfo = JSON.parse(record.ExtraInfo);
-        } catch (error) {
-          extraInfo = [];
-        }
+      const contact = {
+        companyId,
+        name: record.name || record.Name,
+        number: record.number || record.Number,
+        email: record.email || record.Email,
+        extraInfo
+      };
 
-        const contact = {
-          companyId,
-          name: record.name || record.Name,
-          number: record.number || record.Number,
-          email: record.email || record.Email,
-          extraInfo
-        };
-
-        Object.keys(record).forEach((key: string) => {
-          if (
-            key !== "name" &&
-            key !== "number" &&
-            key !== "email" &&
-            key !== "Name" &&
-            key !== "Number" &&
-            key !== "Email" &&
-            key !== "ExtraInfo" &&
-            record[key]
-          ) {
-            contact.extraInfo.push({
-              name: key,
-              value: record[key]
-            });
-          }
-        });
-
-        try {
-          const newContact = await CreateContactService(contact);
-          const io = getIO();
-          io.to(`company-${companyId}-mainchannel`).emit(
-            `company-${companyId}-contact`,
-            {
-              action: "update",
-              contact: newContact
-            }
-          );
-        } catch (error) {
-          logger.error({ contact }, `Error creating contact: ${error.message}`);
+      Object.keys(record).forEach((key: string) => {
+        if (
+          key !== "name" &&
+          key !== "number" &&
+          key !== "email" &&
+          key !== "Name" &&
+          key !== "Number" &&
+          key !== "Email" &&
+          key !== "ExtraInfo" &&
+          record[key]
+        ) {
+          contact.extraInfo.push({
+            name: key,
+            value: record[key]
+          });
         }
       });
-    }
-  );
+
+      try {
+        const newContact = await CreateContactService(contact);
+        const io = getIO();
+        io.to(`company-${companyId}-mainchannel`).emit(
+          `company-${companyId}-contact`,
+          {
+            action: "update",
+            contact: newContact
+          }
+        );
+      } catch (error) {
+        logger.error({ contact }, `Error creating contact: ${error.message}`);
+      }
+    });
+  });
 
   const readable = fs.createReadStream(file.path);
 
@@ -379,15 +385,19 @@ export const exportCsv = async (
     };
   });
 
-  stringify(records, { header: true }, (err, output) => {
-    if (err) {
-      throw new AppError("ERR_GENERATING_CSV", 500);
-    }
+  stringify(
+    records,
+    { header: true, delimiter: csvDetectDelimiter(req) },
+    (err, output) => {
+      if (err) {
+        throw new AppError("ERR_GENERATING_CSV", 500);
+      }
 
-    res.setHeader("Content-disposition", "attachment; filename=contacts.csv");
-    res.set("Content-Type", "text/csv");
-    res.status(200).send(output);
-  });
+      res.setHeader("Content-disposition", "attachment; filename=contacts.csv");
+      res.set("Content-Type", "text/csv");
+      res.status(200).send(output);
+    }
+  );
 
   return res;
 };
