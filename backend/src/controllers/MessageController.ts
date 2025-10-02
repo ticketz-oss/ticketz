@@ -28,6 +28,8 @@ import { getJidOf } from "../services/WbotServices/getJidOf";
 import ShowContactService from "../services/ContactServices/ShowContactService";
 import { verifyContact } from "../services/WbotServices/verifyContact";
 
+import GetDefaultWhatsApp from "../helpers/GetDefaultWhatsApp";
+
 type IndexQuery = {
   pageNumber: string;
   markAsRead: string;
@@ -261,29 +263,29 @@ export const forward = async (
 };
 
 export const send = async (req: Request, res: Response): Promise<Response> => {
-  const { whatsappId } = req.params;
+  // A requisição agora vem com o companyId, injetado pelo nosso middleware corrigido
+  const { companyId } = req;
   const messageData: MessageData = req.body;
   const medias = req.files as Express.Multer.File[];
 
-  if (messageData.number === undefined) {
-    throw new AppError("ERR_SYNTAX", 400);
-  }
-  const whatsapp = await Whatsapp.findByPk(whatsappId);
-
-  if (!whatsapp) {
-    throw new AppError("ERR_WHATSAPP_NOT_FOUND", 404);
-  }
-
   try {
+    // Busca a conexão padrão da empresa em vez de uma específica da URL
+    const whatsapp = await GetDefaultWhatsApp(companyId);
+
+    if (!whatsapp) {
+      throw new AppError("ERR_WHATSAPP_NOT_FOUND", 404);
+    }
+    
+    // Define o whatsappId a partir da conexão padrão que encontramos
+    const whatsappId = whatsapp.id;
+
+    // O resto da lógica original continua, mas agora com o whatsapp correto
     let { number } = messageData;
     const { body, linkPreview } = messageData;
     const saveOnTicket = !!messageData.saveOnTicket;
 
     if (!number.includes("@")) {
       const numberToTest = messageData.number;
-
-      const { companyId } = whatsapp;
-
       const CheckValidNumber = await CheckContactNumber(
         numberToTest,
         companyId,
@@ -322,7 +324,6 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
             saveOnTicket
           }
         },
-
         { removeOnComplete: false, attempts: 3 }
       );
     }
