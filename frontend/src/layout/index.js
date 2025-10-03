@@ -28,6 +28,7 @@ import { PhoneCall } from "../components/PhoneCall";
 import NotificationsVolume from "../components/NotificationsVolume";
 import UserModal from "../components/UserModal";
 import AboutModal from "../components/AboutModal";
+import IOSInstallInstructionsDialog from "../components/IOSInstallInstructionsDialog";
 import { AuthContext } from "../context/Auth/AuthContext";
 import BackdropLoading from "../components/BackdropLoading";
 import DarkMode from "../components/DarkMode";
@@ -50,6 +51,7 @@ import { getBackendURL } from "../services/config";
 import NestedMenuItem from "material-ui-nested-menu-item";
 import GoogleAnalytics from "../components/GoogleAnalytics";
 import OnlyForSuperUser from "../components/OnlyForSuperUser";
+import usePWAInstall from "../hooks/usePWAInstall";
 
 
 
@@ -177,6 +179,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   const classes = useStyles();
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
+  const [iosInstructionsOpen, setIosInstructionsOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
@@ -198,6 +201,8 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   const [volume, setVolume] = useState(localStorage.getItem("volume") || 1);
 
   const { dateToClient } = useDate();
+
+  const { canInstall, promptInstall, isIOS } = usePWAInstall();
 
   const socketManager = useContext(SocketContext);
 
@@ -324,6 +329,27 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   const handleOpenAboutModal = () => {
     setAboutModalOpen(true);
     handleCloseProfileMenu();
+  };
+
+  const handleOpenIosInstructions = () => {
+    if (!isIOS) {
+      return;
+    }
+    setIosInstructionsOpen(true);
+    handleCloseProfileMenu();
+  };
+
+  const handleCloseIosInstructions = () => {
+    setIosInstructionsOpen(false);
+  };
+
+  const handleInstallPWA = async () => {
+    if (!canInstall) {
+      handleCloseProfileMenu();
+      return;
+    }
+    handleCloseProfileMenu();
+    await promptInstall();
   };
 
   const handleClickLogout = () => {
@@ -518,6 +544,19 @@ const LoggedInLayout = ({ children, themeToggle }) => {
                   ))
                 }
               </NestedMenuItem>
+              <MenuItem
+                onClick={handleInstallPWA}
+                disabled={!canInstall}
+              >
+                {i18n.t("pwa.installPwaButton", {
+                  defaultValue: "Instalar app (PWA)",
+                })}
+              </MenuItem>
+              <MenuItem onClick={handleOpenIosInstructions} disabled={!isIOS}>
+                {i18n.t("pwa.installIosButton", {
+                  defaultValue: "Instalar no iOS",
+                })}
+              </MenuItem>
               <MenuItem onClick={handleOpenAboutModal}>
                 {i18n.t("about.aboutthe")} {currentUser?.super ? "ticketz" : theme.appName}
               </MenuItem>
@@ -538,6 +577,10 @@ const LoggedInLayout = ({ children, themeToggle }) => {
           )} />
         {children ? children : null}
       </main>
+      <IOSInstallInstructionsDialog
+        open={iosInstructionsOpen && isIOS}
+        onClose={handleCloseIosInstructions}
+      />
     </div>
   );
 };

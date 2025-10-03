@@ -6,6 +6,24 @@ import { loadJSON } from "./helpers/loadJSON";
 import { i18n } from "./translate/i18n";
 import axios from "axios";
 
+const registerServiceWorker = () => {
+  if ("serviceWorker" in navigator) {
+    const doRegister = () => {
+      navigator.serviceWorker
+        .register("/service-worker.js")
+        .catch((error) => {
+          console.warn("Service worker registration failed", error);
+        });
+    };
+
+    if (document.readyState === "complete") {
+      doRegister();
+    } else {
+      window.addEventListener("load", doRegister, { once: true });
+    }
+  }
+};
+
 const config = loadJSON("/config.json");
 
 if (!config) {
@@ -44,6 +62,7 @@ if (!config) {
         document.getElementById("root"),
         () => {
           window.finishProgress();
+          registerServiceWorker();
         }
       );
     })
