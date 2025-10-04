@@ -332,9 +332,20 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   };
 
   const handleOpenIosInstructions = () => {
-    if (!isIOS) {
-      return;
+    // Try to show the ios-pwa-prompt web component (if loaded) which provides a nicer
+    // native-style hint on iOS. If it's not available, fall back to our modal.
+    try {
+      const el = document.getElementById("ios-pwa-prompt");
+      if (el && typeof el.show === "function") {
+        el.show();
+        handleCloseProfileMenu();
+        return;
+      }
+    } catch (e) {
+      // ignore and fallback
     }
+
+    console.log('Opening iOS instructions modal');
     setIosInstructionsOpen(true);
     handleCloseProfileMenu();
   };
@@ -344,12 +355,14 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   };
 
   const handleInstallPWA = async () => {
-    if (!canInstall) {
-      handleCloseProfileMenu();
-      return;
-    }
+    console.log('Attempting PWA install');
     handleCloseProfileMenu();
-    await promptInstall();
+    if (promptInstall) {
+      await promptInstall();
+    } else {
+      // If beforeinstallprompt hasn't fired yet, inform the user to refresh or use browser menu
+      toastError(new Error(i18n.t("pwa.promptNotReady", { defaultValue: "Instalação não disponível no momento. Atualize a página (Ctrl+F5) ou use o menu do navegador." })));
+    }
   };
 
   const handleClickLogout = () => {
@@ -546,13 +559,12 @@ const LoggedInLayout = ({ children, themeToggle }) => {
               </NestedMenuItem>
               <MenuItem
                 onClick={handleInstallPWA}
-                disabled={!canInstall}
               >
                 {i18n.t("pwa.installPwaButton", {
                   defaultValue: "Instalar app (PWA)",
                 })}
               </MenuItem>
-              <MenuItem onClick={handleOpenIosInstructions} disabled={!isIOS}>
+              <MenuItem onClick={handleOpenIosInstructions}>
                 {i18n.t("pwa.installIosButton", {
                   defaultValue: "Instalar no iOS",
                 })}
@@ -578,7 +590,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
         {children ? children : null}
       </main>
       <IOSInstallInstructionsDialog
-        open={iosInstructionsOpen && isIOS}
+        open={iosInstructionsOpen}
         onClose={handleCloseIosInstructions}
       />
     </div>

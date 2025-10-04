@@ -2,15 +2,11 @@
 	"short_name" : "Ticketz",
 	"name" : "Ticketz - Chat Based Ticket System",
 	"icons" : [{
-			"src" : "vector/favicon.ico",
-			"sizes" : "512x512 192x192 64x64 32x32 24x24 16x16",
-			"type" : "image/svg+xml"
-		},{
-      "src" : "favicon.ico",
-      "sizes" : "64x64 32x32 24x24 16x16",
-      "type" : "image/x-icon"
-    }, {
-			"src" : "/android-chrome-192x192.png",
+			"src" : "favicon.ico",
+			"sizes" : "64x64 32x32 24x24 16x16",
+			"type" : "image/x-icon"
+		}, {
+			"src" : "android-chrome-192x192.png",
 			"sizes" : "192x192",
 			"type" : "image/png"
 		}
