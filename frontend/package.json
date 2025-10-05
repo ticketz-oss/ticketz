@@ -23,7 +23,7 @@
     "gn-api-sdk-node": "^3.0.2",
     "i18next": "^19.8.2",
     "i18next-browser-languagedetector": "^6.0.1",
-    "ios-pwa-prompt-element": "^0.0.5",
+    "ios-pwa-prompt-element": "github:felquis/ios-pwa-prompt-element",
     "libphonenumber-js": "^1.11.0",
     "material-ui-color": "^1.2.0",
     "material-ui-nested-menu-item": "^1.0.2",

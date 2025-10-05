@@ -5,7 +5,6 @@ import App from "./App";
 import { loadJSON } from "./helpers/loadJSON";
 import { i18n } from "./translate/i18n";
 import axios from "axios";
-import "ios-pwa-prompt-element";
 
 const registerServiceWorker = () => {
   if ("serviceWorker" in navigator) {

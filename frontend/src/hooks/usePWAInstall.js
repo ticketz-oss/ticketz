@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { toast } from "react-toastify";
 
 const isClient = typeof window !== "undefined";
 
@@ -86,6 +87,7 @@ const usePWAInstall = () => {
 
   const promptInstall = useCallback(async () => {
     if (!deferredPrompt) {
+      toast.error("Prompt de instalação não disponível. Atualize a página (Ctrl+F5) e tente novamente.");
       return false;
     }
 

@@ -40,7 +40,10 @@ self.addEventListener("fetch", (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone));
           return response;
         })
-        .catch(() => cachedResponse);
+        .catch((error) => {
+          console.error("Fetch failed for:", request.url, error);
+          return cachedResponse; // Return cached if available, else fail silently
+        });
     })
   );
 });
