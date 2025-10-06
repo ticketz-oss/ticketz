@@ -141,8 +141,6 @@
 		</script>
 	</head>
 	<body>
-    <!-- iOS PWA prompt web component -->
-    <script src="https://cdn.jsdelivr.net/npm/ios-pwa-prompt-element@0.0.1/dist/bundle.js"></script>
     <div id="pixelAnchor" style="position:absolute; top:0; left:0; width:1px; height:1px; opacity:0;"></div>
     <div id="splash-background">
 		  <div id="splash-screen">
@@ -155,18 +153,6 @@
 		  </div>
 	  </div>
 		<div id="root"></div>
-
-		<!-- ios-pwa-prompt element: will be used by the app to show a native-like iOS install hint. -->
-		<ios-pwa-prompt 
-			id="ios-pwa-prompt" 
-			style="display:none"
-			title="Ticketz"
-			description="Sistema de Chat"
-			iconpath="/favicon.png"
-			manifestpath="/manifest.json"
-			copy-title="Instalar Ticketz"
-			copy-description="Adicione à tela inicial para usar em tela cheia e offline."
-		></ios-pwa-prompt>
 	<script>
 		window.addEventListener("focusin", () => {
 			  setTimeout(() => window.scrollTo(0, 0), 0);

@@ -202,7 +202,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
 
   const { dateToClient } = useDate();
 
-  const { canInstall, promptInstall, isIOS } = usePWAInstall();
+  const { canInstall, promptInstall, isIOS, isInstalled } = usePWAInstall();
 
   const socketManager = useContext(SocketContext);
 
@@ -332,19 +332,6 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   };
 
   const handleOpenIosInstructions = () => {
-    // Try to show the ios-pwa-prompt web component (if loaded) which provides a nicer
-    // native-style hint on iOS. If it's not available, fall back to our modal.
-    try {
-      const el = document.getElementById("ios-pwa-prompt");
-      if (el && typeof el.show === "function") {
-        el.show();
-        handleCloseProfileMenu();
-        return;
-      }
-    } catch (e) {
-      // ignore and fallback
-    }
-
     console.log('Opening iOS instructions modal');
     setIosInstructionsOpen(true);
     handleCloseProfileMenu();
@@ -557,18 +544,23 @@ const LoggedInLayout = ({ children, themeToggle }) => {
                   ))
                 }
               </NestedMenuItem>
-              <MenuItem
-                onClick={handleInstallPWA}
-              >
-                {i18n.t("pwa.installPwaButton", {
-                  defaultValue: "Instalar app (PWA)",
-                })}
-              </MenuItem>
-              <MenuItem onClick={handleOpenIosInstructions}>
-                {i18n.t("pwa.installIosButton", {
-                  defaultValue: "Instalar no iOS",
-                })}
-              </MenuItem>
+              {!isIOS && (
+                <MenuItem
+                  onClick={handleInstallPWA}
+                  disabled={isInstalled}
+                >
+                  {i18n.t("pwa.installPwaButton", {
+                    defaultValue: "Instalar app (PWA)",
+                  })}
+                </MenuItem>
+              )}
+              {isIOS && (
+                <MenuItem onClick={handleOpenIosInstructions}>
+                  {i18n.t("pwa.installIosButton", {
+                    defaultValue: "Instalar no iOS",
+                  })}
+                </MenuItem>
+              )}
               <MenuItem onClick={handleOpenAboutModal}>
                 {i18n.t("about.aboutthe")} {currentUser?.super ? "ticketz" : theme.appName}
               </MenuItem>
