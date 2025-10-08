@@ -59,7 +59,8 @@ const ListService = async ({
         required: false
       }
     ],
-    attributes: ["id", "name", "color", "ticketsCount", "contactsCount"]
+    attributes: ["id", "name", "color", "ticketsCount", "contactsCount"],
+    distinct: true
   });
 
   const hasMore = count > offset + tags.length;
