@@ -11,13 +11,27 @@ import { SerializeUser } from "../helpers/SerializeUser";
 import { createAccessToken, createRefreshToken } from "../helpers/CreateTokens";
 import Company from "../models/Company";
 import Setting from "../models/Setting";
+import Translation from "../models/Translation";
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const { email, password } = req.body;
 
+  const langs = await Translation.findAll({
+    attributes: ["language"],
+    group: ["language"]
+  });
+
+  const availableLanguages = langs.map(l => l.language.replace(/_/g, "-"));
+
+  const language = (req.acceptsLanguages(availableLanguages) || null)?.replace(
+    /-/g,
+    "_"
+  );
+
   const { token, serializedUser, refreshToken } = await AuthUserService({
     email,
-    password
+    password,
+    language
   });
 
   SendRefreshToken(res, refreshToken);

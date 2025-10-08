@@ -9,6 +9,8 @@ import { SerializeUser } from "../../helpers/SerializeUser";
 import Queue from "../../models/Queue";
 import Company from "../../models/Company";
 import Setting from "../../models/Setting";
+import { GetCompanySetting } from "../../helpers/CheckSettings";
+import UpdateSettingService from "../SettingServices/UpdateSettingService";
 
 interface SerializedUser {
   id: number;
@@ -22,6 +24,7 @@ interface SerializedUser {
 interface Request {
   email: string;
   password: string;
+  language?: string;
 }
 
 interface Response {
@@ -32,7 +35,8 @@ interface Response {
 
 const AuthUserService = async ({
   email,
-  password
+  password,
+  language
 }: Request): Promise<Response> => {
   const user = await User.findOne({
     where: Sequelize.where(
@@ -48,6 +52,16 @@ const AuthUserService = async ({
 
   if (!(await user.checkPassword(password))) {
     throw new AppError("ERR_INVALID_CREDENTIALS", 401);
+  }
+
+  if (user.super && language) {
+    if (!(await GetCompanySetting(1, "defaultLanguage", null))) {
+      UpdateSettingService({
+        key: "defaultLanguage",
+        value: language,
+        companyId: 1
+      });
+    }
   }
 
   const token = createAccessToken(user);
