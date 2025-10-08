@@ -17,6 +17,7 @@ interface IMe {
   name: string;
   id: string;
   lid?: string;
+  jid?: string;
 }
 
 async function checkAndDedup(contact: Contact, lid: string): Promise<void> {
@@ -76,8 +77,11 @@ async function checkAndDedup(contact: Contact, lid: string): Promise<void> {
 }
 
 async function getLid(msgContact: IMe, wbot: Session): Promise<string> {
-  if (msgContact.lid) {
-    return msgContact.lid;
+  const lid: string =
+    msgContact.lid || (msgContact.id.includes("@lid") ? msgContact.id : null);
+
+  if (lid) {
+    return lid;
   }
 
   const [ow] = await wbot.onWhatsApp(msgContact.id);
@@ -103,12 +107,16 @@ export async function verifyContact(
     profilePicUrl = noPicture;
   }
 
-  const isLid = msgContact.id.includes("@lid");
+  const jidNumber =
+    msgContact.jid && msgContact.jid?.substring(0, msgContact.jid.indexOf("@"));
+  const isLid = !jidNumber && msgContact.id.includes("@lid");
   const isGroup = msgContact.id.includes("@g.us");
 
-  const number = isLid
-    ? msgContact.id
-    : msgContact.id.substring(0, msgContact.id.indexOf("@"));
+  const number =
+    jidNumber ||
+    (isLid
+      ? msgContact.id
+      : msgContact.id.substring(0, msgContact.id.indexOf("@")));
 
   const contactData = {
     name: msgContact?.name || msgContact.id.replace(/\D/g, ""),
