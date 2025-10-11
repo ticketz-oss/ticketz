@@ -215,7 +215,8 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 									}
 								/>
 								</>
-                { showTags && <TagsContainer contact={contact} /> }
+                { contactId && showTags && <TagsContainer contact={contact} /> }
+                { contactId && <>
 								<Typography
 									style={{ marginBottom: 8, marginTop: 12 }}
 									variant="subtitle1"
@@ -270,6 +271,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 										</>
 									)}
 								</FieldArray>
+                </> }
 							</DialogContent>
 							<DialogActions>
 								<Button
