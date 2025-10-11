@@ -10,6 +10,7 @@ const messages = {
         save: "Save",
         confirm: "Confirm",
         close: "Close",
+        closed: "Closed",
         error: "Error",
         success: "Success",
         actions: "Actions",

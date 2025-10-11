@@ -554,7 +554,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
           {ticket.status === "closed" && (
             <Badge
               className={classes.Radiusdot}
-              badgeContent={"FECHADO"}
+              badgeContent={i18n.t("common.closed")}
               //color="primary"
               style={{
                 backgroundColor: ticket.queue?.color || "#ff0000",
