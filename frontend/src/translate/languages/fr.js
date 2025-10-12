@@ -1037,6 +1037,25 @@ const messages = {
           international: "International en US$",
         },
       },
+      pwa: {
+        // Boutons du menu
+        installPwaButton: "Installer l'app PWA",
+        installIosButton: "Installer sur iOS",
+        promptNotReady: "Installation non disponible pour le moment. Actualisez la page (Ctrl+F5) ou utilisez le menu du navigateur.",
+        installPromptNotAvailable: "Invite d'installation non disponible. Actualisez la page (Ctrl+F5) et réessayez.",
+        
+        // Modal iOS - Titre et description complète
+        installIosTitle: "📱 Comment installer sur iOS",
+        installIosDescription: `Pour ajouter l'app à l'écran d'accueil sur iPhone ou iPad, suivez les étapes ci-dessous :
+
+📤 1. Dans Safari, appuyez sur l'icône de partage (carré avec flèche vers le haut).
+
+➕ 2. Faites défiler la liste d'options et sélectionnez "Ajouter à l'écran d'accueil".
+
+✅ 3. Ajustez le nom si désiré et appuyez sur "Ajouter" pour créer le raccourci.
+
+🎉 Après cela, l'app sera disponible sur votre écran d'accueil !`
+      },
     },
   },
 };

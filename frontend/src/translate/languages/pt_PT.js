@@ -1079,6 +1079,25 @@ const messages = {
           international: "Internacional em US$",
         },
       },
+      pwa: {
+        // Botões do menu
+        installPwaButton: "Instalar aplicação (PWA)",
+        installIosButton: "Instalar no iOS",
+        promptNotReady: "Instalação não disponível no momento. Actualize a página (Ctrl+F5) ou use o menu do navegador.",
+        installPromptNotAvailable: "Prompt de instalação não disponível. Actualize a página (Ctrl+F5) e tente novamente.",
+        
+        // Modal iOS - Título e descrição completa
+        installIosTitle: "📱 Como instalar no iOS",
+        installIosDescription: `Para adicionar a aplicação ao ecrã inicial no iPhone ou iPad, siga os passos abaixo:
+
+📤 1. No Safari toque no ícone de partilha (quadrado com seta para cima).
+
+➕ 2. Role a lista de opções e seleccione "Adicionar ao Ecrã Principal".
+
+✅ 3. Ajuste o nome se desejar e toque em "Adicionar" para criar o atalho.
+
+🎉 Depois disso a aplicação ficará disponível como uma app no seu ecrã inicial!`
+      },
     },
   },
 };

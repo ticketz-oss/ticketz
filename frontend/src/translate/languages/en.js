@@ -1142,7 +1142,26 @@ const messages = {
           recurringbrl: "Recurring donations in BRL",
           paypaltitle: "Credit Card",
           international: "Donations in USD",
-        }
+        },
+      },
+      pwa: {
+        // Menu buttons
+        installPwaButton: "Install PWA App",
+        installIosButton: "Install on iOS",
+        promptNotReady: "Installation not available at the moment. Refresh the page (Ctrl+F5) or use the browser menu.",
+        installPromptNotAvailable: "Install prompt not available. Refresh the page (Ctrl+F5) and try again.",
+        
+        // iOS Modal - Title and complete description
+        installIosTitle: "📱 How to install on iOS",
+        installIosDescription: `To add the app to the home screen on iPhone or iPad, follow the steps below:
+
+📤 1. In Safari tap the share icon (square with arrow up).
+
+➕ 2. Scroll the options list and select "Add to Home Screen".
+
+✅ 3. Adjust the name if desired and tap "Add" to create the shortcut.
+
+🎉 After that the app will be available on your home screen!`
       },
     },
   },

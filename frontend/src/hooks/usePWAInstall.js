@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
+import { i18n } from "../translate/i18n";
 
 const isClient = typeof window !== "undefined";
 
@@ -87,7 +88,11 @@ const usePWAInstall = () => {
 
   const promptInstall = useCallback(async () => {
     if (!deferredPrompt) {
-      toast.error("Prompt de instalação não disponível. Atualize a página (Ctrl+F5) e tente novamente.");
+      // Pega a tradução no momento da execução (após mudança de idioma)
+      const errorMessage = i18n.t("pwa.installPromptNotAvailable", {
+        defaultValue: "Install prompt not available. Refresh the page (Ctrl+F5) and try again."
+      });
+      toast.error(errorMessage);
       return false;
     }
 

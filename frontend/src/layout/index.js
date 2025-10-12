@@ -348,7 +348,11 @@ const LoggedInLayout = ({ children, themeToggle }) => {
       await promptInstall();
     } else {
       // If beforeinstallprompt hasn't fired yet, inform the user to refresh or use browser menu
-      toastError(new Error(i18n.t("pwa.promptNotReady", { defaultValue: "Instalação não disponível no momento. Atualize a página (Ctrl+F5) ou use o menu do navegador." })));
+      // Pega a tradução no momento da execução (após mudança de idioma)
+      const errorMessage = i18n.t("pwa.promptNotReady", { 
+        defaultValue: "Installation not available at the moment. Refresh the page (Ctrl+F5) or use the browser menu." 
+      });
+      toastError(new Error(errorMessage));
     }
   };
 
@@ -376,6 +380,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
 
   const handleChooseLanguage = (language) => {
     localStorage.setItem("language",language);
+    setCurrentLanguage(language);
     window.location.reload(false);
   }
 
@@ -550,14 +555,14 @@ const LoggedInLayout = ({ children, themeToggle }) => {
                   disabled={isInstalled}
                 >
                   {i18n.t("pwa.installPwaButton", {
-                    defaultValue: "Instalar app (PWA)",
+                    defaultValue: "Install PWA App",
                   })}
                 </MenuItem>
               )}
               {isIOS && (
                 <MenuItem onClick={handleOpenIosInstructions}>
                   {i18n.t("pwa.installIosButton", {
-                    defaultValue: "Instalar no iOS",
+                    defaultValue: "Install on iOS",
                   })}
                 </MenuItem>
               )}
