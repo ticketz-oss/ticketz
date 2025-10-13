@@ -1,13 +1,15 @@
 import { Request, Response } from "express";
 import * as Yup from "yup";
 import AppError from "../errors/AppError";
-import { payGatewayCreateSubscription, payGatewayReceiveWebhook } from "../services/PaymentGatewayServices/PaymentGatewayServices";
+import {
+  payGatewayCreateSubscription,
+  payGatewayReceiveWebhook
+} from "../services/PaymentGatewayServices/PaymentGatewayServices";
 
 export const createSubscription = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-
   const schema = Yup.object().shape({
     price: Yup.string().required(),
     users: Yup.string().required(),
@@ -19,11 +21,11 @@ export const createSubscription = async (
   }
 
   return payGatewayCreateSubscription(req, res);
-}
+};
 
 export const webhook = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
   return payGatewayReceiveWebhook(req, res);
-}
+};
