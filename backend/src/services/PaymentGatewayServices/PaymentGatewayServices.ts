@@ -82,7 +82,7 @@ export const payGatewayCreateSubscription = async (
     case "efi": {
       return efiCreateSubscription(req, res);
     }
-    case "owen": {
+    case "pixTicketz": {
       return owenCreateSubscription(req, res);
     }
     default: {
@@ -103,7 +103,7 @@ export const payGatewayReceiveWebhook = async (
     case "efi": {
       return efiWebhook(req, res);
     }
-    case "owen": {
+    case "pixTicketz": {
       return owenWebhook(req, res);
     }
     default: {
