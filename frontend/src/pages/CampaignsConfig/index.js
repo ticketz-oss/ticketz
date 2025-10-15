@@ -109,7 +109,7 @@ const CampaignsConfig = () => {
 
   const saveSettings = async () => {
     await api.post("/campaign-settings", { settings });
-    toast.success("Configurações salvas");
+    toast.success(i18n.t("common.success"));
   };
 
   return (
@@ -133,7 +133,7 @@ const CampaignsConfig = () => {
         <Box className={classes.tabPanelsContainer}>
           <Grid spacing={2} container>
             <Grid xs={12} item>
-              <Typography component={"h3"}>Intervalos</Typography>
+              <Typography component={"h3"}>{i18n.t("campaignsConfig.intervals")}</Typography>
             </Grid>
             <Grid xs={12} md={4} item>
               <FormControl
@@ -141,23 +141,18 @@ const CampaignsConfig = () => {
                 className={classes.formControl}
                 fullWidth
               >
-                <InputLabel id="messageInterval-label">
-                  Intervalo Randômico de Disparo
-                </InputLabel>
-                <Select
+                <TextField
+                  label={i18n.t("campaignsConfig.messageInterval")}
                   name="messageInterval"
                   id="messageInterval"
-                  labelId="messageInterval-label"
-                  label="Intervalo Randômico de Disparo"
+                  type="number"
+                  variant="outlined"
                   value={settings.messageInterval}
-                  onChange={(e) => handleOnChangeSettings(e)}
-                >
-                  <MenuItem value={0}>Sem Intervalo</MenuItem>
-                  <MenuItem value={5}>5 segundos</MenuItem>
-                  <MenuItem value={10}>10 segundos</MenuItem>
-                  <MenuItem value={15}>15 segundos</MenuItem>
-                  <MenuItem value={20}>20 segundos</MenuItem>
-                </Select>
+                  onChange={handleOnChangeSettings}
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                  inputProps={{ min: 0 }}
+                />
               </FormControl>
             </Grid>
             <Grid xs={12} md={4} item>
@@ -167,7 +162,7 @@ const CampaignsConfig = () => {
                 fullWidth
               >
                 <InputLabel id="longerIntervalAfter-label">
-                  Intervalo Maior Após
+                  {i18n.t("campaignsConfig.longerIntervalAfter")}
                 </InputLabel>
                 <Select
                   name="longerIntervalAfter"
@@ -177,39 +172,27 @@ const CampaignsConfig = () => {
                   value={settings.longerIntervalAfter}
                   onChange={(e) => handleOnChangeSettings(e)}
                 >
-                  <MenuItem value={0}>Não definido</MenuItem>
-                  <MenuItem value={5}>5 mensagens</MenuItem>
-                  <MenuItem value={10}>10 mensagens</MenuItem>
-                  <MenuItem value={15}>15 mensagens</MenuItem>
-                  <MenuItem value={20}>20 mensagens</MenuItem>
+                  <MenuItem value={0}>{i18n.t("common.undefined")}</MenuItem>
+                  <MenuItem value={5}>5 {i18n.t("common.messages")}</MenuItem>
+                  <MenuItem value={10}>10 {i18n.t("common.messages")}</MenuItem>
+                  <MenuItem value={15}>15 {i18n.t("common.messages")}</MenuItem>
+                  <MenuItem value={20}>20 {i18n.t("common.messages")}</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
             <Grid xs={12} md={4} item>
-              <FormControl
+              <TextField
+                label={i18n.t("campaignsConfig.longerInterval")}
+                name="greaterInterval"
+                id="greaterInterval"
+                type="number"
                 variant="outlined"
-                className={classes.formControl}
+                value={settings.greaterInterval}
+                onChange={handleOnChangeSettings}
+                InputLabelProps={{ shrink: true }}
                 fullWidth
-              >
-                <InputLabel id="greaterInterval-label">
-                  Intervalo de Disparo Maior
-                </InputLabel>
-                <Select
-                  name="greaterInterval"
-                  id="greaterInterval"
-                  labelId="greaterInterval-label"
-                  label="Intervalo de Disparo Maior"
-                  value={settings.greaterInterval}
-                  onChange={(e) => handleOnChangeSettings(e)}
-                >
-                  <MenuItem value={0}>Sem Intervalo</MenuItem>
-                  <MenuItem value={20}>20 segundos</MenuItem>
-                  <MenuItem value={30}>30 segundos</MenuItem>
-                  <MenuItem value={40}>40 segundos</MenuItem>
-                  <MenuItem value={50}>50 segundos</MenuItem>
-                  <MenuItem value={60}>60 segundos</MenuItem>
-                </Select>
-              </FormControl>
+                inputProps={{ min: 0 }}
+              />
             </Grid>
             <Grid xs={12} className={classes.textRight} item>
               <Button
@@ -217,21 +200,21 @@ const CampaignsConfig = () => {
                 color="primary"
                 style={{ marginRight: 10 }}
               >
-                Adicionar Variável
+                {i18n.t("campaignsConfig.addVariable")}
               </Button>
               <Button
                 onClick={saveSettings}
                 color="primary"
                 variant="contained"
               >
-                Salvar Configurações
+                {i18n.t("common.save")}
               </Button>
             </Grid>
             {showVariablesForm && (
               <>
                 <Grid xs={12} md={6} item>
                   <TextField
-                    label="Atalho"
+                    label={i18n.t("common.key")}
                     variant="outlined"
                     value={variable.key}
                     name="key"
@@ -241,7 +224,7 @@ const CampaignsConfig = () => {
                 </Grid>
                 <Grid xs={12} md={6} item>
                   <TextField
-                    label="Conteúdo"
+                    label={i18n.t("common.value")}
                     variant="outlined"
                     value={variable.value}
                     name="value"
@@ -255,14 +238,14 @@ const CampaignsConfig = () => {
                     color="primary"
                     style={{ marginRight: 10 }}
                   >
-                    Fechar
+                    {i18n.t("common.close")}
                   </Button>
                   <Button
                     onClick={addVariable}
                     color="primary"
                     variant="contained"
                   >
-                    Adicionar
+                    {i18n.t("common.add")}
                   </Button>
                 </Grid>
               </>
@@ -273,8 +256,8 @@ const CampaignsConfig = () => {
                   <TableHead>
                     <TableRow>
                       <TableCell style={{ width: "1%" }}></TableCell>
-                      <TableCell>Atalho</TableCell>
-                      <TableCell>Conteúdo</TableCell>
+                      <TableCell>{i18n.t("common.key")}</TableCell>
+                      <TableCell>{i18n.t("common.value")}</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
