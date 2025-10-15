@@ -1091,6 +1091,25 @@ const messages = {
           international: "Donasi dalam USD",
         }
       },
+      pwa: {
+        // Tombol menu
+        installPwaButton: "Instal Aplikasi PWA",
+        installIosButton: "Instal di iOS",
+        promptNotReady: "Instalasi tidak tersedia saat ini. Segarkan halaman (Ctrl+F5) atau gunakan menu browser.",
+        installPromptNotAvailable: "Prompt instalasi tidak tersedia. Segarkan halaman (Ctrl+F5) dan coba lagi.",
+        
+        // Modal iOS - Judul dan deskripsi lengkap
+        installIosTitle: "📱 Cara menginstal di iOS",
+        installIosDescription: `Untuk menambah aplikasi ke layar utama di iPhone atau iPad, ikuti langkah-langkah berikut:
+
+📤 1. Di Safari ketuk ikon berbagi (kotak dengan panah ke atas).
+
+➕ 2. Gulir daftar opsi dan pilih "Tambah ke Layar Utama".
+
+✅ 3. Sesuaikan nama jika diinginkan dan ketuk "Tambah" untuk membuat pintasan.
+
+🎉 Setelah itu aplikasi akan tersedia di layar utama Anda!`
+      },
     },
   },
 };

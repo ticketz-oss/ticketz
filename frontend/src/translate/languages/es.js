@@ -1165,7 +1165,26 @@ const messages = {
           recurringbrl: "Donaciones recurrentes en BRL",
           paypaltitle: "Tarjeta de crédito",
           international: "Donaciones en USD",
-        }
+        },
+      },
+      pwa: {
+        // Botones del menú
+        installPwaButton: "Instalar app (PWA)",
+        installIosButton: "Instalar en iOS",
+        promptNotReady: "Instalación no disponible en este momento. Actualiza la página (Ctrl+F5) o usa el menú del navegador.",
+        installPromptNotAvailable: "Solicitud de instalación no disponible. Actualiza la página (Ctrl+F5) e inténtalo de nuevo.",
+        
+        // Modal iOS - Título y descripción completa
+        installIosTitle: "📱 Cómo instalar en iOS",
+        installIosDescription: `Para añadir la aplicación a la pantalla principal en iPhone o iPad, sigue los pasos a continuación:
+
+📤 1. En Safari toca el ícono de compartir (cuadrado con flecha hacia arriba).
+
+➕ 2. Desplaza la lista de opciones y selecciona "Añadir a pantalla principal".
+
+✅ 3. Ajusta el nombre si lo deseas y toca "Añadir" para crear el acceso directo.
+
+🎉 ¡Después de eso la aplicación estará disponible en tu pantalla principal!`
       },
     },
   },
