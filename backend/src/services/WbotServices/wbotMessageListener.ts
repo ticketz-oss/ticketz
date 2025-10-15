@@ -959,6 +959,7 @@ const isValidMsg = (msg: proto.IWebMessageInfo): boolean => {
       msgType === "stickerMessage" ||
       msgType === "buttonsResponseMessage" ||
       msgType === "buttonsMessage" ||
+      msgType === "templateButtonReplyMessage" ||
       msgType === "messageContextInfo" ||
       msgType === "locationMessage" ||
       msgType === "liveLocationMessage" ||
