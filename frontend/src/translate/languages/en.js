@@ -24,6 +24,7 @@ const messages = {
         connection: "Connection",
         queue: "Queue",
         contact: "Contact",
+        messages: "Messages",
         whatsappNumber: "WhatsApp Number",
         dueDate: "Due Date",
         copy: "Copy",
@@ -31,11 +32,13 @@ const messages = {
         proceed: "Proceed",
         enabled: "Enabled",
         disabled: "Disabled",
+        undefined: "Undefined",
         yes: "Yes",
         no: "No",
         noqueue: "No queue",
         rating: "Rating",
         transferTo: "Transfer to",
+        key: "Key",
         value: "Value",
       },
       signup: {
@@ -674,6 +677,11 @@ const messages = {
       },
       campaignsConfig: {
         title: "Campaign Configurations",
+        intervals: "Intervals",
+        messageInterval: "Message Interval (seconds)",
+        longerIntervalAfter: "Longer Interval After (messages)",
+        longerInterval: "Longer Interval (seconds)",
+        addVariable: "Add Variable",
       },
       queues: {
         title: "Queues & Chatbot",

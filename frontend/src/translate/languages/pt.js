@@ -24,6 +24,7 @@ const messages = {
         connection: "Conexão",
         queue: "Fila",
         contact: "Contato",
+        messages: "Mensagens",
         whatsappNumber: "Número do Whatsapp",
         dueDate: "Data de vencimento",
         copy: "Copiar",
@@ -31,11 +32,13 @@ const messages = {
         proceed: "Prosseguir",
         enabled: "Ativado",
         disabled: "Desativado",
+        undefined: "Indefinido",
         yes: "Sim",
         no: "Não",
         noqueue: "Sem fila",
         rating: "Avaliação",
         transferTo: "Transferir para",
+        key: "Chave",
         value: "Valor",
       },
       signup: {
@@ -681,6 +684,11 @@ const messages = {
       },
       campaignsConfig: {
         title: "Configurações de Campanhas",
+        intervals: "Intervalos",
+        messageInterval: "Intervalo entre mensagens (segundos)",
+        longerIntervalAfter: "Intervalo maior após (mensagens)",
+        longerInterval: "Intervalo maior (segundos)",
+        addVariable: "Adicionar variável",
       },
       queues: {
         title: "Filas & Chatbot",
