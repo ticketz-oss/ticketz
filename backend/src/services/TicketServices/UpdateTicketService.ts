@@ -185,7 +185,10 @@ const UpdateTicketService = async ({
               ticket.whatsapp.ratingMessage?.trim() ||
               _t("Please rate our service", ticket);
             const rateInstructions = _t("Send a rating from 1 to 5", ticket);
-            const rateReturn = _t("Send *`!`* to return to the service", ticket);
+            const rateReturn = _t(
+              "Send *`!`* to return to the service",
+              ticket
+            );
             const bodyRatingMessage = `${ratingTxt}\n\n*${rateInstructions}*\n\n${rateReturn}`;
 
             await SendWhatsAppMessage({ body: bodyRatingMessage, ticket });
