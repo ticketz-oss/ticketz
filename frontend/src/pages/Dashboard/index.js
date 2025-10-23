@@ -349,63 +349,67 @@ const Dashboard = () => {
   }
 
   async function updateStatus() {
-    const { data } = await api.get("/dashboard/status");
-    
-    if (!data) return;
+    api.get("/dashboard/status").then(
+      result => {
+        const { data } = result;
 
-    let usersOnlineTotal = 0;
-    let usersOfflineTotal = 0;
-    data.usersStatusSummary.forEach((item) => {
-      if (item.online) {
-        usersOnlineTotal++;
-      } else {
-        usersOfflineTotal++;
-      }
-    });
+        if (!data) return;
 
-    setUsersStatusChartData([
-      {
-        name: "Online",
-        value: usersOnlineTotal,
-        color: "#00ff00"
-      },
-      {
-        name: "Offline",
-        value: usersOfflineTotal,
-        color: "#ff0000"
-      }
-    ]);
-
-    setUsersOnlineTotal(usersOnlineTotal);
-    setUsersOfflineTotal(usersOfflineTotal);
-
-    let pendingTotal = 0;
-    let openedTotal = 0;
-    const pendingChartData = [];
-    const openedChartData = [];
-    data.ticketsStatusSummary.forEach((item) => {
-      if (item.status === "pending") {
-        pendingTotal += Number(item.count);
-        pendingChartData.push({
-          name: item.queue?.name || i18n.t("common.noqueue"),
-          value: Number(item.count),
-          color: item.queue?.color || "#888"
-          });
-        return;
-      }
-      if (item.status === "open") {
-        openedTotal += Number(item.count);
-        openedChartData.push({
-          name: item.queue?.name || i18n.t("common.noqueue"),
-          value: Number(item.count),
-          color: item.queue?.color || "#888" 
+        let usersOnlineTotal = 0;
+        let usersOfflineTotal = 0;
+        data.usersStatusSummary.forEach((item) => {
+          if (item.online) {
+            usersOnlineTotal++;
+          } else {
+            usersOfflineTotal++;
+          }
         });
+
+        setUsersStatusChartData([
+          {
+            name: "Online",
+            value: usersOnlineTotal,
+            color: "#00ff00"
+          },
+          {
+            name: "Offline",
+            value: usersOfflineTotal,
+            color: "#ff0000"
+          }
+        ]);
+
+        setUsersOnlineTotal(usersOnlineTotal);
+        setUsersOfflineTotal(usersOfflineTotal);
+
+        let pendingTotal = 0;
+        let openedTotal = 0;
+        const pendingChartData = [];
+        const openedChartData = [];
+        data.ticketsStatusSummary.forEach((item) => {
+          if (item.status === "pending") {
+            pendingTotal += Number(item.count);
+            pendingChartData.push({
+              name: item.queue?.name || i18n.t("common.noqueue"),
+              value: Number(item.count),
+              color: item.queue?.color || "#888"
+            });
+            return;
+          }
+          if (item.status === "open") {
+            openedTotal += Number(item.count);
+            openedChartData.push({
+              name: item.queue?.name || i18n.t("common.noqueue"),
+              value: Number(item.count),
+              color: item.queue?.color || "#888"
+            });
+          }
+        });
+        setPendingTotal(pendingTotal);
+        setPendingChartData(pendingChartData);
+        setOpenedTotal(openedTotal);
+        setOpenedChartData(openedChartData);
       }
-    });
-    setPendingTotal(pendingTotal);
-    setPendingChartData(pendingChartData);
-    setOpenedTotal(openedTotal);
-    setOpenedChartData(openedChartData);
+    ).catch(() => {});
   }
   
   async function fetchData() {
@@ -446,7 +450,7 @@ const Dashboard = () => {
         if (result?.data) {
           setTicketsData(result.data);
         }
-      });
+      }).catch(() => {});
 
     setLoadingUsers(true);
     api.get("/dashboard/users", { params }).then(
@@ -455,7 +459,7 @@ const Dashboard = () => {
           setUsersData(result.data);
           setLoadingUsers(false);
         }
-      });
+      }).catch(() => {});
   }
 
   useEffect(() => {
