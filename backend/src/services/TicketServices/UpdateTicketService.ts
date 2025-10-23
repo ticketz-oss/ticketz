@@ -415,11 +415,14 @@ const UpdateTicketService = async ({
 
     return { ticket, oldStatus, oldUserId };
   } catch (err) {
-    logger.error({ message: err?.message }, "UpdateTicketService");
+    logger.error(
+      { error: err?.name, message: err?.message, stack: err?.stack },
+      "UpdateTicketService"
+    );
     if (err instanceof AppError) {
       throw err;
     }
-    throw new AppError("Error updating ticket", 500, err);
+    throw new AppError("Error updating ticket", 500);
   }
 };
 
