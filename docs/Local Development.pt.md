@@ -60,13 +60,13 @@ Após alguns segundos, você terá:
 
 - Postgres rodando na porta 5432 do localhost. Ele criará automaticamente um usuário e um banco de dados, ambos com o nome `ticketz`. O usuário `ticketz` aceitará qualquer senha.
 - Redis rodando na porta 6379 do localhost.
-- PgAdmin4 rodando em https://localhost:8081 — O nome de usuário é `admin@ticketz.host` e a senha é `123456`. Já haverá uma conexão de servidor configurada. Quando solicitado a senha do usuário `ticketz`, você pode inserir qualquer coisa.
+- PgAdmin4 rodando em `https://localhost:8081` — O nome de usuário é `admin@ticketz.host` e a senha é `123456`. Já haverá uma conexão de servidor configurada. Quando solicitado a senha do usuário `ticketz`, você pode inserir qualquer coisa.
 
 ## Backend
 
 Os comandos a seguir devem ser emitidos na pasta `backend`. Certifique-se de entrar nela antes de continuar.
 
-### Instalar dependências
+### Instalar dependências (`backend`)
 
 O comando a seguir instalará as dependências do backend:
 
@@ -92,11 +92,21 @@ copy .env.dev .env
 
 ### Inicializar o banco de dados
 
-O banco de dados criado estará vazio. Para inicializá-lo, execute os seguintes comandos:
+A primeira coisa que você precisará fazer é iniciar o recurso de tradução do backend, gerando as chaves do i18n:
+
+```bash
+npm run generate:i18nkeys
+```
+
+Agora, você poderá realizar a build do sistema, que servirá de base para popular as informações no banco de dados:
 
 ```bash
 npm run build
+```
 
+O banco de dados criado estará vazio. Para inicializá-lo, execute os seguintes comandos:
+
+```bash
 npx sequelize db:migrate
 
 npx sequelize db:seed:all
@@ -114,9 +124,12 @@ Deixe-o rodando. Ele monitorará alterações nos arquivos e reiniciará automat
 
 ## Frontend
 
+> [!TIP]
+> Se você já rodou alguma versão do Whaticket, é possível que o seu navegador esteja armazenando informações desatualizadas que podem prejudicar que o `frontend` da sua aplicação encontre o `backend`. Antes de iniciar o front, acesse as ferramentas de desenvolvimento do seu navegador e limpe os dados de aplicações e o `local storage`. Aqui está um guia de como fazer isso no Chrome: [ver e editar o armazenamento local](https://developer.chrome.com/docs/devtools/storage/localstorage?hl=pt-br).
+
 Entre na pasta `frontend` antes dos próximos passos.
 
-### Instalar dependências
+### Instalar dependências (`frontend`)
 
 O comando a seguir instalará as dependências do frontend:
 
@@ -130,7 +143,7 @@ npm ci
 npm run start
 ```
 
-Após alguns minutos, a janela do frontend será aberta em http://localhost:3000.
+Após alguns minutos, a janela do frontend será aberta em `http://localhost:3000`.
 
 Deixe o comando rodando. Ele monitorará alterações nos arquivos e recarregará conforme necessário.
 
