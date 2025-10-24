@@ -58,15 +58,15 @@ docker compose -f docker-compose-dev.yaml up -d
 
 After a few seconds you will have:
 
-* Postgres running on port 5432 of localhost. It will automatically create an user and a database both of them with the name `ticketz`. User `ticketz` will accept anything as password.
-* Redis running on port 6379 of localhost.
-* PgAdmin4 running on https://localhost:8081 - Username is `admin@ticketz.host` and password is `123456`. It will already have a server connection setted up, when asked for `ticketz` user password you can answer anything
+- Postgres running on port 5432 of localhost. It will automatically create an user and a database both of them with the name `ticketz`. User `ticketz` will accept anything as password.
+- Redis running on port 6379 of localhost.
+- PgAdmin4 running on `https://localhost:8081` - Username is `admin@ticketz.host` and password is `123456`. It will already have a server connection setted up, when asked for `ticketz` user password you can answer anything
 
 ## Backend
 
 The following commands must be issued on the `backend`, be sure to enter it before proceeding.
 
-### Install dependencies
+### Install dependencies (`backend`)
 
 The following command will install the backend's dependencies
 
@@ -92,11 +92,21 @@ copy .env.dev .env
 
 ### Initialize Database
 
-The created database is empty, to initialize it you should issue the following commands:
+The first thing you'll need to o is to start translation keys for the backend:
+
+```bash
+npm run generate:i18nkeys
+```
+
+Now you'll be able to build the system, which will allow you to populate the database with all the needed information:
 
 ```bash
 npm run build
+```
 
+The created database is empty, to initialize it you should issue the following commands:
+
+```bash
 npx sequelize db:migrate
 
 npx sequelize db:seed:all
@@ -112,8 +122,10 @@ npm run dev:server
 
 You can leave this running, it will watch for file alterations and restart automatically. It will also connect to the debugger if you launch it from a configured VSCode environment.
 
-
 ## Frontend
+
+> [!TIP]
+> If you ever ran any version or distribution of Whaticket, there is a non zero chance that the browser is holding on to outdated information that may affect the `frontend` not finding the `backend`. Before you start the front, access your browsers development tools and clean up all application data and `local storage`. Here is a guide of how you can do it on Chrome: [check and edit local storage](https://developer.chrome.com/docs/devtools/storage/localstorage?hl=en-us).
 
 Enter the `frontend` folder before the following steps.
 
@@ -131,10 +143,9 @@ npm ci
 npm run start
 ```
 
-After a few minutes the frontend window will be opened at http://localhost:3000
+After a few minutes the frontend window will be opened at `http://localhost:3000`
 
 You can leave the command running, it will watch for file changes and reload as needed.
-
 
 ## Maintenance
 
@@ -169,11 +180,11 @@ docker compose -f docker-compose-dev.yaml up -d
 
 By default these are the ports used on this guide:
 
-* Postgres: 5432
-* Redis: 6379
-* PgAdmin: 8081
-* Ticketz Backend: 8080
-* Ticketz Frontend: 3000
+- Postgres: 5432
+- Redis: 6379
+- PgAdmin: 8081
+- Ticketz Backend: 8080
+- Ticketz Frontend: 3000
 
 You can change the `postgres`, `redis` and `pgadmin` ports changing the `docker-compose-dev.yaml` file
 
