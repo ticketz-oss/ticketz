@@ -92,11 +92,21 @@ copy .env.dev .env
 
 ### Inicializar la base de datos
 
-La base de datos creada estará vacía. Para inicializarla, ejecuta los siguientes comandos:
+Lo primero que necesitas hacer es generar las claves de traducción para el backend:
+
+```bash
+npm run generate:i18nkeys
+```
+
+Ahora podrás compilar el sistema, lo que te permitirá poblar la base de datos con toda la información necesaria:
 
 ```bash
 npm run build
+```
 
+La base de datos creada estará vacía. Para inicializarla, ejecuta los siguientes comandos:
+
+```bash
 npx sequelize db:migrate
 
 npx sequelize db:seed:all
@@ -113,6 +123,9 @@ npm run dev:server
 Déjalo ejecutando. Monitorizará cambios en los archivos y se reiniciará automáticamente. También se conectará al depurador si se inicia desde un entorno configurado en VSCode.
 
 ## Frontend
+
+> [!TIP]
+> Si alguna vez ejecutaste alguna versión o distribución de Whaticket, existe la posibilidad de que el navegador esté reteniendo información desactualizada que puede afectar la capacidad del `frontend` para encontrar el `backend`. Antes de iniciar el frontend, accede a las herramientas de desarrollo de tu navegador y limpia todos los datos de aplicación y el `almacenamiento local`. Aquí hay una guía sobre cómo hacerlo en Chrome: [verificar y editar el almacenamiento local](https://developer.chrome.com/docs/devtools/storage/localstorage?hl=en-us).
 
 Entra en la carpeta `frontend` antes de los siguientes pasos.
 
