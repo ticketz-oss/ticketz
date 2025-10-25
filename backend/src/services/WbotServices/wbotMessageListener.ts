@@ -1743,7 +1743,11 @@ const handleMessage = async (
       });
     }
 
-    if (isGroup || contact.disableBot) {
+    if (isGroup || contact.disableBot || msg.key.fromMe) {
+      if (ticket.chatbot) {
+        await updateTicket(ticket, { chatbot: false });
+        await ticket.reload();
+      }
       if (justCreated && newMessage) {
         websocketCreateMessage(newMessage);
       }
@@ -1751,7 +1755,7 @@ const handleMessage = async (
     }
 
     try {
-      if (!msg.key.fromMe && scheduleType) {
+      if (scheduleType) {
         const isOpenOnline =
           ticket.status === "open" && ticket.user.socketSessions.length > 0;
 
@@ -1828,7 +1832,6 @@ const handleMessage = async (
     if (
       !ticket.queue &&
       !isGroup &&
-      !msg.key.fromMe &&
       !ticket.userId &&
       whatsapp.queues.length >= 1
     ) {
@@ -1848,8 +1851,7 @@ const handleMessage = async (
       justCreated &&
       !whatsapp?.queues?.length &&
       !ticket.userId &&
-      !isGroup &&
-      !msg.key.fromMe
+      !isGroup
     ) {
       const message = await Message.findOne({
         where: {
@@ -1878,7 +1880,7 @@ const handleMessage = async (
       }
     }
 
-    if (ticket.queue && ticket.chatbot && !msg.key.fromMe) {
+    if (ticket.queue && ticket.chatbot) {
       await handleChartbot(ticket, msg, wbot, dontReadTheFirstQuestion);
     }
   } catch (err) {
