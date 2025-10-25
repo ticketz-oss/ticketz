@@ -1077,6 +1077,17 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, allowReplyButtons
     );
   }
   
+  const renderUrlButton = ({ displayText, url }) =>
+    <Button
+      className={classes.messageButton}
+      color="primary"
+      startIcon={displayText === 'Facebook' ? <Facebook /> : displayText === 'Instagram' ? <Instagram /> : <Launch />}
+    >
+      <a href={url} target="_blank" style={{ textDecoration: 'none', color: 'inherit' }}>
+        {displayText}
+      </a>
+    </Button>
+  
   const renderButtons = (message) => {
     const objects = 
       message?.buttonsMessage?.buttons ||
@@ -1086,26 +1097,24 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, allowReplyButtons
 
     if (!objects) return (<></>);
 
-    return objects.map((item, index) => {
+    return objects.map((item) => {
       if (item.urlButton) {
-        return (
-          <Button
-            className={classes.messageButton}
-            key={index}
-            color="primary"
-            startIcon={item.urlButton.displayText === 'Facebook' ? <Facebook /> : item.urlButton.displayText === 'Instagram' ? <Instagram /> : <Launch />}
-          >
-            <a href={item.urlButton.url} target="_blank" style={{ textDecoration: 'none', color: 'inherit' }}>
-              {item.urlButton.displayText}
-            </a>
-          </Button>
-        );
+        return renderUrlButton({
+          displayText: item.urlButton.displayText,
+          url: item.urlButton.url
+        });
       } else if (item.quickReplyButton) {
         return renderReplyButton(item.quickReplyButton.displayText);
       } else if (item.type === "RESPONSE" && item.buttonText) {
         return renderReplyButton(item.buttonText.displayText);
       } else if (item.buttonParamsJson) {
         const params = JSON.parse(item.buttonParamsJson);
+        if (params?.url && params.display_text) {
+          return renderUrlButton({
+            displayText: params.display_text,
+            url: params.url
+          });
+        }
         if (params?.display_text) {
           return renderReplyButton(params.display_text);
         }
