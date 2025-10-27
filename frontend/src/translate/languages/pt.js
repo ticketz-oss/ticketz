@@ -1172,7 +1172,26 @@ const messages = {
           recurringbrl: "Doação recorrente em R$",
           paypaltitle: "Cartão de Crédito",
           international: "Internacional em US$",
-        }
+        },
+      },
+      pwa: {
+        // Botões do menu
+        installPwaButton: "Instalar app (PWA)",
+        installIosButton: "Instalar no iOS",
+        promptNotReady: "Instalação não disponível no momento. Atualize a página (Ctrl+F5) ou use o menu do navegador.",
+        installPromptNotAvailable: "Prompt de instalação não disponível. Atualize a página (Ctrl+F5) e tente novamente.",
+        
+        // Modal iOS - Título e descrição completa
+        installIosTitle: "📱 Como instalar no iOS",
+        installIosDescription: `Para adicionar o aplicativo à tela inicial no iPhone ou iPad, siga os passos abaixo:
+
+📤 1. No Safari toque no ícone de compartilhamento (quadrado com seta para cima).
+
+➕ 2. Role a lista de opções e selecione "Adicionar à Tela de Início".
+
+✅ 3. Ajuste o nome se desejar e toque em "Adicionar" para criar o atalho.
+
+🎉 Depois disso o aplicativo ficará disponível como um app na sua tela inicial!`
       },
     },
   },
