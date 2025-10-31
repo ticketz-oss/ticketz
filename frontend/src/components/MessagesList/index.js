@@ -92,7 +92,7 @@ const useStyles = makeStyles((theme) => ({
     marginRight: 20,
     marginTop: 2,
     minWidth: 100,
-    maxWidth: 600,
+    maxWidth: "min(600px, 100%)",
     height: "auto",
     display: "block",
     position: "relative",
@@ -154,7 +154,7 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: 20,
     marginTop: 2,
     minWidth: 100,
-    maxWidth: 600,
+    maxWidth: "min(600px, 100%)",
     height: "auto",
     display: "block",
     position: "relative",
@@ -497,6 +497,7 @@ const useStyles = makeStyles((theme) => ({
   },
   previewThumbnail: {
     width: "383px",
+    maxWidth: "100%",
   },
   audioBottom: {
     marginBottom: "12px",
