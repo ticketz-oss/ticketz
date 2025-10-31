@@ -44,6 +44,7 @@ import { i18n } from "../../translate/i18n";
 import vCard from "vcard-parser";
 import { generateColor } from "../../helpers/colorGenerator";
 import { getInitials } from "../../helpers/getInitials";
+import { downloadFile } from "../../helpers/downloadFile";
 import { Mutex } from "async-mutex";
 
 const loadPageMutex = new Mutex();
@@ -820,8 +821,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, allowReplyButtons
               endIcon={<GetApp />}
               color="primary"
               variant="outlined"
-              target="_blank"
-              href={message.mediaUrl}
+              onClick={() => downloadFile(message.mediaUrl)}
             >
              { document?.fileName || message.body}
             </Button>
