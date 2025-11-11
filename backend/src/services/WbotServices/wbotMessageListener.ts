@@ -68,10 +68,17 @@ import { verifyContact } from "./verifyContact";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
 import saveMediaToFile from "../../helpers/saveMediaFile";
 import { _t } from "../TranslationServices/i18nService";
+import WhatsappLidMap from "../../models/WhatsappLidMap";
 
 export interface ImessageUpsert {
   messages: proto.IWebMessageInfo[];
   type: MessageUpsertType;
+}
+
+export interface MentionPayload {
+  contactId?: number;
+  name?: string;
+  number?: string;
 }
 
 interface IMe {
@@ -132,7 +139,43 @@ export const getBodyFromTemplateMessage = (
   );
 };
 
-export const getBodyMessage = (msg: proto.IMessage): string | null => {
+const processMention = async (body: string, mention: string) => {
+  const payload: MentionPayload = {};
+
+  let contact: Contact;
+  if (mention.endsWith("@lid")) {
+    const lidMap = await WhatsappLidMap.findOne({
+      where: { lid: mention },
+      include: [Contact]
+    });
+    contact = lidMap?.contact;
+  }
+
+  if (!contact) {
+    contact = await Contact.findOne({
+      where: {
+        number: {
+          [Op.or]: [mention, mention.split("@")[0]]
+        }
+      }
+    });
+  }
+
+  if (contact) {
+    payload.contactId = contact.id;
+    payload.name = contact.name;
+    payload.number = contact.number;
+  } else {
+    // eslint-disable-next-line prefer-destructuring
+    payload.number = mention.split("@")[0];
+  }
+
+  const b64payload = Buffer.from(JSON.stringify(payload)).toString("base64");
+  body = body.replace(`@${mention.split("@")[0]}`, `@[${b64payload}]`);
+  return body;
+};
+
+export const getBodyMessage = async (msg: proto.IMessage): Promise<string> => {
   try {
     if (!msg) {
       return "";
@@ -199,6 +242,13 @@ export const getBodyMessage = (msg: proto.IMessage): string | null => {
     if (typeof body !== "string") {
       body = "unsupported body content";
     }
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const mention of (msg[type] as any)?.contextInfo?.mentionedJid ?? []) {
+      // eslint-disable-next-line no-await-in-loop
+      body = await processMention(body, mention);
+    }
+
     return body;
   } catch (error) {
     logger.error({ error, msg }, `getBodyMessage: error: ${error?.message}`);
@@ -506,7 +556,7 @@ const storeQuotedMessage = async (
     wbot = await GetTicketWbot(ticket);
   }
 
-  const body = getBodyMessage(quotedMsg) || "";
+  const body = (await getBodyMessage(quotedMsg)) || "";
   const fromMe = !!wbot.myJid && participant === wbot.myJid;
 
   const messageMedia = getMessageMedia(quotedMsg);
@@ -658,7 +708,7 @@ export const verifyMediaMessage = async (
   const mediaType = mimetype.split("/")[0];
   const filename = mediaInfo?.filename || media?.filename || "file.bin";
 
-  let body = getBodyMessage(msg?.message);
+  let body = await getBodyMessage(msg?.message);
 
   if (
     mediaType === "audio" &&
@@ -763,7 +813,7 @@ export const verifyMessage = async (
 ) => {
   const io = getIO();
   const quotedMsg = await verifyQuotedMessage(msg, ticket);
-  const body = getBodyMessage(msg?.message);
+  const body = await getBodyMessage(msg?.message);
 
   const messageData = {
     id: msg.key.id,
@@ -1204,7 +1254,7 @@ const verifyQueue = async (
       "disabled"
     )) === "enabled";
 
-  const selectedOption = msg ? getBodyMessage(msg?.message) : null;
+  const selectedOption = msg ? await getBodyMessage(msg?.message) : null;
   const choosenQueue = selectedOption ? queues[+selectedOption - 1] : null;
 
   const botText = async () => {
@@ -1300,7 +1350,7 @@ const handleChartbot = async (
     order: [["options", "option", "ASC"]]
   });
 
-  const messageBody = getBodyMessage(msg?.message);
+  const messageBody = await getBodyMessage(msg?.message);
 
   if (messageBody === "#") {
     // voltar para o menu inicial
@@ -1500,7 +1550,7 @@ const handleMessage = async (
       }
     }
 
-    const bodyMessage = getBodyMessage(msg?.message);
+    const bodyMessage = await getBodyMessage(msg?.message);
     const msgType = getTypeMessage(msg);
 
     const unpackedMessage = getUnpackedMessage(msg);
