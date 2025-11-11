@@ -50,7 +50,7 @@
     "react-router-dom": "^5.2.0",
     "react-text-mask": "^5.5.0",
     "react-toastify": "9.0.0",
-    "react-whatsmarked": "^0.9.17",
+    "react-whatsmarked": "^0.9.19",
     "recharts": "^2.0.2",
     "socket.io-client": "^4.7.5",
     "styled-components": "^5.3.5",
