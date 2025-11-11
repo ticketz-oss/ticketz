@@ -56,6 +56,11 @@ const useStyles = makeStyles((theme) => ({
       fontWeight: "bold",
       textDecoration: "none",
     },
+    "& span.ticketzMention": {
+      color: theme.palette.primary.main,
+      fontWeight: "bold",
+      // cursor: "pointer",
+    },
     marginBottom: 5,
   },
   
