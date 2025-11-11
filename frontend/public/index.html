@@ -224,7 +224,15 @@
       root.style.setProperty('--primary', "#f44");
       progress = 0;
 		}
+		
+		window.mentionClick = (mention) => {
+      console.log("mentionClick not implemented yet", mention);
+    }
 
+		window.mentionRenderer = (mention) => {
+      return `<span class="ticketzMention" onclick='window.mentionClick(${JSON.stringify(mention).replace(/'/g, "\\'")})'>@` + (mention?.name || mention?.number || "invalid mention") + "</span>";
+		}
+		
     const configureSplash = async (config) => {
       const protocol = config.BACKEND_PROTOCOL || "https";
       const hostname = config.BACKEND_HOST || window.location.hostname;
