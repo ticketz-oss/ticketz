@@ -574,9 +574,16 @@ export const initWASocket = async (
                 return;
               }
 
-              let contact: Contact;
+              let contact = await Contact.findOne({
+                where: {
+                  number: remoteJid.endsWith("@lid")
+                    ? remoteJid
+                    : remoteJid.replace(/\D/g, ""),
+                  companyId: whatsapp.companyId
+                }
+              });
 
-              if (remoteJid.endsWith("@lid")) {
+              if (!contact && remoteJid.endsWith("@lid")) {
                 const lidMap = await WhatsappLidMap.findOne({
                   where: {
                     lid: remoteJid,
@@ -585,13 +592,6 @@ export const initWASocket = async (
                   include: [Contact]
                 });
                 contact = lidMap?.contact;
-              } else {
-                contact = await Contact.findOne({
-                  where: {
-                    number: remoteJid.replace(/\D/g, ""),
-                    companyId: whatsapp.companyId
-                  }
-                });
               }
 
               if (!contact) {
