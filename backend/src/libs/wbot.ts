@@ -42,6 +42,7 @@ import { DecoupledDriverServices } from "../services/DecoupledDriverServices/Dec
 import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import GetTicketWbot from "../helpers/GetTicketWbot";
 import { getJidOf } from "../services/WbotServices/getJidOf";
+import WhatsappLidMap from "../models/WhatsappLidMap";
 
 // const loggerBaileys = MAIN_LOGGER.child({});
 // loggerBaileys.level = process.env.BAILEYS_LOG_LEVEL || "error";
@@ -572,12 +573,27 @@ export const initWASocket = async (
                 // ignore presence from groups
                 return;
               }
-              const contact = await Contact.findOne({
-                where: {
-                  number: remoteJid.replace(/\D/g, ""),
-                  companyId: whatsapp.companyId
-                }
-              });
+
+              let contact: Contact;
+
+              if (remoteJid.endsWith("@lid")) {
+                const lidMap = await WhatsappLidMap.findOne({
+                  where: {
+                    lid: remoteJid,
+                    companyId: whatsapp.companyId
+                  },
+                  include: [Contact]
+                });
+                contact = lidMap?.contact;
+              } else {
+                contact = await Contact.findOne({
+                  where: {
+                    number: remoteJid.replace(/\D/g, ""),
+                    companyId: whatsapp.companyId
+                  }
+                });
+              }
+
               if (!contact) {
                 return;
               }
