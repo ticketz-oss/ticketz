@@ -3,24 +3,38 @@ import TextField from "@material-ui/core/TextField";
 import MenuItem from "@material-ui/core/MenuItem";
 import { loadedCountries, currentCountry } from "../../helpers/loadCountries";
 import { i18n } from "../../translate/i18n";
+import { useFormikContext } from "formik";
 
 function isNumeric(str) {
   return /^\d+$/.test(str);
 }
 
-export function PhoneNumberInput({ value, onChange, label, ...props }) {
+export function PhoneNumberInput(props) {
+  const formik = useFormikContext();
+  const { field, label, ...rest } = props;
+  const value = field?.value ?? props.value ?? "";
+  const name = field?.name ?? props.name;
+
+  const onChangeValue = (val) => {
+    if (formik && name) {
+      formik.setFieldValue(name, val);
+      formik.setFieldTouched(name, true, false);
+    } else if (props.onChange) {
+      props.onChange(val);
+    }
+  };
+
   const [countryCode, setCountryCode] = useState("");
   const [localNumber, setLocalNumber] = useState("");
   const [isStandard, setIsStandard] = useState(false);
   const [countries, setCountries] = useState([]);
 
   useEffect(() => {
-    // loadedCountries is a promise
     (async () => {
       setCountries(await loadedCountries);
     })();
   }, []);
-  
+
   useEffect(() => {
     if (!value && countries.length) {
       const defaultCountry = countries.find(c => c.iso2 === currentCountry) || countries[0];
@@ -41,7 +55,6 @@ export function PhoneNumberInput({ value, onChange, label, ...props }) {
         setIsStandard(false);
         return;
       }
-
       const defaultCountry = countries.find(c => c.iso2 === currentCountry) || countries[0];
       setCountryCode(defaultCountry.phonecode);
       setLocalNumber(value);
@@ -51,17 +64,17 @@ export function PhoneNumberInput({ value, onChange, label, ...props }) {
 
   const handleCountryChange = (e) => {
     setCountryCode(e.target.value);
-    onChange(e.target.value + localNumber);
+    onChangeValue(e.target.value + localNumber);
   };
 
   const handleLocalChange = (e) => {
     const val = e.target.value.replace(/\D/g, "");
     setLocalNumber(val);
-    onChange(countryCode + val);
+    onChangeValue(countryCode + val);
   };
 
   const handleStandardChange = (e) => {
-    onChange(e.target.value);
+    onChangeValue(e.target.value);
   };
 
   if (isStandard) {
@@ -71,12 +84,12 @@ export function PhoneNumberInput({ value, onChange, label, ...props }) {
         value={value}
         onChange={handleStandardChange}
         style={{ width: "100%" }}
-        {...props}
+        name={name}
+        {...rest}
       />
     );
   }
 
-  // Find selected country for custom rendering
   const selectedCountry = countries.find(c => c.phonecode === countryCode);
 
   return (
@@ -89,6 +102,7 @@ export function PhoneNumberInput({ value, onChange, label, ...props }) {
         style={{ width: 100, marginRight: 8 }}
         variant="outlined"
         margin="dense"
+        name={name}
         SelectProps={{
           renderValue: () =>
             selectedCountry
@@ -110,6 +124,7 @@ export function PhoneNumberInput({ value, onChange, label, ...props }) {
         margin="dense"
         style={{ flex: 1 }}
         inputProps={{ maxLength: 15 }}
+        name={name}
       />
     </div>
   );
