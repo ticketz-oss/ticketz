@@ -18,6 +18,7 @@ import {
 import {
   AccessTime,
   Block,
+  Warning,
   Done,
   DoneAll,
   ExpandMore,
@@ -343,13 +344,6 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 18,
     verticalAlign: "middle",
     marginRight: 4,
-  },
-
-  ackDoneAllIcon: {
-    color: green[500],
-    fontSize: 18,
-    verticalAlign: "middle",
-    marginLeft: 4,
   },
 
   ackDoneReadIcon: {
@@ -849,16 +843,16 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, allowReplyButtons
 
   const renderMessageAck = (message) => {
     if (message.ack === 0) {
-      return <AccessTime fontSize="small" className={classes.ackIcons} />;
+      return <Warning fontSize="small" className={classes.ackIcons} />;
     }
     if (message.ack === 1) {
-      return <Done fontSize="small" className={classes.ackIcons} />;
+      return <AccessTime fontSize="small" className={classes.ackIcons} />;
     }
     if (message.ack === 2) {
-      return <DoneAll fontSize="small" className={classes.ackIcons} />;
+      return <Done fontSize="small" className={classes.ackIcons} />;
     }
     if (message.ack === 3) {
-      return <DoneAll fontSize="small" className={classes.ackDoneAllIcon} />;
+      return <DoneAll fontSize="small" className={classes.ackIcons} />;
     }
     if (message.ack === 4) {
       return <DoneAll fontSize="small" className={classes.ackDoneReadIcon} />;
