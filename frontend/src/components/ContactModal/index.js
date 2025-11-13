@@ -25,6 +25,7 @@ import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import { SelectLanguage } from "../SelectLanguage";
 import { TagsContainer } from "../TagsContainer";
+import { PhoneNumberInput } from "../PhoneNumberInput";
 import useSettings from "../../hooks/useSettings";
 
 const useStyles = makeStyles(theme => ({
@@ -35,6 +36,7 @@ const useStyles = makeStyles(theme => ({
 	textField: {
 		marginRight: theme.spacing(1),
 		flex: 1,
+    width: '100%',
 	},
 
 	extraAttr: {
@@ -165,22 +167,23 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 									margin="dense"
 									className={classes.textField}
 								/>
-								<Field
-									as={TextField}
-									label={i18n.t("contactModal.form.number")}
-									name="number"
-									error={touched.number && Boolean(errors.number)}
-									helperText={touched.number && errors.number}
-									placeholder="5513912344321"
-									variant="outlined"
-									margin="dense"
-								/>
-								<div>
-									<Field
-										as={TextField}
-										label={i18n.t("contactModal.form.email")}
-										name="email"
-										error={touched.email && Boolean(errors.email)}
+                <div>
+                  <Field
+                    as={PhoneNumberInput}
+                    label={i18n.t("contactModal.form.number")}
+                    name="number"
+                    error={touched.number && Boolean(errors.number)}
+                    helperText={touched.number && errors.number}
+                    variant="outlined"
+                    margin="dense"
+                  />
+                </div>
+                <div>
+                  <Field
+                    as={TextField}
+                    label={i18n.t("contactModal.form.email")}
+                    name="email"
+                    error={touched.email && Boolean(errors.email)}
 										helperText={touched.email && errors.email}
 										placeholder="Email address"
 										fullWidth
