@@ -1093,6 +1093,11 @@ const messages = {
           disappearing: "To update the Default Disappearing Mode",
         },
       },
+      phoneNumberInput: {
+        country: "Country",
+        phoneNumber: "Phone Number",
+        localNumber: "Local Number",
+      },
       frontendErrors: {
         ERR_CONFIG_ERROR: "Configuration error. Please contact support.",
         ERR_CLOCK_OUT_OF_SYNC: "Clock out of sync. Please check the date and time settings of your device.",

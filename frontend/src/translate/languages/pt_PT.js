@@ -1030,6 +1030,11 @@ const messages = {
           disappearing: "Para atualizar o Modo de Desaparecimento Padrão",
         },
       },
+      phoneNumberInput: {
+        country: "País",
+        phoneNumber: "Telefone",
+        localNumber: "Telefone",
+      },
       frontendErrors: {
         ERR_CONFIG_ERROR: "Erro de configuração. Por favor, contacte o suporte.",
         ERR_CLOCK_OUT_OF_SYNC: "Relógio fora de sincronização. Verifique as configurações de data e hora do seu dispositivo.",

@@ -1098,6 +1098,11 @@ const messages = {
             "Para actualizar el modo de desaparición predeterminado",
         },
       },
+      phoneNumberInput: {
+        country: "País",
+        phoneNumber: "Número de teléfono",
+        localNumber: "Número de teléfono",
+      },
       frontendErrors: {
         ERR_CONFIG_ERROR: "Error de configuración. Por favor, contacte al soporte.",
         ERR_CLOCK_OUT_OF_SYNC: "Reloj fuera de sincronización. Por favor, verifique la configuración de fecha y hora de su dispositivo.",
