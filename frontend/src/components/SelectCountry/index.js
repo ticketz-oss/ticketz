@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { FormControl, InputLabel, Select, MenuItem } from "@material-ui/core";
 import { i18n } from '../../translate/i18n';
-import { loadCountries } from "../../helpers/loadCountries";
+import { loadedCountries } from "../../helpers/loadCountries";
 
-const loadedCountryes = await loadCountries();
+const loadedCountryes = await loadedCountries
+
+export function getCountryes() {
+  return loadedCountryes;
+}
 
 export function getPhoneCode(iso2) {
   const country = loadedCountryes.find(country => country.iso2 === iso2);
