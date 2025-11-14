@@ -1940,19 +1940,27 @@ const handleMessage = async (
   }
 };
 
-const handleMsgAck = async (msg: WAMessage, ack: number) => {
+const handleMsgAck = async (id: string, whatsappId: number, ack: number) => {
   if (!ack) return;
 
   const io = getIO();
 
   try {
-    const messageToUpdate = await Message.findByPk(msg.key.id, {
+    const messageToUpdate = await Message.findOne({
+      where: {
+        id
+      },
       include: [
         "contact",
         {
           model: Message,
           as: "quotedMsg",
           include: ["contact"]
+        },
+        {
+          model: Ticket,
+          where: { whatsappId },
+          required: true
         }
       ]
     });
@@ -2062,6 +2070,19 @@ const wbotMessageListener = async (
       });
     });
 
+    wbot.ev.on("message-receipt.update", async (messageReceipt: any) => {
+      logger.trace(
+        { messageReceipt },
+        "wbotMessageListener: message-receipt.update"
+      );
+      if (messageReceipt.length === 0) return;
+      messageReceipt.forEach(async (receipt: any) => {
+        await ackMutex.runExclusive(async () => {
+          handleMsgAck(receipt.key.id, wbot.id, 2);
+        });
+      });
+    });
+
     wbot.ev.on("messages.update", (messageUpdate: WAMessageUpdate[]) => {
       logger.trace({ messageUpdate }, "wbotMessageListener: messages.update");
       if (messageUpdate.length === 0) return;
@@ -2069,7 +2090,7 @@ const wbotMessageListener = async (
         (wbot as WASocket)!.readMessages([message.key]);
 
         await ackMutex.runExclusive(async () => {
-          handleMsgAck(message, message.update.status);
+          handleMsgAck(message.key.id, wbot.id, message.update.status);
         });
       });
     });
