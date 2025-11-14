@@ -130,9 +130,7 @@ const checkWbotDuplicity = new Mutex();
 
 const getProjectWAVersion = async () => {
   try {
-    const res = await fetch(
-      "https://raw.githubusercontent.com/ticketz-oss/ticketz/refs/heads/main/backend/src/waversion.json"
-    );
+    const res = await fetch("https://waversion.ticke.tz");
     const version = await res.json();
     return version;
   } catch (error) {
