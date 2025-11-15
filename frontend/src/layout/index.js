@@ -28,6 +28,7 @@ import { PhoneCall } from "../components/PhoneCall";
 import NotificationsVolume from "../components/NotificationsVolume";
 import UserModal from "../components/UserModal";
 import AboutModal from "../components/AboutModal";
+import IOSInstallInstructionsDialog from "../components/IOSInstallInstructionsDialog";
 import { AuthContext } from "../context/Auth/AuthContext";
 import BackdropLoading from "../components/BackdropLoading";
 import DarkMode from "../components/DarkMode";
@@ -50,6 +51,7 @@ import { getBackendURL } from "../services/config";
 import NestedMenuItem from "material-ui-nested-menu-item";
 import GoogleAnalytics from "../components/GoogleAnalytics";
 import OnlyForSuperUser from "../components/OnlyForSuperUser";
+import usePWAInstall from "../hooks/usePWAInstall";
 
 
 
@@ -177,6 +179,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   const classes = useStyles();
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
+  const [iosInstructionsOpen, setIosInstructionsOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
@@ -198,6 +201,8 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   const [volume, setVolume] = useState(localStorage.getItem("volume") || 1);
 
   const { dateToClient } = useDate();
+
+  const { canInstall, promptInstall, isIOS, isInstalled } = usePWAInstall();
 
   const socketManager = useContext(SocketContext);
 
@@ -326,6 +331,31 @@ const LoggedInLayout = ({ children, themeToggle }) => {
     handleCloseProfileMenu();
   };
 
+  const handleOpenIosInstructions = () => {
+    console.log('Opening iOS instructions modal');
+    setIosInstructionsOpen(true);
+    handleCloseProfileMenu();
+  };
+
+  const handleCloseIosInstructions = () => {
+    setIosInstructionsOpen(false);
+  };
+
+  const handleInstallPWA = async () => {
+    console.log('Attempting PWA install');
+    handleCloseProfileMenu();
+    if (promptInstall) {
+      await promptInstall();
+    } else {
+      // If beforeinstallprompt hasn't fired yet, inform the user to refresh or use browser menu
+      // Pega a tradução no momento da execução (após mudança de idioma)
+      const errorMessage = i18n.t("pwa.promptNotReady", { 
+        defaultValue: "Installation not available at the moment. Refresh the page (Ctrl+F5) or use the browser menu." 
+      });
+      toastError(new Error(errorMessage));
+    }
+  };
+
   const handleClickLogout = () => {
     handleCloseProfileMenu();
     handleLogout();
@@ -350,6 +380,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
 
   const handleChooseLanguage = (language) => {
     localStorage.setItem("language",language);
+    setCurrentLanguage(language);
     window.location.reload(false);
   }
 
@@ -518,6 +549,23 @@ const LoggedInLayout = ({ children, themeToggle }) => {
                   ))
                 }
               </NestedMenuItem>
+              {!isIOS && (
+                <MenuItem
+                  onClick={handleInstallPWA}
+                  disabled={isInstalled}
+                >
+                  {i18n.t("pwa.installPwaButton", {
+                    defaultValue: "Install PWA App",
+                  })}
+                </MenuItem>
+              )}
+              {isIOS && (
+                <MenuItem onClick={handleOpenIosInstructions}>
+                  {i18n.t("pwa.installIosButton", {
+                    defaultValue: "Install on iOS",
+                  })}
+                </MenuItem>
+              )}
               <MenuItem onClick={handleOpenAboutModal}>
                 {i18n.t("about.aboutthe")} {currentUser?.super ? "ticketz" : theme.appName}
               </MenuItem>
@@ -538,6 +586,10 @@ const LoggedInLayout = ({ children, themeToggle }) => {
           )} />
         {children ? children : null}
       </main>
+      <IOSInstallInstructionsDialog
+        open={iosInstructionsOpen}
+        onClose={handleCloseIosInstructions}
+      />
     </div>
   );
 };

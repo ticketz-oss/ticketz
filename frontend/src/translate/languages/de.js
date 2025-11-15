@@ -1036,6 +1036,25 @@ const messages = {
           international: "International in US$",
         },
       },
+      pwa: {
+        // Menu buttons
+        installPwaButton: "PWA App installieren",
+        installIosButton: "Auf iOS installieren",
+        promptNotReady: "Installation derzeit nicht verfügbar. Seite aktualisieren (Strg+F5) oder Browser-Menü verwenden.",
+        installPromptNotAvailable: "Installations-Eingabeaufforderung nicht verfügbar. Seite aktualisieren (Strg+F5) und erneut versuchen.",
+        
+        // iOS Modal - Title and complete description
+        installIosTitle: "📱 So installieren Sie auf iOS",
+        installIosDescription: `Um die App zum Startbildschirm auf iPhone oder iPad hinzuzufügen, befolgen Sie die folgenden Schritte:
+
+📤 1. Tippen Sie in Safari auf das Teilen-Symbol (Quadrat mit Pfeil nach oben).
+
+➕ 2. Scrollen Sie durch die Optionsliste und wählen Sie "Zum Home-Bildschirm hinzufügen".
+
+✅ 3. Passen Sie den Namen bei Bedarf an und tippen Sie auf "Hinzufügen", um die Verknüpfung zu erstellen.
+
+🎉 Danach wird die App auf Ihrem Startbildschirm verfügbar sein!`
+      },
     },
   },
 };

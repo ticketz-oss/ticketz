@@ -1041,6 +1041,25 @@ const messages = {
           international: "Internazionale in US$",
         },
       },
+      pwa: {
+        // Pulsanti del menu
+        installPwaButton: "Installa App PWA",
+        installIosButton: "Installa su iOS",
+        promptNotReady: "Installazione non disponibile al momento. Aggiorna la pagina (Ctrl+F5) o usa il menu del browser.",
+        installPromptNotAvailable: "Prompt di installazione non disponibile. Aggiorna la pagina (Ctrl+F5) e riprova.",
+        
+        // Modal iOS - Titolo e descrizione completa
+        installIosTitle: "📱 Come installare su iOS",
+        installIosDescription: `Per aggiungere l'app alla schermata principale su iPhone o iPad, segui i passaggi seguenti:
+
+📤 1. In Safari tocca l'icona di condivisione (quadrato con freccia verso l'alto).
+
+➕ 2. Scorri l'elenco delle opzioni e seleziona "Aggiungi alla schermata Home".
+
+✅ 3. Regola il nome se desiderato e tocca "Aggiungi" per creare il collegamento.
+
+🎉 Dopo di ciò l'app sarà disponibile sulla tua schermata principale!`
+      },
     },
   },
 };
