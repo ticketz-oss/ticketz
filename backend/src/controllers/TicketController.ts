@@ -24,6 +24,7 @@ type IndexQuery = {
   notClosed: string;
   all: string;
   queueIds: string;
+  contactId: string;
   tags: string;
   users: string;
 };
@@ -48,6 +49,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     searchParam,
     showAll,
     queueIds: queueIdsStringified,
+    contactId,
     tags: tagIdsStringified,
     users: userIdsStringified,
     withUnreadMessages,
@@ -77,6 +79,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   const { tickets, count, hasMore } = await ListTicketsService({
     isSearch: isSearch === "true",
     searchParam,
+    contactId: Number(contactId) || undefined,
     tags: tagsIds,
     users: usersIds,
     pageNumber,

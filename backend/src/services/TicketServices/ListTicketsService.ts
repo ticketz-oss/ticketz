@@ -36,6 +36,7 @@ interface Request {
   notClosed?: boolean;
   all?: boolean;
   queueIds: number[];
+  contactId?: number;
   tags: number[];
   users: number[];
   companyId: number;
@@ -52,6 +53,7 @@ const ListTicketsService = async ({
   searchParam = "",
   pageNumber = "1",
   queueIds,
+  contactId,
   tags,
   users,
   status,
@@ -65,6 +67,28 @@ const ListTicketsService = async ({
   all,
   companyId
 }: Request): Promise<Response> => {
+  let ticketId: number;
+
+  if (/^\d{8}-\d+$/.test(searchParam)) {
+    const parts = searchParam.split("-");
+    ticketId = parseInt(parts[1], 10);
+  }
+
+  if (Number(searchParam)) {
+    ticketId = Number(searchParam);
+  }
+
+  if (ticketId) {
+    searchParam = "";
+  }
+
+  if (
+    (searchParam.trim().startsWith('"') && searchParam.trim().endsWith('"')) ||
+    (searchParam.trim().startsWith("'") && searchParam.trim().endsWith("'"))
+  ) {
+    searchParam = searchParam.trim().slice(1, -1);
+  }
+
   const groupsTab =
     !isSearch &&
     (await GetCompanySetting(companyId, "groupsTab", "disabled")) === "enabled";
@@ -240,6 +264,20 @@ const ListTicketsService = async ({
         }
       ]
     });
+  }
+
+  if (contactId) {
+    whereCondition = {
+      ...whereCondition,
+      contactId
+    };
+  }
+
+  if (ticketId) {
+    whereCondition = {
+      ...whereCondition,
+      id: ticketId
+    };
   }
 
   if (Array.isArray(users) && users.length > 0) {
