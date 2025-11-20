@@ -19,9 +19,14 @@ const ShowUserService = async (
       "tokenVersion"
     ],
     include: [
-      { model: Queue, as: "queues", attributes: ["id", "name", "color"] },
+      {
+        model: Queue,
+        as: "queues",
+        attributes: ["id", "name", "color"]
+      },
       { model: Company, as: "company", attributes: ["id", "name", "dueDate"] }
-    ]
+    ],
+    order: [[{ model: Queue, as: "queues" }, "name", "ASC"]]
   });
 
   if (!user) {
