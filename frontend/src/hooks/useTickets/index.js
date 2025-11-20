@@ -6,6 +6,7 @@ import api from "../../services/api";
 const useTickets = ({
   isSearch,
   searchParam,
+  contactId,
   tags,
   users,
   pageNumber,
@@ -33,6 +34,7 @@ const useTickets = ({
               isSearch,
               searchParam,
               pageNumber,
+              contactId,
               tags,
               users,
               status,
@@ -59,6 +61,7 @@ const useTickets = ({
     return () => clearTimeout(delayDebounceFn);
   }, [
     searchParam,
+    contactId,
     tags,
     users,
     pageNumber,
