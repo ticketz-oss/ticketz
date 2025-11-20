@@ -7,7 +7,7 @@ import api from "../../services/api";
 
 export function UsersFilter({ onFiltered, initialUsers, excludeId }) {
   const [users, setUsers] = useState([]);
-  const [selecteds, setSelecteds] = useState([]);
+  const [selected, setSelected] = useState(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -17,13 +17,14 @@ export function UsersFilter({ onFiltered, initialUsers, excludeId }) {
   }, []);
 
   useEffect(() => {
-    setSelecteds([]);
+    setSelected(null);
     if (
       Array.isArray(initialUsers) &&
       Array.isArray(users) &&
-      users.length > 0
+      users.length > 0 &&
+      initialUsers.length > 0
     ) {
-      onChange(initialUsers);
+      onChange(initialUsers[0]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialUsers, users]);
@@ -34,7 +35,7 @@ export function UsersFilter({ onFiltered, initialUsers, excludeId }) {
       let userList = data.map((u) => ({ id: u.id, name: u.name }));
       if (excludeId) {
         userList = userList.filter(user => user.id !== excludeId);
-      }      
+      }
       setUsers(userList);
     } catch (err) {
       toastError(err);
@@ -42,17 +43,16 @@ export function UsersFilter({ onFiltered, initialUsers, excludeId }) {
   };
 
   const onChange = async (value) => {
-    setSelecteds(value);
-    onFiltered(value);
+    setSelected(value);
+    onFiltered(value ? [value] : []);
   };
 
   return (
     <Box style={{ padding: "0px 10px 10px" }}>
       <Autocomplete
-        multiple
         size="small"
         options={users}
-        value={selecteds}
+        value={selected}
         onChange={(e, v, r) => onChange(v)}
         getOptionLabel={(option) => option.name}
         getOptionSelected={(option, value) => {
@@ -62,19 +62,22 @@ export function UsersFilter({ onFiltered, initialUsers, excludeId }) {
           );
         }}
         renderTags={(value, getUserProps) =>
-          value.map((option, index) => (
-            <Chip
-              variant="outlined"
-              style={{
-                backgroundColor: "#bfbfbf",
-                textShadow: "1px 1px 1px #000",
-                color: "white",
-              }}
-              label={option.name}
-              {...getUserProps({ index })}
-              size="small"
-            />
-          ))
+          value
+            ? [
+              <Chip
+                key={value.id}
+                variant="outlined"
+                style={{
+                  backgroundColor: "#bfbfbf",
+                  textShadow: "1px 1px 1px #000",
+                  color: "white",
+                }}
+                label={value.name}
+                {...getUserProps({ index: 0 })}
+                size="small"
+              />,
+            ]
+            : []
         }
         renderInput={(params) => (
           <TextField
