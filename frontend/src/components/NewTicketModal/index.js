@@ -1,17 +1,10 @@
 import React, { useState, useEffect, useContext } from "react";
 
 import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
 import Dialog from "@material-ui/core/Dialog";
-
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import Autocomplete, {
-  createFilterOptions,
-} from "@material-ui/lab/Autocomplete";
-import CircularProgress from "@material-ui/core/CircularProgress";
-
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import ButtonWithSpinner from "../ButtonWithSpinner";
@@ -20,57 +13,24 @@ import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { Grid, ListItemText, MenuItem, Select } from "@material-ui/core";
 import { toast } from "react-toastify";
-
-const filter = createFilterOptions({
-  trim: true,
-});
+import { ContactSelect } from "../ContactSelect";
 
 const NewTicketModal = ({ modalOpen, onClose, initialContact }) => {
-
-  const [options, setOptions] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [searchParam, setSearchParam] = useState("");
   const [selectedContact, setSelectedContact] = useState(null);
   const [selectedQueue, setSelectedQueue] = useState("");
   const [newContact, setNewContact] = useState({});
   const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const { user } = useContext(AuthContext);
 
   useEffect(() => {
     if (initialContact?.id !== undefined) {
-      setOptions([initialContact]);
       setSelectedContact(initialContact);
     }
   }, [initialContact]);
 
-  useEffect(() => {
-    if (!modalOpen || searchParam.length < 3) {
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    const delayDebounceFn = setTimeout(() => {
-      const fetchContacts = async () => {
-        try {
-          const { data } = await api.get("contacts", {
-            params: { searchParam },
-          });
-          setOptions(data.contacts);
-          setLoading(false);
-        } catch (err) {
-          setLoading(false);
-          toastError(err);
-        }
-      };
-
-      fetchContacts();
-    }, 500);
-    return () => clearTimeout(delayDebounceFn);
-  }, [searchParam, modalOpen]);
-
   const handleClose = () => {
     onClose();
-    setSearchParam("");
     setSelectedContact(null);
   };
 
@@ -96,13 +56,17 @@ const NewTicketModal = ({ modalOpen, onClose, initialContact }) => {
     setLoading(false);
   };
 
-  const handleSelectOption = (e, newValue) => {
-    if (newValue?.number) {
-      setSelectedContact(newValue);
-    } else if (newValue?.name) {
-      setNewContact({ name: newValue.name });
-      setContactModalOpen(true);
+  const handleSelectedContact = contactId => {
+    if (contactId) {
+      setSelectedContact({ id: contactId });
+    } else {
+      setSelectedContact(null);
     }
+  };
+
+  const handleCreateContact = name => {
+    setNewContact({ name });
+    setContactModalOpen(true);
   };
 
   const handleCloseContactModal = () => {
@@ -110,86 +74,8 @@ const NewTicketModal = ({ modalOpen, onClose, initialContact }) => {
   };
 
   const handleAddNewContactTicket = contact => {
-    setOptions([contact]);
     setSelectedContact(contact);
   };
-
-  const createAddContactOption = (filterOptions, params) => {
-    const filtered = filter(filterOptions, params);
-
-    if (params.inputValue !== "" && !loading && searchParam.length >= 3) {
-      filtered.push({
-        name: `${params.inputValue}`,
-      });
-    }
-
-    return filtered;
-  };
-
-  const renderOption = option => {
-    if (option.number) {
-      return `${option.name} - ${option.number}`;
-    } else {
-      return `${i18n.t("newTicketModal.add")} ${option.name}`;
-    }
-  };
-
-  const renderOptionLabel = option => {
-    if (option.number) {
-      return `${option.name} - ${option.number}`;
-    } else {
-      return `${option.name}`;
-    }
-  };
-
-  const renderContactAutocomplete = () => {
-    if (initialContact === undefined || initialContact.id === undefined) {
-      return (
-        <Grid xs={12} item>
-          <Autocomplete
-            fullWidth
-            options={options}
-            loading={loading}
-            clearOnBlur
-            autoHighlight
-            freeSolo
-            clearOnEscape
-            getOptionLabel={renderOptionLabel}
-            renderOption={renderOption}
-            filterOptions={createAddContactOption}
-            onChange={(e, newValue) => handleSelectOption(e, newValue)}
-            renderInput={params => (
-              <TextField
-                {...params}
-                label={i18n.t("newTicketModal.fieldLabel")}
-                variant="outlined"
-                autoFocus
-                onChange={e => setSearchParam(e.target.value)}
-                onKeyPress={e => {
-                  if (loading || !selectedContact) return;
-                  else if (e.key === "Enter") {
-                    handleSaveTicket(selectedContact.id);
-                  }
-                }}
-                InputProps={{
-                  ...params.InputProps,
-                  endAdornment: (
-                    <React.Fragment>
-                      {loading ? (
-                        <CircularProgress color="inherit" size={20} />
-                      ) : null}
-                      {params.InputProps.endAdornment}
-                    </React.Fragment>
-                  ),
-                }}
-              />
-            )}
-          />
-        </Grid>
-      )
-    }
-    return null;
-  }
 
   return (
     <>
@@ -198,19 +84,27 @@ const NewTicketModal = ({ modalOpen, onClose, initialContact }) => {
         initialValues={newContact}
         onClose={handleCloseContactModal}
         onSave={handleAddNewContactTicket}
-      ></ContactModal>
+      />
       <Dialog open={modalOpen} onClose={handleClose}>
         <DialogTitle id="form-dialog-title">
           {i18n.t("newTicketModal.title")}
         </DialogTitle>
         <DialogContent dividers>
           <Grid style={{ width: 300 }} container spacing={2}>
-            {renderContactAutocomplete()}
+            <Grid xs={12} item>
+              <ContactSelect
+                onSelected={handleSelectedContact}
+                allowCreate={true}
+                onCreateContact={handleCreateContact}
+                initialContact={initialContact}
+              />
+            </Grid>
             <Grid xs={12} item>
               <Select
                 fullWidth
                 displayEmpty
                 variant="outlined"
+                margin="dense"
                 value={selectedQueue}
                 onChange={(e) => {
                   setSelectedQueue(e.target.value)
@@ -257,7 +151,7 @@ const NewTicketModal = ({ modalOpen, onClose, initialContact }) => {
             variant="contained"
             type="button"
             disabled={!selectedContact}
-            onClick={() => handleSaveTicket(selectedContact.id)}
+            onClick={() => handleSaveTicket(selectedContact?.id)}
             color="primary"
             loading={loading}
           >
