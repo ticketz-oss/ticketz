@@ -22,13 +22,13 @@ import { i18n } from "../../translate/i18n";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { Can } from "../Can";
 import TicketsQueueSelect from "../TicketsQueueSelect";
-import { Button } from "@material-ui/core";
+import { Box, Button } from "@material-ui/core";
 import { TagsFilter } from "../TagsFilter";
 import { UsersFilter } from "../UsersFilter";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPeopleGroup } from '@fortawesome/free-solid-svg-icons';
-import api from "../../services/api";
 import useSettings from "../../hooks/useSettings";
+import { ContactSelect } from "../ContactSelect";
 
 const useStyles = makeStyles((theme) => ({
   ticketsWrapper: {
@@ -126,6 +126,7 @@ const TicketsManagerTabs = () => {
 
   const userQueueIds = user.queues.map((q) => q.id);
   const [selectedQueueIds, setSelectedQueueIds] = useState(userQueueIds || []);
+  const [selectedContact, setSelectedContact] = useState(null);
   const [selectedTags, setSelectedTags] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
 
@@ -369,6 +370,11 @@ const TicketsManagerTabs = () => {
         />
       </TabPanel>
       <TabPanel value={tab} name="search" className={classes.ticketsWrapper}>
+        <Box style={{ paddingRight: 10, paddingLeft: 10 }}>
+        <ContactSelect onSelected={(contactId) => {
+          setSelectedContact(contactId);
+        }} allowCreate={false} />
+        </Box>
         <TagsFilter onFiltered={handleSelectedTags} />
         {profile === "admin" && (
           <UsersFilter onFiltered={handleSelectedUsers} />
@@ -377,6 +383,7 @@ const TicketsManagerTabs = () => {
           isSearch={true}
           searchParam={searchParam}
           showAll={true}
+          contactId={selectedContact}
           tags={selectedTags}
           users={selectedUsers}
           selectedQueueIds={selectedQueueIds}
