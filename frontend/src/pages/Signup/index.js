@@ -7,21 +7,16 @@ import { Link as RouterLink } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Formik, Form, Field } from "formik";
 import usePlans from "../../hooks/usePlans";
-import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import TextField from "@material-ui/core/TextField";
 import Link from "@material-ui/core/Link";
 import Grid from "@material-ui/core/Grid";
-import Box from "@material-ui/core/Box";
 import {
-	FormControl,
 	InputLabel,
 	MenuItem,
 	Select,
 } from "@material-ui/core";
-import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
-import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import { useTheme } from "@material-ui/core";
 import Container from "@material-ui/core/Container";
@@ -133,10 +128,6 @@ const SignUp = () => {
         <div>
           <img className={classes.logoImg} />
         </div>
-				{/*<Typography component="h1" variant="h5">
-					{i18n.t("signup.title")}
-				</Typography>*/}
-				{/* <form className={classes.form} noValidate onSubmit={handleSignUp}> */}
 				<Formik
 					initialValues={user}
 					enableReinitialize={true}
@@ -259,7 +250,6 @@ const SignUp = () => {
 					)}
 				</Formik>
 			</div>
-			<Box mt={5}>{/* <Copyright /> */}</Box>
 			{ config.RECAPTCHA_SITE_KEY && allowSignup &&
 				<ReCAPTCHA
 				  size="invisible"
