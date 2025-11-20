@@ -14,6 +14,7 @@ import Link from "@material-ui/core/Link";
 import Grid from "@material-ui/core/Grid";
 import {
 	InputLabel,
+      FormControl,
 	MenuItem,
 	Select,
 } from "@material-ui/core";
@@ -29,6 +30,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 import config from "../../services/config";
 import useSettings from "../../hooks/useSettings";
 import { safeValueFormat } from "../../helpers/safeValueFormat";
+import {PhoneNumberInput} from "../../components/PhoneNumberInput";
 
 const useStyles = makeStyles(theme => ({
 	paper: {
@@ -58,12 +60,17 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const UserSchema = Yup.object().shape({
-	name: Yup.string()
-		.min(2, "Too Short!")
-		.max(50, "Too Long!")
-		.required("Required"),
-	password: Yup.string().min(5, "Too Short!").max(50, "Too Long!"),
-	email: Yup.string().email("Invalid email").required("Required"),
+  name: Yup.string()
+    .min(2, i18n.t("common.validations.short"))
+    .max(50, i18n.t("common.validations.long"))
+    .required(i18n.t("common.validations.required")),
+  password: Yup.string()
+    .min(5, i18n.t("common.validations.short"))
+    .max(50, i18n.t("common.validations.long"))
+    .required(i18n.t("common.validations.required")),
+  email: Yup.string()
+    .email(i18n.t("common.validations.invalidEmail"))
+    .required(i18n.t("common.validations.required")),
 });
 
 const SignUp = () => {
@@ -152,9 +159,10 @@ const SignUp = () => {
 										error={touched.name && Boolean(errors.name)}
 										helperText={touched.name && errors.name}
 										variant="outlined"
+                    margin="dense"
 										fullWidth
 										id="name"
-										label="Nome da Empresa"
+										label={i18n.t("common.company")}
 									/>
 								</Grid>
 
@@ -162,9 +170,10 @@ const SignUp = () => {
 									<Field
 										as={TextField}
 										variant="outlined"
+                    margin="dense"
 										fullWidth
 										id="email"
-										label={i18n.t("signup.form.email")}
+										label={i18n.t("common.email")}
 										name="email"
 										error={touched.email && Boolean(errors.email)}
 										helperText={touched.email && errors.email}
@@ -172,26 +181,26 @@ const SignUp = () => {
 										required
 									/>
 								</Grid>
-								
-								<Grid item xs={12}>
-									<Field
-										as={TextField}
-										variant="outlined"
-										fullWidth
-										id="phone"
-										label="Telefone com (DDD)"
-										name="phone"
-										error={touched.email && Boolean(errors.email)}
-										helperText={touched.email && errors.email}
-										autoComplete="phone"
-										required
-									/>
-								</Grid>
+
+                <Grid item xs={12}>
+                  <Field
+                    as={PhoneNumberInput}
+                    variant="outlined"
+                    fullWidth
+                    id="phone"
+                    name="phone"
+                    error={touched.phone && Boolean(errors.phone)}
+                    helperText={touched.phone && errors.phone}
+                    autoComplete="phone"
+                    required
+                  />
+                </Grid>
 
 								<Grid item xs={12}>
 									<Field
 										as={TextField}
 										variant="outlined"
+                    margin="dense"
 										fullWidth
 										name="password"
 										error={touched.password && Boolean(errors.password)}
@@ -204,22 +213,23 @@ const SignUp = () => {
 									/>
 								</Grid>
 								<Grid item xs={12}>
-									<InputLabel htmlFor="plan-selection">Plano</InputLabel>
-									<Field
-										as={Select}
-										variant="outlined"
-										fullWidth
-										id="plan-selection"
-										label="Plano"
-										name="planId"
-										required
-									>
-										{plans.map((plan, key) => (
-											<MenuItem key={key} value={plan.id}>
-												{plan.name} - Atendentes: {plan.users} - WhatsApp: {plan.connections} - Filas: {plan.queues} - {safeValueFormat(plan.value, plan.currency)}
-											</MenuItem>
-										))}
-									</Field>
+                  <FormControl variant="outlined" fullWidth margin="dense">
+                    <InputLabel htmlFor="plan-selection">{i18n.t("companies.form.plan")}</InputLabel>
+                    <Field
+                      as={Select}
+                      fullWidth
+                      id="plan-selection"
+                      label={i18n.t("companies.form.plan")}
+                      name="planId"
+                      required
+                    >
+                      {plans.map((plan, key) => (
+                        <MenuItem key={key} value={plan.id}>
+                          {plan.name} - {i18n.t("common.users")}: {plan.users} - {i18n.t("common.connections")}: {plan.connections} - {i18n.t("common.queues")}: {plan.queues} - {safeValueFormat(plan.value, plan.currency)}
+                        </MenuItem>
+                      ))}
+                    </Field>
+                  </FormControl>
 								</Grid>
 							</Grid>
 							<Button
@@ -233,7 +243,7 @@ const SignUp = () => {
 							</Button>
 							</>
 							}
-							{ allowSignup || <h2>Cadastro desabilitado!</h2> }
+							{ allowSignup || <h2>{i18n.t("common.disabled")}</h2> }
 							<Grid container justify="flex-end">
 								<Grid item>
 									<Link
