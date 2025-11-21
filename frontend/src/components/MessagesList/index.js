@@ -60,7 +60,7 @@ const useStyles = makeStyles((theme) => ({
     "& span.ticketzMention": {
       color: theme.palette.primary.main,
       fontWeight: "bold",
-      // cursor: "pointer",
+      cursor: "pointer",
     },
     marginBottom: 5,
   },
@@ -223,6 +223,7 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     color: "#6bcbef",
     fontWeight: 500,
+    cursor: "pointer",
   },
   
   forwardedMessage: {
@@ -1354,7 +1355,13 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, allowReplyButtons
                 </span>
               )}
               {isGroup && (
-                <span className={classes.messageContactName}>
+                <span className={classes.messageContactName} onClick={() => {
+                  window.mentionClick({
+                    contactId: message.contact?.id,
+                    name: message.contact?.name,
+                    number: message.contact?.number
+                  })
+                }}>
                   {message.contact?.name}
                 </span>
               )}
