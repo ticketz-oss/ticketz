@@ -1,4 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
+import { useHistory } from "react-router-dom";
 import clsx from "clsx";
 import moment from "moment";
 import {
@@ -50,6 +51,7 @@ import { getBackendURL } from "../services/config";
 import NestedMenuItem from "material-ui-nested-menu-item";
 import GoogleAnalytics from "../components/GoogleAnalytics";
 import OnlyForSuperUser from "../components/OnlyForSuperUser";
+import NewTicketModal from "../components/NewTicketModal/index.js";
 
 
 
@@ -175,6 +177,7 @@ const useStyles = makeStyles((theme) => ({
 
 const LoggedInLayout = ({ children, themeToggle }) => {
   const classes = useStyles();
+  const history = useHistory();
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -200,6 +203,9 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   const { dateToClient } = useDate();
 
   const socketManager = useContext(SocketContext);
+  
+  const [newTicketContact, setNewTicketContact] = useState(null);
+  
 
   //################### CODIGOS DE TESTE #########################################
   // useEffect(() => {
@@ -261,6 +267,17 @@ const LoggedInLayout = ({ children, themeToggle }) => {
       }
     );
   // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  
+  useEffect(() => {
+    window.mentionClick = (mention) => {
+      const contact = {
+        id: mention.contactId,
+        name: mention.name,
+        number: mention.number
+      }
+      setNewTicketContact(contact);
+    }
   }, []);
 
   useEffect(() => {
@@ -529,6 +546,16 @@ const LoggedInLayout = ({ children, themeToggle }) => {
 
         </Toolbar>
       </AppBar>
+      <NewTicketModal
+        modalOpen={!!newTicketContact}
+        contact={newTicketContact}
+        onClose={(ticket) => {
+          setNewTicketContact(null);
+          if (ticket !== undefined && ticket.uuid !== undefined) {
+            history.push(`/tickets/${ticket.uuid}`);
+          }
+        }}
+      />
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
         <OnlyForSuperUser
