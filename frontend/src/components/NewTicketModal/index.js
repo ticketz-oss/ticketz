@@ -11,12 +11,13 @@ import ButtonWithSpinner from "../ButtonWithSpinner";
 import ContactModal from "../ContactModal";
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
-import { Grid, ListItemText, MenuItem, Select } from "@material-ui/core";
+import { Grid, ListItemText, MenuItem, Select, TextField } from "@material-ui/core";
 import { toast } from "react-toastify";
 import { ContactSelect } from "../ContactSelect";
 
-const NewTicketModal = ({ modalOpen, onClose, initialContact }) => {
+const NewTicketModal = ({ modalOpen, onClose, contact }) => {
   const [selectedContact, setSelectedContact] = useState(null);
+  const [forcedContact, setForcedContact] = useState(null);
   const [selectedQueue, setSelectedQueue] = useState("");
   const [newContact, setNewContact] = useState({});
   const [contactModalOpen, setContactModalOpen] = useState(false);
@@ -24,11 +25,16 @@ const NewTicketModal = ({ modalOpen, onClose, initialContact }) => {
   const { user } = useContext(AuthContext);
 
   useEffect(() => {
-    if (initialContact?.id !== undefined) {
-      setSelectedContact(initialContact);
+    if (contact) {
+      setForcedContact(contact);
+      setSelectedContact(contact);
     }
-  }, [initialContact]);
-
+  }, [contact]);
+  
+  useEffect(() => {
+    setSelectedQueue("");
+  }, [modalOpen]);
+  
   const handleClose = () => {
     onClose();
     setSelectedContact(null);
@@ -92,12 +98,22 @@ const NewTicketModal = ({ modalOpen, onClose, initialContact }) => {
         <DialogContent dividers>
           <Grid style={{ width: 300 }} container spacing={2}>
             <Grid xs={12} item>
-              <ContactSelect
-                onSelected={handleSelectedContact}
-                allowCreate={true}
-                onCreateContact={handleCreateContact}
-                initialContact={initialContact}
-              />
+              {forcedContact ? (
+                <TextField
+                  label={i18n.t("common.contact")}
+                  value={`${forcedContact.name} (${forcedContact.number})`}
+                  variant="outlined"
+                  fullWidth
+                  disabled
+                  margin="dense"
+                />
+              ) : (
+                <ContactSelect
+                  onSelected={handleSelectedContact}
+                  allowCreate={true}
+                  onCreateContact={handleCreateContact}
+                />
+              )}
             </Grid>
             <Grid xs={12} item>
               <Select
