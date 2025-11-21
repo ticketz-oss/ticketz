@@ -13,7 +13,6 @@ export function ContactSelect({
   allowCreate = false,
   onCreateContact,
   excludeId,
-  initialContact,
   margin
 }) {
   const [contacts, setContacts] = useState([]);
@@ -22,7 +21,7 @@ export function ContactSelect({
 
   useEffect(() => {
     if (searchParam.length < 2) {
-      setContacts(initialContact ? [initialContact] : []);
+      setContacts([]);
       return;
     }
     const fetchContacts = async () => {
@@ -42,13 +41,7 @@ export function ContactSelect({
       }
     };
     fetchContacts();
-  }, [searchParam, excludeId, initialContact]);
-
-  useEffect(() => {
-    if (initialContact) {
-      setSelected(initialContact);
-    }
-  }, [initialContact]);
+  }, [searchParam, excludeId, setSelected]);
 
   const handleChange = (event, value) => {
     if (value && value.inputValue && allowCreate && onCreateContact) {
