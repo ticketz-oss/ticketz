@@ -23,11 +23,37 @@ const CreateTicketService = async ({
 }: Request): Promise<Ticket> => {
   const defaultWhatsapp = await GetDefaultWhatsApp(companyId);
 
-  await CheckContactOpenTickets(contactId, defaultWhatsapp.id);
+  let ticket = await CheckContactOpenTickets(
+    contactId,
+    defaultWhatsapp.id,
+    true
+  );
+
+  const include = [
+    {
+      model: Contact,
+      as: "contact",
+      include: ["tags", "extraInfo"]
+    },
+    "queue",
+    "whatsapp",
+    "user",
+    "tags"
+  ];
+
+  if (ticket) {
+    if (ticket.status === "open" && ticket.userId === userId) {
+      await ticket.reload({
+        include
+      });
+      return ticket;
+    }
+    throw new AppError("ERR_OTHER_OPEN_TICKET");
+  }
 
   const { isGroup } = await ShowContactService(contactId, companyId);
 
-  const ticket = await Ticket.create({
+  ticket = await Ticket.create({
     contactId,
     companyId,
     queueId,
@@ -51,17 +77,7 @@ const CreateTicketService = async ({
   incrementCounter(ticket.companyId, "ticket-create");
 
   await ticket.reload({
-    include: [
-      {
-        model: Contact,
-        as: "contact",
-        include: ["tags", "extraInfo"]
-      },
-      "queue",
-      "whatsapp",
-      "user",
-      "tags"
-    ]
+    include
   });
 
   const io = getIO();
