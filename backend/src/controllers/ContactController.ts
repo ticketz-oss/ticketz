@@ -65,7 +65,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   return res.json({ contacts, count, hasMore });
 };
 
-export const getContact = async (
+export const findOrInsertContact = async (
   req: Request,
   res: Response
 ): Promise<Response> => {

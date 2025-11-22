@@ -48,6 +48,13 @@ contactRoutes.get(
   ContactController.show
 );
 
+contactRoutes.post(
+  "/contacts/findOrInsert",
+  apiTokenAuth,
+  isAuth,
+  ContactController.findOrInsertContact
+);
+
 contactRoutes.post("/contacts", apiTokenAuth, isAuth, ContactController.store);
 
 contactRoutes.put(
