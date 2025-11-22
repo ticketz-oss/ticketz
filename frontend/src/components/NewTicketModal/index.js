@@ -30,11 +30,11 @@ const NewTicketModal = ({ modalOpen, onClose, contact }) => {
       setSelectedContact(contact);
     }
   }, [contact]);
-  
+
   useEffect(() => {
     setSelectedQueue("");
   }, [modalOpen]);
-  
+
   const handleClose = () => {
     onClose();
     setSelectedContact(null);
