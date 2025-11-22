@@ -272,7 +272,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   useEffect(() => {
     window.mentionClick = (mention) => {
       const contact = {
-        id: mention.contactId,
+        id: mention.contactId || mention.id,
         name: mention.name,
         number: mention.number
       }
