@@ -69,42 +69,42 @@ export function ContactSelect({
   };
 
   return (
-      <Autocomplete
-        size="small"
-        options={contacts}
-        value={selected}
-        onChange={handleChange}
-        filterOptions={filterOptions}
-        getOptionLabel={option =>
-          option.inputValue ? option.name : `${option.name}${option.number ? ` - ${option.number}` : ""}`
-        }
-        renderTags={(value, getTagProps) =>
-          value
-            ? [
-              <Chip
-                key={value.id || value.inputValue}
-                variant="outlined"
-                style={{
-                  backgroundColor: "#bfbfbf",
-                  textShadow: "1px 1px 1px #000",
-                  color: "white",
-                }}
-                label={value.name}
-                {...getTagProps({ index: 0 })}
-                size="small"
-              />,
-            ]
-            : []
-        }
-        renderInput={params => (
-            <TextField
-              {...params}
-              label={label || i18n.t("common.contact")}
+    <Autocomplete
+      size="small"
+      options={contacts}
+      value={selected}
+      onChange={handleChange}
+      filterOptions={filterOptions}
+      getOptionLabel={option =>
+        option.inputValue ? option.name : `${option.name}${option.number ? ` - ${option.number}` : ""}`
+      }
+      renderTags={(value, getTagProps) =>
+        value
+          ? [
+            <Chip
+              key={value.id || value.inputValue}
               variant="outlined"
-              margin={margin || "dense"}
-              onChange={e => setSearchParam(e.target.value)}
-            />
-        )}
-      />
+              style={{
+                backgroundColor: "#bfbfbf",
+                textShadow: "1px 1px 1px #000",
+                color: "white",
+              }}
+              label={value.name}
+              {...getTagProps({ index: 0 })}
+              size="small"
+            />,
+          ]
+          : []
+      }
+      renderInput={params => (
+        <TextField
+          {...params}
+          label={label || i18n.t("common.contact")}
+          variant="outlined"
+          margin={margin || "dense"}
+          onChange={e => setSearchParam(e.target.value)}
+        />
+      )}
+    />
   );
 }
