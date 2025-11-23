@@ -75,6 +75,7 @@ export function ContactSelect({
       value={selected}
       onChange={handleChange}
       filterOptions={filterOptions}
+      noOptionsText=""
       getOptionLabel={option =>
         option.inputValue ? option.name : `${option.name}${option.number ? ` - ${option.number}` : ""}`
       }
