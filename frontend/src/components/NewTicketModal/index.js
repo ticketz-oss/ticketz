@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useContext } from "react";
-
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -11,7 +10,7 @@ import ButtonWithSpinner from "../ButtonWithSpinner";
 import ContactModal from "../ContactModal";
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
-import { Grid, ListItemText, MenuItem, Select, TextField } from "@material-ui/core";
+import { Grid, ListItemText, MenuItem, Select, TextField, FormControl, InputLabel } from "@material-ui/core";
 import { toast } from "react-toastify";
 import { ContactSelect } from "../ContactSelect";
 
@@ -116,41 +115,45 @@ const NewTicketModal = ({ modalOpen, onClose, contact }) => {
               )}
             </Grid>
             <Grid xs={12} item>
-              <Select
-                fullWidth
-                displayEmpty
-                variant="outlined"
-                margin="dense"
-                value={selectedQueue}
-                onChange={(e) => {
-                  setSelectedQueue(e.target.value)
-                }}
-                MenuProps={{
-                  anchorOrigin: {
-                    vertical: "bottom",
-                    horizontal: "left",
-                  },
-                  transformOrigin: {
-                    vertical: "top",
-                    horizontal: "left",
-                  },
-                  getContentAnchorEl: null,
-                }}
-                renderValue={() => {
-                  if (selectedQueue === "") {
-                    return i18n.t("transferTicketModal.fieldQueuePlaceholder")
-                  }
-                  const queue = user.queues.find(q => q.id === selectedQueue)
-                  return queue.name
-                }}
-              >
-                {user.queues?.length > 0 &&
-                  user.queues.map((queue, key) => (
-                    <MenuItem dense key={key} value={queue.id}>
-                      <ListItemText primary={queue.name} />
-                    </MenuItem>
-                  ))}
-              </Select>
+              <FormControl fullWidth variant="outlined" margin="dense">
+                <InputLabel id="queue-label">{i18n.t("common.queue")}</InputLabel>
+                <Select
+                  fullWidth
+                  displayEmpty
+                  variant="outlined"
+                  margin="dense"
+                  value={selectedQueue || ""}
+                  label={i18n.t("common.queue")}
+                  onChange={(e) => {
+                    setSelectedQueue(e.target.value)
+                  }}
+                  MenuProps={{
+                    anchorOrigin: {
+                      vertical: "bottom",
+                      horizontal: "left",
+                    },
+                    transformOrigin: {
+                      vertical: "top",
+                      horizontal: "left",
+                    },
+                    getContentAnchorEl: null,
+                  }}
+                  renderValue={() => {
+                    if (!selectedQueue) {
+                      return
+                    }
+                    const queue = user.queues.find(q => q.id === selectedQueue)
+                    return queue.name
+                  }}
+                >
+                  {user.queues?.length > 0 &&
+                    user.queues.map((queue, key) => (
+                      <MenuItem dense key={key} value={queue.id}>
+                        <ListItemText primary={queue.name} />
+                      </MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
             </Grid>
           </Grid>
         </DialogContent>
