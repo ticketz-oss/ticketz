@@ -32,6 +32,9 @@ const useSettings = () => {
     }
 
     const getSetting = async (key, defaultValue = "") => {
+      if (!api.defaults.headers.Authorization) {
+        return defaultValue;
+      }
       const { data } = await api.request({
         url: `/settings/${key}`,
         method: 'GET'
