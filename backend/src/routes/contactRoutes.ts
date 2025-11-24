@@ -14,6 +14,7 @@ const upload = multer(uploadConfig);
 contactRoutes.post(
   "/contacts/import",
   isAuth,
+  isAdmin,
   ImportPhoneContactsController.store
 );
 
