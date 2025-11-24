@@ -364,27 +364,31 @@ const Contacts = () => {
               ),
             }}
           />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => importCsv()}
-          >
-            &nbsp;<FontAwesomeIcon icon={faCloudArrowUp} />&nbsp;
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => exportCsv()}
-          >
-            &nbsp;<FontAwesomeIcon icon={faDownload} />&nbsp;
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => setImportConfirmOpen(true)}
-          >
-            {i18n.t("contacts.buttons.import")}
-          </Button>
+          {user?.profile === 'admin' &&
+            <>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => importCsv()}
+              >
+                &nbsp;<FontAwesomeIcon icon={faCloudArrowUp} />&nbsp;
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => exportCsv()}
+              >
+                &nbsp;<FontAwesomeIcon icon={faDownload} />&nbsp;
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => setImportConfirmOpen(true)}
+              >
+                {i18n.t("contacts.buttons.import")}
+              </Button>
+            </>
+          }
           <Button
             variant="contained"
             color="primary"
