@@ -160,6 +160,17 @@ const UpdateTicketService = async ({
       }
     }
 
+    // only admin can reopen closed tickets
+    if (
+      status &&
+      oldStatus === "closed" &&
+      status !== "closed" &&
+      user &&
+      user.profile !== "admin"
+    ) {
+      throw new AppError("ERR_NO_PERMISSION", 403);
+    }
+
     if (oldStatus === "closed") {
       await CheckContactOpenTickets(ticket.contactId, ticket.whatsappId);
       chatbot = null;
