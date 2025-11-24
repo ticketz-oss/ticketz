@@ -34,7 +34,6 @@ import MainContainer from "../../components/MainContainer";
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { Can } from "../../components/Can";
-import NewTicketModal from "../../components/NewTicketModal";
 import { SocketContext } from "../../context/Socket/SocketContext";
 import { generateColor } from "../../helpers/colorGenerator";
 import { getInitials } from "../../helpers/getInitials";
@@ -131,8 +130,6 @@ const Contacts = () => {
   const [contacts, dispatch] = useReducer(reducer, []);
   const [selectedContactId, setSelectedContactId] = useState(null);
   const [contactModalOpen, setContactModalOpen] = useState(false);
-  const [newTicketModalOpen, setNewTicketModalOpen] = useState(false);
-  const [contactTicket, setContactTicket] = useState({});
   const [deletingContact, setDeletingContact] = useState(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [importConfirmOpen, setImportConfirmOpen] = useState(false);
@@ -211,13 +208,6 @@ const Contacts = () => {
   const handleCloseContactModal = () => {
     setSelectedContactId(null);
     setContactModalOpen(false);
-  };
-
-  const handleCloseOrOpenTicket = (ticket) => {
-    setNewTicketModalOpen(false);
-    if (ticket !== undefined && ticket.uuid !== undefined) {
-      history.push(`/tickets/${ticket.uuid}`);
-    }
   };
 
   const hadleEditContact = (contactId) => {
@@ -301,13 +291,6 @@ const Contacts = () => {
   
   return (
     <MainContainer className={classes.mainContainer}>
-      <NewTicketModal
-        modalOpen={newTicketModalOpen}
-        initialContact={contactTicket}
-        onClose={(ticket) => {
-          handleCloseOrOpenTicket(ticket);
-        }}
-      />
       <ContactModal
         open={contactModalOpen}
         onClose={handleCloseContactModal}
@@ -462,15 +445,16 @@ const Contacts = () => {
                   <TableCell align="center">{contact.number}</TableCell>
                   <TableCell align="center">{contact.email}</TableCell>
                   <TableCell align="center">
-                    <IconButton
+                    {!contact.isGroup && <IconButton
                       size="small"
-                      onClick={() => {
-                        setContactTicket(contact);
-                        setNewTicketModalOpen(true);
-                      }}
+                      onClick={() => window.mentionClick({
+                        contactId: contact.id,
+                        name: contact?.name,
+                        number: contact?.number
+                      })}
                     >
                       <WhatsAppIcon />
-                    </IconButton>
+                    </IconButton>}
                     <IconButton
                       size="small"
                       onClick={() => hadleEditContact(contact.id)}
