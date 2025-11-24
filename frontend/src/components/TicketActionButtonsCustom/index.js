@@ -14,11 +14,13 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 import { TicketsContext } from "../../context/Tickets/TicketsContext";
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import UndoRoundedIcon from '@material-ui/icons/UndoRounded';
+import AddBoxIcon from '@material-ui/icons/AddBox';
 import { Call, CallEnd } from "@material-ui/icons";
 import Tooltip from '@material-ui/core/Tooltip';
 import { green } from '@material-ui/core/colors';
 import { PhoneCallContext } from "../../context/PhoneCall/PhoneCallContext";
 import { wavoipAvailable, wavoipCall } from "../../helpers/wavoipCallManager";
+import { toBeChecked } from "@testing-library/jest-dom/matchers";
 
 const useStyles = makeStyles(theme => ({
 	actionButtons: {
@@ -97,16 +99,26 @@ const TicketActionButtonsCustom = ({ ticket, showTabGroups }) => {
   };
      
 	return (
-		<div className={classes.actionButtons}>
-			{ticket.status === "closed" && (!showTabGroups || !ticket.isGroup) && (
-				<ButtonWithSpinner
-					loading={loading}
-					startIcon={<Replay />}
-					size="small"
-					onClick={e => handleUpdateTicketStatus(e, "open", user?.id)}
-				>
-					{i18n.t("messagesList.header.buttons.reopen")}
-				</ButtonWithSpinner>
+    <div className={classes.actionButtons}>
+      {ticket.status === "closed" && (!showTabGroups || !ticket.isGroup) && (
+        <>
+          <Tooltip title={i18n.t("ticketsManager.buttons.newTicket")}>
+            <IconButton onClick={() => window.mentionClick({
+              contactId: ticket.contactId,
+              name: ticket.contact?.name,
+              number: ticket.contact?.number
+            })}>
+              <AddBoxIcon />
+            </IconButton>
+          </Tooltip>
+          {user.profile === "admin" && (
+            <Tooltip title={i18n.t("messagesList.header.buttons.reopen")}>
+              <IconButton onClick={e => handleUpdateTicketStatus(e, "open", user?.id)}>
+                <Replay />
+              </IconButton>
+            </Tooltip>
+          )}
+        </>
 			)}
 			{(ticket.status === "open" || (showTabGroups && ticket.isGroup ) ) && (
 				<>
