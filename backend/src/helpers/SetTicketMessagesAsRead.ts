@@ -65,6 +65,10 @@ const SetTicketMessagesAsRead = async (ticket: Ticket): Promise<void> => {
             lastMessage.key.remoteJid
           )
           .catch(err => {
+            if (err.output?.statusCode === 404) {
+              return;
+            }
+
             logger.error(
               { error: err as Error },
               `Could not modify chat. Err: ${err?.message}`
