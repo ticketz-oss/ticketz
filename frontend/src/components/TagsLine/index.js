@@ -31,7 +31,10 @@ const TagsLine = ({ ticket }) => {
         <Chip
           key={index}
           label={tag.name}
-          style={{ backgroundColor: tag.color }}
+          style={{
+            backgroundColor: tag.color,
+            textShadow: "-1px 0 #808080, 0 1px #808080, 1px 0 #808080, 0 -1px #808080"
+          }}
           className={classes.tag}
         />
       ))}

@@ -108,7 +108,11 @@ export function TagsContainer ({ ticket, contact }) {
                     value.map((option, index) => (
                         <Chip
                             variant="outlined"
-                            style={{backgroundColor: option.color || '#eee', textShadow: '1px 1px 1px #000', color: 'white'}}
+                            style={{
+                              color: "white",
+                              backgroundColor: option.color || '#eee',
+                              textShadow: "-1px 0 #808080, 0 1px #808080, 1px 0 #808080, 0 -1px #808080"
+                            }}
                             label={option.name}
                             {...getTagProps({ index })}
                             size="small"
