@@ -1,18 +1,26 @@
+import { Mutex } from "async-mutex";
 import pino from "pino";
 
 const state = {
   io: null
 };
 
+const expireLogMutex = new Mutex();
+
 const logBuffer = [];
 
 function expireLog() {
-  const now = Date.now();
-  const expireTime = 60 * 5000;
+  expireLogMutex.runExclusive(() => {
+    if (logBuffer.length > 500) {
+      logBuffer.splice(0, logBuffer.length - 500);
+    }
 
-  while (logBuffer.length > 0 && now - logBuffer[0].timestamp > expireTime) {
-    logBuffer.shift();
-  }
+    const now = Date.now();
+    const expireTime = 60 * 5000;
+    while (logBuffer.length > 0 && now - logBuffer[0].timestamp > expireTime) {
+      logBuffer.shift();
+    }
+  });
 }
 
 export async function setSocketIo(io) {
