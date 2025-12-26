@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 
 import { useParams, useHistory } from "react-router-dom";
 
@@ -139,6 +139,7 @@ export function ChatModal({
           </Grid>
           <Grid xs={12} item>
             <UsersFilter
+              multiple
               onFiltered={(users) => setUsers(users)}
               initialUsers={users}
               excludeId={user.id}
