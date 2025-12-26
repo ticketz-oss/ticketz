@@ -1,4 +1,4 @@
-import React, { useState, useRef, useContext, useEffect } from "react";
+import { useState, useRef, useContext, useEffect } from "react";
 
 import Popover from "@material-ui/core/Popover";
 import IconButton from "@material-ui/core/IconButton";
@@ -9,6 +9,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBug, faTrash, faFileImport, faFileExport } from "@fortawesome/free-solid-svg-icons";
 import { i18n } from "../../translate/i18n";
 import { SocketContext } from "../../context/Socket/SocketContext";
+import ReactJsonView from "@microlink/react-json-view";
 
 import { FormControl, Grid, InputBase, InputLabel, MenuItem, Select, TextField } from "@material-ui/core";
 
@@ -211,9 +212,7 @@ function LogLine({ logInfo, filter }) {
           <br />
           {details.map((detail, _index) => {
             return (
-              <pre>
-                { JSON.stringify(detail, null, 2) }
-              </pre>
+              <ReactJsonView src={detail} theme='tomorrow' />
             );
           }
           )}
