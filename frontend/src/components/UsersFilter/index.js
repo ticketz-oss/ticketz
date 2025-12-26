@@ -1,13 +1,13 @@
 import { Box, Chip, TextField } from "@material-ui/core";
 import Autocomplete from "@material-ui/lab/Autocomplete";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { i18n } from "../../translate/i18n";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 
-export function UsersFilter({ onFiltered, initialUsers, excludeId }) {
+export function UsersFilter({ onFiltered, initialUsers, excludeId, multiple = false }) {
   const [users, setUsers] = useState([]);
-  const [selected, setSelected] = useState(null);
+  const [selected, setSelected] = useState(multiple ? [] : null);
 
   useEffect(() => {
     async function fetchData() {
@@ -17,17 +17,29 @@ export function UsersFilter({ onFiltered, initialUsers, excludeId }) {
   }, []);
 
   useEffect(() => {
-    setSelected(null);
-    if (
-      Array.isArray(initialUsers) &&
-      Array.isArray(users) &&
-      users.length > 0 &&
-      initialUsers.length > 0
-    ) {
-      onChange(initialUsers[0]);
+    if (multiple) {
+      setSelected(Array.isArray(initialUsers) ? initialUsers : []);
+      if (
+        Array.isArray(initialUsers) &&
+        Array.isArray(users) &&
+        users.length > 0 &&
+        initialUsers.length > 0
+      ) {
+        onChange(initialUsers);
+      }
+    } else {
+      setSelected(null);
+      if (
+        Array.isArray(initialUsers) &&
+        Array.isArray(users) &&
+        users.length > 0 &&
+        initialUsers.length > 0
+      ) {
+        onChange(initialUsers[0]);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialUsers, users]);
+  }, [initialUsers, users, multiple]);
 
   const loadUsers = async () => {
     try {
@@ -44,13 +56,14 @@ export function UsersFilter({ onFiltered, initialUsers, excludeId }) {
 
   const onChange = async (value) => {
     setSelected(value);
-    onFiltered(value ? [value] : []);
+    onFiltered(multiple ? (value || []) : value ? [value] : []);
   };
 
   return (
     <Box style={{ padding: "0px 10px 10px" }}>
       <Autocomplete
         size="small"
+        multiple={multiple}
         options={users}
         value={selected}
         onChange={(e, v, r) => onChange(v)}
@@ -62,21 +75,36 @@ export function UsersFilter({ onFiltered, initialUsers, excludeId }) {
           );
         }}
         renderTags={(value, getUserProps) =>
-          value
-            ? [
+          multiple
+            ? value.map((v, idx) => (
               <Chip
-                key={value.id}
+                key={v.id}
                 variant="outlined"
                 style={{
                   backgroundColor: "#bfbfbf",
                   textShadow: "1px 1px 1px #000",
-                  color: "white",
-                }}
-                label={value.name}
-                {...getUserProps({ index: 0 })}
-                size="small"
-              />,
-            ]
+                    color: "white",
+                  }}
+                  label={v.name}
+                  {...getUserProps({ index: idx })}
+                  size="small"
+                />
+              ))
+            : value
+            ? [
+                <Chip
+                  key={value.id}
+                  variant="outlined"
+                  style={{
+                    backgroundColor: "#bfbfbf",
+                    textShadow: "1px 1px 1px #000",
+                    color: "white",
+                  }}
+                  label={value.name}
+                  {...getUserProps({ index: 0 })}
+                  size="small"
+                />,
+              ]
             : []
         }
         renderInput={(params) => (
