@@ -140,6 +140,10 @@ export const list = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.query;
   const { companyId: userCompanyId } = req.user;
 
+  if (!req.user.isSuper && companyId && +companyId !== userCompanyId) {
+    throw new AppError("ERR_FORBIDDEN", 403);
+  }
+
   const users = await SimpleListService({
     companyId: companyId ? +companyId : userCompanyId
   });
