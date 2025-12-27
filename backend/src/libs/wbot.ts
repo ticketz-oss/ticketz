@@ -27,11 +27,12 @@ import Whatsapp from "../models/Whatsapp";
 import { logger, loggerBaileys } from "../utils/logger";
 import authState from "../helpers/authState";
 import AppError from "../errors/AppError";
-import { getIO } from "./socket";
-import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
-import DeleteBaileysService from "../services/BaileysServices/DeleteBaileysService";
-import Contact from "../models/Contact";
-import Ticket from "../models/Ticket";
+  import { getIO } from "./socket";
+  import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
+  import DeleteBaileysService from "../services/BaileysServices/DeleteBaileysService";
+import SendDisconnectWebhookService from "../services/WebhookServices/SendDisconnectWebhookService";
+  import Contact from "../models/Contact";
+  import Ticket from "../models/Ticket";
 import { GitInfo } from "../gitinfo";
 import GetPublicSettingService from "../services/SettingServices/GetPublicSettingService";
 import waVersion from "../waversion.json";
@@ -336,8 +337,15 @@ export const initWASocket = async (
               `Socket  ${name} Connection Update ${connection || ""}`
             );
 
+            const disconnectStatusCode =
+              (lastDisconnect?.error as Boom)?.output?.statusCode;
+            const disconnectReason =
+              (lastDisconnect?.error as Boom)?.output?.payload?.error ||
+              disconnectStatusCode?.toString();
+            let webhookStatus: string | null = null;
+
             if (connection === "close") {
-              if ((lastDisconnect?.error as Boom)?.output?.statusCode === 403) {
+              if (disconnectStatusCode === 403) {
                 // disconnected from whatsapp
                 await removeWbot(id);
                 await whatsapp.update({
@@ -345,6 +353,7 @@ export const initWASocket = async (
                   session: "",
                   qrcode: ""
                 });
+                webhookStatus = "DISCONNECTED";
                 await DeleteBaileysService(whatsapp.id);
                 io.to(`company-${whatsapp.companyId}-admin`).emit(
                   `company-${whatsapp.companyId}-whatsappSession`,
@@ -355,11 +364,11 @@ export const initWASocket = async (
                 );
               }
               if (
-                (lastDisconnect?.error as Boom)?.output?.statusCode !==
-                DisconnectReason.loggedOut
+                disconnectStatusCode !== DisconnectReason.loggedOut
               ) {
                 // connection dropped without logging out
                 await whatsapp.update({ status: "PENDING" });
+                webhookStatus = webhookStatus || "PENDING";
                 io.to(`company-${whatsapp.companyId}-admin`).emit(
                   `company-${whatsapp.companyId}-whatsappSession`,
                   {
@@ -393,6 +402,14 @@ export const initWASocket = async (
                     action: "update",
                     session: whatsapp
                   }
+                );
+              }
+
+              if (webhookStatus) {
+                await SendDisconnectWebhookService(
+                  whatsapp,
+                  webhookStatus,
+                  disconnectReason
                 );
               }
             }
