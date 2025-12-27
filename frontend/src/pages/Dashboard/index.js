@@ -232,7 +232,7 @@ const InfoCard = ({ title, value, icon }) => {
 const InfoRingCard = ({ title, value, graph }) => {
   const classes = useStyles();
   return (
-    <Grid item xs={12} sm={6} md={4}>
+    <Grid item xs={12} sm={4}>
       <Paper
         className={classes.cardSolid}
         elevation={4}
@@ -547,18 +547,18 @@ const Dashboard = () => {
                   </Paper>
                 }
               </Grid>
-              <Grid item lg={8} sm={12}>
+              <Grid item xs={12} md={8}>
                 <Paper className={clsx(classes.ticketzProPaper, {
                   [classes.clickpointer]: !proInstructionsOpen,
                 })} onClick={() => showProInstructions()}>
                   <Grid container justifyContent="flex-end">
-                    <Grid className={classes.ticketzProBox} item xs={12} md={proInstructionsOpen ? 4 : 6} sm={12}>
+                    <Grid className={classes.ticketzProBox} item xs={12} sm={4}>
                       <div>
                         <img className={classes.ticketzProScreen} src="https://pro.ticke.tz/images/0/7/3/0/b/0730b234af7b4b0dac72d09828863bb7cb9193ea-ticketz-computador.png" />
                       </div>
                     </Grid>
                     { !proInstructionsOpen &&
-                    <Grid className={classes.ticketzProBox} item xs={12} md={6} sm={12}>
+                    <Grid className={classes.ticketzProBox} item xs={12} sm={8}>
                       <Typography className={classes.ticketzProTitle} component="h3" variant="h5" gutterBottom>
                         Ticketz PRO
                       </Typography>
@@ -589,7 +589,7 @@ const Dashboard = () => {
                     </Grid>
                     }
                     { proInstructionsOpen &&
-                    <Grid className={classes.ticketzProBox} item xs={12} md={8} sm={12}>
+                    <Grid className={classes.ticketzProBox} item xs={12} sm={8}>
                       <Typography className={classes.ticketzProTitle} component="h3" variant="h5" gutterBottom>
                         Instruções de Upgrade
                       </Typography>
@@ -624,7 +624,7 @@ const Dashboard = () => {
           { !localStorage.getItem("hideAds") && <OnlyForSuperUser
             user={currentUser}
             yes={() => (
-              <Grid item lg={4} sm={12}>
+              <Grid item xs={12} md={4}>
                 <Paper className={classes.supportPaper}>
                   <Typography style={{ overflow: "hidden" }} component="h2" variant="h6" gutterBottom>
                     {i18n.t("ticketz.support.title")}
