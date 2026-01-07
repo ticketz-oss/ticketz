@@ -42,10 +42,12 @@ const useStyles = makeStyles((theme) => ({
   },
   messageList: {
     position: "relative",
+    display: "flex",
+    flexDirection: "column",
     overflowY: "auto",
     height: "100%",
     ...theme.scrollbarStyles,
-    backgroundColor: theme.palette.chatlist, //DARK MODE PLW DESIGN//
+    backgroundColor: theme.palette.chatlist.main,
   },
   inputArea: {
     position: "relative",
@@ -61,22 +63,29 @@ const useStyles = makeStyles((theme) => ({
     padding: "10px 10px 5px",
     margin: "10px",
     position: "relative",
-    backgroundColor: "blue",
-    maxWidth: 300,
+    alignSelf: "flex-start",
+    backgroundColor: theme.palette.chatBubbleReceived.main,
+    color: theme.palette.chatBubbleReceived.contrastText,
+    minWidth: 100,
+    maxWidth: 600,
     borderRadius: 10,
     borderBottomLeftRadius: 0,
     border: "1px solid rgba(0, 0, 0, 0.12)",
+    boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000",
   },
   boxRight: {
     padding: "10px 10px 5px",
     margin: "10px 10px 10px auto",
     position: "relative",
-    backgroundColor: "green", //DARK MODE PLW DESIGN//
-    textAlign: "right",
-    maxWidth: 300,
+    alignSelf: "flex-end",
+    backgroundColor: theme.palette.chatBubbleFromMe.main,
+    color: theme.palette.chatBubbleFromMe.contrastText,
+    minWidth: 100,
+    maxWidth: 600,
     borderRadius: 10,
     borderBottomRightRadius: 0,
     border: "1px solid rgba(0, 0, 0, 0.12)",
+    boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000",
   },
 
   sendMessageIcons: {
