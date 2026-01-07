@@ -34,8 +34,12 @@ const ListService = async ({
       }
     },
     include: [
-      { model: User, as: "owner" },
-      { model: ChatUser, as: "users", include: [{ model: User, as: "user" }] }
+      { model: User, as: "owner", attributes: ["id", "name"] },
+      {
+        model: ChatUser,
+        as: "users",
+        include: [{ model: User, as: "user", attributes: ["id", "name"] }]
+      }
     ],
     limit,
     offset,

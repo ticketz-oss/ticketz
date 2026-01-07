@@ -20,15 +20,19 @@ const CreateService = async (data: Data): Promise<Chat> => {
 
   if (Array.isArray(users) && users.length > 0) {
     await ChatUser.create({ chatId: record.id, userId: ownerId });
-    for (let user of users) {
+    for (const user of users) {
       await ChatUser.create({ chatId: record.id, userId: user.id });
     }
   }
 
   await record.reload({
     include: [
-      { model: ChatUser, as: "users", include: [{ model: User, as: "user" }] },
-      { model: User, as: "owner" }
+      {
+        model: ChatUser,
+        as: "users",
+        include: [{ model: User, as: "user", attributes: ["id", "name"] }]
+      },
+      { model: User, as: "owner", attributes: ["id", "name"] }
     ]
   });
 
