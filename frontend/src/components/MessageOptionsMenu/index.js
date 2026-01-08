@@ -127,7 +127,7 @@ const MessageOptionsMenu = ({ message, data, menuOpen, handleClose, anchorEl }) 
         open={menuOpen}
         onClose={closeMenu}
       >
-        <>
+        <div>
           <div className={classes.flexContainer}>
             {mostUsedEmojis.map((emoji, index) => (
               <div className={classes.emojiButton} onClick={() => handleReact(emoji)} key={index}>
@@ -159,7 +159,7 @@ const MessageOptionsMenu = ({ message, data, menuOpen, handleClose, anchorEl }) 
           <MenuItem key="forward" onClick={handleOpenForwardModal}>
             {i18n.t("messageOptionsMenu.forward")}
           </MenuItem>
-        </>
+        </div>
       </Menu>
 		</>
 	);
