@@ -197,7 +197,6 @@ const Ticket = () => {
           ticketId={ticket.id}
           isGroup={ticket.isGroup}
           markAsRead={true}
-          allowReplyButtons
         ></MessagesList>
         <MessageInput ticket={ticket} showTabGroups />
       </>

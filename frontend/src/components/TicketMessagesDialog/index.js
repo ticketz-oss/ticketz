@@ -175,6 +175,7 @@ export default function TicketMessagesDialog({ open, handleClose, ticketId }) {
           ticket={ticket}
           ticketId={ticket.id}
           isGroup={ticket.isGroup}
+          readOnly
         ></MessagesList>
       </Box>
     );

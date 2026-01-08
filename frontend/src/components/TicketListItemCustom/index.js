@@ -470,7 +470,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
 
 
   return (
-    <React.Fragment key={ticket.id}>
+    <div key={`ticket-${ticket.id}`} className={classes.ticketContainer}>
       <TicketMessagesDialog
         open={openTicketMessageDialog}
         handleClose={() => setOpenTicketMessageDialog(false)}
@@ -602,7 +602,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
 
       </ListItem>
       <Divider variant="inset" component="li" />
-    </React.Fragment>
+    </div>
   );
 };
 

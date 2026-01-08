@@ -592,7 +592,7 @@ const reducer = (state, action) => {
   }
 };
 
-const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, allowReplyButtons }) => {
+const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
   const classes = useStyles();
 
   const [messagesList, dispatch] = useReducer(reducer, []);
@@ -1065,9 +1065,9 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, allowReplyButtons
         className={classes.messageButton}
         color="primary"
         startIcon={<Reply />}
-        disabled={!(allowReplyButtons || false)}
+        disabled={!!readOnly}
         onClick={() => {
-          if (allowReplyButtons) {
+          if (!readOnly) {
             sendReply(text);
           };
         }
@@ -1332,7 +1332,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, allowReplyButtons
               })]}
               title={message.queueId && message.queue?.name}
             >
-              <IconButton
+              { readOnly || <IconButton
                 variant="contained"
                 size="small"
                 id={`messageActionsButton-${message.id}`}
@@ -1341,7 +1341,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, allowReplyButtons
                 onClick={(e) => handleOpenMessageOptionsMenu(e, message, data)}
               >
                 <ExpandMore />
-              </IconButton>
+              </IconButton> }
               { dataContext?.isForwarded && (
                 <span className={classes.forwardedMessage}>
                   <Forward fontSize="small" className={classes.forwardedIcon}/> {i18n.t("message.forwarded")}
@@ -1423,7 +1423,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, allowReplyButtons
               })]}
               title={message.queueId && message.queue?.name}
             >
-              <IconButton
+              { readOnly || <IconButton
                 variant="contained"
                 size="small"
                 id={`messageActionsButton-${message.id}`}
@@ -1432,7 +1432,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, allowReplyButtons
                 onClick={(e) => handleOpenMessageOptionsMenu(e, message, data)}
               >
                 <ExpandMore />
-              </IconButton>
+              </IconButton> }
 
               { dataContext?.isForwarded && (
                 <span className={classes.forwardedMessage}>
