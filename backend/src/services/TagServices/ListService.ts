@@ -19,12 +19,9 @@ interface Response {
 
 const ListService = async ({
   companyId,
-  searchParam,
-  pageNumber = "1"
+  searchParam
 }: Request): Promise<Response> => {
   let where: WhereOptions<Tag> = { companyId };
-  const limit = 20;
-  const offset = limit * (+pageNumber - 1);
 
   if (searchParam) {
     const searchPattern = `%${searchParam}%`;
@@ -40,10 +37,8 @@ const ListService = async ({
     };
   }
 
-  const { count, rows: tags } = await Tag.findAndCountAll({
+  const tags = await Tag.findAll({
     where,
-    limit,
-    offset,
     order: [Sequelize.literal('immutable_unaccent(LOWER("name")) ASC')],
     include: [
       {
@@ -59,16 +54,13 @@ const ListService = async ({
         required: false
       }
     ],
-    attributes: ["id", "name", "color", "ticketsCount", "contactsCount"],
-    distinct: true
+    attributes: ["id", "name", "color", "ticketsCount", "contactsCount"]
   });
-
-  const hasMore = count > offset + tags.length;
 
   return {
     tags,
-    count,
-    hasMore
+    count: tags.length,
+    hasMore: false
   };
 };
 
