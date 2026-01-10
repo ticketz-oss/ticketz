@@ -5,7 +5,6 @@ import AppError from "../errors/AppError";
 
 import CreateService from "../services/TagServices/CreateService";
 import ListService from "../services/TagServices/ListService";
-import KanbanListService from "../services/TagServices/KanbanListService";
 import UpdateService from "../services/TagServices/UpdateService";
 import ShowService from "../services/TagServices/ShowService";
 import DeleteService from "../services/TagServices/DeleteService";
@@ -45,7 +44,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   });
 
   const io = getIO();
-  io.emit("tag", {
+  io.to(`company-${companyId}-mainchannel`).emit("tag", {
     action: "create",
     tag
   });
@@ -56,7 +55,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 export const show = async (req: Request, res: Response): Promise<Response> => {
   const { tagId } = req.params;
 
-  const tag = await ShowService(tagId);
+  const tag = await ShowService(Number(tagId), req.user.companyId);
 
   return res.status(200).json(tag);
 };
@@ -70,12 +69,13 @@ export const update = async (
   }
 
   const { tagId } = req.params;
+  const { companyId } = req.user;
   const tagData = req.body;
 
-  const tag = await UpdateService({ tagData, id: tagId });
+  const tag = await UpdateService({ tagData, id: Number(tagId), companyId });
 
   const io = getIO();
-  io.emit("tag", {
+  io.to(`company-${companyId}-mainchannel`).emit("tag", {
     action: "update",
     tag
   });
@@ -88,11 +88,12 @@ export const remove = async (
   res: Response
 ): Promise<Response> => {
   const { tagId } = req.params;
+  const { companyId } = req.user;
 
-  await DeleteService(tagId);
+  await DeleteService(Number(tagId), companyId);
 
   const io = getIO();
-  io.emit("tag", {
+  io.to(`company-${companyId}-mainchannel`).emit("tag", {
     action: "delete",
     tagId
   });
@@ -108,17 +109,6 @@ export const list = async (req: Request, res: Response): Promise<Response> => {
   const tags = await SimpleListService({ searchParam, companyId });
 
   return res.json(tags);
-};
-
-export const kanban = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
-  const { companyId } = req.user;
-
-  const tags = await KanbanListService({ companyId });
-  // console.log(tags);
-  return res.json({ lista: tags });
 };
 
 export const syncTags = async (
