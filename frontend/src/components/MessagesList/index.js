@@ -627,7 +627,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
             setLoading(false);
           }
 
-          if (pageNumber === 1 && data.messages.length > 1) {
+          if (thisPageNumber === 1 && data.messages.length > 1) {
             scrollToBottom();
           }
         } catch (err) {
