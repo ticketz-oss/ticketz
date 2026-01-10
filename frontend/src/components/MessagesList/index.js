@@ -65,6 +65,22 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: 5,
   },
   
+  stickedMessages: {
+    backgroundImage: theme.mode === 'light' ? `url(${whatsBackground})` : `url(${whatsBackgroundDark})`,
+    flexDirection: "column",
+    flexGrow: 1,
+    padding: "5px 20px 20px 20px",
+    overflowY: "scroll",
+    ...theme.scrollbarStyles,
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    width: "100%",
+    maxHeight: "250px",
+    zIndex: 10,
+    borderTop: `1px solid ${theme.palette.divider}`,
+  },
+
   messagesListWrapper: {
     overflow: "hidden",
     position: "relative",
@@ -575,6 +591,13 @@ const reducer = (state, action) => {
     
     return [...state];
   }
+  
+  if (action.type === "RESET_STICKY") {
+    state.forEach((message) => {
+      delete message.bottomStick;
+    });
+    return [...state];
+  }
 
   if (action.type === "UPDATE_MESSAGE") {
     const messageToUpdate = action.payload;
@@ -600,6 +623,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef();
+  const stickedRef = useRef();
 
   const [selectedMessage, setSelectedMessage] = useState({});
   const [selectedMessageData, setSelectedMessageData] = useState({});
@@ -673,10 +697,17 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
       if (data.message.ticketId === currentTicketId.current) {
         setContactPresence("available");
         if (data.action === "create") {
-          dispatch({ type: "ADD_MESSAGE", payload: data.message });
-          if (data.message.mediaType !== "reactionMessage") {
+          const message = data.message;
+          const { scrollTop, clientHeight, scrollHeight } = scrollRef.current;
+          const isAtBottom = scrollTop + clientHeight >= (scrollHeight - clientHeight / 4);
+          message.bottomStick = !isAtBottom && !message.fromMe || undefined;
+          dispatch({ type: "ADD_MESSAGE", payload: message });
+          if (data.message.fromMe && data.message.mediaType !== "reactionMessage") {
             scrollToBottom();
-          } 
+          }
+          if (message.bottomStick) {
+            scrollStickedToBottom();
+          }
         }
 
         if (data.action === "update") {
@@ -714,11 +745,29 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
 
   const scrollToBottom = () => {
     if (scrollRef.current) {
+      dispatch({ type: "RESET_STICKY" });
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  };
+  
+  const scrollStickedToBottom = () => {
+    if (stickedRef.current) {
+      stickedRef.current.scrollTop = stickedRef.current.scrollHeight;
     }
   };
 
   const handleScroll = (e) => {
+    const messagesList = e.currentTarget;
+    const sticky = document.querySelector(`.${classes.stickedMessages}`);
+    if (sticky && sticky.style.display !== "none") {
+      const { scrollTop, clientHeight, scrollHeight } = messagesList;
+      const stickyHeight = sticky.offsetHeight;
+      // If any part of sticky is visible at the bottom
+      if (scrollTop + clientHeight >= scrollHeight - stickyHeight) {
+        dispatch({ type: "RESET_STICKY" });
+      }
+    }
+
     if (!hasMore) return;
     const { scrollTop } = e.currentTarget;
 
@@ -1314,15 +1363,17 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
   };
         
   const renderMessages = () => {
+    const stickedMessages = [];
     const viewMessagesList = messagesList.map((message, index) => {
       if (message.mediaType === "reactionMessage") {
         return;
       }
+      
       const data = JSON.parse(message.dataJson);
       const dataContext = getDataContextInfo(data);
       const isSticker = data?.message && ("stickerMessage" in data.message);
       if (!message.fromMe) {
-        return (
+        const messageFragment = (
           <React.Fragment key={message.id}>
             {renderDailyTimestamps(message, index)}
             {renderMessageDivider(message, index)}
@@ -1412,6 +1463,10 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
             </div>
           </React.Fragment>
         );
+        if (message.bottomStick) {
+          stickedMessages.push(messageFragment);
+        }
+        return messageFragment;
       } else {
         return (
           <React.Fragment key={message.id}>
@@ -1487,7 +1542,18 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
         );
       }
     });
-    return viewMessagesList;
+    return (
+      <>
+        {viewMessagesList}
+        <div
+          ref={stickedRef}
+          className={classes.stickedMessages}
+          style={{ display: stickedMessages.length > 0 ? 'flex' : 'none' }}
+        >
+          {stickedMessages}
+        </div>
+      </>
+    )
   };
 
   return (
