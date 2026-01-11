@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   makeStyles,
   Paper,
@@ -17,8 +17,6 @@ import {
   Tabs,
   Tab,
   Box,
-  Divider,
-  Autocomplete,
 } from "@material-ui/core";
 import {
   Add as AddIcon,
@@ -27,37 +25,18 @@ import {
   Schedule as ScheduleIcon,
   Public as PublicIcon,
 } from "@material-ui/icons";
-import { DatePicker } from "@material-ui/pickers";
 import { format, startOfWeek, addDays } from "date-fns";
+import { enUS, es, id, pt } from "date-fns/locale";
 import { i18n } from "../../translate/i18n";
+import { Autocomplete } from "@material-ui/lab";
+import { timeZonesNames } from "@vvo/tzdb";
 
-// Lista de timezones mais comuns
-const COMMON_TIMEZONES = [
-  { value: "America/Sao_Paulo", label: "América/São Paulo (BRT/BRST)" },
-  { value: "America/New_York", label: "América/Nova York (EST/EDT)" },
-  { value: "America/Chicago", label: "América/Chicago (CST/CDT)" },
-  { value: "America/Denver", label: "América/Denver (MST/MDT)" },
-  { value: "America/Los_Angeles", label: "América/Los Angeles (PST/PDT)" },
-  { value: "America/Mexico_City", label: "América/Cidade do México (CST)" },
-  { value: "America/Buenos_Aires", label: "América/Buenos Aires (ART)" },
-  { value: "America/Santiago", label: "América/Santiago (CLT/CLST)" },
-  { value: "Europe/London", label: "Europa/Londres (GMT/BST)" },
-  { value: "Europe/Paris", label: "Europa/Paris (CET/CEST)" },
-  { value: "Europe/Berlin", label: "Europa/Berlim (CET/CEST)" },
-  { value: "Europe/Madrid", label: "Europa/Madrid (CET/CEST)" },
-  { value: "Europe/Rome", label: "Europa/Roma (CET/CEST)" },
-  { value: "Europe/Lisbon", label: "Europa/Lisboa (WET/WEST)" },
-  { value: "Europe/Moscow", label: "Europa/Moscou (MSK)" },
-  { value: "Asia/Dubai", label: "Ásia/Dubai (GST)" },
-  { value: "Asia/Kolkata", label: "Ásia/Kolkata (IST)" },
-  { value: "Asia/Shanghai", label: "Ásia/Xangai (CST)" },
-  { value: "Asia/Tokyo", label: "Ásia/Tóquio (JST)" },
-  { value: "Asia/Seoul", label: "Ásia/Seul (KST)" },
-  { value: "Asia/Singapore", label: "Ásia/Singapura (SGT)" },
-  { value: "Australia/Sydney", label: "Austrália/Sydney (AEDT/AEST)" },
-  { value: "Pacific/Auckland", label: "Pacífico/Auckland (NZDT/NZST)" },
-  { value: "UTC", label: "UTC (Tempo Universal Coordenado)" },
-];
+const availableLocales = { en: enUS, es, pt, id };
+
+const ALL_TIMEZONES = timeZonesNames.map(tz => ({
+  value: tz,
+  label: tz.replace(/_/g, " "),
+}));
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -118,11 +97,13 @@ const getDayNames = () => {
   
   // Começa de uma segunda-feira
   const monday = startOfWeek(new Date(2026, 0, 5), { weekStartsOn: 1 });
+
+  const locale = availableLocales[localStorage.getItem('language') || "en"] || enUS;
   
   dayKeys.forEach((key, index) => {
     const date = addDays(monday, index);
     // Formata o dia da semana de forma localizada ("Segunda", "Terça", etc.)
-    dayNames[key] = format(date, "EEEE", { locale: undefined }).split("-")[0];
+    dayNames[key] = format(date, "EEEE", { locale }).split("-")[0];
   });
   
   return dayNames;
@@ -148,7 +129,7 @@ const OpenHoursEditor = ({ value = {}, onChange }) => {
 
   // Gera os nomes dos dias da semana usando date-fns com locale do navegador
   const DAYS_MAP = useMemo(() => getDayNames(), []);
-
+  
   useEffect(() => {
     if (onChange) {
       onChange({
@@ -271,13 +252,13 @@ const OpenHoursEditor = ({ value = {}, onChange }) => {
           </Grid>
           <Grid item xs={12}>
             <Autocomplete
-              value={COMMON_TIMEZONES.find(tz => tz.value === timezone) || null}
+              value={ALL_TIMEZONES.find(tz => tz.value === timezone) || null}
               onChange={(event, newValue) => {
                 if (newValue) {
                   setTimezone(newValue.value);
                 }
               }}
-              options={COMMON_TIMEZONES}
+              options={ALL_TIMEZONES}
               getOptionLabel={(option) => option.label}
               renderInput={(params) => (
                 <TextField

@@ -1,6 +1,9 @@
 const messages = {
   es: {
     translations: {
+      date: {
+        yesterday: "Ayer",
+      },
       common: {
         search: "Buscar",
         filter: "Filtrar",

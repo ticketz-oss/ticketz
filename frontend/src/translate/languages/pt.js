@@ -1,6 +1,9 @@
 const messages = {
   pt: {
     translations: {
+      date: {
+        yesterday: "Ontem",
+      },
       common: {
         search: "Buscar",
         filter: "Filtrar",
