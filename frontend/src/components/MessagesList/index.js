@@ -702,7 +702,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
           const isAtBottom = scrollTop + clientHeight >= (scrollHeight - clientHeight / 4);
           message.bottomStick = !isAtBottom && !message.fromMe || undefined;
           dispatch({ type: "ADD_MESSAGE", payload: message });
-          if (data.message.fromMe && data.message.mediaType !== "reactionMessage") {
+          if ((isAtBottom || data.message.fromMe) && data.message.mediaType !== "reactionMessage") {
             scrollToBottom();
           }
           if (message.bottomStick) {
