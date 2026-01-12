@@ -36,6 +36,7 @@ import DoneIcon from '@material-ui/icons/Done';
 import ClearOutlinedIcon from '@material-ui/icons/ClearOutlined';
 import { generateColor } from "../../helpers/colorGenerator";
 import { getInitials } from "../../helpers/getInitials";
+import pastRelativeDate from "../../helpers/pastRelativeDate";
 import TagsLine from "../TagsLine";
 
 const useStyles = makeStyles((theme) => ({
@@ -579,11 +580,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
                 variant="body2"
                 color="textSecondary"
               >
-                {isSameDay(parseISO(ticket.updatedAt), new Date()) ? (
-                  <>{format(parseISO(ticket.updatedAt), "HH:mm")}</>
-                ) : (
-                  <>{format(parseISO(ticket.updatedAt), "dd/MM/yyyy")}</>
-                )}
+                {pastRelativeDate(parseISO(ticket.updatedAt))}
               </Typography>
 
               <Badge
