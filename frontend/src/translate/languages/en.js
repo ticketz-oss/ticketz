@@ -1,6 +1,9 @@
 const messages = {
   en: {
     translations: {
+      date: {
+        yesterday: "Yesterday",
+      },
       common: {
         search: "Search",
         filter: "Filter",
@@ -958,6 +961,7 @@ const messages = {
         },
         schedules: {
           title: "schedules",
+          updateToNewFormat: "Update to new format",
         },
         Plans: {
           title: "Plans",
@@ -1155,6 +1159,58 @@ const messages = {
         title: "Enter your Wavoip connection token",
         instructions: "By accessing the address below you can create an account with 50 free calls for testing",
         coupon: "When hiring the service use the coupon TICKETZ to get a discount!",
+      },
+      openHours: {
+        title: "Business Hours",
+        timezone: {
+          placeholder: "Select time zone",
+          searchPlaceholder: "Type to search...",
+          selected: "Selected time zone",
+        },
+        tabs: {
+          weekly: "Weekly Hours",
+          overrides: "Exceptions and Holidays",
+        },
+        weekly: {
+          title: "Weekly Business Hours",
+          description: "Configure regular business hours for each day of the week.",
+          rule: "Rule",
+          days: "Days of the Week",
+          hours: "Hours",
+          closedMessage: "Closed (no hours defined)",
+          addHour: "Add Hours",
+          addRule: "Add New Weekly Rule",
+          from: "From",
+          to: "To",
+          until: "to",
+        },
+        overrides: {
+          title: "Exceptions and Holidays",
+          description: "Configure specific dates with special hours or closures (holidays, events, etc.).",
+          exception: "Exception",
+          date: "Date",
+          label: "Description",
+          labelPlaceholder: "E.g.: Christmas, Carnival...",
+          repeat: "Repeat",
+          repeatNone: "Don't repeat",
+          repeatYearly: "Yearly",
+          closedDay: "Closed on this day",
+          specialHours: "Special Hours",
+          addHour: "Add Hours",
+          addException: "Add Exception or Holiday",
+          from: "From",
+          to: "To",
+          until: "to",
+        },
+        days: {
+          mon: "Monday",
+          tue: "Tuesday",
+          wed: "Wednesday",
+          thu: "Thursday",
+          fri: "Friday",
+          sat: "Saturday",
+          sun: "Sunday",
+        },
       },
       ticketz: {
         registration: {

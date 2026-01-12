@@ -1,6 +1,9 @@
 const messages = {
   pt: {
     translations: {
+      date: {
+        yesterday: "Ontem",
+      },
       common: {
         search: "Buscar",
         filter: "Filtrar",
@@ -965,6 +968,7 @@ const messages = {
         },
         schedules: {
           title: "Horários",
+          updateToNewFormat: "Atualizar para novo formato",
         },
         Plans: {
           title: "Planos",
@@ -1172,6 +1176,58 @@ const messages = {
         title: "Insira o token da sua conexão no Wavoip",
         instructions: "Acessando o endereço abaixo você pode criar uma conta com 50 ligações gratuitas para teste",
         coupon: "Ao contratar o serviço use o cupom TICKETZ para ganhar um desconto!",
+      },
+      openHours: {
+        title: "Horários de Funcionamento",
+        timezone: {
+          placeholder: "Selecione o fuso horário",
+          searchPlaceholder: "Digite para buscar...",
+          selected: "Fuso horário selecionado",
+        },
+        tabs: {
+          weekly: "Horários Semanais",
+          overrides: "Exceções e Feriados",
+        },
+        weekly: {
+          title: "Horários de Funcionamento Semanais",
+          description: "Configure os horários regulares de funcionamento para cada dia da semana.",
+          rule: "Regra",
+          days: "Dias da Semana",
+          hours: "Horários",
+          closedMessage: "Fechado (sem horários definidos)",
+          addHour: "Adicionar Horário",
+          addRule: "Adicionar Nova Regra Semanal",
+          from: "De",
+          to: "Até",
+          until: "até",
+        },
+        overrides: {
+          title: "Exceções e Feriados",
+          description: "Configure datas específicas com horários especiais ou fechamentos (feriados, eventos, etc.).",
+          exception: "Exceção",
+          date: "Data",
+          label: "Descrição",
+          labelPlaceholder: "Ex: Natal, Carnaval...",
+          repeat: "Repetição",
+          repeatNone: "Não repetir",
+          repeatYearly: "Anual",
+          closedDay: "Fechado neste dia",
+          specialHours: "Horários Especiais",
+          addHour: "Adicionar Horário",
+          addException: "Adicionar Exceção ou Feriado",
+          from: "De",
+          to: "Até",
+          until: "até",
+        },
+        days: {
+          mon: "Segunda",
+          tue: "Terça",
+          wed: "Quarta",
+          thu: "Quinta",
+          fri: "Sexta",
+          sat: "Sábado",
+          sun: "Domingo",
+        },
       },
       ticketz: {
         registration: {
