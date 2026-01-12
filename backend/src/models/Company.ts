@@ -22,6 +22,7 @@ import TicketTraking from "./TicketTraking";
 import User from "./User";
 import UserRating from "./UserRating";
 import Whatsapp from "./Whatsapp";
+import { OpenHoursData } from "../helpers/checkOpenHours";
 
 @Table
 class Company extends Model<Company> {
@@ -51,7 +52,7 @@ class Company extends Model<Company> {
   @Column({
     type: DataType.JSONB
   })
-  schedules: [];
+  schedules: OpenHoursData;
 
   @ForeignKey(() => Plan)
   @Column

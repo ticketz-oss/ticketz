@@ -23,6 +23,7 @@ import Whatsapp from "./Whatsapp";
 import WhatsappQueue from "./WhatsappQueue";
 import QueueOption from "./QueueOption";
 import Ticket from "./Ticket";
+import { OpenHoursData } from "../helpers/checkOpenHours";
 
 @Table
 class Queue extends Model {
@@ -52,7 +53,7 @@ class Queue extends Model {
   @Column({
     type: DataType.JSONB
   })
-  schedules: unknown[];
+  schedules: OpenHoursData;
 
   @CreatedAt
   createdAt: Date;

@@ -48,6 +48,7 @@
     "jsonwebtoken": "^9.0.2",
     "libzapitu-rf": "^1.0.0-alpha.9",
     "link-preview-js": "^3.0.12",
+    "luxon": "^3.7.2",
     "mime-types": "^2.1.35",
     "moment": "^2.30.1",
     "multer": "^1.4.5-lts.1",

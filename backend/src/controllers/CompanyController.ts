@@ -15,6 +15,7 @@ import FindAllCompaniesService from "../services/CompanyService/FindAllCompanies
 import User from "../models/User";
 
 import CheckSettings from "../helpers/CheckSettings";
+import { OpenHoursData } from "../helpers/checkOpenHours";
 
 type IndexQuery = {
   searchParam: string;
@@ -34,7 +35,7 @@ type CompanyData = {
 };
 
 type SchedulesData = {
-  schedules: [];
+  schedules: OpenHoursData;
 };
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
