@@ -31,6 +31,7 @@ import {
 import { AttachFile, Colorize, DeleteOutline } from "@material-ui/icons";
 import { QueueOptions } from "../QueueOptions";
 import SchedulesForm from "../SchedulesForm";
+import OpenHoursEditor from "../../components/OpenHoursEditor";
 import ConfirmationModal from "../ConfirmationModal";
 
 const useStyles = makeStyles((theme) => ({
@@ -74,6 +75,16 @@ const QueueSchema = Yup.object().shape({
   greetingMessage: Yup.string(),
 });
 
+// Helper to check if value is OpenHours format or empty
+const isOpenHoursFormat = (schedules) => {
+  if (!schedules || Object.keys(schedules).length === 0) return true;
+  return (
+    typeof schedules === "object" &&
+    Array.isArray(schedules.weeklyRules) &&
+    Array.isArray(schedules.overrides)
+  );
+};
+
 const QueueModal = ({ open, onClose, queueId }) => {
   const classes = useStyles();
 
@@ -95,15 +106,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
   const [queueEditable, setQueueEditable] = useState(true);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
 
-  const [schedules, setSchedules] = useState([
-    { weekday: "Segunda-feira",weekdayEn: "monday",startTime: "08:00",endTime: "18:00",},
-    { weekday: "Terça-feira",weekdayEn: "tuesday",startTime: "08:00",endTime: "18:00",},
-    { weekday: "Quarta-feira",weekdayEn: "wednesday",startTime: "08:00",endTime: "18:00",},
-    { weekday: "Quinta-feira",weekdayEn: "thursday",startTime: "08:00",endTime: "18:00",},
-    { weekday: "Sexta-feira", weekdayEn: "friday",startTime: "08:00",endTime: "18:00",},
-    { weekday: "Sábado", weekdayEn: "saturday",startTime: "08:00",endTime: "12:00",},
-    { weekday: "Domingo", weekdayEn: "sunday",startTime: "00:00",endTime: "00:00",},
-  ]);
+  const [schedules, setSchedules] = useState({});
 
   useEffect(() => {
     api.get(`/settings`).then(({ data }) => {
@@ -411,12 +414,45 @@ const QueueModal = ({ open, onClose, queueId }) => {
         )}
         {tab === 1 && (
           <Paper style={{ padding: 20 }}>
-            <SchedulesForm
-              loading={false}
-              onSubmit={handleSaveSchedules}
-              initialValues={schedules}
-              labelSaveButton="Adicionar"
-            />
+            {isOpenHoursFormat(schedules) ? (
+              <>
+                <OpenHoursEditor
+                  value={schedules}
+                  onChange={setSchedules}
+                />
+                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleSaveSchedules(schedules)}
+                  >
+                    {i18n.t("common.save")}
+                  </Button>
+                </div>
+              </>
+            ) : (
+                <>
+                  <Grid spacing={4} container>
+                    <Grid item xs={12}>
+                      <div>
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          onClick={() => setSchedules({})}
+                        >
+                        ⚠️ {i18n.t("settings.schedules.updateToNewFormat")}
+                        </Button>
+                      </div>
+                    </Grid>
+                  </Grid>
+                  <SchedulesForm
+                    loading={false}
+                    onSubmit={handleSaveSchedules}
+                    initialValues={schedules}
+                    labelSaveButton="Adicionar"
+                  />
+                </>
+            )}
           </Paper>
         )}
       </Dialog>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
 import Title from "../../components/Title";
-import { makeStyles, Paper, Tabs, Tab } from "@material-ui/core";
+import { makeStyles, Paper, Tabs, Tab, Button, Grid } from "@material-ui/core";
 
 import TabPanel from "../../components/TabPanel";
 
@@ -23,6 +23,17 @@ import useAuth from "../../hooks/useAuth.js";
 import useSettings from "../../hooks/useSettings";
 
 import OnlyForSuperUser from "../../components/OnlyForSuperUser";
+import OpenHoursEditor from "../../components/OpenHoursEditor";
+
+// Helper to check if value is OpenHours format or empty
+const isOpenHoursFormat = (schedules) => {
+  if (!schedules || Object.keys(schedules).length === 0) return true;
+  return (
+    typeof schedules === "object" &&
+    Array.isArray(schedules.weeklyRules) &&
+    Array.isArray(schedules.overrides)
+  );
+};
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -60,7 +71,7 @@ const useStyles = makeStyles((theme) => ({
 const SettingsCustom = () => {
   const classes = useStyles();
   const [tab, setTab] = useState("options");
-  const [schedules, setSchedules] = useState([]);
+  const [schedules, setSchedules] = useState({});
   const [company, setCompany] = useState({});
   const [loading, setLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState({});
@@ -181,11 +192,46 @@ const SettingsCustom = () => {
             value={tab}
             name={"schedules"}
           >
-            <SchedulesForm
-              loading={loading}
-              onSubmit={handleSubmitSchedules}
-              initialValues={schedules}
-            />
+            {isOpenHoursFormat(schedules) ? (
+              <>
+                <OpenHoursEditor
+                  value={schedules}
+                  onChange={setSchedules}
+                />
+                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleSubmitSchedules(schedules)}
+                    disabled={loading}
+                  >
+                    {loading ? i18n.t("settings.saving") : i18n.t("common.save")}
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <Grid spacing={4} container>
+                  <Grid item xs={12}>
+                    <div>
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        onClick={() => setSchedules({})}
+                        disabled={loading}
+                      >
+                      ⚠️ {i18n.t("settings.schedules.updateToNewFormat")}
+                      </Button>
+                    </div>
+                  </Grid>
+                </Grid>
+                <SchedulesForm
+                  loading={loading}
+                  onSubmit={handleSubmitSchedules}
+                  initialValues={schedules}
+                />
+              </>
+            )}
           </TabPanel>
           <OnlyForSuperUser
             user={currentUser}
