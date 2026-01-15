@@ -39,3 +39,10 @@ ticketRoutes.delete(
 );
 
 export default ticketRoutes;
+
+ticketRoutes.patch(
+    "/tickets/:ticketId/transfer",
+    isAuth,
+    isCompliant,
+    TicketController.transfer // Certifique-se de importar o método no topo do arquivo
+);
