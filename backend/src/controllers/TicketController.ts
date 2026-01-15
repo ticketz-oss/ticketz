@@ -237,3 +237,32 @@ export const remove = async (
 
   return res.status(200).json({ message: "ticket deleted" });
 };
+export const transfer = async (req: Request, res: Response): Promise<Response> => {
+    const { ticketId } = req.params;
+    const { newUserId } = req.body; // ID do usuário para o qual o ticket será transferido
+    const reqUserId = req.user.id; // ID do usuário que está realizando a ação
+    const { companyId } = req.user;
+
+    // Usa o mutex para evitar condições de corrida em atualizações concorrentes
+    const { ticket } = await updateMutex.runExclusive(async () => {
+        const result = await TransferTicketService({
+            ticketId: Number(ticketId),
+            newUserId: Number(newUserId),
+            reqUserId: Number(reqUserId),
+            companyId
+        });
+        return { ticket: result };
+    });
+
+    // Emite evento via socket para atualizar os clientes em tempo real
+    const io = getIO();
+    io.to(`company-${companyId}-${ticket.status}`)
+        .to(`queue-${ticket.queueId}-${ticket.status}`)
+        .to(`user-${newUserId}`) // Notifica especificamente o novo usuário
+        .emit(`company-${companyId}-ticket`, {
+            action: "transfer",
+            ticket
+        });
+
+    return res.status(200).json(ticket);
+};
