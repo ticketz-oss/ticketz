@@ -3,7 +3,7 @@ name: Create and publish multi-arch Docker images
 on:
   push:
     branches:
-      - 'crm'
+      - 'tutujaru-crm'
       - 'fix/**'
       - 'dev'
       - 'test-**'
