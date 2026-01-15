@@ -25,7 +25,6 @@ import TableAttendantsStatus from "../../components/Dashboard/TableAttendantsSta
 import { isEmpty } from "lodash";
 import moment from "moment";
 import { i18n } from "../../translate/i18n";
-import OnlyForSuperUser from "../../components/OnlyForSuperUser";
 import useAuth from "../../hooks/useAuth.js";
 import clsx from "clsx";
 import { loadJSON } from "../../helpers/loadJSON";
@@ -33,14 +32,10 @@ import { loadJSON } from "../../helpers/loadJSON";
 import { SmallPie } from "./SmallPie";
 import { TicketCountersChart } from "./TicketCountersChart";
 import { getTimezoneOffset } from "../../helpers/getTimezoneOffset.js";
-
-import TicketzRegistry from "../../components/TicketzRegistry";
-import { copyToClipboard } from "../../helpers/copyToClipboard.js";
-import api from "../../services/api.js";
-import { SocketContext } from "../../context/Socket/SocketContext.js";
 import { formatTimeInterval } from "../../helpers/formatTimeInterval.js";
 
-const gitinfo = loadJSON('/gitinfo.json');
+import api from "../../services/api.js";
+import { SocketContext } from "../../context/Socket/SocketContext.js";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -54,42 +49,6 @@ const useStyles = makeStyles((theme) => ({
     height: 240,
     overflowY: "auto",
     ...theme.scrollbarStyles,
-  },
-  pixkey: {
-    fontSize: "9pt",
-  },
-  paymentimg: {
-    maxWidth: "75%",
-    marginTop: 10,
-  },
-  paymentpix: {
-    maxWidth: "100%",
-    maxHeight: 130,
-    padding: "5px",
-    backgroundColor: "white",
-    borderColor: "black",
-    borderStyle: "solid",
-    borderWidth: "2px",
-  },
-  supportPaper: {
-    padding: theme.spacing(2),
-    display: "flex",
-    flexDirection: "column",
-    overflowY: "clip",
-    height: 300,
-    backgroundColor: theme.palette.secondary.main,
-    color: theme.palette.secondary.contrastText,
-    ...theme.scrollbarStyles,
-  },
-  supportBox: {
-    backgroundColor: theme.palette.secondary.light,
-    borderRadius: "10px",
-    textAlign: "center",
-    borderColor: theme.palette.secondary.main,
-    borderWidth: "3px",
-    borderStyle: "solid",
-    transition: "max-height 0.5s ease",
-    overflow: "clip"
   },
   cardAvatar: {
     fontSize: "55px",
@@ -150,51 +109,6 @@ const useStyles = makeStyles((theme) => ({
     position: "sticky",
     right: 0,
   },
-  ticketzProPaper: {
-    padding: theme.spacing(2),
-    display: "flex",
-    flexDirection: "column",
-    overflowY: "auto",
-    minHeight: 300,
-    backgroundColor: theme.palette.ticketzproad.main,
-    color: theme.palette.ticketzproad.contrastText,
-    ...theme.scrollbarStyles,
-  },
-  ticketzRegistryPaper: {
-    padding: theme.spacing(2),
-    display: "flex",
-    flexDirection: "column",
-    overflowY: "auto",
-    backgroundColor: theme.palette.background.main,
-    color: theme.palette.background.contrastText,
-    borderColor: theme.palette.primary.main,
-    borderWidth: "3px",
-    borderStyle: "solid",
-    marginBottom: "1em",
-    ...theme.scrollbarStyles,
-  },
-  ticketzProBox: {
-    textAlign: "center",
-    alignContent: "center"
-  },
-  ticketzProTitle: {
-    fontWeight: "bold"
-  },
-  ticketzProScreen: {
-    maxHeight: "300px",
-    maxWidth: "100%"
-  },
-  ticketzProFeatures: {
-    padding: 0,
-    listStyleType: "none"
-  },
-  ticketzProCommand: {
-    fontFamily: "monospace",
-    backgroundColor: "#00000080"
-  },
-  clickpointer: {
-    cursor: "pointer"
-  }
 }));
 
 const InfoCard = ({ title, value, icon }) => {
@@ -232,7 +146,7 @@ const InfoCard = ({ title, value, icon }) => {
 const InfoRingCard = ({ title, value, graph }) => {
   const classes = useStyles();
   return (
-    <Grid item xs={12} sm={4}>
+    <Grid item xs={12} sm={6} md={4}>
       <Paper
         className={classes.cardSolid}
         elevation={4}
@@ -271,12 +185,7 @@ const Dashboard = () => {
   );
   const [dateTo, setDateTo] = useState(moment().format("YYYY-MM-DDTHH") + ":59");
   const { getCurrentUserInfo } = useAuth();
-    
-  const [supportPix, setSupportPix] = useState(false);
-  const [supportIsBr, setSupportIsBr] = useState(false);
-  const [registered, setRegistered] = useState(false);
-  const [proInstructionsOpen, setProInstructionsOpen] = useState(false);
-  
+
   const [usersOnlineTotal, setUsersOnlineTotal] = useState(0);
   const [usersOfflineTotal, setUsersOfflineTotal] = useState(0);
   const [usersStatusChartData, setUsersStatusChartData] = useState([]);
@@ -291,37 +200,6 @@ const Dashboard = () => {
 
   const socketManager = useContext(SocketContext);
     
-  async function showProInstructions() {
-    if (gitinfo.commitHash) {
-      setProInstructionsOpen(true);
-      return;
-    }
-    
-    window.open("https://pro.ticke.tz", "_blank");
-  }
-  
-  useEffect(() => {
-    fetch('https://ipapi.co/json/')
-      .then(res => res.json())
-      .then(data => {
-        if (data.country === 'BR') {
-          setSupportPix(true);
-          setSupportIsBr(true);
-        }
-      });
-  }, []);
-  
-  useEffect(() => {
-    const socket = socketManager.GetSocket(companyId);
-    
-    socket.on("userOnlineChange", updateStatus);
-    socket.on("counter", updateStatus);
-
-    return () => {
-      socket.disconnect();
-    }
-  }, [socketManager]);
-  
   useEffect(() => {
     getCurrentUserInfo().then(
       (user) => {
@@ -334,12 +212,6 @@ const Dashboard = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(async () => {
-    const registry = await api.get("/ticketz/registry");
-
-    setRegistered( registry?.data?.disabled || !!(registry?.data?.whatsapp ) );
-  }, []);
-    
   useEffect(() => {
     fetchData();
   }, [period]);
@@ -464,9 +336,20 @@ const Dashboard = () => {
 
   useEffect(() => {
     updateStatus();
-  }, [])
+  }, []);
 
   const companyId = localStorage.getItem("companyId");
+
+  useEffect(() => {
+    const socket = socketManager.GetSocket(companyId);
+    
+    socket.on("userOnlineChange", updateStatus);
+    socket.on("counter", updateStatus);
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [socketManager, companyId]);
 
   function renderFilters() {
       return (
@@ -525,163 +408,13 @@ const Dashboard = () => {
   }
 
   if (currentUser?.profile !== "admin") {
-    return (
-      <div>
-      </div>
-    );
+    return null;
   }
       
   return (
     <div>
       <Container maxWidth="lg" className={classes.container}>
         <Grid container spacing={3} justifyContent="flex-start">
-
-          { !localStorage.getItem("hideAds") && <OnlyForSuperUser
-            user={currentUser}
-            yes={() => (
-              <>
-              <Grid item xs={12}>
-                {!registered &&
-                  <Paper className={classes.ticketzRegistryPaper}>
-                    <TicketzRegistry onRegister={setRegistered} />
-                  </Paper>
-                }
-              </Grid>
-              <Grid item xs={12} md={8}>
-                <Paper className={clsx(classes.ticketzProPaper, {
-                  [classes.clickpointer]: !proInstructionsOpen,
-                })} onClick={() => showProInstructions()}>
-                  <Grid container justifyContent="flex-end">
-                    <Grid className={classes.ticketzProBox} item xs={12} sm={4}>
-                      <div>
-                        <img className={classes.ticketzProScreen} src="https://pro.ticke.tz/images/0/7/3/0/b/0730b234af7b4b0dac72d09828863bb7cb9193ea-ticketz-computador.png" />
-                      </div>
-                    </Grid>
-                    { !proInstructionsOpen &&
-                    <Grid className={classes.ticketzProBox} item xs={12} sm={8}>
-                      <Typography className={classes.ticketzProTitle} component="h3" variant="h5" gutterBottom>
-                        Ticketz PRO
-                      </Typography>
-                      <Typography component="h4" variant="h7" gutterBottom>
-                      <ul className={classes.ticketzProFeatures}>
-                        <li>Whatsapp Oficial - Instagram - Messenger e outros</li>
-                        <li>Features exclusivas</li>
-                        <li>Suporte Avançado</li>
-                        <li>Migração Facilitada</li>
-                      </ul>
-                      </Typography>
-                      <Typography component="h3" variant="h5">
-                        Assine por R$ 199/mês
-                      </Typography>
-                      <Typography component="h3" variant="h7" gutterBottom>
-                        direto dentro do sistema
-                      </Typography>
-                      { gitinfo.commitHash && 
-                      <Typography component="h4" variant="h6">
-                        Clique para instruções de Upgrade
-                      </Typography>
-                      }
-                      { !gitinfo.commitHash && 
-                      <Typography component="h3" variant="h5">
-                        Clique para visitar o site!
-                      </Typography>
-                      }
-                    </Grid>
-                    }
-                    { proInstructionsOpen &&
-                    <Grid className={classes.ticketzProBox} item xs={12} sm={8}>
-                      <Typography className={classes.ticketzProTitle} component="h3" variant="h5" gutterBottom>
-                        Instruções de Upgrade
-                      </Typography>
-                      <Typography paragraph>
-                        Se você instalou as imagens disponibilizadas pelo projeto em um
-                        servidor ou VPS utilizando as instruções facilitadas tudo o que
-                        você precisa fazer é acessar seu servidor e digitar o comando abaixo:
-                      </Typography>
-                      <Typography className={classes.ticketzProCommand} paragraph>
-                        curl -sSL update.ticke.tz | sudo bash -s pro
-                      </Typography>
-                      <Typography paragraph>
-                        Em instantes o Ticketz PRO estará instalado com todos os teus dados,
-                        agora só precisa ir até o menu de usuário, clicar em "Assinatura do
-                        Ticketz PRO" e fazer a sua assinatura.
-                      </Typography>
-                      <Typography paragraph>
-                        Se a tua instalação for diferente ou acredita que precisa
-                        de auxílio para instalar o Ticketz
-                        Pro, <a href="https://wa.me/554935670707"> entre
-                        em contato</a> que nós ajudamos!
-                      </Typography>
-                    </Grid>
-                    }
-                  </Grid>
-                </Paper>
-              </Grid>
-              </>
-            )} />
-          }
-
-          { !localStorage.getItem("hideAds") && <OnlyForSuperUser
-            user={currentUser}
-            yes={() => (
-              <Grid item xs={12} md={4}>
-                <Paper className={classes.supportPaper}>
-                  <Typography style={{ overflow: "hidden" }} component="h2" variant="h6" gutterBottom>
-                    {i18n.t("ticketz.support.title")}
-                  </Typography>
-                    <Grid container justifyContent="flex-end">
-                      <Grid className={classes.supportBox} style={{maxHeight: supportPix ? 300 : 35} } item xs={12}>
-                        <Typography
-                          className={classes.clickpointer}
-                          component="h3" variant="h6"
-                          gutterBottom onClick={() => setSupportPix(true)}>
-                          PIX
-                        </Typography>
-                        <div
-                          className={classes.clickpointer}
-                          onClick={() => {
-                            copyToClipboard("1ab11506-9480-4303-8e1e-988e7c49ed4d");
-                            toast.success("Chave PIX copiada");
-                          }
-                          }>
-                          <div>
-                            <img className={classes.paymentpix} src="/ticketzpix.png" />
-                          </div>
-                          <Typography className={classes.pixkey} component="body2" paragraph>
-                            Clique para copiar a chave PIX
-                          </Typography>
-                        </div>
-                      </Grid>
-                      <Grid className={classes.supportBox}  style={{maxHeight: supportPix ? 35 : 300 }} item xs={12} onClick={() => setSupportPix(false)}>
-                        <Typography
-                          className={classes.clickpointer}
-                          component="h3" variant="h6"
-                          gutterBottom onClick={() => setSupportPix(true)}>
-                          {i18n.t("ticketz.support.mercadopagotitle")}
-                        </Typography>
-                        { supportPix || <> 
-                        {supportIsBr && <>
-                          <Typography component="body2" paragraph>
-                            {i18n.t("ticketz.support.recurringbrl")}
-                          </Typography>
-                          <div><a href="https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=2c9380848f1b8ed1018f2b011f90061f" target="_blank">
-                            <img className={classes.paymentimg} src="/mercadopago.png" />
-                          </a></div>
-                        </>}
-                        {!supportIsBr && <>
-                          <Typography component="body2" paragraph>
-                            {i18n.t("ticketz.support.international")}
-                          </Typography>
-                          <div><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=X6XHVCPMRQEL4" target="_blank">
-                            <img className={classes.paymentimg} src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" />
-                          </a></div>
-                        </>}
-                        </> }
-                      </Grid>
-                    </Grid>
-                </Paper>
-              </Grid>
-            )} /> }
 
           {/* USUARIOS ONLINE */}
           <InfoRingCard
@@ -753,7 +486,6 @@ const Dashboard = () => {
                />
             </Paper>
           </Grid>
-
 
           {/* USER REPORT */}
           <Grid item xs={12}>
