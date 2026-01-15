@@ -10,6 +10,7 @@ import ShowTicketUUIDService from "../services/TicketServices/ShowTicketFromUUID
 import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import UpdateTicketService from "../services/TicketServices/UpdateTicketService";
 import ListTicketsServiceKanban from "../services/TicketServices/ListTicketsServiceKanban";
+import TransferTicketService from "../services/TicketServices/TransferTicketService";
 
 type IndexQuery = {
   isSearch?: string;
@@ -265,4 +266,35 @@ export const transfer = async (req: Request, res: Response): Promise<Response> =
         });
 
     return res.status(200).json(ticket);
+};
+
+// Adicione este método antes do último } export:
+export const transfer = async (req: Request, res: Response): Promise<Response> => {
+  const { ticketId } = req.params;
+  const { newUserId, queueId } = req.body;
+  const reqUserId = req.user.id;
+  const { companyId } = req.user;
+
+  // Validação básica
+  if (!newUserId) {
+    return res.status(400).json({ error: "newUserId is required" });
+  }
+
+  // Usa o mutex para evitar condições de corrida
+  const { ticket, oldUserId } = await updateMutex.runExclusive(async () => {
+    return await TransferTicketService({
+      ticketId: Number(ticketId),
+      newUserId: Number(newUserId),
+      reqUserId: Number(reqUserId),
+      companyId,
+      queueId: queueId ? Number(queueId) : null
+    });
+  });
+
+  return res.status(200).json({ 
+    ticket, 
+    message: "Ticket transferred successfully",
+    oldUserId,
+    newUserId: ticket.userId 
+  });
 };
