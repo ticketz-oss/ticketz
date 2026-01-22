@@ -312,7 +312,7 @@ const getContactMessage = async (msg: WAMessage, wbot: Session) => {
         id: msg.key.remoteJid,
         lid: msg?.key?.sender_lid,
         jid: msg?.key?.sender_pn,
-        name: msg.key.fromMe ? rawNumber : msg.pushName
+        name: msg.key.fromMe ? rawNumber : msg.pushName || msg.verifiedBizName
       };
 };
 
