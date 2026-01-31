@@ -53,6 +53,7 @@ import { CounterManager } from "./counter";
 import UserSocketSession from "../models/UserSocketSession";
 import { GetCompanySetting } from "../helpers/CheckSettings";
 import { DecoupledDriverServices } from "../services/DecoupledDriverServices/DecoupledDriverServices";
+import { corsOrigin } from "../helpers/corsOrigin";
 
 const decoupledDriverServices = DecoupledDriverServices.getInstance();
 
@@ -78,7 +79,7 @@ const notifyOnlineChange = (companyId: number, userId: number, online) => {
 export const initIO = (httpServer: Server): SocketIO => {
   io = new SocketIO(httpServer, {
     cors: {
-      origin: process.env.FRONTEND_URL
+      origin: corsOrigin
     }
   });
 

@@ -13,6 +13,7 @@ import AppError from "./errors/AppError";
 import routes from "./routes";
 import { logger } from "./utils/logger";
 import { messageQueue, sendScheduledMessages } from "./queues";
+import { corsOrigin } from "./helpers/corsOrigin";
 
 class SystemError extends Error {
   code?: string;
@@ -30,7 +31,7 @@ app.set("queues", {
 app.use(
   cors({
     credentials: true,
-    origin: process.env.FRONTEND_URL,
+    origin: corsOrigin,
     exposedHeaders: ["Content-Range", "X-Content-Range", "Date"]
   })
 );
