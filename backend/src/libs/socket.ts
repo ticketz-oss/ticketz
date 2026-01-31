@@ -73,7 +73,9 @@ const joinTicketChannel = async (
 };
 
 const notifyOnlineChange = (companyId: number, userId: number, online) => {
-  io.to("super").to(`company-${companyId}-admin`).emit("userOnlineChange", { userId, online });
+  io.to("super")
+    .to(`company-${companyId}-admin`)
+    .emit("userOnlineChange", { userId, online });
 };
 
 export const initIO = (httpServer: Server): SocketIO => {
