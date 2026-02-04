@@ -3,7 +3,7 @@ name: Create and publish multi-arch Docker images
 on:
   push:
     branches:
-      - 'main'
+      - 'tutujaru-crm'
       - 'fix/**'
       - 'dev'
       - 'test-**'
@@ -11,8 +11,8 @@ on:
       - 'v*.*.*'
 env:
   REGISTRY: ghcr.io
-  IMAGE_BACKEND: ticketz-oss/ticketz-backend
-  IMAGE_FRONTEND: ticketz-oss/ticketz-frontend
+  IMAGE_BACKEND: tutujaru/CNRO-backend
+  IMAGE_FRONTEND: tutujaru/CNRO-frontend
 
 jobs:
   build-and-push-images:

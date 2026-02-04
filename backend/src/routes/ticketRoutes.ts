@@ -4,6 +4,8 @@ import isAuth from "../middleware/isAuth";
 import * as TicketController from "../controllers/TicketController";
 import isCompliant from "../middleware/isCompliant";
 
+import validateTransfer from "../middleware/validateTransfer";
+
 const ticketRoutes = express.Router();
 
 ticketRoutes.get("/tickets", isAuth, isCompliant, TicketController.index);
@@ -39,3 +41,10 @@ ticketRoutes.delete(
 );
 
 export default ticketRoutes;
+
+ticketRoutes.patch(
+  "/tickets/:ticketId/transfer",
+  isAuth,
+  isCompliant,
+  TicketController.transfer
+);
