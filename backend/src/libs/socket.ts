@@ -53,6 +53,7 @@ import { CounterManager } from "./counter";
 import UserSocketSession from "../models/UserSocketSession";
 import { GetCompanySetting } from "../helpers/CheckSettings";
 import { DecoupledDriverServices } from "../services/DecoupledDriverServices/DecoupledDriverServices";
+import { corsOrigin } from "../helpers/corsOrigin";
 
 const decoupledDriverServices = DecoupledDriverServices.getInstance();
 
@@ -72,13 +73,15 @@ const joinTicketChannel = async (
 };
 
 const notifyOnlineChange = (companyId: number, userId: number, online) => {
-  io.to("super").to(`company-${companyId}-admin`).emit("userOnlineChange", { userId, online });
+  io.to("super")
+    .to(`company-${companyId}-admin`)
+    .emit("userOnlineChange", { userId, online });
 };
 
 export const initIO = (httpServer: Server): SocketIO => {
   io = new SocketIO(httpServer, {
     cors: {
-      origin: process.env.FRONTEND_URL
+      origin: corsOrigin
     }
   });
 

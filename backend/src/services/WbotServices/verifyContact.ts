@@ -119,7 +119,7 @@ export async function verifyContact(
       : msgContact.id.substring(0, msgContact.id.indexOf("@")));
 
   const contactData = {
-    name: msgContact?.name || msgContact.id.replace(/\D/g, ""),
+    name: msgContact?.name || number || msgContact.id.replace(/\D/g, ""),
     number,
     profilePicUrl,
     isGroup: msgContact.id.includes("g.us"),
