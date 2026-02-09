@@ -142,10 +142,10 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, ticket, loading }) =>
 					<ContactDrawerSkeleton classes={classes} />
 				) : (
 					<div className={classes.content}>
-						<Paper square variant="outlined" className={classes.contactHeader}>
+						<div className={classes.contactHeader}>
 							<CardHeader
 								onClick={() => {}}
-								style={{ cursor: "pointer", width: '100%' }}
+								style={{ cursor: "pointer", width: '100%', padding: 0 }}
 								titleTypographyProps={{ noWrap: true }}
 								subheaderTypographyProps={{ noWrap: true }}
 								avatar={<Avatar src={contact.profilePicUrl} alt="contact_image" style={{ width: 60, height: 60, backgroundColor: generateColor(contact?.number), color: "white", fontWeight: "bold" }}>{ getInitials(contact?.name) }</Avatar>}
@@ -167,49 +167,41 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, ticket, loading }) =>
 									</>
 								}
 							/>
-							<Button
-								variant="outlined"
-								color="primary"
-								onClick={() => setModalOpen(!openForm)}
-								style={{fontSize: 12}}
-							>
-								{i18n.t("contactDrawer.buttons.edit")}
-							</Button>
-						</Paper>
+						</div>
               {showTags && (
-                <Paper square variant="outlined" className={classes.contactDetails}>
-                  <TagsContainer contact={contact} />
-                </Paper>
+                <TagsContainer contact={contact} />
               )}
+              {contact?.extraInfo?.length > 0 &&
+                <div
+                  className={classes.contactExtraInfo}
+                >
+                  <Typography variant="subtitle1">
+                    {i18n.t("contactModal.form.extraInfo")}
+                  </Typography>
+                  {contact?.extraInfo?.map(info => (
+                    <WhatsMarked>{`*${info?.name}:* ${info?.value}`}</WhatsMarked>
+                  ))}
+                </div>
+              }
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={() => setModalOpen(!openForm)}
+                style={{fontSize: 12, marginTop: 8}}
+              >
+                {i18n.t("contactDrawer.buttons.edit")}
+              </Button>
 						<Paper square variant="outlined" className={classes.contactDetails}>
 							<Typography variant="subtitle1" style={{marginBottom: 10}}>
 								{i18n.t("ticketOptionsMenu.appointmentsModal.title")}
 							</Typography>
 							<TicketNotes ticket={ticket} />
 						</Paper>
-						<Paper square variant="outlined" className={classes.contactDetails}>
-							<ContactModal
-								open={modalOpen}
-								onClose={() => setModalOpen(false)}
-								contactId={contact.id}
-							></ContactModal>
-							<Typography variant="subtitle1">
-								{i18n.t("contactDrawer.extraInfo")}
-							</Typography>
-							{contact?.extraInfo?.map(info => (
-								<Paper
-									key={info.id}
-									square
-									variant="outlined"
-									className={classes.contactExtraInfo}
-								>
-									<InputLabel>{info.name}</InputLabel>
-									<Typography component="div" noWrap style={{ paddingTop: 2 }}>
-										<WhatsMarked>{info.value}</WhatsMarked>
-									</Typography>
-								</Paper>
-							))}
-						</Paper>
+						<ContactModal
+							open={modalOpen}
+							onClose={() => setModalOpen(false)}
+							contactId={contact.id}
+						></ContactModal>
 					</div>
 				)}
 			</Drawer>
