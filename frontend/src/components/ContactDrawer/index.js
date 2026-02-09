@@ -10,16 +10,14 @@ import InputLabel from "@material-ui/core/InputLabel";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import Paper from "@material-ui/core/Paper";
-import CreateIcon from '@material-ui/icons/Create';
 
 import { i18n } from "../../translate/i18n";
 
 import ContactDrawerSkeleton from "../ContactDrawerSkeleton";
 import WhatsMarked from "react-whatsmarked";
 import { CardHeader } from "@material-ui/core";
-import { ContactForm } from "../ContactForm";
 import ContactModal from "../ContactModal";
-import { ContactNotes } from "../ContactNotes";
+import { TicketNotes } from "../TicketNotes";
 import { generateColor } from "../../helpers/colorGenerator";
 import { getInitials } from "../../helpers/getInitials";
 import { TagsContainer } from "../TagsContainer";
@@ -153,9 +151,8 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, ticket, loading }) =>
 								avatar={<Avatar src={contact.profilePicUrl} alt="contact_image" style={{ width: 60, height: 60, backgroundColor: generateColor(contact?.number), color: "white", fontWeight: "bold" }}>{ getInitials(contact?.name) }</Avatar>}
 								title={
 									<>
-										<Typography onClick={() => setOpenForm(true)}>
+										<Typography>
 											{contact.name}
-											<CreateIcon style={{fontSize: 16, marginLeft: 5}} />
 										</Typography>
 									</>
 								}
@@ -178,7 +175,6 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, ticket, loading }) =>
 							>
 								{i18n.t("contactDrawer.buttons.edit")}
 							</Button>
-							{(contact.id && openForm) && <ContactForm initialContact={contact} onCancel={() => setOpenForm(false)} />}
 						</Paper>
               {showTags && (
                 <Paper square variant="outlined" className={classes.contactDetails}>
@@ -189,7 +185,7 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, ticket, loading }) =>
 							<Typography variant="subtitle1" style={{marginBottom: 10}}>
 								{i18n.t("ticketOptionsMenu.appointmentsModal.title")}
 							</Typography>
-							<ContactNotes ticket={ticket} />
+							<TicketNotes ticket={ticket} />
 						</Paper>
 						<Paper square variant="outlined" className={classes.contactDetails}>
 							<ContactModal

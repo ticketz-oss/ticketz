@@ -973,9 +973,8 @@ const messages = {
         schedule: "Jadwal",
         delete: "Hapus",
         transfer: "Transfer",
-        registerAppointment: "Catatan Kontak",
         appointmentsModal: {
-          title: "Catatan Kontak",
+          title_id: "Catatan Tiket",
           textarea: "Catatan",
           placeholder: "Masukkan informasi yang ingin Anda catat di sini",
         },

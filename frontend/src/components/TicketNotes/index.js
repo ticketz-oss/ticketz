@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import List from '@material-ui/core/List';
@@ -6,15 +6,12 @@ import { makeStyles } from '@material-ui/core/styles';
 import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
 
-import ContactNotesDialogListItem from '../ContactNotesDialogListItem';
+import TicketNotesItem from '../TicketNotesItem';
 import ConfirmationModal from '../ConfirmationModal';
 
 import { toast } from "react-toastify";
-
 import { i18n } from "../../translate/i18n";
-
 import ButtonWithSpinner from '../ButtonWithSpinner';
-
 import useTicketNotes from '../../hooks/useTicketNotes';
 import { Grid } from '@material-ui/core';
 
@@ -38,14 +35,14 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const NoteSchema = Yup.object().shape({
-	note: Yup.string()
-		.min(2, "Too Short!")
-		.required("Required")
+ note: Yup.string()
+  .min(2, "Too Short!")
+  .required("Required")
 });
-export function ContactNotes ({ ticket }) {
+
+export function TicketNotes ({ ticket }) {
     const { id: ticketId, contactId } = ticket
     const classes = useStyles()
-    const [newNote, setNewNote] = useState({ note: "" });
     const [loading, setLoading] = useState(false)
     const [showOnDeleteDialog, setShowOnDeleteDialog] = useState(false)
     const [selectedNote, setSelectedNote] = useState({})
@@ -54,23 +51,13 @@ export function ContactNotes ({ ticket }) {
 
     useEffect(() => {
         async function openAndFetchData () {
-            handleResetState()
+            setLoading(false)
             await loadNotes()
         }
         openAndFetchData()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    const handleResetState = () => {
-        setNewNote({ note: "" })
-        setLoading(false)
-    }
-
-    const handleChangeComment = (e) => {
-        setNewNote({ note: e.target.value })
-    }
-
-    const handleSave = async values => {
+    const handleSave = async (values, { resetForm }) => {
         setLoading(true)
         try {
             await saveNote({
@@ -79,8 +66,8 @@ export function ContactNotes ({ ticket }) {
                 contactId
             })
             await loadNotes()
-            setNewNote({ note: '' })
-            toast.success('Observação adicionada com sucesso!')
+            resetForm()
+            toast.success(i18n.t("common.success"))
         } catch (e) {
             toast.error(e)
         }
@@ -98,7 +85,7 @@ export function ContactNotes ({ ticket }) {
             await deleteNote(selectedNote.id)
             await loadNotes()
             setSelectedNote({})
-            toast.success('Observação excluída com sucesso!')
+            toast.success(i18n.t("common.success"))
         } catch (e) {
             toast.error(e)
         }
@@ -118,7 +105,7 @@ export function ContactNotes ({ ticket }) {
 
     const renderNoteList = () => {
         return notes.map((note) => {
-            return <ContactNotesDialogListItem
+            return <TicketNotesItem
                 note={note}
                 key={note.id}
                 deleteItem={handleOpenDialogDelete}
@@ -129,28 +116,26 @@ export function ContactNotes ({ ticket }) {
     return (
         <>
             <ConfirmationModal
-                title="Excluir Registro"
+                title={i18n.t("common.delete")}
                 open={showOnDeleteDialog}
                 onClose={setShowOnDeleteDialog}
-                onConfirm={handleDelete}
-            >
-                Deseja realmente excluir este registro?
-            </ConfirmationModal>
+                onConfirm={handleDelete} />
             <Formik
-                initialValues={newNote}
-                enableReinitialize={true}
+                initialValues={{ note: "" }}
+                enableReinitialize={false}
                 validationSchema={NoteSchema}
-                onSubmit={(values, actions) => {
-                    setTimeout(() => {
-                        handleSave(values);
-                        actions.setSubmitting(false);
-                    }, 400);
-                }}
+                onSubmit={handleSave}
             >
-
-                {({ touched, errors, setErrors }) => (
+                {({ touched, errors, resetForm, setErrors }) => (
                     <Form>
                         <Grid container spacing={2}>
+                            { notes.length > 0 && (
+                                <Grid xs={12} item>
+                                    <List className={classes.list}>
+                                        { renderNoteList() }
+                                    </List>
+                                </Grid>
+                            ) }
                             <Grid xs={12} item>
                                 <Field
                                     as={TextField}
@@ -162,35 +147,27 @@ export function ContactNotes ({ ticket }) {
                                     error={touched.note && Boolean(errors.note)}
                                     helperText={touched.note && errors.note}
                                     variant="outlined"
-                                    onChange={handleChangeComment}
                                     fullWidth
                                 />
                             </Grid>
-                            { notes.length > 0 && (
-                                <Grid xs={12} item>
-                                    <List className={classes.list}>
-                                        { renderNoteList() }
-                                    </List>
-                                </Grid>
-                            ) }
                             <Grid xs={12} item>
                                 <Grid container spacing={2}>
                                     <Grid xs={6} item>
                                         <Button
                                             onClick={() => {
-                                                setNewNote("");
+                                                resetForm();
                                                 setErrors({});
                                             }}
                                             color="primary"
                                             variant="outlined"
                                             fullWidth
                                         >
-                                            Cancelar
+                                            {i18n.t("common.cancel")}
                                         </Button>
                                     </Grid>
                                     <Grid xs={6} item>
                                         <ButtonWithSpinner loading={loading} color="primary" type="submit" variant="contained" autoFocus fullWidth>
-                                            Salvar
+                                            {i18n.t("common.save")}
                                         </ButtonWithSpinner>
                                     </Grid>
                                 </Grid>

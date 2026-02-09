@@ -911,9 +911,8 @@ const messages = {
         schedule: "Planification",
         delete: "Supprimer",
         transfer: "Transférer",
-        registerAppointment: "Observations du Contact",
         appointmentsModal: {
-          title: "Observations du Contact",
+          title: "Observations du Service",
           textarea: "Observation",
           placeholder: "Insérez ici les informations que vous souhaitez enregistrer",
         },

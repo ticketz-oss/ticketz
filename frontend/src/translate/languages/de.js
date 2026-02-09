@@ -910,9 +910,8 @@ const messages = {
         schedule: "Planung",
         delete: "Löschen",
         transfer: "Übertragen",
-        registerAppointment: "Kontaktbeobachtungen",
         appointmentsModal: {
-          title: "Kontaktbeobachtungen",
+          title: "Beobachtungen zum Ticket",
           textarea: "Beobachtung",
           placeholder: "Geben Sie hier die Informationen ein, die Sie registrieren möchten",
         },

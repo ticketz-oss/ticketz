@@ -1,4 +1,3 @@
-import React from 'react';
 import PropTypes from 'prop-types';
 import IconButton from '@material-ui/core/IconButton';
 import ListItem from '@material-ui/core/ListItem';
@@ -17,7 +16,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-export default function ContactNotesDialogListItem (props) {
+export default function TicketNotesItem (props) {
     const { note, deleteItem } = props;
     const classes = useStyles();
 
@@ -58,7 +57,7 @@ export default function ContactNotesDialogListItem (props) {
     )   
 }
 
-ContactNotesDialogListItem.propTypes = {
+TicketNotesItem.propTypes = {
     note: PropTypes.object.isRequired,
     deleteItem: PropTypes.func.isRequired
 }
