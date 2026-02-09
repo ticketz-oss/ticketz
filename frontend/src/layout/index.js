@@ -270,6 +270,13 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   }, []);
   
   useEffect(() => {
+    const currentLang = localStorage.getItem("language");
+    if (currentLang) {
+      setCurrentLanguage(currentLang);
+    }
+  }, []);
+
+  useEffect(() => {
     window.mentionClick = (mention) => {
       const contact = {
         id: mention.contactId || mention.id,
@@ -465,33 +472,6 @@ const LoggedInLayout = ({ children, themeToggle }) => {
           <ChatPopover />
 
           <div>
-            <Menu
-              id="language-appbar"
-              anchorEl={anchorEl}
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "right",
-              }}
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              open={languageOpen}
-              onClose={handleCloseLanguageMenu}
-            >
-            {
-              Object.keys(messages).map((m) => (
-                <MenuItem onClick={() => handleChooseLanguage(m)}>
-                  {messages[m].translations.mainDrawer.appBar.i18n.language}
-                </MenuItem>
-              ))
-            }
-            </Menu>
-          </div>
-
-
-          <div>
             <IconButton
               aria-label="account of current user"
               aria-controls="menu-appbar"
@@ -530,7 +510,9 @@ const LoggedInLayout = ({ children, themeToggle }) => {
                 {
                   Object.keys(messages).map((m) => (
                     <MenuItem onClick={() => handleChooseLanguage(m)}>
-                      {messages[m].translations.mainDrawer.appBar.i18n.language}
+                      <div style={{ fontWeight: currentLanguage === m ? "bold" : "normal" }}>
+                        {messages[m].translations.mainDrawer.appBar.i18n.language}
+                      </div>
                     </MenuItem>
                   ))
                 }
