@@ -27,7 +27,7 @@ export default function TicketNotesItem (props) {
     return (
         <ListItem alignItems="flex-start">
             <ListItemAvatar>
-                <Avatar alt={note.user.name} src="/static/images/avatar/1.jpg" />
+                <Avatar alt={note.user?.name || ""} src="/static/images/avatar/1.jpg" />
             </ListItemAvatar>
             <ListItemText
                 primary={
@@ -44,7 +44,7 @@ export default function TicketNotesItem (props) {
                 }
                 secondary={
                     <>
-                        {note.user.name}, {moment(note.createdAt).format('DD/MM/YY HH:mm')}
+                        {note.user?.name || "---"}, {moment(note.createdAt).format('DD/MM/YY HH:mm')}
                     </>
                 }
             />
