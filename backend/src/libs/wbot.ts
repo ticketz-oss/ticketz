@@ -17,11 +17,6 @@ import NodeCache from "node-cache";
 import { Op } from "sequelize";
 import { Agent } from "https";
 import { Mutex } from "async-mutex";
-import useVoiceCallsZapitu from "voice-calls-zapitu";
-import {
-  ClientToServerEvents,
-  ServerToClientEvents
-} from "voice-calls-zapitu/lib/services/transport.type";
 import { Socket } from "socket.io-client";
 import Whatsapp from "../models/Whatsapp";
 import { logger, loggerBaileys } from "../utils/logger";
@@ -401,35 +396,6 @@ export const initWASocket = async (
               await whatsapp.reload({
                 include: ["wavoip"]
               });
-              if (whatsapp.wavoip) {
-                useVoiceCallsZapitu(
-                  whatsapp.wavoip.token,
-                  wsocket,
-                  "open",
-                  true
-                )
-                  .then(
-                    (
-                      wavoipSocket: Socket<
-                        ServerToClientEvents,
-                        ClientToServerEvents
-                      >
-                    ) => {
-                      wavoipSocket.onAny((event, ...args) => {
-                        logger.trace(
-                          { event, args },
-                          `Wavoip event received: ${event}`
-                        );
-                      });
-                    }
-                  )
-                  .catch(error => {
-                    logger.error(
-                      { message: error.message },
-                      `Error initializing Wavoip for session ${name}`
-                    );
-                  });
-              }
 
               wsocket.myLid = jidNormalizedUser(wsocket.user?.lid);
               wsocket.myJid = jidNormalizedUser(wsocket.user.id);
