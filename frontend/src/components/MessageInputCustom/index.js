@@ -429,7 +429,7 @@ const CustomInput = (props) => {
       setPopupOpen(firstWord.indexOf("/") > -1);
 
       const filteredOptions = quickMessages.filter(
-        (m) => m.label.indexOf(inputMessage) > -1
+        (m) => m.label.toLowerCase().indexOf(inputMessage.toLowerCase()) > -1
       );
       setOptions(filteredOptions);
     } else {
