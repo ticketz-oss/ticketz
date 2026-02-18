@@ -9,8 +9,6 @@ export default function pastRelativeDate(date) {
   const diffDays = differenceInCalendarDays(now, date);
   const locale = availableLocales[localStorage.getItem('language')?.substring(0,2) || "en"] || enUS;
 
-  console.log("Locale: ", { locale });
-  
   if (isToday(date)) {
     return format(date, 'HH:mm', { locale });
   }
