@@ -460,7 +460,7 @@ const Connections = () => {
 													</IconButton>
 												)}
 
-                        {whatsApp.channel === "whatsapp" && wavoipAvailable() && (
+                        {false && whatsApp.channel === "whatsapp" && wavoipAvailable() && (
                           <IconButton
                             size="small"
                             onClick={() => handleOpenWavoipModal(whatsApp)}
