@@ -64,7 +64,7 @@ export const SendMessage = async (
                 mime.lookup(originalFilename) || "application/octet-stream",
               filename: messageData.mediaPath.split("/").pop() || "file.bin"
             },
-            whatsapp.companyId
+            { destination: whatsapp.companyId }
           )
         );
         if (!fileUrl.startsWith("http")) {

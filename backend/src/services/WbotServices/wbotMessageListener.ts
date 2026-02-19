@@ -573,13 +573,15 @@ const storeQuotedMessage = async (
   let mediaUrl = null;
   if (media) {
     // eslint-disable-next-line no-use-before-define
-    mediaUrl = await saveMediaToFile(media, ticket);
+    mediaUrl = await saveMediaToFile(media, { destination: ticket });
   }
 
   let thumbnailUrl = null;
   if (thumbnailMedia) {
     // eslint-disable-next-line no-use-before-define
-    thumbnailUrl = await saveMediaToFile(thumbnailMedia, ticket);
+    thumbnailUrl = await saveMediaToFile(thumbnailMedia, {
+      destination: ticket
+    });
   }
 
   const mediaType = media?.mimetype.split("/")[0];
@@ -696,12 +698,14 @@ export const verifyMediaMessage = async (
 
   let mediaUrl = mediaInfo?.mediaUrl || null;
   if (media) {
-    mediaUrl = await saveMediaToFile(media, ticket);
+    mediaUrl = await saveMediaToFile(media, { destination: ticket });
   }
 
   let thumbnailUrl = null;
   if (thumbnailMedia) {
-    thumbnailUrl = await saveMediaToFile(thumbnailMedia, ticket);
+    thumbnailUrl = await saveMediaToFile(thumbnailMedia, {
+      destination: ticket
+    });
   }
 
   const mimetype = mediaInfo?.mimetype || media?.mimetype || "";

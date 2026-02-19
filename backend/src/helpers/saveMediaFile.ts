@@ -6,13 +6,19 @@ import { logger } from "../utils/logger";
 import { makeRandomId } from "./MakeRandomId";
 import Ticket from "../models/Ticket";
 
+type SaveMediaOptions = {
+  destination: Ticket | number;
+  persistant?: boolean;
+  baseFolder?: string;
+};
+
 export default async function saveMediaToFile(
   media: {
     data: FileContents;
     mimetype: string;
     filename: string;
   },
-  destination: Ticket | number
+  { destination, persistant, baseFolder }: SaveMediaOptions
 ): Promise<string> {
   if (!media || !media.data || !media.mimetype || !destination) {
     logger.error("saveMediaToFile: Invalid media or destination provided");
@@ -33,7 +39,9 @@ export default async function saveMediaToFile(
     typeof destination === "number" ? undefined : destination.contactId;
   const ticketId = typeof destination === "number" ? undefined : destination.id;
 
-  let relativePath = `media/${companyId}/`;
+  const basePath = baseFolder || persistant ? "media-persistant" : "media";
+
+  let relativePath = `${basePath || "media"}/${companyId}/`;
 
   if (contactId && ticketId) {
     relativePath += `${contactId}/${ticketId}/`;
