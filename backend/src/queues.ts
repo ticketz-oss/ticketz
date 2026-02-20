@@ -1,5 +1,5 @@
 import * as Sentry from "@sentry/node";
-import Queue from "bull";
+import Queue, { Job } from "bull";
 import moment from "moment";
 import { Op, WhereOptions } from "sequelize";
 import { CronJob } from "cron";
@@ -29,6 +29,7 @@ import { startCampaignQueues } from "./queues/campaign";
 import OutOfTicketMessage from "./models/OutOfTicketMessages";
 import { getJidOf } from "./services/WbotServices/getJidOf";
 import { _t } from "./services/TranslationServices/i18nService";
+import { makeRandomId } from "./helpers/MakeRandomId";
 
 const connection = process.env.REDIS_URI || "";
 const limiterMax = process.env.REDIS_OPT_LIMITER_MAX || 1;
@@ -540,14 +541,29 @@ async function handleTicketTimeouts() {
   }
 }
 
-async function handleEveryMinute() {
-  logger.trace("handleEveryMinute: entering");
+async function handleEveryMinute(job: Job) {
+  const now = Date.now();
+  const delay = now - ((job.opts as any).prevMillis || now);
+
+  // only start jobs that are up to 10s after its scheduled time
+  if (delay > 10 * 1000) {
+    logger.warn(
+      `handleEveryMinute: job skipped due to delay - delay: ${delay}ms`
+    );
+    return;
+  }
+
+  const executionId = makeRandomId(10);
+  logger.trace(`handleEveryMinute: entering - executionId: ${executionId}`);
   try {
     await handleRatingsTimeout();
     await handleTicketTimeouts();
-    logger.trace("handleEveryMinute: exiting");
-  } catch (e: unknown) {
-    logger.error(`handleEveryMinute: error received: ${(e as Error).message}`);
+    logger.trace(`handleEveryMinute: exiting - executionId: ${executionId}`);
+  } catch (e) {
+    logger.error(
+      { message: e?.message },
+      `handleEveryMinute: error received - executionId: ${executionId}`
+    );
   }
 }
 
