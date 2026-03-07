@@ -1,0 +1,793 @@
+backend-1  | 2026/03/05 11:39:08 Waiting for: tcp://postgres:5432
+backend-1  | 2026/03/05 11:39:08 Connected to tcp://postgres:5432
+backend-1  | 
+backend-1  | [4mSequelize CLI [Node: 20.18.0, CLI: 5.5.1, ORM: 6.37.7][24m
+backend-1  | 
+backend-1  | Loaded configuration file "dist/config/database.js".
+backend-1  | No migrations were executed, database schema was already up to date.
+backend-1  | npm notice
+backend-1  | npm notice New major version of npm available! 10.8.2 -> 11.11.0
+backend-1  | npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.11.0
+backend-1  | npm notice To update run: npm install -g npm@11.11.0
+backend-1  | npm notice
+backend-1  | 
+backend-1  | [4mSequelize CLI [Node: 20.18.0, CLI: 5.5.1, ORM: 6.37.7][24m
+backend-1  | 
+backend-1  | Loaded configuration file "dist/config/database.js".
+backend-1  | No seeders found.
+backend-1  | 🌐 i18next is maintained with support from Locize — consider powering your project with managed localization (AI, CDN, integrations): https://locize.com 💙
+backend-1  | [32mINFO[39m [11:39:15.859] (60): [36m[ticketz]: Server is listening on port: 3000[39m
+backend-1  | [32mINFO[39m [11:39:15.884] (60): [36m[ticketz]: Started WhatsApp session for company ID: 1[39m
+backend-1  | [32mINFO[39m [11:39:15.884] (60): [36m[ticketz]: Starting queue processing[39m
+backend-1  | [32mINFO[39m [11:39:15.885] (60): [36m[ticketz]: Server started on port: 3000[39m
+backend-1  | [32mINFO[39m [11:39:15.887] (60): [36m[ticketz]: Campaign processing functions started[39m
+backend-1  | [32mINFO[39m [11:39:16.161] (60): [36m[ticketz]: using WA v2.3000.1031670115[39m
+backend-1  | [32mINFO[39m [11:39:16.161] (60): [36m[ticketz]: isLegacy: false[39m
+backend-1  | [32mINFO[39m [11:39:16.161] (60): [36m[ticketz]: Starting session 25125492[39m
+backend-1  | [32mINFO[39m [11:39:16.183] (60): [36m[ticketz]: Socket  25125492 Connection Update connecting[39m
+backend-1  | [32mINFO[39m [11:39:17.475] (60): [36m[ticketz]: Socket  25125492 Connection Update [39m
+backend-1  | [32mINFO[39m [11:39:17.477] (60): [36m[ticketz]: Socket  25125492 Connection Update open[39m
+backend-1  | [32mINFO[39m [11:39:17.545] (60): [36m[ticketz]: Socket  25125492 Connection Update [39m
+backend-1  | [32mINFO[39m [11:39:30.814] (60): [36m[ticketz]: Client Connected[39m
+backend-1  | [33mWARN[39m [11:41:46.224] (60):
+backend-1  |     [35mmessage[39m: "ERR_NOT_APPLICABLE"
+backend-1  |     [35mstatusCode[39m: 404
+backend-1  |     [35msubsystem[39m: "ticketz"
+backend-1  | [32mINFO[39m [11:41:46.951] (60): [36m[ticketz]: Telegram webhook registered successfully[39m
+backend-1  |     [35mwebhookUrl[39m: "https://note1.lpvoicetecnologia.com.br/webhook/telegram/8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg"
+backend-1  | [33mWARN[39m [11:41:46.958] (60): [36m[ticketz]: Telegram setWebhook returned non-ok[39m
+backend-1  |     [35mwebhookUrl[39m: "https://note1.lpvoicetecnologia.com.br/webhook/telegram/8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg"
+backend-1  |     [35mresult[39m: {
+backend-1  |       "ok": false,
+backend-1  |       "error_code": 429,
+backend-1  |       "description": "Too Many Requests: retry after 1",
+backend-1  |       "parameters": {
+backend-1  |         "retry_after": 1
+backend-1  |       }
+backend-1  |     }
+backend-1  | [33mWARN[39m [11:41:46.963] (60): [36m[ticketz]: Telegram setWebhook returned non-ok[39m
+backend-1  |     [35mwebhookUrl[39m: "https://note1.lpvoicetecnologia.com.br/webhook/telegram/8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg"
+backend-1  |     [35mresult[39m: {
+backend-1  |       "ok": false,
+backend-1  |       "error_code": 429,
+backend-1  |       "description": "Too Many Requests: retry after 1",
+backend-1  |       "parameters": {
+backend-1  |         "retry_after": 1
+backend-1  |       }
+backend-1  |     }
+backend-1  | [33mWARN[39m [11:41:46.982] (60): [36m[ticketz]: Telegram setWebhook returned non-ok[39m
+backend-1  |     [35mwebhookUrl[39m: "https://note1.lpvoicetecnologia.com.br/webhook/telegram/8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg"
+backend-1  |     [35mresult[39m: {
+backend-1  |       "ok": false,
+backend-1  |       "error_code": 429,
+backend-1  |       "description": "Too Many Requests: retry after 1",
+backend-1  |       "parameters": {
+backend-1  |         "retry_after": 1
+backend-1  |       }
+backend-1  |     }
+backend-1  | [33mWARN[39m [11:41:46.994] (60): [36m[ticketz]: Telegram setWebhook returned non-ok[39m
+backend-1  |     [35mwebhookUrl[39m: "https://note1.lpvoicetecnologia.com.br/webhook/telegram/8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg"
+backend-1  |     [35mresult[39m: {
+backend-1  |       "ok": false,
+backend-1  |       "error_code": 429,
+backend-1  |       "description": "Too Many Requests: retry after 1",
+backend-1  |       "parameters": {
+backend-1  |         "retry_after": 1
+backend-1  |       }
+backend-1  |     }
+backend-1  | [33mWARN[39m [11:41:47.000] (60): [36m[ticketz]: Telegram setWebhook returned non-ok[39m
+backend-1  |     [35mwebhookUrl[39m: "https://note1.lpvoicetecnologia.com.br/webhook/telegram/8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg"
+backend-1  |     [35mresult[39m: {
+backend-1  |       "ok": false,
+backend-1  |       "error_code": 429,
+backend-1  |       "description": "Too Many Requests: retry after 1",
+backend-1  |       "parameters": {
+backend-1  |         "retry_after": 1
+backend-1  |       }
+backend-1  |     }
+backend-1  | [32mINFO[39m [11:41:50.828] (60): [36m[ticketz]: ValidateStatelessChannel: Telegram token valid[39m
+backend-1  |     [35mbotName[39m: "opennnote_bot"
+backend-1  |     [35mid[39m: 6
+backend-1  | [32mINFO[39m [11:41:50.838] (60): [36m[ticketz]: Telegram webhook registered successfully[39m
+backend-1  |     [35mwebhookUrl[39m: "https://note1.lpvoicetecnologia.com.br/webhook/telegram/8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg"
+backend-1  | [33mWARN[39m [11:41:51.057] (60): [36m[ticketz]: ValidateStatelessChannel: Telegram setWebhook error — retrying[39m
+backend-1  |     [35mattempt[39m: 0
+backend-1  |     [35mwaitMs[39m: 1000
+backend-1  |     err: {
+backend-1  |       "code": "ERR_BAD_REQUEST",
+backend-1  |       "config": {
+backend-1  |         "adapter": [
+backend-1  |           "xhr",
+backend-1  |           "http",
+backend-1  |           "fetch"
+backend-1  |         ],
+backend-1  |         "allowAbsoluteUrls": true,
+backend-1  |         "data": "{\"url\":\"https://note1.lpvoicetecnologia.com.br/webhook/telegram/8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg\",\"drop_pending_updates\":true}",
+backend-1  |         "env": {},
+backend-1  |         "headers": {
+backend-1  |           "Accept": "application/json, text/plain, */*",
+backend-1  |           "Accept-Encoding": "gzip, compress, deflate, br",
+backend-1  |           "Content-Length": "140",
+backend-1  |           "Content-Type": "application/json",
+backend-1  |           "User-Agent": "axios/1.13.5"
+backend-1  |         },
+backend-1  |         "maxBodyLength": -1,
+backend-1  |         "maxContentLength": -1,
+backend-1  |         "method": "post",
+backend-1  |         "timeout": 10000,
+backend-1  |         "transformRequest": [
+backend-1  |           null
+backend-1  |         ],
+backend-1  |         "transformResponse": [
+backend-1  |           null
+backend-1  |         ],
+backend-1  |         "transitional": {
+backend-1  |           "clarifyTimeoutError": false,
+backend-1  |           "forcedJSONParsing": true,
+backend-1  |           "legacyInterceptorReqResOrdering": true,
+backend-1  |           "silentJSONParsing": true
+backend-1  |         },
+backend-1  |         "url": "https://api.telegram.org/bot8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg/setWebhook",
+backend-1  |         "xsrfCookieName": "XSRF-TOKEN",
+backend-1  |         "xsrfHeaderName": "X-XSRF-TOKEN"
+backend-1  |       },
+backend-1  |       "isAxiosError": true,
+backend-1  |       "message": "Request failed with status code 429",
+backend-1  |       "name": "AxiosError",
+backend-1  |       "request": {
+backend-1  |         "_closed": true,
+backend-1  |         "_contentLength": "140",
+backend-1  |         "_defaultKeepAlive": true,
+backend-1  |         "_ended": true,
+backend-1  |         "_events": {},
+backend-1  |         "_eventsCount": 7,
+backend-1  |         "_hasBody": true,
+backend-1  |         "_header": "POST /bot8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg/setWebhook HTTP/1.1\r\nAccept: application/json, text/plain, */*\r\nContent-Type: application/json\r\nUser-Agent: axios/1.13.5\r\nContent-Length: 140\r\nAccept-Encoding: gzip, compress, deflate, br\r\nHost: api.telegram.org\r\nConnection: keep-alive\r\n\r\n",
+backend-1  |         "_headerSent": true,
+backend-1  |         "_keepAliveTimeout": 0,
+backend-1  |         "_last": false,
+backend-1  |         "_redirectable": {
+backend-1  |           "_currentRequest": "[Circular]",
+backend-1  |           "_currentUrl": "https://api.telegram.org/bot8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg/setWebhook",
+backend-1  |           "_ended": true,
+backend-1  |           "_ending": true,
+backend-1  |           "_events": {
+backend-1  |             "socket": [
+backend-1  |               null,
+backend-1  |               null
+backend-1  |             ]
+backend-1  |           },
+backend-1  |           "_eventsCount": 3,
+backend-1  |           "_options": {
+backend-1  |             "agents": {},
+backend-1  |             "beforeRedirects": {},
+backend-1  |             "headers": {
+backend-1  |               "Accept": "application/json, text/plain, */*",
+backend-1  |               "Accept-Encoding": "gzip, compress, deflate, br",
+backend-1  |               "Content-Length": "140",
+backend-1  |               "Content-Type": "application/json",
+backend-1  |               "User-Agent": "axios/1.13.5"
+backend-1  |             },
+backend-1  |             "hostname": "api.telegram.org",
+backend-1  |             "maxBodyLength": null,
+backend-1  |             "maxRedirects": 21,
+backend-1  |             "method": "POST",
+backend-1  |             "nativeProtocols": {
+backend-1  |               "http:": "[Object]",
+backend-1  |               "https:": "[Object]"
+backend-1  |             },
+backend-1  |             "path": "/bot8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg/setWebhook",
+backend-1  |             "pathname": "/bot8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg/setWebhook",
+backend-1  |             "port": "",
+backend-1  |             "protocol": "https:"
+backend-1  |           },
+backend-1  |           "_redirectCount": 0,
+backend-1  |           "_redirects": [],
+backend-1  |           "_requestBodyBuffers": [],
+backend-1  |           "_requestBodyLength": 140,
+backend-1  |           "_timeout": null,
+backend-1  |           "_writableState": {
+backend-1  |             "bufferedIndex": 0,
+backend-1  |             "corked": 0,
+backend-1  |             "highWaterMark": 16384,
+backend-1  |             "length": 0,
+backend-1  |             "pendingcb": 0,
+backend-1  |             "writelen": 0
+backend-1  |           }
+backend-1  |         },
+backend-1  |         "_removedConnection": false,
+backend-1  |         "_removedContLen": false,
+backend-1  |         "_removedTE": false,
+backend-1  |         "_trailer": "",
+backend-1  |         "aborted": false,
+backend-1  |         "agent": {
+backend-1  |           "_events": {},
+backend-1  |           "_eventsCount": 2,
+backend-1  |           "_sessionCache": {
+backend-1  |             "list": [
+backend-1  |               "graph.facebook.com:443:::::::::::::::::::::",
+backend-1  |               "lookaside.fbsbx.com:443:::::::::::::::::::::",
+backend-1  |               "api.telegram.org:443:::::::::::::::::::::"
+backend-1  |             ],
+backend-1  |             "map": {
+backend-1  |               "api.telegram.org:443:::::::::::::::::::::": "[Object]",
+backend-1  |               "graph.facebook.com:443:::::::::::::::::::::": "[Object]",
+backend-1  |               "lookaside.fbsbx.com:443:::::::::::::::::::::": "[Object]"
+backend-1  |             }
+backend-1  |           },
+backend-1  |           "defaultPort": 443,
+backend-1  |           "freeSockets": {
+backend-1  |             "api.telegram.org:443:::::::::::::::::::::": [
+backend-1  |               "[Object]",
+backend-1  |               "[Object]",
+backend-1  |               "[Object]",
+backend-1  |               "[Object]",
+backend-1  |               "[Object]",
+backend-1  |               "[Object]"
+backend-1  |             ]
+backend-1  |           },
+backend-1  |           "keepAlive": true,
+backend-1  |           "keepAliveMsecs": 1000,
+backend-1  |           "maxCachedSessions": 100,
+backend-1  |           "maxFreeSockets": 256,
+backend-1  |           "maxSockets": null,
+backend-1  |           "maxTotalSockets": null,
+backend-1  |           "options": {
+backend-1  |             "keepAlive": true,
+backend-1  |             "noDelay": true,
+backend-1  |             "path": null,
+backend-1  |             "scheduling": "lifo",
+backend-1  |             "timeout": 5000
+backend-1  |           },
+backend-1  |           "protocol": "https:",
+backend-1  |           "requests": {},
+backend-1  |           "scheduling": "lifo",
+backend-1  |           "sockets": {},
+backend-1  |           "totalSocketCount": 6
+backend-1  |         },
+backend-1  |         "chunkedEncoding": false,
+backend-1  |         "destroyed": true,
+backend-1  |         "finished": true,
+backend-1  |         "host": "api.telegram.org",
+backend-1  |         "maxHeadersCount": null,
+backend-1  |         "maxRequestsOnConnectionReached": false,
+backend-1  |         "method": "POST",
+backend-1  |         "outputData": [],
+backend-1  |         "outputSize": 0,
+backend-1  |         "parser": null,
+backend-1  |         "path": "/bot8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg/setWebhook",
+backend-1  |         "protocol": "https:",
+backend-1  |         "res": {
+backend-1  |           "_consuming": false,
+backend-1  |           "_dumped": false,
+backend-1  |           "_events": {
+backend-1  |             "end": [
+backend-1  |               null,
+backend-1  |               null
+backend-1  |             ]
+backend-1  |           },
+backend-1  |           "_eventsCount": 4,
+backend-1  |           "_readableState": {
+backend-1  |             "awaitDrainWriters": null,
+backend-1  |             "buffer": [],
+backend-1  |             "bufferIndex": 0,
+backend-1  |             "highWaterMark": 16384,
+backend-1  |             "length": 0,
+backend-1  |             "pipes": []
+backend-1  |           },
+backend-1  |           "aborted": false,
+backend-1  |           "client": {
+backend-1  |             "_SNICallback": null,
+backend-1  |             "_closeAfterHandlingError": false,
+backend-1  |             "_controlReleased": true,
+backend-1  |             "_events": {
+backend-1  |               "close": "[Array]",
+backend-1  |               "timeout": "[Array]"
+backend-1  |             },
+backend-1  |             "_eventsCount": 9,
+backend-1  |             "_hadError": false,
+backend-1  |             "_host": "api.telegram.org",
+backend-1  |             "_httpMessage": null,
+backend-1  |             "_newSessionPending": false,
+backend-1  |             "_parent": null,
+backend-1  |             "_pendingData": null,
+backend-1  |             "_pendingEncoding": "",
+backend-1  |             "_readableState": {
+backend-1  |               "awaitDrainWriters": null,
+backend-1  |               "buffer": [],
+backend-1  |               "bufferIndex": 0,
+backend-1  |               "highWaterMark": 16384,
+backend-1  |               "length": 0,
+backend-1  |               "pipes": []
+backend-1  |             },
+backend-1  |             "_rejectUnauthorized": true,
+backend-1  |             "_requestCert": true,
+backend-1  |             "_secureEstablished": true,
+backend-1  |             "_securePending": false,
+backend-1  |             "_server": null,
+backend-1  |             "_sockname": null,
+backend-1  |             "_tlsOptions": {
+backend-1  |               "isServer": false,
+backend-1  |               "pipe": false,
+backend-1  |               "rejectUnauthorized": true,
+backend-1  |               "requestCert": true,
+backend-1  |               "secureContext": "[Object]"
+backend-1  |             },
+backend-1  |             "_writableState": {
+backend-1  |               "bufferedIndex": 0,
+backend-1  |               "corked": 0,
+backend-1  |               "highWaterMark": 16384,
+backend-1  |               "length": 0,
+backend-1  |               "pendingcb": 0,
+backend-1  |               "writelen": 0
+backend-1  |             },
+backend-1  |             "allowHalfOpen": false,
+backend-1  |             "alpnProtocol": false,
+backend-1  |             "authorizationError": null,
+backend-1  |             "authorized": true,
+backend-1  |             "connecting": false,
+backend-1  |             "encrypted": true,
+backend-1  |             "parser": null,
+backend-1  |             "secureConnecting": false,
+backend-1  |             "servername": "api.telegram.org",
+backend-1  |             "ssl": {
+backend-1  |               "_parent": "[Object]",
+backend-1  |               "_parentWrap": null,
+backend-1  |               "_secureContext": "[Object]",
+backend-1  |               "reading": true
+backend-1  |             },
+backend-1  |             "timeout": 5000
+backend-1  |           },
+backend-1  |           "complete": true,
+backend-1  |           "httpVersion": "1.1",
+backend-1  |           "httpVersionMajor": 1,
+backend-1  |           "httpVersionMinor": 1,
+backend-1  |           "method": null,
+backend-1  |           "rawHeaders": [
+backend-1  |             "Server",
+backend-1  |             "nginx/1.18.0",
+backend-1  |             "Date",
+backend-1  |             "Thu, 05 Mar 2026 14:41:50 GMT",
+backend-1  |             "Content-Type",
+backend-1  |             "application/json",
+backend-1  |             "Content-Length",
+backend-1  |             "109",
+backend-1  |             "Connection",
+backend-1  |             "keep-alive",
+backend-1  |             "Retry-After",
+backend-1  |             "1",
+backend-1  |             "Strict-Transport-Security",
+backend-1  |             "max-age=31536000; includeSubDomains; preload",
+backend-1  |             "Access-Control-Allow-Origin",
+backend-1  |             "*",
+backend-1  |             "Access-Control-Expose-Headers",
+backend-1  |             "Content-Length,Content-Type,Date,Server,Connection"
+backend-1  |           ],
+backend-1  |           "rawTrailers": [],
+backend-1  |           "redirects": [],
+backend-1  |           "req": "[Circular]",
+backend-1  |           "responseUrl": "https://api.telegram.org/bot8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg/setWebhook",
+backend-1  |           "socket": null,
+backend-1  |           "statusCode": 429,
+backend-1  |           "statusMessage": "Too Many Requests",
+backend-1  |           "upgrade": false,
+backend-1  |           "url": ""
+backend-1  |         },
+backend-1  |         "reusedSocket": true,
+backend-1  |         "sendDate": false,
+backend-1  |         "shouldKeepAlive": true,
+backend-1  |         "socket": {
+backend-1  |           "_SNICallback": null,
+backend-1  |           "_closeAfterHandlingError": false,
+backend-1  |           "_controlReleased": true,
+backend-1  |           "_events": {
+backend-1  |             "close": [
+backend-1  |               null,
+backend-1  |               null,
+backend-1  |               null
+backend-1  |             ],
+backend-1  |             "timeout": [
+backend-1  |               null,
+backend-1  |               null
+backend-1  |             ]
+backend-1  |           },
+backend-1  |           "_eventsCount": 9,
+backend-1  |           "_hadError": false,
+backend-1  |           "_host": "api.telegram.org",
+backend-1  |           "_httpMessage": null,
+backend-1  |           "_newSessionPending": false,
+backend-1  |           "_parent": null,
+backend-1  |           "_pendingData": null,
+backend-1  |           "_pendingEncoding": "",
+backend-1  |           "_readableState": {
+backend-1  |             "awaitDrainWriters": null,
+backend-1  |             "buffer": [],
+backend-1  |             "bufferIndex": 0,
+backend-1  |             "highWaterMark": 16384,
+backend-1  |             "length": 0,
+backend-1  |             "pipes": []
+backend-1  |           },
+backend-1  |           "_rejectUnauthorized": true,
+backend-1  |           "_requestCert": true,
+backend-1  |           "_secureEstablished": true,
+backend-1  |           "_securePending": false,
+backend-1  |           "_server": null,
+backend-1  |           "_sockname": null,
+backend-1  |           "_tlsOptions": {
+backend-1  |             "isServer": false,
+backend-1  |             "pipe": false,
+backend-1  |             "rejectUnauthorized": true,
+backend-1  |             "requestCert": true,
+backend-1  |             "secureContext": {
+backend-1  |               "context": {}
+backend-1  |             }
+backend-1  |           },
+backend-1  |           "_writableState": {
+backend-1  |             "bufferedIndex": 0,
+backend-1  |             "corked": 0,
+backend-1  |             "highWaterMark": 16384,
+backend-1  |             "length": 0,
+backend-1  |             "pendingcb": 0,
+backend-1  |             "writelen": 0
+backend-1  |           },
+backend-1  |           "allowHalfOpen": false,
+backend-1  |           "alpnProtocol": false,
+backend-1  |           "authorizationError": null,
+backend-1  |           "authorized": true,
+backend-1  |           "connecting": false,
+backend-1  |           "encrypted": true,
+backend-1  |           "parser": null,
+backend-1  |           "secureConnecting": false,
+backend-1  |           "servername": "api.telegram.org",
+backend-1  |           "ssl": {
+backend-1  |             "_parent": {
+backend-1  |               "onconnection": null,
+backend-1  |               "reading": true
+backend-1  |             },
+backend-1  |             "_parentWrap": null,
+backend-1  |             "_secureContext": {
+backend-1  |               "context": {}
+backend-1  |             },
+backend-1  |             "reading": true
+backend-1  |           },
+backend-1  |           "timeout": 5000
+backend-1  |         },
+backend-1  |         "strictContentLength": false,
+backend-1  |         "timeoutCb": null,
+backend-1  |         "upgradeOrConnect": false,
+backend-1  |         "useChunkedEncodingByDefault": true,
+backend-1  |         "writable": true
+backend-1  |       },
+backend-1  |       "response": {
+backend-1  |         "config": {
+backend-1  |           "adapter": [
+backend-1  |             "xhr",
+backend-1  |             "http",
+backend-1  |             "fetch"
+backend-1  |           ],
+backend-1  |           "allowAbsoluteUrls": true,
+backend-1  |           "data": "{\"url\":\"https://note1.lpvoicetecnologia.com.br/webhook/telegram/8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg\",\"drop_pending_updates\":true}",
+backend-1  |           "env": {},
+backend-1  |           "headers": {
+backend-1  |             "Accept": "application/json, text/plain, */*",
+backend-1  |             "Accept-Encoding": "gzip, compress, deflate, br",
+backend-1  |             "Content-Length": "140",
+backend-1  |             "Content-Type": "application/json",
+backend-1  |             "User-Agent": "axios/1.13.5"
+backend-1  |           },
+backend-1  |           "maxBodyLength": -1,
+backend-1  |           "maxContentLength": -1,
+backend-1  |           "method": "post",
+backend-1  |           "timeout": 10000,
+backend-1  |           "transformRequest": [
+backend-1  |             null
+backend-1  |           ],
+backend-1  |           "transformResponse": [
+backend-1  |             null
+backend-1  |           ],
+backend-1  |           "transitional": {
+backend-1  |             "clarifyTimeoutError": false,
+backend-1  |             "forcedJSONParsing": true,
+backend-1  |             "legacyInterceptorReqResOrdering": true,
+backend-1  |             "silentJSONParsing": true
+backend-1  |           },
+backend-1  |           "url": "https://api.telegram.org/bot8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg/setWebhook",
+backend-1  |           "xsrfCookieName": "XSRF-TOKEN",
+backend-1  |           "xsrfHeaderName": "X-XSRF-TOKEN"
+backend-1  |         },
+backend-1  |         "data": {
+backend-1  |           "description": "Too Many Requests: retry after 1",
+backend-1  |           "error_code": 429,
+backend-1  |           "ok": false,
+backend-1  |           "parameters": {
+backend-1  |             "retry_after": 1
+backend-1  |           }
+backend-1  |         },
+backend-1  |         "headers": {
+backend-1  |           "access-control-allow-origin": "*",
+backend-1  |           "access-control-expose-headers": "Content-Length,Content-Type,Date,Server,Connection",
+backend-1  |           "connection": "keep-alive",
+backend-1  |           "content-length": "109",
+backend-1  |           "content-type": "application/json",
+backend-1  |           "date": "Thu, 05 Mar 2026 14:41:50 GMT",
+backend-1  |           "retry-after": "1",
+backend-1  |           "server": "nginx/1.18.0",
+backend-1  |           "strict-transport-security": "max-age=31536000; includeSubDomains; preload"
+backend-1  |         },
+backend-1  |         "request": {
+backend-1  |           "_closed": true,
+backend-1  |           "_contentLength": "140",
+backend-1  |           "_defaultKeepAlive": true,
+backend-1  |           "_ended": true,
+backend-1  |           "_events": {},
+backend-1  |           "_eventsCount": 7,
+backend-1  |           "_hasBody": true,
+backend-1  |           "_header": "POST /bot8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg/setWebhook HTTP/1.1\r\nAccept: application/json, text/plain, */*\r\nContent-Type: application/json\r\nUser-Agent: axios/1.13.5\r\nContent-Length: 140\r\nAccept-Encoding: gzip, compress, deflate, br\r\nHost: api.telegram.org\r\nConnection: keep-alive\r\n\r\n",
+backend-1  |           "_headerSent": true,
+backend-1  |           "_keepAliveTimeout": 0,
+backend-1  |           "_last": false,
+backend-1  |           "_redirectable": {
+backend-1  |             "_currentRequest": "[Circular]",
+backend-1  |             "_currentUrl": "https://api.telegram.org/bot8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg/setWebhook",
+backend-1  |             "_ended": true,
+backend-1  |             "_ending": true,
+backend-1  |             "_events": {
+backend-1  |               "socket": "[Array]"
+backend-1  |             },
+backend-1  |             "_eventsCount": 3,
+backend-1  |             "_options": {
+backend-1  |               "agents": "[Object]",
+backend-1  |               "beforeRedirects": "[Object]",
+backend-1  |               "headers": "[Object]",
+backend-1  |               "hostname": "api.telegram.org",
+backend-1  |               "maxBodyLength": null,
+backend-1  |               "maxRedirects": 21,
+backend-1  |               "method": "POST",
+backend-1  |               "nativeProtocols": "[Object]",
+backend-1  |               "path": "/bot8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg/setWebhook",
+backend-1  |               "pathname": "/bot8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg/setWebhook",
+backend-1  |               "port": "",
+backend-1  |               "protocol": "https:"
+backend-1  |             },
+backend-1  |             "_redirectCount": 0,
+backend-1  |             "_redirects": [],
+backend-1  |             "_requestBodyBuffers": [],
+backend-1  |             "_requestBodyLength": 140,
+backend-1  |             "_timeout": null,
+backend-1  |             "_writableState": {
+backend-1  |               "bufferedIndex": 0,
+backend-1  |               "corked": 0,
+backend-1  |               "highWaterMark": 16384,
+backend-1  |               "length": 0,
+backend-1  |               "pendingcb": 0,
+backend-1  |               "writelen": 0
+backend-1  |             }
+backend-1  |           },
+backend-1  |           "_removedConnection": false,
+backend-1  |           "_removedContLen": false,
+backend-1  |           "_removedTE": false,
+backend-1  |           "_trailer": "",
+backend-1  |           "aborted": false,
+backend-1  |           "agent": {
+backend-1  |             "_events": {},
+backend-1  |             "_eventsCount": 2,
+backend-1  |             "_sessionCache": {
+backend-1  |               "list": "[Array]",
+backend-1  |               "map": "[Object]"
+backend-1  |             },
+backend-1  |             "defaultPort": 443,
+backend-1  |             "freeSockets": {
+backend-1  |               "api.telegram.org:443:::::::::::::::::::::": "[Array]"
+backend-1  |             },
+backend-1  |             "keepAlive": true,
+backend-1  |             "keepAliveMsecs": 1000,
+backend-1  |             "maxCachedSessions": 100,
+backend-1  |             "maxFreeSockets": 256,
+backend-1  |             "maxSockets": null,
+backend-1  |             "maxTotalSockets": null,
+backend-1  |             "options": {
+backend-1  |               "keepAlive": true,
+backend-1  |               "noDelay": true,
+backend-1  |               "path": null,
+backend-1  |               "scheduling": "lifo",
+backend-1  |               "timeout": 5000
+backend-1  |             },
+backend-1  |             "protocol": "https:",
+backend-1  |             "requests": {},
+backend-1  |             "scheduling": "lifo",
+backend-1  |             "sockets": {},
+backend-1  |             "totalSocketCount": 6
+backend-1  |           },
+backend-1  |           "chunkedEncoding": false,
+backend-1  |           "destroyed": true,
+backend-1  |           "finished": true,
+backend-1  |           "host": "api.telegram.org",
+backend-1  |           "maxHeadersCount": null,
+backend-1  |           "maxRequestsOnConnectionReached": false,
+backend-1  |           "method": "POST",
+backend-1  |           "outputData": [],
+backend-1  |           "outputSize": 0,
+backend-1  |           "parser": null,
+backend-1  |           "path": "/bot8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg/setWebhook",
+backend-1  |           "protocol": "https:",
+backend-1  |           "res": {
+backend-1  |             "_consuming": false,
+backend-1  |             "_dumped": false,
+backend-1  |             "_events": {
+backend-1  |               "end": "[Array]"
+backend-1  |             },
+backend-1  |             "_eventsCount": 4,
+backend-1  |             "_readableState": {
+backend-1  |               "awaitDrainWriters": null,
+backend-1  |               "buffer": [],
+backend-1  |               "bufferIndex": 0,
+backend-1  |               "highWaterMark": 16384,
+backend-1  |               "length": 0,
+backend-1  |               "pipes": []
+backend-1  |             },
+backend-1  |             "aborted": false,
+backend-1  |             "client": {
+backend-1  |               "_SNICallback": null,
+backend-1  |               "_closeAfterHandlingError": false,
+backend-1  |               "_controlReleased": true,
+backend-1  |               "_events": "[Object]",
+backend-1  |               "_eventsCount": 9,
+backend-1  |               "_hadError": false,
+backend-1  |               "_host": "api.telegram.org",
+backend-1  |               "_httpMessage": null,
+backend-1  |               "_newSessionPending": false,
+backend-1  |               "_parent": null,
+backend-1  |               "_pendingData": null,
+backend-1  |               "_pendingEncoding": "",
+backend-1  |               "_readableState": "[Object]",
+backend-1  |               "_rejectUnauthorized": true,
+backend-1  |               "_requestCert": true,
+backend-1  |               "_secureEstablished": true,
+backend-1  |               "_securePending": false,
+backend-1  |               "_server": null,
+backend-1  |               "_sockname": null,
+backend-1  |               "_tlsOptions": "[Object]",
+backend-1  |               "_writableState": "[Object]",
+backend-1  |               "allowHalfOpen": false,
+backend-1  |               "alpnProtocol": false,
+backend-1  |               "authorizationError": null,
+backend-1  |               "authorized": true,
+backend-1  |               "connecting": false,
+backend-1  |               "encrypted": true,
+backend-1  |               "parser": null,
+backend-1  |               "secureConnecting": false,
+backend-1  |               "servername": "api.telegram.org",
+backend-1  |               "ssl": "[Object]",
+backend-1  |               "timeout": 5000
+backend-1  |             },
+backend-1  |             "complete": true,
+backend-1  |             "httpVersion": "1.1",
+backend-1  |             "httpVersionMajor": 1,
+backend-1  |             "httpVersionMinor": 1,
+backend-1  |             "method": null,
+backend-1  |             "rawHeaders": [
+backend-1  |               "Server",
+backend-1  |               "nginx/1.18.0",
+backend-1  |               "Date",
+backend-1  |               "Thu, 05 Mar 2026 14:41:50 GMT",
+backend-1  |               "Content-Type",
+backend-1  |               "application/json",
+backend-1  |               "Content-Length",
+backend-1  |               "109",
+backend-1  |               "Connection",
+backend-1  |               "keep-alive",
+backend-1  |               "Retry-After",
+backend-1  |               "1",
+backend-1  |               "Strict-Transport-Security",
+backend-1  |               "max-age=31536000; includeSubDomains; preload",
+backend-1  |               "Access-Control-Allow-Origin",
+backend-1  |               "*",
+backend-1  |               "Access-Control-Expose-Headers",
+backend-1  |               "Content-Length,Content-Type,Date,Server,Connection"
+backend-1  |             ],
+backend-1  |             "rawTrailers": [],
+backend-1  |             "redirects": [],
+backend-1  |             "req": "[Circular]",
+backend-1  |             "responseUrl": "https://api.telegram.org/bot8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg/setWebhook",
+backend-1  |             "socket": null,
+backend-1  |             "statusCode": 429,
+backend-1  |             "statusMessage": "Too Many Requests",
+backend-1  |             "upgrade": false,
+backend-1  |             "url": ""
+backend-1  |           },
+backend-1  |           "reusedSocket": true,
+backend-1  |           "sendDate": false,
+backend-1  |           "shouldKeepAlive": true,
+backend-1  |           "socket": {
+backend-1  |             "_SNICallback": null,
+backend-1  |             "_closeAfterHandlingError": false,
+backend-1  |             "_controlReleased": true,
+backend-1  |             "_events": {
+backend-1  |               "close": "[Array]",
+backend-1  |               "timeout": "[Array]"
+backend-1  |             },
+backend-1  |             "_eventsCount": 9,
+backend-1  |             "_hadError": false,
+backend-1  |             "_host": "api.telegram.org",
+backend-1  |             "_httpMessage": null,
+backend-1  |             "_newSessionPending": false,
+backend-1  |             "_parent": null,
+backend-1  |             "_pendingData": null,
+backend-1  |             "_pendingEncoding": "",
+backend-1  |             "_readableState": {
+backend-1  |               "awaitDrainWriters": null,
+backend-1  |               "buffer": [],
+backend-1  |               "bufferIndex": 0,
+backend-1  |               "highWaterMark": 16384,
+backend-1  |               "length": 0,
+backend-1  |               "pipes": []
+backend-1  |             },
+backend-1  |             "_rejectUnauthorized": true,
+backend-1  |             "_requestCert": true,
+backend-1  |             "_secureEstablished": true,
+backend-1  |             "_securePending": false,
+backend-1  |             "_server": null,
+backend-1  |             "_sockname": null,
+backend-1  |             "_tlsOptions": {
+backend-1  |               "isServer": false,
+backend-1  |               "pipe": false,
+backend-1  |               "rejectUnauthorized": true,
+backend-1  |               "requestCert": true,
+backend-1  |               "secureContext": "[Object]"
+backend-1  |             },
+backend-1  |             "_writableState": {
+backend-1  |               "bufferedIndex": 0,
+backend-1  |               "corked": 0,
+backend-1  |               "highWaterMark": 16384,
+backend-1  |               "length": 0,
+backend-1  |               "pendingcb": 0,
+backend-1  |               "writelen": 0
+backend-1  |             },
+backend-1  |             "allowHalfOpen": false,
+backend-1  |             "alpnProtocol": false,
+backend-1  |             "authorizationError": null,
+backend-1  |             "authorized": true,
+backend-1  |             "connecting": false,
+backend-1  |             "encrypted": true,
+backend-1  |             "parser": null,
+backend-1  |             "secureConnecting": false,
+backend-1  |             "servername": "api.telegram.org",
+backend-1  |             "ssl": {
+backend-1  |               "_parent": "[Object]",
+backend-1  |               "_parentWrap": null,
+backend-1  |               "_secureContext": "[Object]",
+backend-1  |               "reading": true
+backend-1  |             },
+backend-1  |             "timeout": 5000
+backend-1  |           },
+backend-1  |           "strictContentLength": false,
+backend-1  |           "timeoutCb": null,
+backend-1  |           "upgradeOrConnect": false,
+backend-1  |           "useChunkedEncodingByDefault": true,
+backend-1  |           "writable": true
+backend-1  |         },
+backend-1  |         "status": 429,
+backend-1  |         "statusText": "Too Many Requests"
+backend-1  |       },
+backend-1  |       "stack":
+backend-1  |           AxiosError: Request failed with status code 429
+backend-1  |               at settle (/usr/src/app/node_modules/axios/dist/node/axios.cjs:2151:12)
+backend-1  |               at IncomingMessage.handleStreamEnd (/usr/src/app/node_modules/axios/dist/node/axios.cjs:3545:11)
+backend-1  |               at IncomingMessage.emit (node:events:531:35)
+backend-1  |               at IncomingMessage.emit (node:domain:551:15)
+backend-1  |               at endReadableNT (node:internal/streams/readable:1696:12)
+backend-1  |               at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+backend-1  |               at Axios.request (/usr/src/app/node_modules/axios/dist/node/axios.cjs:4796:41)
+backend-1  |               at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+backend-1  |               at async setTelegramWebhookWithRetry (/usr/src/app/dist/helpers/ValidateStatelessChannel.js:24:26)
+backend-1  |               at async validateTelegram (/usr/src/app/dist/helpers/ValidateStatelessChannel.js:69:13)
+backend-1  |               at async validateAndConnectStatelessChannel (/usr/src/app/dist/helpers/ValidateStatelessChannel.js:167:23)
+backend-1  |       "status": 429,
+backend-1  |       "type": "AxiosError"
+backend-1  |     }
+backend-1  | [32mINFO[39m [11:41:52.291] (60): [36m[ticketz]: ValidateStatelessChannel: Telegram webhook set successfully[39m
+backend-1  |     [35mwebhookUrl[39m: "https://note1.lpvoicetecnologia.com.br/webhook/telegram/8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg"
+backend-1  | [32mINFO[39m [11:41:52.300] (60): [36m[ticketz]: ValidateStatelessChannel: channel status updated[39m
+backend-1  |     [35mchannel[39m: "telegram"
+backend-1  |     [35mid[39m: 6
+backend-1  |     [35mstatus[39m: "CONNECTED"

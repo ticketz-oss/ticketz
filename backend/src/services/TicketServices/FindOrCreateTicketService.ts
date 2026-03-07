@@ -33,6 +33,14 @@ const internalFindOrCreateTicketService = async (
     queue
   }: FindOrCreateTicketOptions = {}
 ): Promise<{ ticket: Ticket; justCreated: boolean }> => {
+  // Determinar o canal pela SESSÃO (Whatsapp), não pelo contato.
+  // Contatos são compartilhados entre canais (mesmo número pode estar no Baileys e no WaCloud).
+  let sessionChannel = "whatsapp";
+  try {
+    const session = await Whatsapp.findByPk(whatsappId, { attributes: ["channel"] });
+    if (session?.channel) sessionChannel = session.channel;
+  } catch (_) {}
+
   let justCreated = false;
   const result = await sequelize.transaction(async () => {
     let ticket = await Ticket.findOne({
@@ -106,7 +114,8 @@ const internalFindOrCreateTicketService = async (
           unreadMessages: incrementUnread
             ? ticket.unreadMessages + 1
             : ticket.unreadMessages,
-          companyId
+          companyId,
+          channel: sessionChannel
         });
         await FindOrCreateATicketTrakingService({
           ticketId: ticket.id,
@@ -141,7 +150,8 @@ const internalFindOrCreateTicketService = async (
         unreadMessages: incrementUnread ? 1 : 0,
         whatsappId,
         queueId,
-        companyId
+        companyId,
+        channel: sessionChannel
       });
 
       justCreated = true;

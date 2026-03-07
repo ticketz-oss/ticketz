@@ -5,6 +5,7 @@ import AppError from "../../errors/AppError";
 import Whatsapp from "../../models/Whatsapp";
 import ShowWhatsAppService from "./ShowWhatsAppService";
 import AssociateWhatsappQueue from "./AssociateWhatsappQueue";
+import { validateAndConnectStatelessChannel } from "../../helpers/ValidateStatelessChannel";
 
 export interface WhatsappData {
   name?: string;
@@ -20,6 +21,21 @@ export interface WhatsappData {
   companyId?: number;
   token?: string;
   language?: string;
+  channel?: string;
+  telegramToken?: string;
+  telegramBotName?: string;
+  facebookUserId?: string;
+  facebookUserToken?: string;
+  facebookPageUserId?: string;
+  tokenMeta?: string;
+  emailSmtpHost?: string;
+  emailSmtpPort?: number;
+  emailSmtpUser?: string;
+  emailSmtpPass?: string;
+  emailImapHost?: string;
+  emailImapPort?: number;
+  emailFrom?: string;
+  instagramBusinessAccountId?: string;
 }
 
 interface Request {
@@ -56,7 +72,22 @@ const UpdateWhatsAppService = async ({
     transferMessage,
     queueIds,
     token,
-    language
+    language,
+    channel,
+    telegramToken,
+    telegramBotName,
+    facebookUserId,
+    facebookUserToken,
+    facebookPageUserId,
+    tokenMeta,
+    emailSmtpHost,
+    emailSmtpPort,
+    emailSmtpUser,
+    emailSmtpPass,
+    emailImapHost,
+    emailImapPort,
+    emailFrom,
+    instagramBusinessAccountId
   } = whatsappData;
 
   try {
@@ -102,11 +133,36 @@ const UpdateWhatsAppService = async ({
     companyId,
     token,
     transferMessage,
-    language
+    language,
+    channel,
+    telegramToken,
+    telegramBotName,
+    facebookUserId,
+    facebookUserToken,
+    facebookPageUserId,
+    tokenMeta,
+    emailSmtpHost,
+    emailSmtpPort,
+    emailSmtpUser,
+    emailSmtpPass,
+    emailImapHost,
+    emailImapPort,
+    emailFrom,
+    instagramBusinessAccountId
   });
 
   if (queueIds) {
     await AssociateWhatsappQueue(whatsapp, queueIds);
+  }
+
+  // Para canais stateless com token/configuração recebida, revalidar e ativar canal
+  const shouldRevalidate =
+    whatsapp.channel === "telegram" && telegramToken;
+  if (shouldRevalidate) {
+    // Não bloqueia a resposta — executa em background
+    Promise.resolve().then(() => {
+      validateAndConnectStatelessChannel(whatsapp).catch(() => {});
+    });
   }
 
   return { whatsapp, oldDefaultWhatsapp };

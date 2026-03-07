@@ -25,6 +25,16 @@ interface Request {
   channel?: string;
   facebookPageUserId?: string;
   language?: string;
+  telegramToken?: string;
+  telegramBotName?: string;
+  emailSmtpHost?: string;
+  emailSmtpPort?: number;
+  emailSmtpUser?: string;
+  emailSmtpPass?: string;
+  emailImapHost?: string;
+  emailImapPort?: number;
+  emailFrom?: string;
+  instagramBusinessAccountId?: string;
 }
 
 interface Response {
@@ -34,7 +44,7 @@ interface Response {
 
 const CreateWhatsAppService = async ({
   name,
-  status = "OPENING",
+  status,
   queueIds = [],
   greetingMessage,
   complationMessage,
@@ -50,8 +60,23 @@ const CreateWhatsAppService = async ({
   facebookPageUserId,
   tokenMeta,
   channel = "whatsapp",
-  language
+  language,
+  telegramToken,
+  telegramBotName,
+  emailSmtpHost,
+  emailSmtpPort,
+  emailSmtpUser,
+  emailSmtpPass,
+  emailImapHost,
+  emailImapPort,
+  emailFrom,
+  instagramBusinessAccountId
 }: Request): Promise<Response> => {
+  // Status inicial: Baileys precisa de OPENING para disparar o fluxo,
+  // canais stateless começam DISCONNECTED até serem validados.
+  if (!status) {
+    status = channel === "whatsapp" ? "OPENING" : "DISCONNECTED";
+  }
   const company = await Company.findOne({
     where: {
       id: companyId
@@ -160,7 +185,17 @@ const CreateWhatsAppService = async ({
       facebookUserToken,
       facebookPageUserId,
       tokenMeta,
-      language
+      language,
+      telegramToken,
+      telegramBotName,
+      emailSmtpHost,
+      emailSmtpPort,
+      emailSmtpUser,
+      emailSmtpPass,
+      emailImapHost,
+      emailImapPort,
+      emailFrom,
+      instagramBusinessAccountId
     },
     { include: ["queues"] }
   );

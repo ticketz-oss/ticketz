@@ -17,6 +17,8 @@ import { incrementCounter } from "../CounterServices/IncrementCounter";
 import { getJidOf } from "../WbotServices/getJidOf";
 import Queue from "../../models/Queue";
 import { _t } from "../TranslationServices/i18nService";
+import SendTelegramMessage from "../TelegramServices/SendTelegramMessage";
+import SendWaCloudMessage from "../WaCloudServices/SendWaCloudMessage";
 
 export interface UpdateTicketData {
   status?: string;
@@ -48,11 +50,18 @@ const sendFormattedMessage = async (
 ) => {
   const messageText = formatBody(message, ticket, user);
 
-  const wbot = await GetTicketWbot(ticket);
-  const queueChangedMessage = await wbot.sendMessage(getJidOf(ticket), {
-    text: messageText
-  });
-  await verifyMessage(queueChangedMessage, ticket, ticket.contact);
+  if (ticket.channel === "whatsapp") {
+    const wbot = await GetTicketWbot(ticket);
+    const sentMsg = await wbot.sendMessage(getJidOf(ticket), {
+      text: messageText
+    });
+    await verifyMessage(sentMsg, ticket, ticket.contact);
+  } else if (ticket.channel === "telegram") {
+    await SendTelegramMessage({ body: messageText, ticket });
+  } else if (ticket.channel === "whatsapp_cloud") {
+    await SendWaCloudMessage({ body: messageText, ticket });
+  }
+  // instagram e email: sem mensagem automática de sistema por ora
 };
 
 export function websocketUpdateTicket(ticket: Ticket, moreChannels?: string[]) {
@@ -349,7 +358,8 @@ const UpdateTicketService = async ({
       !dontRunChatbot &&
       !ticket.userId &&
       ticket.queueId &&
-      ticket.queueId !== oldQueueId
+      ticket.queueId !== oldQueueId &&
+      ticket.channel === "whatsapp"
     ) {
       const wbot = await GetTicketWbot(ticket);
       if (wbot) {

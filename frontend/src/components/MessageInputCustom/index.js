@@ -5,7 +5,7 @@ import { Picker } from "emoji-mart";
 import MicRecorder from "mic-recorder-to-mp3";
 import clsx from "clsx";
 
-import { 
+import {
   Code,
   FormatListNumbered,
   FormatListBulleted,
@@ -379,6 +379,7 @@ const CustomInput = (props) => {
     handleChangeMedias,
     handlePresenceUpdate,
     disableOption,
+    ticket,
   } = props;
   const classes = useStyles();
   const [quickMessages, setQuickMessages] = useState([]);
@@ -440,7 +441,7 @@ const CustomInput = (props) => {
 
   const onKeyPress = (e) => {
     if (loading) return;
-    else if ( !e.shiftKey && e.key === "Enter" && !isMobile()) {
+    else if (!e.shiftKey && e.key === "Enter" && !isMobile()) {
       e.preventDefault();
       handleSendMessage();
       return;
@@ -456,6 +457,9 @@ const CustomInput = (props) => {
 
   const renderPlaceholder = () => {
     if (ticketStatus === "open") {
+      if (ticket?.channel === "email") {
+        return `Responder via E-mail para: ${ticket.contact?.email || ticket.contact?.number}`;
+      }
       return i18n.t("messagesInput.placeholderOpen");
     }
     return i18n.t("messagesInput.placeholderClosed");
@@ -479,7 +483,7 @@ const CustomInput = (props) => {
       menuElement.style.left = `${selection.anchorNode.offsetLeft}px`;
     }
   };
-  
+
   const formatText = (prefix, suffix) => {
     const selection = window.getSelection();
     const selectedText = selection.toString().trim();
@@ -490,17 +494,17 @@ const CustomInput = (props) => {
       const end = textArea.selectionEnd;
       const textBefore = inputMessage.substring(0, start);
       const textAfter = inputMessage.substring(end);
-      
+
       const prevChar = textBefore.charAt(start - 1);
       if (prevChar && prevChar !== ' ' && prevChar !== '\n') {
         formattedText = ` ${formattedText}`;
       }
-      
+
       const nextChar = textAfter.charAt(0);
       if (nextChar && nextChar !== ' ' && nextChar !== '\n') {
         formattedText = `${formattedText} `;
       }
-      
+
       setInputMessage(textBefore + formattedText + textAfter);
       document.getElementById('format-menu').style.display = 'none';
       setTimeout(() => {
@@ -522,8 +526,8 @@ const CustomInput = (props) => {
       const start = textArea.selectionStart;
       const end = textArea.selectionEnd;
 
-      const firstLineStart = inputMessage.substring(0, start).lastIndexOf("\n")+1;
-      const lastLineEnd = end+inputMessage.substring(end).indexOf("\n");
+      const firstLineStart = inputMessage.substring(0, start).lastIndexOf("\n") + 1;
+      const lastLineEnd = end + inputMessage.substring(end).indexOf("\n");
       const textBefore = inputMessage.substring(0, firstLineStart);
       const textAfter = inputMessage.substring(lastLineEnd);
 
@@ -532,14 +536,14 @@ const CustomInput = (props) => {
     }
     return { lines: [], textBefore: inputMessage, textAfter: "" };
   };
-  
+
   const formatCode = () => {
     const selection = window.getSelection();
     if (selection.toString().indexOf('\n') === -1) {
       formatText('`', '`');
       return;
     }
-      
+
     const { lines, textBefore, textAfter } = splitSelectionLines();
     if (lines.length > 0) {
       const formattedText = "```\n" + lines.join('\n') + "\n```\n";
@@ -555,7 +559,7 @@ const CustomInput = (props) => {
       }, 0);
     }
   };
-          
+
   const formatListNumbered = () => {
     const { lines, textBefore, textAfter } = splitSelectionLines();
     if (lines.length > 0) {
@@ -651,129 +655,129 @@ const CustomInput = (props) => {
           const { InputLabelProps, InputProps, ...rest } = params;
           return (
             <>
-            <InputBase
-              {...params.InputProps}
-              {...rest}
-              disabled={disableOption}
-              inputRef={(input) => setInputRef(input)}
-              placeholder={renderPlaceholder()}
-              multiline
-              className={classes.messageInput}
-              maxRows={5}
-              endAdornment={
-                isMobile() &&
-                <InputAdornment position="end">
-                  <input
-                    type="file"
-                    id="camera-button"
-                    accept="image/*"
-                    capture="camera"
-                    className={classes.uploadInput}
-                    onChange={handleChangeMedias}
-                  />
-                  <label htmlFor="camera-button">
-                    <IconButton
-                      aria-label="camera-upload"
-                      component="span"
-                      disabled={disableOption}
-                    >
-                      <CameraAltIcon className={classes.cameraIcon} />
-                    </IconButton>
-                  </label>
-                </InputAdornment>
-              }    
-              onKeyDownCapture={(e) => {
-                if (
-                  !popupOpen && (
-                    e.key === 'ArrowUp' ||
-                    e.key === 'ArrowDown'
-                  )
-                ) {
-                  e.stopPropagation();
+              <InputBase
+                {...params.InputProps}
+                {...rest}
+                disabled={disableOption}
+                inputRef={(input) => setInputRef(input)}
+                placeholder={renderPlaceholder()}
+                multiline
+                className={classes.messageInput}
+                maxRows={5}
+                endAdornment={
+                  isMobile() &&
+                  <InputAdornment position="end">
+                    <input
+                      type="file"
+                      id="camera-button"
+                      accept="image/*"
+                      capture="camera"
+                      className={classes.uploadInput}
+                      onChange={handleChangeMedias}
+                    />
+                    <label htmlFor="camera-button">
+                      <IconButton
+                        aria-label="camera-upload"
+                        component="span"
+                        disabled={disableOption}
+                      >
+                        <CameraAltIcon className={classes.cameraIcon} />
+                      </IconButton>
+                    </label>
+                  </InputAdornment>
                 }
-              }}
-              onMouseUp={showFormatMenu}
-              onKeyUp={showFormatMenu}
-              onKeyDown={(e) => {
-                if (e.ctrlKey && e.key === 'b') {
-                  e.preventDefault();
-                  formatText('*', '*');
-                } else if (e.ctrlKey && e.key === 'i') {
-                  e.preventDefault();
-                  formatText('_', '_');
-                } else if (e.ctrlKey && e.key === 's') {
-                  e.preventDefault();
-                  formatText('~', '~');
-                } else if (e.ctrlKey && e.key === 'm') {
-                  e.preventDefault();
-                  formatCode();
-                } else if (e.ctrlKey && e.key === 'q') {
-                  e.preventDefault();
-                  formatQuote();
-                } else if (e.ctrlKey && e.key === 'n') {
-                  e.preventDefault();
-                  formatListNumbered();
-                } else if (e.ctrlKey && e.key === 'l') {
-                  e.preventDefault();
-                  formatListBulleted();
-                }
-              }}
-            />
-            <div
-              id="format-menu"
-              className={classes.formatMenu}
-              style={{ display: 'none', position: 'absolute', zIndex: 1000 }}
-            >
-              <IconButton 
-                size="small" 
-                onClick={() => formatText('*','*')}
-                style={{ padding: '6px', margin: '0 2px' }}
+                onKeyDownCapture={(e) => {
+                  if (
+                    !popupOpen && (
+                      e.key === 'ArrowUp' ||
+                      e.key === 'ArrowDown'
+                    )
+                  ) {
+                    e.stopPropagation();
+                  }
+                }}
+                onMouseUp={showFormatMenu}
+                onKeyUp={showFormatMenu}
+                onKeyDown={(e) => {
+                  if (e.ctrlKey && e.key === 'b') {
+                    e.preventDefault();
+                    formatText('*', '*');
+                  } else if (e.ctrlKey && e.key === 'i') {
+                    e.preventDefault();
+                    formatText('_', '_');
+                  } else if (e.ctrlKey && e.key === 's') {
+                    e.preventDefault();
+                    formatText('~', '~');
+                  } else if (e.ctrlKey && e.key === 'm') {
+                    e.preventDefault();
+                    formatCode();
+                  } else if (e.ctrlKey && e.key === 'q') {
+                    e.preventDefault();
+                    formatQuote();
+                  } else if (e.ctrlKey && e.key === 'n') {
+                    e.preventDefault();
+                    formatListNumbered();
+                  } else if (e.ctrlKey && e.key === 'l') {
+                    e.preventDefault();
+                    formatListBulleted();
+                  }
+                }}
+              />
+              <div
+                id="format-menu"
+                className={classes.formatMenu}
+                style={{ display: 'none', position: 'absolute', zIndex: 1000 }}
               >
-                <Typography style={{ fontWeight: 'bold', fontSize: '15px' }}>B</Typography>
-              </IconButton>
-              <IconButton 
-                size="small" 
-                onClick={() => formatText('_','_')}
-                style={{ padding: '6px', margin: '0 2px' }}
-              >
-                <Typography style={{ fontStyle: 'italic', fontSize: '15px' }}>I</Typography>
-              </IconButton>
-              <IconButton 
-                size="small" 
-                onClick={() => formatText('~','~')}
-                style={{ padding: '6px', margin: '0 2px' }}
-              >
-                <Typography style={{ textDecoration: 'line-through', fontSize: '15px' }}>S</Typography>
-              </IconButton>
-              <IconButton 
-                size="small" 
-                onClick={formatCode}
-                style={{ padding: '6px', margin: '0 2px' }}
-              >
-                <Code fontSize="small" />
-              </IconButton>
-              <IconButton 
-                size="small" 
-                onClick={formatListNumbered}
-                style={{ padding: '6px', margin: '0 2px' }}
-              >
-                <FormatListNumbered fontSize="small" />
-              </IconButton>
-              <IconButton 
-                size="small" 
-                onClick={formatListBulleted}
-                style={{ padding: '6px', margin: '0 2px' }}
-              >
-                <FormatListBulleted fontSize="small" />
-              </IconButton>
-              <IconButton 
-                size="small" 
-                onClick={formatQuote}
-                style={{ padding: '6px', margin: '0 2px' }}
-              >
-                <FormatQuote fontSize="small" />
-              </IconButton>
-            </div>
+                <IconButton
+                  size="small"
+                  onClick={() => formatText('*', '*')}
+                  style={{ padding: '6px', margin: '0 2px' }}
+                >
+                  <Typography style={{ fontWeight: 'bold', fontSize: '15px' }}>B</Typography>
+                </IconButton>
+                <IconButton
+                  size="small"
+                  onClick={() => formatText('_', '_')}
+                  style={{ padding: '6px', margin: '0 2px' }}
+                >
+                  <Typography style={{ fontStyle: 'italic', fontSize: '15px' }}>I</Typography>
+                </IconButton>
+                <IconButton
+                  size="small"
+                  onClick={() => formatText('~', '~')}
+                  style={{ padding: '6px', margin: '0 2px' }}
+                >
+                  <Typography style={{ textDecoration: 'line-through', fontSize: '15px' }}>S</Typography>
+                </IconButton>
+                <IconButton
+                  size="small"
+                  onClick={formatCode}
+                  style={{ padding: '6px', margin: '0 2px' }}
+                >
+                  <Code fontSize="small" />
+                </IconButton>
+                <IconButton
+                  size="small"
+                  onClick={formatListNumbered}
+                  style={{ padding: '6px', margin: '0 2px' }}
+                >
+                  <FormatListNumbered fontSize="small" />
+                </IconButton>
+                <IconButton
+                  size="small"
+                  onClick={formatListBulleted}
+                  style={{ padding: '6px', margin: '0 2px' }}
+                >
+                  <FormatListBulleted fontSize="small" />
+                </IconButton>
+                <IconButton
+                  size="small"
+                  onClick={formatQuote}
+                  style={{ padding: '6px', margin: '0 2px' }}
+                >
+                  <FormatQuote fontSize="small" />
+                </IconButton>
+              </div>
             </>
           );
         }}
@@ -798,8 +802,8 @@ const MessageInputCustom = (props) => {
   const { setReplyingMessage, replyingMessage } =
     useContext(ReplyMessageContext);
   const { setEditingMessage, editingMessage } = useContext(
-		EditMessageContext
-	);  
+    EditMessageContext
+  );
   const { user } = useContext(AuthContext);
 
   const [signMessage, setSignMessage] = useLocalStorage("signOption", true);
@@ -832,23 +836,23 @@ const MessageInputCustom = (props) => {
     return () => {
       socket.disconnect();
     };
-  }, [socketManager]);        
+  }, [socketManager]);
 
   useEffect(() => {
     if (editingMessage) {
       if (signMessage && editingMessage.body.startsWith(`*${user.name}:*\n`)) {
-        setInputMessage(editingMessage.body.substr(editingMessage.body.indexOf("\n")+1));
+        setInputMessage(editingMessage.body.substr(editingMessage.body.indexOf("\n") + 1));
       } else {
         setInputMessage(editingMessage.body);
       }
     }
-    
+
     if (replyingMessage || editingMessage) {
       inputRef.current.focus();
     }
-    
+
   }, [replyingMessage, editingMessage, signMessage, user.name]);
-  
+
   useEffect(() => {
     inputRef.current.focus();
     return () => {
@@ -929,7 +933,7 @@ const MessageInputCustom = (props) => {
 
     },);
 
-    setTimeout(async()=> {
+    setTimeout(async () => {
 
       try {
         await api.post(`/messages/${ticketId}`, formData, {
@@ -956,18 +960,18 @@ const MessageInputCustom = (props) => {
       }
 
 
-    },2000)
+    }, 2000)
 
   }
 
   const handlePresenceUpdate = (presence) => {
     if (!socket || currentPresence === presence) return;
-    
+
     if (presenceTimeout) {
       clearTimeout(presenceTimeout);
       setPresenceTimeout(null);
     }
-    
+
     if (!presence) {
       setCurrentPresence(null);
       socket.emit("presenceUpdate", {
@@ -976,7 +980,7 @@ const MessageInputCustom = (props) => {
       });
       return;
     }
-    
+
     setCurrentPresence(presence);
     socket.emit("presenceUpdate", {
       ticketId,
@@ -994,7 +998,7 @@ const MessageInputCustom = (props) => {
         }, 5000)
       );
     }
-  }  
+  }
 
   const handleSendMessage = async () => {
     if (inputMessage.trim() === "") return;
@@ -1012,7 +1016,7 @@ const MessageInputCustom = (props) => {
     };
 
     handlePresenceUpdate(null);
-    
+
     const url = editingMessage !== null ?
       `/messages/edit/${editingMessage.id}` :
       `/messages/${ticketId}`;
@@ -1029,7 +1033,7 @@ const MessageInputCustom = (props) => {
   };
 
   const handleStartRecording = async () => {
-    if(disableOption)return;
+    if (disableOption) return;
     setLoading(true);
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -1097,7 +1101,7 @@ const MessageInputCustom = (props) => {
                 {i18n.t("messagesInput.replying")} {message.contact?.name}
               </span>
               <WhatsMarked>
-                { message.body.startsWith('{"ticketzvCard":') ? "🪪" : message.body }
+                {message.body.startsWith('{"ticketzvCard":') ? "🪪" : message.body}
               </WhatsMarked>
             </div>
           )}
@@ -1117,9 +1121,9 @@ const MessageInputCustom = (props) => {
           component="span"
           disabled={disableOption}
           onClick={() => {
-              setReplyingMessage(null);
-              setEditingMessage(null);
-              setInputMessage("");
+            setReplyingMessage(null);
+            setEditingMessage(null);
+            setInputMessage("");
           }}
         >
           <ClearIcon className={classes.sendMessageIcons} />
@@ -1189,9 +1193,10 @@ const MessageInputCustom = (props) => {
           />
 
           <CustomInput
+            ticket={ticket}
             loading={loading}
             inputRef={inputRef}
-            ticketStatus={(isGroup && "open" ) || ticketStatus}
+            ticketStatus={(isGroup && "open") || ticketStatus}
             inputMessage={inputMessage}
             setInputMessage={setInputMessage}
             // handleChangeInput={handleChangeInput}

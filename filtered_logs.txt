@@ -1,0 +1,63 @@
+[32mINFO[39m [11:41:46.951] (60): [36m[ticketz]: Telegram webhook registered successfully[39m
+    [35mwebhookUrl[39m: "https://note1.lpvoicetecnologia.com.br/webhook/telegram/8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg"
+[33mWARN[39m [11:41:46.958] (60): [36m[ticketz]: Telegram setWebhook returned non-ok[39m
+    [35mwebhookUrl[39m: "https://note1.lpvoicetecnologia.com.br/webhook/telegram/8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg"
+[33mWARN[39m [11:41:46.963] (60): [36m[ticketz]: Telegram setWebhook returned non-ok[39m
+    [35mwebhookUrl[39m: "https://note1.lpvoicetecnologia.com.br/webhook/telegram/8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg"
+[33mWARN[39m [11:41:46.982] (60): [36m[ticketz]: Telegram setWebhook returned non-ok[39m
+    [35mwebhookUrl[39m: "https://note1.lpvoicetecnologia.com.br/webhook/telegram/8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg"
+[33mWARN[39m [11:41:46.994] (60): [36m[ticketz]: Telegram setWebhook returned non-ok[39m
+    [35mwebhookUrl[39m: "https://note1.lpvoicetecnologia.com.br/webhook/telegram/8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg"
+[33mWARN[39m [11:41:47.000] (60): [36m[ticketz]: Telegram setWebhook returned non-ok[39m
+    [35mwebhookUrl[39m: "https://note1.lpvoicetecnologia.com.br/webhook/telegram/8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg"
+[32mINFO[39m [11:41:50.828] (60): [36m[ticketz]: ValidateStatelessChannel: Telegram token valid[39m
+[32mINFO[39m [11:41:50.838] (60): [36m[ticketz]: Telegram webhook registered successfully[39m
+    [35mwebhookUrl[39m: "https://note1.lpvoicetecnologia.com.br/webhook/telegram/8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg"
+[33mWARN[39m [11:41:51.057] (60): [36m[ticketz]: ValidateStatelessChannel: Telegram setWebhook error — retrying[39m
+        "data": "{\"url\":\"https://note1.lpvoicetecnologia.com.br/webhook/telegram/8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg\",\"drop_pending_updates\":true}",
+          "User-Agent": "axios/1.13.5"
+        "url": "https://api.telegram.org/bot8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg/setWebhook",
+      "isAxiosError": true,
+      "name": "AxiosError",
+        "_header": "POST /bot8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg/setWebhook HTTP/1.1\r\nAccept: application/json, text/plain, */*\r\nContent-Type: application/json\r\nUser-Agent: axios/1.13.5\r\nContent-Length: 140\r\nAccept-Encoding: gzip, compress, deflate, br\r\nHost: api.telegram.org\r\nConnection: keep-alive\r\n\r\n",
+          "_currentUrl": "https://api.telegram.org/bot8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg/setWebhook",
+              "User-Agent": "axios/1.13.5"
+            "hostname": "api.telegram.org",
+            "path": "/bot8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg/setWebhook",
+            "pathname": "/bot8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg/setWebhook",
+              "api.telegram.org:443:::::::::::::::::::::"
+              "api.telegram.org:443:::::::::::::::::::::": "[Object]",
+            "api.telegram.org:443:::::::::::::::::::::": [
+        "host": "api.telegram.org",
+        "path": "/bot8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg/setWebhook",
+            "_host": "api.telegram.org",
+            "servername": "api.telegram.org",
+          "responseUrl": "https://api.telegram.org/bot8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg/setWebhook",
+          "_host": "api.telegram.org",
+          "servername": "api.telegram.org",
+          "data": "{\"url\":\"https://note1.lpvoicetecnologia.com.br/webhook/telegram/8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg\",\"drop_pending_updates\":true}",
+            "User-Agent": "axios/1.13.5"
+          "url": "https://api.telegram.org/bot8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg/setWebhook",
+          "_header": "POST /bot8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg/setWebhook HTTP/1.1\r\nAccept: application/json, text/plain, */*\r\nContent-Type: application/json\r\nUser-Agent: axios/1.13.5\r\nContent-Length: 140\r\nAccept-Encoding: gzip, compress, deflate, br\r\nHost: api.telegram.org\r\nConnection: keep-alive\r\n\r\n",
+            "_currentUrl": "https://api.telegram.org/bot8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg/setWebhook",
+              "hostname": "api.telegram.org",
+              "path": "/bot8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg/setWebhook",
+              "pathname": "/bot8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg/setWebhook",
+              "api.telegram.org:443:::::::::::::::::::::": "[Array]"
+          "host": "api.telegram.org",
+          "path": "/bot8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg/setWebhook",
+              "_host": "api.telegram.org",
+              "servername": "api.telegram.org",
+            "responseUrl": "https://api.telegram.org/bot8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg/setWebhook",
+            "_host": "api.telegram.org",
+            "servername": "api.telegram.org",
+          AxiosError: Request failed with status code 429
+              at settle (/usr/src/app/node_modules/axios/dist/node/axios.cjs:2151:12)
+              at IncomingMessage.handleStreamEnd (/usr/src/app/node_modules/axios/dist/node/axios.cjs:3545:11)
+              at Axios.request (/usr/src/app/node_modules/axios/dist/node/axios.cjs:4796:41)
+              at async setTelegramWebhookWithRetry (/usr/src/app/dist/helpers/ValidateStatelessChannel.js:24:26)
+              at async validateTelegram (/usr/src/app/dist/helpers/ValidateStatelessChannel.js:69:13)
+      "type": "AxiosError"
+[32mINFO[39m [11:41:52.291] (60): [36m[ticketz]: ValidateStatelessChannel: Telegram webhook set successfully[39m
+    [35mwebhookUrl[39m: "https://note1.lpvoicetecnologia.com.br/webhook/telegram/8535780211:AAH9Q126ZN-oCk5_IBaOruEdItoUBhAOHhg"
+    [35mchannel[39m: "telegram"

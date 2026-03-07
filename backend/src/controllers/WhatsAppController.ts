@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { Op } from "sequelize";
+import * as https from "https";
 import { cacheLayer } from "../libs/cache";
 import { getIO } from "../libs/socket";
 import { removeWbot } from "../libs/wbot";
@@ -14,6 +15,42 @@ import UpdateWhatsAppService from "../services/WhatsappService/UpdateWhatsAppSer
 import AppError from "../errors/AppError";
 import Ticket from "../models/Ticket";
 import { sendWhatsappUpdate } from "../services/WhatsappService/SocketSendWhatsappUpdate";
+import { logger } from "../utils/logger";
+
+// ─── Telegram auto-webhook helper ─────────────────────────────────────────────
+const registerTelegramWebhook = (token: string): void => {
+  const backendUrl = process.env.BACKEND_URL || "";
+  if (!backendUrl || !token) {
+    logger.warn("registerTelegramWebhook: BACKEND_URL not set, skipping");
+    return;
+  }
+  const webhookUrl = `${backendUrl}/webhook/telegram/${token}`;
+  const body = JSON.stringify({ url: webhookUrl, drop_pending_updates: true });
+  const options = {
+    hostname: "api.telegram.org",
+    port: 443,
+    path: `/bot${token}/setWebhook`,
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body) }
+  };
+  const req = https.request(options, res => {
+    let data = "";
+    res.on("data", chunk => { data += chunk; });
+    res.on("end", () => {
+      try {
+        const parsed = JSON.parse(data);
+        if (parsed.ok) {
+          logger.info({ webhookUrl }, "Telegram webhook registered successfully");
+        } else {
+          logger.warn({ webhookUrl, result: parsed }, "Telegram setWebhook returned non-ok");
+        }
+      } catch (e) { /* ignore */ }
+    });
+  });
+  req.on("error", err => logger.error({ err, webhookUrl }, "Failed to register Telegram webhook"));
+  req.write(body);
+  req.end();
+};
 
 interface WhatsappData {
   name: string;
@@ -27,6 +64,17 @@ interface WhatsappData {
   status?: string;
   isDefault?: boolean;
   token?: string;
+  channel?: string;
+  telegramToken?: string;
+  telegramBotName?: string;
+  emailSmtpHost?: string;
+  emailSmtpPort?: number;
+  emailSmtpUser?: string;
+  emailSmtpPass?: string;
+  emailImapHost?: string;
+  emailImapPort?: number;
+  emailFrom?: string;
+  instagramBusinessAccountId?: string;
 }
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
@@ -52,7 +100,18 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     ratingMessage,
     transferMessage,
     queueIds,
-    token
+    token,
+    channel,
+    telegramToken,
+    telegramBotName,
+    emailSmtpHost,
+    emailSmtpPort,
+    emailSmtpUser,
+    emailSmtpPass,
+    emailImapHost,
+    emailImapPort,
+    emailFrom,
+    instagramBusinessAccountId
   }: WhatsappData = req.body;
   const { companyId } = req.user;
 
@@ -67,7 +126,18 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     transferMessage,
     queueIds,
     companyId,
-    token
+    token,
+    channel,
+    telegramToken,
+    telegramBotName,
+    emailSmtpHost,
+    emailSmtpPort,
+    emailSmtpUser,
+    emailSmtpPass,
+    emailImapHost,
+    emailImapPort,
+    emailFrom,
+    instagramBusinessAccountId
   });
 
   sendWhatsappUpdate(whatsapp);
@@ -76,7 +146,10 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     sendWhatsappUpdate(oldDefaultWhatsapp);
   }
 
-  StartWhatsAppSession(whatsapp, companyId);
+  // Only start Baileys session for the WhatsApp (Baileys) channel
+  if (!whatsapp.channel || whatsapp.channel === "whatsapp") {
+    StartWhatsAppSession(whatsapp, companyId);
+  }
 
   return res.status(200).json(whatsapp);
 };
@@ -96,6 +169,11 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
 
   if (!whatsapp) {
     throw new AppError("ERR_NO_WAPP_FOUND", 404);
+  }
+
+  // Auto-register Telegram webhook if this is a Telegram channel
+  if (whatsapp.channel === "telegram" && whatsapp.telegramToken) {
+    registerTelegramWebhook(whatsapp.telegramToken);
   }
 
   return res.status(200).json(whatsapp);
@@ -118,6 +196,11 @@ export const update = async (
 
   if (oldDefaultWhatsapp) {
     sendWhatsappUpdate(oldDefaultWhatsapp);
+  }
+
+  // Auto-register Telegram webhook on update too
+  if (whatsapp.channel === "telegram" && whatsapp.telegramToken) {
+    registerTelegramWebhook(whatsapp.telegramToken);
   }
 
   return res.status(200).json(whatsapp);
@@ -180,10 +263,21 @@ export const remove = async (
     }
   }
 
-  if (whatsapp.channel === "whatsapp") {
+  if (!whatsapp.channel || whatsapp.channel === "whatsapp") {
     await DeleteBaileysService(whatsappId);
     await cacheLayer.delFromPattern(`sessions:${whatsappId}:*`);
     removeWbot(+whatsappId);
+  } else if (whatsapp.channel === "telegram" && whatsapp.telegramToken) {
+    // Stop Telegram webhook
+    try {
+      const axios = require("axios");
+      await axios.default.post(
+        `https://api.telegram.org/bot${whatsapp.telegramToken}/deleteWebhook`
+      );
+    } catch (e) { /* ignore */ }
+  } else if (whatsapp.channel === "email") {
+    const { stopEmailPolling } = require("../services/EmailServices/EmailMessageListener");
+    stopEmailPolling(+whatsappId);
   }
 
   await DeleteWhatsAppService(whatsappId);

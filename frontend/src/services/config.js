@@ -30,7 +30,7 @@ export function getBackendURL() {
 
 export function getBackendSocketURL() {
   return (
-    config.REACT_APP_BACKEND_URL ||
+    config.FRONTEND_URL ||
     (config.BACKEND_PROTOCOL ?? "https") + "://" +
     (config.BACKEND_HOST) + ":" + (config.BACKEND_PORT ?? 443)
   );

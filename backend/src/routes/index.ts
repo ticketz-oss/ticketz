@@ -32,6 +32,8 @@ import versionRoutes from "./versionRoutes";
 import ticketzOSSRoutes from "./ticketzOSSRoutes";
 import i18nRoutes from "./i18nRoutes";
 import wavoipRoutes from "./wavoipRoutes";
+import metaWebhookRoutes from "./metaWebhookRoutes";
+import telegramRoutes from "./telegramRoutes";
 
 const routes = Router();
 
@@ -68,5 +70,7 @@ routes.use(versionRoutes);
 routes.use(ticketzOSSRoutes);
 routes.use(i18nRoutes);
 routes.use(wavoipRoutes);
+routes.use(metaWebhookRoutes);
+routes.use(telegramRoutes);
 
 export default routes;

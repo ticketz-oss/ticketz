@@ -15,6 +15,10 @@ import SendWhatsAppMedia from "../services/WbotServices/SendWhatsAppMedia";
 import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import CheckContactNumber from "../services/WbotServices/CheckNumber";
 import EditWhatsAppMessage from "../services/WbotServices/EditWhatsAppMessage";
+import SendWaCloudMessage from "../services/WaCloudServices/SendWaCloudMessage";
+import SendInstagramMessage from "../services/InstagramServices/SendInstagramMessage";
+import SendTelegramMessage from "../services/TelegramServices/SendTelegramMessage";
+import SendEmailMessage from "../services/EmailServices/SendEmailMessage";
 
 import { logger } from "../utils/logger";
 import { MessageData } from "../helpers/SendMessage";
@@ -78,6 +82,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   const ticket = await ShowTicketService(ticketId, companyId);
   const { channel } = ticket;
+
   if (channel === "whatsapp") {
     await SetTicketMessagesAsRead(ticket);
     if (!ticket.isGroup) {
@@ -93,17 +98,47 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     }
   }
 
-  if (medias) {
+  const hasMedias = medias && medias.length > 0;
+
+  if (hasMedias) {
     if (channel === "whatsapp") {
+      // WhatsApp Baileys: múltiplas mídias em paralelo
       await Promise.all(
         medias.map(async (media: Express.Multer.File) => {
           await SendWhatsAppMedia({ media, ticket });
-          fs.unlinkSync(media.path);
+          try { fs.unlinkSync(media.path); } catch (_) {}
         })
       );
+    } else if (channel === "telegram") {
+      // Telegram: enviar cada mídia separadamente
+      for (const media of medias) {
+        await SendTelegramMessage({ body: body || "", ticket, userId, quotedMsg, media });
+      }
+    } else if (channel === "whatsapp_cloud") {
+      // WaCloud: enviar cada mídia separadamente
+      for (const media of medias) {
+        await SendWaCloudMessage({ body: body || "", ticket, userId, quotedMsg, media });
+      }
+    } else {
+      // Outros canais ainda não suportam mídia
+      medias.forEach((media: any) => {
+        try { fs.unlinkSync(media.path); } catch (_) {}
+      });
+      throw new AppError(`Envio de mídia não suportado para o canal ${channel}`, 400);
     }
-  } else if (channel === "whatsapp") {
-    await SendWhatsAppMessage({ body, ticket, userId, quotedMsg });
+  } else if (body) {
+    // Envio de texto/mensagem sem mídia
+    if (channel === "whatsapp") {
+      await SendWhatsAppMessage({ body, ticket, userId, quotedMsg });
+    } else if (channel === "whatsapp_cloud") {
+      await SendWaCloudMessage({ body, ticket, userId, quotedMsg });
+    } else if (channel === "instagram") {
+      await SendInstagramMessage({ body, ticket, userId });
+    } else if (channel === "telegram") {
+      await SendTelegramMessage({ body, ticket, userId, quotedMsg });
+    } else if (channel === "email") {
+      await SendEmailMessage({ body, ticket, userId });
+    }
   }
 
   return res.send();

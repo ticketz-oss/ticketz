@@ -636,6 +636,10 @@ decoupledDriverServices.registerFunction(
       return;
     }
 
+    if (ticket.channel !== "whatsapp") {
+      return;
+    }
+
     const wbot = await GetTicketWbot(ticket);
     if (!wbot) {
       return;

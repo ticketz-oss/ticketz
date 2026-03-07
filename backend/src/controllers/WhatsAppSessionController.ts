@@ -4,6 +4,9 @@ import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
 import UpdateWhatsAppService from "../services/WhatsappService/UpdateWhatsAppService";
 import AppError from "../errors/AppError";
+import { validateAndConnectStatelessChannel } from "../helpers/ValidateStatelessChannel";
+
+const STATELESS_CHANNELS = ["telegram", "whatsapp_cloud", "instagram", "email"];
 
 const store = async (req: Request, res: Response): Promise<Response> => {
   const { whatsappId } = req.params;
@@ -19,9 +22,19 @@ const store = async (req: Request, res: Response): Promise<Response> => {
     throw new AppError("ERR_NO_WAPP_FOUND", 404);
   }
 
-  await StartWhatsAppSession(whatsapp, companyId);
+  if (whatsapp.channel === "whatsapp") {
+    await StartWhatsAppSession(whatsapp, companyId);
+    return res.status(200).json({ message: "Starting session." });
+  }
 
-  return res.status(200).json({ message: "Starting session." });
+  if (STATELESS_CHANNELS.includes(whatsapp.channel)) {
+    const connected = await validateAndConnectStatelessChannel(whatsapp);
+    return res.status(200).json({
+      message: connected ? "Channel connected." : "Channel configuration invalid."
+    });
+  }
+
+  return res.status(400).json({ message: "Unsupported channel type." });
 };
 
 const update = async (req: Request, res: Response): Promise<Response> => {
@@ -36,9 +49,17 @@ const update = async (req: Request, res: Response): Promise<Response> => {
 
   if (whatsapp.channel === "whatsapp") {
     await StartWhatsAppSession(whatsapp, companyId);
+    return res.status(200).json({ message: "Starting session." });
   }
 
-  return res.status(200).json({ message: "Starting session." });
+  if (STATELESS_CHANNELS.includes(whatsapp.channel)) {
+    const connected = await validateAndConnectStatelessChannel(whatsapp);
+    return res.status(200).json({
+      message: connected ? "Channel connected." : "Channel configuration invalid."
+    });
+  }
+
+  return res.status(400).json({ message: "Unsupported channel type." });
 };
 
 const remove = async (req: Request, res: Response): Promise<Response> => {
@@ -56,13 +77,24 @@ const remove = async (req: Request, res: Response): Promise<Response> => {
   }
 
   if (whatsapp.channel === "whatsapp") {
-    const wbot = getWbot(whatsapp.id);
-    wbot.logout();
-    wbot.ws.close();
-  }
-
-  if (whatsapp.channel === "facebook" || whatsapp.channel === "instagram") {
-    whatsapp.destroy();
+    try {
+      const wbot = getWbot(whatsapp.id);
+      wbot.logout();
+      wbot.ws.close();
+    } catch (err) {
+      // Sessão pode já estar encerrada — ignorar
+    }
+  } else if (STATELESS_CHANNELS.includes(whatsapp.channel)) {
+    // Canais stateless: apenas atualiza status para DISCONNECTED via service
+    await UpdateWhatsAppService({
+      whatsappId,
+      companyId,
+      whatsappData: { status: "DISCONNECTED" }
+    });
+    if (whatsapp.channel === "email") {
+      const { stopEmailPolling } = require("../services/EmailServices/EmailMessageListener");
+      stopEmailPolling(whatsapp.id);
+    }
   }
 
   return res.status(200).json({ message: "Session disconnected." });

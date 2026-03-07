@@ -11,7 +11,9 @@ const SetTicketMessagesAsRead = async (ticket: Ticket): Promise<void> => {
   let companyId: number;
 
   try {
-    const wbot = await GetTicketWbot(ticket);
+    // Apenas canais WhatsApp Baileys têm sessão — os demais são stateless
+    const wbot =
+      ticket.channel === "whatsapp" ? await GetTicketWbot(ticket) : null;
 
     if (wbot) {
       const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);

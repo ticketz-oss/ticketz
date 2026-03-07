@@ -14,6 +14,11 @@ import Avatar from "@material-ui/core/Avatar";
 import Divider from "@material-ui/core/Divider";
 import Badge from "@material-ui/core/Badge";
 
+import TelegramIcon from "@material-ui/icons/Telegram";
+import InstagramIcon from "@material-ui/icons/Instagram";
+import CloudIcon from "@material-ui/icons/Cloud";
+import EmailIcon from "@material-ui/icons/Email";
+
 import { i18n } from "../../translate/i18n";
 
 import api from "../../services/api";
@@ -173,6 +178,10 @@ const TicketListItem = ({ ticket, groupActionButtons }) => {
                 variant="body2"
                 color="textPrimary"
               >
+                {ticket.channel === "telegram" && <TelegramIcon fontSize="small" style={{ color: "#0088cc", fontSize: 16, marginRight: 4, verticalAlign: "middle" }} />}
+                {ticket.channel === "instagram" && <InstagramIcon fontSize="small" style={{ color: "#E1306C", fontSize: 16, marginRight: 4, verticalAlign: "middle" }} />}
+                {ticket.channel === "whatsapp_cloud" && <CloudIcon fontSize="small" style={{ color: "#25D366", fontSize: 16, marginRight: 4, verticalAlign: "middle" }} />}
+                {ticket.channel === "email" && <EmailIcon fontSize="small" style={{ color: "#D44638", fontSize: 16, marginRight: 4, verticalAlign: "middle" }} />}
                 {ticket.contact.name}
               </Typography>
               {ticket.status === "closed" && (

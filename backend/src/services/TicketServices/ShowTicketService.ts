@@ -54,12 +54,32 @@ const ShowTicketService = async (
         model: Whatsapp,
         as: "whatsapp",
         attributes: [
+          "id",
           "name",
           "status",
+          "channel",
           "ratingMessage",
           "transferMessage",
           "complationMessage",
-          "language"
+          "language",
+          // Telegram
+          "telegramToken",
+          "telegramBotName",
+          // WhatsApp Cloud API / Meta
+          "tokenMeta",
+          "facebookPageUserId",
+          "facebookUserId",
+          "facebookUserToken",
+          // Instagram
+          "instagramBusinessAccountId",
+          // Email
+          "emailSmtpHost",
+          "emailSmtpPort",
+          "emailSmtpUser",
+          "emailSmtpPass",
+          "emailImapHost",
+          "emailImapPort",
+          "emailFrom"
         ]
       },
       {

@@ -129,6 +129,36 @@ class Whatsapp extends Model<Whatsapp> {
 
   @Column(DataType.TEXT)
   channel: string;
+
+  @Column(DataType.TEXT)
+  telegramToken: string;
+
+  @Column(DataType.TEXT)
+  telegramBotName: string;
+
+  @Column(DataType.TEXT)
+  emailSmtpHost: string;
+
+  @Column(DataType.INTEGER)
+  emailSmtpPort: number;
+
+  @Column(DataType.TEXT)
+  emailSmtpUser: string;
+
+  @Column(DataType.TEXT)
+  emailSmtpPass: string;
+
+  @Column(DataType.TEXT)
+  emailImapHost: string;
+
+  @Column(DataType.INTEGER)
+  emailImapPort: number;
+
+  @Column(DataType.TEXT)
+  emailFrom: string;
+
+  @Column(DataType.TEXT)
+  instagramBusinessAccountId: string;
 }
 
 export default Whatsapp;

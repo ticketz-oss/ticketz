@@ -30,6 +30,10 @@ import { v4 as uuidv4 } from "uuid";
 import RoomIcon from '@material-ui/icons/Room';
 import WhatsAppIcon from "@material-ui/icons/WhatsApp";
 import AndroidIcon from "@material-ui/icons/Android";
+import TelegramIcon from "@material-ui/icons/Telegram";
+import InstagramIcon from "@material-ui/icons/Instagram";
+import CloudIcon from "@material-ui/icons/Cloud";
+import EmailIcon from "@material-ui/icons/Email";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import TicketMessagesDialog from "../TicketMessagesDialog";
 import DoneIcon from '@material-ui/icons/Done';
@@ -500,7 +504,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
           ></span>
         </Tooltip>
         <ListItemAvatar>
-          <Avatar style={{ backgroundColor: generateColor(ticket?.contact?.number), color: "white", fontWeight: "bold" }} src={ticket?.contact?.profilePicUrl}>{ getInitials(ticket?.contact?.name || "") }</Avatar>
+          <Avatar style={{ backgroundColor: generateColor(ticket?.contact?.number), color: "white", fontWeight: "bold" }} src={ticket?.contact?.profilePicUrl}>{getInitials(ticket?.contact?.name || "")}</Avatar>
         </ListItemAvatar>
         <ListItemText
           style={{ paddingBottom: 10 }}
@@ -518,8 +522,12 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
                   <Tooltip title={`Atribuido à ${ticketUser}`}>
                     <WhatsAppIcon fontSize="inherit" style={{ color: grey[700] }} />
                   </Tooltip>
-                )}{' '}
-                {ticket.contact.name}
+                )}
+                {ticket.channel === "telegram" && <TelegramIcon fontSize="inherit" style={{ color: "#0088cc", marginRight: 4, verticalAlign: "middle" }} />}
+                {ticket.channel === "instagram" && <InstagramIcon fontSize="inherit" style={{ color: "#E1306C", marginRight: 4, verticalAlign: "middle" }} />}
+                {ticket.channel === "whatsapp_cloud" && <CloudIcon fontSize="inherit" style={{ color: "#25D366", marginRight: 4, verticalAlign: "middle" }} />}
+                {ticket.channel === "email" && <EmailIcon fontSize="inherit" style={{ color: "#D44638", marginRight: 4, verticalAlign: "middle" }} />}
+                {' '}{ticket.contact.name}
               </Typography>
 
             </span>
@@ -538,10 +546,10 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
                     {i18n.t(`presence.${ticket.presence}`)}
                   </span>
                 ) : (
-                <>
-                  {ticket.lastMessage?.includes('data:image/png;base64') ? <div>Localização</div> : <WhatsMarked oneline>{ticket.lastMessage.startsWith('{"ticketzvCard"') ? "🪪" : ticket.lastMessage.split("\n")[0] }</WhatsMarked>}
-                </>
-              )}
+                  <>
+                    {ticket.lastMessage?.includes('data:image/png;base64') ? <div>Localização</div> : <WhatsMarked oneline>{ticket.lastMessage.startsWith('{"ticketzvCard"') ? "🪪" : ticket.lastMessage.split("\n")[0]}</WhatsMarked>}
+                  </>
+                )}
               </Typography>
               <TagsLine ticket={ticket} />
               <ListItemSecondaryAction style={{ left: 73 }}>
