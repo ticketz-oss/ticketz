@@ -144,13 +144,6 @@ export function TicketNotes({ ticket }) {
       >
         {({ values, handleChange, handleBlur, resetForm, submitForm }) => (
           <Grid container spacing={2}>
-            {notes.length > 0 && (
-              <Grid xs={12} item>
-                <List className={classes.list}>
-                  {renderNoteList()}
-                </List>
-              </Grid>
-            )}
             <Grid xs={12} item>
               <div className={classes.textFieldWrapper}>
                 <TextField
@@ -193,6 +186,13 @@ export function TicketNotes({ ticket }) {
                 )}
               </div>
             </Grid>
+            {notes.length > 0 && (
+              <Grid xs={12} item>
+                <List className={classes.list}>
+                  {renderNoteList()}
+                </List>
+              </Grid>
+            )}
           </Grid>
         )}
       </Formik>
