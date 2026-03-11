@@ -1,15 +1,24 @@
 {
+  "debug.onTaskErrors": "debugAnyway",
   "debug.javascript.autoAttachFilter": "smart",
   "debug.javascript.terminalOptions": {
     "skipFiles": [
       "<node_internals>/**"
     ]
   },
+  "editor.formatOnSave": false,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "never",
+    "source.fixAll.eslint": "never",
+    "source.organizeImports": "never"
+  },
   "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "vscode.typescript-language-features",
+    "editor.formatOnSave": false,
     "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": "explicit"
+      "source.fixAll": "never",
+      "source.fixAll.eslint": "never",
+      "source.organizeImports": "never"
     }
   },
   "typescript.tsserver.experimental.enableProjectDiagnostics": true
