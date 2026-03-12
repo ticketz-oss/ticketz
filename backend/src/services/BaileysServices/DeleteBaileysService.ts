@@ -1,15 +1,11 @@
-import Baileys from "../../models/Baileys";
+import BaileysContact from "../../models/BaileysContact";
 
 const DeleteBaileysService = async (id: string | number): Promise<void> => {
-  const baileysData = await Baileys.findOne({
+  await BaileysContact.destroy({
     where: {
       whatsappId: id
     }
   });
-
-  if (baileysData) {
-    await baileysData.destroy();
-  }
 };
 
 export default DeleteBaileysService;

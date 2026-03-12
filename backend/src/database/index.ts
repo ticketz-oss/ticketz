@@ -28,7 +28,7 @@ import ContactList from "../models/ContactList";
 import ContactListItem from "../models/ContactListItem";
 import Campaign from "../models/Campaign";
 import CampaignSetting from "../models/CampaignSetting";
-import Baileys from "../models/Baileys";
+import BaileysContact from "../models/BaileysContact";
 import CampaignShipping from "../models/CampaignShipping";
 import Announcement from "../models/Announcement";
 import Chat from "../models/Chat";
@@ -78,7 +78,7 @@ const models = [
   ContactListItem,
   Campaign,
   CampaignSetting,
-  Baileys,
+  BaileysContact,
   BaileysKeys,
   CampaignShipping,
   Announcement,
