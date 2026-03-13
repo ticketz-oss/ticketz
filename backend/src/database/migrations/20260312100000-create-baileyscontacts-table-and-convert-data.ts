@@ -1,70 +1,64 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { DataTypes } = require("sequelize");
+import { QueryInterface, DataTypes } from "sequelize";
 
-module.exports = {
-  up: async queryInterface => {
-    await queryInterface.sequelize.transaction(async transaction => {
-      let hasBaileysContactsTable = true;
+export async function up(queryInterface: QueryInterface) {
+  await queryInterface.sequelize.transaction(async transaction => {
+    let hasBaileysContactsTable = true;
 
-      try {
-        await queryInterface.describeTable("BaileysContacts");
-      } catch {
-        hasBaileysContactsTable = false;
-      }
+    try {
+      await queryInterface.describeTable("BaileysContacts");
+    } catch {
+      hasBaileysContactsTable = false;
+    }
 
-      if (!hasBaileysContactsTable) {
-        await queryInterface.createTable(
-          "BaileysContacts",
-          {
-            whatsappId: {
-              type: DataTypes.INTEGER,
-              primaryKey: true,
-              allowNull: false,
-              references: { model: "Whatsapps", key: "id" },
-              onUpdate: "CASCADE",
-              onDelete: "CASCADE"
-            },
-            contactId: {
-              type: DataTypes.TEXT,
-              primaryKey: true,
-              allowNull: false
-            },
-            payload: {
-              type: DataTypes.JSONB,
-              allowNull: false,
-              defaultValue: {}
-            },
-            createdAt: {
-              type: DataTypes.DATE,
-              allowNull: false
-            },
-            updatedAt: {
-              type: DataTypes.DATE,
-              allowNull: false
-            }
+    if (!hasBaileysContactsTable) {
+      await queryInterface.createTable(
+        "BaileysContacts",
+        {
+          whatsappId: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            allowNull: false,
+            references: { model: "Whatsapps", key: "id" },
+            onUpdate: "CASCADE",
+            onDelete: "CASCADE"
           },
-          { transaction }
-        );
-      }
-
-      try {
-        await queryInterface.addIndex(
-          "BaileysContacts",
-          ["whatsappId"],
-          {
-            name: "idx_baileys_contacts_whatsappid",
-            transaction
+          contactId: {
+            type: DataTypes.TEXT,
+            primaryKey: true,
+            allowNull: false
+          },
+          payload: {
+            type: DataTypes.JSONB,
+            allowNull: false,
+            defaultValue: {}
+          },
+          createdAt: {
+            type: DataTypes.DATE,
+            allowNull: false
+          },
+          updatedAt: {
+            type: DataTypes.DATE,
+            allowNull: false
           }
-        );
-      } catch (error) {
-        const errorMessage = String(error?.message || error);
-        if (!errorMessage.includes("already exists")) {
-          throw error;
-        }
-      }
+        },
+        { transaction }
+      );
+    }
 
-      await queryInterface.sequelize.query(
-        `
+    try {
+      await queryInterface.addIndex("BaileysContacts", ["whatsappId"], {
+        name: "idx_baileys_contacts_whatsappid",
+        transaction
+      });
+    } catch (error) {
+      const errorMessage = String(error?.message || error);
+      if (!errorMessage.includes("already exists")) {
+        throw error;
+      }
+    }
+
+    await queryInterface.sequelize.query(
+      `
       CREATE OR REPLACE FUNCTION ticketz_safe_jsonb_baileyscontacts_20260312(input_text TEXT)
       RETURNS JSONB
       LANGUAGE plpgsql
@@ -92,11 +86,11 @@ module.exports = {
       END;
       $$;
     `,
-        { transaction }
-      );
+      { transaction }
+    );
 
-      await queryInterface.sequelize.query(
-        `
+    await queryInterface.sequelize.query(
+      `
       WITH extracted AS (
         SELECT
           b."whatsappId" AS "whatsappId",
@@ -105,6 +99,7 @@ module.exports = {
           COALESCE(b."createdAt", NOW()) AS "createdAt",
           COALESCE(b."updatedAt", NOW()) AS "updatedAt"
         FROM "Baileys" b
+        INNER JOIN "Whatsapps" w ON w."id" = b."whatsappId"
         CROSS JOIN LATERAL jsonb_array_elements(
           ticketz_safe_jsonb_baileyscontacts_20260312(b."contacts")
         ) elem
@@ -139,29 +134,29 @@ module.exports = {
         "payload" = EXCLUDED."payload",
         "updatedAt" = EXCLUDED."updatedAt";
     `,
-        { transaction }
-      );
+      { transaction }
+    );
 
-      await queryInterface.sequelize.query(
-        `
+    await queryInterface.sequelize.query(
+      `
       DROP FUNCTION IF EXISTS ticketz_safe_jsonb_baileyscontacts_20260312(TEXT);
     `,
-        { transaction }
-      );
+      { transaction }
+    );
 
-      await queryInterface.sequelize.query(
-        `
+    await queryInterface.sequelize.query(
+      `
       DELETE FROM "Baileys";
     `,
-        { transaction }
-      );
-    });
-  },
+      { transaction }
+    );
+  });
+}
 
-  down: async queryInterface => {
-    await queryInterface.sequelize.transaction(async transaction => {
-      await queryInterface.sequelize.query(
-        `
+export async function down(queryInterface: QueryInterface) {
+  await queryInterface.sequelize.transaction(async transaction => {
+    await queryInterface.sequelize.query(
+      `
       WITH aggregated AS (
         SELECT
           bc."whatsappId" AS "whatsappId",
@@ -178,11 +173,11 @@ module.exports = {
       FROM aggregated
       WHERE b."whatsappId" = aggregated."whatsappId";
     `,
-        { transaction }
-      );
+      { transaction }
+    );
 
-      await queryInterface.sequelize.query(
-        `
+    await queryInterface.sequelize.query(
+      `
       INSERT INTO "Baileys" (
         "whatsappId",
         "contacts",
@@ -211,10 +206,9 @@ module.exports = {
         WHERE b."whatsappId" = aggregated."whatsappId"
       );
     `,
-        { transaction }
-      );
+      { transaction }
+    );
 
-      await queryInterface.dropTable("BaileysContacts", { transaction });
-    });
-  }
-};
+    await queryInterface.dropTable("BaileysContacts", { transaction });
+  });
+}
