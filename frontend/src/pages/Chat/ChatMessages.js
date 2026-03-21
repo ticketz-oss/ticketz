@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   Box,
   Button,
@@ -20,14 +20,17 @@ import { green } from "@material-ui/core/colors";
 import AttachFileIcon from "@material-ui/icons/AttachFile";
 import CancelIcon from "@material-ui/icons/Cancel";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import ModalImageCors from "../../components/ModalImageCors";
 import { GetApp } from "@material-ui/icons";
 import toastError from "../../errors/toastError";
 import MicRecorder from "mic-recorder-to-mp3";
 import MicIcon from "@material-ui/icons/Mic";
+import PlayArrowIcon from "@material-ui/icons/PlayArrow";
+import PauseIcon from "@material-ui/icons/Pause";
+import CropFreeIcon from "@material-ui/icons/CropFree";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import RecordingTimer from "../../components/MessageInputCustom/RecordingTimer";
+import MediaGalleryLightbox, { buildMediaGalleryData } from "../../components/MediaGalleryLightbox";
 
 const useStyles = makeStyles((theme) => ({
   mainContainer: {
@@ -128,6 +131,35 @@ const useStyles = makeStyles((theme) => ({
     borderBottomLeftRadius: 8,
     borderBottomRightRadius: 8,
   },
+  videoPreviewWrapper: {
+    width: 250,
+    height: 200,
+    borderRadius: 8,
+    overflow: "hidden",
+    position: "relative",
+    backgroundColor: "#000",
+  },
+  videoPreviewMedia: {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+    display: "block",
+  },
+  videoPreviewActions: {
+    position: "absolute",
+    right: 8,
+    bottom: 8,
+    display: "flex",
+    gap: 8,
+    zIndex: 1,
+  },
+  videoPreviewActionButton: {
+    backgroundColor: "rgba(15, 23, 42, 0.65)",
+    color: "#fff",
+    "&:hover": {
+      backgroundColor: "rgba(15, 23, 42, 0.82)",
+    },
+  },
 
   recorderWrapper: {
     display: "flex",
@@ -166,11 +198,35 @@ export default function ChatMessages({
   const { user } = useContext(AuthContext);
   const { datetimeToClient } = useDate();
   const baseRef = useRef();
+  const previewVideoRefs = useRef({});
 
   const [contentMessage, setContentMessage] = useState("");
   const [medias, setMedias] = useState([]);
   const [loading, setLoading] = useState(false);
   const [recording, setRecording] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [previewVideoPlayingById, setPreviewVideoPlayingById] = useState({});
+
+  const lightboxMedia = useMemo(() => {
+    return buildMediaGalleryData(messages, {
+      getMediaUrl: (message) => message?.mediaPath,
+    });
+  }, [messages]);
+
+  const openLightboxForMessage = (messageId) => {
+    const index = lightboxMedia.byMessageId[messageId];
+    if (index === undefined) {
+      return;
+    }
+
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  };
+
+  const closeLightbox = () => {
+    setLightboxOpen(false);
+  };
 
   const scrollToBottom = () => {
     if (baseRef.current) {
@@ -215,26 +271,108 @@ export default function ChatMessages({
     setMedias(selectedMedias);
   };
 
+  const handleVideoPreviewPlayClick = (event, messageId) => {
+    event.stopPropagation();
+
+    const previewVideo = previewVideoRefs.current[messageId];
+    if (!previewVideo) {
+      return;
+    }
+
+    if (previewVideo.paused) {
+      previewVideo.play().catch(() => { });
+      return;
+    }
+
+    previewVideo.pause();
+  };
+
+  const pausePreviewVideo = (messageId) => {
+    const previewVideo = previewVideoRefs.current[messageId];
+    if (!previewVideo) {
+      return;
+    }
+
+    previewVideo.pause();
+  };
+
   const checkMessageMedia = (message) => {
+    const mediaUrl = message.mediaPath;
 
     if (message.mediaType === "image") {
-      return <ModalImageCors imageUrl={message.mediaPath} />;
+      return (
+        <img
+          className={classes.messageMedia}
+          src={mediaUrl}
+          alt="midia da mensagem"
+          style={{ cursor: "pointer" }}
+          onClick={() => openLightboxForMessage(message.id)}
+        />
+      );
     }
     if (message.mediaType === "audio") {
       return (
         <audio controls>
-          <source src={message.mediaPath} type="audio/ogg"></source>
+          <source src={mediaUrl} type="audio/ogg"></source>
         </audio>
       );
     }
 
     if (message.mediaType === "video") {
       return (
-        <video
-          className={classes.messageMedia}
-          src={message.mediaPath}
-          controls
-        />
+        <div className={classes.videoPreviewWrapper}>
+          <video
+            ref={(element) => {
+              if (element) {
+                previewVideoRefs.current[message.id] = element;
+              } else {
+                delete previewVideoRefs.current[message.id];
+              }
+            }}
+            className={classes.videoPreviewMedia}
+            src={mediaUrl}
+            preload="metadata"
+            playsInline
+            onPlay={() => {
+              setPreviewVideoPlayingById((previous) => ({
+                ...previous,
+                [message.id]: true,
+              }));
+            }}
+            onPause={() => {
+              setPreviewVideoPlayingById((previous) => ({
+                ...previous,
+                [message.id]: false,
+              }));
+            }}
+            onEnded={() => {
+              setPreviewVideoPlayingById((previous) => ({
+                ...previous,
+                [message.id]: false,
+              }));
+            }}
+          />
+          <div className={classes.videoPreviewActions}>
+            <IconButton
+              className={classes.videoPreviewActionButton}
+              aria-label="play preview"
+              onClick={(event) => handleVideoPreviewPlayClick(event, message.id)}
+            >
+              {previewVideoPlayingById[message.id] ? <PauseIcon /> : <PlayArrowIcon />}
+            </IconButton>
+            <IconButton
+              className={classes.videoPreviewActionButton}
+              aria-label="open video lightbox"
+              onClick={(event) => {
+                event.stopPropagation();
+                pausePreviewVideo(message.id);
+                openLightboxForMessage(message.id);
+              }}
+            >
+              <CropFreeIcon />
+            </IconButton>
+          </div>
+        </div>
       );
     } else {
       return (
@@ -245,7 +383,7 @@ export default function ChatMessages({
               color="primary"
               variant="outlined"
               target="_blank"
-              href={message.mediaPath}
+              href={mediaUrl}
             >
               Download
             </Button>
@@ -485,6 +623,12 @@ export default function ChatMessages({
 
         </FormControl>
       </div>
+      <MediaGalleryLightbox
+        open={lightboxOpen}
+        onClose={closeLightbox}
+        index={lightboxIndex}
+        slides={lightboxMedia.slides}
+      />
     </Paper>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer, useRef, useContext } from "react";
+import React, { useState, useEffect, useReducer, useRef, useContext, useMemo } from "react";
 
 import { isSameDay, parseISO, format } from "date-fns";
 import clsx from "clsx";
@@ -29,15 +29,18 @@ import {
   Forward,
   Launch,
   Reply,
-  LocationOn
+  LocationOn,
+  PlayArrow,
+  Pause,
+  CropFree,
 } from "@material-ui/icons";
 
 import WhatsMarked from "react-whatsmarked";
-import ModalImageCors from "../ModalImageCors";
 import PdfPreview from "../PdfPreview";
 import MessageOptionsMenu from "../MessageOptionsMenu";
 import whatsBackground from "../../assets/wa-background.png";
 import whatsBackgroundDark from "../../assets/wa-background-dark.png";
+import MediaGalleryLightbox, { buildMediaGalleryData } from "../MediaGalleryLightbox";
 
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
@@ -299,6 +302,51 @@ const useStyles = makeStyles((theme) => ({
     borderTopRightRadius: 8,
     borderBottomLeftRadius: 8,
     borderBottomRightRadius: 8,
+  },
+  videoPreviewWrapper: {
+    width: 250,
+    maxHeight: 445,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+    overflow: "hidden",
+    position: "relative",
+    backgroundColor: "#000",
+  },
+  videoPreviewMedia: {
+    width: "100%",
+    maxHeight: 445,
+    display: "block",
+  },
+  videoPreviewActions: {
+    position: "absolute",
+    right: 8,
+    bottom: 8,
+    display: "flex",
+    gap: 8,
+    zIndex: 1,
+  },
+  videoPreviewActionButton: {
+    backgroundColor: "rgba(15, 23, 42, 0.65)",
+    color: "#fff",
+    "&:hover": {
+      backgroundColor: "rgba(15, 23, 42, 0.82)",
+    },
+  },
+
+  messageMedia: {
+    objectFit: "cover",
+    width: "100%",
+    height: 200,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+  },
+
+  messageMediaClickable: {
+    cursor: "pointer",
   },
 
   messageMediaSticker: {
@@ -625,9 +673,13 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef();
   const stickedRef = useRef();
+  const previewVideoRefs = useRef({});
 
   const [selectedMessage, setSelectedMessage] = useState({});
   const [selectedMessageData, setSelectedMessageData] = useState({});
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [previewVideoPlayingById, setPreviewVideoPlayingById] = useState({});
   const [anchorEl, setAnchorEl] = useState(null);
   const messageOptionsMenuOpen = Boolean(anchorEl);
   const currentTicketId = useRef(ticketId);
@@ -795,14 +847,76 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
     setAnchorEl(null);
   };
 
-  const checkMessageMedia = (message, data) => {
+  const lightboxMedia = useMemo(() => {
+    return buildMediaGalleryData(messagesList);
+  }, [messagesList]);
+
+  const openLightboxForMessage = (messageId) => {
+    const index = lightboxMedia.byMessageId[messageId];
+    if (index === undefined) {
+      return;
+    }
+
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  };
+
+  const closeLightbox = () => {
+    setLightboxOpen(false);
+  };
+
+  const handleVideoPreviewPlayClick = (event, messageId) => {
+    event.stopPropagation();
+
+    const previewVideo = previewVideoRefs.current[messageId];
+    if (!previewVideo) {
+      return;
+    }
+
+    if (previewVideo.paused) {
+      previewVideo.play().catch(() => { });
+      return;
+    }
+
+    previewVideo.pause();
+  };
+
+  const pausePreviewVideo = (messageId) => {
+    const previewVideo = previewVideoRefs.current[messageId];
+    if (!previewVideo) {
+      return;
+    }
+
+    previewVideo.pause();
+  };
+
+  const checkMessageMedia = (message, data, isSticker = false) => {
     const document =
       data?.message?.documentMessage
       || data?.message?.documentWithCaptionMessage?.message?.documentMessage;
+    if (isSticker) {
+      return (
+        <img
+          className={clsx(classes.messageMedia, {
+            [classes.messageMediaDeleted]: message.isDeleted,
+          })}
+          src={message.mediaUrl}
+          alt="sticker"
+        />
+      );
+    }
+
     if (!document && message.mediaType === "image") {
       return (
         <>
-          { <ModalImageCors imageUrl={message.mediaUrl} isDeleted={message.isDeleted} /> }
+          <img
+            className={clsx(classes.messageMedia, classes.messageMediaClickable, {
+              [classes.messageMediaDeleted]: message.isDeleted,
+            })}
+            src={message.mediaUrl}
+            alt="midia da mensagem"
+            onClick={() => openLightboxForMessage(message.id)}
+          />
           <>
             <div className={[clsx({
               [classes.textContentItemDeleted]: message.isDeleted,
@@ -841,13 +955,63 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
     if (!document || message.mediaType === "video") {
       return (
         <>
-          <video
-            className={[clsx(classes.messageVideo, {
-              [classes.messageMediaDeleted]: message.isDeleted
-            })]}
-            src={message.mediaUrl}
-            controls
-          />
+          <div
+            className={clsx(classes.videoPreviewWrapper, {
+              [classes.messageMediaDeleted]: message.isDeleted,
+            })}
+          >
+            <video
+              ref={(element) => {
+                if (element) {
+                  previewVideoRefs.current[message.id] = element;
+                } else {
+                  delete previewVideoRefs.current[message.id];
+                }
+              }}
+              className={classes.videoPreviewMedia}
+              src={message.mediaUrl}
+              preload="metadata"
+              playsInline
+              onPlay={() => {
+                setPreviewVideoPlayingById((previous) => ({
+                  ...previous,
+                  [message.id]: true,
+                }));
+              }}
+              onPause={() => {
+                setPreviewVideoPlayingById((previous) => ({
+                  ...previous,
+                  [message.id]: false,
+                }));
+              }}
+              onEnded={() => {
+                setPreviewVideoPlayingById((previous) => ({
+                  ...previous,
+                  [message.id]: false,
+                }));
+              }}
+            />
+            <div className={classes.videoPreviewActions}>
+              <IconButton
+                className={classes.videoPreviewActionButton}
+                aria-label="play preview"
+                onClick={(event) => handleVideoPreviewPlayClick(event, message.id)}
+              >
+                {previewVideoPlayingById[message.id] ? <Pause /> : <PlayArrow />}
+              </IconButton>
+              <IconButton
+                className={classes.videoPreviewActionButton}
+                aria-label="open video lightbox"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  pausePreviewVideo(message.id);
+                  openLightboxForMessage(message.id);
+                }}
+              >
+                <CropFree />
+              </IconButton>
+            </div>
+          </div>
           <div className={[clsx({
             [classes.textContentItemDeleted]: message.isDeleted,
             [classes.textContentItem]: !message.isDeleted,
@@ -1469,7 +1633,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
                       {format(parseISO(message.createdAt), "HH:mm")}
                     </span>
                   </div>)}
-                  {message.mediaUrl && !data?.message?.extendedTextMessage && checkMessageMedia(message, data)}
+                  {message.mediaUrl && !data?.message?.extendedTextMessage && checkMessageMedia(message, data, isSticker)}
                   {renderButtons(data?.message)}
                   {renderReplies(message.replies)}
             </div>
@@ -1547,7 +1711,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
                   {renderMessageAck(message)}
                 </span>
               </div>
-              {message.mediaUrl && checkMessageMedia(message, data)}
+              {message.mediaUrl && checkMessageMedia(message, data, isSticker)}
               {renderReplies(message.replies)}
             </div>
           </React.Fragment>
@@ -1632,6 +1796,12 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
           <CircularProgress className={classes.circleLoading} />
         </div>
       )}
+      <MediaGalleryLightbox
+        open={lightboxOpen}
+        onClose={closeLightbox}
+        index={lightboxIndex}
+        slides={lightboxMedia.slides}
+      />
     </div>
   );
 };
