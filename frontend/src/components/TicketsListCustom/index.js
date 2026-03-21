@@ -226,6 +226,13 @@ const TicketsListCustom = (props) => {
 
     const shouldUpdateTicket = (ticket) => {
       return (!isSearch || !searchParam) &&
+        (!contactId || ticket.contactId === contactId) &&
+        (!tags?.length || tags.some(
+          tag =>
+            ticket.tags.some(t => t.id === tag) ||
+            ticket.contact.tags.some(t => t.id === tag)
+        )) &&
+        (!users?.length || users.some(u => u === ticket.userId)) &&
         (!ticket.userId || ticket.userId === user?.id || showAll) &&
         (!ticket.queueId || selectedQueueIds.indexOf(ticket.queueId) > -1);
     };
