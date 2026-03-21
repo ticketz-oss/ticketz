@@ -34,6 +34,7 @@ import {
 
 import WhatsMarked from "react-whatsmarked";
 import ModalImageCors from "../ModalImageCors";
+import PdfPreview from "../PdfPreview";
 import MessageOptionsMenu from "../MessageOptionsMenu";
 import whatsBackground from "../../assets/wa-background.png";
 import whatsBackgroundDark from "../../assets/wa-background-dark.png";
@@ -862,8 +863,19 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
         </>
       );
     } else {
+      const fileName = document?.fileName || message.body || "";
+      const isPdf =
+        fileName.toLowerCase().endsWith(".pdf") ||
+        (document?.mimetype || "").toLowerCase().includes("pdf") ||
+        (message.mediaUrl || "").toLowerCase().includes(".pdf");
       return (
         <>
+          {isPdf && message.mediaUrl && (
+            <PdfPreview
+              url={message.mediaUrl}
+              fileName={fileName}
+            />
+          )}
           <div className={classes.downloadMedia}>
             <Button
               startIcon={<Description />}
