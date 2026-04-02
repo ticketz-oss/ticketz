@@ -33,6 +33,7 @@ import { csvDetectDelimiter } from "../helpers/csvDetectDelimiter";
 type IndexQuery = {
   searchParam: string;
   pageNumber: string;
+  tags?: string;
 };
 
 type IndexGetContactQuery = {
@@ -53,13 +54,19 @@ interface ContactData {
 }
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
-  const { searchParam, pageNumber } = req.query as IndexQuery;
+  const { searchParam, pageNumber, tags: tagsStringified } = req.query as IndexQuery;
   const { companyId } = req.user;
+
+  let tagsIds: number[] = [];
+  if (tagsStringified) {
+    tagsIds = JSON.parse(tagsStringified);
+  }
 
   const { contacts, count, hasMore } = await ListContactsService({
     searchParam,
     pageNumber,
-    companyId
+    companyId,
+    tags: tagsIds
   });
 
   return res.json({ contacts, count, hasMore });
