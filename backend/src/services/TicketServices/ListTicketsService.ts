@@ -21,6 +21,7 @@ import TicketTag from "../../models/TicketTag";
 import Whatsapp from "../../models/Whatsapp";
 import { GetCompanySetting } from "../../helpers/CheckSettings";
 import ContactTag from "../../models/ContactTag";
+import ContactCustomField from "../../models/ContactCustomField";
 
 interface Request {
   isSearch?: boolean;
@@ -117,7 +118,15 @@ const ListTicketsService = async ({
     {
       model: Contact,
       as: "contact",
-      include: ["tags", "extraInfo"],
+      include: [
+        "tags",
+        {
+          model: ContactCustomField,
+          as: "extraInfo",
+          attributes: ["id", "name", "value"],
+          required: false
+        }
+      ],
       attributes: ["id", "name", "number", "email", "profilePicUrl", "presence"]
     },
     {
@@ -194,6 +203,13 @@ const ListTicketsService = async ({
         {
           "$message.body$": where(
             fn("LOWER", col("body")),
+            "LIKE",
+            `%${sanitizedSearchParam}%`
+          )
+        },
+        {
+          "$contact.extraInfo.value$": where(
+            fn("LOWER", col("contact.extraInfo.value")),
             "LIKE",
             `%${sanitizedSearchParam}%`
           )
