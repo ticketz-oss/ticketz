@@ -211,6 +211,11 @@ const NewTicketModal = ({ modalOpen, onClose, contact }) => {
                               height: 20,
                             }}
                           />
+                          {ticket.whatsapp && (
+                            <span style={{ marginLeft: 8, fontSize: 12, color: "#1976d2" }}>
+                              [{ticket.whatsapp.name}]
+                            </span>
+                          )}
                           {ticket.user && (
                             <span style={{ marginLeft: 8, fontSize: 12, color: "#666" }}>
                               ({ticket.user.name})
