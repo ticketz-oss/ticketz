@@ -428,9 +428,12 @@ const messages = {
         title: "Criar Ticket",
         fieldLabel: "Digite para pesquisar o contato",
         add: "Adicionar",
+        openTicketsWarning: "Este contato já possui ticket(s) aberto(s):",
         buttons: {
           ok: "Salvar",
           cancel: "Cancelar",
+          goToTicket: "Ir para ticket",
+          transfer: "Transferir para mim",
         },
       },
       mainDrawer: {

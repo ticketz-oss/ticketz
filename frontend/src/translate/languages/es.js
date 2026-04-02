@@ -425,9 +425,12 @@ const messages = {
         title: "Crear Ticket",
         fieldLabel: "Escribe para buscar el contacto",
         add: "Agregar",
+        openTicketsWarning: "Este contacto ya tiene ticket(s) abierto(s):",
         buttons: {
           ok: "Guardar",
           cancel: "Cancelar",
+          goToTicket: "Ir al ticket",
+          transfer: "Transferir a mí",
         },
       },
       mainDrawer: {
