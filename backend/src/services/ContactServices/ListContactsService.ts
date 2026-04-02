@@ -1,11 +1,14 @@
 import { Sequelize, Op, Includeable } from "sequelize";
 import Contact from "../../models/Contact";
 import ContactCustomField from "../../models/ContactCustomField";
+import ContactTag from "../../models/ContactTag";
+import { intersection } from "lodash";
 
 interface Request {
   searchParam?: string;
   pageNumber?: string;
   companyId: number;
+  tags?: number[];
 }
 
 interface Response {
@@ -17,7 +20,8 @@ interface Response {
 const ListContactsService = async ({
   searchParam = "",
   pageNumber = "1",
-  companyId
+  companyId,
+  tags
 }: Request): Promise<Response> => {
   const normalizedSearchParam = searchParam.toLowerCase().trim();
 
@@ -69,6 +73,20 @@ const ListContactsService = async ({
       [Op.eq]: companyId
     }
   };
+
+  if (Array.isArray(tags) && tags.length > 0) {
+    const contactTagFilters: number[][] = [];
+    for (const tag of tags) {
+      const contactTags = await ContactTag.findAll({
+        where: { tagId: tag }
+      });
+      if (contactTags) {
+        contactTagFilters.push(contactTags.map(ct => ct.contactId));
+      }
+    }
+    const contactsIntersection: number[] = intersection(...contactTagFilters);
+    whereCondition.id = { [Op.in]: contactsIntersection };
+  }
 
   const limit = 20;
   const offset = limit * (+pageNumber - 1);

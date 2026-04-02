@@ -42,6 +42,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCloudArrowUp } from '@fortawesome/free-solid-svg-icons';
 import { faDownload } from '@fortawesome/free-solid-svg-icons';
 import { FormControl, Grid, InputLabel, MenuItem, Select, Tooltip } from "@material-ui/core";
+import { TagsFilter } from "../../components/TagsFilter";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_CONTACTS") {
@@ -136,6 +137,7 @@ const Contacts = () => {
   const [connections, setConnections] = useState([]);
   const [importConnectionId, setImportConnectionId] = useState("");
   const [hasMore, setHasMore] = useState(false);
+  const [selectedTags, setSelectedTags] = useState([]);
 
   const socketManager = useContext(SocketContext);
 
@@ -153,7 +155,7 @@ const Contacts = () => {
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
-  }, [searchParam]);
+  }, [searchParam, selectedTags]);
 
   useEffect(() => {
     setLoading(true);
@@ -161,7 +163,11 @@ const Contacts = () => {
       const fetchContacts = async () => {
         try {
           const { data } = await api.get("/contacts/", {
-            params: { searchParam, pageNumber },
+            params: {
+              searchParam,
+              pageNumber,
+              tags: JSON.stringify(selectedTags),
+            },
           });
           dispatch({ type: "LOAD_CONTACTS", payload: data.contacts });
           setHasMore(data.hasMore);
@@ -173,7 +179,7 @@ const Contacts = () => {
       fetchContacts();
     }, 500);
     return () => clearTimeout(delayDebounceFn);
-  }, [searchParam, pageNumber]);
+  }, [searchParam, pageNumber, selectedTags]);
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
@@ -198,6 +204,11 @@ const Contacts = () => {
 
   const handleSearch = (event) => {
     setSearchParam(event.target.value.toLowerCase());
+  };
+
+  const handleSelectedTags = (selecteds) => {
+    const tags = selecteds.map((t) => t.id);
+    setSelectedTags(tags);
   };
 
   const handleOpenContactModal = () => {
@@ -398,6 +409,7 @@ const Contacts = () => {
           </Button>
         </MainHeaderButtonsWrapper>
       </MainHeader>
+      <TagsFilter onFiltered={handleSelectedTags} />
       <Paper
         className={classes.mainPaper}
         variant="outlined"
