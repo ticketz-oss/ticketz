@@ -1016,6 +1016,11 @@ const messages = {
           },
         },
       },
+      messageSearch: {
+        title: "Search in conversation",
+        placeholder: "Search messages...",
+        noResults: "No results",
+      },
       messagesInput: {
         placeholderOpen: "Type a message",
         placeholderClosed:

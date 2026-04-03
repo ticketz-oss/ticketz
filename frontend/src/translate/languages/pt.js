@@ -1023,6 +1023,11 @@ const messages = {
           },
         },
       },
+      messageSearch: {
+        title: "Buscar na conversa",
+        placeholder: "Buscar mensagens...",
+        noResults: "Nenhum resultado",
+      },
       messagesInput: {
         placeholderOpen: "Digite uma mensagem",
         placeholderClosed:

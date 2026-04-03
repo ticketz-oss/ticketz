@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { useParams, useHistory } from "react-router-dom";
 
 import { toast } from "react-toastify";
@@ -12,6 +12,7 @@ import TicketHeader from "../TicketHeader";
 import TicketInfo from "../TicketInfo";
 import TicketActionButtons from "../TicketActionButtonsCustom";
 import MessagesList from "../MessagesList";
+import MessageSearch from "../MessageSearch";
 import api from "../../services/api";
 import { ReplyMessageProvider } from "../../context/ReplyingMessage/ReplyingMessageContext";
 import { EditMessageProvider } from "../../context/EditingMessage/EditingMessageContext";
@@ -83,6 +84,8 @@ const Ticket = () => {
   const [ticket, setTicket] = useState({});
   const [showTabGroups, setShowTabGroups] = useState(false);
   const [tagsMode, setTagsMode] = useState("ticket");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const messageListRef = useRef(null);
   const { getSetting } = useSettings();
 
   const socketManager = useContext(SocketContext);
@@ -197,6 +200,7 @@ const Ticket = () => {
           ticketId={ticket.id}
           isGroup={ticket.isGroup}
           markAsRead={true}
+          messageListRef={messageListRef}
         ></MessagesList>
         <MessageInput ticket={ticket} showTabGroups />
       </>
@@ -217,7 +221,7 @@ const Ticket = () => {
         })} onClick={() => setDrawerOpen(false)}></div>
         <TicketHeader loading={loading}>
           {renderTicketInfo()}
-          <TicketActionButtons ticket={ticket} showTabGroups={showTabGroups} />
+          <TicketActionButtons ticket={ticket} showTabGroups={showTabGroups} onSearchToggle={() => setSearchOpen((prev) => !prev)} />
         </TicketHeader>
         <Paper>
           <TagsContainer
@@ -225,6 +229,11 @@ const Ticket = () => {
             contact={tagsMode === "contact" && contact}
           />
         </Paper>
+        <MessageSearch
+          open={searchOpen}
+          onClose={() => setSearchOpen(false)}
+          messageListRef={messageListRef}
+        />
         <ReplyMessageProvider>
           <EditMessageProvider>
 	        {renderMessagesList()}

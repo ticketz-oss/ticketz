@@ -664,7 +664,7 @@ const reducer = (state, action) => {
   }
 };
 
-const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
+const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly, messageListRef }) => {
   const classes = useStyles();
 
   const [messagesList, dispatch] = useReducer(reducer, []);
@@ -1745,7 +1745,10 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
         id="messagesList"
         className={classes.messagesList}
         onScroll={handleScroll}
-        ref={scrollRef}
+        ref={(el) => {
+          scrollRef.current = el;
+          if (messageListRef) messageListRef.current = el;
+        }}
       >
         {messagesList.length > 0 ? renderMessages() : []}
         {contactPresence === "composing" && (

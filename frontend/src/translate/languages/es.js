@@ -1020,6 +1020,11 @@ const messages = {
           },
         },
       },
+      messageSearch: {
+        title: "Buscar en la conversación",
+        placeholder: "Buscar mensajes...",
+        noResults: "Sin resultados",
+      },
       messagesInput: {
         placeholderOpen: "Ingrese un mensaje",
         placeholderClosed:
