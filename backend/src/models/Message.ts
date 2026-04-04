@@ -16,7 +16,7 @@ import Ticket from "./Ticket";
 import Company from "./Company";
 import Queue from "./Queue";
 import OldMessage from "./OldMessage";
-import { URLCharEncoder } from "../helpers/URLCharEncoder";
+import { URLCharEncoder } from "./URLCharEncoder";
 
 @Table
 class Message extends Model {
