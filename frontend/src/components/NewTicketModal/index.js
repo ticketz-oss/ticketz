@@ -10,7 +10,7 @@ import ButtonWithSpinner from "../ButtonWithSpinner";
 import ContactModal from "../ContactModal";
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
-import { Grid, ListItemText, MenuItem, Select, TextField, FormControl, InputLabel } from "@material-ui/core";
+import { Grid, ListItemText, MenuItem, Select, TextField, FormControl, InputLabel, Typography, Box, Chip } from "@material-ui/core";
 import { toast } from "react-toastify";
 import { ContactSelect } from "../ContactSelect";
 
@@ -21,6 +21,7 @@ const NewTicketModal = ({ modalOpen, onClose, contact }) => {
   const [newContact, setNewContact] = useState({});
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [openTickets, setOpenTickets] = useState([]);
   const { user } = useContext(AuthContext);
 
   useEffect(() => {
@@ -32,7 +33,37 @@ const NewTicketModal = ({ modalOpen, onClose, contact }) => {
 
   useEffect(() => {
     setSelectedQueue("");
+    setOpenTickets([]);
   }, [modalOpen]);
+
+  useEffect(() => {
+    const fetchOpenTickets = async () => {
+      if (user.profile !== "admin") {
+        setOpenTickets([]);
+        return;
+      }
+      const contactId = selectedContact?.id;
+      if (!contactId) {
+        setOpenTickets([]);
+        return;
+      }
+      try {
+        const { data } = await api.get("/tickets", {
+          params: {
+            contactId,
+            notClosed: true,
+            showAll: true,
+            all: true,
+            queueIds: JSON.stringify([]),
+          },
+        });
+        setOpenTickets(data.tickets || []);
+      } catch (err) {
+        setOpenTickets([]);
+      }
+    };
+    fetchOpenTickets();
+  }, [selectedContact, user.profile]);
 
   const handleClose = () => {
     onClose();
@@ -61,6 +92,24 @@ const NewTicketModal = ({ modalOpen, onClose, contact }) => {
     setLoading(false);
   };
 
+  const handleTransferTicket = async (ticket) => {
+    setLoading(true);
+    try {
+      await api.put(`/tickets/${ticket.id}`, {
+        userId: user.id,
+        status: "open",
+      });
+      onClose(ticket);
+    } catch (err) {
+      toastError(err);
+    }
+    setLoading(false);
+  };
+
+  const handleGoToTicket = (ticket) => {
+    onClose(ticket);
+  };
+
   const handleSelectedContact = contactId => {
     if (contactId) {
       setSelectedContact({ id: contactId });
@@ -80,6 +129,20 @@ const NewTicketModal = ({ modalOpen, onClose, contact }) => {
 
   const handleAddNewContactTicket = contact => {
     setSelectedContact(contact);
+  };
+
+  const getStatusLabel = (status) => {
+    const labels = {
+      open: i18n.t("tickets.tabs.open.title"),
+      pending: i18n.t("ticketsList.pendingHeader"),
+      closed: i18n.t("tickets.tabs.closed.title"),
+    };
+    return labels[status] || status;
+  };
+
+  const getStatusColor = (status) => {
+    const colors = { open: "#4caf50", pending: "#ff9800", closed: "#9e9e9e" };
+    return colors[status] || "#9e9e9e";
   };
 
   return (
@@ -114,6 +177,79 @@ const NewTicketModal = ({ modalOpen, onClose, contact }) => {
                 />
               )}
             </Grid>
+            {user.profile === "admin" && openTickets.length > 0 && (
+              <Grid xs={12} item>
+                <Box style={{
+                  border: "1px solid #ff9800",
+                  borderRadius: 8,
+                  padding: 12,
+                  backgroundColor: "#fff8e1"
+                }}>
+                  <Typography variant="subtitle2" style={{ marginBottom: 8 }}>
+                    {i18n.t("newTicketModal.openTicketsWarning") || "Este contato já possui ticket(s) aberto(s):"}
+                  </Typography>
+                  {openTickets.map((ticket) => (
+                    <Box
+                      key={ticket.id}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        marginBottom: 6,
+                        padding: "4px 0",
+                      }}
+                    >
+                      <Box style={{ flex: 1 }}>
+                        <Typography variant="body2">
+                          #{ticket.id} -&nbsp;
+                          <Chip
+                            size="small"
+                            label={getStatusLabel(ticket.status)}
+                            style={{
+                              backgroundColor: getStatusColor(ticket.status),
+                              color: "white",
+                              height: 20,
+                            }}
+                          />
+                          {ticket.whatsapp && (
+                            <span style={{ marginLeft: 8, fontSize: 12, color: "#1976d2" }}>
+                              [{ticket.whatsapp.name}]
+                            </span>
+                          )}
+                          {ticket.user && (
+                            <span style={{ marginLeft: 8, fontSize: 12, color: "#666" }}>
+                              ({ticket.user.name})
+                            </span>
+                          )}
+                        </Typography>
+                      </Box>
+                      <Box>
+                        {ticket.userId === user.id ? (
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            color="primary"
+                            onClick={() => handleGoToTicket(ticket)}
+                          >
+                            {i18n.t("newTicketModal.buttons.goToTicket") || "Ir para ticket"}
+                          </Button>
+                        ) : (
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            color="primary"
+                            disabled={loading}
+                            onClick={() => handleTransferTicket(ticket)}
+                          >
+                            {i18n.t("newTicketModal.buttons.transfer") || "Transferir para mim"}
+                          </Button>
+                        )}
+                      </Box>
+                    </Box>
+                  ))}
+                </Box>
+              </Grid>
+            )}
             <Grid xs={12} item>
               <FormControl fullWidth variant="outlined" margin="dense">
                 <InputLabel id="queue-label">{i18n.t("common.queue")}</InputLabel>

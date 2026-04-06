@@ -428,9 +428,12 @@ const messages = {
         title: "Criar Ticket",
         fieldLabel: "Digite para pesquisar o contato",
         add: "Adicionar",
+        openTicketsWarning: "Este contato já possui ticket(s) aberto(s):",
         buttons: {
           ok: "Salvar",
           cancel: "Cancelar",
+          goToTicket: "Ir para ticket",
+          transfer: "Transferir para mim",
         },
       },
       mainDrawer: {
@@ -1019,6 +1022,11 @@ const messages = {
             endCall: "Encerrar Chamada",
           },
         },
+      },
+      messageSearch: {
+        title: "Buscar na conversa",
+        placeholder: "Buscar mensagens...",
+        noResults: "Nenhum resultado",
       },
       messagesInput: {
         placeholderOpen: "Digite uma mensagem",
