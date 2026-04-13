@@ -11,8 +11,8 @@ on:
       - 'v*.*.*'
 env:
   REGISTRY: ghcr.io
-  IMAGE_BACKEND: erpcon-oss/erpcon-backend
-  IMAGE_FRONTEND: erpcon-oss/erpcon-frontend
+  IMAGE_BACKEND: erpsg/erpconticketz-backend
+  IMAGE_FRONTEND: erpsg/erpconticketz-frontend
 
 jobs:
   build-and-push-images:
