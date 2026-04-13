@@ -63,7 +63,7 @@
     "uuid": "^9.0.1",
     "validations-br": "^1.4.0",
     "vcard-parser": "^1.0.0",
-    "wavoip-api": "https://github.com/erpcon-oss/wavoip-api#nossl-error",
+    "wavoip-api": "https://github.com/ticketz-oss/wavoip-api#nossl-error",
     "yet-another-react-lightbox": "^3.29.1",
     "yup": "^1.4.0"
   },
