@@ -1,83 +1,27 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
-<svg
-   width="115mm"
-   height="115mm"
-   viewBox="0 0 115 115"
-   version="1.1"
-   id="svg5953"
-   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
-   sodipodi:docname="favicon.svg"
-   inkscape:export-filename="../../../public/mstile-150x150.png"
-   inkscape:export-xdpi="59.630001"
-   inkscape:export-ydpi="59.630001"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
-  <sodipodi:namedview
-     id="namedview5955"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:showpageshadow="2"
-     inkscape:pageopacity="0.0"
-     inkscape:pagecheckerboard="0"
-     inkscape:deskcolor="#d1d1d1"
-     inkscape:document-units="mm"
-     showgrid="false"
-     inkscape:zoom="0.75366162"
-     inkscape:cx="350.95326"
-     inkscape:cy="203.67231"
-     inkscape:window-width="1920"
-     inkscape:window-height="1011"
-     inkscape:window-x="0"
-     inkscape:window-y="32"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="layer1" />
-  <defs
-     id="defs5950" />
-  <g
-     inkscape:label="Camada 1"
-     inkscape:groupmode="layer"
-     id="layer1">
-    <g
-       id="g985"
-       transform="matrix(1.3543717,0,0,1.3543664,-1638.0753,-241.82079)">
-      <rect
-         width="22.265394"
-         height="81.458755"
-         fill="#4b91f1"
-         stroke="transparent"
-         data-fill-palette-color="accent"
-         x="1213.642"
-         fill-opacity="1"
-         id="rect141"
-         y="180.27492"
-         style="stroke-width:0.406801" />
-      <rect
-         width="22.265394"
-         height="81.458755"
-         fill="#4b91f1"
-         stroke="transparent"
-         data-fill-palette-color="accent"
-         x="1240.7949"
-         fill-opacity="0.75"
-         id="rect143"
-         y="180.27492"
-         style="stroke-width:0.406801" />
-      <rect
-         width="22.265394"
-         height="81.458755"
-         fill="#4b91f1"
-         stroke="transparent"
-         data-fill-palette-color="accent"
-         x="1267.9479"
-         fill-opacity="0.5"
-         id="rect145"
-         y="180.27492"
-         style="stroke-width:0.406801" />
-    </g>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img">
+  <title>ERPCon</title>
+  <!-- Hub lines -->
+  <line x1="50" y1="30" x2="50" y2="18" stroke="#1d5a8a" stroke-width="2" fill="none"/>
+  <line x1="62" y1="36" x2="73" y2="25" stroke="#1d5a8a" stroke-width="2" fill="none"/>
+  <line x1="68" y1="54" x2="81" y2="51" stroke="#1d5a8a" stroke-width="2" fill="none"/>
+  <line x1="62" y1="72" x2="73" y2="83" stroke="#1d5a8a" stroke-width="2" fill="none"/>
+  <line x1="50" y1="78" x2="50" y2="90" stroke="#1d5a8a" stroke-width="2" fill="none"/>
+  <line x1="38" y1="72" x2="27" y2="83" stroke="#1d5a8a" stroke-width="2" fill="none"/>
+  <line x1="32" y1="54" x2="19" y2="51" stroke="#1d5a8a" stroke-width="2" fill="none"/>
+  <line x1="38" y1="36" x2="27" y2="25" stroke="#1d5a8a" stroke-width="2" fill="none"/>
+  <!-- Outer nodes -->
+  <circle cx="50" cy="12" r="6" fill="none" stroke="#1ab4e8" stroke-width="2"/>
+  <circle cx="79" cy="20" r="6" fill="none" stroke="#1ab4e8" stroke-width="2"/>
+  <circle cx="88" cy="49" r="6" fill="none" stroke="#1ab4e8" stroke-width="2"/>
+  <circle cx="79" cy="88" r="6" fill="none" stroke="#1ab4e8" stroke-width="2"/>
+  <circle cx="50" cy="96" r="6" fill="none" stroke="#1ab4e8" stroke-width="2"/>
+  <circle cx="21" cy="88" r="6" fill="none" stroke="#1ab4e8" stroke-width="2"/>
+  <circle cx="12" cy="49" r="6" fill="none" stroke="#1ab4e8" stroke-width="2"/>
+  <circle cx="21" cy="20" r="6" fill="none" stroke="#1ab4e8" stroke-width="2"/>
+  <!-- Hexagon -->
+  <polygon points="50,27 66,36 66,55 50,64 34,55 34,36" fill="none" stroke="#1d5a8a" stroke-width="3"/>
+  <!-- Cube -->
+  <polygon points="50,30 63,37 50,44 37,37" fill="#a8d8f0"/>
+  <polygon points="37,37 50,44 50,58 37,51" fill="#2a8fc4"/>
+  <polygon points="63,37 63,51 50,58 50,44" fill="#1d5a8a"/>
 </svg>
