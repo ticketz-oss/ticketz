@@ -747,18 +747,18 @@ const messages = {
       },
       about: {
         aboutthe: "About the",
-        copyright: "© 2024 - Powered by ticketz",
+        copyright: "© 2024 - Powered by erpcon",
         buttonclose: "Close",
-        title: "About ticketz",
+        title: "About erpcon",
         abouttitle: "Origin and improvements",
-        aboutdetail: "ticketz is indirectly derived from the Whaticket project with improvements shared by the developers of the EquipeChat system through the VemFazer channel on YouTube, later improved by Claudemir Todo Bom",
+        aboutdetail: "erpcon is indirectly derived from the Whaticket project with improvements shared by the developers of the EquipeChat system through the VemFazer channel on YouTube, later improved by Claudemir Todo Bom",
         aboutauthorsite: "Author's site",
         aboutwhaticketsite: "Whaticket Community site on Github",
         aboutvemfazersite: "Vem Fazer channel site on Github",
         licenseheading: "Open Source License",
-        licensedetail: "ticketz is licensed under the GNU Affero General Public License version 3, which means that any user who has access to this application has the right to obtain access to the source code. More information at the links below:",
+        licensedetail: "erpcon is licensed under the GNU Affero General Public License version 3, which means that any user who has access to this application has the right to obtain access to the source code. More information at the links below:",
         licensefulltext: "Full text of the license",
-        licensesourcecode: "Ticketz source code"
+        licensesourcecode: "ERPCon source code"
       },
       schedules: {
         title: "Schedules",
@@ -1159,7 +1159,7 @@ const messages = {
       wavoipModal: {
         title: "Enter your Wavoip connection token",
         instructions: "By accessing the address below you can create an account with 50 free calls for testing",
-        coupon: "When hiring the service use the coupon TICKETZ to get a discount!",
+        coupon: "When hiring the service use the coupon ERPCON to get a discount!",
       },
       openHours: {
         title: "Business Hours",
@@ -1213,17 +1213,17 @@ const messages = {
           sun: "Sunday",
         },
       },
-      ticketz: {
+      erpcon: {
         registration: {
-          header: "Register in the Ticketz user base",
-          description: "Fill in the fields below to register in the Ticketz user base and receive news about the project.",
+          header: "Register in the ERPCon user base",
+          description: "Fill in the fields below to register in the ERPCon user base and receive news about the project.",
           name: "Name",
           country: "Country",
           phoneNumber: "Whatsapp Number",
           submit: "Register",
         },
         support: {
-          title: "Support Ticketz project",
+          title: "Support ERPCon project",
           mercadopagotitle: "Credit Card",
           recurringbrl: "Recurring donations in BRL",
           paypaltitle: "Credit Card",

@@ -61,7 +61,7 @@ const useStyles = makeStyles((theme) => ({
       fontWeight: "bold",
       textDecoration: "none",
     },
-    "& span.ticketzMention": {
+    "& span.erpconMention": {
       color: theme.palette.primary.main,
       fontWeight: "bold",
       cursor: "pointer",
@@ -1366,7 +1366,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
   }
 
   const isVCard = (message) => {
-    return message.startsWith('{"ticketzvCard":');
+    return message.startsWith('{"erpconvCard":');
   };
   
   const stringOrFirstElement = (data) => {
@@ -1393,7 +1393,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
   };
   
   const renderVCard = (vcardJson) => {
-    const cardArray = JSON.parse(vcardJson)?.ticketzvCard;
+    const cardArray = JSON.parse(vcardJson)?.erpconvCard;
     
     if (!cardArray || !Array.isArray(cardArray)) {
       return <div>Invalid VCARD data</div>;
@@ -1451,7 +1451,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
                   color="textPrimary"
                   style={{ display: 'flex' }}
                 >
-                  <span class="ticketzMention" onClick={() => handleContactClick(name, metaNumber)}>{number}</span>
+                  <span class="erpconMention" onClick={() => handleContactClick(name, metaNumber)}>{number}</span>
                 </Typography>
               </div>
 

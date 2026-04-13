@@ -679,18 +679,18 @@ const messages = {
       },
       about: {
         aboutthe: "Über",
-        copyright: "© 2024 - Betrieben mit ticketz",
+        copyright: "© 2024 - Betrieben mit erpcon",
         buttonclose: "Schließen",
-        title: "Über ticketz",
+        title: "Über erpcon",
         abouttitle: "Ursprung und Verbesserungen",
-        aboutdetail: "Ticketz ist indirekt vom Whaticket-Projekt abgeleitet, mit Verbesserungen, die von den Entwicklern des EquipeChat-Systems über den YouTube-Kanal VemFazer geteilt wurden, und später von Claudemir Todo Bom verbessert wurden",
+        aboutdetail: "ERPCon ist indirekt vom Whaticket-Projekt abgeleitet, mit Verbesserungen, die von den Entwicklern des EquipeChat-Systems über den YouTube-Kanal VemFazer geteilt wurden, und später von Claudemir Todo Bom verbessert wurden",
         aboutauthorsite: "Website des Autors",
         aboutwhaticketsite: "Website der Whaticket-Community auf Github",
         aboutvemfazersite: "Website des Vem Fazer-Kanals auf Github",
         licenseheading: "Open-Source-Lizenz",
-        licensedetail: "Ticketz ist unter der GNU Affero General Public License Version 3 lizenziert, was bedeutet, dass jeder Benutzer, der Zugriff auf diese Anwendung hat, das Recht hat, auf den Quellcode zuzugreifen. Weitere Informationen finden Sie in den folgenden Links:",
+        licensedetail: "ERPCon ist unter der GNU Affero General Public License Version 3 lizenziert, was bedeutet, dass jeder Benutzer, der Zugriff auf diese Anwendung hat, das Recht hat, auf den Quellcode zuzugreifen. Weitere Informationen finden Sie in den folgenden Links:",
         licensefulltext: "Vollständiger Lizenztext",
-        licensesourcecode: "Quellcode von ticketz",
+        licensesourcecode: "Quellcode von erpcon",
       },
       schedules: {
         title: "Planungen",
@@ -1018,17 +1018,17 @@ const messages = {
         ERR_WAPP_GREETING_REQUIRED:
           "Die Begrüßungsnachricht ist erforderlich, wenn es mehr als eine Warteschlange gibt.",
       },
-      ticketz: {
+      erpcon: {
         registration: {
-          header: "Registrieren Sie sich in der Ticketz-Benutzerdatenbank",
-          description: "Füllen Sie die folgenden Felder aus, um sich in der Ticketz-Benutzerdatenbank zu registrieren und Neuigkeiten über das Projekt zu erhalten.",
+          header: "Registrieren Sie sich in der ERPCon-Benutzerdatenbank",
+          description: "Füllen Sie die folgenden Felder aus, um sich in der ERPCon-Benutzerdatenbank zu registrieren und Neuigkeiten über das Projekt zu erhalten.",
           name: "Name",
           country: "Land",
           phoneNumber: "WhatsApp-Nummer",
           submit: "Registrieren",
         },
         support: {
-          title: "Unterstützen Sie das Ticketz Open Source-Projekt",
+          title: "Unterstützen Sie das ERPCon Open Source-Projekt",
           mercadopagotitle: "Kreditkarte",
           recurringbrl: "Wiederkehrende Spende in R$",
           paypaltitle: "Kreditkarte",

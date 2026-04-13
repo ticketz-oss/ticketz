@@ -50,7 +50,7 @@ import useSettings from "../../hooks/useSettings";
 import { toast } from 'react-toastify';
 import { makeStyles } from "@material-ui/core/styles";
 import EfiSettings from "../PaymentGateways/Efi/EfiSettings";
-import PixTicketzSettings from "../PaymentGateways/PixTicketz/PixTicketzSettings";
+import PixERPConSettings from "../PaymentGateways/PixERPCon/PixERPConSettings";
 
 const useStyles = makeStyles((_) => ({
   fieldContainer: {
@@ -98,7 +98,7 @@ export default function PaymentGateway(props) {
               }}
             >
               <MenuItem value={""}>None</MenuItem>
-              <MenuItem value={"pixTicketz"}>Pix Ticketz 💎</MenuItem>
+              <MenuItem value={"pixERPCon"}>Pix ERPCon 💎</MenuItem>
               <MenuItem value={"efi"}>Efí</MenuItem>
             </Select>
           </FormControl>
@@ -107,8 +107,8 @@ export default function PaymentGateway(props) {
       { paymentGateway === "efi" && 
         <EfiSettings settings={settings} />
       }
-      { paymentGateway === "pixTicketz" && 
-        <PixTicketzSettings settings={settings} />
+      { paymentGateway === "pixERPCon" && 
+        <PixERPConSettings settings={settings} />
       }
     </>
   );

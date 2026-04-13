@@ -680,18 +680,18 @@ const messages = {
       },
       about: {
         aboutthe: "À propos de",
-        copyright: "© 2024 - Fonctionne avec ticketz",
+        copyright: "© 2024 - Fonctionne avec erpcon",
         buttonclose: "Fermer",
-        title: "À propos de ticketz",
+        title: "À propos de erpcon",
         abouttitle: "Origine et améliorations",
-        aboutdetail: "Le ticketz est dérivé indirectement du projet Whaticket avec des améliorations partagées par les développeurs du système EquipeChat via la chaîne VemFazer sur YouTube, puis améliorées par Claudemir Todo Bom",
+        aboutdetail: "Le erpcon est dérivé indirectement du projet Whaticket avec des améliorations partagées par les développeurs du système EquipeChat via la chaîne VemFazer sur YouTube, puis améliorées par Claudemir Todo Bom",
         aboutauthorsite: "Site de l'auteur",
         aboutwhaticketsite: "Site de la communauté Whaticket sur Github",
         aboutvemfazersite: "Site de la chaîne Vem Fazer sur Github",
         licenseheading: "Licence Open Source",
-        licensedetail: "Le ticketz est sous licence GNU Affero General Public License version 3, ce qui signifie que tout utilisateur ayant accès à cette application a le droit d'accéder au code source. Plus d'informations dans les liens ci-dessous :",
+        licensedetail: "Le erpcon est sous licence GNU Affero General Public License version 3, ce qui signifie que tout utilisateur ayant accès à cette application a le droit d'accéder au code source. Plus d'informations dans les liens ci-dessous :",
         licensefulltext: "Texte complet de la licence",
-        licensesourcecode: "Code source de ticketz",
+        licensesourcecode: "Code source de erpcon",
       },
       schedules: {
         title: "Planifications",
@@ -1019,17 +1019,17 @@ const messages = {
         ERR_WAPP_GREETING_REQUIRED:
           "Le message de bienvenue est obligatoire lorsqu'il y a plus d'une file d'attente.",
       },
-      ticketz: {
+      erpcon: {
         registration: {
-          header: "Inscrivez-vous à la base d'utilisateurs de Ticketz",
-          description: "Remplissez les champs ci-dessous pour vous inscrire à la base d'utilisateurs de Ticketz et recevoir des nouvelles sur le projet.",
+          header: "Inscrivez-vous à la base d'utilisateurs de ERPCon",
+          description: "Remplissez les champs ci-dessous pour vous inscrire à la base d'utilisateurs de ERPCon et recevoir des nouvelles sur le projet.",
           name: "Nom",
           country: "Pays",
           phoneNumber: "Numéro WhatsApp",
           submit: "S'inscrire",
         },
         support: {
-          title: "Soutenez le projet Ticketz Open Source",
+          title: "Soutenez le projet ERPCon Open Source",
           mercadopagotitle: "Carte de Crédit",
           recurringbrl: "Don récurrent en R$",
           paypaltitle: "Carte de Crédit",

@@ -24,7 +24,7 @@ You may need to logoff and logon again before proceeding. Just close the termina
 
 ## Install NodeJS
 
-To develop on ticketz you need to have NodeJS 20 available, If you do not have it already you can get it on [NodeJS official download site](https://nodejs.org/en/download/prebuilt-binaries)
+To develop on erpcon you need to have NodeJS 20 available, If you do not have it already you can get it on [NodeJS official download site](https://nodejs.org/en/download/prebuilt-binaries)
 
 After installing it, you can check if you have node and npm available issuing the following commands on a terminal:
 
@@ -39,18 +39,18 @@ npm -v
 You need to clone this repository on your computer before any further steps:
 
 ```bash
-git clone https://github.com/ticketz-oss/ticketz
+git clone https://github.com/erpcon-oss/erpcon
 ```
 
 Any following command will need to be issued inside the cloned directory, unless specified diferently:
 
 ```bash
-cd ticketz
+cd erpcon
 ```
 
 ## Run postgres and redis from Docker
 
-Ticketz provide a docker compose configuration to run `postgres` and `redis`, launch it using:
+ERPCon provide a docker compose configuration to run `postgres` and `redis`, launch it using:
 
 ```bash
 docker compose -f docker-compose-dev.yaml up -d
@@ -58,9 +58,9 @@ docker compose -f docker-compose-dev.yaml up -d
 
 After a few seconds you will have:
 
-- Postgres running on port 5432 of localhost. It will automatically create an user and a database both of them with the name `ticketz`. User `ticketz` will accept anything as password.
+- Postgres running on port 5432 of localhost. It will automatically create an user and a database both of them with the name `erpcon`. User `erpcon` will accept anything as password.
 - Redis running on port 6379 of localhost.
-- PgAdmin4 running on `https://localhost:8081` - Username is `admin@ticketz.host` and password is `123456`. It will already have a server connection setted up, when asked for `ticketz` user password you can answer anything
+- PgAdmin4 running on `https://localhost:8081` - Username is `admin@erpcon.host` and password is `123456`. It will already have a server connection setted up, when asked for `erpcon` user password you can answer anything
 
 ## Backend
 
@@ -153,7 +153,7 @@ You can leave the command running, it will watch for file changes and reload as 
 
 You can stop, clear the data and restart the `postgres`, `redis` and `pgadmin` docker services.
 
-All the commands should be entered inside the base projects folder (usually `ticketz`)
+All the commands should be entered inside the base projects folder (usually `erpcon`)
 
 #### Stop the services
 
@@ -163,11 +163,11 @@ docker compose -f docker-compose-dev.yaml down
 
 #### Remove the data (reset)
 
-Volume names can be different if you cloned the folder with a name different than `ticketz`
+Volume names can be different if you cloned the folder with a name different than `erpcon`
 
 ```bash
-docker volume rm ticketz_postgres_data
-docker volume rm ticketz_redis_data
+docker volume rm erpcon_postgres_data
+docker volume rm erpcon_redis_data
 ```
 
 #### (re)start the services
@@ -183,14 +183,14 @@ By default these are the ports used on this guide:
 - Postgres: 5432
 - Redis: 6379
 - PgAdmin: 8081
-- Ticketz Backend: 8080
-- Ticketz Frontend: 3000
+- ERPCon Backend: 8080
+- ERPCon Frontend: 3000
 
 You can change the `postgres`, `redis` and `pgadmin` ports changing the `docker-compose-dev.yaml` file
 
-To change the Ticketz Backend port you need to edit the `.env` file and also need to create the `config-dev.json` file on `frontend/public` using the `frontend/public/config-dev-example.json`
+To change the ERPCon Backend port you need to edit the `.env` file and also need to create the `config-dev.json` file on `frontend/public` using the `frontend/public/config-dev-example.json`
 
-To change the Ticketz Frontend port you need to create a `.env` file inside the `frontend` folder setting the desired port:
+To change the ERPCon Frontend port you need to create a `.env` file inside the `frontend` folder setting the desired port:
 
 ```bash
 PORT=3001

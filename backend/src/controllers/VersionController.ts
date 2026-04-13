@@ -9,7 +9,7 @@ export const version = async (
   const appName = await GetPublicSettingService({ key: "appName" });
 
   const data = {
-    name: appName || "Ticketz - Chat Based Ticket System",
+    name: appName || "ERPCon - Gestão de Resultados",
     ...GitInfo
   };
 

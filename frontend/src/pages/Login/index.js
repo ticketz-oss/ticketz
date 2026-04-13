@@ -18,7 +18,7 @@ const useStyles = makeStyles(theme => ({
 	root: {
 		width: "100vw",
 		height: "100vh",
-		background: `linear-gradient(to right, ${ theme.mode === "light" ? "#fff , #fff , " + theme.palette.primary.main + " , #fff, #fff" : "#000, #000, " + theme.palette.primary.main + ", #000, #000" })`,
+		background: "linear-gradient(135deg, #1d5a8a 0%, #1a7ab8 40%, #1ab4e8 100%)",
 		backgroundRepeat: "no-repeat",
 		backgroundSize: "100% 100%",
 		backgroundPosition: "center",
@@ -29,15 +29,16 @@ const useStyles = makeStyles(theme => ({
 		textAlign: "center",
 	},
 	paper: {
-		backgroundColor: theme.palette.login, //DARK MODE PLW DESIGN//
+		backgroundColor: theme.mode === "dark" ? "#1C1C1C" : "#ffffff",
 		display: "flex",
 		flexDirection: "column",
 		alignItems: "center",
-		padding: "55px 30px",
-		borderRadius: "12.5px",
+		padding: "48px 36px",
+		borderRadius: "16px",
+		boxShadow: "0 8px 32px rgba(0, 0, 0, 0.25)",
 	},
 	avatar: {
-		margin: theme.spacing(1),  
+		margin: theme.spacing(1),
 		backgroundColor: theme.palette.secondary.main,
 	},
 	form: {
@@ -46,17 +47,26 @@ const useStyles = makeStyles(theme => ({
 	},
 	submit: {
 		margin: theme.spacing(3, 0, 2),
+		background: "linear-gradient(90deg, #1d5a8a 0%, #1ab4e8 100%)",
+		color: "#fff",
+		fontWeight: "bold",
+		letterSpacing: "0.5px",
+		"&:hover": {
+			background: "linear-gradient(90deg, #174d7a 0%, #12a0d4 100%)",
+		},
 	},
 	powered: {
 		color: "white"
 	},
-	
+
 	logoImg: {
     width: "100%",
-    margin: "0 auto",
+    maxWidth: "240px",
+    margin: "0 auto 16px auto",
+    display: "block",
     content: `url("${theme.calculatedLogo()}")`
   }
-	
+
 }));
 
 const Login = () => {

@@ -230,7 +230,7 @@
     }
 
 		window.mentionRenderer = (mention) => {
-      return `<span class="ticketzMention" onclick='window.mentionClick(${JSON.stringify(mention).replace(/'/g, "\\'")})'>@` + (mention?.name || mention?.number || "invalid mention") + "</span>";
+      return `<span class="erpconMention" onclick='window.mentionClick(${JSON.stringify(mention).replace(/'/g, "\\'")})'>@` + (mention?.name || mention?.number || "invalid mention") + "</span>";
 		}
 		
     const configureSplash = async (config) => {
@@ -277,7 +277,7 @@
 	    fetch(settingsBaseUrl + "/appName")
 	        .then(response => response.json())
 	        .then(data => {
-	          document.title = data || "ticketz";
+	          document.title = data || "erpcon";
 	        });
     };
 		

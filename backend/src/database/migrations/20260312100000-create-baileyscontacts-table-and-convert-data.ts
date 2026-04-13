@@ -59,7 +59,7 @@ export async function up(queryInterface: QueryInterface) {
 
     await queryInterface.sequelize.query(
       `
-      CREATE OR REPLACE FUNCTION ticketz_safe_jsonb_baileyscontacts_20260312(input_text TEXT)
+      CREATE OR REPLACE FUNCTION erpcon_safe_jsonb_baileyscontacts_20260312(input_text TEXT)
       RETURNS JSONB
       LANGUAGE plpgsql
       AS $$
@@ -101,7 +101,7 @@ export async function up(queryInterface: QueryInterface) {
         FROM "Baileys" b
         INNER JOIN "Whatsapps" w ON w."id" = b."whatsappId"
         CROSS JOIN LATERAL jsonb_array_elements(
-          ticketz_safe_jsonb_baileyscontacts_20260312(b."contacts")
+          erpcon_safe_jsonb_baileyscontacts_20260312(b."contacts")
         ) elem
         WHERE NULLIF(elem->>'id', '') IS NOT NULL
       ),
@@ -139,7 +139,7 @@ export async function up(queryInterface: QueryInterface) {
 
     await queryInterface.sequelize.query(
       `
-      DROP FUNCTION IF EXISTS ticketz_safe_jsonb_baileyscontacts_20260312(TEXT);
+      DROP FUNCTION IF EXISTS erpcon_safe_jsonb_baileyscontacts_20260312(TEXT);
     `,
       { transaction }
     );

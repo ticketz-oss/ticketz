@@ -51,8 +51,8 @@ const App = () => {
   const prefersDarkMode = !!(window.matchMedia('(prefers-color-scheme: dark)').matches);
   const preferredTheme = window.localStorage.getItem("preferredTheme");
   const [mode, setMode] = useState(preferredTheme ? preferredTheme : prefersDarkMode ? "dark" : "light");
-  const [primaryColorLight, setPrimaryColorLight] = useState("#888");
-  const [primaryColorDark, setPrimaryColorDark] = useState("#888");
+  const [primaryColorLight, setPrimaryColorLight] = useState("#1d5a8a");
+  const [primaryColorDark, setPrimaryColorDark] = useState("#1ab4e8");
   const [appLogoLight, setAppLogoLight] = useState("");
   const [appLogoDark, setAppLogoDark] = useState("");
   const [appLogoFavicon, setAppLogoFavicon] = useState("");
@@ -160,7 +160,7 @@ const App = () => {
         barraSuperior: mode === "light" ? primaryColorLight : "#666",
         boxticket: mode === "light" ? "#EEE" : "#666",
         campaigntab: mode === "light" ? "#ededed" : "#666",
-        ticketzproad: { main: "#39ACE7", contrastText: "white" }
+        erpconproad: { main: "#1ab4e8", contrastText: "white" }
       },
       mode,
       appLogoLight,
@@ -199,10 +199,10 @@ const App = () => {
 
   useEffect(() => {
     getPublicSetting("primaryColorLight")
-      .then((color) => { setPrimaryColorLight(color || "#0000FF") })
+      .then((color) => { setPrimaryColorLight(color || "#1d5a8a") })
       .catch((error) => { console.log("Error reading setting", error); });
     getPublicSetting("primaryColorDark")
-      .then((color) => { setPrimaryColorDark(color || "#39ACE7") })
+      .then((color) => { setPrimaryColorDark(color || "#1ab4e8") })
       .catch((error) => { console.log("Error reading setting", error); });
     getPublicSetting("appLogoLight")
       .then((file) => { setAppLogoLight(file ? (`${getBackendURL()}/public/${file}`) : defaultLogoLight) }, (_) => { })
@@ -213,7 +213,7 @@ const App = () => {
     getPublicSetting("appLogoFavicon")
       .then((file) => { setAppLogoFavicon(file ? (`${getBackendURL()}/public/${file}`) : null) })
       .catch((error) => { console.log("Error reading setting", error); });
-    getPublicSetting("appName").then((name) => { setAppName(name || "ticketz") })
+    getPublicSetting("appName").then((name) => { setAppName(name || "erpcon") })
       .catch((error) => { console.log("Error reading setting", error); setAppName("whitelabel chat") });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

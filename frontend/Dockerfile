@@ -5,6 +5,8 @@ COPY . .
 
 ENV NODE_OPTIONS --openssl-legacy-provider
 
+RUN apk add --no-cache git
+
 RUN --mount=type=cache,target=/root/.npm \
     npm ci && npm run build
 

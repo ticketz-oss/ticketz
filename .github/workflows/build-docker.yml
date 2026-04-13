@@ -11,8 +11,8 @@ on:
       - 'v*.*.*'
 env:
   REGISTRY: ghcr.io
-  IMAGE_BACKEND: ticketz-oss/ticketz-backend
-  IMAGE_FRONTEND: ticketz-oss/ticketz-frontend
+  IMAGE_BACKEND: erpcon-oss/erpcon-backend
+  IMAGE_FRONTEND: erpcon-oss/erpcon-frontend
 
 jobs:
   build-and-push-images:
@@ -66,7 +66,7 @@ jobs:
           images: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_BACKEND }}
           labels: |
-            org.opencontainers.image.title=ticketz-backend
+            org.opencontainers.image.title=erpcon-backend
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}
@@ -81,7 +81,7 @@ jobs:
           images: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_FRONTEND }}
           labels: |
-            org.opencontainers.image.title=ticketz-frontend
+            org.opencontainers.image.title=erpcon-frontend
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}
@@ -98,7 +98,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.metabackend.outputs.tags }}
           labels: ${{ steps.metabackend.outputs.labels }}
-          build-args: TICKETZ_REGISTRY_URL=${{secrets.TICKETZ_REGISTRY_URL}}
+          build-args: ERPCON_REGISTRY_URL=${{secrets.ERPCON_REGISTRY_URL}}
 
       - name: Build and push frontend Docker image
         id: frontend

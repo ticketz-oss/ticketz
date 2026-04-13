@@ -720,18 +720,18 @@ const messages = {
       },
       about: {
         aboutthe: "Tentang",
-        copyright: "� 2024 - Didukung oleh ticketz",
+        copyright: "� 2024 - Didukung oleh erpcon",
         buttonclose: "Tutup",
-        title: "Tentang ticketz",
+        title: "Tentang erpcon",
         abouttitle: "Asal dan peningkatan",
-        aboutdetail: "ticketz berasal secara tidak langsung dari proyek Whaticket dengan peningkatan yang dibagikan oleh para pengembang sistem EquipeChat melalui saluran VemFazer di YouTube, kemudian ditingkatkan oleh Claudemir Todo Bom",
+        aboutdetail: "erpcon berasal secara tidak langsung dari proyek Whaticket dengan peningkatan yang dibagikan oleh para pengembang sistem EquipeChat melalui saluran VemFazer di YouTube, kemudian ditingkatkan oleh Claudemir Todo Bom",
         aboutauthorsite: "Situs penulis",
         aboutwhaticketsite: "Situs Komunitas Whaticket di Github",
         aboutvemfazersite: "Situs saluran Vem Fazer di Github",
         licenseheading: "Lisensi Sumber Terbuka",
-        licensedetail: "ticketz dilisensikan di bawah GNU Affero General Public License versi 3, yang berarti bahwa setiap pengguna yang memiliki akses ke aplikasi ini berhak untuk mendapatkan akses ke kode sumbernya. Informasi lebih lanjut di tautan berikut:",
+        licensedetail: "erpcon dilisensikan di bawah GNU Affero General Public License versi 3, yang berarti bahwa setiap pengguna yang memiliki akses ke aplikasi ini berhak untuk mendapatkan akses ke kode sumbernya. Informasi lebih lanjut di tautan berikut:",
         licensefulltext: "Teks lengkap lisensi",
-        licensesourcecode: "Kode sumber Ticketz"
+        licensesourcecode: "Kode sumber ERPCon"
       },
       schedules: {
         title: "Jadwal",
@@ -1073,17 +1073,17 @@ const messages = {
         ERR_QUEUE_COLOR_ALREADY_EXISTS: "Warna ini sudah digunakan, pilih yang lain.",
         ERR_WAPP_GREETING_REQUIRED: "Pesan sambutan wajib jika ada lebih dari satu antrian.",
       },
-      ticketz: {
+      erpcon: {
         registration: {
-          header: "Daftar di basis pengguna Ticketz",
-          description: "Isi kolom di bawah ini untuk mendaftar di basis pengguna Ticketz dan menerima berita tentang proyek.",
+          header: "Daftar di basis pengguna ERPCon",
+          description: "Isi kolom di bawah ini untuk mendaftar di basis pengguna ERPCon dan menerima berita tentang proyek.",
           name: "Nama",
           country: "Negara",
           phoneNumber: "Nomor Telepon",
           submit: "Daftar",
         },
         support: {
-          title: "Dukung proyek Ticketz",
+          title: "Dukung proyek ERPCon",
           mercadopagotitle: "Kartu Kredit",
           recurringbrl: "Donasi berulang dalam BRL",
           paypaltitle: "Kartu Kredit",

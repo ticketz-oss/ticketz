@@ -1,9 +1,9 @@
-# Ticketz PRO
+# ERPCon PRO
 
-O Ticketz PRO é o Ticketz com fornecimento de suporte para o uso e operação, e receberá
+O ERPCon PRO é o ERPCon com fornecimento de suporte para o uso e operação, e receberá
 features exclusivas.
 
-O Ticketz PRO é um produto licenciado para uso na infraestrutura do cliente tanto
+O ERPCon PRO é um produto licenciado para uso na infraestrutura do cliente tanto
 para uso próprio quanto para comercialização na modalidade SaaS Whitelabel.
 
 **A Licença e o suporte são fornecidos mediante uma assinatura mensal no valor de R$ 199**
@@ -21,7 +21,7 @@ cartão de crédito com recorrência automática.
 
 ## Instalação
 
-Para instalar o Ticketz PRO o comando é semelhante ao da versão Open Source,
+Para instalar o ERPCon PRO o comando é semelhante ao da versão Open Source,
 adicionando apenas um parâmetro para indicar a "branch" a ser utilizada para
 a configuração dos containers.
 
@@ -31,7 +31,7 @@ Da mesma maneira, é necessário cumprir o checklist:
 - [X] Portas 80 e 443 disponíveis e não filtradas por firewall
 - [X] Um hostname configurado do DNS apontando para o servidor
 
-Passado o checklist, o seguinte comando instala o Ticketz PRO:
+Passado o checklist, o seguinte comando instala o ERPCon PRO:
 
 ```bash
 curl -sSL get.ticke.tz | sudo bash -s -- -b pro hostname.example.com email@example.com
@@ -39,10 +39,10 @@ curl -sSL get.ticke.tz | sudo bash -s -- -b pro hostname.example.com email@examp
 
 **ATENÇÃO**: O email precisa ser um endereço válido para a correga geração do certificado SSL.
 
-## Atualizar o Ticketz OSS para o Ticketz PRO
+## Atualizar o ERPCon OSS para o ERPCon PRO
 
 O mesmo comando pode atualizar tanto as instalações feitas pelo comando simplificado quanto as feitas
-a partir do código fonte. É importante porém salientar que o Ticketz PRO não pode ser personalizado
+a partir do código fonte. É importante porém salientar que o ERPCon PRO não pode ser personalizado
 por não ser fornecido como código aberto.
 
 > **IMPORTANTE:** Caso seja uma instalação feita a partir do código fonte é necessário entrar dentro
