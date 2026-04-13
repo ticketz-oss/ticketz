@@ -214,7 +214,7 @@ Facilitou sua vida?
 
 Se este projeto ajudou você em uma tarefa complexa, considere fazer uma doação ao autor pelo Paypal ou PIX.
 
-![image](https://github.com/erpcon-oss/erpcon/assets/6070736/8e85b263-73ca-4fb4-9bdc-03fff356b6ff)
+![image](https://github.com/erpsg/ERPCONticketz/assets/6070736/8e85b263-73ca-4fb4-9bdc-03fff356b6ff)
 
 Chave Pix: 0699c69d-0951-4686-a5b7-c6cd21aa7e15
 

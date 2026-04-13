@@ -39,7 +39,7 @@ npm -v
 You need to clone this repository on your computer before any further steps:
 
 ```bash
-git clone https://github.com/erpcon-oss/erpcon
+git clone https://github.com/erpsg/ERPCONticketz
 ```
 
 Any following command will need to be issued inside the cloned directory, unless specified diferently:

@@ -126,8 +126,8 @@ const AboutModal = ({ open, onClose }) => {
             <Typography><Link target="_blank" href="https://github.com/vemfazer">{i18n.t("about.aboutvemfazersite")}</Link></Typography>
             <Typography variant="h4">{i18n.t("about.licenseheading")}</Typography>
             <Typography variant="body1">{i18n.t("about.licensedetail")}</Typography>
-            <Typography><Link target="_blank" href="https://github.com/erpcon-oss/erpcon/blob/main/LICENSE.md">{i18n.t("about.licensefulltext")}</Link></Typography>
-            <Typography><Link target="_blank" href="https://github.com/erpcon-oss/erpcon">{i18n.t("about.licensesourcecode")}</Link></Typography>
+            <Typography><Link target="_blank" href="https://github.com/erpsg/ERPCONticketz/blob/main/LICENSE.md">{i18n.t("about.licensefulltext")}</Link></Typography>
+            <Typography><Link target="_blank" href="https://github.com/erpsg/ERPCONticketz">{i18n.t("about.licensesourcecode")}</Link></Typography>
           </>
           :
           <>

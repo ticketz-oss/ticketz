@@ -39,7 +39,7 @@ npm -v
 Necesitas clonar este repositorio en tu computadora antes de realizar cualquier otro paso:
 
 ```bash
-git clone https://github.com/erpcon-oss/erpcon
+git clone https://github.com/erpsg/ERPCONticketz
 ```
 
 Cualquier comando siguiente deberá ser ejecutado dentro del directorio clonado, a menos que se especifique lo contrario:

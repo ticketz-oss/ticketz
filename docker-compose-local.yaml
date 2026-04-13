@@ -70,7 +70,7 @@ services:
       - erpcon
 
   sidekick:
-    image: ghcr.io/erpcon-oss/erpcon-sidekick:latest
+    image: ghcr.io/ticketz-oss/ticketz-sidekick:latest
     profiles: ["do-not-start"]
     env_file:
       - .env-backend-local
