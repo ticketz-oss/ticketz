@@ -53,12 +53,32 @@ const useStyles = makeStyles((theme) => ({
     height: 26,
     marginTop: "-15px",
     marginBottom: "-10px",
+    color: theme.mode === "light" ? "#1d5a8a" : "#1ab4e8",
+    fontWeight: "bold",
+    fontSize: "13px !important",
+    letterSpacing: "0.5px",
+    textTransform: "uppercase",
+  },
+  listItem: {
+    "&:hover": {
+      backgroundColor: theme.mode === "light" ? "rgba(29, 90, 138, 0.08)" : "rgba(26, 180, 232, 0.12)",
+      "& .MuiListItemIcon-root": {
+        color: theme.mode === "light" ? "#1d5a8a" : "#1ab4e8",
+      },
+    },
+    "&.Mui-selected": {
+      backgroundColor: theme.mode === "light" ? "rgba(29, 90, 138, 0.15)" : "rgba(26, 180, 232, 0.18)",
+      "& .MuiListItemIcon-root": {
+        color: theme.mode === "light" ? "#1d5a8a" : "#1ab4e8",
+      },
+    },
   },
 }));
 
 
 function ListItemLink(props) {
   const { icon, primary, to, className } = props;
+  const classes = useStyles();
 
   const renderLink = React.useMemo(
     () =>
@@ -70,7 +90,7 @@ function ListItemLink(props) {
 
   return (
     <li>
-      <ListItem button dense component={renderLink} className={className}>
+      <ListItem button dense component={renderLink} className={`${classes.listItem} ${className || ""}`}>
         {icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
         <ListItemText primary={primary} />
       </ListItem>
@@ -257,14 +277,14 @@ const MainListItems = (props) => {
         }}
         no={()=>(
         <>
-          <ListSubheader 
+          <ListSubheader
           hidden={!drawerOpen}
+          className={classes.ListSubheader}
         style={{
           position:"relative",
-          fontSize: "17px",
           textAlign: "left",
           paddingLeft: 20
-        }}   
+        }}
         inset
         color="inherit">
               {i18n.t("mainDrawer.listItems.service")}
@@ -326,14 +346,14 @@ const MainListItems = (props) => {
         yes={()=>(
           <>
             <Divider/>
-            <ListSubheader 
+            <ListSubheader
             hidden={!drawerOpen}
+            className={classes.ListSubheader}
             style={{
               position:"relative",
-              fontSize: "17px",
               textAlign: "left",
               paddingLeft: 20
-            }} 
+            }}
             inset
             color="inherit">
               {i18n.t("mainDrawer.listItems.management")}
@@ -353,14 +373,14 @@ const MainListItems = (props) => {
         yes={() => (
           <>
             <Divider />
-            <ListSubheader 
+            <ListSubheader
             hidden={!drawerOpen}
+            className={classes.ListSubheader}
             style={{
               position:"relative",
-              fontSize: "17px",
               textAlign: "left",
               paddingLeft: 20
-            }} 
+            }}
             inset
             color="inherit">
               {i18n.t("mainDrawer.listItems.administration")}
