@@ -10,7 +10,7 @@ subscriptionRoutes.post(
   SubscriptionController.createSubscription
 );
 subscriptionRoutes.post(
-  "/subscription/ticketz/webhook/:type?",
+  "/subscription/erpcon/webhook/:type?",
   SubscriptionController.webhook
 );
 

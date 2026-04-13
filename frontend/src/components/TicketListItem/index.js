@@ -210,7 +210,7 @@ const TicketListItem = ({ ticket, groupActionButtons }) => {
                 {ticket.lastMessage ? (
                   <WhatsMarked oneline>
                     {
-                      ticket.lastMessage.startsWith('{"ticketzvCard"') ? "🪪" : ticket.lastMessage.split("\n")[0]
+                      ticket.lastMessage.startsWith('{"erpconvCard"') ? "🪪" : ticket.lastMessage.split("\n")[0]
                     }
                   </WhatsMarked>
                 ) : (

@@ -1,6 +1,6 @@
 {
-	"short_name" : "Ticketz",
-	"name" : "Ticketz - Chat Based Ticket System",
+	"short_name" : "ERPCon",
+	"name" : "ERPCon - Gestão de Resultados",
 	"icons" : [{
 			"src" : "vector/favicon.ico",
 			"sizes" : "512x512 192x192 64x64 32x32 24x24 16x16",

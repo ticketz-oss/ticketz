@@ -539,7 +539,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
                   </span>
                 ) : (
                 <>
-                  {ticket.lastMessage?.includes('data:image/png;base64') ? <div>Localização</div> : <WhatsMarked oneline>{ticket.lastMessage.startsWith('{"ticketzvCard"') ? "🪪" : ticket.lastMessage.split("\n")[0] }</WhatsMarked>}
+                  {ticket.lastMessage?.includes('data:image/png;base64') ? <div>Localização</div> : <WhatsMarked oneline>{ticket.lastMessage.startsWith('{"erpconvCard"') ? "🪪" : ticket.lastMessage.split("\n")[0] }</WhatsMarked>}
                 </>
               )}
               </Typography>

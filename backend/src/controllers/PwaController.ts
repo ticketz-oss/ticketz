@@ -22,8 +22,8 @@ export const manifest = async (
   }
 
   const data = {
-    short_name: appName || "TIcketz",
-    name: appName || "Ticketz - Chat Based Ticket System",
+    short_name: appName || "ERPCon",
+    name: appName || "ERPCon - Gestão de Resultados",
     icons: [
       {
         src: logoFavicon ? `/backend/public/${logoFavicon}` : "/vector/favicon.svg",

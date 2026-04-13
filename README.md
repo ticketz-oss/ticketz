@@ -3,7 +3,7 @@
 
 # About the Project
 
-Ticketz is a communicator with CRM and helpdesk features that utilizes WhatsApp as a means of communication with clients.
+ERPCon is a communicator with CRM and helpdesk features that utilizes WhatsApp as a means of communication with clients.
 
 ## Original Authorship
 
@@ -17,7 +17,7 @@ It is practically impossible to identify and credit the authors of the improveme
 
 As I am making these changes and providing them at no cost, I want them to be available to everyone. Therefore, I am choosing to relicense under the AGPL, which requires that every user who has access to the system can obtain the source code.
 
-Therefore, if you directly utilize this version, it is **very important to keep the link on the "About Ticketz" screen, which provides access to the repository**. If you wish, you can move the link to the source code elsewhere, but it must be easily accessible to any system user.
+Therefore, if you directly utilize this version, it is **very important to keep the link on the "About ERPCon" screen, which provides access to the repository**. If you wish, you can move the link to the source code elsewhere, but it must be easily accessible to any system user.
 
 If you make changes to the code, you must change the link to a repository or another way to obtain the code for your changes.
 
@@ -36,7 +36,7 @@ Whenever possible, I intend to backport some adjustments made here to the origin
 Very Quick Start on a public Server
 -----------------------------------
 
-There are Docker images provided from the project, so you can get **ticketz** to work very easily on a public server (baremetal or VPS).
+There are Docker images provided from the project, so you can get **erpcon** to work very easily on a public server (baremetal or VPS).
 
 ### First setup
 
@@ -75,7 +75,7 @@ You must login to your server using the same user you used for the installation.
 First you need to move the current directory to the installation folder:
 
 ```bash
-cd ~/ticketz-docker-acme
+cd ~/erpcon-docker-acme
 ```
 
 After this you can get a full log report with the following command:
@@ -99,8 +99,8 @@ For installation, you need to have Docker Community Edition and the Git client i
 In both cases, it is necessary to clone the repository, then open a command terminal:
 
 ```bash
-git clone https://github.com/allgood/ticketz.git
-cd ticketz
+git clone https://github.com/allgood/erpcon.git
+cd erpcon
 ```
 
 ## Running Locally
@@ -113,9 +113,9 @@ To run the system, simply execute the following command:
 docker compose -f docker-compose-local.yaml up -d
 ```
 
-On the first run, the system will initialize the databases and tables, and after a few minutes, Ticketz will be accessible through port 3000.
+On the first run, the system will initialize the databases and tables, and after a few minutes, ERPCon will be accessible through port 3000.
 
-The default username is `admin@ticketz.host`, and the default password is 123456.
+The default username is `admin@erpcon.host`, and the default password is 123456.
 
 The application will restart automatically after each server reboot.
 
@@ -129,9 +129,9 @@ docker compose -f docker-compose-local.yaml down
 
 Having a server accessible via the internet, it is necessary to adjust two DNS names of your choice, one for the backend and another for the frontend, and also an email address for certificate registration, for example:
 
-* **backend:** api.ticketz.example.com
-* **frontend:** ticketz.example.com
-* **email:** ticketz@example.com
+* **backend:** api.erpcon.example.com
+* **frontend:** erpcon.example.com
+* **email:** erpcon@example.com
 
 You need to edit the `.env-backend-acme` and `.env-frontend-acme` files, defining these values in them.
 
@@ -145,7 +145,7 @@ Being in the project's root folder, execute the following command to start the s
 sudo docker compose -f docker-compose-acme.yaml up -d
 ```
 
-On the first run, Docker will compile the code and create the containers, and then Ticketz will initialize the databases and tables. This operation can take quite some time, after which Ticketz will be accessible at the provided frontend address.
+On the first run, Docker will compile the code and create the containers, and then ERPCon will initialize the databases and tables. This operation can take quite some time, after which ERPCon will be accessible at the provided frontend address.
 
 The default username is the email address provided on the `.env-backend-acme` file and the default password is 123456.
 
@@ -169,6 +169,6 @@ If this project has helped you with a complex task, consider making a donation t
 
 [![](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=X6XHVCPMRQEL4)
 
-![image](https://github.com/ticketz-oss/ticketz/assets/6070736/8e85b263-73ca-4fb4-9bdc-03fff356b6ff)
+![image](https://github.com/erpcon-oss/erpcon/assets/6070736/8e85b263-73ca-4fb4-9bdc-03fff356b6ff)
 
 PIX Key: 0699c69d-0951-4686-a5b7-c6cd21aa7e15

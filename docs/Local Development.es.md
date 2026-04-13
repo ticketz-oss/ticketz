@@ -24,7 +24,7 @@ Puede ser necesario cerrar y volver a iniciar sesión antes de continuar. Solo c
 
 ## Instalar NodeJS
 
-Para desarrollar en Ticketz, necesitas tener NodeJS 20 instalado. Si aún no lo tienes, puedes obtenerlo en el [sitio oficial de NodeJS](https://nodejs.org/en/download/prebuilt-binaries).
+Para desarrollar en ERPCon, necesitas tener NodeJS 20 instalado. Si aún no lo tienes, puedes obtenerlo en el [sitio oficial de NodeJS](https://nodejs.org/en/download/prebuilt-binaries).
 
 Después de la instalación, verifica que Node y npm estén disponibles ejecutando los siguientes comandos en una terminal:
 
@@ -39,18 +39,18 @@ npm -v
 Necesitas clonar este repositorio en tu computadora antes de realizar cualquier otro paso:
 
 ```bash
-git clone https://github.com/ticketz-oss/ticketz
+git clone https://github.com/erpcon-oss/erpcon
 ```
 
 Cualquier comando siguiente deberá ser ejecutado dentro del directorio clonado, a menos que se especifique lo contrario:
 
 ```bash
-cd ticketz
+cd erpcon
 ```
 
 ## Ejecutar postgres y redis con Docker
 
-Ticketz proporciona una configuración de docker-compose para ejecutar `postgres` y `redis`. Inícialo con:
+ERPCon proporciona una configuración de docker-compose para ejecutar `postgres` y `redis`. Inícialo con:
 
 ```bash
 docker compose -f docker-compose-dev.yaml up -d
@@ -58,9 +58,9 @@ docker compose -f docker-compose-dev.yaml up -d
 
 Después de unos segundos, tendrás:
 
-- Postgres ejecutándose en el puerto 5432 del localhost. Creará automáticamente un usuario y una base de datos, ambos con el nombre `ticketz`. El usuario `ticketz` aceptará cualquier contraseña.
+- Postgres ejecutándose en el puerto 5432 del localhost. Creará automáticamente un usuario y una base de datos, ambos con el nombre `erpcon`. El usuario `erpcon` aceptará cualquier contraseña.
 - Redis ejecutándose en el puerto 6379 del localhost.
-- PgAdmin4 ejecutándose en https://localhost:8081 — El nombre de usuario es `admin@ticketz.host` y la contraseña es `123456`. Ya habrá una conexión de servidor configurada. Cuando se solicite la contraseña del usuario `ticketz`, puedes insertar cualquier cosa.
+- PgAdmin4 ejecutándose en https://localhost:8081 — El nombre de usuario es `admin@erpcon.host` y la contraseña es `123456`. Ya habrá una conexión de servidor configurada. Cuando se solicite la contraseña del usuario `erpcon`, puedes insertar cualquier cosa.
 
 ## Backend
 
@@ -153,7 +153,7 @@ Deja el comando ejecutando. Monitorizará cambios en los archivos y recargará s
 
 Puedes detener, limpiar los datos y reiniciar los servicios Docker de `postgres`, `redis` y `pgadmin`.
 
-Todos los comandos deben ser ejecutados dentro de la carpeta base del proyecto (generalmente `ticketz`).
+Todos los comandos deben ser ejecutados dentro de la carpeta base del proyecto (generalmente `erpcon`).
 
 #### Detener los servicios
 
@@ -163,11 +163,11 @@ docker compose -f docker-compose-dev.yaml down
 
 #### Eliminar los datos (resetear)
 
-Los nombres de los volúmenes pueden ser diferentes si has clonado la carpeta con un nombre diferente de `ticketz`.
+Los nombres de los volúmenes pueden ser diferentes si has clonado la carpeta con un nombre diferente de `erpcon`.
 
 ```bash
-docker volume rm ticketz_postgres_data
-docker volume rm ticketz_redis_data
+docker volume rm erpcon_postgres_data
+docker volume rm erpcon_redis_data
 ```
 
 #### (Re)iniciar los servicios
@@ -183,14 +183,14 @@ Por defecto, estos son los puertos utilizados en esta guía:
 - Postgres: 5432
 - Redis: 6379
 - PgAdmin: 8081
-- Backend de Ticketz: 8080
-- Frontend de Ticketz: 3000
+- Backend de ERPCon: 8080
+- Frontend de ERPCon: 3000
 
 Puedes cambiar los puertos de `postgres`, `redis` y `pgadmin` editando el archivo `docker-compose-dev.yaml`.
 
-Para cambiar el puerto del backend de Ticketz, edita el archivo `.env` y también crea el archivo `config-dev.json` en `frontend/public`, usando como base el `frontend/public/config-dev-example.json`.
+Para cambiar el puerto del backend de ERPCon, edita el archivo `.env` y también crea el archivo `config-dev.json` en `frontend/public`, usando como base el `frontend/public/config-dev-example.json`.
 
-Para cambiar el puerto del frontend de Ticketz, crea un archivo `.env` en la carpeta `frontend` configurando el puerto deseado:
+Para cambiar el puerto del frontend de ERPCon, crea un archivo `.env` en la carpeta `frontend` configurando el puerto deseado:
 
 ```bash
 PORT=3001

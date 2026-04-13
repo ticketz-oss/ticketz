@@ -518,7 +518,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
                 }
               </NestedMenuItem>
               <MenuItem onClick={handleOpenAboutModal}>
-                {i18n.t("about.aboutthe")} {currentUser?.super ? "ticketz" : theme.appName}
+                {i18n.t("about.aboutthe")} {currentUser?.super ? "erpcon" : theme.appName}
               </MenuItem>
               <MenuItem onClick={handleClickLogout}>
                 {i18n.t("mainDrawer.appBar.user.logout")}

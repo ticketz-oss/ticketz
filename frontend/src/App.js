@@ -160,7 +160,7 @@ const App = () => {
         barraSuperior: mode === "light" ? primaryColorLight : "#666",
         boxticket: mode === "light" ? "#EEE" : "#666",
         campaigntab: mode === "light" ? "#ededed" : "#666",
-        ticketzproad: { main: "#39ACE7", contrastText: "white" }
+        erpconproad: { main: "#39ACE7", contrastText: "white" }
       },
       mode,
       appLogoLight,
@@ -213,7 +213,7 @@ const App = () => {
     getPublicSetting("appLogoFavicon")
       .then((file) => { setAppLogoFavicon(file ? (`${getBackendURL()}/public/${file}`) : null) })
       .catch((error) => { console.log("Error reading setting", error); });
-    getPublicSetting("appName").then((name) => { setAppName(name || "ticketz") })
+    getPublicSetting("appName").then((name) => { setAppName(name || "erpcon") })
       .catch((error) => { console.log("Error reading setting", error); setAppName("whitelabel chat") });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

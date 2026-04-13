@@ -24,7 +24,7 @@ Pode ser necessário fazer logoff e logon novamente antes de prosseguir. Apenas 
 
 ## Instalar NodeJS
 
-Para desenvolver no Ticketz, você precisa ter o NodeJS 20 instalado. Caso ainda não tenha, pode obtê-lo no [site oficial do NodeJS](https://nodejs.org/en/download/prebuilt-binaries).
+Para desenvolver no ERPCon, você precisa ter o NodeJS 20 instalado. Caso ainda não tenha, pode obtê-lo no [site oficial do NodeJS](https://nodejs.org/en/download/prebuilt-binaries).
 
 Após a instalação, verifique se o Node e o npm estão disponíveis executando os seguintes comandos em um terminal:
 
@@ -39,18 +39,18 @@ npm -v
 Você precisa clonar este repositório no seu computador antes de realizar qualquer outro passo:
 
 ```bash
-git clone https://github.com/ticketz-oss/ticketz
+git clone https://github.com/erpcon-oss/erpcon
 ```
 
 Qualquer comando a seguir deverá ser executado dentro do diretório clonado, a menos que especificado de outra forma:
 
 ```bash
-cd ticketz
+cd erpcon
 ```
 
 ## Executar postgres e redis com Docker
 
-O Ticketz fornece uma configuração do docker-compose para executar `postgres` e `redis`. Inicie com:
+O ERPCon fornece uma configuração do docker-compose para executar `postgres` e `redis`. Inicie com:
 
 ```bash
 docker compose -f docker-compose-dev.yaml up -d
@@ -58,9 +58,9 @@ docker compose -f docker-compose-dev.yaml up -d
 
 Após alguns segundos, você terá:
 
-- Postgres rodando na porta 5432 do localhost. Ele criará automaticamente um usuário e um banco de dados, ambos com o nome `ticketz`. O usuário `ticketz` aceitará qualquer senha.
+- Postgres rodando na porta 5432 do localhost. Ele criará automaticamente um usuário e um banco de dados, ambos com o nome `erpcon`. O usuário `erpcon` aceitará qualquer senha.
 - Redis rodando na porta 6379 do localhost.
-- PgAdmin4 rodando em `https://localhost:8081` — O nome de usuário é `admin@ticketz.host` e a senha é `123456`. Já haverá uma conexão de servidor configurada. Quando solicitado a senha do usuário `ticketz`, você pode inserir qualquer coisa.
+- PgAdmin4 rodando em `https://localhost:8081` — O nome de usuário é `admin@erpcon.host` e a senha é `123456`. Já haverá uma conexão de servidor configurada. Quando solicitado a senha do usuário `erpcon`, você pode inserir qualquer coisa.
 
 ## Backend
 
@@ -153,7 +153,7 @@ Deixe o comando rodando. Ele monitorará alterações nos arquivos e recarregar�
 
 Você pode parar, limpar os dados e reiniciar os serviços Docker de `postgres`, `redis` e `pgadmin`.
 
-Todos os comandos devem ser executados dentro da pasta base do projeto (geralmente `ticketz`).
+Todos os comandos devem ser executados dentro da pasta base do projeto (geralmente `erpcon`).
 
 #### Parar os serviços
 
@@ -163,11 +163,11 @@ docker compose -f docker-compose-dev.yaml down
 
 #### Remover os dados (resetar)
 
-Os nomes dos volumes podem ser diferentes caso você tenha clonado a pasta com um nome diferente de `ticketz`.
+Os nomes dos volumes podem ser diferentes caso você tenha clonado a pasta com um nome diferente de `erpcon`.
 
 ```bash
-docker volume rm ticketz_postgres_data
-docker volume rm ticketz_redis_data
+docker volume rm erpcon_postgres_data
+docker volume rm erpcon_redis_data
 ```
 
 #### (Re)iniciar os serviços
@@ -183,14 +183,14 @@ Por padrão, estas são as portas utilizadas neste guia:
 - Postgres: 5432
 - Redis: 6379
 - PgAdmin: 8081
-- Backend do Ticketz: 8080
-- Frontend do Ticketz: 3000
+- Backend do ERPCon: 8080
+- Frontend do ERPCon: 3000
 
 Você pode alterar as portas de `postgres`, `redis` e `pgadmin` editando o arquivo `docker-compose-dev.yaml`.
 
-Para alterar a porta do backend do Ticketz, edite o arquivo `.env` e também crie o arquivo `config-dev.json` em `frontend/public`, usando como base o `frontend/public/config-dev-example.json`.
+Para alterar a porta do backend do ERPCon, edite o arquivo `.env` e também crie o arquivo `config-dev.json` em `frontend/public`, usando como base o `frontend/public/config-dev-example.json`.
 
-Para alterar a porta do frontend do Ticketz, crie um arquivo `.env` na pasta `frontend` configurando a porta desejada:
+Para alterar a porta do frontend do ERPCon, crie um arquivo `.env` na pasta `frontend` configurando a porta desejada:
 
 ```bash
 PORT=3001

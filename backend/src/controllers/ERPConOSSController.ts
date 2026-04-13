@@ -7,24 +7,24 @@ import { GitInfo } from "../gitinfo";
 import { cacheLayer } from "../libs/cache";
 
 export async function show(_req: Request, res: Response): Promise<Response> {
-  if (!process.env.TICKETZ_REGISTRY_URL) {
+  if (!process.env.ERPCON_REGISTRY_URL) {
     return res.status(200).json({ disabled: "true" });
   }
 
   const registry = JSON.parse(
-    await GetCompanySetting(1, "ticketz_registry", "{}")
+    await GetCompanySetting(1, "erpcon_registry", "{}")
   );
 
   return res.status(200).json(registry);
 }
 
 export async function store(req: Request, res: Response): Promise<Response> {
-  if (!process.env.TICKETZ_REGISTRY_URL) {
+  if (!process.env.ERPCON_REGISTRY_URL) {
     return res.status(200).json({ disabled: "true" });
   }
 
   await UpdateSettingService({
-    key: "ticketz_registry",
+    key: "erpcon_registry",
     value: JSON.stringify(req.body),
     companyId: 1
   });
@@ -44,11 +44,11 @@ export async function store(req: Request, res: Response): Promise<Response> {
     hostname,
     name: req.body.name,
     whatsapp: req.body.whatsapp,
-    email: process.env.EMAIL_ADDRESS || "admin@ticketz.host",
+    email: process.env.EMAIL_ADDRESS || "admin@erpcon.host",
     version: GitInfo.tagName || GitInfo.branchName || GitInfo.commitHash
   };
 
-  await axios.post(process.env.TICKETZ_REGISTRY_URL, registryData);
+  await axios.post(process.env.ERPCON_REGISTRY_URL, registryData);
 
   return res.status(200).json(true);
 }

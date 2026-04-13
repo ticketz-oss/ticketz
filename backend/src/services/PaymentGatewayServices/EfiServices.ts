@@ -52,7 +52,7 @@ import {
   processInvoicePaid
 } from "./PaymentGatewayServices";
 
-const webhookUrl = `${process.env.BACKEND_URL}/subscription/ticketz/webhook`;
+const webhookUrl = `${process.env.BACKEND_URL}/subscription/erpcon/webhook`;
 
 const privateFolder = __dirname.endsWith("/dist")
   ? path.resolve(__dirname, "..", "private")

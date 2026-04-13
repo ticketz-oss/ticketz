@@ -196,7 +196,7 @@ const NotificationsPopOver = (props) => {
   const handleNotifications = (data) => {
     const { message, contact, ticket } = data;
 
-    const body = message.body.startsWith('{"ticketzvCard"') ? "🪪" : message.body;
+    const body = message.body.startsWith('{"erpconvCard"') ? "🪪" : message.body;
 
     const options = {
       body: `${format(new Date(), "HH:mm")}\n${body}`,

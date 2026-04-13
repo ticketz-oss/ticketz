@@ -39,7 +39,7 @@ const useStyles = makeStyles(theme => ({
     margin: "0 auto",
     content: `url("${theme.calculatedLogo()}")`
   },
-  ticketzLogoImg: {
+  erpconLogoImg: {
     width: "100%",
     margin: "0 auto",
     content: "url(" + (theme.mode === "light" ? logo : logoDark) + ")"
@@ -87,13 +87,13 @@ const AboutModal = ({ open, onClose }) => {
 				scroll="paper"
 			>
 				<DialogTitle id="form-dialog-title">
-					{i18n.t("about.aboutthe")} {currentUser?.super ? "ticketz" : theme.appName }
+					{i18n.t("about.aboutthe")} {currentUser?.super ? "erpcon" : theme.appName }
 				</DialogTitle>
 				<DialogContent dividers>
 				{ currentUser?.super ? 
           <>
             <div>
-              <img className={classes.ticketzLogoImg} />
+              <img className={classes.erpconLogoImg} />
             </div>
             <Typography variant="body1" gutterBottom><b>Frontend: 
               { frontendGitInfo.tagName && `Version: ${frontendGitInfo.tagName} Build info: ${frontendGitInfo.buildTimestamp}` }
@@ -126,8 +126,8 @@ const AboutModal = ({ open, onClose }) => {
             <Typography><Link target="_blank" href="https://github.com/vemfazer">{i18n.t("about.aboutvemfazersite")}</Link></Typography>
             <Typography variant="h4">{i18n.t("about.licenseheading")}</Typography>
             <Typography variant="body1">{i18n.t("about.licensedetail")}</Typography>
-            <Typography><Link target="_blank" href="https://github.com/ticketz-oss/ticketz/blob/main/LICENSE.md">{i18n.t("about.licensefulltext")}</Link></Typography>
-            <Typography><Link target="_blank" href="https://github.com/ticketz-oss/ticketz">{i18n.t("about.licensesourcecode")}</Link></Typography>
+            <Typography><Link target="_blank" href="https://github.com/erpcon-oss/erpcon/blob/main/LICENSE.md">{i18n.t("about.licensefulltext")}</Link></Typography>
+            <Typography><Link target="_blank" href="https://github.com/erpcon-oss/erpcon">{i18n.t("about.licensesourcecode")}</Link></Typography>
           </>
           :
           <>

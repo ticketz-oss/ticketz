@@ -29,7 +29,7 @@ import subscriptionRoutes from "./subScriptionRoutes";
 import ticketTagRoutes from "./ticketTagRoutes";
 import pwaRoutes from "./pwaRoutes";
 import versionRoutes from "./versionRoutes";
-import ticketzOSSRoutes from "./ticketzOSSRoutes";
+import erpconOSSRoutes from "./erpconOSSRoutes";
 import i18nRoutes from "./i18nRoutes";
 import wavoipRoutes from "./wavoipRoutes";
 
@@ -65,7 +65,7 @@ routes.use(invoiceRoutes);
 routes.use(ticketTagRoutes);
 routes.use(pwaRoutes);
 routes.use(versionRoutes);
-routes.use(ticketzOSSRoutes);
+routes.use(erpconOSSRoutes);
 routes.use(i18nRoutes);
 routes.use(wavoipRoutes);
 

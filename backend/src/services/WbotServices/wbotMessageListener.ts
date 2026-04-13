@@ -206,7 +206,7 @@ export const getBodyMessage = async (msg: proto.IMessage): Promise<string> => {
       contactMessage:
         msg?.contactMessage?.vcard &&
         JSON.stringify({
-          ticketzvCard: [
+          erpconvCard: [
             {
               displayName: msg.contactMessage.displayName,
               vcard: msg.contactMessage.vcard
@@ -216,7 +216,7 @@ export const getBodyMessage = async (msg: proto.IMessage): Promise<string> => {
       contactsArrayMessage:
         msg?.contactsArrayMessage &&
         JSON.stringify({
-          ticketzvCard: msg.contactsArrayMessage.contacts
+          erpconvCard: msg.contactsArrayMessage.contacts
         }),
       locationMessage: msgLocationBody(msg?.locationMessage),
       liveLocationMessage: `Latitude: ${msg?.liveLocationMessage?.degreesLatitude} - Longitude: ${msg?.liveLocationMessage?.degreesLongitude}`,

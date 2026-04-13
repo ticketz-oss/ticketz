@@ -11,7 +11,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const TicketzRegistry = ({onRegister}) => {
+const ERPConRegistry = ({onRegister}) => {
   const classes = useStyles();
   const phoneNumberRef = useRef(null);
   const [formData, setFormData] = useState({
@@ -39,7 +39,7 @@ const TicketzRegistry = ({onRegister}) => {
         name: formData.name,
         whatsapp: `${getPhoneCode(formData.country)}${formData.phoneNumber}`
       };
-      const response = await api.post('/ticketz/registry', registryData);
+      const response = await api.post('/erpcon/registry', registryData);
       console.debug('Form submitted successfully:', response.data);
       if (!!onRegister) {
         onRegister(true);
@@ -54,14 +54,14 @@ const TicketzRegistry = ({onRegister}) => {
       <Grid container spacing={3}>
         <Grid item xs={12}>
             <Typography component="h2" variant="h6" gutterBottom>
-              {i18n.t("ticketz.registration.header")}
+              {i18n.t("erpcon.registration.header")}
             </Typography>
-            <p>{i18n.t("ticketz.registration.description")}</p>
+            <p>{i18n.t("erpcon.registration.description")}</p>
         </Grid>
         <Grid item xs={12} md={4}>
           <TextField
             className={classes.fullWidth}
-            label={i18n.t('ticketz.registration.name')}
+            label={i18n.t('erpcon.registration.name')}
             name="name"
             value={formData.name}
             onChange={handleChange}
@@ -71,7 +71,7 @@ const TicketzRegistry = ({onRegister}) => {
         <Grid item xs={12} md={3}>
           <SelectCountry
             className={classes.fullWidth}
-            label={i18n.t('ticketz.registration.country')}
+            label={i18n.t('erpcon.registration.country')}
             value={formData.country}
             onChange={handleChange}
             name="country"
@@ -80,7 +80,7 @@ const TicketzRegistry = ({onRegister}) => {
         <Grid item xs={12} md={3}>
           <TextField
             className={classes.fullWidth}
-            label={i18n.t('ticketz.registration.phoneNumber')}
+            label={i18n.t('erpcon.registration.phoneNumber')}
             name="phoneNumber"
             value={formData.phoneNumber}
             onChange={handleChange}
@@ -97,7 +97,7 @@ const TicketzRegistry = ({onRegister}) => {
         </Grid>
         <Grid item xs={12} md={2}>
           <Button className={classes.fullWidth} type="submit" variant="contained" color="primary">
-            {i18n.t('ticketz.registration.submit')}
+            {i18n.t('erpcon.registration.submit')}
           </Button>
         </Grid>
       </Grid>
@@ -105,4 +105,4 @@ const TicketzRegistry = ({onRegister}) => {
   );
 };
 
-export default TicketzRegistry;
+export default ERPConRegistry;

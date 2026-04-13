@@ -84,10 +84,10 @@ const createSchema = Yup.object().shape({
   whatsapp: Yup.string().min(10).test('is-phone', "Whatsapp is not valid", (value) => isValidPhoneNumber(value,"BR")).required("Required"),
 });
 
-export default function PixTicketzSettings(props) {
+export default function PixERPConSettings(props) {
   const { settings } = props;
   const classes = useStyles();
-  const [pixTicketzSettings, setPixTicketzSettings] = useState({});
+  const [pixERPConSettings, setPixERPConSettings] = useState({});
   const { update } = useSettings();
   const [showCreateForm, setShowCreateForm] = useState(true);
   const initialCreateState = { nome: "", "cnpj": "", email: "", whatsapp: "" };
@@ -101,7 +101,7 @@ export default function PixTicketzSettings(props) {
           newSettings[setting.key.substring(1)] = setting.value;
         }
       });
-      setPixTicketzSettings(newSettings);
+      setPixERPConSettings(newSettings);
       if (newSettings.owenCnpj && newSettings.owenToken && newSettings.owenSecretKey) {
         setShowCreateForm(false);
       }
@@ -117,10 +117,10 @@ export default function PixTicketzSettings(props) {
   }
 
   async function handleSaveSetting(key) {
-    if (typeof pixTicketzSettings[key] !== "string") {
+    if (typeof pixERPConSettings[key] !== "string") {
       return;
     }
-    storeSetting(`_${key}`, pixTicketzSettings[key]);
+    storeSetting(`_${key}`, pixERPConSettings[key]);
     toast.success("Operação atualizada com sucesso.");
   }
 
@@ -139,7 +139,7 @@ export default function PixTicketzSettings(props) {
   return (
     <>
       <div><p>
-        <b>Pix Ticketz</b> é uma implementação para recebimento via PIX através
+        <b>Pix ERPCon</b> é uma implementação para recebimento via PIX através
         do parceiro PixPDV.
       </p></div>
       { !showCreateForm &&
@@ -159,11 +159,11 @@ export default function PixTicketzSettings(props) {
               label="CNPJ"
               variant="standard"
               name="owenCnpj"
-              value={pixTicketzSettings.owenCnpj || ""}
+              value={pixERPConSettings.owenCnpj || ""}
               onChange={(e) => {
-                const newSettings = { ...pixTicketzSettings };
+                const newSettings = { ...pixERPConSettings };
                 newSettings.owenCnpj = e.target.value;
-                setPixTicketzSettings(newSettings);
+                setPixERPConSettings(newSettings);
               }}
               onBlur={async (_) => {
                 await handleSaveSetting("owenCnpj");
@@ -178,11 +178,11 @@ export default function PixTicketzSettings(props) {
               label="Token"
               variant="standard"
               name="owenToken"
-              value={pixTicketzSettings.owenToken || ""}
+              value={pixERPConSettings.owenToken || ""}
               onChange={(e) => {
-                const newSettings = { ...pixTicketzSettings };
+                const newSettings = { ...pixERPConSettings };
                 newSettings.owenToken = e.target.value;
-                setPixTicketzSettings(newSettings);
+                setPixERPConSettings(newSettings);
               }}
               onBlur={async (_) => {
                 await handleSaveSetting("owenToken");
@@ -197,11 +197,11 @@ export default function PixTicketzSettings(props) {
               label="Secret Key"
               variant="standard"
               name="owenSecretKey"
-              value={pixTicketzSettings.owenSecretKey || ""}
+              value={pixERPConSettings.owenSecretKey || ""}
               onChange={(e) => {
-                const newSettings = { ...pixTicketzSettings };
+                const newSettings = { ...pixERPConSettings };
                 newSettings.owenSecretKey = e.target.value;
-                setPixTicketzSettings(newSettings);
+                setPixERPConSettings(newSettings);
               }}
               onBlur={async (_) => {
                 await handleSaveSetting("owenSecretKey");
@@ -218,7 +218,7 @@ export default function PixTicketzSettings(props) {
             webhook para o seguinte conteúdo:
           </Typography>
           <Typography variant="pre">
-            {getBackendURL()}/subscription/ticketz/webhook
+            {getBackendURL()}/subscription/erpcon/webhook
           </Typography>
         </Grid>
       </Grid>

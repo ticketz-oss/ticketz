@@ -3,7 +3,7 @@
 
 # Sobre o projeto
 
-Ticketz é um comunicador com recursos de CRM e helpdesk que utiliza
+ERPCon é um comunicador com recursos de CRM e helpdesk que utiliza
 Whatsapp como meio de comunicação com os clientes.
 
 ## Autoria original
@@ -33,7 +33,7 @@ AGPL, que exige que todo usuário que tenha acesso ao sistema possa obter o
 código fonte.
 
 Por isso, se você utilizar diretamente esta versão, é
-**muito importante manter o link na tela "Sobre o Ticketz", que dá acesso ao repositório**. Se você desejar pode mover o link para o código fonte para outro lugar, mas ele deve ser facilmente acessível por qualquer usuário do sistema.
+**muito importante manter o link na tela "Sobre o ERPCon", que dá acesso ao repositório**. Se você desejar pode mover o link para o código fonte para outro lugar, mas ele deve ser facilmente acessível por qualquer usuário do sistema.
 
 Caso você faça alterações no código você deve alterar o link para um
 repositório ou outra forma de obter o código das suas alterações.
@@ -58,7 +58,7 @@ aos projetos originais
 Início Muito Rápido em um Servidor Público
 ------------------------------------------
 
-Existem imagens Docker fornecidas pelo projeto, então você pode fazer o **ticketz** funcionar muito facilmente em um servidor público (baremetal ou VPS).
+Existem imagens Docker fornecidas pelo projeto, então você pode fazer o **erpcon** funcionar muito facilmente em um servidor público (baremetal ou VPS).
 
 ### Primeira configuração
 
@@ -97,7 +97,7 @@ Você deve fazer login no seu servidor usando o mesmo usuário que você usou pa
 Primeiro você precisa mover o diretório atual para a pasta de instalação:
 
 ```bash
-cd ~/ticketz-docker-acme
+cd ~/erpcon-docker-acme
 ```
 
 Após isso, você pode obter um relatório completo de logs com o seguinte comando:
@@ -126,8 +126,8 @@ Em ambos os casos é necessário clonar o repositório, necessário então abrir
 um terminal de comandos:
 
 ```bash
-git clone https://github.com/allgood/ticketz.git
-cd ticketz
+git clone https://github.com/allgood/erpcon.git
+cd erpcon
 ```
 
 ## Rodando localmente
@@ -145,9 +145,9 @@ docker compose -f docker-compose-local.yaml up -d
 ```
 
 Na primeira execução o sistema vai inicializar os bancos de dados e tabelas,
-e após alguns minutos o Ticketz estará acessível pela porta 3000
+e após alguns minutos o ERPCon estará acessível pela porta 3000
 
-O usuário padrão é `admin@ticketz.host` e a senha padrão é `123456`
+O usuário padrão é `admin@erpcon.host` e a senha padrão é `123456`
 
 A aplicação irá se reiniciar automaticamente a cada reboot do servidor.
 
@@ -164,9 +164,9 @@ Tendo um servidor acessível pela internet, é necessário ajustar dois nomes
 de DNS a sua escolha, um para o backend e outro para o frontend, e também um
 endereço de email para cadastro dos certificados, por exemplo:
 
-* **backend:** api.ticketz.exemplo.com.br
-* **frontend:** ticketz.exemplo.com.br
-* **email:** ticketz@exemplo.com.br
+* **backend:** api.erpcon.exemplo.com.br
+* **frontend:** erpcon.exemplo.com.br
+* **email:** erpcon@exemplo.com.br
 
 É necessário editar os arquivos `.env-backend-acme` e `.env-frontend-acme`
 definindo neles estes valores.
@@ -187,8 +187,8 @@ sudo docker compose -f docker-compose-acme.yaml up -d
 ```
 
 Na primeira execução o Docker irá fazer a compilação do código e criação dos
-conteiners, e após isso o ticketz vai inicializar os bancos de dados e
-tabelas. Esta operação pode levar bastante tempo, depois disso o Ticketz
+conteiners, e após isso o erpcon vai inicializar os bancos de dados e
+tabelas. Esta operação pode levar bastante tempo, depois disso o ERPCon
 estará acessível pelo endereço fornecido para oo frontend.
 
 O usuário padrão será o endereço de email fornecido na configuração do arquivo `.env-backend-acme` e a senha padrão é `123456`
@@ -214,7 +214,7 @@ Facilitou sua vida?
 
 Se este projeto ajudou você em uma tarefa complexa, considere fazer uma doação ao autor pelo Paypal ou PIX.
 
-![image](https://github.com/ticketz-oss/ticketz/assets/6070736/8e85b263-73ca-4fb4-9bdc-03fff356b6ff)
+![image](https://github.com/erpcon-oss/erpcon/assets/6070736/8e85b263-73ca-4fb4-9bdc-03fff356b6ff)
 
 Chave Pix: 0699c69d-0951-4686-a5b7-c6cd21aa7e15
 
