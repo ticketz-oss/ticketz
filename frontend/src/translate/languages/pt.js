@@ -56,6 +56,9 @@ const messages = {
           invalidEmail: "Email inválido",
           invalidPhone: "Número de telefone inválido",
         },
+        serverTime: "Hora do servidor:",
+        clientTime: "Hora do cliente:",
+        differenceMinutes: "Diferença: {{count}} minuto(s)",
       },
       signup: {
         title: "Cadastre-se",
@@ -1135,6 +1138,8 @@ const messages = {
         ERR_CONFIG_ERROR: "Erro de configuração. Por favor, contate o suporte.",
         ERR_CLOCK_OUT_OF_SYNC: "Relógio fora de sincronia. Por favor, verifique as configurações de data e hora do seu dispositivo.",
         ERR_BACKEND_UNREACHABLE: "Backend inacessível. Por favor, tente novamente mais tarde.",
+        ERR_BACKEND_NOT_READY:
+          "O backend está iniciando e ainda não está pronto. Tentando novamente automaticamente.",
       },
       backendErrors: {
         ERR_UNAUTHORIZED: "Você não está autorizado a acessar este recurso.",

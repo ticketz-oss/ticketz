@@ -19,7 +19,10 @@ const messages = {
         company: "Perusahaan",
         connection: "Koneksi",
         queue: "Antrian",
-        contact: "Kontak"
+        contact: "Kontak",
+        serverTime: "Waktu server:",
+        clientTime: "Waktu klien:",
+        differenceMinutes: "Selisih: {{count}} menit",
       },
       signup: {
         title: "Daftar",
@@ -1053,6 +1056,15 @@ const messages = {
           calladd: "Untuk memperbarui Panggilan Tambahkan privasi",
           disappearing: "Untuk memperbarui Mode Hilang Default",
         },
+      },
+      frontendErrors: {
+        ERR_CONFIG_ERROR: "Kesalahan konfigurasi. Silakan hubungi dukungan.",
+        ERR_CLOCK_OUT_OF_SYNC:
+          "Jam tidak sinkron. Silakan periksa pengaturan tanggal dan waktu perangkat Anda.",
+        ERR_BACKEND_UNREACHABLE:
+          "Backend tidak dapat dijangkau. Silakan coba lagi nanti.",
+        ERR_BACKEND_NOT_READY:
+          "Backend sedang memulai dan belum siap. Mencoba lagi secara otomatis.",
       },
       backendErrors: {
         ERR_FORBIDDEN: "Akses ditolak. Periksa izin Anda.",

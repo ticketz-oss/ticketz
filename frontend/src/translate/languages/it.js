@@ -20,7 +20,10 @@ const messages = {
         user: "Utente",
         connection: "Connessione",
         queue: "Coda",
-        contact: "Contatto"
+        contact: "Contatto",
+        serverTime: "Ora del server:",
+        clientTime: "Ora del client:",
+        differenceMinutes: "Differenza: {{count}} minuto(i)",
       },
       signup: {
         title: "Registrati",
@@ -1005,6 +1008,14 @@ const messages = {
           calladd: "Per aggiornare la privacy di Aggiunta alle chiamate",
           disappearing: "Per aggiornare la Modalità di Scomparsa Predefinita",
         },
+      },
+      frontendErrors: {
+        ERR_CONFIG_ERROR: "Errore di configurazione. Contatta il supporto.",
+        ERR_CLOCK_OUT_OF_SYNC:
+          "Orologio non sincronizzato. Controlla le impostazioni di data e ora del tuo dispositivo.",
+        ERR_BACKEND_UNREACHABLE: "Backend non raggiungibile. Riprova più tardi.",
+        ERR_BACKEND_NOT_READY:
+          "Il backend si sta avviando e non è ancora pronto. Nuovo tentativo automatico.",
       },
       backendErrors: {
         ERR_NO_OTHER_WHATSAPP: "Deve esserci almeno un WhatsApp predefinito.",

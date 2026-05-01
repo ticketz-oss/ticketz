@@ -19,7 +19,10 @@ const messages = {
         company: "Firma",
         connection: "Verbindung",
         queue: "Warteschlange",
-        contact: "Kontakt"
+        contact: "Kontakt",
+        serverTime: "Serverzeit:",
+        clientTime: "Clientzeit:",
+        differenceMinutes: "Unterschied: {{count}} Minute(n)",
       },
       signup: {
         title: "Registrieren",
@@ -1000,6 +1003,16 @@ const messages = {
           calladd: "Um den Datenschutz der Anrufhinzufügung zu aktualisieren",
           disappearing: "Um den Standardmodus für verschwindende Nachrichten zu aktualisieren",
         },
+      },
+      frontendErrors: {
+        ERR_CONFIG_ERROR:
+          "Konfigurationsfehler. Bitte kontaktieren Sie den Support.",
+        ERR_CLOCK_OUT_OF_SYNC:
+          "Uhrzeit nicht synchron. Bitte überprüfen Sie die Datums- und Uhrzeiteinstellungen Ihres Geräts.",
+        ERR_BACKEND_UNREACHABLE:
+          "Backend nicht erreichbar. Bitte versuchen Sie es später erneut.",
+        ERR_BACKEND_NOT_READY:
+          "Das Backend startet noch und ist noch nicht bereit. Automatischer neuer Versuch.",
       },
       backendErrors: {
         ERR_NO_OTHER_WHATSAPP: "Es muss mindestens ein Standard-WhatsApp geben.",

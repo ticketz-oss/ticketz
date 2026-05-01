@@ -20,7 +20,10 @@ const messages = {
         user: "Utilisateur",
         connection: "Connexion",
         queue: "File d'attente",
-        contact: "Contact"
+        contact: "Contact",
+        serverTime: "Heure du serveur :",
+        clientTime: "Heure du client :",
+        differenceMinutes: "Différence : {{count}} minute(s)",
       },
       signup: {
         title: "S'inscrire",
@@ -1001,6 +1004,16 @@ const messages = {
           calladd: "Pour mettre à jour la confidentialité de l'ajout aux appels",
           disappearing: "Pour mettre à jour le Mode Disparition par Défaut",
         },
+      },
+      frontendErrors: {
+        ERR_CONFIG_ERROR:
+          "Erreur de configuration. Veuillez contacter le support.",
+        ERR_CLOCK_OUT_OF_SYNC:
+          "Horloge désynchronisée. Veuillez vérifier les paramètres de date et d'heure de votre appareil.",
+        ERR_BACKEND_UNREACHABLE:
+          "Backend inaccessible. Veuillez réessayer plus tard.",
+        ERR_BACKEND_NOT_READY:
+          "Le backend démarre et n'est pas encore prêt. Nouvelle tentative automatique.",
       },
       backendErrors: {
         ERR_NO_OTHER_WHATSAPP: "Il doit y avoir au moins un WhatsApp par défaut.",

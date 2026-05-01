@@ -56,6 +56,9 @@ const messages = {
           invalidEmail: "Invalid email",
           invalidPhone: "Invalid phone number",
         },
+        serverTime: "Server time:",
+        clientTime: "Client time:",
+        differenceMinutes: "Difference: {{count}} minute(s)",
       },
       signup: {
         title: "Sign Up",
@@ -1128,6 +1131,8 @@ const messages = {
         ERR_CONFIG_ERROR: "Configuration error. Please contact support.",
         ERR_CLOCK_OUT_OF_SYNC: "Clock out of sync. Please check the date and time settings of your device.",
         ERR_BACKEND_UNREACHABLE: "Backend unreachable. Please try again later.",
+        ERR_BACKEND_NOT_READY:
+          "Backend is starting up and not ready yet. Retrying automatically.",
       },        
       backendErrors: {
         ERR_UNAUTHORIZED: "You are not authorized to perform this action.",
