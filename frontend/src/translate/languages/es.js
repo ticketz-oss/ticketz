@@ -465,6 +465,7 @@ const messages = {
           },
           user: {
             profile: "Perfil",
+            subscriptionValidUntilLabel: "Suscripción válida hasta",
             darkmode: "Modo oscuro",
             lightmode: "Modo claro",
             language: "Seleccionar idioma",

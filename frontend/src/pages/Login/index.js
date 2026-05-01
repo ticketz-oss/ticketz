@@ -16,6 +16,7 @@ import { makeStyles, useTheme } from "@material-ui/core/styles";
 import Brightness4Icon from "@material-ui/icons/Brightness4";
 import Brightness7Icon from "@material-ui/icons/Brightness7";
 import LanguageIcon from "@material-ui/icons/Translate";
+import Typography from "@material-ui/core/Typography";
 
 import { i18n } from "../../translate/i18n";
 import { messages } from "../../translate/languages";
@@ -24,6 +25,9 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 import useSettings from "../../hooks/useSettings";
 import { getBackendURL } from "../../services/config";
 import ColorModeContext from "../../layout/themeContext";
+import { loadJSON } from "../../helpers/loadJSON";
+
+const gitinfo = loadJSON("/gitinfo.json");
 
 const parseLoginLinks = (value) => {
   if (!value) {
@@ -308,6 +312,25 @@ const useStyles = makeStyles((theme) => ({
       textDecoration: "none",
     },
   },
+  versionInfo: {
+    position: "absolute",
+    right: theme.spacing(2),
+    bottom: theme.spacing(1.25),
+    zIndex: 2,
+    fontSize: "12px",
+    fontWeight: "bold",
+    textAlign: "right",
+    color: theme.palette.type === "light" ? "#0e1726" : "#ffffff",
+    textShadow:
+      theme.palette.type === "light"
+        ? "1px 0 2px rgba(255,255,255,0.9), -1px 0 2px rgba(255,255,255,0.9), 0 1px 2px rgba(255,255,255,0.9), 0 -1px 2px rgba(255,255,255,0.9), 0 2px 6px rgba(0,0,0,0.35)"
+        : "1px 0 2px rgba(0,0,0,0.9), -1px 0 2px rgba(0,0,0,0.9), 0 1px 2px rgba(0,0,0,0.9), 0 -1px 2px rgba(0,0,0,0.9), 0 2px 6px rgba(0,0,0,0.65)",
+    [theme.breakpoints.down("xs")]: {
+      right: theme.spacing(1),
+      bottom: theme.spacing(0.75),
+      fontSize: "11px",
+    },
+  },
   "@keyframes gradientDrift": {
     "0%": {
       backgroundPosition: "0% 50%",
@@ -567,6 +590,11 @@ const Login = () => {
           )}
         </div>
       </div>
+      <Typography className={classes.versionInfo}>
+        {`${gitinfo.tagName || `${gitinfo.branchName || "N/A"} ${gitinfo.commitHash || "N/A"}`}`}
+        {" / "}
+        {`${gitinfo.buildTimestamp || "N/A"}`}
+      </Typography>
     </div>
   );
 };

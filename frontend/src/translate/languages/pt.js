@@ -468,6 +468,7 @@ const messages = {
           },
           user: {
             profile: "Perfil",
+            subscriptionValidUntilLabel: "Assinatura válida até",
             darkmode: "Modo escuro",
             lightmode: "Modo claro",
             language: "Selecionar idioma",

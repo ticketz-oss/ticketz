@@ -400,6 +400,7 @@ const messages = {
           },
           user: {
             profile: "Profilo",
+            subscriptionValidUntilLabel: "Abbonamento valido fino al",
             darkmode: "Modalità scura",
             lightmode: "Modalità chiara",
             language: "Seleziona lingua",

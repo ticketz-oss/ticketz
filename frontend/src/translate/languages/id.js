@@ -414,6 +414,7 @@ const messages = {
           },
           user: {
             profile: "Profile",
+            subscriptionValidUntilLabel: "Langganan aktif sampai",
             darkmode: "Dark mode",
             lightmode: "Light mode",
             language: "Select language",

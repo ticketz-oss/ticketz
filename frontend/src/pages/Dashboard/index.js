@@ -308,7 +308,8 @@ const Dashboard = () => {
           setSupportPix(true);
           setSupportIsBr(true);
         }
-      });
+      })
+      .catch(() => {});
   }, []);
   
   useEffect(() => {

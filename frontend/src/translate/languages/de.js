@@ -398,6 +398,7 @@ const messages = {
           },
           user: {
             profile: "Profil",
+            subscriptionValidUntilLabel: "Abo gueltig bis",
             darkmode: "Dunkelmodus",
             lightmode: "Hellmodus",
             language: "Sprache auswählen",

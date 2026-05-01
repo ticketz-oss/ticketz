@@ -399,6 +399,7 @@ const messages = {
           },
           user: {
             profile: "Profil",
+            subscriptionValidUntilLabel: "Abonnement valide jusqu'au",
             darkmode: "Mode sombre",
             lightmode: "Mode clair",
             language: "Sélectionner la langue",
