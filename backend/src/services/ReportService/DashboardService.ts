@@ -5,7 +5,10 @@ import { GetCompanySetting } from "../../helpers/CheckSettings";
 import User from "../../models/User";
 import TicketTraking from "../../models/TicketTraking";
 import sequelize from "../../database";
-import { listCounterSerie } from "../CounterServices/ListCounterSerie";
+import {
+  listCounterSerie,
+  TicketCounterSeries
+} from "../CounterServices/ListCounterSerie";
 
 type TicketTrackingStatistics = {
   avgWaitTime: number;
@@ -23,15 +26,11 @@ export type DashboardDateRange = {
 };
 
 type TicketsStatisticsData = {
-  start: string;
-  end: string;
-  hour_start?: string;
-  hour_end?: string;
   ticketCounters: {
-    create: any;
-    accept: any;
-    transfer: any;
-    close: any;
+    create: TicketCounterSeries;
+    accept: TicketCounterSeries;
+    transfer: TicketCounterSeries;
+    close: TicketCounterSeries;
   };
   ticketStatistics: {
     avgWaitTime: number;
@@ -307,10 +306,6 @@ export async function ticketsStatisticsService(
   }
 
   return {
-    start: params.date_from,
-    end: params.date_to,
-    hour_start: params?.hour_from,
-    hour_end: params?.hour_to,
     ticketCounters: {
       create: await listCounterSerie(companyId, "ticket-create", start, end),
       accept: await listCounterSerie(companyId, "ticket-accept", start, end),

@@ -1,12 +1,22 @@
 import { col, fn, Op } from "sequelize";
 import Counter from "../../models/Counter";
 
+export type TicketCounterSeries = {
+  field: string;
+  start: Date;
+  end: Date;
+  counters: {
+    time: string;
+    counter: number;
+  }[];
+};
+
 export async function listCounterSerie(
   companyId: number,
   serie: string,
   start: Date,
   end: Date
-) {
+): Promise<TicketCounterSeries> {
   const where = {
     companyId,
     serie,
@@ -48,6 +58,8 @@ export async function listCounterSerie(
 
   return {
     field: groupByField,
+    start,
+    end,
     counters
   };
 }

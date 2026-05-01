@@ -746,10 +746,6 @@ const Dashboard = () => {
             <Paper className={classes.fixedHeightPaper}>
               <TicketCountersChart
                 ticketCounters={ticketsData.ticketCounters}
-                start={ticketsData.start}
-                end={ticketsData.end}
-                hour_start={ticketsData.hour_start}
-                hour_end={ticketsData.hour_end}
                />
             </Paper>
           </Grid>

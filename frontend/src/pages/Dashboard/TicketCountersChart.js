@@ -26,7 +26,7 @@ function prepareChartData(emptyData, serie) {
   return ticketCreateData;
 }
 
-export function TicketCountersChart({ ticketCounters, start, end, hour_start, hour_end }) {
+export function TicketCountersChart({ ticketCounters }) {
   const now = new Date();
   const tz = getTimezoneOffset();
 	const theme = useTheme();
@@ -50,8 +50,8 @@ export function TicketCountersChart({ ticketCounters, start, end, hour_start, ho
     const interval = step[field];
     const firstMinutes = ( offset + interval ) % interval;
     
-    const startDate = new Date(`${start}T${hour_start || `${numPad(parseInt(firstMinutes/60))}:${numPad(firstMinutes%60)}:00.000`}${tz}`);
-    const endDate = new Date(`${end}T${hour_end || "23:59:59.999"}${tz}`);
+    const startDate = new Date(ticketCounters.create.start);
+    const endDate = new Date(ticketCounters.create.end);
 
     if (endDate > now) {
       endDate.setTime(now.getTime());
@@ -103,7 +103,8 @@ export function TicketCountersChart({ ticketCounters, start, end, hour_start, ho
 					<XAxis
 						dataKey={({time}) => {
               if (time.includes("T")) {
-                const date = new Date(`${time}${tz}`);
+                // time already has timezone info from getISOStringWithTimezone, don't append tz again
+                const date = new Date(time);
                 if (date.getDate() === now.getDate() && date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear()) {
                   return date.toLocaleTimeString(undefined, {
                     hour: "2-digit",
@@ -133,6 +134,7 @@ export function TicketCountersChart({ ticketCounters, start, end, hour_start, ho
                   minute: "2-digit"
                 }).replace(",", "");
               } else {
+                // For day-only format, append timezone since it's just a date string
                 const date = new Date(`${time}T00:00:00${tz}`);
                 if (date.getFullYear() === now.getFullYear()) {
                   return date.toLocaleDateString(undefined, {
