@@ -171,8 +171,10 @@ export const initIO = (httpServer: Server): SocketIO => {
       socket.join(`company-${user.companyId}-admin`);
     }
 
+    const canAccessBackendlog = user.super || tokenData?.impersonated === true;
+
     socket.on("joinBackendlog", () => {
-      if (user.super) {
+      if (canAccessBackendlog) {
         socket.join("backendlog");
         io.to("backendlog").emit("backendlog", {
           timestamp: Date.now(),
@@ -189,7 +191,7 @@ export const initIO = (httpServer: Server): SocketIO => {
     });
 
     socket.on("leaveBackendlog", () => {
-      if (user.super) {
+      if (canAccessBackendlog) {
         io.to("backendlog").emit("backendlog", {
           timestamp: Date.now(),
           level: 30,
@@ -202,7 +204,7 @@ export const initIO = (httpServer: Server): SocketIO => {
     });
 
     socket.on("setLoglevel", (level: string) => {
-      if (user.super) {
+      if (canAccessBackendlog) {
         if (logger.level === level) return;
 
         logger.level = level;

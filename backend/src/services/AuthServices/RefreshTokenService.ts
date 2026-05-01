@@ -1,20 +1,16 @@
-import { verify } from "jsonwebtoken";
 import { Response as Res } from "express";
 
 import User from "../../models/User";
 import AppError from "../../errors/AppError";
 import ShowUserService from "../UserServices/ShowUserService";
-import authConfig from "../../config/auth";
 import {
   createAccessToken,
   createRefreshToken
 } from "../../helpers/CreateTokens";
-
-interface RefreshTokenPayload {
-  id: string;
-  tokenVersion: number;
-  companyId: number;
-}
+import {
+  decodeRefreshToken,
+  RefreshTokenPayload
+} from "../../helpers/DecodeRefreshToken";
 
 interface Response {
   user: User;
@@ -27,8 +23,14 @@ export const RefreshTokenService = async (
   token: string
 ): Promise<Response> => {
   try {
-    const decoded = verify(token, authConfig.refreshSecret);
-    const { id, tokenVersion } = decoded as RefreshTokenPayload;
+    const decoded = decodeRefreshToken(token);
+    const {
+      id,
+      tokenVersion,
+      impersonated,
+      originalUserId,
+      originalCompanyId
+    } = decoded as RefreshTokenPayload;
 
     const user = await ShowUserService(id);
 
@@ -37,11 +39,19 @@ export const RefreshTokenService = async (
       throw new AppError("ERR_SESSION_EXPIRED", 401);
     }
 
-    const newToken = createAccessToken(user);
-    const refreshToken = createRefreshToken(user);
+    const newToken = createAccessToken(user, {
+      impersonated: impersonated === true,
+      originalUserId,
+      originalCompanyId
+    });
+    const refreshToken = createRefreshToken(user, {
+      impersonated: impersonated === true,
+      originalUserId,
+      originalCompanyId
+    });
 
     return { user, newToken, refreshToken };
-  } catch (err) {
+  } catch {
     res.clearCookie("jrt");
     throw new AppError("ERR_SESSION_EXPIRED", 401);
   }

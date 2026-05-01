@@ -12,6 +12,7 @@ import { createAccessToken, createRefreshToken } from "../helpers/CreateTokens";
 import Company from "../models/Company";
 import Setting from "../models/Setting";
 import Translation from "../models/Translation";
+import { decodeRefreshToken } from "../helpers/DecodeRefreshToken";
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const { email, password } = req.body;
@@ -107,6 +108,12 @@ export const impersonate = async (
     throw new AppError("ERR_UNAUTHORIZED", 401);
   }
 
+  const currentRefreshTokenData = decodeRefreshToken(token);
+
+  if (currentRefreshTokenData.impersonated) {
+    throw new AppError("ERR_ALREADY_IMPERSONATING", 400);
+  }
+
   const user = await User.findOne({
     where: { companyId: Number(companyId), profile: "admin" },
     include: ["queues", { model: Company, include: [{ model: Setting }] }]
@@ -116,8 +123,19 @@ export const impersonate = async (
     throw new AppError("ERR_NO_USER_FOUND", 404);
   }
 
-  const newToken = createAccessToken(user);
-  const refreshToken = createRefreshToken(user);
+  const metadata = {
+    originalUserId: Number(req.user.id),
+    originalCompanyId: Number(req.user.companyId)
+  };
+
+  const newToken = createAccessToken(user, {
+    impersonated: true,
+    ...metadata
+  });
+  const refreshToken = createRefreshToken(user, {
+    impersonated: true,
+    ...metadata
+  });
   const serializedUser = await SerializeUser(user);
 
   SendRefreshToken(res, refreshToken);
@@ -135,6 +153,42 @@ export const impersonate = async (
       }
     }
   );
+
+  return res.status(200).json({
+    token: newToken,
+    user: serializedUser
+  });
+};
+
+export const backToSuper = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const token: string = req.cookies.jrt;
+
+  if (!token) {
+    throw new AppError("ERR_UNAUTHORIZED", 401);
+  }
+
+  const refreshTokenData = decodeRefreshToken(token);
+
+  if (!refreshTokenData.impersonated || !refreshTokenData.originalUserId) {
+    throw new AppError("ERR_NOT_IMPERSONATING", 400);
+  }
+
+  const originalUser = await User.findByPk(refreshTokenData.originalUserId, {
+    include: ["queues", { model: Company, include: [{ model: Setting }] }]
+  });
+
+  if (!originalUser || !originalUser.super) {
+    throw new AppError("ERR_NO_USER_FOUND", 404);
+  }
+
+  const newToken = createAccessToken(originalUser);
+  const newRefreshToken = createRefreshToken(originalUser);
+  const serializedUser = await SerializeUser(originalUser);
+
+  SendRefreshToken(res, newRefreshToken);
 
   return res.status(200).json({
     token: newToken,

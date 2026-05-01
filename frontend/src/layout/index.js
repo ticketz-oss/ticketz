@@ -13,7 +13,7 @@ import {
   IconButton,
   Menu,
   useTheme,
-  useMediaQuery,
+  useMediaQuery
 } from "@material-ui/core";
 
 import MenuIcon from "@material-ui/icons/Menu";
@@ -63,7 +63,7 @@ function persistDrawerOpenState(value) {
   localStorage.setItem(DRAWER_STORAGE_KEY, String(value));
 }
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     display: "flex",
     height: "var(--vh)",
@@ -73,14 +73,14 @@ const useStyles = makeStyles((theme) => ({
       border:
         theme.mode === "light"
           ? "1px solid rgba(0 124 102)"
-          : "1px solid rgba(255, 255, 255, 0.5)",
+          : "1px solid rgba(255, 255, 255, 0.5)"
     },
     "& .MuiTab-textColorPrimary.Mui-selected": {
-      color: theme.palette.primary,
-    },
+      color: theme.palette.primary
+    }
   },
   avatar: {
-    width: "100%",
+    width: "100%"
   },
   toolbar: {
     paddingRight: 24, // keep right padding when drawer closed
@@ -91,54 +91,54 @@ const useStyles = makeStyles((theme) => ({
     background:
       localStorage.getItem("impersonated") === "true"
         ? theme.palette.secondary.main
-        : theme.palette.primary.main,
+        : theme.palette.primary.main
   },
   toolbarIcon: {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    minHeight: "48px",
+    minHeight: "48px"
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
     transition: theme.transitions.create(["width", "margin"], {
       easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
+      duration: theme.transitions.duration.leavingScreen
     }),
     [theme.breakpoints.up("sm")]: {
       marginLeft: theme.spacing(9),
-      width: `calc(100% - ${theme.spacing(9)}px)`,
-    },
+      width: `calc(100% - ${theme.spacing(9)}px)`
+    }
   },
   appBarShift: {
     marginLeft: drawerWidth,
     width: `calc(100% - ${drawerWidth}px)`,
     transition: theme.transitions.create(["width", "margin"], {
       easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
+      duration: theme.transitions.duration.enteringScreen
     }),
     [theme.breakpoints.down("sm")]: {
-      display: "none",
-    },
+      display: "none"
+    }
   },
   menuButton: {
-    marginRight: 36,
+    marginRight: 36
   },
   menuButtonHidden: {
-    display: "none",
+    display: "none"
   },
   title: {
     flexGrow: 1,
     fontSize: 14,
-    color: "white",
+    color: "white"
   },
   userMenuInfoContainer: {
     padding: theme.spacing(1.5, 2),
-    maxWidth: 320,
+    maxWidth: 320
   },
   userMenuInfoLine: {
     fontSize: 13,
-    lineHeight: 1.4,
+    lineHeight: 1.4
   },
   drawerPaper: {
     position: "relative",
@@ -146,46 +146,46 @@ const useStyles = makeStyles((theme) => ({
     width: drawerWidth,
     transition: theme.transitions.create("width", {
       easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
+      duration: theme.transitions.duration.enteringScreen
     }),
     overflowY: "clip",
-    ...theme.scrollbarStylesSoft,
+    ...theme.scrollbarStylesSoft
   },
   drawerPaperClose: {
     overflowX: "hidden",
     overflowY: "clip",
     transition: theme.transitions.create("width", {
       easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
+      duration: theme.transitions.duration.leavingScreen
     }),
     width: theme.spacing(7),
     [theme.breakpoints.up("sm")]: {
-      width: theme.spacing(9),
-    },
+      width: theme.spacing(9)
+    }
   },
   appBarSpacer: {
-    minHeight: "48px",
+    minHeight: "48px"
   },
   content: {
     flex: 1,
-    overflow: "auto",
+    overflow: "auto"
   },
   container: {
     paddingTop: theme.spacing(4),
-    paddingBottom: theme.spacing(4),
+    paddingBottom: theme.spacing(4)
   },
   paper: {
     padding: theme.spacing(2),
     display: "flex",
     overflow: "auto",
-    flexDirection: "column",
+    flexDirection: "column"
   },
   containerWithScroll: {
     flex: 1,
     padding: theme.spacing(1),
     overflowY: "auto",
     overflowX: "clip",
-    ...theme.scrollbarStyles,
+    ...theme.scrollbarStyles
   },
   NotificationsPopOver: {
     // color: theme.barraSuperior.secondary.main,
@@ -195,18 +195,18 @@ const useStyles = makeStyles((theme) => ({
     maxHeight: "72px",
     logo: theme.logo,
     margin: "auto",
-    content: `url("${theme.calculatedLogo()}")`,
+    content: `url("${theme.calculatedLogo()}")`
   },
   logoIcon: {
     width: "40px",
     height: "40px",
     logo: theme.logo,
     margin: "auto",
-    content: `url("${theme.appLogoFavicon ? theme.appLogoFavicon : "/vector/favicon.svg"}")`,
+    content: `url("${theme.appLogoFavicon ? theme.appLogoFavicon : "/vector/favicon.svg"}")`
   },
   hideLogo: {
-    display: "none",
-  },
+    display: "none"
+  }
 }));
 
 const LoggedInLayout = ({ children, themeToggle }) => {
@@ -240,6 +240,8 @@ const LoggedInLayout = ({ children, themeToggle }) => {
 
   const { getCurrentUserInfo } = useAuth();
   const [currentUser, setCurrentUser] = useState({});
+  const canAccessBackendlogs =
+    currentUser?.super || localStorage.getItem("impersonated") === "true";
 
   const [volume, setVolume] = useState(localStorage.getItem("volume") || 1);
 
@@ -297,7 +299,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   //##############################################################################
 
   useEffect(() => {
-    getCurrentUserInfo().then((user) => {
+    getCurrentUserInfo().then(user => {
       setCurrentUser(user);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -311,11 +313,11 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   }, []);
 
   useEffect(() => {
-    window.mentionClick = (mention) => {
+    window.mentionClick = mention => {
       const contact = {
         id: mention.contactId || mention.id,
         name: mention.name,
-        number: mention.number,
+        number: mention.number
       };
       setNewTicketContact(contact);
     };
@@ -346,7 +348,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
 
     const socket = socketManager.GetSocket(companyId);
 
-    const onCompanyAuthLayout = (data) => {
+    const onCompanyAuthLayout = data => {
       const impersonated = localStorage.getItem("impersonated") === "true";
       if (
         !impersonated &&
@@ -368,7 +370,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
       () => {
         socket.emit("userStatus");
       },
-      1000 * 60 * 5,
+      1000 * 60 * 5
     );
 
     return () => {
@@ -377,7 +379,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
     };
   }, [socketManager]);
 
-  const handleProfileMenu = (event) => {
+  const handleProfileMenu = event => {
     setAnchorEl(event.currentTarget);
     setMenuOpen(true);
   };
@@ -414,7 +416,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   };
 
   const handleDrawerToggle = () => {
-    setDrawerOpen((prevState) => {
+    setDrawerOpen(prevState => {
       const nextState = !prevState;
       if (greaterThenSm) {
         persistDrawerOpenState(nextState);
@@ -434,7 +436,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
     colorMode.toggleColorMode();
   };
 
-  const handleChooseLanguage = (language) => {
+  const handleChooseLanguage = language => {
     localStorage.setItem("language", language);
     window.location.reload(false);
   };
@@ -459,8 +461,8 @@ const LoggedInLayout = ({ children, themeToggle }) => {
         classes={{
           paper: clsx(
             classes.drawerPaper,
-            !drawerOpen && classes.drawerPaperClose,
-          ),
+            !drawerOpen && classes.drawerPaperClose
+          )
         }}
         open={drawerOpen}
       >
@@ -523,7 +525,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
             className={classes.title}
           />
 
-          <OnlyForSuperUser user={currentUser} yes={() => <Backendlogs />} />
+          {canAccessBackendlogs && <Backendlogs />}
 
           <PhoneCall />
 
@@ -552,11 +554,11 @@ const LoggedInLayout = ({ children, themeToggle }) => {
               getContentAnchorEl={null}
               anchorOrigin={{
                 vertical: "bottom",
-                horizontal: "right",
+                horizontal: "right"
               }}
               transformOrigin={{
                 vertical: "top",
-                horizontal: "right",
+                horizontal: "right"
               }}
               open={menuOpen}
               onClose={handleCloseProfileMenu}
@@ -571,7 +573,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
                 {shouldShowCompanyDueDate && (
                   <Typography className={classes.userMenuInfoLine}>
                     {i18n.t(
-                      "mainDrawer.appBar.user.subscriptionValidUntilLabel",
+                      "mainDrawer.appBar.user.subscriptionValidUntilLabel"
                     )}
                     : {companyDueDateText}
                   </Typography>
@@ -590,11 +592,11 @@ const LoggedInLayout = ({ children, themeToggle }) => {
                 label={i18n.t("mainDrawer.appBar.user.language")}
                 parentMenuOpen={menuOpen}
               >
-                {Object.keys(messages).map((m) => (
+                {Object.keys(messages).map(m => (
                   <MenuItem onClick={() => handleChooseLanguage(m)}>
                     <div
                       style={{
-                        fontWeight: currentLanguage === m ? "bold" : "normal",
+                        fontWeight: currentLanguage === m ? "bold" : "normal"
                       }}
                     >
                       {messages[m].translations.mainDrawer.appBar.i18n.language}
@@ -616,7 +618,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
       <NewTicketModal
         modalOpen={!!newTicketContact}
         contact={newTicketContact}
-        onClose={(ticket) => {
+        onClose={ticket => {
           setNewTicketContact(null);
           if (ticket !== undefined && ticket.uuid !== undefined) {
             history.push(`/tickets/${ticket.uuid}`);

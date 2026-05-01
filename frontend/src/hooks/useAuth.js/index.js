@@ -20,7 +20,7 @@ const useAuth = () => {
   const socketManager = useContext(SocketContext);
 
   api.interceptors.request.use(
-    (config) => {
+    config => {
       const token = localStorage.getItem("token");
       if (token) {
         config.headers["Authorization"] = `Bearer ${JSON.parse(token)}`;
@@ -28,16 +28,16 @@ const useAuth = () => {
       }
       return config;
     },
-    (error) => {
+    error => {
       Promise.reject(error);
-    },
+    }
   );
 
   api.interceptors.response.use(
-    (response) => {
+    response => {
       return response;
     },
-    async (error) => {
+    async error => {
       const originalRequest = error.config;
       if (error?.response?.status === 403 && !originalRequest._retry) {
         originalRequest._retry = true;
@@ -56,7 +56,7 @@ const useAuth = () => {
         setIsAuth(false);
       }
       return Promise.reject(error);
-    },
+    }
   );
 
   useEffect(() => {
@@ -83,7 +83,7 @@ const useAuth = () => {
     }
     const socket = socketManager.GetSocket(companyId);
 
-    const onCompanyUserUseAuth = (data) => {
+    const onCompanyUserUseAuth = data => {
       if (data.action === "update" && data.user.id === user.id) {
         setUser(data.user);
       }
@@ -100,15 +100,13 @@ const useAuth = () => {
   const posLogin = (data, impersonated = false) => {
     const {
       user: { company },
-      token,
+      token
     } = data;
 
     const { companyId, userId } = decodeToken(token);
 
     if (has(company, "settings") && isArray(company.settings)) {
-      const setting = company.settings.find(
-        (s) => s.key === "campaignsEnabled",
-      );
+      const setting = company.settings.find(s => s.key === "campaignsEnabled");
       if (setting && setting.value === "true") {
         localStorage.setItem("cshow", null); //regra pra exibir campanhas
       }
@@ -133,11 +131,11 @@ const useAuth = () => {
     setIsAuth(true);
     if (dias < 0) {
       toast.warn(
-        `Sua assinatura venceu há ${Math.round(dias) * -1} ${Math.round(dias) * -1 === 1 ? "dia" : "dias"} `,
+        `Sua assinatura venceu há ${Math.round(dias) * -1} ${Math.round(dias) * -1 === 1 ? "dia" : "dias"} `
       );
     } else if (Math.round(dias) < 5) {
       toast.warn(
-        `Sua assinatura vence em ${Math.round(dias)} ${Math.round(dias) === 1 ? "dia" : "dias"} `,
+        `Sua assinatura vence em ${Math.round(dias)} ${Math.round(dias) === 1 ? "dia" : "dias"} `
       );
     } else {
       toast.success(i18n.t("auth.toasts.success"));
@@ -149,7 +147,7 @@ const useAuth = () => {
     }
   };
 
-  const handleLogin = async (userData) => {
+  const handleLogin = async userData => {
     setLoading(true);
 
     try {
@@ -162,7 +160,7 @@ const useAuth = () => {
     }
   };
 
-  const handleImpersonate = async (companyId) => {
+  const handleImpersonate = async companyId => {
     setLoading(true);
 
     try {
@@ -180,6 +178,31 @@ const useAuth = () => {
     setLoading(true);
 
     try {
+      const impersonatedFlag = localStorage.getItem("impersonated") === "true";
+      const token = localStorage.getItem("token");
+      let impersonatedByToken = false;
+
+      if (token) {
+        try {
+          const decoded = decodeToken(JSON.parse(token));
+          impersonatedByToken = !!decoded?.impersonated;
+        } catch (_) {
+          impersonatedByToken = false;
+        }
+      }
+
+      if (impersonatedFlag || impersonatedByToken) {
+        const socket = socketManager.GetSocket();
+        socket.logout();
+
+        const { data } = await api.post("/auth/impersonate/back");
+        localStorage.removeItem("impersonated");
+        posLogin(data, false);
+        setLoading(false);
+        window.location.reload(false);
+        return;
+      }
+
       const socket = socketManager.GetSocket();
       socket.logout();
 
@@ -190,6 +213,7 @@ const useAuth = () => {
       localStorage.removeItem("companyId");
       localStorage.removeItem("userId");
       localStorage.removeItem("cshow");
+      localStorage.removeItem("impersonated");
       api.defaults.headers.Authorization = undefined;
 
       setLoading(false);
@@ -216,7 +240,7 @@ const useAuth = () => {
     handleLogin,
     handleImpersonate,
     handleLogout,
-    getCurrentUserInfo,
+    getCurrentUserInfo
   };
 };
 
