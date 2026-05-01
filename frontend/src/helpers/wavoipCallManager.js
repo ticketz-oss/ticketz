@@ -1,5 +1,5 @@
-import { CallingSound } from './callingSound';
-import WavoipInstance from "wavoip-api"
+import { CallingSound } from "./callingSound";
+import WavoipInstance from "wavoip-api";
 
 function initializeWavoipCallManager() {
   window.wavoipCallingSound = window.wavoipCallingSound || new CallingSound();
@@ -15,10 +15,10 @@ async function getWavoipInstance(token, disconnect) {
     window.wavoipInstances[token] = {
       instance,
       disconnect,
-      ready: false
-    }
-    
-    instance.socket.on('signaling', (signal) => {
+      ready: false,
+    };
+
+    instance.socket.on("signaling", (signal) => {
       if (signal?.tag === "accept") {
         window.wavoipCallingSound.stop();
       }
@@ -27,21 +27,21 @@ async function getWavoipInstance(token, disconnect) {
       }
     });
 
-    instance.socket.on('disconnect', () => {
+    instance.socket.on("disconnect", () => {
       window.wavoipInstances[token].ready = false;
     });
-    
-    instance.socket.on('connect', () => {
+
+    instance.socket.on("connect", () => {
       window.wavoipInstances[token].ready = true;
     });
 
     return new Promise((resolve) => {
-      instance.socket.once('connect', () => {
+      instance.socket.once("connect", () => {
         resolve(instance);
       });
     });
   }
-  
+
   window.wavoipInstances[token].disconnect = disconnect;
 
   return window.wavoipInstances[token].instance;
@@ -52,16 +52,21 @@ export async function wavoipCall(ticket, disconnect) {
     throw new Error("Wavoip token is missing in the ticket's WhatsApp data.");
   }
 
-  const wavoipInstance = await getWavoipInstance(ticket.whatsapp.wavoip.token, disconnect);
+  const wavoipInstance = await getWavoipInstance(
+    ticket.whatsapp.wavoip.token,
+    disconnect,
+  );
 
-  wavoipInstance.callStart({
-    whatsappid: ticket.contact.number
-  }).then(() => {
-    window.wavoipCallingSound.start();
-  })
+  wavoipInstance
+    .callStart({
+      whatsappid: ticket.contact.number,
+    })
+    .then(() => {
+      window.wavoipCallingSound.start();
+    });
 
   return wavoipInstance;
-};
+}
 
 export function wavoipAvailable() {
   return false;

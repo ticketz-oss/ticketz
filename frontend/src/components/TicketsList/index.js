@@ -206,7 +206,7 @@ const TicketsList = ({
       } else {
         socket.emit("joinNotification");
       }
-    }
+    };
 
     const onTicket = (data) => {
       if (data.action === "updateUnread") {
@@ -230,7 +230,7 @@ const TicketsList = ({
       if (data.action === "delete") {
         dispatch({ type: "DELETE_TICKET", payload: data.ticketId });
       }
-    }
+    };
 
     const onAppMessage = (data) => {
       if (data.action === "create" && shouldUpdateTicket(data.ticket)) {
@@ -239,7 +239,7 @@ const TicketsList = ({
           payload: data.ticket,
         });
       }
-    }
+    };
 
     const onContact = (data) => {
       if (data.action === "update") {
@@ -248,11 +248,11 @@ const TicketsList = ({
           payload: data.contact,
         });
       }
-    }
+    };
 
     socket.on("connect", onConnect);
     socket.on(`company-${companyId}-ticket`, onTicket);
-    socket.on(`company-${companyId}-appMessage`, onAppMessage);  
+    socket.on(`company-${companyId}-appMessage`, onAppMessage);
     socket.on(`company-${companyId}-contact`, onContact);
 
     return () => {

@@ -121,7 +121,7 @@ const messages = {
           last7days: "Last 7 days",
           last14days: "Last 14 days",
           last30days: "Last 30 days",
-          last90days: "Last 90 days"
+          last90days: "Last 90 days",
         },
         date: {
           start: "Start date",
@@ -141,7 +141,8 @@ const messages = {
           deleteTitle: "Delete",
           deleteMessage: "Are you sure? This action cannot be undone.",
           disconnectTitle: "Disconnect",
-          disconnectMessage: "Are you sure? You will need to scan the QR Code again.",
+          disconnectMessage:
+            "Are you sure? You will need to scan the QR Code again.",
           closeTickets: "Close all open tickets from this connection",
         },
         buttons: {
@@ -155,18 +156,21 @@ const messages = {
         toolTips: {
           disconnected: {
             title: "Failed to initiate WhatsApp session",
-            content: "Make sure your phone is connected to the internet and try again, or request a new QR Code.",
+            content:
+              "Make sure your phone is connected to the internet and try again, or request a new QR Code.",
           },
           qrcode: {
             title: "Waiting for QR Code scan",
-            content: "Click the 'QR CODE' button and scan the QR Code with your phone to start the session.",
+            content:
+              "Click the 'QR CODE' button and scan the QR Code with your phone to start the session.",
           },
           connected: {
             title: "Connection established!",
           },
           timeout: {
             title: "Connection to the phone has been lost",
-            content: "Make sure your phone is connected to the internet and WhatsApp is open, or click 'Disconnect' to get a new QR Code.",
+            content:
+              "Make sure your phone is connected to the internet and WhatsApp is open, or click 'Disconnect' to get a new QR Code.",
           },
           refresh: "Refresh",
           disconnect: "Disconnect",
@@ -214,7 +218,8 @@ const messages = {
         confirmationModal: {
           deleteTitle: "Delete ",
           importTitlte: "Import Contacts",
-          deleteMessage: "Are you sure you want to delete this contact? All related interactions will be lost.",
+          deleteMessage:
+            "Are you sure you want to delete this contact? All related interactions will be lost.",
           importMessage: "Do you want to import all contacts from the phone?",
         },
         buttons: {
@@ -295,7 +300,7 @@ const messages = {
           add: "Add User",
           edit: "Edit User",
         },
-        listItems:{
+        listItems: {
           adminProfile: "Administrator",
           userProfile: "User",
         },
@@ -357,7 +362,7 @@ const messages = {
       uploads: {
         titles: {
           titleUploadMsgDragDrop: "DRAG AND DROP FILES IN THE FIELD BELOW",
-          titleFileList: "List of file(s)"
+          titleFileList: "List of file(s)",
         },
       },
       todolist: {
@@ -458,7 +463,7 @@ const messages = {
         appBar: {
           i18n: {
             language: "English",
-            language_short: "EN"
+            language_short: "EN",
           },
           user: {
             profile: "Profile",
@@ -502,8 +507,8 @@ const messages = {
         searchPlaceholder: "Search",
         subMenus: {
           list: "Panel",
-          tags: "Lanes"
-        }
+          tags: "Lanes",
+        },
       },
       tagsKanban: {
         title: "Lanes",
@@ -582,7 +587,8 @@ const messages = {
         confirmationModal: {
           deleteTitle: "Delete",
           deleteMessage: "This action cannot be undone.",
-          importMessage: "Do you want to import the contacts from this spreadsheet? ",
+          importMessage:
+            "Do you want to import the contacts from this spreadsheet? ",
           importTitlte: "Import",
         },
         toasts: {
@@ -755,14 +761,16 @@ const messages = {
         buttonclose: "Close",
         title: "About ticketz",
         abouttitle: "Origin and improvements",
-        aboutdetail: "ticketz is indirectly derived from the Whaticket project with improvements shared by the developers of the EquipeChat system through the VemFazer channel on YouTube, later improved by Claudemir Todo Bom",
+        aboutdetail:
+          "ticketz is indirectly derived from the Whaticket project with improvements shared by the developers of the EquipeChat system through the VemFazer channel on YouTube, later improved by Claudemir Todo Bom",
         aboutauthorsite: "Author's site",
         aboutwhaticketsite: "Whaticket Community site on Github",
         aboutvemfazersite: "Vem Fazer channel site on Github",
         licenseheading: "Open Source License",
-        licensedetail: "ticketz is licensed under the GNU Affero General Public License version 3, which means that any user who has access to this application has the right to obtain access to the source code. More information at the links below:",
+        licensedetail:
+          "ticketz is licensed under the GNU Affero General Public License version 3, which means that any user who has access to this application has the right to obtain access to the source code. More information at the links below:",
         licensefulltext: "Full text of the license",
-        licensesourcecode: "Ticketz source code"
+        licensesourcecode: "Ticketz source code",
       },
       schedules: {
         title: "Schedules",
@@ -817,14 +825,17 @@ const messages = {
         logoHint: "Prefer SVG and aspect of 28:10",
         faviconHint: "Prefer square SVG image or 512x512 PNG",
         loginLinks: "Login links",
-        loginLinksHint: "Add title and URL pairs to display below the login box on desktop and mobile.",
+        loginLinksHint:
+          "Add title and URL pairs to display below the login box on desktop and mobile.",
         linkTitle: "Link title",
         linkUrl: "Link URL",
         removeLink: "Remove link",
         sidePanelImage: "Login side panel image",
-        sidePanelImageHint: "Displayed on the left side of the login form on desktop layouts.",
+        sidePanelImageHint:
+          "Displayed on the left side of the login form on desktop layouts.",
         backgroundContent: "Login background content",
-        backgroundContentHint: "Supports images, SVG files, and MP4 videos for the login screen background.",
+        backgroundContentHint:
+          "Supports images, SVG files, and MP4 videos for the login screen background.",
         noFileSelected: "No file selected yet.",
       },
       settings: {
@@ -936,33 +947,33 @@ const messages = {
         FileDownloadLimit: {
           title: "File Download Limit (MB)",
         },
-        "messageVisibility": {
-          "title": "Message Visibility",
-          "options": {
-            "respectMessageQueue": "Respect queue of message",
-            "respectTicketQueue": "Respect queue of ticket"
-          }
+        messageVisibility: {
+          title: "Message Visibility",
+          options: {
+            respectMessageQueue: "Respect queue of message",
+            respectTicketQueue: "Respect queue of ticket",
+          },
         },
-        "keepQueueAndUser": {
-          "title": "Keep queue and user on closed ticket",
-          "options": {
-            "enabled": "Enabled",
-            "disabled": "Disabled"
-          }
+        keepQueueAndUser: {
+          title: "Keep queue and user on closed ticket",
+          options: {
+            enabled: "Enabled",
+            disabled: "Disabled",
+          },
         },
         GracePeriod: {
           title: "Subscription Grace Period (days)",
         },
-        "ticketAcceptedMessage": {
-          "title": "Ticket Accepted Message",
-          "placeholder": "Enter your ticket accepted message here"
+        ticketAcceptedMessage: {
+          title: "Ticket Accepted Message",
+          placeholder: "Enter your ticket accepted message here",
         },
-        "transferMessage": {
-          "title": "Transfer Message",
-          "placeholder": "Enter your transfer message here"
+        transferMessage: {
+          title: "Transfer Message",
+          placeholder: "Enter your transfer message here",
         },
-        "mustacheVariables": {
-          "title": "Available variables:",
+        mustacheVariables: {
+          title: "Available variables:",
         },
         WelcomeGreeting: {
           greetings: "Hello",
@@ -1010,7 +1021,7 @@ const messages = {
           options: {
             ticket: "Ticket",
             contact: "Contact",
-            both: "Ticket and Contact"
+            both: "Ticket and Contact",
           },
         },
       },
@@ -1029,8 +1040,7 @@ const messages = {
       },
       messagesInput: {
         placeholderOpen: "Type a message",
-        placeholderClosed:
-          "Reopen or accept this ticket to send a message.",
+        placeholderClosed: "Reopen or accept this ticket to send a message.",
         signMessage: "Sign",
         replying: "Replying",
         editing: "Editing",
@@ -1085,7 +1095,7 @@ const messages = {
       },
       messageHistoryModal: {
         close: "Close",
-        title: "Message edit history"
+        title: "Message edit history",
       },
       presence: {
         unavailable: "Unavailable",
@@ -1130,29 +1140,38 @@ const messages = {
       },
       frontendErrors: {
         ERR_CONFIG_ERROR: "Configuration error. Please contact support.",
-        ERR_CLOCK_OUT_OF_SYNC: "Clock out of sync. Please check the date and time settings of your device.",
+        ERR_CLOCK_OUT_OF_SYNC:
+          "Clock out of sync. Please check the date and time settings of your device.",
         ERR_BACKEND_UNREACHABLE: "Backend unreachable. Please try again later.",
         ERR_BACKEND_NOT_READY:
           "Backend is starting up and not ready yet. Retrying automatically.",
-      },        
+      },
       backendErrors: {
         ERR_UNAUTHORIZED: "You are not authorized to perform this action.",
         ERR_FORBIDDEN: "You do not have permission to access this resource.",
         ERR_CHECK_NUMBER: "Check the number and try again.",
         ERR_NO_OTHER_WHATSAPP: "There must be at least one default WhatsApp.",
-        ERR_NO_DEF_WAPP_FOUND: "No default WhatsApp found. Check the connections page.",
-        ERR_WAPP_NOT_INITIALIZED: "This WhatsApp session has not been initialized. Check the connections page.",
-        ERR_WAPP_CHECK_CONTACT: "Could not check WhatsApp contact. Check the connections page.",
+        ERR_NO_DEF_WAPP_FOUND:
+          "No default WhatsApp found. Check the connections page.",
+        ERR_WAPP_NOT_INITIALIZED:
+          "This WhatsApp session has not been initialized. Check the connections page.",
+        ERR_WAPP_CHECK_CONTACT:
+          "Could not check WhatsApp contact. Check the connections page.",
         ERR_WAPP_INVALID_CONTACT: "This is not a valid WhatsApp number.",
-        ERR_WAPP_DOWNLOAD_MEDIA: "Could not download media from WhatsApp. Check the connections page.",
+        ERR_WAPP_DOWNLOAD_MEDIA:
+          "Could not download media from WhatsApp. Check the connections page.",
         ERR_INVALID_CREDENTIALS: "Authentication error. Please try again.",
-        ERR_SENDING_WAPP_MSG: "Error sending WhatsApp message. Check the connections page.",
+        ERR_SENDING_WAPP_MSG:
+          "Error sending WhatsApp message. Check the connections page.",
         ERR_DELETE_WAPP_MSG: "Could not delete WhatsApp message.",
         ERR_EDITING_WAPP_MSG: "Could not edit WhatsApp message.",
-        ERR_OTHER_OPEN_TICKET: "There is already an open ticket for this contact.",
+        ERR_OTHER_OPEN_TICKET:
+          "There is already an open ticket for this contact.",
         ERR_SESSION_EXPIRED: "Session expired. Please log in.",
-        ERR_USER_CREATION_DISABLED: "User creation has been disabled by the administrator.",
-        ERR_NO_PERMISSION: "You do not have permission to access this resource.",
+        ERR_USER_CREATION_DISABLED:
+          "User creation has been disabled by the administrator.",
+        ERR_NO_PERMISSION:
+          "You do not have permission to access this resource.",
         ERR_DUPLICATED_CONTACT: "A contact with this number already exists.",
         ERR_NO_SETTING_FOUND: "No setting found with this ID.",
         ERR_NO_CONTACT_FOUND: "No contact found with this ID.",
@@ -1161,9 +1180,12 @@ const messages = {
         ERR_NO_WAPP_FOUND: "No WhatsApp found with this ID.",
         ERR_CREATING_MESSAGE: "Error creating message in the database.",
         ERR_CREATING_TICKET: "Error creating ticket in the database.",
-        ERR_FETCH_WAPP_MSG: "Error fetching message from WhatsApp, perhaps it is too old.",
-        ERR_QUEUE_COLOR_ALREADY_EXISTS: "This color is already in use, choose another.",
-        ERR_WAPP_GREETING_REQUIRED: "Greeting message is mandatory when there is more than one queue.",
+        ERR_FETCH_WAPP_MSG:
+          "Error fetching message from WhatsApp, perhaps it is too old.",
+        ERR_QUEUE_COLOR_ALREADY_EXISTS:
+          "This color is already in use, choose another.",
+        ERR_WAPP_GREETING_REQUIRED:
+          "Greeting message is mandatory when there is more than one queue.",
         ERR_SUBSCRIPTION_CHECK_FAILED: "Subscription check failed.",
         ERR_WAPP_NOT_FOUND: "Connection unavailable.",
         ERR_SUBSCRIPTION_EXPIRED: "Your subscription has expired.",
@@ -1174,8 +1196,10 @@ const messages = {
       },
       wavoipModal: {
         title: "Enter your Wavoip connection token",
-        instructions: "By accessing the address below you can create an account with 50 free calls for testing",
-        coupon: "When hiring the service use the coupon TICKETZ to get a discount!",
+        instructions:
+          "By accessing the address below you can create an account with 50 free calls for testing",
+        coupon:
+          "When hiring the service use the coupon TICKETZ to get a discount!",
       },
       openHours: {
         title: "Business Hours",
@@ -1190,7 +1214,8 @@ const messages = {
         },
         weekly: {
           title: "Weekly Business Hours",
-          description: "Configure regular business hours for each day of the week.",
+          description:
+            "Configure regular business hours for each day of the week.",
           rule: "Rule",
           days: "Days of the Week",
           hours: "Hours",
@@ -1203,7 +1228,8 @@ const messages = {
         },
         overrides: {
           title: "Exceptions and Holidays",
-          description: "Configure specific dates with special hours or closures (holidays, events, etc.).",
+          description:
+            "Configure specific dates with special hours or closures (holidays, events, etc.).",
           exception: "Exception",
           date: "Date",
           label: "Description",
@@ -1232,7 +1258,8 @@ const messages = {
       ticketz: {
         registration: {
           header: "Register in the Ticketz user base",
-          description: "Fill in the fields below to register in the Ticketz user base and receive news about the project.",
+          description:
+            "Fill in the fields below to register in the Ticketz user base and receive news about the project.",
           name: "Name",
           country: "Country",
           phoneNumber: "Whatsapp Number",
@@ -1244,7 +1271,7 @@ const messages = {
           recurringbrl: "Recurring donations in BRL",
           paypaltitle: "Credit Card",
           international: "Donations in USD",
-        }
+        },
       },
     },
   },

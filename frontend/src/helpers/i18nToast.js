@@ -1,5 +1,5 @@
-import { toast as realToast } from 'react-toastify';
-import { i18n } from '../translate/i18n';
+import { toast as realToast } from "react-toastify";
+import { i18n } from "../translate/i18n";
 
 export const i18nToast = {
   error: (message, options) => {
@@ -13,5 +13,5 @@ export const i18nToast = {
   },
   warn: (message, options) => {
     return realToast.warn(i18n.t(message), options);
-  }
-}
+  },
+};

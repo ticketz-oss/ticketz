@@ -1,12 +1,12 @@
-import React from 'react';
-import { at } from 'lodash';
-import { useField } from 'formik';
+import React from "react";
+import { at } from "lodash";
+import { useField } from "formik";
 import {
   Checkbox,
   FormControl,
   FormControlLabel,
-  FormHelperText
-} from '@material-ui/core';
+  FormHelperText,
+} from "@material-ui/core";
 
 export default function CheckboxField(props) {
   const { label, ...rest } = props;
@@ -14,7 +14,7 @@ export default function CheckboxField(props) {
   const { setValue } = helper;
 
   function _renderHelperText() {
-    const [touched, error] = at(meta, 'touched', 'error');
+    const [touched, error] = at(meta, "touched", "error");
     if (touched && error) {
       return <FormHelperText>{error}</FormHelperText>;
     }

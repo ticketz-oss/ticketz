@@ -138,7 +138,7 @@ const reducer = (state, action) => {
     });
     return [...state];
   }
-  
+
   if (action.type === "UPDATE_TICKET_PRESENCE") {
     const data = action.payload;
     const ticketIndex = state.findIndex((t) => t.id === data.ticketId);
@@ -177,7 +177,7 @@ const TicketsListCustom = (props) => {
     updateCount,
     style,
     setTabOpen,
-    showTabGroups
+    showTabGroups,
   } = props;
   const classes = useStyles();
   const [pageNumber, setPageNumber] = useState(1);
@@ -192,7 +192,16 @@ const TicketsListCustom = (props) => {
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
-  }, [status, searchParam, dispatch, showAll, contactId, tags, users, selectedQueueIds]);
+  }, [
+    status,
+    searchParam,
+    dispatch,
+    showAll,
+    contactId,
+    tags,
+    users,
+    selectedQueueIds,
+  ]);
 
   const { tickets, hasMore, loading } = useTickets({
     pageNumber,
@@ -210,7 +219,7 @@ const TicketsListCustom = (props) => {
   useEffect(() => {
     const queueIds = queues.map((q) => q.id);
     const filteredTickets = tickets.filter(
-      (t) => queueIds.indexOf(t.queueId) > -1
+      (t) => queueIds.indexOf(t.queueId) > -1,
     );
 
     if (profile === "user") {
@@ -225,16 +234,19 @@ const TicketsListCustom = (props) => {
     const socket = socketManager.GetSocket(companyId);
 
     const shouldUpdateTicket = (ticket) => {
-      return (!isSearch || !searchParam) &&
+      return (
+        (!isSearch || !searchParam) &&
         (!contactId || ticket.contactId === contactId) &&
-        (!tags?.length || tags.some(
-          tag =>
-            ticket.tags.some(t => t.id === tag) ||
-            ticket.contact.tags.some(t => t.id === tag)
-        )) &&
-        (!users?.length || users.some(u => u === ticket.userId)) &&
+        (!tags?.length ||
+          tags.some(
+            (tag) =>
+              ticket.tags.some((t) => t.id === tag) ||
+              ticket.contact.tags.some((t) => t.id === tag),
+          )) &&
+        (!users?.length || users.some((u) => u === ticket.userId)) &&
         (!ticket.userId || ticket.userId === user?.id || showAll) &&
-        (!ticket.queueId || selectedQueueIds.indexOf(ticket.queueId) > -1);
+        (!ticket.queueId || selectedQueueIds.indexOf(ticket.queueId) > -1)
+      );
     };
 
     const notBelongsToUserQueues = (ticket) =>
@@ -246,8 +258,8 @@ const TicketsListCustom = (props) => {
       } else {
         socket.emit("joinNotification");
       }
-    }
-    
+    };
+
     const onCompanyTicket = (data) => {
       if (data.action === "updateUnread") {
         dispatch({
@@ -256,14 +268,23 @@ const TicketsListCustom = (props) => {
         });
       }
 
-      if (data.action === "update" && data.ticket.status === status && shouldUpdateTicket(data.ticket)) {
+      if (
+        data.action === "update" &&
+        data.ticket.status === status &&
+        shouldUpdateTicket(data.ticket)
+      ) {
         dispatch({
           type: "UPDATE_TICKET",
           payload: data.ticket,
         });
       }
-      
-      if (groups && data.action === "update" && data.ticket.isGroup && shouldUpdateTicket(data.ticket)) {
+
+      if (
+        groups &&
+        data.action === "update" &&
+        data.ticket.isGroup &&
+        shouldUpdateTicket(data.ticket)
+      ) {
         dispatch({
           type: "UPDATE_TICKET",
           payload: data.ticket,
@@ -276,17 +297,15 @@ const TicketsListCustom = (props) => {
 
       if (data.action === "delete") {
         dispatch({ type: "DELETE_TICKET", payload: data?.ticketId });
-        
       }
 
       if (data.action === "removeFromList") {
         dispatch({ type: "DELETE_TICKET", payload: data.ticketId });
       }
+    };
 
-    }
-    
     const onCompanyAppMessage = (data) => {
-	  console.debug("appMessage event received", data);
+      console.debug("appMessage event received", data);
       if (showTabGroups && !!data.ticket?.isGroup !== !!groups) {
         return;
       }
@@ -311,23 +330,23 @@ const TicketsListCustom = (props) => {
           payload: data.ticket,
         });
       }
-    }
+    };
 
-	const onCompanyContact = (data) => {
+    const onCompanyContact = (data) => {
       if (data.action === "update") {
         dispatch({
           type: "UPDATE_TICKET_CONTACT",
           payload: data.contact,
         });
       }
-    }
-    
-	socketManager.onConnect(onConnectTicketList);
-	
+    };
+
+    socketManager.onConnect(onConnectTicketList);
+
     socket.on(`company-${companyId}-ticket`, onCompanyTicket);
     socket.on(`company-${companyId}-appMessage`, onCompanyAppMessage);
-    socket.on(`company-${companyId}-contact`, onCompanyContact );
-    
+    socket.on(`company-${companyId}-contact`, onCompanyContact);
+
     socket.on(`company-${companyId}-presence`, (data) => {
       dispatch({
         type: "UPDATE_TICKET_PRESENCE",
@@ -343,8 +362,22 @@ const TicketsListCustom = (props) => {
       }
       socket.disconnect();
     };
-    
-  }, [status, isSearch, searchParam, showAll, groups, showTabGroups, user, selectedQueueIds, contactId, tags, users, profile, queues, socketManager]);
+  }, [
+    status,
+    isSearch,
+    searchParam,
+    showAll,
+    groups,
+    showTabGroups,
+    user,
+    selectedQueueIds,
+    contactId,
+    tags,
+    users,
+    profile,
+    queues,
+    socketManager,
+  ]);
 
   useEffect(() => {
     if (typeof updateCount === "function") {
@@ -352,7 +385,6 @@ const TicketsListCustom = (props) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticketsList]);
-
 
   const loadMore = () => {
     setPageNumber((prevState) => prevState + 1);

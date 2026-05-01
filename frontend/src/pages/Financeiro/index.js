@@ -77,19 +77,17 @@ const Invoices = () => {
   const [loading, setLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
   const [hasMore, setHasMore] = useState(false);
-  const [searchParam, ] = useState("");
+  const [searchParam] = useState("");
   const [invoices, dispatch] = useReducer(reducer, []);
   const [storagePlans, setStoragePlans] = React.useState([]);
   const [selectedContactId, setSelectedContactId] = useState(null);
   const [contactModalOpen, setContactModalOpen] = useState(false);
-
 
   const handleOpenContactModal = (invoices) => {
     setStoragePlans(invoices);
     setSelectedContactId(null);
     setContactModalOpen(true);
   };
-
 
   const handleCloseContactModal = () => {
     setSelectedContactId(null);
@@ -120,7 +118,6 @@ const Invoices = () => {
     return () => clearTimeout(delayDebounceFn);
   }, [searchParam, pageNumber]);
 
-
   const loadMore = () => {
     setPageNumber((prevState) => prevState + 1);
   };
@@ -135,8 +132,10 @@ const Invoices = () => {
   const rowStyle = (record) => {
     const hoje = moment(moment()).format("DD/MM/yyyy");
     const vencimento = moment(record.dueDate).format("DD/MM/yyyy");
-    var diff = moment(vencimento, "DD/MM/yyyy").diff(moment(hoje, "DD/MM/yyyy"));
-    var dias = moment.duration(diff).asDays();    
+    var diff = moment(vencimento, "DD/MM/yyyy").diff(
+      moment(hoje, "DD/MM/yyyy"),
+    );
+    var dias = moment.duration(diff).asDays();
     if (dias < 0 && record.status !== "paid") {
       return { backgroundColor: "#ffbcbc9c" };
     }
@@ -145,8 +144,10 @@ const Invoices = () => {
   const rowStatus = (record) => {
     const hoje = moment(moment()).format("DD/MM/yyyy");
     const vencimento = moment(record.dueDate).format("DD/MM/yyyy");
-    var diff = moment(vencimento, "DD/MM/yyyy").diff(moment(hoje, "DD/MM/yyyy"));
-    var dias = moment.duration(diff).asDays();    
+    var diff = moment(vencimento, "DD/MM/yyyy").diff(
+      moment(hoje, "DD/MM/yyyy"),
+    );
+    var dias = moment.duration(diff).asDays();
     const status = record.status;
     if (status === "paid") {
       return "Pago";
@@ -154,10 +155,9 @@ const Invoices = () => {
     if (dias < 0) {
       return "Vencido";
     } else {
-      return "Em Aberto"
+      return "Em Aberto";
     }
-
-  }
+  };
 
   return (
     <MainContainer>
@@ -167,7 +167,6 @@ const Invoices = () => {
         aria-labelledby="form-dialog-title"
         Invoice={storagePlans}
         contactId={selectedContactId}
-
       ></SubscriptionModal>
       <MainHeader>
         <Title>Faturas</Title>
@@ -194,13 +193,19 @@ const Invoices = () => {
                 <TableRow style={rowStyle(invoices)} key={invoices.id}>
                   <TableCell align="center">{invoices.id}</TableCell>
                   <TableCell align="center">{invoices.detail}</TableCell>
-                  <TableCell style={{ fontWeight: 'bold' }} align="center">{safeValueFormat(invoices.value, invoices.currency)}</TableCell>
-                  <TableCell align="center">
-                    {moment(invoices.dueDate).locale(navigator.language).format("L")}
+                  <TableCell style={{ fontWeight: "bold" }} align="center">
+                    {safeValueFormat(invoices.value, invoices.currency)}
                   </TableCell>
-                  <TableCell style={{ fontWeight: 'bold' }} align="center">{rowStatus(invoices)}</TableCell>
                   <TableCell align="center">
-                    {rowStatus(invoices) !== "Pago" ?
+                    {moment(invoices.dueDate)
+                      .locale(navigator.language)
+                      .format("L")}
+                  </TableCell>
+                  <TableCell style={{ fontWeight: "bold" }} align="center">
+                    {rowStatus(invoices)}
+                  </TableCell>
+                  <TableCell align="center">
+                    {rowStatus(invoices) !== "Pago" ? (
                       <Button
                         size="small"
                         variant="outlined"
@@ -208,16 +213,17 @@ const Invoices = () => {
                         onClick={() => handleOpenContactModal(invoices)}
                       >
                         PAGAR
-                      </Button> :
+                      </Button>
+                    ) : (
                       <Button
                         size="small"
-                        variant="outlined" 
+                        variant="outlined"
                         /* color="secondary"
                         disabled */
                       >
-                        PAGO 
-                      </Button>}
-
+                        PAGO
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

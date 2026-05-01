@@ -63,7 +63,7 @@ const FindOrCreateTicketServiceMeta = async (
     const msgIsGroupBlock = await Setting.findOne({
       where: { key: "timeCreateNewTicket" }
     });
-  
+
     const value = msgIsGroupBlock ? parseInt(msgIsGroupBlock.value, 10) : 7200;
   }
 
@@ -98,7 +98,7 @@ const FindOrCreateTicketServiceMeta = async (
 
   if (!ticket) {
     ticket = await Ticket.create({
-      contactId:contact.id,
+      contactId: contact.id,
       status: "pending",
       isGroup: false,
       unreadMessages,
@@ -114,7 +114,6 @@ const FindOrCreateTicketServiceMeta = async (
       userId: ticket.userId,
       channel
     });
-    
   } else {
     await ticket.update({ whatsappId });
   }

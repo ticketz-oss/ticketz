@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import qs from 'query-string'
+import qs from "query-string";
 
 import * as Yup from "yup";
 import { useHistory } from "react-router-dom";
@@ -12,12 +12,7 @@ import CssBaseline from "@material-ui/core/CssBaseline";
 import TextField from "@material-ui/core/TextField";
 import Link from "@material-ui/core/Link";
 import Grid from "@material-ui/core/Grid";
-import {
-	InputLabel,
-      FormControl,
-	MenuItem,
-	Select,
-} from "@material-ui/core";
+import { InputLabel, FormControl, MenuItem, Select } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useTheme } from "@material-ui/core";
 import Container from "@material-ui/core/Container";
@@ -30,33 +25,32 @@ import ReCAPTCHA from "react-google-recaptcha";
 import config from "../../services/config";
 import useSettings from "../../hooks/useSettings";
 import { safeValueFormat } from "../../helpers/safeValueFormat";
-import {PhoneNumberInput} from "../../components/PhoneNumberInput";
+import { PhoneNumberInput } from "../../components/PhoneNumberInput";
 
-const useStyles = makeStyles(theme => ({
-	paper: {
-		marginTop: theme.spacing(8),
-		display: "flex",
-		flexDirection: "column",
-		alignItems: "center",
-	},
-	avatar: {
-		margin: theme.spacing(1),
-		backgroundColor: theme.palette.secondary.main,
-	},
-	form: {
-		width: "100%",
-		marginTop: theme.spacing(3),
-	},
-	submit: {
-		margin: theme.spacing(3, 0, 2),
-	},
-	
+const useStyles = makeStyles((theme) => ({
+  paper: {
+    marginTop: theme.spacing(8),
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  avatar: {
+    margin: theme.spacing(1),
+    backgroundColor: theme.palette.secondary.main,
+  },
+  form: {
+    width: "100%",
+    marginTop: theme.spacing(3),
+  },
+  submit: {
+    margin: theme.spacing(3, 0, 2),
+  },
+
   logoImg: {
     width: "100%",
     margin: "0 auto",
-    content: `url("${theme.calculatedLogo()}")`
-  }
-	
+    content: `url("${theme.calculatedLogo()}")`,
+  },
 }));
 
 const UserSchema = Yup.object().shape({
@@ -75,200 +69,212 @@ const UserSchema = Yup.object().shape({
 
 const SignUp = () => {
   const theme = useTheme();
-	const classes = useStyles();
-	const history = useHistory();
+  const classes = useStyles();
+  const history = useHistory();
   const { getPublicSetting } = useSettings();
   const [allowSignup, setAllowSignup] = useState(false);
 
-	let companyId = null
+  let companyId = null;
 
-	const params = qs.parse(window.location.search)
-	if (params.companyId !== undefined) {
-		companyId = params.companyId
-	}
+  const params = qs.parse(window.location.search);
+  if (params.companyId !== undefined) {
+    companyId = params.companyId;
+  }
 
-	const initialState = { name: "", email: "", phone: "", password: "", planId: "", };
+  const initialState = {
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+    planId: "",
+  };
 
-	const [user] = useState(initialState);
+  const [user] = useState(initialState);
 
-	const handleSignUp = async (values) => {
-		if (config.RECAPTCHA_SITE_KEY) {
-			Object.assign(values, { captchaToken: await captchaRef.current.executeAsync() });
-		}
-		
-		Object.assign(values, { recurrence: "MENSAL" });
-		Object.assign(values, { status: "t" });
-		Object.assign(values, { campaignsEnabled: true });
-		try {
-			await openApi.post("/companies/cadastro", values);
-			toast.success(i18n.t("signup.toasts.success"));
-			history.push("/login");
-		} catch (err) {
-			console.log(err);
-			toastError(err);
-		}
-	};
-
-	const [plans, setPlans] = useState([]);
-	const { listPublic: listPublicPlans } = usePlans();
-
-	useEffect(() => {
-		async function fetchData() {
-			const list = await listPublicPlans();
-			setPlans(list);
-		}
-		fetchData();
-	}, []);
-
-	const captchaRef = useRef(null)
-
-  getPublicSetting("allowSignup").then(
-    (data) => {
-      setAllowSignup(data === "enabled");
+  const handleSignUp = async (values) => {
+    if (config.RECAPTCHA_SITE_KEY) {
+      Object.assign(values, {
+        captchaToken: await captchaRef.current.executeAsync(),
+      });
     }
-  )
 
-	return (
-		<Container component="main" maxWidth="xs">
-			<CssBaseline />
-			<div className={classes.paper}>
+    Object.assign(values, { recurrence: "MENSAL" });
+    Object.assign(values, { status: "t" });
+    Object.assign(values, { campaignsEnabled: true });
+    try {
+      await openApi.post("/companies/cadastro", values);
+      toast.success(i18n.t("signup.toasts.success"));
+      history.push("/login");
+    } catch (err) {
+      console.log(err);
+      toastError(err);
+    }
+  };
+
+  const [plans, setPlans] = useState([]);
+  const { listPublic: listPublicPlans } = usePlans();
+
+  useEffect(() => {
+    async function fetchData() {
+      const list = await listPublicPlans();
+      setPlans(list);
+    }
+    fetchData();
+  }, []);
+
+  const captchaRef = useRef(null);
+
+  getPublicSetting("allowSignup").then((data) => {
+    setAllowSignup(data === "enabled");
+  });
+
+  return (
+    <Container component="main" maxWidth="xs">
+      <CssBaseline />
+      <div className={classes.paper}>
         <div>
           <img className={classes.logoImg} />
         </div>
-				<Formik
-					initialValues={user}
-					enableReinitialize={true}
-					validationSchema={UserSchema}
-					onSubmit={(values, actions) => {
-						setTimeout(() => {
-							handleSignUp(values);
-							actions.setSubmitting(false);
-						}, 400);
-					}}
-				>
-					{({ touched, errors, isSubmitting }) => (
-						<Form className={classes.form}>
-						  { allowSignup && 
-						  <>
-							<Grid container spacing={2}>
-								<Grid item xs={12}>
-									<Field
-										as={TextField}
-										autoComplete="name"
-										name="name"
-										error={touched.name && Boolean(errors.name)}
-										helperText={touched.name && errors.name}
-										variant="outlined"
-                    margin="dense"
-										fullWidth
-										id="name"
-										label={i18n.t("common.company")}
-									/>
-								</Grid>
+        <Formik
+          initialValues={user}
+          enableReinitialize={true}
+          validationSchema={UserSchema}
+          onSubmit={(values, actions) => {
+            setTimeout(() => {
+              handleSignUp(values);
+              actions.setSubmitting(false);
+            }, 400);
+          }}
+        >
+          {({ touched, errors, isSubmitting }) => (
+            <Form className={classes.form}>
+              {allowSignup && (
+                <>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                      <Field
+                        as={TextField}
+                        autoComplete="name"
+                        name="name"
+                        error={touched.name && Boolean(errors.name)}
+                        helperText={touched.name && errors.name}
+                        variant="outlined"
+                        margin="dense"
+                        fullWidth
+                        id="name"
+                        label={i18n.t("common.company")}
+                      />
+                    </Grid>
 
-								<Grid item xs={12}>
-									<Field
-										as={TextField}
-										variant="outlined"
-                    margin="dense"
-										fullWidth
-										id="email"
-										label={i18n.t("common.email")}
-										name="email"
-										error={touched.email && Boolean(errors.email)}
-										helperText={touched.email && errors.email}
-										autoComplete="email"
-										required
-									/>
-								</Grid>
+                    <Grid item xs={12}>
+                      <Field
+                        as={TextField}
+                        variant="outlined"
+                        margin="dense"
+                        fullWidth
+                        id="email"
+                        label={i18n.t("common.email")}
+                        name="email"
+                        error={touched.email && Boolean(errors.email)}
+                        helperText={touched.email && errors.email}
+                        autoComplete="email"
+                        required
+                      />
+                    </Grid>
 
-                <Grid item xs={12}>
-                  <Field
-                    as={PhoneNumberInput}
-                    variant="outlined"
+                    <Grid item xs={12}>
+                      <Field
+                        as={PhoneNumberInput}
+                        variant="outlined"
+                        fullWidth
+                        id="phone"
+                        name="phone"
+                        error={touched.phone && Boolean(errors.phone)}
+                        helperText={touched.phone && errors.phone}
+                        autoComplete="phone"
+                        required
+                      />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <Field
+                        as={TextField}
+                        variant="outlined"
+                        margin="dense"
+                        fullWidth
+                        name="password"
+                        error={touched.password && Boolean(errors.password)}
+                        helperText={touched.password && errors.password}
+                        label={i18n.t("signup.form.password")}
+                        type="password"
+                        id="password"
+                        autoComplete="current-password"
+                        required
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <FormControl variant="outlined" fullWidth margin="dense">
+                        <InputLabel htmlFor="plan-selection">
+                          {i18n.t("companies.form.plan")}
+                        </InputLabel>
+                        <Field
+                          as={Select}
+                          fullWidth
+                          id="plan-selection"
+                          label={i18n.t("companies.form.plan")}
+                          name="planId"
+                          required
+                        >
+                          {plans.map((plan, key) => (
+                            <MenuItem key={key} value={plan.id}>
+                              {plan.name} - {i18n.t("common.users")}:{" "}
+                              {plan.users} - {i18n.t("common.connections")}:{" "}
+                              {plan.connections} - {i18n.t("common.queues")}:{" "}
+                              {plan.queues} -{" "}
+                              {safeValueFormat(plan.value, plan.currency)}
+                            </MenuItem>
+                          ))}
+                        </Field>
+                      </FormControl>
+                    </Grid>
+                  </Grid>
+                  <Button
+                    type="submit"
                     fullWidth
-                    id="phone"
-                    name="phone"
-                    error={touched.phone && Boolean(errors.phone)}
-                    helperText={touched.phone && errors.phone}
-                    autoComplete="phone"
-                    required
-                  />
+                    variant="contained"
+                    color="primary"
+                    className={classes.submit}
+                  >
+                    {i18n.t("signup.buttons.submit")}
+                  </Button>
+                </>
+              )}
+              {allowSignup || <h2>{i18n.t("common.disabled")}</h2>}
+              <Grid container justify="flex-end">
+                <Grid item>
+                  <Link
+                    href="#"
+                    variant="body2"
+                    component={RouterLink}
+                    to="/login"
+                  >
+                    {i18n.t("signup.buttons.login")}
+                  </Link>
                 </Grid>
-
-								<Grid item xs={12}>
-									<Field
-										as={TextField}
-										variant="outlined"
-                    margin="dense"
-										fullWidth
-										name="password"
-										error={touched.password && Boolean(errors.password)}
-										helperText={touched.password && errors.password}
-										label={i18n.t("signup.form.password")}
-										type="password"
-										id="password"
-										autoComplete="current-password"
-										required
-									/>
-								</Grid>
-								<Grid item xs={12}>
-                  <FormControl variant="outlined" fullWidth margin="dense">
-                    <InputLabel htmlFor="plan-selection">{i18n.t("companies.form.plan")}</InputLabel>
-                    <Field
-                      as={Select}
-                      fullWidth
-                      id="plan-selection"
-                      label={i18n.t("companies.form.plan")}
-                      name="planId"
-                      required
-                    >
-                      {plans.map((plan, key) => (
-                        <MenuItem key={key} value={plan.id}>
-                          {plan.name} - {i18n.t("common.users")}: {plan.users} - {i18n.t("common.connections")}: {plan.connections} - {i18n.t("common.queues")}: {plan.queues} - {safeValueFormat(plan.value, plan.currency)}
-                        </MenuItem>
-                      ))}
-                    </Field>
-                  </FormControl>
-								</Grid>
-							</Grid>
-							<Button
-								type="submit"
-								fullWidth
-								variant="contained"
-								color="primary"
-								className={classes.submit}
-							>
-								{i18n.t("signup.buttons.submit")}
-							</Button>
-							</>
-							}
-							{ allowSignup || <h2>{i18n.t("common.disabled")}</h2> }
-							<Grid container justify="flex-end">
-								<Grid item>
-									<Link
-										href="#"
-										variant="body2"
-										component={RouterLink}
-										to="/login"
-									>
-										{i18n.t("signup.buttons.login")}
-									</Link>
-								</Grid>
-							</Grid>
-						</Form>
-					)}
-				</Formik>
-			</div>
-			{ config.RECAPTCHA_SITE_KEY && allowSignup &&
-				<ReCAPTCHA
-				  size="invisible"
-				  sitekey={ config.RECAPTCHA_SITE_KEY }
-				  ref={captchaRef}
-				/>
-			}
-		</Container>
-	);
+              </Grid>
+            </Form>
+          )}
+        </Formik>
+      </div>
+      {config.RECAPTCHA_SITE_KEY && allowSignup && (
+        <ReCAPTCHA
+          size="invisible"
+          sitekey={config.RECAPTCHA_SITE_KEY}
+          ref={captchaRef}
+        />
+      )}
+    </Container>
+  );
 };
 
 export default SignUp;

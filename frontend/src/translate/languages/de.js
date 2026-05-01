@@ -81,7 +81,8 @@ const messages = {
         },
         confirmationModal: {
           deleteTitle: "Löschen",
-          deleteMessage: "Sind Sie sicher? Diese Aktion kann nicht rückgängig gemacht werden.",
+          deleteMessage:
+            "Sind Sie sicher? Diese Aktion kann nicht rückgängig gemacht werden.",
           disconnectTitle: "Trennen",
           disconnectMessage:
             "Sind Sie sicher? Sie müssen den QR-Code erneut scannen.",
@@ -519,7 +520,8 @@ const messages = {
         confirmationModal: {
           deleteTitle: "Löschen",
           deleteMessage: "Diese Aktion kann nicht rückgängig gemacht werden.",
-          importMessage: "Möchten Sie die Kontakte aus dieser Tabelle importieren?",
+          importMessage:
+            "Möchten Sie die Kontakte aus dieser Tabelle importieren?",
           importTitlte: "Importieren",
         },
         toasts: {
@@ -687,19 +689,22 @@ const messages = {
         buttonclose: "Schließen",
         title: "Über ticketz",
         abouttitle: "Ursprung und Verbesserungen",
-        aboutdetail: "Ticketz ist indirekt vom Whaticket-Projekt abgeleitet, mit Verbesserungen, die von den Entwicklern des EquipeChat-Systems über den YouTube-Kanal VemFazer geteilt wurden, und später von Claudemir Todo Bom verbessert wurden",
+        aboutdetail:
+          "Ticketz ist indirekt vom Whaticket-Projekt abgeleitet, mit Verbesserungen, die von den Entwicklern des EquipeChat-Systems über den YouTube-Kanal VemFazer geteilt wurden, und später von Claudemir Todo Bom verbessert wurden",
         aboutauthorsite: "Website des Autors",
         aboutwhaticketsite: "Website der Whaticket-Community auf Github",
         aboutvemfazersite: "Website des Vem Fazer-Kanals auf Github",
         licenseheading: "Open-Source-Lizenz",
-        licensedetail: "Ticketz ist unter der GNU Affero General Public License Version 3 lizenziert, was bedeutet, dass jeder Benutzer, der Zugriff auf diese Anwendung hat, das Recht hat, auf den Quellcode zuzugreifen. Weitere Informationen finden Sie in den folgenden Links:",
+        licensedetail:
+          "Ticketz ist unter der GNU Affero General Public License Version 3 lizenziert, was bedeutet, dass jeder Benutzer, der Zugriff auf diese Anwendung hat, das Recht hat, auf den Quellcode zuzugreifen. Weitere Informationen finden Sie in den folgenden Links:",
         licensefulltext: "Vollständiger Lizenztext",
         licensesourcecode: "Quellcode von ticketz",
       },
       schedules: {
         title: "Planungen",
         confirmationModal: {
-          deleteTitle: "Sind Sie sicher, dass Sie diese Planung löschen möchten?",
+          deleteTitle:
+            "Sind Sie sicher, dass Sie diese Planung löschen möchten?",
           deleteMessage: "Diese Aktion kann nicht rückgängig gemacht werden.",
         },
         table: {
@@ -746,16 +751,20 @@ const messages = {
         favicon: "App-Favicon",
         appname: "App-Name",
         logoHint: "Bevorzugen Sie SVG und ein Seitenverhältnis von 28:10",
-        faviconHint: "Bevorzugen Sie ein quadratisches SVG-Bild oder 512x512 PNG",
+        faviconHint:
+          "Bevorzugen Sie ein quadratisches SVG-Bild oder 512x512 PNG",
         loginLinks: "Login-Links",
-        loginLinksHint: "Fügen Sie Titel- und URL-Paare hinzu, die unter dem Login-Bereich auf Desktop und Mobilgeräten angezeigt werden.",
+        loginLinksHint:
+          "Fügen Sie Titel- und URL-Paare hinzu, die unter dem Login-Bereich auf Desktop und Mobilgeräten angezeigt werden.",
         linkTitle: "Linktitel",
         linkUrl: "Link-URL",
         removeLink: "Link entfernen",
         sidePanelImage: "Seitliches Login-Bild",
-        sidePanelImageHint: "Wird auf Desktop-Layouts links neben dem Login-Formular angezeigt.",
+        sidePanelImageHint:
+          "Wird auf Desktop-Layouts links neben dem Login-Formular angezeigt.",
         backgroundContent: "Login-Hintergrundinhalt",
-        backgroundContentHint: "Unterstützt Bilder, SVG-Dateien und MP4-Videos für den Hintergrund des Login-Bildschirms.",
+        backgroundContentHint:
+          "Unterstützt Bilder, SVG-Dateien und MP4-Videos für den Hintergrund des Login-Bildschirms.",
         noFileSelected: "Noch keine Datei ausgewählt.",
       },
       settings: {
@@ -868,7 +877,8 @@ const messages = {
           },
         },
         keepQueueAndUser: {
-          title: "Warteschlange und Benutzer im geschlossenen Ticket beibehalten",
+          title:
+            "Warteschlange und Benutzer im geschlossenen Ticket beibehalten",
           options: {
             enabled: "Aktiviert",
             disabled: "Deaktiviert",
@@ -937,7 +947,8 @@ const messages = {
         appointmentsModal: {
           title: "Beobachtungen zum Ticket",
           textarea: "Beobachtung",
-          placeholder: "Geben Sie hier die Informationen ein, die Sie registrieren möchten",
+          placeholder:
+            "Geben Sie hier die Informationen ein, die Sie registrieren möchten",
         },
         confirmationModal: {
           title: "Ticket des Kontakts löschen",
@@ -995,14 +1006,17 @@ const messages = {
             dias7: "7 Tage",
             dias90: "90 Tage",
           },
-          readreceipts: "Um den Datenschutz der Lesebestätigungen zu aktualisieren",
+          readreceipts:
+            "Um den Datenschutz der Lesebestätigungen zu aktualisieren",
           profile: "Um den Datenschutz des Profilbilds zu aktualisieren",
           status: "Um den Datenschutz der Statusmeldungen zu aktualisieren",
           online: "Um den Online-Datenschutz zu aktualisieren",
           last: "Um den Datenschutz des Zuletzt gesehen zu aktualisieren",
-          groupadd: "Um den Datenschutz der Gruppenhinzufügung zu aktualisieren",
+          groupadd:
+            "Um den Datenschutz der Gruppenhinzufügung zu aktualisieren",
           calladd: "Um den Datenschutz der Anrufhinzufügung zu aktualisieren",
-          disappearing: "Um den Standardmodus für verschwindende Nachrichten zu aktualisieren",
+          disappearing:
+            "Um den Standardmodus für verschwindende Nachrichten zu aktualisieren",
         },
       },
       frontendErrors: {
@@ -1016,7 +1030,8 @@ const messages = {
           "Das Backend startet noch und ist noch nicht bereit. Automatischer neuer Versuch.",
       },
       backendErrors: {
-        ERR_NO_OTHER_WHATSAPP: "Es muss mindestens ein Standard-WhatsApp geben.",
+        ERR_NO_OTHER_WHATSAPP:
+          "Es muss mindestens ein Standard-WhatsApp geben.",
         ERR_NO_DEF_WAPP_FOUND:
           "Kein Standard-WhatsApp gefunden. Überprüfen Sie die Verbindungsseite.",
         ERR_WAPP_NOT_INITIALIZED:
@@ -1031,20 +1046,26 @@ const messages = {
         ERR_SENDING_WAPP_MSG:
           "Fehler beim Senden der WhatsApp-Nachricht. Überprüfen Sie die Verbindungsseite.",
         ERR_DELETE_WAPP_MSG: "WhatsApp-Nachricht konnte nicht gelöscht werden.",
-        ERR_EDITING_WAPP_MSG: "WhatsApp-Nachricht konnte nicht bearbeitet werden.",
-        ERR_OTHER_OPEN_TICKET: "Es gibt bereits ein offenes Ticket für diesen Kontakt.",
+        ERR_EDITING_WAPP_MSG:
+          "WhatsApp-Nachricht konnte nicht bearbeitet werden.",
+        ERR_OTHER_OPEN_TICKET:
+          "Es gibt bereits ein offenes Ticket für diesen Kontakt.",
         ERR_SESSION_EXPIRED: "Sitzung abgelaufen. Bitte erneut einloggen.",
         ERR_USER_CREATION_DISABLED:
           "Die Benutzererstellung wurde vom Administrator deaktiviert.",
-        ERR_NO_PERMISSION: "Sie haben keine Berechtigung, auf diese Funktion zuzugreifen.",
-        ERR_DUPLICATED_CONTACT: "Es gibt bereits einen Kontakt mit dieser Nummer.",
+        ERR_NO_PERMISSION:
+          "Sie haben keine Berechtigung, auf diese Funktion zuzugreifen.",
+        ERR_DUPLICATED_CONTACT:
+          "Es gibt bereits einen Kontakt mit dieser Nummer.",
         ERR_NO_SETTING_FOUND: "Keine Einstellung mit dieser ID gefunden.",
         ERR_NO_CONTACT_FOUND: "Kein Kontakt mit dieser ID gefunden.",
         ERR_NO_TICKET_FOUND: "Kein Ticket mit dieser ID gefunden.",
         ERR_NO_USER_FOUND: "Kein Benutzer mit dieser ID gefunden.",
         ERR_NO_WAPP_FOUND: "Kein WhatsApp mit dieser ID gefunden.",
-        ERR_CREATING_MESSAGE: "Fehler beim Erstellen der Nachricht in der Datenbank.",
-        ERR_CREATING_TICKET: "Fehler beim Erstellen des Tickets in der Datenbank.",
+        ERR_CREATING_MESSAGE:
+          "Fehler beim Erstellen der Nachricht in der Datenbank.",
+        ERR_CREATING_TICKET:
+          "Fehler beim Erstellen des Tickets in der Datenbank.",
         ERR_FETCH_WAPP_MSG:
           "Fehler beim Abrufen der Nachricht auf WhatsApp, möglicherweise ist sie zu alt.",
         ERR_QUEUE_COLOR_ALREADY_EXISTS:
@@ -1055,7 +1076,8 @@ const messages = {
       ticketz: {
         registration: {
           header: "Registrieren Sie sich in der Ticketz-Benutzerdatenbank",
-          description: "Füllen Sie die folgenden Felder aus, um sich in der Ticketz-Benutzerdatenbank zu registrieren und Neuigkeiten über das Projekt zu erhalten.",
+          description:
+            "Füllen Sie die folgenden Felder aus, um sich in der Ticketz-Benutzerdatenbank zu registrieren und Neuigkeiten über das Projekt zu erhalten.",
           name: "Name",
           country: "Land",
           phoneNumber: "WhatsApp-Nummer",

@@ -5,7 +5,7 @@ import { Picker } from "emoji-mart";
 import MicRecorder from "mic-recorder-to-mp3";
 import clsx from "clsx";
 
-import { 
+import {
   Code,
   FormatListNumbered,
   FormatListBulleted,
@@ -27,7 +27,14 @@ import MicIcon from "@material-ui/icons/Mic";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import CameraAltIcon from "@material-ui/icons/CameraAlt";
-import { FormControlLabel, Switch, Tooltip, InputAdornment, Typography, Popper } from "@material-ui/core";
+import {
+  FormControlLabel,
+  Switch,
+  Tooltip,
+  InputAdornment,
+  Typography,
+  Popper,
+} from "@material-ui/core";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { isString, isEmpty, isObject, has } from "lodash";
 
@@ -42,11 +49,11 @@ import { EditMessageContext } from "../../context/EditingMessage/EditingMessageC
 
 import useQuickMessages from "../../hooks/useQuickMessages";
 
-import Compressor from 'compressorjs';
+import Compressor from "compressorjs";
 import LinearWithValueLabel from "./ProgressBarCustom";
 import WhatsMarked from "react-whatsmarked";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSignature } from '@fortawesome/free-solid-svg-icons';
+import { faSignature } from "@fortawesome/free-solid-svg-icons";
 import { isMobile } from "../../helpers/isMobile";
 import { SocketContext } from "../../context/Socket/SocketContext";
 
@@ -189,7 +196,7 @@ const useStyles = makeStyles((theme) => ({
   iconSwitch: {
     color: (props) => (props.value ? theme.palette.primary.main : "gray"),
     width: 48,
-    height: 48
+    height: 48,
   },
 
   formatMenu: {
@@ -197,9 +204,9 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.text.primary,
     borderRadius: 30,
     boxShadow: theme.shadows[2],
-    padding: '4px 8px',
-    display: 'flex',
-    alignItems: 'center',
+    padding: "4px 8px",
+    display: "flex",
+    alignItems: "center",
   },
 }));
 
@@ -250,10 +257,7 @@ const IconSwitch = (props) => {
 
   return (
     <Tooltip title={tooltip}>
-      <IconButton
-        onClick={() => setter(!value)}
-        className={classes.iconSwitch}
-      >
+      <IconButton onClick={() => setter(!value)} className={classes.iconSwitch}>
         <FontAwesomeIcon icon={icon} />
       </IconButton>
     </Tooltip>
@@ -360,7 +364,7 @@ function UpwardPopper(props) {
       {...props}
       placement="top-start" // force always upwards
       modifiers={{
-        flip: { enabled: false },            // disable flipping
+        flip: { enabled: false }, // disable flipping
         preventOverflow: { enabled: false }, // disable overflow adjustment
       }}
     />
@@ -391,13 +395,13 @@ const CustomInput = (props) => {
 
   useEffect(() => {
     const handleClickAway = (event) => {
-      const menu = document.getElementById('format-menu');
+      const menu = document.getElementById("format-menu");
       if (menu && !menu.contains(event.target)) {
-        menu.style.display = 'none';
+        menu.style.display = "none";
       }
     };
-    document.addEventListener('mousedown', handleClickAway);
-    return () => document.removeEventListener('mousedown', handleClickAway);
+    document.addEventListener("mousedown", handleClickAway);
+    return () => document.removeEventListener("mousedown", handleClickAway);
   }, []);
 
   useEffect(() => {
@@ -429,7 +433,7 @@ const CustomInput = (props) => {
       setPopupOpen(firstWord.indexOf("/") > -1);
 
       const filteredOptions = quickMessages.filter(
-        (m) => m.label.toLowerCase().indexOf(inputMessage.toLowerCase()) > -1
+        (m) => m.label.toLowerCase().indexOf(inputMessage.toLowerCase()) > -1,
       );
       setOptions(filteredOptions);
     } else {
@@ -440,7 +444,7 @@ const CustomInput = (props) => {
 
   const onKeyPress = (e) => {
     if (loading) return;
-    else if ( !e.shiftKey && e.key === "Enter" && !isMobile()) {
+    else if (!e.shiftKey && e.key === "Enter" && !isMobile()) {
       e.preventDefault();
       handleSendMessage();
       return;
@@ -470,16 +474,16 @@ const CustomInput = (props) => {
 
   const showFormatMenu = () => {
     const selection = window.getSelection();
-    const menuElement = document.getElementById('format-menu');
+    const menuElement = document.getElementById("format-menu");
     if (!selection?.toString()) {
-      menuElement.style.display = 'none';
+      menuElement.style.display = "none";
     } else {
-      menuElement.style.display = 'flex';
+      menuElement.style.display = "flex";
       menuElement.style.top = `${selection.anchorNode.offsetTop - 40}px`;
       menuElement.style.left = `${selection.anchorNode.offsetLeft}px`;
     }
   };
-  
+
   const formatText = (prefix, suffix) => {
     const selection = window.getSelection();
     const selectedText = selection.toString().trim();
@@ -490,24 +494,24 @@ const CustomInput = (props) => {
       const end = textArea.selectionEnd;
       const textBefore = inputMessage.substring(0, start);
       const textAfter = inputMessage.substring(end);
-      
+
       const prevChar = textBefore.charAt(start - 1);
-      if (prevChar && prevChar !== ' ' && prevChar !== '\n') {
+      if (prevChar && prevChar !== " " && prevChar !== "\n") {
         formattedText = ` ${formattedText}`;
       }
-      
+
       const nextChar = textAfter.charAt(0);
-      if (nextChar && nextChar !== ' ' && nextChar !== '\n') {
+      if (nextChar && nextChar !== " " && nextChar !== "\n") {
         formattedText = `${formattedText} `;
       }
-      
+
       setInputMessage(textBefore + formattedText + textAfter);
-      document.getElementById('format-menu').style.display = 'none';
+      document.getElementById("format-menu").style.display = "none";
       setTimeout(() => {
         textArea.focus();
         textArea.setSelectionRange(
           start + prefix.length - 1,
-          start + prefix.length + formattedText.length - 1
+          start + prefix.length + formattedText.length - 1,
         );
         showFormatMenu();
       }, 0);
@@ -522,45 +526,50 @@ const CustomInput = (props) => {
       const start = textArea.selectionStart;
       const end = textArea.selectionEnd;
 
-      const firstLineStart = inputMessage.substring(0, start).lastIndexOf("\n")+1;
-      const lastLineEnd = end+inputMessage.substring(end).indexOf("\n");
+      const firstLineStart =
+        inputMessage.substring(0, start).lastIndexOf("\n") + 1;
+      const lastLineEnd = end + inputMessage.substring(end).indexOf("\n");
       const textBefore = inputMessage.substring(0, firstLineStart);
       const textAfter = inputMessage.substring(lastLineEnd);
 
-      const lines = inputMessage.substring(firstLineStart, lastLineEnd).split('\n');
+      const lines = inputMessage
+        .substring(firstLineStart, lastLineEnd)
+        .split("\n");
       return { lines, textBefore, textAfter };
     }
     return { lines: [], textBefore: inputMessage, textAfter: "" };
   };
-  
+
   const formatCode = () => {
     const selection = window.getSelection();
-    if (selection.toString().indexOf('\n') === -1) {
-      formatText('`', '`');
+    if (selection.toString().indexOf("\n") === -1) {
+      formatText("`", "`");
       return;
     }
-      
+
     const { lines, textBefore, textAfter } = splitSelectionLines();
     if (lines.length > 0) {
-      const formattedText = "```\n" + lines.join('\n') + "\n```\n";
+      const formattedText = "```\n" + lines.join("\n") + "\n```\n";
       setInputMessage(textBefore + formattedText + textAfter);
       setTimeout(() => {
         const textArea = inputRef.current;
         textArea.focus();
         textArea.setSelectionRange(
           textBefore.length,
-          textBefore.length + formattedText.length
+          textBefore.length + formattedText.length,
         );
         showFormatMenu();
       }, 0);
     }
   };
-          
+
   const formatListNumbered = () => {
     const { lines, textBefore, textAfter } = splitSelectionLines();
     if (lines.length > 0) {
-      const formattedLines = lines.map((line, index) => `${index + 1}. ${line}`);
-      const formattedText = formattedLines.join('\n');
+      const formattedLines = lines.map(
+        (line, index) => `${index + 1}. ${line}`,
+      );
+      const formattedText = formattedLines.join("\n");
 
       setInputMessage(textBefore + formattedText + textAfter);
       setTimeout(() => {
@@ -568,7 +577,7 @@ const CustomInput = (props) => {
         textArea.focus();
         textArea.setSelectionRange(
           textBefore.length,
-          textBefore.length + formattedText.length
+          textBefore.length + formattedText.length,
         );
         showFormatMenu();
       }, 0);
@@ -578,8 +587,8 @@ const CustomInput = (props) => {
   const formatListBulleted = () => {
     const { lines, textBefore, textAfter } = splitSelectionLines();
     if (lines.length > 0) {
-      const formattedLines = lines.map(line => `* ${line}`);
-      const formattedText = formattedLines.join('\n');
+      const formattedLines = lines.map((line) => `* ${line}`);
+      const formattedText = formattedLines.join("\n");
 
       setInputMessage(textBefore + formattedText + textAfter);
       setTimeout(() => {
@@ -587,7 +596,7 @@ const CustomInput = (props) => {
         textArea.focus();
         textArea.setSelectionRange(
           textBefore.length,
-          textBefore.length + formattedText.length
+          textBefore.length + formattedText.length,
         );
         showFormatMenu();
       }, 0);
@@ -597,8 +606,8 @@ const CustomInput = (props) => {
   const formatQuote = () => {
     const { lines, textBefore, textAfter } = splitSelectionLines();
     if (lines.length > 0) {
-      const formattedLines = lines.map(line => `> ${line}`);
-      const formattedText = formattedLines.join('\n');
+      const formattedLines = lines.map((line) => `> ${line}`);
+      const formattedText = formattedLines.join("\n");
 
       setInputMessage(textBefore + formattedText + textAfter);
       setTimeout(() => {
@@ -606,7 +615,7 @@ const CustomInput = (props) => {
         textArea.focus();
         textArea.setSelectionRange(
           textBefore.length,
-          textBefore.length + formattedText.length
+          textBefore.length + formattedText.length,
         );
         showFormatMenu();
       }, 0);
@@ -651,129 +660,136 @@ const CustomInput = (props) => {
           const { InputLabelProps, InputProps, ...rest } = params;
           return (
             <>
-            <InputBase
-              {...params.InputProps}
-              {...rest}
-              disabled={disableOption}
-              inputRef={(input) => setInputRef(input)}
-              placeholder={renderPlaceholder()}
-              multiline
-              className={classes.messageInput}
-              maxRows={5}
-              endAdornment={
-                isMobile() &&
-                <InputAdornment position="end">
-                  <input
-                    type="file"
-                    id="camera-button"
-                    accept="image/*"
-                    capture="camera"
-                    className={classes.uploadInput}
-                    onChange={handleChangeMedias}
-                  />
-                  <label htmlFor="camera-button">
-                    <IconButton
-                      aria-label="camera-upload"
-                      component="span"
-                      disabled={disableOption}
-                    >
-                      <CameraAltIcon className={classes.cameraIcon} />
-                    </IconButton>
-                  </label>
-                </InputAdornment>
-              }    
-              onKeyDownCapture={(e) => {
-                if (
-                  !popupOpen && (
-                    e.key === 'ArrowUp' ||
-                    e.key === 'ArrowDown'
+              <InputBase
+                {...params.InputProps}
+                {...rest}
+                disabled={disableOption}
+                inputRef={(input) => setInputRef(input)}
+                placeholder={renderPlaceholder()}
+                multiline
+                className={classes.messageInput}
+                maxRows={5}
+                endAdornment={
+                  isMobile() && (
+                    <InputAdornment position="end">
+                      <input
+                        type="file"
+                        id="camera-button"
+                        accept="image/*"
+                        capture="camera"
+                        className={classes.uploadInput}
+                        onChange={handleChangeMedias}
+                      />
+                      <label htmlFor="camera-button">
+                        <IconButton
+                          aria-label="camera-upload"
+                          component="span"
+                          disabled={disableOption}
+                        >
+                          <CameraAltIcon className={classes.cameraIcon} />
+                        </IconButton>
+                      </label>
+                    </InputAdornment>
                   )
-                ) {
-                  e.stopPropagation();
                 }
-              }}
-              onMouseUp={showFormatMenu}
-              onKeyUp={showFormatMenu}
-              onKeyDown={(e) => {
-                if (e.ctrlKey && e.key === 'b') {
-                  e.preventDefault();
-                  formatText('*', '*');
-                } else if (e.ctrlKey && e.key === 'i') {
-                  e.preventDefault();
-                  formatText('_', '_');
-                } else if (e.ctrlKey && e.key === 's') {
-                  e.preventDefault();
-                  formatText('~', '~');
-                } else if (e.ctrlKey && e.key === 'm') {
-                  e.preventDefault();
-                  formatCode();
-                } else if (e.ctrlKey && e.key === 'q') {
-                  e.preventDefault();
-                  formatQuote();
-                } else if (e.ctrlKey && e.key === 'n') {
-                  e.preventDefault();
-                  formatListNumbered();
-                } else if (e.ctrlKey && e.key === 'l') {
-                  e.preventDefault();
-                  formatListBulleted();
-                }
-              }}
-            />
-            <div
-              id="format-menu"
-              className={classes.formatMenu}
-              style={{ display: 'none', position: 'absolute', zIndex: 1000 }}
-            >
-              <IconButton 
-                size="small" 
-                onClick={() => formatText('*','*')}
-                style={{ padding: '6px', margin: '0 2px' }}
+                onKeyDownCapture={(e) => {
+                  if (
+                    !popupOpen &&
+                    (e.key === "ArrowUp" || e.key === "ArrowDown")
+                  ) {
+                    e.stopPropagation();
+                  }
+                }}
+                onMouseUp={showFormatMenu}
+                onKeyUp={showFormatMenu}
+                onKeyDown={(e) => {
+                  if (e.ctrlKey && e.key === "b") {
+                    e.preventDefault();
+                    formatText("*", "*");
+                  } else if (e.ctrlKey && e.key === "i") {
+                    e.preventDefault();
+                    formatText("_", "_");
+                  } else if (e.ctrlKey && e.key === "s") {
+                    e.preventDefault();
+                    formatText("~", "~");
+                  } else if (e.ctrlKey && e.key === "m") {
+                    e.preventDefault();
+                    formatCode();
+                  } else if (e.ctrlKey && e.key === "q") {
+                    e.preventDefault();
+                    formatQuote();
+                  } else if (e.ctrlKey && e.key === "n") {
+                    e.preventDefault();
+                    formatListNumbered();
+                  } else if (e.ctrlKey && e.key === "l") {
+                    e.preventDefault();
+                    formatListBulleted();
+                  }
+                }}
+              />
+              <div
+                id="format-menu"
+                className={classes.formatMenu}
+                style={{ display: "none", position: "absolute", zIndex: 1000 }}
               >
-                <Typography style={{ fontWeight: 'bold', fontSize: '15px' }}>B</Typography>
-              </IconButton>
-              <IconButton 
-                size="small" 
-                onClick={() => formatText('_','_')}
-                style={{ padding: '6px', margin: '0 2px' }}
-              >
-                <Typography style={{ fontStyle: 'italic', fontSize: '15px' }}>I</Typography>
-              </IconButton>
-              <IconButton 
-                size="small" 
-                onClick={() => formatText('~','~')}
-                style={{ padding: '6px', margin: '0 2px' }}
-              >
-                <Typography style={{ textDecoration: 'line-through', fontSize: '15px' }}>S</Typography>
-              </IconButton>
-              <IconButton 
-                size="small" 
-                onClick={formatCode}
-                style={{ padding: '6px', margin: '0 2px' }}
-              >
-                <Code fontSize="small" />
-              </IconButton>
-              <IconButton 
-                size="small" 
-                onClick={formatListNumbered}
-                style={{ padding: '6px', margin: '0 2px' }}
-              >
-                <FormatListNumbered fontSize="small" />
-              </IconButton>
-              <IconButton 
-                size="small" 
-                onClick={formatListBulleted}
-                style={{ padding: '6px', margin: '0 2px' }}
-              >
-                <FormatListBulleted fontSize="small" />
-              </IconButton>
-              <IconButton 
-                size="small" 
-                onClick={formatQuote}
-                style={{ padding: '6px', margin: '0 2px' }}
-              >
-                <FormatQuote fontSize="small" />
-              </IconButton>
-            </div>
+                <IconButton
+                  size="small"
+                  onClick={() => formatText("*", "*")}
+                  style={{ padding: "6px", margin: "0 2px" }}
+                >
+                  <Typography style={{ fontWeight: "bold", fontSize: "15px" }}>
+                    B
+                  </Typography>
+                </IconButton>
+                <IconButton
+                  size="small"
+                  onClick={() => formatText("_", "_")}
+                  style={{ padding: "6px", margin: "0 2px" }}
+                >
+                  <Typography style={{ fontStyle: "italic", fontSize: "15px" }}>
+                    I
+                  </Typography>
+                </IconButton>
+                <IconButton
+                  size="small"
+                  onClick={() => formatText("~", "~")}
+                  style={{ padding: "6px", margin: "0 2px" }}
+                >
+                  <Typography
+                    style={{ textDecoration: "line-through", fontSize: "15px" }}
+                  >
+                    S
+                  </Typography>
+                </IconButton>
+                <IconButton
+                  size="small"
+                  onClick={formatCode}
+                  style={{ padding: "6px", margin: "0 2px" }}
+                >
+                  <Code fontSize="small" />
+                </IconButton>
+                <IconButton
+                  size="small"
+                  onClick={formatListNumbered}
+                  style={{ padding: "6px", margin: "0 2px" }}
+                >
+                  <FormatListNumbered fontSize="small" />
+                </IconButton>
+                <IconButton
+                  size="small"
+                  onClick={formatListBulleted}
+                  style={{ padding: "6px", margin: "0 2px" }}
+                >
+                  <FormatListBulleted fontSize="small" />
+                </IconButton>
+                <IconButton
+                  size="small"
+                  onClick={formatQuote}
+                  style={{ padding: "6px", margin: "0 2px" }}
+                >
+                  <FormatQuote fontSize="small" />
+                </IconButton>
+              </div>
             </>
           );
         }}
@@ -797,9 +813,7 @@ const MessageInputCustom = (props) => {
   const inputRef = useRef();
   const { setReplyingMessage, replyingMessage } =
     useContext(ReplyMessageContext);
-  const { setEditingMessage, editingMessage } = useContext(
-		EditMessageContext
-	);  
+  const { setEditingMessage, editingMessage } = useContext(EditMessageContext);
   const { user } = useContext(AuthContext);
 
   const [signMessage, setSignMessage] = useLocalStorage("signOption", true);
@@ -832,23 +846,24 @@ const MessageInputCustom = (props) => {
     return () => {
       socket.disconnect();
     };
-  }, [socketManager]);        
+  }, [socketManager]);
 
   useEffect(() => {
     if (editingMessage) {
       if (signMessage && editingMessage.body.startsWith(`*${user.name}:*\n`)) {
-        setInputMessage(editingMessage.body.substr(editingMessage.body.indexOf("\n")+1));
+        setInputMessage(
+          editingMessage.body.substr(editingMessage.body.indexOf("\n") + 1),
+        );
       } else {
         setInputMessage(editingMessage.body);
       }
     }
-    
+
     if (replyingMessage || editingMessage) {
       inputRef.current.focus();
     }
-    
   }, [replyingMessage, editingMessage, signMessage, user.name]);
-  
+
   useEffect(() => {
     inputRef.current.focus();
     return () => {
@@ -896,12 +911,13 @@ const MessageInputCustom = (props) => {
     formData.append("fromMe", true);
 
     medias.forEach(async (media, idx) => {
-
       const file = media;
 
-      if (!file) { return; }
+      if (!file) {
+        return;
+      }
 
-      if (media?.type.split('/')[0] == 'image') {
+      if (media?.type.split("/")[0] == "image") {
         new Compressor(file, {
           quality: 0.7,
 
@@ -912,37 +928,30 @@ const MessageInputCustom = (props) => {
 
             formData.append("medias", media, media.name);
             formData.append("body", media.name);
-
           },
           error(err) {
-            alert('erro')
+            alert("erro");
             console.log(err.message);
           },
-
         });
       } else {
         formData.append("medias", media);
         formData.append("body", media.name);
-
       }
+    });
 
-
-    },);
-
-    setTimeout(async()=> {
-
+    setTimeout(async () => {
       try {
-        await api.post(`/messages/${ticketId}`, formData, {
-          onUploadProgress: (event) => {
-            let progress = Math.round(
-              (event.loaded * 100) / event.total
-            );
-            setPercentLoading(progress);
-          },
-        })
+        await api
+          .post(`/messages/${ticketId}`, formData, {
+            onUploadProgress: (event) => {
+              let progress = Math.round((event.loaded * 100) / event.total);
+              setPercentLoading(progress);
+            },
+          })
           .then((response) => {
-            setLoading(false)
-            setMedias([])
+            setLoading(false);
+            setMedias([]);
             setPercentLoading(0);
           })
           .catch((err) => {
@@ -954,20 +963,17 @@ const MessageInputCustom = (props) => {
       } catch (err) {
         toastError(err);
       }
-
-
-    },2000)
-
-  }
+    }, 2000);
+  };
 
   const handlePresenceUpdate = (presence) => {
     if (!socket || currentPresence === presence) return;
-    
+
     if (presenceTimeout) {
       clearTimeout(presenceTimeout);
       setPresenceTimeout(null);
     }
-    
+
     if (!presence) {
       setCurrentPresence(null);
       socket.emit("presenceUpdate", {
@@ -976,7 +982,7 @@ const MessageInputCustom = (props) => {
       });
       return;
     }
-    
+
     setCurrentPresence(presence);
     socket.emit("presenceUpdate", {
       ticketId,
@@ -991,10 +997,10 @@ const MessageInputCustom = (props) => {
             ticketId,
             presence: "paused",
           });
-        }, 5000)
+        }, 5000),
       );
     }
-  }  
+  };
 
   const handleSendMessage = async () => {
     if (inputMessage.trim() === "") return;
@@ -1012,10 +1018,11 @@ const MessageInputCustom = (props) => {
     };
 
     handlePresenceUpdate(null);
-    
-    const url = editingMessage !== null ?
-      `/messages/edit/${editingMessage.id}` :
-      `/messages/${ticketId}`;
+
+    const url =
+      editingMessage !== null
+        ? `/messages/edit/${editingMessage.id}`
+        : `/messages/${ticketId}`;
     api.post(url, message).catch((err) => {
       toastError(err);
     });
@@ -1029,7 +1036,7 @@ const MessageInputCustom = (props) => {
   };
 
   const handleStartRecording = async () => {
-    if(disableOption)return;
+    if (disableOption) return;
     setLoading(true);
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -1080,7 +1087,8 @@ const MessageInputCustom = (props) => {
   };
 
   const isGroup = showTabGroups && ticket.isGroup;
-  const disableOption = !isGroup && loading || recording || ticketStatus === "closed";
+  const disableOption =
+    (!isGroup && loading) || recording || ticketStatus === "closed";
 
   const renderReplyingMessage = (message) => {
     return (
@@ -1097,7 +1105,9 @@ const MessageInputCustom = (props) => {
                 {i18n.t("messagesInput.replying")} {message.contact?.name}
               </span>
               <WhatsMarked>
-                { message.body.startsWith('{"ticketzvCard":') ? "🪪" : message.body }
+                {message.body.startsWith('{"ticketzvCard":')
+                  ? "🪪"
+                  : message.body}
               </WhatsMarked>
             </div>
           )}
@@ -1106,9 +1116,7 @@ const MessageInputCustom = (props) => {
               <span className={classes.messageContactName}>
                 {i18n.t("messagesInput.editing")}
               </span>
-              <WhatsMarked>
-                {message.body}
-              </WhatsMarked>
+              <WhatsMarked>{message.body}</WhatsMarked>
             </div>
           )}
         </div>
@@ -1117,9 +1125,9 @@ const MessageInputCustom = (props) => {
           component="span"
           disabled={disableOption}
           onClick={() => {
-              setReplyingMessage(null);
-              setEditingMessage(null);
-              setInputMessage("");
+            setReplyingMessage(null);
+            setEditingMessage(null);
+            setInputMessage("");
           }}
         >
           <ClearIcon className={classes.sendMessageIcons} />
@@ -1164,17 +1172,17 @@ const MessageInputCustom = (props) => {
   else {
     return (
       <Paper square elevation={0} className={classes.mainWrapper}>
-        {(replyingMessage && renderReplyingMessage(replyingMessage)) || (editingMessage && renderReplyingMessage(editingMessage))}
+        {(replyingMessage && renderReplyingMessage(replyingMessage)) ||
+          (editingMessage && renderReplyingMessage(editingMessage))}
         <div className={classes.newMessageBox}>
-          {
-            isMobile() ||
+          {isMobile() || (
             <EmojiOptions
               disabled={disableOption}
               handleAddEmoji={handleAddEmoji}
               showEmoji={showEmoji}
               setShowEmoji={setShowEmoji}
             />
-          }
+          )}
 
           <FileInput
             disableOption={disableOption}
@@ -1191,7 +1199,7 @@ const MessageInputCustom = (props) => {
           <CustomInput
             loading={loading}
             inputRef={inputRef}
-            ticketStatus={(isGroup && "open" ) || ticketStatus}
+            ticketStatus={(isGroup && "open") || ticketStatus}
             inputMessage={inputMessage}
             setInputMessage={setInputMessage}
             // handleChangeInput={handleChangeInput}

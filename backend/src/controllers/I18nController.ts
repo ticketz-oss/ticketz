@@ -55,10 +55,13 @@ export const getKeysAndValues = async (
     });
 
     // Create a map of existing translations
-    const translationMap = translations.reduce((map, translation) => {
-      map[translation.key] = translation.value;
-      return map;
-    }, {} as Record<string, string>);
+    const translationMap = translations.reduce(
+      (map, translation) => {
+        map[translation.key] = translation.value;
+        return map;
+      },
+      {} as Record<string, string>
+    );
 
     // Combine results, ensuring all keys are included
     const combinedTranslations = allKeys.map(key => ({

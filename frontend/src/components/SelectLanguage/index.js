@@ -6,10 +6,22 @@ import { messages } from "../../translate/languages";
 const languageOptions = {};
 
 Object.keys(messages).forEach((key) => {
-  languageOptions[key] = messages[key].translations.mainDrawer.appBar.i18n.language;
+  languageOptions[key] =
+    messages[key].translations.mainDrawer.appBar.i18n.language;
 });
 
-export function SelectLanguage({ className, label, value, name, onChange, field, form, variant, margin, fullWidth }) {
+export function SelectLanguage({
+  className,
+  label,
+  value,
+  name,
+  onChange,
+  field,
+  form,
+  variant,
+  margin,
+  fullWidth,
+}) {
   const handleChange = (event) => {
     if (form && field) {
       form.setFieldValue(field.name, event.target.value);
@@ -19,14 +31,17 @@ export function SelectLanguage({ className, label, value, name, onChange, field,
   };
 
   const selectedValue = field?.value || value;
-  
+
   label = label || i18n.t("common.language");
 
   return (
-    <FormControl className={className} variant={variant} margin={margin} fullWidth={fullWidth}>
-      <InputLabel id="language-label">
-        {label}
-      </InputLabel>
+    <FormControl
+      className={className}
+      variant={variant}
+      margin={margin}
+      fullWidth={fullWidth}
+    >
+      <InputLabel id="language-label">{label}</InputLabel>
       <Select
         labelId="language-label"
         label={label}

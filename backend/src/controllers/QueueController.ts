@@ -108,12 +108,12 @@ export const mediaUpload = async (
 
   try {
     const queue = await Queue.findByPk(queueId);
-   
+
     queue.update({
       mediaPath: file.filename,
       mediaName: file.originalname
     });
-   
+
     return res.send({ mensagem: "Arquivo Salvo" });
   } catch (err: any) {
     throw new AppError(err.message);

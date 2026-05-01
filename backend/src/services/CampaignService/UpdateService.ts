@@ -39,10 +39,7 @@ const UpdateService = async (data: Data): Promise<Campaign> => {
     );
   }
 
-  if (
-    data.scheduledAt != null &&
-    data.status === "INATIVA"
-  ) {
+  if (data.scheduledAt != null && data.status === "INATIVA") {
     data.status = "PROGRAMADA";
   }
 

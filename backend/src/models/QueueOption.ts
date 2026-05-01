@@ -34,7 +34,7 @@ class QueueOption extends Model<QueueOption> {
   @ForeignKey(() => Queue)
   @Column
   queueId: number;
-  
+
   @ForeignKey(() => QueueOption)
   @Column
   parentId: number;
@@ -46,7 +46,7 @@ class QueueOption extends Model<QueueOption> {
 
   @Column
   exitChatbot: boolean;
-  
+
   @CreatedAt
   createdAt: Date;
 
@@ -56,7 +56,7 @@ class QueueOption extends Model<QueueOption> {
   @BelongsTo(() => Queue)
   queue: Queue;
 
-  @BelongsTo(() => QueueOption, { foreignKey: 'parentId' })
+  @BelongsTo(() => QueueOption, { foreignKey: "parentId" })
   parent: QueueOption;
 
   @BelongsTo(() => Queue, { foreignKey: "forwardQueueId" })

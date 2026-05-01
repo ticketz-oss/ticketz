@@ -563,12 +563,10 @@ const LoggedInLayout = ({ children, themeToggle }) => {
             >
               <div className={classes.userMenuInfoContainer}>
                 <Typography className={classes.userMenuInfoLine}>
-                  {i18n.t("common.name")}:{" "}
-                  {user?.name || "-"}
+                  {i18n.t("common.name")}: {user?.name || "-"}
                 </Typography>
                 <Typography className={classes.userMenuInfoLine}>
-                  {i18n.t("common.company")}:{" "}
-                  {user?.company?.name || "-"}
+                  {i18n.t("common.company")}: {user?.company?.name || "-"}
                 </Typography>
                 {shouldShowCompanyDueDate && (
                   <Typography className={classes.userMenuInfoLine}>

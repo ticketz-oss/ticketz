@@ -1,12 +1,12 @@
 import {
-    Table,
-    Column,
-    Model,
-    ForeignKey,
-    BelongsTo,
-    DataType,
-    PrimaryKey,
-  } from "sequelize-typescript";
+  Table,
+  Column,
+  Model,
+  ForeignKey,
+  BelongsTo,
+  DataType,
+  PrimaryKey
+} from "sequelize-typescript";
 import Whatsapp from "./Whatsapp";
 
 @Table({ timestamps: false })

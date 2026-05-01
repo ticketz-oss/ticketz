@@ -66,7 +66,7 @@ export default function TicketMessagesDialog({ open, handleClose, ticketId }) {
   const [loading, setLoading] = useState(true);
   const [contact, setContact] = useState({});
   const [ticket, setTicket] = useState({});
-  
+
   const socketManager = useContext(SocketContext);
 
   useEffect(() => {
@@ -108,14 +108,14 @@ export default function TicketMessagesDialog({ open, handleClose, ticketId }) {
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
     let socket = null;
-    let onReturn = () => { };
+    let onReturn = () => {};
 
     if (open) {
       socket = socketManager.GetSocket(companyId);
 
       const onConnectTicketMessagesDialog = () => {
         socket.emit("joinChatBox", `${ticket.id}`);
-      }
+      };
 
       const onCompanyTicketMessagesDialog = (data) => {
         if (data.action === "update" && data.ticket.id === ticket.id) {
@@ -125,7 +125,7 @@ export default function TicketMessagesDialog({ open, handleClose, ticketId }) {
         if (data.action === "delete" && data.ticketId === ticket.id) {
           history.push("/tickets");
         }
-      }
+      };
 
       const onCompanyContactMessagesDialog = (data) => {
         if (data.action === "update") {
@@ -136,13 +136,13 @@ export default function TicketMessagesDialog({ open, handleClose, ticketId }) {
             return prevState;
           });
         }
-      }
+      };
 
       onReturn = () => {
         if (socket !== null) {
           socket.disconnect();
         }
-      }
+      };
 
       socketManager.onConnect(onConnectTicketMessagesDialog);
       socket.on(`company-${companyId}-ticket`, onCompanyTicketMessagesDialog);

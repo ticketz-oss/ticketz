@@ -11,15 +11,15 @@ module.exports = {
       },
       title: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: false
       },
       message: {
         type: DataTypes.TEXT,
-        allowNull: true,
+        allowNull: true
       },
       option: {
         type: DataTypes.TEXT,
-        allowNull: true,
+        allowNull: true
       },
       queueId: {
         type: DataTypes.INTEGER,

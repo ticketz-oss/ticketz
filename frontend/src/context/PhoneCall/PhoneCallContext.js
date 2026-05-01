@@ -8,7 +8,9 @@ export function PhoneCallProvider({ children }) {
   const updateCurrentCall = (call) => {
     setCurrentCall((prevCall) => {
       if (prevCall && call) {
-        throw new Error("A call is already in progress. Please disconnect before starting a new call.");
+        throw new Error(
+          "A call is already in progress. Please disconnect before starting a new call.",
+        );
       }
       return call;
     });
@@ -20,7 +22,7 @@ export function PhoneCallProvider({ children }) {
       return null;
     });
   };
-  
+
   const contextValue = { currentCall, updateCurrentCall, disconnect };
 
   return (

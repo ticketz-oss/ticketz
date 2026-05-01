@@ -93,7 +93,6 @@ const QueueModal = ({ open, onClose, queueId }) => {
     color: "",
     greetingMessage: "",
     outOfHoursMessage: "",
-
   };
 
   const [colorPickerModalOpen, setColorPickerModalOpen] = useState(false);
@@ -199,7 +198,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
 
   return (
     <div className={classes.root}>
-       <ConfirmationModal
+      <ConfirmationModal
         title={i18n.t("queueModal.confirmationModal.deleteTitle")}
         open={confirmationOpen}
         onClose={() => setConfirmationOpen(false)}
@@ -218,7 +217,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
           {queueId
             ? `${i18n.t("queueModal.title.edit")}`
             : `${i18n.t("queueModal.title.add")}`}
-           <div style={{ display: "none" }}>
+          <div style={{ display: "none" }}>
             <input
               type="file"
               ref={attachmentFile}
@@ -308,67 +307,68 @@ const QueueModal = ({ open, onClose, queueId }) => {
                       }}
                     />
                     <div style={{ marginTop: 5 }}>
-                          <Field
-                            as={TextField}
-                            label={i18n.t("queueModal.form.greetingMessage")}
-                            type="greetingMessage"
-                            multiline
-                            inputRef={greetingRef}
-                            rows={5}
-                            fullWidth
-                            name="greetingMessage"
-                            spellCheck={true}
-                            error={
-                              touched.greetingMessage &&
-                              Boolean(errors.greetingMessage)
-                            }
-                            helperText={
-                              touched.greetingMessage && errors.greetingMessage
-                            }
-                            variant="outlined"
-                            margin="dense"
-                          />
-                        {schedulesEnabled && (
-                            <Field
-                              as={TextField}
-                              InputLabelProps={{ shrink: true }}
-                              label={i18n.t("queueModal.form.outOfHoursMessage")}
-                              type="outOfHoursMessage"
-                              multiline
-                              rows={5}
-                              fullWidth
-                              name="outOfHoursMessage"
-                              spellCheck={true}
-                              error={
-                                touched.outOfHoursMessage &&
-                                Boolean(errors.outOfHoursMessage)
-                              }
-                              helperText={
-                                touched.outOfHoursMessage && errors.outOfHoursMessage
-                              }
-                              variant="outlined"
-                              margin="dense"
-                            />
-                        )}
+                      <Field
+                        as={TextField}
+                        label={i18n.t("queueModal.form.greetingMessage")}
+                        type="greetingMessage"
+                        multiline
+                        inputRef={greetingRef}
+                        rows={5}
+                        fullWidth
+                        name="greetingMessage"
+                        spellCheck={true}
+                        error={
+                          touched.greetingMessage &&
+                          Boolean(errors.greetingMessage)
+                        }
+                        helperText={
+                          touched.greetingMessage && errors.greetingMessage
+                        }
+                        variant="outlined"
+                        margin="dense"
+                      />
+                      {schedulesEnabled && (
+                        <Field
+                          as={TextField}
+                          InputLabelProps={{ shrink: true }}
+                          label={i18n.t("queueModal.form.outOfHoursMessage")}
+                          type="outOfHoursMessage"
+                          multiline
+                          rows={5}
+                          fullWidth
+                          name="outOfHoursMessage"
+                          spellCheck={true}
+                          error={
+                            touched.outOfHoursMessage &&
+                            Boolean(errors.outOfHoursMessage)
+                          }
+                          helperText={
+                            touched.outOfHoursMessage &&
+                            errors.outOfHoursMessage
+                          }
+                          variant="outlined"
+                          margin="dense"
+                        />
+                      )}
                     </div>
                     <QueueOptions queueId={queueId} />
                     {(queue.mediaPath || attachment) && (
-                    <Grid xs={12} item>
-                      <Button startIcon={<AttachFile />}>
-                        {attachment != null
-                          ? attachment.name
-                          : queue.mediaName}
-                      </Button>
-                      {queueEditable && (
-                        <IconButton
-                          onClick={() => setConfirmationOpen(true)}
-                          color="secondary"
-                        >
-                          <DeleteOutline />
-                        </IconButton>
-                      )}
-                    </Grid>
-                  )}
+                      <Grid xs={12} item>
+                        <Button startIcon={<AttachFile />}>
+                          {attachment != null
+                            ? attachment.name
+                            : queue.mediaName}
+                        </Button>
+                        {queueEditable && (
+                          <IconButton
+                            onClick={() => setConfirmationOpen(true)}
+                            color="secondary"
+                          >
+                            <DeleteOutline />
+                          </IconButton>
+                        )}
+                      </Grid>
+                    )}
                   </DialogContent>
                   <DialogActions>
                     {!attachment && !queue.mediaPath && queueEditable && (
@@ -416,11 +416,14 @@ const QueueModal = ({ open, onClose, queueId }) => {
           <Paper style={{ padding: 20 }}>
             {isOpenHoursFormat(schedules) ? (
               <>
-                <OpenHoursEditor
-                  value={schedules}
-                  onChange={setSchedules}
-                />
-                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
+                <OpenHoursEditor value={schedules} onChange={setSchedules} />
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    marginTop: 16,
+                  }}
+                >
                   <Button
                     variant="contained"
                     color="primary"
@@ -431,27 +434,27 @@ const QueueModal = ({ open, onClose, queueId }) => {
                 </div>
               </>
             ) : (
-                <>
-                  <Grid spacing={4} container>
-                    <Grid item xs={12}>
-                      <div>
-                        <Button
-                          variant="contained"
-                          color="secondary"
-                          onClick={() => setSchedules({})}
-                        >
+              <>
+                <Grid spacing={4} container>
+                  <Grid item xs={12}>
+                    <div>
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        onClick={() => setSchedules({})}
+                      >
                         ⚠️ {i18n.t("settings.schedules.updateToNewFormat")}
-                        </Button>
-                      </div>
-                    </Grid>
+                      </Button>
+                    </div>
                   </Grid>
-                  <SchedulesForm
-                    loading={false}
-                    onSubmit={handleSaveSchedules}
-                    initialValues={schedules}
-                    labelSaveButton="Adicionar"
-                  />
-                </>
+                </Grid>
+                <SchedulesForm
+                  loading={false}
+                  onSubmit={handleSaveSchedules}
+                  initialValues={schedules}
+                  labelSaveButton="Adicionar"
+                />
+              </>
             )}
           </Paper>
         )}

@@ -82,19 +82,19 @@ const useWhatsApps = () => {
       if (data.action === "delete") {
         dispatch({ type: "DELETE_WHATSAPPS", payload: data.whatsappId });
       }
-    }
+    };
 
     const onCompanyWhatsappSession = (data) => {
       if (data.action === "update") {
         dispatch({ type: "UPDATE_SESSION", payload: data.session });
       }
-    }
+    };
 
     socket.on(`company-${companyId}-whatsapp`, onCompanyWhatsapp);
     socket.on(`company-${companyId}-whatsappSession`, onCompanyWhatsappSession);
 
     return () => {
-	    socket.disconnect();
+      socket.disconnect();
     };
   }, [socketManager]);
 

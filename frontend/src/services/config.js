@@ -7,10 +7,10 @@ if (!config && ["localhost", "127.0.0.1"].includes(window.location.hostname)) {
   config = loadJSON("/config-dev.json");
   if (!config) {
     config = {
-      "BACKEND_PROTOCOL": "http",
-      "BACKEND_HOST": "localhost",
-      "BACKEND_PORT": "8080",
-      "LOG_LEVEL": "debug"
+      BACKEND_PROTOCOL: "http",
+      BACKEND_HOST: "localhost",
+      BACKEND_PORT: "8080",
+      LOG_LEVEL: "debug",
     };
   }
 }
@@ -22,17 +22,23 @@ if (!config) {
 export function getBackendURL() {
   return (
     config.REACT_APP_BACKEND_URL ||
-    (config.BACKEND_PROTOCOL ?? "https") + "://" +
-    (config.BACKEND_HOST) + ":" + (config.BACKEND_PORT ?? 443) +
-    (config.BACKEND_PATH ?? "")
+    (config.BACKEND_PROTOCOL ?? "https") +
+      "://" +
+      config.BACKEND_HOST +
+      ":" +
+      (config.BACKEND_PORT ?? 443) +
+      (config.BACKEND_PATH ?? "")
   );
 }
 
 export function getBackendSocketURL() {
   return (
     config.REACT_APP_BACKEND_URL ||
-    (config.BACKEND_PROTOCOL ?? "https") + "://" +
-    (config.BACKEND_HOST) + ":" + (config.BACKEND_PORT ?? 443)
+    (config.BACKEND_PROTOCOL ?? "https") +
+      "://" +
+      config.BACKEND_HOST +
+      ":" +
+      (config.BACKEND_PORT ?? 443)
   );
 }
 

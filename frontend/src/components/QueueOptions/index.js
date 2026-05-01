@@ -4,7 +4,19 @@ import Stepper from "@material-ui/core/Stepper";
 import Step from "@material-ui/core/Step";
 import StepLabel from "@material-ui/core/StepLabel";
 import Typography from "@material-ui/core/Typography";
-import { Button, Grid, IconButton, StepContent, TextField, FormControlLabel, Switch, FormControl, InputLabel, Select, MenuItem } from "@material-ui/core";
+import {
+  Button,
+  Grid,
+  IconButton,
+  StepContent,
+  TextField,
+  FormControlLabel,
+  Switch,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
 import SaveIcon from "@material-ui/icons/Save";
@@ -73,7 +85,7 @@ export function QueueOptionStepper({ queueId, options, updateOptions }) {
       };
       loadQueues();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleOption = (index) => async () => {
@@ -134,12 +146,11 @@ export function QueueOptionStepper({ queueId, options, updateOptions }) {
       }
       option.edition = false;
       updateOptions();
-      setAttachment(null)
+      setAttachment(null);
     } catch (e) {
       toastError(e);
     }
   };
-
 
   const deleteMedia = async (index) => {
     const option = options[index];
@@ -156,8 +167,7 @@ export function QueueOptionStepper({ queueId, options, updateOptions }) {
       updateOptions();
     }
   };
-  
-  
+
   const handleEdition = (index) => {
     options[index].edition = !options[index].edition;
     updateOptions();
@@ -199,14 +209,14 @@ export function QueueOptionStepper({ queueId, options, updateOptions }) {
       setAttachment(file);
     }
   };
-  
+
   const handleToggleExitChatbot = (event, index) => {
     options[index].exitChatbot = !options[index].exitChatbot;
     if (options[index].exitChatbot) {
       options[index].forwardQueueId = "";
     }
     updateOptions();
-  }
+  };
 
   const handleChangeForwardQueue = (value, index) => {
     console.debug("Selected queue", value);
@@ -215,14 +225,13 @@ export function QueueOptionStepper({ queueId, options, updateOptions }) {
       options[index].exitChatbot = false;
     }
     updateOptions();
-  }
+  };
 
   const renderTitle = (index) => {
     const option = options[index];
     if (option.edition) {
       return (
         <>
-
           <ConfirmationModal
             title={i18n.t("queueModal.confirmationModal.deleteTitle")}
             open={confirmationOpen}
@@ -231,7 +240,7 @@ export function QueueOptionStepper({ queueId, options, updateOptions }) {
           >
             {i18n.t("queueModal.confirmationModal.deleteMessage")}
           </ConfirmationModal>
-              
+
           <TextField
             value={option.title}
             spellCheck={true}
@@ -273,27 +282,25 @@ export function QueueOptionStepper({ queueId, options, updateOptions }) {
                   color="primary"
                   size="small"
                   className={classes.button}
-                    onClick={() => attachmentFile.current.click()}
-                  >
-                  <AttachFile/>
+                  onClick={() => attachmentFile.current.click()}
+                >
+                  <AttachFile />
                 </IconButton>
               )}
-               {(option.mediaPath || attachment) && (
-                    <Grid xs={12} item>
-                      <Button startIcon={<AttachFile />}>
-                        {attachment != null
-                          ? attachment.name
-                          : option.mediaName}
-                      </Button>
-                      
-                        <IconButton
-                          onClick={() => setConfirmationOpen(true)}
-                          color="secondary"
-                        >
-                          <DeleteOutline />
-                        </IconButton>
-                    </Grid>
-                  )}
+              {(option.mediaPath || attachment) && (
+                <Grid xs={12} item>
+                  <Button startIcon={<AttachFile />}>
+                    {attachment != null ? attachment.name : option.mediaName}
+                  </Button>
+
+                  <IconButton
+                    onClick={() => setConfirmationOpen(true)}
+                    color="secondary"
+                  >
+                    <DeleteOutline />
+                  </IconButton>
+                </Grid>
+              )}
             </>
           )}
         </>
@@ -333,50 +340,52 @@ export function QueueOptionStepper({ queueId, options, updateOptions }) {
           />
 
           <Grid spacing={3} container>
-          <Grid className={classes.verticalCenter} xs={12} sm={12} md={3} item>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={option.exitChatbot}
-                  disabled={option.forwardQueueId && !option.exitChatbot}
-                  color="primary"
-                  onChange={(event) => handleToggleExitChatbot(event, index)}
-                  name="exitChatbot"
+            <Grid
+              className={classes.verticalCenter}
+              xs={12}
+              sm={12}
+              md={3}
+              item
+            >
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={option.exitChatbot}
+                    disabled={option.forwardQueueId && !option.exitChatbot}
+                    color="primary"
+                    onChange={(event) => handleToggleExitChatbot(event, index)}
+                    name="exitChatbot"
+                    size="small"
+                  />
+                }
+                label="Exit chatbot"
+              />
+            </Grid>
+
+            <Grid xs={12} sm={12} md={3} item>
+              <FormControl className={classes.maxWidth}>
+                <InputLabel>Forward to Queue</InputLabel>
+                <Select
+                  value={option.forwardQueueId}
+                  onChange={(event) =>
+                    handleChangeForwardQueue(event.target.value, index)
+                  }
+                  label="Select queue"
                   size="small"
-                />
-              }
-              label="Exit chatbot"
-            />
-          </Grid>
-
-          <Grid xs={12} sm={12} md={3} item>
-            <FormControl className={classes.maxWidth}>
-              <InputLabel>
-                Forward to Queue
-              </InputLabel>
-              <Select
-                value={option.forwardQueueId}
-                onChange={(event) => handleChangeForwardQueue(event.target.value, index)}
-                label="Select queue"
-                size="small"
-                disabled={option.exitChatbot && !option.forwardQueueId}
-              >
-                <MenuItem key="noqueue" value="">
-                  None
-                </MenuItem>
-                {queues.map((queue) => (
-                  <MenuItem key={queue.id} value={queue.id}>
-                    {queue.name}
+                  disabled={option.exitChatbot && !option.forwardQueueId}
+                >
+                  <MenuItem key="noqueue" value="">
+                    None
                   </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+                  {queues.map((queue) => (
+                    <MenuItem key={queue.id} value={queue.id}>
+                      {queue.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
           </Grid>
-        </Grid>
-
-
-
-
         </>
       );
     }

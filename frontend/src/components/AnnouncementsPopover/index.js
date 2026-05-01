@@ -28,7 +28,7 @@ import { getBackendURL } from "../../services/config";
 import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles((theme) => ({
-contend:{minWidth: 300,maxWidth: 500,},
+  contend: { minWidth: 300, maxWidth: 500 },
   mainPaper: {
     flex: 1,
     maxHeight: 300,
@@ -40,7 +40,7 @@ contend:{minWidth: 300,maxWidth: 500,},
 }));
 
 function AnnouncementDialog({ announcement, open, handleClose }) {
- const classes=useStyles()
+  const classes = useStyles();
   const getMediaPath = (filename) => {
     return `${getBackendURL()}}/public/${filename}`;
   };
@@ -89,7 +89,7 @@ const reducer = (state, action) => {
     if (isArray(announcements)) {
       announcements.forEach((announcement) => {
         const announcementIndex = state.findIndex(
-          (u) => u.id === announcement.id
+          (u) => u.id === announcement.id,
         );
         if (announcementIndex !== -1) {
           state[announcementIndex] = announcement;
@@ -143,7 +143,7 @@ export default function AnnouncementsPopover() {
   const [showAnnouncementDialog, setShowAnnouncementDialog] = useState(false);
 
   const socketManager = useContext(SocketContext);
-  
+
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
@@ -162,7 +162,7 @@ export default function AnnouncementsPopover() {
     const companyId = localStorage.getItem("companyId");
     const socket = socketManager.GetSocket(companyId);
 
-	const onCompanyAnnouncement = (data) => {
+    const onCompanyAnnouncement = (data) => {
       if (data.action === "update" || data.action === "create") {
         dispatch({ type: "UPDATE_ANNOUNCEMENTS", payload: data.record });
         setInvisible(false);
@@ -319,7 +319,9 @@ export default function AnnouncementsPopover() {
                 </ListItem>
               ))}
             {isArray(announcements) && announcements.length === 0 && (
-              <ListItemText primary={i18n.t("tickets.notification.nomessages")} />
+              <ListItemText
+                primary={i18n.t("tickets.notification.nomessages")}
+              />
             )}
           </List>
         </Paper>

@@ -145,14 +145,13 @@ export default function ChatPopover() {
       if (data.action === "new-message") {
         dispatch({ type: "CHANGE_CHAT", payload: data });
         if (data.newMessage.senderId !== user.id) {
-        
           soundAlertRef.current();
         }
       }
       if (data.action === "update") {
         dispatch({ type: "CHANGE_CHAT", payload: data });
       }
-    }
+    };
 
     socket.on(`company-${companyId}-chat`, onCompanyChatPopover);
 
@@ -282,7 +281,9 @@ export default function ChatPopover() {
                 </ListItem>
               ))}
             {isArray(chats) && chats.length === 0 && (
-              <ListItemText primary={i18n.t("tickets.notification.nomessages")} />
+              <ListItemText
+                primary={i18n.t("tickets.notification.nomessages")}
+              />
             )}
           </List>
         </Paper>

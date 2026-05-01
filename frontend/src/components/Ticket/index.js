@@ -88,14 +88,15 @@ const Ticket = () => {
   const socketManager = useContext(SocketContext);
 
   useEffect(() => {
-    Promise.all([
-      getSetting("CheckMsgIsGroup"),
-      getSetting("groupsTab")
-    ]).then(([ignoreGroups, groupsTab]) => {
-      setShowTabGroups(ignoreGroups === "disabled" && groupsTab === "enabled");
-    });
-    
-    getSetting("tagsMode","ticket").then((tagsMode) => {
+    Promise.all([getSetting("CheckMsgIsGroup"), getSetting("groupsTab")]).then(
+      ([ignoreGroups, groupsTab]) => {
+        setShowTabGroups(
+          ignoreGroups === "disabled" && groupsTab === "enabled",
+        );
+      },
+    );
+
+    getSetting("tagsMode", "ticket").then((tagsMode) => {
       setTagsMode(tagsMode);
     });
   }, []);
@@ -136,7 +137,7 @@ const Ticket = () => {
 
     const onConnectTicket = () => {
       socket.emit("joinChatBox", `${ticket.id}`);
-    }
+    };
 
     socketManager.onConnect(onConnectTicket);
 
@@ -212,23 +213,24 @@ const Ticket = () => {
           [classes.mainWrapperShift]: drawerOpen,
         })}
       >
-        <div className={clsx({
-          [classes.drawerShade]: drawerOpen,
-        })} onClick={() => setDrawerOpen(false)}></div>
+        <div
+          className={clsx({
+            [classes.drawerShade]: drawerOpen,
+          })}
+          onClick={() => setDrawerOpen(false)}
+        ></div>
         <TicketHeader loading={loading}>
           {renderTicketInfo()}
           <TicketActionButtons ticket={ticket} showTabGroups={showTabGroups} />
         </TicketHeader>
         <Paper>
           <TagsContainer
-            ticket={["ticket","both"].includes(tagsMode) && ticket}
+            ticket={["ticket", "both"].includes(tagsMode) && ticket}
             contact={tagsMode === "contact" && contact}
           />
         </Paper>
         <ReplyMessageProvider>
-          <EditMessageProvider>
-	        {renderMessagesList()}
-          </EditMessageProvider>
+          <EditMessageProvider>{renderMessagesList()}</EditMessageProvider>
         </ReplyMessageProvider>
       </Paper>
       <ContactDrawer

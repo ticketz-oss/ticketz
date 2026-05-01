@@ -43,7 +43,9 @@ export default async function CreateMessageService({
 
   const sender = await User.findByPk(senderId);
 
-  await newMessage.chat.update({ lastMessage: `${sender.name}: ${mediaName != null ? mediaName : message}` });
+  await newMessage.chat.update({
+    lastMessage: `${sender.name}: ${mediaName != null ? mediaName : message}`
+  });
 
   const chatUsers = await ChatUser.findAll({
     where: { chatId }

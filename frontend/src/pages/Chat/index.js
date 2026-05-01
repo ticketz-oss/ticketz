@@ -25,7 +25,7 @@ import { has, isObject } from "lodash";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
 import withWidth, { isWidthUp } from "@material-ui/core/withWidth";
-import whatsBackground from "../../assets/wa-background.png"
+import whatsBackground from "../../assets/wa-background.png";
 import whatsBackgroundDark from "../../assets/wa-background-dark.png";
 
 import { i18n } from "../../translate/i18n";
@@ -40,10 +40,13 @@ const useStyles = makeStyles((theme) => ({
     height: `calc(100% - 48px)`,
     overflowY: "hidden",
     border: "1px solid rgba(0, 0, 0, 0.12)",
-    backgroundImage: theme.mode === 'light' ? `url(${whatsBackground})` : `url(${whatsBackgroundDark})`,
-		backgroundPosition: 'center', 
-		backgroundSize: 'cover', 
-		backgroundRepeat: 'no-repeat', 
+    backgroundImage:
+      theme.mode === "light"
+        ? `url(${whatsBackground})`
+        : `url(${whatsBackgroundDark})`,
+    backgroundPosition: "center",
+    backgroundSize: "cover",
+    backgroundRepeat: "no-repeat",
   },
   gridContainer: {
     flex: 1,
@@ -114,7 +117,7 @@ export function ChatModal({
       }
       handleClose();
     } catch (err) {}
-  };  
+  };
 
   return (
     <Dialog
@@ -237,7 +240,7 @@ function Chat(props) {
         });
         setChats(changedChats);
       }
-    }
+    };
 
     const onChat = (data) => {
       if (data.action === "delete") {
@@ -249,47 +252,47 @@ function Chat(props) {
         setCurrentChat({});
         history.push("/chats");
       }
-    }
+    };
 
     const onCurrentChat = (data) => {
-        if (data.action === "new-message") {
-          setMessages((prev) => [...prev, data.newMessage]);
-          const changedChats = chats.map((chat) => {
-            if (chat.id === data.newMessage.chatId) {
-              return {
-                ...data.chat,
-              };
-            }
-            return chat;
-          });
-          setChats(changedChats);
-          scrollToBottomRef.current();
-        }
-
-        if (data.action === "update") {
-          const changedChats = chats.map((chat) => {
-            if (chat.id === data.chat.id) {
-              return {
-                ...data.chat,
-              };
-            }
-            return chat;
-          });
-          setChats(changedChats);
-          scrollToBottomRef.current();
-        }
+      if (data.action === "new-message") {
+        setMessages((prev) => [...prev, data.newMessage]);
+        const changedChats = chats.map((chat) => {
+          if (chat.id === data.newMessage.chatId) {
+            return {
+              ...data.chat,
+            };
+          }
+          return chat;
+        });
+        setChats(changedChats);
+        scrollToBottomRef.current();
       }
 
-    socket.on(`company-${companyId}-chat-user-${user.id}`, onChatUser); 
+      if (data.action === "update") {
+        const changedChats = chats.map((chat) => {
+          if (chat.id === data.chat.id) {
+            return {
+              ...data.chat,
+            };
+          }
+          return chat;
+        });
+        setChats(changedChats);
+        scrollToBottomRef.current();
+      }
+    };
+
+    socket.on(`company-${companyId}-chat-user-${user.id}`, onChatUser);
     socket.on(`company-${companyId}-chat`, onChat);
     if (isObject(currentChat) && has(currentChat, "id")) {
       socket.on(`company-${companyId}-chat-${currentChat.id}`, onCurrentChat);
     }
-        
+
     return () => {
       socket.disconnect();
     };
-    
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentChat, socketManager]);
 
@@ -322,7 +325,7 @@ function Chat(props) {
     setLoading(true);
     try {
       const { data } = await api.get(
-        `/chats/${chatId}/messages?pageNumber=${messagesPage}`
+        `/chats/${chatId}/messages?pageNumber=${messagesPage}`,
       );
       setMessagesPage((prev) => prev + 1);
       setMessagesPageInfo(data);
@@ -349,10 +352,9 @@ function Chat(props) {
   const renderGrid = () => {
     return (
       <>
-      <Title>{i18n.t("internalChat.title")}</Title>
-      <Grid className={classes.gridContainer} container>
-        <Grid className={classes.gridItem} md={3} item>
-         
+        <Title>{i18n.t("internalChat.title")}</Title>
+        <Grid className={classes.gridContainer} container>
+          <Grid className={classes.gridItem} md={3} item>
             <div className={classes.btnContainer}>
               <Button
                 onClick={() => {
@@ -365,33 +367,33 @@ function Chat(props) {
                 Nova
               </Button>
             </div>
-        
-          <ChatList
-            chats={chats}
-            pageInfo={chatsPageInfo}
-            loading={loading}
-            handleSelectChat={(chat) => selectChat(chat)}
-            handleDeleteChat={(chat) => deleteChat(chat)}
-            handleEditChat={() => {
-              setDialogType("edit");
-              setShowDialog(true);
-            }}
-          />
-        </Grid>
-        <Grid className={classes.gridItem} md={9} item>
-          {isObject(currentChat) && has(currentChat, "id") && (
-            <ChatMessages
-              chat={currentChat}
-              scrollToBottomRef={scrollToBottomRef}
-              pageInfo={messagesPageInfo}
-              messages={messages}
+
+            <ChatList
+              chats={chats}
+              pageInfo={chatsPageInfo}
               loading={loading}
-              handleSendMessage={sendMessage}
-              handleLoadMore={loadMoreMessages}
+              handleSelectChat={(chat) => selectChat(chat)}
+              handleDeleteChat={(chat) => deleteChat(chat)}
+              handleEditChat={() => {
+                setDialogType("edit");
+                setShowDialog(true);
+              }}
             />
-          )}
+          </Grid>
+          <Grid className={classes.gridItem} md={9} item>
+            {isObject(currentChat) && has(currentChat, "id") && (
+              <ChatMessages
+                chat={currentChat}
+                scrollToBottomRef={scrollToBottomRef}
+                pageInfo={messagesPageInfo}
+                messages={messages}
+                loading={loading}
+                handleSendMessage={sendMessage}
+                handleLoadMore={loadMoreMessages}
+              />
+            )}
+          </Grid>
         </Grid>
-      </Grid>
       </>
     );
   };

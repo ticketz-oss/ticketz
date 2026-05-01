@@ -4,13 +4,13 @@ module.exports = {
     return Promise.all([
       queryInterface.addColumn("ChatMessages", "mediaType", {
         type: DataTypes.TEXT,
-        allowNull: true,
-      }),
+        allowNull: true
+      })
     ]);
   },
   down: (queryInterface: QueryInterface) => {
     return Promise.all([
-      queryInterface.removeColumn("ChatMessages", "mediaType"),
+      queryInterface.removeColumn("ChatMessages", "mediaType")
     ]);
   }
 };

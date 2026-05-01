@@ -1,13 +1,12 @@
-
-var getInitials = function(string) {
+var getInitials = function (string) {
   if (!string) {
     return "";
   }
 
   let initials = "";
 
-  var names = string.trim().split(' ');
-  
+  var names = string.trim().split(" ");
+
   if (names.length > 0) {
     initials = Array.from(names[0])[0];
   }

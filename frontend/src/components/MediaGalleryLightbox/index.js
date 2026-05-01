@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
-import Lightbox, { IconButton as YarlIconButton } from "yet-another-react-lightbox";
+import Lightbox, {
+  IconButton as YarlIconButton,
+} from "yet-another-react-lightbox";
 import Captions from "yet-another-react-lightbox/plugins/captions";
 import Download from "yet-another-react-lightbox/plugins/download";
 import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
@@ -10,14 +12,34 @@ import "yet-another-react-lightbox/plugins/thumbnails.css";
 import "yet-another-react-lightbox/styles.css";
 
 const RotateLeftIcon = (props) => (
-  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+  <svg
+    viewBox="0 0 24 24"
+    width="24"
+    height="24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
     <path d="M3 12a9 9 0 1 0 3-6.7" />
     <polyline points="3 4 3 10 9 10" />
   </svg>
 );
 
 const RotateRightIcon = (props) => (
-  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+  <svg
+    viewBox="0 0 24 24"
+    width="24"
+    height="24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
     <path d="M21 12a9 9 0 1 1-3-6.7" />
     <polyline points="21 4 21 10 15 10" />
   </svg>
@@ -57,7 +79,7 @@ const extractFileName = (url, fallback) => {
 };
 
 const VIDEO_THUMBNAIL_FALLBACK = `data:image/svg+xml,${encodeURIComponent(
-  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180"><rect width="320" height="180" fill="#0f172a"/><circle cx="160" cy="90" r="42" fill="#ffffff" fill-opacity="0.92"/><polygon points="148,68 148,112 186,90" fill="#0f172a"/></svg>'
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180"><rect width="320" height="180" fill="#0f172a"/><circle cx="160" cy="90" r="42" fill="#ffffff" fill-opacity="0.92"/><polygon points="148,68 148,112 186,90" fill="#0f172a"/></svg>',
 )}`;
 
 export const buildMediaGalleryData = (
@@ -71,7 +93,7 @@ export const buildMediaGalleryData = (
     getUpdatedAt = (message) => message?.updatedAt,
     getCreatedAt = (message) => message?.createdAt,
     getDataJson = (message) => message?.dataJson,
-  } = {}
+  } = {},
 ) => {
   return messages.reduce(
     (acc, message) => {
@@ -91,14 +113,15 @@ export const buildMediaGalleryData = (
         data = null;
       }
 
-      const isSticker = !!(data?.message && ("stickerMessage" in data.message));
+      const isSticker = !!(data?.message && "stickerMessage" in data.message);
       if (isSticker) {
         return acc;
       }
 
       const thumbnailUrl = getThumbnailUrl(message);
       const description = getDescription(message) || undefined;
-      const cacheSeed = getUpdatedAt(message) || getCreatedAt(message) || messageId;
+      const cacheSeed =
+        getUpdatedAt(message) || getCreatedAt(message) || messageId;
       const downloadUrl = buildCacheBustedUrl(mediaUrl, cacheSeed);
 
       acc.byMessageId[messageId] = acc.slides.length;
@@ -135,7 +158,7 @@ export const buildMediaGalleryData = (
 
       return acc;
     },
-    { slides: [], byMessageId: {} }
+    { slides: [], byMessageId: {} },
   );
 };
 

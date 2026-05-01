@@ -141,7 +141,7 @@ const Campaigns = () => {
       if (data.action === "delete") {
         dispatch({ type: "DELETE_CAMPAIGN", payload: +data.id });
       }
-    }
+    };
 
     socket.on(`company-${companyId}-campaign`, onCompanyCampaign);
     return () => {
@@ -344,11 +344,10 @@ const Campaigns = () => {
             <>
               {campaigns.map((campaign) => {
                 const canEdit =
-                  campaign.status === "INATIVA"
-                  || (
-                    campaign.status === "PROGRAMADA"
-                    && new Date(campaign.scheduledAt) > new Date(Date.now() + 3600000)
-                  );
+                  campaign.status === "INATIVA" ||
+                  (campaign.status === "PROGRAMADA" &&
+                    new Date(campaign.scheduledAt) >
+                      new Date(Date.now() + 3600000));
                 return (
                   <TableRow key={campaign.id}>
                     <TableCell align="center">{campaign.name}</TableCell>
@@ -405,7 +404,7 @@ const Campaigns = () => {
                         size="small"
                         onClick={() => handleEditCampaign(campaign)}
                       >
-                        { canEdit ? <EditIcon /> : <ZoomInIcon /> }
+                        {canEdit ? <EditIcon /> : <ZoomInIcon />}
                       </IconButton>
 
                       <IconButton
@@ -419,9 +418,8 @@ const Campaigns = () => {
                       </IconButton>
                     </TableCell>
                   </TableRow>
-                )
-              }
-              )}
+                );
+              })}
               {loading && <TableRowSkeleton columns={8} />}
             </>
           </TableBody>

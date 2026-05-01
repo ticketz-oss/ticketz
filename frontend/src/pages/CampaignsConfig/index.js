@@ -90,7 +90,7 @@ const CampaignsConfig = () => {
   const addVariable = () => {
     setSettings((prev) => {
       const variablesExists = settings.variables.filter(
-        (v) => v.key === variable.key
+        (v) => v.key === variable.key,
       );
       const variables = prev.variables;
       if (variablesExists.length === 0) {
@@ -133,7 +133,9 @@ const CampaignsConfig = () => {
         <Box className={classes.tabPanelsContainer}>
           <Grid spacing={2} container>
             <Grid xs={12} item>
-              <Typography component={"h3"}>{i18n.t("campaignsConfig.intervals")}</Typography>
+              <Typography component={"h3"}>
+                {i18n.t("campaignsConfig.intervals")}
+              </Typography>
             </Grid>
             <Grid xs={12} md={4} item>
               <FormControl

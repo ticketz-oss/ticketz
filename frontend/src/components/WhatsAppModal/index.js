@@ -203,11 +203,11 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                   />
                 </div>
                 <div>
-                 <Typography style={{fontSize: "11px"}}>
-                  {`Variaveis: ( {{ms}}=> Turno, 
+                  <Typography style={{ fontSize: "11px" }}>
+                    {`Variaveis: ( {{ms}}=> Turno, 
                   {{name}}=> Nome do contato, 
                   {{protocol}}=> protocolo, {{hora}}=> hora )`}
-                 </Typography>
+                  </Typography>
                 </div>
                 <div>
                   <Field
@@ -241,8 +241,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                     name="transferMessage"
                     spellCheck={true}
                     error={
-                      touched.transferMessage &&
-                      Boolean(errors.transferMessage)
+                      touched.transferMessage && Boolean(errors.transferMessage)
                     }
                     helperText={
                       touched.transferMessage && errors.transferMessage

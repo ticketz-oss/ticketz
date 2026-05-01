@@ -4,7 +4,13 @@ import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
 
 import { i18n } from "../../translate/i18n";
-import { Button, CircularProgress, Grid, TextField, Typography } from "@material-ui/core";
+import {
+  Button,
+  CircularProgress,
+  Grid,
+  TextField,
+  Typography,
+} from "@material-ui/core";
 import { Field, Form, Formik } from "formik";
 import toastError from "../../errors/toastError";
 import { toast } from "react-toastify";
@@ -14,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
   mainPaper: {
     flex: 1,
     padding: theme.spacing(2),
-    paddingBottom: 100
+    paddingBottom: 100,
   },
   mainHeader: {
     marginTop: theme.spacing(1),
@@ -26,67 +32,77 @@ const useStyles = makeStyles((theme) => ({
     maxWidth: 500,
   },
   textRight: {
-    textAlign: "right"
-  }
+    textAlign: "right",
+  },
 }));
 
 const MessagesAPI = () => {
   const classes = useStyles();
 
-  const [formMessageTextData,] = useState({ token: '',number: '', body: '' })
-  const [formMessageMediaData,] = useState({ token: '', number: '', medias: '' })
-  const [file, setFile] = useState({})
+  const [formMessageTextData] = useState({ token: "", number: "", body: "" });
+  const [formMessageMediaData] = useState({
+    token: "",
+    number: "",
+    medias: "",
+  });
+  const [file, setFile] = useState({});
 
   const getEndpoint = () => {
-    return getBackendURL() + '/api/messages/send'
-  }
+    return getBackendURL() + "/api/messages/send";
+  };
 
   const handleSendTextMessage = async (values) => {
     const { number, body } = values;
     const data = { number, body };
     var options = {
-      method: 'POST',
+      method: "POST",
       url: `${getBackendURL()}/api/messages/send`,
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${values.token}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${values.token}`,
       },
-      data
+      data,
     };
-    
-    axios.request(options).then(function (response) {
-      toast.success('Mensagem enviada com sucesso');
-    }).catch(function (error) {
-      toastError(error);
-    });    
-  }
 
-  const handleSendMediaMessage = async (values) => { 
+    axios
+      .request(options)
+      .then(function (response) {
+        toast.success("Mensagem enviada com sucesso");
+      })
+      .catch(function (error) {
+        toastError(error);
+      });
+  };
+
+  const handleSendMediaMessage = async (values) => {
     try {
-      const firstFile =  file[0];
+      const firstFile = file[0];
       const data = new FormData();
-      data.append('number', values.number);
-      data.append('body', firstFile.name);
-      data.append('medias', firstFile);
+      data.append("number", values.number);
+      data.append("body", firstFile.name);
+      data.append("medias", firstFile);
       var options = {
-        method: 'POST',
+        method: "POST",
         url: `${getBackendURL()}/api/messages/send`,
         headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${values.token}`
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${values.token}`,
         },
-        data
+        data,
       };
-      
-      axios.request(options).then(function (response) {
-        toast.success('Mensagem enviada com sucesso');
-      }).catch(function (error) {
-        toastError(error);
-      });      
+
+      axios
+        .request(options)
+        .then(function (response) {
+          toast.success("Mensagem enviada com sucesso");
+        })
+        .catch(function (error) {
+          toastError(error);
+        });
     } catch (err) {
       toastError(err);
     }
-  }
+  };
 
   const renderFormMessageText = () => {
     return (
@@ -97,7 +113,7 @@ const MessagesAPI = () => {
           setTimeout(async () => {
             await handleSendTextMessage(values);
             actions.setSubmitting(false);
-            actions.resetForm()
+            actions.resetForm();
           }, 400);
         }}
         className={classes.elementMargin}
@@ -146,25 +162,27 @@ const MessagesAPI = () => {
               </Grid>
               <Grid item xs={12} className={classes.textRight}>
                 <Button
-									type="submit"
-									color="primary"
-									variant="contained"
-									className={classes.btnWrapper}
-								>
-									{isSubmitting ? (
-										<CircularProgress
-											size={24}
-											className={classes.buttonProgress}
-										/>
-									) : 'Enviar'}
-								</Button>
+                  type="submit"
+                  color="primary"
+                  variant="contained"
+                  className={classes.btnWrapper}
+                >
+                  {isSubmitting ? (
+                    <CircularProgress
+                      size={24}
+                      className={classes.buttonProgress}
+                    />
+                  ) : (
+                    "Enviar"
+                  )}
+                </Button>
               </Grid>
             </Grid>
           </Form>
         )}
       </Formik>
-    )
-  }
+    );
+  };
 
   const renderFormMessageMedia = () => {
     return (
@@ -173,12 +191,11 @@ const MessagesAPI = () => {
         enableReinitialize={true}
         onSubmit={(values, actions) => {
           setTimeout(async () => {
-        
             await handleSendMediaMessage(values);
             actions.setSubmitting(false);
-            actions.resetForm()
-            document.getElementById('medias').files = null
-            document.getElementById('medias').value = null
+            actions.resetForm();
+            document.getElementById("medias").files = null;
+            document.getElementById("medias").value = null;
           }, 400);
         }}
         className={classes.elementMargin}
@@ -213,39 +230,46 @@ const MessagesAPI = () => {
                 />
               </Grid>
               <Grid item xs={12}>
-                <input type="file" name="medias" id="medias" required onChange={(e) => setFile(e.target.files)} />
+                <input
+                  type="file"
+                  name="medias"
+                  id="medias"
+                  required
+                  onChange={(e) => setFile(e.target.files)}
+                />
               </Grid>
               <Grid item xs={12} className={classes.textRight}>
                 <Button
-									type="submit"
-									color="primary"
-									variant="contained"
-									className={classes.btnWrapper}
-								>
-									{isSubmitting ? (
-										<CircularProgress
-											size={24}
-											className={classes.buttonProgress}
-										/>
-									) : 'Enviar'}
-								</Button>
+                  type="submit"
+                  color="primary"
+                  variant="contained"
+                  className={classes.btnWrapper}
+                >
+                  {isSubmitting ? (
+                    <CircularProgress
+                      size={24}
+                      className={classes.buttonProgress}
+                    />
+                  ) : (
+                    "Enviar"
+                  )}
+                </Button>
               </Grid>
             </Grid>
           </Form>
         )}
       </Formik>
-    )
-  }
+    );
+  };
 
   return (
-    <Paper
-      className={classes.mainPaper}
-      variant="outlined"
-    >
-      <Typography variant="h5">
-        Documentação para envio de mensagens
-      </Typography>
-      <Typography variant="h6" color="primary" className={classes.elementMargin}>
+    <Paper className={classes.mainPaper} variant="outlined">
+      <Typography variant="h5">Documentação para envio de mensagens</Typography>
+      <Typography
+        variant="h6"
+        color="primary"
+        className={classes.elementMargin}
+      >
         Métodos de Envio
       </Typography>
       <Typography component="div">
@@ -254,33 +278,60 @@ const MessagesAPI = () => {
           <li>Mensagens de Media</li>
         </ol>
       </Typography>
-      <Typography variant="h6" color="primary" className={classes.elementMargin}>
+      <Typography
+        variant="h6"
+        color="primary"
+        className={classes.elementMargin}
+      >
         Instruções
       </Typography>
       <Typography className={classes.elementMargin} component="div">
-        <b>Observações importantes</b><br />
+        <b>Observações importantes</b>
+        <br />
         <ul>
-          <li>Antes de enviar mensagens, é necessário o cadastro do token vinculado à conexão que enviará as mensagens. <br/>Para realizar o cadastro acesse o menu "Conexões", clique no botão editar da conexão e insira o token no devido campo.</li>
+          <li>
+            Antes de enviar mensagens, é necessário o cadastro do token
+            vinculado à conexão que enviará as mensagens. <br />
+            Para realizar o cadastro acesse o menu "Conexões", clique no botão
+            editar da conexão e insira o token no devido campo.
+          </li>
           <li>
             O campo número aceita dois tipos de informação:
-              <ul>
-                <li><b>Número de Whatsapp:</b> Qualquer número de whatsapp completo iniciando pelo código do país (BR=55)</li>
-                <li><b>Whatsapp JID:</b> Qualquer identificador do Whatsapp, para grupos ele é um número extenso seguido de @g.us</li>
-              </ul>
+            <ul>
+              <li>
+                <b>Número de Whatsapp:</b> Qualquer número de whatsapp completo
+                iniciando pelo código do país (BR=55)
+              </li>
+              <li>
+                <b>Whatsapp JID:</b> Qualquer identificador do Whatsapp, para
+                grupos ele é um número extenso seguido de @g.us
+              </li>
+            </ul>
           </li>
         </ul>
       </Typography>
-      <Typography variant="h6" color="primary" className={classes.elementMargin}>
+      <Typography
+        variant="h6"
+        color="primary"
+        className={classes.elementMargin}
+      >
         1. Mensagens de Texto
       </Typography>
       <Grid container>
         <Grid item xs={12} sm={6}>
           <Typography className={classes.elementMargin} component="div">
-            <p>Seguem abaixo a lista de informações necessárias para envio das mensagens de texto:</p>
+            <p>
+              Seguem abaixo a lista de informações necessárias para envio das
+              mensagens de texto:
+            </p>
             <b>Endpoint: </b> {getEndpoint()} <br />
             <b>Método: </b> POST <br />
-            <b>Headers: </b> Authorization ("Bearer " + token cadastrado) e Content-Type (application/json) <br />
-            <b>Body: </b> {"{ \"number\": \"558599999999\", \"body\": \"Sua mensagem\", \"saveOnTicket\": true, \"linkPreview\": true }"}
+            <b>Headers: </b> Authorization ("Bearer " + token cadastrado) e
+            Content-Type (application/json) <br />
+            <b>Body: </b>{" "}
+            {
+              '{ "number": "558599999999", "body": "Sua mensagem", "saveOnTicket": true, "linkPreview": true }'
+            }
           </Typography>
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -290,16 +341,24 @@ const MessagesAPI = () => {
           {renderFormMessageText()}
         </Grid>
       </Grid>
-      <Typography variant="h6" color="primary" className={classes.elementMargin}>
+      <Typography
+        variant="h6"
+        color="primary"
+        className={classes.elementMargin}
+      >
         2. Mensagens de Media
       </Typography>
       <Grid container>
         <Grid item xs={12} sm={6}>
           <Typography className={classes.elementMargin} component="div">
-            <p>Seguem abaixo a lista de informações necessárias para envio das mensagens de texto:</p>
+            <p>
+              Seguem abaixo a lista de informações necessárias para envio das
+              mensagens de texto:
+            </p>
             <b>Endpoint: </b> {getEndpoint()} <br />
             <b>Método: </b> POST <br />
-            <b>Headers: </b> Authorization ("Bearer " + token cadastrado) e Content-Type (multipart/form-data) <br />
+            <b>Headers: </b> Authorization ("Bearer " + token cadastrado) e
+            Content-Type (multipart/form-data) <br />
             <b>FormData: </b> <br />
             <ul>
               <li>

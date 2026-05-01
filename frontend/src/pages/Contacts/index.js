@@ -38,10 +38,17 @@ import { SocketContext } from "../../context/Socket/SocketContext";
 import { generateColor } from "../../helpers/colorGenerator";
 import { getInitials } from "../../helpers/getInitials";
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCloudArrowUp } from '@fortawesome/free-solid-svg-icons';
-import { faDownload } from '@fortawesome/free-solid-svg-icons';
-import { FormControl, Grid, InputLabel, MenuItem, Select, Tooltip } from "@material-ui/core";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCloudArrowUp } from "@fortawesome/free-solid-svg-icons";
+import { faDownload } from "@fortawesome/free-solid-svg-icons";
+import {
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  Tooltip,
+} from "@material-ui/core";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_CONTACTS") {
@@ -94,7 +101,7 @@ const useStyles = makeStyles((theme) => ({
     overflowY: "scroll",
     ...theme.scrollbarStyles,
   },
-  
+
   selectContainer: {
     width: "100%",
     textAlign: "left",
@@ -114,8 +121,7 @@ const useStyles = makeStyles((theme) => ({
     overflow: "hidden",
     textOverflow: "ellipsis",
   },
-  contactName: {
-  }
+  contactName: {},
 }));
 
 const Contacts = () => {
@@ -140,7 +146,7 @@ const Contacts = () => {
   const socketManager = useContext(SocketContext);
 
   useEffect(() => {
-    api.get('/whatsapp').then(({ data }) => {
+    api.get("/whatsapp").then(({ data }) => {
       setConnections(data);
       data.map((connection) => {
         if (connection.channel === "whatsapp" && connection.isDefault) {
@@ -149,7 +155,7 @@ const Contacts = () => {
       });
     });
   }, []);
-  
+
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
@@ -187,8 +193,8 @@ const Contacts = () => {
       if (data.action === "delete") {
         dispatch({ type: "DELETE_CONTACT", payload: +data.contactId });
       }
-    }
-    
+    };
+
     socket.on(`company-${companyId}-contact`, onContact);
 
     return () => {
@@ -247,7 +253,7 @@ const Contacts = () => {
       loadMore();
     }
   };
-  
+
   const importCsv = async () => {
     const fileInput = document.createElement("input");
     fileInput.type = "file";
@@ -258,21 +264,24 @@ const Contacts = () => {
       const formData = new FormData();
       formData.append("contacts", file);
       try {
-        api.post("/contacts/importCsv", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }).then(() => {
-          toast.success(i18n.t("contacts.toasts.imported"));
-        }).catch((err) => {
-          toastError(err);
-        });
+        api
+          .post("/contacts/importCsv", formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          })
+          .then(() => {
+            toast.success(i18n.t("contacts.toasts.imported"));
+          })
+          .catch((err) => {
+            toastError(err);
+          });
       } catch (err) {
         toastError(err);
       }
     };
-  }
-  
+  };
+
   const exportCsv = async () => {
     try {
       const { data } = await api.get("/contacts/exportCsv", {
@@ -287,8 +296,8 @@ const Contacts = () => {
     } catch (err) {
       toastError(err);
     }
-  }
-  
+  };
+
   return (
     <MainContainer className={classes.mainContainer}>
       <ContactModal
@@ -298,14 +307,10 @@ const Contacts = () => {
         contactId={selectedContactId}
       ></ContactModal>
       <ConfirmationModal
-        title={
-          `${i18n.t("contacts.confirmationModal.deleteTitle")} ${deletingContact?.name}?`
-        }
+        title={`${i18n.t("contacts.confirmationModal.deleteTitle")} ${deletingContact?.name}?`}
         open={deleteConfirmOpen}
         onClose={setDeleteConfirmOpen}
-        onConfirm={() =>
-          handleDeleteContact(deletingContact.id)
-        }
+        onConfirm={() => handleDeleteContact(deletingContact.id)}
       >
         {i18n.t("contacts.confirmationModal.deleteMessage")}
       </ConfirmationModal>
@@ -315,9 +320,7 @@ const Contacts = () => {
         okEnabled={importConnectionId}
         open={importConfirmOpen}
         onClose={setImportConfirmOpen}
-        onConfirm={() =>
-          handleimportContact()
-        }
+        onConfirm={() => handleimportContact()}
       >
         <Grid container spacing={2}>
           <Grid item xs={12}>
@@ -337,12 +340,14 @@ const Contacts = () => {
                 onChange={(e) => setImportConnectionId(e.target.value)}
               >
                 <MenuItem value="">&nbsp;</MenuItem>
-                {connections.map((connection) => (
-                  connection.channel === "whatsapp" &&
-                  <MenuItem key={connection.id} value={connection.id}>
-                    {connection.name}
-                  </MenuItem>
-                ))}
+                {connections.map(
+                  (connection) =>
+                    connection.channel === "whatsapp" && (
+                      <MenuItem key={connection.id} value={connection.id}>
+                        {connection.name}
+                      </MenuItem>
+                    ),
+                )}
               </Select>
             </FormControl>
           </Grid>
@@ -364,21 +369,25 @@ const Contacts = () => {
               ),
             }}
           />
-          {user?.profile === 'admin' &&
+          {user?.profile === "admin" && (
             <>
               <Button
                 variant="contained"
                 color="primary"
                 onClick={() => importCsv()}
               >
-                &nbsp;<FontAwesomeIcon icon={faCloudArrowUp} />&nbsp;
+                &nbsp;
+                <FontAwesomeIcon icon={faCloudArrowUp} />
+                &nbsp;
               </Button>
               <Button
                 variant="contained"
                 color="primary"
                 onClick={() => exportCsv()}
               >
-                &nbsp;<FontAwesomeIcon icon={faDownload} />&nbsp;
+                &nbsp;
+                <FontAwesomeIcon icon={faDownload} />
+                &nbsp;
               </Button>
               <Button
                 variant="contained"
@@ -388,7 +397,7 @@ const Contacts = () => {
                 {i18n.t("contacts.buttons.import")}
               </Button>
             </>
-          }
+          )}
           <Button
             variant="contained"
             color="primary"
@@ -407,7 +416,9 @@ const Contacts = () => {
           <TableHead>
             <TableRow>
               <TableCell padding="checkbox" />
-              <TableCell className={classes.contactName}>{i18n.t("contacts.table.name")}</TableCell>
+              <TableCell className={classes.contactName}>
+                {i18n.t("contacts.table.name")}
+              </TableCell>
               <TableCell align="center">
                 {i18n.t("contacts.table.whatsapp")}
               </TableCell>
@@ -424,41 +435,54 @@ const Contacts = () => {
               {contacts.map((contact) => (
                 <TableRow key={contact.id}>
                   <TableCell style={{ paddingRight: 0 }}>
-                    {<Avatar style={{ backgroundColor: generateColor(contact?.number), fontWeight: "bold", color: "white" }} src={contact.profilePicUrl}>{getInitials(contact?.name)}</Avatar>}
+                    {
+                      <Avatar
+                        style={{
+                          backgroundColor: generateColor(contact?.number),
+                          fontWeight: "bold",
+                          color: "white",
+                        }}
+                        src={contact.profilePicUrl}
+                      >
+                        {getInitials(contact?.name)}
+                      </Avatar>
+                    }
                   </TableCell>
                   <TableCell className={classes.contactName}>
                     {contact.name}
                     <div className={classes.tagsdiv}>
-                      {
-                        contact.tags.map((tag) => (
-                          <Tooltip title={tag.name} placement="top" arrow>
-                            <div
-                              key={tag.id}
-                              className={classes.tag}
-                              style={{
-                                backgroundColor: tag.color
-                              }}
-                            >
-                              {tag.name}
-                            </div>
-                          </Tooltip>
-                        ))
-                      }
+                      {contact.tags.map((tag) => (
+                        <Tooltip title={tag.name} placement="top" arrow>
+                          <div
+                            key={tag.id}
+                            className={classes.tag}
+                            style={{
+                              backgroundColor: tag.color,
+                            }}
+                          >
+                            {tag.name}
+                          </div>
+                        </Tooltip>
+                      ))}
                     </div>
                   </TableCell>
                   <TableCell align="center">{contact.number}</TableCell>
                   <TableCell align="center">{contact.email}</TableCell>
                   <TableCell align="center">
-                    {!contact.isGroup && <IconButton
-                      size="small"
-                      onClick={() => window.mentionClick({
-                        contactId: contact.id,
-                        name: contact?.name,
-                        number: contact?.number
-                      })}
-                    >
-                      <WhatsAppIcon />
-                    </IconButton>}
+                    {!contact.isGroup && (
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          window.mentionClick({
+                            contactId: contact.id,
+                            name: contact?.name,
+                            number: contact?.number,
+                          })
+                        }
+                      >
+                        <WhatsAppIcon />
+                      </IconButton>
+                    )}
                     <IconButton
                       size="small"
                       onClick={() => hadleEditContact(contact.id)}

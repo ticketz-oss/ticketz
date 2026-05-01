@@ -30,7 +30,7 @@ const useAuth = () => {
     },
     (error) => {
       Promise.reject(error);
-    }
+    },
   );
 
   api.interceptors.response.use(
@@ -56,7 +56,7 @@ const useAuth = () => {
         setIsAuth(false);
       }
       return Promise.reject(error);
-    }
+    },
   );
 
   useEffect(() => {
@@ -79,15 +79,15 @@ const useAuth = () => {
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
     if (!companyId) {
-		return () => {};
-	}
+      return () => {};
+    }
     const socket = socketManager.GetSocket(companyId);
 
     const onCompanyUserUseAuth = (data) => {
       if (data.action === "update" && data.user.id === user.id) {
         setUser(data.user);
       }
-    }
+    };
 
     socket.on(`company-${companyId}-user`, onCompanyUserUseAuth);
 
@@ -97,25 +97,24 @@ const useAuth = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-
   const posLogin = (data, impersonated = false) => {
     const {
       user: { company },
-      token
+      token,
     } = data;
 
     const { companyId, userId } = decodeToken(token);
 
     if (has(company, "settings") && isArray(company.settings)) {
       const setting = company.settings.find(
-        (s) => s.key === "campaignsEnabled"
+        (s) => s.key === "campaignsEnabled",
       );
       if (setting && setting.value === "true") {
         localStorage.setItem("cshow", null); //regra pra exibir campanhas
       }
     }
 
-    moment.locale('pt-br');
+    moment.locale("pt-br");
     const dueDate = data.user.company.dueDate;
     const hoje = moment(moment()).format("DD/MM/yyyy");
     const vencimento = moment(dueDate).format("DD/MM/yyyy");
@@ -133,9 +132,13 @@ const useAuth = () => {
     setUser(data.user);
     setIsAuth(true);
     if (dias < 0) {
-      toast.warn(`Sua assinatura venceu há ${Math.round(dias) * -1} ${Math.round(dias) * -1 === 1 ? 'dia' : 'dias'} `);
+      toast.warn(
+        `Sua assinatura venceu há ${Math.round(dias) * -1} ${Math.round(dias) * -1 === 1 ? "dia" : "dias"} `,
+      );
     } else if (Math.round(dias) < 5) {
-      toast.warn(`Sua assinatura vence em ${Math.round(dias)} ${Math.round(dias) === 1 ? 'dia' : 'dias'} `);
+      toast.warn(
+        `Sua assinatura vence em ${Math.round(dias)} ${Math.round(dias) === 1 ? "dia" : "dias"} `,
+      );
     } else {
       toast.success(i18n.t("auth.toasts.success"));
     }
@@ -144,7 +147,7 @@ const useAuth = () => {
     } else {
       history.push("/tickets");
     }
-  }
+  };
 
   const handleLogin = async (userData) => {
     setLoading(true);

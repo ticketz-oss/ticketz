@@ -37,7 +37,8 @@ export function PhoneNumberInput(props) {
 
   useEffect(() => {
     if (!value && countries.length) {
-      const defaultCountry = countries.find(c => c.iso2 === currentCountry) || countries[0];
+      const defaultCountry =
+        countries.find((c) => c.iso2 === currentCountry) || countries[0];
       if (defaultCountry && !countryCode) {
         setCountryCode(defaultCountry.phonecode);
       }
@@ -48,14 +49,15 @@ export function PhoneNumberInput(props) {
     if (value && !isNumeric(value)) {
       setIsStandard(true);
     } else if (value && countries.length) {
-      const found = countries.find(c => value.startsWith(c.phonecode));
+      const found = countries.find((c) => value.startsWith(c.phonecode));
       if (found) {
         setCountryCode(found.phonecode);
         setLocalNumber(value.slice(found.phonecode.length));
         setIsStandard(false);
         return;
       }
-      const defaultCountry = countries.find(c => c.iso2 === currentCountry) || countries[0];
+      const defaultCountry =
+        countries.find((c) => c.iso2 === currentCountry) || countries[0];
       setCountryCode(defaultCountry.phonecode);
       setLocalNumber(value);
       setIsStandard(false);
@@ -90,7 +92,7 @@ export function PhoneNumberInput(props) {
     );
   }
 
-  const selectedCountry = countries.find(c => c.phonecode === countryCode);
+  const selectedCountry = countries.find((c) => c.phonecode === countryCode);
 
   return (
     <div style={{ display: "flex", alignItems: "center" }}>
@@ -107,7 +109,7 @@ export function PhoneNumberInput(props) {
           renderValue: () =>
             selectedCountry
               ? `${selectedCountry.emoji} +${selectedCountry.phonecode}`
-              : `+${countryCode}`
+              : `+${countryCode}`,
         }}
       >
         {countries.map((option) => (

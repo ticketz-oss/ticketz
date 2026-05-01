@@ -26,7 +26,7 @@ import { Box, Button } from "@material-ui/core";
 import { TagsFilter } from "../TagsFilter";
 import { UsersFilter } from "../UsersFilter";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPeopleGroup } from '@fortawesome/free-solid-svg-icons';
+import { faPeopleGroup } from "@fortawesome/free-solid-svg-icons";
 import useSettings from "../../hooks/useSettings";
 import { ContactSelect } from "../ContactSelect";
 
@@ -43,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
 
   tabsHeader: {
     flex: "none",
-   // backgroundColor: "#eee",
+    // backgroundColor: "#eee",
   },
 
   settingsIcon: {
@@ -134,12 +134,13 @@ const TicketsManagerTabs = () => {
   const [showTabGroups, setShowTabGroups] = useState(false);
 
   useEffect(() => {
-    Promise.all([
-      getSetting("CheckMsgIsGroup"),
-      getSetting("groupsTab")
-    ]).then(([ignoreGroups, groupsTab]) => {
-      setShowTabGroups(ignoreGroups === "disabled" && groupsTab === "enabled");
-    });
+    Promise.all([getSetting("CheckMsgIsGroup"), getSetting("groupsTab")]).then(
+      ([ignoreGroups, groupsTab]) => {
+        setShowTabGroups(
+          ignoreGroups === "disabled" && groupsTab === "enabled",
+        );
+      },
+    );
   }, []);
 
   useEffect(() => {
@@ -203,7 +204,6 @@ const TicketsManagerTabs = () => {
       <NewTicketModal
         modalOpen={newTicketModalOpen}
         onClose={(ticket) => {
-       
           handleCloseOrOpenTicket(ticket);
         }}
       />
@@ -220,13 +220,20 @@ const TicketsManagerTabs = () => {
             value={"open"}
             icon={<MoveToInboxIcon />}
             label={i18n.t("tickets.tabs.open.title")}
-            classes={{ root: showTabGroups ? classes.tabWithGroups : classes.tab }}
+            classes={{
+              root: showTabGroups ? classes.tabWithGroups : classes.tab,
+            }}
           />
 
-          { showTabGroups && (
+          {showTabGroups && (
             <Tab
               value={"groups"}
-              icon={<FontAwesomeIcon className={classes.icon24} icon={faPeopleGroup} />}
+              icon={
+                <FontAwesomeIcon
+                  className={classes.icon24}
+                  icon={faPeopleGroup}
+                />
+              }
               label={i18n.t("tickets.tabs.groups.title")}
               classes={{ root: classes.tabWithGroups }}
             />
@@ -236,14 +243,18 @@ const TicketsManagerTabs = () => {
             value={"closed"}
             icon={<CheckBoxIcon />}
             label={i18n.t("tickets.tabs.closed.title")}
-            classes={{ root: showTabGroups ? classes.tabWithGroups : classes.tab }}
+            classes={{
+              root: showTabGroups ? classes.tabWithGroups : classes.tab,
+            }}
           />
 
           <Tab
             value={"search"}
             icon={<SearchIcon />}
             label={i18n.t("tickets.tabs.search.title")}
-            classes={{ root: showTabGroups ? classes.tabWithGroups : classes.tab }}
+            classes={{
+              root: showTabGroups ? classes.tabWithGroups : classes.tab,
+            }}
           />
         </Tabs>
       </Paper>
@@ -268,28 +279,28 @@ const TicketsManagerTabs = () => {
             >
               {i18n.t("ticketsManager.buttons.newTicket")}
             </Button>
-            { tab === "open" && (
-            <Can
-              role={user.profile}
-              perform="tickets-manager:showall"
-              yes={() => (
-                <FormControlLabel
-                  label={i18n.t("tickets.buttons.showAll")}
-                  labelPlacement="start"
-                  control={
-                    <Switch
-                      size="small"
-                      checked={showAllTickets}
-                      onChange={() =>
-                        setShowAllTickets((prevState) => !prevState)
-                      }
-                      name="showAllTickets"
-                      color="primary"
-                    />
-                  }
-                />
-              )}
-            />
+            {tab === "open" && (
+              <Can
+                role={user.profile}
+                perform="tickets-manager:showall"
+                yes={() => (
+                  <FormControlLabel
+                    label={i18n.t("tickets.buttons.showAll")}
+                    labelPlacement="start"
+                    control={
+                      <Switch
+                        size="small"
+                        checked={showAllTickets}
+                        onChange={() =>
+                          setShowAllTickets((prevState) => !prevState)
+                        }
+                        name="showAllTickets"
+                        color="primary"
+                      />
+                    }
+                  />
+                )}
+              />
             )}
           </>
         )}
@@ -359,7 +370,7 @@ const TicketsManagerTabs = () => {
           showAll={true}
           selectedQueueIds={selectedQueueIds}
           showTabGroups={showTabGroups}
-          />
+        />
       </TabPanel>
       <TabPanel value={tab} name="groups" className={classes.ticketsWrapper}>
         <TicketsList
@@ -371,9 +382,12 @@ const TicketsManagerTabs = () => {
       </TabPanel>
       <TabPanel value={tab} name="search" className={classes.ticketsWrapper}>
         <Box style={{ paddingRight: 10, paddingLeft: 10 }}>
-        <ContactSelect onSelected={(contactId) => {
-          setSelectedContact(contactId);
-        }} allowCreate={false} />
+          <ContactSelect
+            onSelected={(contactId) => {
+              setSelectedContact(contactId);
+            }}
+            allowCreate={false}
+          />
         </Box>
         <TagsFilter onFiltered={handleSelectedTags} />
         {profile === "admin" && (

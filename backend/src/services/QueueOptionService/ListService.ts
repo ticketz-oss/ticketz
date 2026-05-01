@@ -7,8 +7,11 @@ type QueueOptionFilter = {
   parentId: number;
 };
 
-const ListService = async ({ queueId, queueOptionId, parentId }: QueueOptionFilter): Promise<QueueOption[]> => {
-
+const ListService = async ({
+  queueId,
+  queueOptionId,
+  parentId
+}: QueueOptionFilter): Promise<QueueOption[]> => {
   const whereOptions: WhereOptions = {};
 
   if (queueId) {

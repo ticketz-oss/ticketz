@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { FormControl, InputLabel, Select, MenuItem } from "@material-ui/core";
-import { i18n } from '../../translate/i18n';
+import { i18n } from "../../translate/i18n";
 import { loadedCountries } from "../../helpers/loadCountries";
 
-const loadedCountryes = await loadedCountries
+const loadedCountryes = await loadedCountries;
 
 export function getCountryes() {
   return loadedCountryes;
 }
 
 export function getPhoneCode(iso2) {
-  const country = loadedCountryes.find(country => country.iso2 === iso2);
+  const country = loadedCountryes.find((country) => country.iso2 === iso2);
   return country ? country.phonecode : "";
 }
 
@@ -23,7 +23,9 @@ export function SelectCountry({ className, label, value, name, onChange }) {
 
   return (
     <FormControl className={className}>
-      <InputLabel id="country-label">{label || i18n.t('addressForm.country')}</InputLabel>
+      <InputLabel id="country-label">
+        {label || i18n.t("addressForm.country")}
+      </InputLabel>
       <Select
         labelId="country-label"
         id="country"

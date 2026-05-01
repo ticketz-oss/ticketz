@@ -157,7 +157,8 @@ const messages = {
           importTitlte: "Importer des contacts",
           deleteMessage:
             "Êtes-vous sûr de vouloir supprimer ce contact ? Toutes les interventions associées seront perdues.",
-          importMessage: "Voulez-vous importer tous les contacts du téléphone ?",
+          importMessage:
+            "Voulez-vous importer tous les contacts du téléphone ?",
         },
         buttons: {
           import: "Importer des Contacts",
@@ -208,7 +209,7 @@ const messages = {
           transferMessage: "Message de transfert",
           token: "Jeton",
         },
-         toasts: {
+        toasts: {
           saved: "File d'attente enregistrée avec succès",
         },
         buttons: {
@@ -294,11 +295,12 @@ const messages = {
       },
       uploads: {
         titles: {
-          titleUploadMsgDragDrop: "GLISSEZ ET DÉPOSEZ LES FICHIERS DANS LE CHAMP CI-DESSOUS",
+          titleUploadMsgDragDrop:
+            "GLISSEZ ET DÉPOSEZ LES FICHIERS DANS LE CHAMP CI-DESSOUS",
           titleFileList: "Liste des fichiers",
         },
       },
-       todolist: {
+      todolist: {
         title: "Liste des tâches",
         form: {
           name: "Nom de la tâche",
@@ -688,19 +690,22 @@ const messages = {
         buttonclose: "Fermer",
         title: "À propos de ticketz",
         abouttitle: "Origine et améliorations",
-        aboutdetail: "Le ticketz est dérivé indirectement du projet Whaticket avec des améliorations partagées par les développeurs du système EquipeChat via la chaîne VemFazer sur YouTube, puis améliorées par Claudemir Todo Bom",
+        aboutdetail:
+          "Le ticketz est dérivé indirectement du projet Whaticket avec des améliorations partagées par les développeurs du système EquipeChat via la chaîne VemFazer sur YouTube, puis améliorées par Claudemir Todo Bom",
         aboutauthorsite: "Site de l'auteur",
         aboutwhaticketsite: "Site de la communauté Whaticket sur Github",
         aboutvemfazersite: "Site de la chaîne Vem Fazer sur Github",
         licenseheading: "Licence Open Source",
-        licensedetail: "Le ticketz est sous licence GNU Affero General Public License version 3, ce qui signifie que tout utilisateur ayant accès à cette application a le droit d'accéder au code source. Plus d'informations dans les liens ci-dessous :",
+        licensedetail:
+          "Le ticketz est sous licence GNU Affero General Public License version 3, ce qui signifie que tout utilisateur ayant accès à cette application a le droit d'accéder au code source. Plus d'informations dans les liens ci-dessous :",
         licensefulltext: "Texte complet de la licence",
         licensesourcecode: "Code source de ticketz",
       },
       schedules: {
         title: "Planifications",
         confirmationModal: {
-          deleteTitle: "Êtes-vous sûr de vouloir supprimer cette Planification ?",
+          deleteTitle:
+            "Êtes-vous sûr de vouloir supprimer cette Planification ?",
           deleteMessage: "Cette action est irréversible.",
         },
         table: {
@@ -749,14 +754,17 @@ const messages = {
         logoHint: "Préférez le SVG et un ratio de 28:10",
         faviconHint: "Préférez une image SVG carrée ou PNG 512x512",
         loginLinks: "Liens de connexion",
-        loginLinksHint: "Ajoutez des paires titre/URL à afficher sous le bloc de connexion sur ordinateur et mobile.",
+        loginLinksHint:
+          "Ajoutez des paires titre/URL à afficher sous le bloc de connexion sur ordinateur et mobile.",
         linkTitle: "Titre du lien",
         linkUrl: "URL du lien",
         removeLink: "Supprimer le lien",
         sidePanelImage: "Image latérale de connexion",
-        sidePanelImageHint: "Affichée à gauche du formulaire de connexion sur les écrans desktop.",
+        sidePanelImageHint:
+          "Affichée à gauche du formulaire de connexion sur les écrans desktop.",
         backgroundContent: "Contenu d'arrière-plan de connexion",
-        backgroundContentHint: "Accepte les images, fichiers SVG et vidéos MP4 pour l'arrière-plan de l'écran de connexion.",
+        backgroundContentHint:
+          "Accepte les images, fichiers SVG et vidéos MP4 pour l'arrière-plan de l'écran de connexion.",
         noFileSelected: "Aucun fichier sélectionné pour le moment.",
       },
       settings: {
@@ -869,7 +877,8 @@ const messages = {
           },
         },
         keepQueueAndUser: {
-          title: "Maintenir la file d'attente et l'utilisateur dans le ticket fermé",
+          title:
+            "Maintenir la file d'attente et l'utilisateur dans le ticket fermé",
           options: {
             enabled: "Activé",
             disabled: "Désactivé",
@@ -938,7 +947,8 @@ const messages = {
         appointmentsModal: {
           title: "Observations du Service",
           textarea: "Observation",
-          placeholder: "Insérez ici les informations que vous souhaitez enregistrer",
+          placeholder:
+            "Insérez ici les informations que vous souhaitez enregistrer",
         },
         confirmationModal: {
           title: "Supprimer le ticket du contact",
@@ -996,13 +1006,17 @@ const messages = {
             dias7: "7 Jours",
             dias90: "90 Jours",
           },
-          readreceipts: "Pour mettre à jour la confidentialité des accusés de lecture",
-          profile: "Pour mettre à jour la confidentialité de la photo de profil",
+          readreceipts:
+            "Pour mettre à jour la confidentialité des accusés de lecture",
+          profile:
+            "Pour mettre à jour la confidentialité de la photo de profil",
           status: "Pour mettre à jour la confidentialité des statuts",
           online: "Pour mettre à jour la confidentialité en ligne",
           last: "Pour mettre à jour la confidentialité du Dernier Vu",
-          groupadd: "Pour mettre à jour la confidentialité de l'ajout aux groupes",
-          calladd: "Pour mettre à jour la confidentialité de l'ajout aux appels",
+          groupadd:
+            "Pour mettre à jour la confidentialité de l'ajout aux groupes",
+          calladd:
+            "Pour mettre à jour la confidentialité de l'ajout aux appels",
           disappearing: "Pour mettre à jour le Mode Disparition par Défaut",
         },
       },
@@ -1017,7 +1031,8 @@ const messages = {
           "Le backend démarre et n'est pas encore prêt. Nouvelle tentative automatique.",
       },
       backendErrors: {
-        ERR_NO_OTHER_WHATSAPP: "Il doit y avoir au moins un WhatsApp par défaut.",
+        ERR_NO_OTHER_WHATSAPP:
+          "Il doit y avoir au moins un WhatsApp par défaut.",
         ERR_NO_DEF_WAPP_FOUND:
           "Aucun WhatsApp par défaut trouvé. Vérifiez la page des connexions.",
         ERR_WAPP_NOT_INITIALIZED:
@@ -1037,15 +1052,18 @@ const messages = {
         ERR_SESSION_EXPIRED: "Session expirée. Veuillez vous reconnecter.",
         ERR_USER_CREATION_DISABLED:
           "La création d'utilisateur a été désactivée par l'administrateur.",
-        ERR_NO_PERMISSION: "Vous n'avez pas la permission d'accéder à cette fonctionnalité.",
+        ERR_NO_PERMISSION:
+          "Vous n'avez pas la permission d'accéder à cette fonctionnalité.",
         ERR_DUPLICATED_CONTACT: "Il existe déjà un contact avec ce numéro.",
         ERR_NO_SETTING_FOUND: "Aucun paramètre trouvé avec cet ID.",
         ERR_NO_CONTACT_FOUND: "Aucun contact trouvé avec cet ID.",
         ERR_NO_TICKET_FOUND: "Aucun ticket trouvé avec cet ID.",
         ERR_NO_USER_FOUND: "Aucun utilisateur trouvé avec cet ID.",
         ERR_NO_WAPP_FOUND: "Aucun WhatsApp trouvé avec cet ID.",
-        ERR_CREATING_MESSAGE: "Erreur lors de la création du message dans la base de données.",
-        ERR_CREATING_TICKET: "Erreur lors de la création du ticket dans la base de données.",
+        ERR_CREATING_MESSAGE:
+          "Erreur lors de la création du message dans la base de données.",
+        ERR_CREATING_TICKET:
+          "Erreur lors de la création du ticket dans la base de données.",
         ERR_FETCH_WAPP_MSG:
           "Erreur lors de la récupération du message sur WhatsApp, il est peut-être trop ancien.",
         ERR_QUEUE_COLOR_ALREADY_EXISTS:
@@ -1056,7 +1074,8 @@ const messages = {
       ticketz: {
         registration: {
           header: "Inscrivez-vous à la base d'utilisateurs de Ticketz",
-          description: "Remplissez les champs ci-dessous pour vous inscrire à la base d'utilisateurs de Ticketz et recevoir des nouvelles sur le projet.",
+          description:
+            "Remplissez les champs ci-dessous pour vous inscrire à la base d'utilisateurs de Ticketz et recevoir des nouvelles sur le projet.",
           name: "Nom",
           country: "Pays",
           phoneNumber: "Numéro WhatsApp",

@@ -5,7 +5,12 @@ import { i18n } from "../../translate/i18n";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 
-export function UsersFilter({ onFiltered, initialUsers, excludeId, multiple = false }) {
+export function UsersFilter({
+  onFiltered,
+  initialUsers,
+  excludeId,
+  multiple = false,
+}) {
   const [users, setUsers] = useState([]);
   const [selected, setSelected] = useState(multiple ? [] : null);
 
@@ -46,7 +51,7 @@ export function UsersFilter({ onFiltered, initialUsers, excludeId, multiple = fa
       const { data } = await api.get(`/users/list`);
       let userList = data.map((u) => ({ id: u.id, name: u.name }));
       if (excludeId) {
-        userList = userList.filter(user => user.id !== excludeId);
+        userList = userList.filter((user) => user.id !== excludeId);
       }
       setUsers(userList);
     } catch (err) {
@@ -56,7 +61,7 @@ export function UsersFilter({ onFiltered, initialUsers, excludeId, multiple = fa
 
   const onChange = async (value) => {
     setSelected(value);
-    onFiltered(multiple ? (value || []) : value ? [value] : []);
+    onFiltered(multiple ? value || [] : value ? [value] : []);
   };
 
   return (
@@ -77,12 +82,12 @@ export function UsersFilter({ onFiltered, initialUsers, excludeId, multiple = fa
         renderTags={(value, getUserProps) =>
           multiple
             ? value.map((v, idx) => (
-              <Chip
-                key={v.id}
-                variant="outlined"
-                style={{
-                  backgroundColor: "#bfbfbf",
-                  textShadow: "1px 1px 1px #000",
+                <Chip
+                  key={v.id}
+                  variant="outlined"
+                  style={{
+                    backgroundColor: "#bfbfbf",
+                    textShadow: "1px 1px 1px #000",
                     color: "white",
                   }}
                   label={v.name}
@@ -91,21 +96,21 @@ export function UsersFilter({ onFiltered, initialUsers, excludeId, multiple = fa
                 />
               ))
             : value
-            ? [
-                <Chip
-                  key={value.id}
-                  variant="outlined"
-                  style={{
-                    backgroundColor: "#bfbfbf",
-                    textShadow: "1px 1px 1px #000",
-                    color: "white",
-                  }}
-                  label={value.name}
-                  {...getUserProps({ index: 0 })}
-                  size="small"
-                />,
-              ]
-            : []
+              ? [
+                  <Chip
+                    key={value.id}
+                    variant="outlined"
+                    style={{
+                      backgroundColor: "#bfbfbf",
+                      textShadow: "1px 1px 1px #000",
+                      color: "white",
+                    }}
+                    label={value.name}
+                    {...getUserProps({ index: 0 })}
+                    size="small"
+                  />,
+                ]
+              : []
         }
         renderInput={(params) => (
           <TextField

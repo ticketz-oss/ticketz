@@ -7,11 +7,10 @@ interface Request {
 const GetSuperSettingService = async ({
   key
 }: Request): Promise<string | undefined> => {
-  
   if (!key.startsWith("_")) {
     return null;
   }
-  
+
   const setting = await Setting.findOne({
     where: {
       companyId: 1,

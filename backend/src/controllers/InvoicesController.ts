@@ -18,7 +18,7 @@ type IndexQuery = {
   searchParam: string;
   pageNumber: string;
 };
- 
+
 type StorePlanData = {
   name: string;
   id?: number | string;
@@ -52,7 +52,6 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
   return res.status(200).json(invoice);
 };
 
-
 export const list = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.user;
   const invoice: Invoices[] = await FindAllInvoiceService(companyId);
@@ -80,8 +79,7 @@ export const update = async (
 
   const plan = await UpdateInvoiceService({
     id,
-    status,
-
+    status
   });
 
   // const io = getIO();

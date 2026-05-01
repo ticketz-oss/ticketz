@@ -1,25 +1,35 @@
 import React, { useState, useEffect } from "react";
-import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, CircularProgress, Typography, makeStyles } from "@material-ui/core";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+  CircularProgress,
+  Typography,
+  makeStyles,
+} from "@material-ui/core";
 import { toast } from "react-toastify";
 import api from "../../services/api";
 import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles((theme) => ({
   wavoipTitle: {
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     marginBottom: theme.spacing(2),
   },
   wavoipInstructions: {
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: theme.spacing(2),
   },
   wavoipLink: {
-    textDecoration: 'none',
+    textDecoration: "none",
     color: theme.palette.primary.main,
-    cursor: 'pointer',
-    '&:hover': {
-      textDecoration: 'underline',
+    cursor: "pointer",
+    "&:hover": {
+      textDecoration: "underline",
     },
     marginBottom: theme.spacing(2),
   },
@@ -93,31 +103,43 @@ const WavoipModal = ({ open, onClose, whatsappId }) => {
           <>
             <Typography
               className={classes.wavoipTitle}
-              variant="body2" gutterBottom>
-              {i18n.t("wavoipModal.title")}<br />
+              variant="body2"
+              gutterBottom
+            >
+              {i18n.t("wavoipModal.title")}
+              <br />
             </Typography>
             <Typography
               className={classes.wavoipInstructions}
-              variant="body2" gutterBottom>
+              variant="body2"
+              gutterBottom
+            >
               {i18n.t("wavoipModal.instructions")}
             </Typography>
             <Typography
               className={classes.wavoipInstructions}
-              variant="body2" gutterBottom>
-              <a className={classes.wavoipLink}
-                href="https://wavoip.com" target="_blank">
+              variant="body2"
+              gutterBottom
+            >
+              <a
+                className={classes.wavoipLink}
+                href="https://wavoip.com"
+                target="_blank"
+              >
                 wavoip.com.br
               </a>
             </Typography>
             <Typography
               className={classes.wavoipInstructions}
-              variant="body2" gutterBottom>
+              variant="body2"
+              gutterBottom
+            >
               {i18n.t("wavoipModal.coupon")}
             </Typography>
             <TextField
               label="Token"
               value={token || ""}
-              onChange={e => setToken(e.target.value)}
+              onChange={(e) => setToken(e.target.value)}
               fullWidth
               variant="outlined"
             />
@@ -127,14 +149,14 @@ const WavoipModal = ({ open, onClose, whatsappId }) => {
       <DialogActions>
         {token && (
           <Button onClick={handleDelete} color="secondary" disabled={loading}>
-            { i18n.t("common.delete") }
+            {i18n.t("common.delete")}
           </Button>
         )}
         <Button onClick={handleSave} color="primary" disabled={loading}>
-          {loading ? <CircularProgress size={24} /> :i18n.t("common.save") }
+          {loading ? <CircularProgress size={24} /> : i18n.t("common.save")}
         </Button>
         <Button onClick={handleClose} variant="outlined" disabled={loading}>
-        { i18n.t("common.close") }
+          {i18n.t("common.close")}
         </Button>
       </DialogActions>
     </Dialog>

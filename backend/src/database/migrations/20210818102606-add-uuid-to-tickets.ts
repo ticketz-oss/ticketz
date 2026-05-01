@@ -6,7 +6,7 @@ module.exports = {
       queryInterface.addColumn("Tickets", "uuid", {
         type: DataTypes.UUID,
         allowNull: true,
-        defaultValue: Sequelize.literal('uuid_generate_v4()')
+        defaultValue: Sequelize.literal("uuid_generate_v4()")
       })
     ]);
   },

@@ -3,9 +3,9 @@
 // Function to hash a string to a number
 function hashStringToNumber(str) {
   if (!str) {
-    return 0x7F7F7F;  // 50% of all colors
+    return 0x7f7f7f; // 50% of all colors
   }
-  
+
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
@@ -19,9 +19,9 @@ function hashStringToNumber(str) {
 function generateColorFromHash(hash) {
   // Normalize the hash value
   const normalizedHash = Math.abs(hash) % 16777215; // 16777215 is 0xFFFFFF
-  const r = (normalizedHash & 0xFF0000) >> 16;
-  const g = (normalizedHash & 0x00FF00) >> 8;
-  const b = normalizedHash & 0x0000FF;
+  const r = (normalizedHash & 0xff0000) >> 16;
+  const g = (normalizedHash & 0x00ff00) >> 8;
+  const b = normalizedHash & 0x0000ff;
   return { r, g, b };
 }
 
@@ -33,7 +33,7 @@ function getLuminance(r, g, b) {
 // Function to adjust color for contrast
 function adjustColorForContrast(r, g, b) {
   const luminance = getLuminance(r, g, b);
-  const thresholdLow = 50;  // Luminance threshold for dark colors
+  const thresholdLow = 50; // Luminance threshold for dark colors
   const thresholdHigh = 200; // Luminance threshold for bright colors
 
   if (luminance < thresholdLow) {
@@ -55,7 +55,7 @@ function generateColor(identifier) {
   const hash = hashStringToNumber(identifier);
   const { r, g, b } = generateColorFromHash(hash);
   const luminance = getLuminance(r, g, b);
-  const thresholdLow = 50;  // Luminance threshold for dark colors
+  const thresholdLow = 50; // Luminance threshold for dark colors
   const thresholdHigh = 200; // Luminance threshold for bright colors
 
   if (luminance < thresholdLow || luminance > thresholdHigh) {

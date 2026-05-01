@@ -1,60 +1,60 @@
-import React, { useState, useEffect } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
+import React, { useState, useEffect } from "react";
+import { makeStyles } from "@material-ui/core/styles";
+import TextField from "@material-ui/core/TextField";
+import Button from "@material-ui/core/Button";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import IconButton from "@material-ui/core/IconButton";
+import DeleteIcon from "@material-ui/icons/Delete";
+import EditIcon from "@material-ui/icons/Edit";
 import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles({
   root: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    margin: '2rem'
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    margin: "2rem",
   },
   inputContainer: {
-    display: 'flex',
-    width: '100%',
-    marginBottom: '1rem'
+    display: "flex",
+    width: "100%",
+    marginBottom: "1rem",
   },
   input: {
     flexGrow: 1,
-    marginRight: '1rem'
+    marginRight: "1rem",
   },
   listContainer: {
-    width: '100%',
-    height: '100%',
-    marginTop: '1rem',
-    backgroundColor: '#f5f5f5',
-    borderRadius: '5px',
+    width: "100%",
+    height: "100%",
+    marginTop: "1rem",
+    backgroundColor: "#f5f5f5",
+    borderRadius: "5px",
   },
   list: {
-    marginBottom: '5px'
-  }
+    marginBottom: "5px",
+  },
 });
 
 const ToDoList = () => {
   const classes = useStyles();
 
-  const [task, setTask] = useState('');
+  const [task, setTask] = useState("");
   const [tasks, setTasks] = useState([]);
   const [editIndex, setEditIndex] = useState(-1);
 
   useEffect(() => {
-    const savedTasks = localStorage.getItem('tasks');
+    const savedTasks = localStorage.getItem("tasks");
     if (savedTasks) {
       setTasks(JSON.parse(savedTasks));
     }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('tasks', JSON.stringify(tasks));
+    localStorage.setItem("tasks", JSON.stringify(tasks));
   }, [tasks]);
 
   const handleTaskChange = (event) => {
@@ -71,14 +71,18 @@ const ToDoList = () => {
     if (editIndex >= 0) {
       // Editar tarefa existente
       const newTasks = [...tasks];
-      newTasks[editIndex] = {text: task, updatedAt: now, createdAt: newTasks[editIndex].createdAt};
+      newTasks[editIndex] = {
+        text: task,
+        updatedAt: now,
+        createdAt: newTasks[editIndex].createdAt,
+      };
       setTasks(newTasks);
-      setTask('');
+      setTask("");
       setEditIndex(-1);
     } else {
       // Adicionar nova tarefa
-      setTasks([...tasks, {text: task, createdAt: now, updatedAt: now}]);
-      setTask('');
+      setTasks([...tasks, { text: task, createdAt: now, updatedAt: now }]);
+      setTask("");
     }
   };
 
@@ -104,14 +108,17 @@ const ToDoList = () => {
           variant="outlined"
         />
         <Button variant="contained" color="primary" onClick={handleAddTask}>
-          {editIndex >= 0 ? 'Salvar' : 'Adicionarr'}
+          {editIndex >= 0 ? "Salvar" : "Adicionarr"}
         </Button>
       </div>
       <div className={classes.listContainer}>
         <List>
           {tasks.map((task, index) => (
             <ListItem key={index} className={classes.list}>
-              <ListItemText primary={task.text} secondary={task.updatedAt.toLocaleString()} />
+              <ListItemText
+                primary={task.text}
+                secondary={task.updatedAt.toLocaleString()}
+              />
               <ListItemSecondaryAction>
                 <IconButton onClick={() => handleEditTask(index)}>
                   <EditIcon />
@@ -127,6 +134,5 @@ const ToDoList = () => {
     </div>
   );
 };
-
 
 export default ToDoList;

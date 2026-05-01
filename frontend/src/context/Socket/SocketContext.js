@@ -65,34 +65,36 @@ class ManagedSocket {
           this.rawSocket.off(j.event, j.callback);
           this.rawSocket.on(j.event, j.callback);
         }
-        
+
         this.rawSocket.on("ready", refreshJoinsOnReady);
       }
     });
   }
-  
+
   on(event, callback) {
     if (event === "ready" || event === "connect") {
       return this.socketManager.onReady(callback);
     }
-    this.callbacks.push({event, callback});
+    this.callbacks.push({ event, callback });
     return this.rawSocket.on(event, callback);
   }
-  
+
   off(event, callback) {
-    const i = this.callbacks.findIndex((c) => c.event === event && c.callback === callback);
+    const i = this.callbacks.findIndex(
+      (c) => c.event === event && c.callback === callback,
+    );
     this.callbacks.splice(i, 1);
     return this.rawSocket.off(event, callback);
   }
-  
+
   emit(event, ...params) {
     if (event.startsWith("join")) {
       this.joins.push({ event: event.substring(4), params });
-      console.debug("Joining", { event: event.substring(4), params});
+      console.debug("Joining", { event: event.substring(4), params });
     }
     return this.rawSocket.emit(event, ...params);
   }
-  
+
   disconnect() {
     for (const j of this.joins) {
       this.rawSocket.emit(`leave${j.event}`, ...j.params);
@@ -103,7 +105,7 @@ class ManagedSocket {
     }
     this.callbacks = [];
   }
-  
+
   logout() {
     this.disconnect();
     this.socketManager.currentSocket = null;
@@ -127,15 +129,14 @@ const socketManager = {
   currentSocket: null,
   socketReady: false,
 
-  GetSocket: function(_discardCompanyId = null) {
-
+  GetSocket: function (_discardCompanyId = null) {
     const token = JSON.parse(localStorage.getItem("token"));
     if (!token) {
       return new DummySocket();
     }
 
     const { userId, companyId } = decodeToken(token);
-    
+
     if (companyId !== this.currentCompanyId || userId !== this.currentUserId) {
       if (this.currentSocket) {
         console.debug("closing old socket - company or user changed");
@@ -145,7 +146,7 @@ const socketManager = {
         this.currentCompanyId = null;
         this.currentUserId = null;
       }
-      
+
       if (isExpired(token)) {
         console.debug("Expired token, refreshing token");
 
@@ -159,7 +160,7 @@ const socketManager = {
 
       this.currentCompanyId = companyId;
       this.currentUserId = userId;
-      
+
       this.currentSocket = openSocket(getBackendSocketURL(), {
         transports: ["websocket"],
         pingTimeout: 18000,
@@ -170,7 +171,7 @@ const socketManager = {
       this.currentSocket.io.on("reconnect_attempt", () => {
         this.currentSocket.io.opts.query.r = 1;
         const newToken = JSON.parse(localStorage.getItem("token"));
-        if ( isExpired(newToken) ) {
+        if (isExpired(newToken)) {
           console.debug("Refreshing");
           window.location.reload();
         } else {
@@ -178,14 +179,14 @@ const socketManager = {
           this.currentSocket.io.opts.query.token = newToken;
         }
       });
-      
+
       this.currentSocket.on("disconnect", (reason) => {
         console.debug(`socket disconnected because: ${reason}`);
         if (reason.startsWith("io server disconnect")) {
           console.debug("tryng to reconnect", this.currentSocket);
           const newToken = JSON.parse(localStorage.getItem("token"));
-          
-          if ( isExpired(newToken) ) {
+
+          if (isExpired(newToken)) {
             console.debug("Expired token - refreshing");
             window.location.reload();
             return;
@@ -194,48 +195,48 @@ const socketManager = {
           this.currentSocket.io.opts.query.token = newToken;
           this.currentSocket.io.opts.query.r = 1;
           this.currentSocket.connect();
-        }        
+        }
       });
-      
+
       this.currentSocket.on("connect", (...params) => {
         console.debug("socket connected", params);
-      })
-      
+      });
+
       this.currentSocket.onAny((event, ...args) => {
         if (event === "backendlog") {
           return;
         }
         console.debug("Event: ", { socket: this.currentSocket, event, args });
       });
-      
+
       this.onReady(() => {
         this.socketReady = true;
       });
-
     }
-    
+
     return new ManagedSocket(this);
   },
-  
-  onReady: function( callbackReady ) {
+
+  onReady: function (callbackReady) {
     if (this.socketReady) {
       callbackReady();
-      return
+      return;
     }
-    
+
     if (!this.currentSocket) {
       return;
     }
-    
+
     this.currentSocket.once("ready", () => {
       callbackReady();
     });
   },
-  
-  onConnect: function( callbackReady ) { this.onReady( callbackReady ) },
 
+  onConnect: function (callbackReady) {
+    this.onReady(callbackReady);
+  },
 };
 
-const SocketContext = createContext()
+const SocketContext = createContext();
 
 export { SocketContext, socketManager };

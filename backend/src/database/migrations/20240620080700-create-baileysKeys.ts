@@ -7,9 +7,9 @@ module.exports = {
         type: DataTypes.INTEGER,
         primaryKey: true,
         allowNull: false,
-        references: { model: "Whatsapps", key: "id"},
+        references: { model: "Whatsapps", key: "id" },
         onUpdate: "CASCADE",
-        onDelete: "CASCADE",
+        onDelete: "CASCADE"
       },
       type: {
         type: DataTypes.STRING,
@@ -24,7 +24,7 @@ module.exports = {
       value: {
         type: DataTypes.TEXT,
         allowNull: false
-      },
+      }
     });
   },
 

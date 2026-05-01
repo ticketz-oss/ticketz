@@ -100,7 +100,7 @@ export const update = async (
   const record = await UpdateService({
     ...data,
     userId: Number.parseInt(req.user.id, 10),
-    id: Number.parseInt(id, 10),
+    id: Number.parseInt(id, 10)
   });
 
   const io = getIO();
@@ -134,7 +134,10 @@ export const findList = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const records: QuickMessage[] = await FindService({userId: parseInt(req.user.id,10), companyId: req.user.companyId});
+  const records: QuickMessage[] = await FindService({
+    userId: parseInt(req.user.id, 10),
+    companyId: req.user.companyId
+  });
 
   return res.status(200).json(records);
 };

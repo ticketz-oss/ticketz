@@ -36,14 +36,7 @@ const UpdateUserService = async ({
     body: Yup.string().min(5)
   });
 
-  const {
-    body,
-    sendAt,
-    sentAt,
-    contactId,
-    ticketId,
-    userId,
-  } = scheduleData;
+  const { body, sendAt, sentAt, contactId, ticketId, userId } = scheduleData;
 
   try {
     await schema.validate({ body });
@@ -57,7 +50,7 @@ const UpdateUserService = async ({
     sentAt,
     contactId,
     ticketId,
-    userId,
+    userId
   });
 
   await schedule.reload();

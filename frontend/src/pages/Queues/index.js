@@ -123,7 +123,7 @@ const Queues = () => {
       if (data.action === "delete") {
         dispatch({ type: "DELETE_QUEUE", payload: data.queueId });
       }
-    }
+    };
 
     socket.on(`company-${companyId}-queue`, onQueue);
 
@@ -198,9 +198,7 @@ const Queues = () => {
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell align="center">
-                ID
-              </TableCell>
+              <TableCell align="center">ID</TableCell>
               <TableCell align="center">
                 {i18n.t("queues.table.name")}
               </TableCell>

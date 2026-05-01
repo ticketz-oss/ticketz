@@ -135,7 +135,7 @@ const Users = () => {
       if (data.action === "delete") {
         dispatch({ type: "DELETE_USER", payload: +data.userId });
       }
-    }
+    };
 
     socket.on(`company-${companyId}-user`, onCompanyUser);
 

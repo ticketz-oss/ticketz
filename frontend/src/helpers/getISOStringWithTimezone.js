@@ -1,4 +1,4 @@
-import { numPad as pad } from './numPad';
+import { numPad as pad } from "./numPad";
 
 export function getISOStringWithTimezone(date = new Date()) {
   const year = date.getFullYear();
@@ -10,7 +10,7 @@ export function getISOStringWithTimezone(date = new Date()) {
   const milliseconds = pad(date.getMilliseconds(), 3);
 
   const offsetMinutes = -date.getTimezoneOffset();
-  const sign = offsetMinutes >= 0 ? '+' : '-';
+  const sign = offsetMinutes >= 0 ? "+" : "-";
   const absOffsetMinutes = Math.abs(offsetMinutes);
   const offsetHour = pad(Math.floor(absOffsetMinutes / 60));
   const offsetMinute = pad(absOffsetMinutes % 60);

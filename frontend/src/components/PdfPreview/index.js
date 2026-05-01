@@ -120,7 +120,10 @@ async function renderPageToCanvas(pdf, pageNum, canvas) {
   const scaledViewport = page.getViewport({ scale });
   canvas.width = scaledViewport.width;
   canvas.height = scaledViewport.height;
-  await page.render({ canvasContext: canvas.getContext("2d"), viewport: scaledViewport }).promise;
+  await page.render({
+    canvasContext: canvas.getContext("2d"),
+    viewport: scaledViewport,
+  }).promise;
 }
 
 function cacheBustUrl(url) {
@@ -142,30 +145,47 @@ const Thumbnail = ({ url, onOpen }) => {
     (async () => {
       try {
         const pdf = await getDocument({ url }).promise;
-        if (cancelled) { pdf.destroy(); return; }
+        if (cancelled) {
+          pdf.destroy();
+          return;
+        }
         const canvas = canvasRef.current;
-        if (!canvas) { pdf.destroy(); return; }
+        if (!canvas) {
+          pdf.destroy();
+          return;
+        }
 
         const containerWidth = canvas.parentElement?.clientWidth || 300;
         const page = await pdf.getPage(1);
-        if (cancelled) { pdf.destroy(); return; }
+        if (cancelled) {
+          pdf.destroy();
+          return;
+        }
 
         const viewport = page.getViewport({ scale: 1 });
         const scale = containerWidth / viewport.width;
         const scaledViewport = page.getViewport({ scale });
 
         canvas.width = scaledViewport.width;
-        canvas.height = Math.floor(scaledViewport.height / 2);  // top half only
-        await page.render({ canvasContext: canvas.getContext("2d"), viewport: scaledViewport }).promise;
+        canvas.height = Math.floor(scaledViewport.height / 2); // top half only
+        await page.render({
+          canvasContext: canvas.getContext("2d"),
+          viewport: scaledViewport,
+        }).promise;
 
         if (!cancelled) setStatus("done");
         pdf.destroy();
       } catch (e) {
-        if (!cancelled) { console.error("PdfPreview thumbnail error:", e); setStatus("error"); }
+        if (!cancelled) {
+          console.error("PdfPreview thumbnail error:", e);
+          setStatus("error");
+        }
       }
     })();
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [url]);
 
   return (
@@ -214,17 +234,26 @@ const PdfViewerDialog = ({ url, fileName, open, onClose }) => {
     (async () => {
       try {
         const pdf = await getDocument({ url }).promise;
-        if (cancelled) { pdf.destroy(); return; }
+        if (cancelled) {
+          pdf.destroy();
+          return;
+        }
         pdfRef.current = pdf;
         setNumPages(pdf.numPages);
       } catch (e) {
-        if (!cancelled) { console.error("PdfViewer load error:", e); setPageStatus("error"); }
+        if (!cancelled) {
+          console.error("PdfViewer load error:", e);
+          setPageStatus("error");
+        }
       }
     })();
 
     return () => {
       cancelled = true;
-      if (pdfRef.current) { pdfRef.current.destroy(); pdfRef.current = null; }
+      if (pdfRef.current) {
+        pdfRef.current.destroy();
+        pdfRef.current = null;
+      }
     };
   }, [open, url]);
 
@@ -241,11 +270,16 @@ const PdfViewerDialog = ({ url, fileName, open, onClose }) => {
         await renderPageToCanvas(pdfRef.current, currentPage, canvas);
         if (!cancelled) setPageStatus("done");
       } catch (e) {
-        if (!cancelled) { console.error("PdfViewer render error:", e); setPageStatus("error"); }
+        if (!cancelled) {
+          console.error("PdfViewer render error:", e);
+          setPageStatus("error");
+        }
       }
     })();
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [currentPage, numPages]);
 
   const handleDownload = useCallback(() => {
@@ -261,7 +295,11 @@ const PdfViewerDialog = ({ url, fileName, open, onClose }) => {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle disableTypography className={classes.dialogTitle}>
-        <Typography variant="subtitle1" noWrap style={{ flex: 1, marginRight: 8 }}>
+        <Typography
+          variant="subtitle1"
+          noWrap
+          style={{ flex: 1, marginRight: 8 }}
+        >
           {fileName || "PDF Document"}
         </Typography>
         <div className={classes.dialogTitleButtons}>
@@ -269,7 +307,11 @@ const PdfViewerDialog = ({ url, fileName, open, onClose }) => {
             <div className={classes.pageNav}>
               <Tooltip title="Previous page">
                 <span>
-                  <IconButton size="small" disabled={currentPage <= 1} onClick={() => setCurrentPage((p) => p - 1)}>
+                  <IconButton
+                    size="small"
+                    disabled={currentPage <= 1}
+                    onClick={() => setCurrentPage((p) => p - 1)}
+                  >
                     <NavigateBefore />
                   </IconButton>
                 </span>
@@ -279,7 +321,11 @@ const PdfViewerDialog = ({ url, fileName, open, onClose }) => {
               </Typography>
               <Tooltip title="Next page">
                 <span>
-                  <IconButton size="small" disabled={currentPage >= numPages} onClick={() => setCurrentPage((p) => p + 1)}>
+                  <IconButton
+                    size="small"
+                    disabled={currentPage >= numPages}
+                    onClick={() => setCurrentPage((p) => p + 1)}
+                  >
                     <NavigateNext />
                   </IconButton>
                 </span>

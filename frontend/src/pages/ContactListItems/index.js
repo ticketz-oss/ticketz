@@ -170,17 +170,20 @@ const ContactListItems = () => {
       if (data.action === "reload") {
         dispatch({ type: "LOAD_CONTACTS", payload: data.records });
       }
-    }
+    };
 
     const onContactListItemId = (data) => {
-        if (data.action === "reload") {
-          dispatch({ type: "LOAD_CONTACTS", payload: data.records });
-        }
+      if (data.action === "reload") {
+        dispatch({ type: "LOAD_CONTACTS", payload: data.records });
       }
+    };
 
     socket.on(`company-${companyId}-ContactListItem`, onContactListItem);
-    socket.on(`company-${companyId}-ContactListItem-${contactListId}`, onContactListItemId);
-  
+    socket.on(
+      `company-${companyId}-ContactListItem-${contactListId}`,
+      onContactListItemId,
+    );
+
     return () => {
       socket.disconnect();
     };

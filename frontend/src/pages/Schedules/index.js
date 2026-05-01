@@ -133,7 +133,6 @@ const Schedules = () => {
     }
   }, [contactId]);
 
-
   const socketManager = useContext(SocketContext);
 
   useEffect(() => {
@@ -161,13 +160,16 @@ const Schedules = () => {
 
     const onSchedule = (data) => {
       if (data.action === "update" || data.action === "create") {
-        dispatch({ type: "UPDATE_SCHEDULES", payload: data?.schedules || data?.schedule });
+        dispatch({
+          type: "UPDATE_SCHEDULES",
+          payload: data?.schedules || data?.schedule,
+        });
       }
 
       if (data.action === "delete") {
         dispatch({ type: "DELETE_USER", payload: +data.scheduleId });
       }
-    }
+    };
 
     socket.on(`company-${user.companyId}-schedule`, onSchedule);
 

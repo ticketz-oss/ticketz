@@ -39,7 +39,7 @@ const reducer = (state, action) => {
     if (isArray(announcements)) {
       announcements.forEach((announcement) => {
         const announcementIndex = state.findIndex(
-          (u) => u.id === announcement.id
+          (u) => u.id === announcement.id,
         );
         if (announcementIndex !== -1) {
           state[announcementIndex] = announcement;
@@ -128,10 +128,10 @@ const Announcements = () => {
       if (data.action === "delete") {
         dispatch({ type: "DELETE_ANNOUNCEMENT", payload: +data.id });
       }
-    }
-    
+    };
+
     socket.on(`company-announcement`, onAnnouncement);
-    
+
     return () => {
       socket.disconnect();
     };

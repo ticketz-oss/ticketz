@@ -47,7 +47,7 @@ import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import useSettings from "../../hooks/useSettings";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 import { makeStyles } from "@material-ui/core/styles";
 import EfiSettings from "../PaymentGateways/Efi/EfiSettings";
 import PixTicketzSettings from "../PaymentGateways/PixTicketz/PixTicketzSettings";
@@ -68,7 +68,9 @@ export default function PaymentGateway(props) {
 
   useEffect(() => {
     if (Array.isArray(settings) && settings.length) {
-      const paymentGatewaySetting = settings.find((s) => s.key === "_paymentGateway");
+      const paymentGatewaySetting = settings.find(
+        (s) => s.key === "_paymentGateway",
+      );
       if (paymentGatewaySetting) {
         setPaymentGateway(paymentGatewaySetting.value);
       }
@@ -104,12 +106,10 @@ export default function PaymentGateway(props) {
           </FormControl>
         </Grid>
       </Grid>
-      { paymentGateway === "efi" && 
-        <EfiSettings settings={settings} />
-      }
-      { paymentGateway === "pixTicketz" && 
+      {paymentGateway === "efi" && <EfiSettings settings={settings} />}
+      {paymentGateway === "pixTicketz" && (
         <PixTicketzSettings settings={settings} />
-      }
+      )}
     </>
   );
 }

@@ -44,23 +44,23 @@ const ListService = async ({
             "LIKE",
             `%${searchParam.toLowerCase()}%`
           )
-        },
-      ],
-    }
+        }
+      ]
+    };
   }
 
   if (contactId !== "") {
     whereCondition = {
       ...whereCondition,
       contactId
-    }
+    };
   }
 
   if (userId !== "") {
     whereCondition = {
       ...whereCondition,
       userId
-    }
+    };
   }
 
   whereCondition = {
@@ -68,7 +68,7 @@ const ListService = async ({
     companyId: {
       [Op.eq]: companyId
     }
-  }
+  };
 
   const { count, rows: schedules } = await Schedule.findAndCountAll({
     where: whereCondition,
@@ -77,7 +77,7 @@ const ListService = async ({
     order: [["createdAt", "DESC"]],
     include: [
       { model: Contact, as: "contact", attributes: ["id", "name"] },
-      { model: User, as: "user", attributes: ["id", "name"] },
+      { model: User, as: "user", attributes: ["id", "name"] }
     ]
   });
 

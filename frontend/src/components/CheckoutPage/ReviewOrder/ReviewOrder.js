@@ -1,7 +1,7 @@
-import React from 'react';
-import { useFormikContext } from 'formik';
-import { Typography, Grid } from '@material-ui/core';
-import ShippingDetails from './ShippingDetails';
+import React from "react";
+import { useFormikContext } from "formik";
+import { Typography, Grid } from "@material-ui/core";
+import ShippingDetails from "./ShippingDetails";
 
 export default function ReviewOrder() {
   const { values: formValues } = useFormikContext();

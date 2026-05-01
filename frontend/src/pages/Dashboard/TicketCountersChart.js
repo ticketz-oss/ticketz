@@ -2,13 +2,13 @@ import { useTheme } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
 import { i18n } from "../../translate/i18n";
 import {
-	Area,
-	AreaChart,
-	CartesianGrid,
-	ResponsiveContainer,
-	Tooltip,
-	XAxis,
-	YAxis
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from "recharts";
 import CustomTooltip from "./CustomTooltip";
 import Title from "./Title";
@@ -20,7 +20,10 @@ function prepareChartData(emptyData, serie) {
   const ticketCreateData = JSON.parse(JSON.stringify(emptyData));
   serie.counters.forEach((item) => {
     const date = new Date(item.time);
-    const dateKey = serie.field === "day" ? getISOStringWithTimezone(date).split("T")[0] : getISOStringWithTimezone(date).split(".")[0];
+    const dateKey =
+      serie.field === "day"
+        ? getISOStringWithTimezone(date).split("T")[0]
+        : getISOStringWithTimezone(date).split(".")[0];
     ticketCreateData[dateKey] = Number(item.counter);
   });
   return ticketCreateData;
@@ -29,10 +32,10 @@ function prepareChartData(emptyData, serie) {
 export function TicketCountersChart({ ticketCounters }) {
   const now = new Date();
   const tz = getTimezoneOffset();
-	const theme = useTheme();
-	const t = (...params) => i18n.t(...params);
+  const theme = useTheme();
+  const t = (...params) => i18n.t(...params);
 
-  const [ chartData, setChartData ] = useState([]);
+  const [chartData, setChartData] = useState([]);
 
   useEffect(() => {
     if (!ticketCounters?.create?.field) return;
@@ -43,13 +46,13 @@ export function TicketCountersChart({ ticketCounters }) {
       six_hours: 360,
       three_hours: 180,
       hour: 60,
-      timestamp: 30
-    }
+      timestamp: 30,
+    };
 
     const offset = new Date().getTimezoneOffset();
     const interval = step[field];
-    const firstMinutes = ( offset + interval ) % interval;
-    
+    const firstMinutes = (offset + interval) % interval;
+
     const startDate = new Date(ticketCounters.create.start);
     const endDate = new Date(ticketCounters.create.end);
 
@@ -57,7 +60,7 @@ export function TicketCountersChart({ ticketCounters }) {
       endDate.setTime(now.getTime());
     }
     const xAxisEmptyData = {};
-    
+
     if (field === "day") {
       let currentDate = new Date(startDate);
       while (currentDate < endDate) {
@@ -71,106 +74,125 @@ export function TicketCountersChart({ ticketCounters }) {
         currentDate.setMinutes(currentDate.getMinutes() + step[field]);
       }
     }
-    
+
     const createData = prepareChartData(xAxisEmptyData, ticketCounters.create);
     const closeData = prepareChartData(xAxisEmptyData, ticketCounters.close);
-    
+
     const chartData = Object.keys(createData).map((key) => ({
       time: key,
       created: createData[key] || 0,
-      closed: closeData[key] || 0
+      closed: closeData[key] || 0,
     }));
-    
+
     setChartData(chartData);
   }, [ticketCounters]);
-  
-	return (
-		<React.Fragment>
-			<Title>{t("dashboard.ticketsOnPeriod")}</Title>
-			<ResponsiveContainer>
-				<AreaChart
-					data={chartData}
-					barSize={40}
-					width={730}
-					height={300}
-					margin={{
-						top: 16,
-						right: 16,
-						bottom: 0,
-						left: 0,
-					}}
-				>
-					<XAxis
-						dataKey={({time}) => {
+
+  return (
+    <React.Fragment>
+      <Title>{t("dashboard.ticketsOnPeriod")}</Title>
+      <ResponsiveContainer>
+        <AreaChart
+          data={chartData}
+          barSize={40}
+          width={730}
+          height={300}
+          margin={{
+            top: 16,
+            right: 16,
+            bottom: 0,
+            left: 0,
+          }}
+        >
+          <XAxis
+            dataKey={({ time }) => {
               if (time.includes("T")) {
                 // time already has timezone info from getISOStringWithTimezone, don't append tz again
                 const date = new Date(time);
-                if (date.getDate() === now.getDate() && date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear()) {
+                if (
+                  date.getDate() === now.getDate() &&
+                  date.getMonth() === now.getMonth() &&
+                  date.getFullYear() === now.getFullYear()
+                ) {
                   return date.toLocaleTimeString(undefined, {
                     hour: "2-digit",
-                    minute: "2-digit"
+                    minute: "2-digit",
                   });
                 }
-                if (date.getDate() >= now.getDate() - 6 && date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear()) {
-                  return date.toLocaleDateString(undefined, {
-                    weekday: "short",
-                    hour: "2-digit",
-                    minute: "2-digit"
-                  }).replace(",", "");
+                if (
+                  date.getDate() >= now.getDate() - 6 &&
+                  date.getMonth() === now.getMonth() &&
+                  date.getFullYear() === now.getFullYear()
+                ) {
+                  return date
+                    .toLocaleDateString(undefined, {
+                      weekday: "short",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                    .replace(",", "");
                 }
                 if (date.getFullYear() === now.getFullYear()) {
-                  return date.toLocaleDateString(undefined, {
+                  return date
+                    .toLocaleDateString(undefined, {
+                      month: "2-digit",
+                      day: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                    .replace(",", "");
+                }
+                return date
+                  .toLocaleDateString(undefined, {
+                    year: "numeric",
                     month: "2-digit",
                     day: "2-digit",
                     hour: "2-digit",
-                    minute: "2-digit"
-                  }).replace(",", "");
-                }
-                return date.toLocaleDateString(undefined, {
-                  year: "numeric",
-                  month: "2-digit",
-                  day: "2-digit",
-                  hour: "2-digit",
-                  minute: "2-digit"
-                }).replace(",", "");
+                    minute: "2-digit",
+                  })
+                  .replace(",", "");
               } else {
                 // For day-only format, append timezone since it's just a date string
                 const date = new Date(`${time}T00:00:00${tz}`);
                 if (date.getFullYear() === now.getFullYear()) {
                   return date.toLocaleDateString(undefined, {
                     month: "short",
-                    day: "2-digit"
+                    day: "2-digit",
                   });
                 }
                 return date.toLocaleDateString(undefined, {
                   year: "numeric",
                   month: "short",
-                  day: "2-digit"
+                  day: "2-digit",
                 });
               }
             }}
-						tickLine={false}
-						axisLine={false}
-						stroke={theme.palette.text.secondary}
-					/>
-					<YAxis
-						type="number"
-						allowDecimals={false}
-						stroke={theme.palette.text.secondary}
-						tickLine={false}
-						axisLine={false}
-					/>
-					<CartesianGrid vertical={false} strokeDasharray="4" opacity={0.3} />
-					<Tooltip content={<CustomTooltip i18nBase="dashboard.ticketCountersLabels"/>} cursor={true} />
-					<Area
-						type="monotone"
-						dataKey="created"
-						stroke="blue"
-						strokeWidth={1}
-						fillOpacity={0.5}
-						fill="lightblue"
-						activeDot={{ r: 8 }}
-					/>
+            tickLine={false}
+            axisLine={false}
+            stroke={theme.palette.text.secondary}
+          />
+          <YAxis
+            type="number"
+            allowDecimals={false}
+            stroke={theme.palette.text.secondary}
+            tickLine={false}
+            axisLine={false}
+          />
+          <CartesianGrid vertical={false} strokeDasharray="4" opacity={0.3} />
+          <Tooltip
+            content={
+              <CustomTooltip i18nBase="dashboard.ticketCountersLabels" />
+            }
+            cursor={true}
+          />
+          <Area
+            type="monotone"
+            dataKey="created"
+            stroke="blue"
+            strokeWidth={1}
+            fillOpacity={0.5}
+            fill="lightblue"
+            activeDot={{ r: 8 }}
+          />
           <Area
             type="monotone"
             dataKey="closed"
@@ -180,8 +202,8 @@ export function TicketCountersChart({ ticketCounters }) {
             fill="lightgreen"
             activeDot={{ r: 8 }}
           />
-				</AreaChart>
-			</ResponsiveContainer>
-		</React.Fragment>
-	);
-};
+        </AreaChart>
+      </ResponsiveContainer>
+    </React.Fragment>
+  );
+}

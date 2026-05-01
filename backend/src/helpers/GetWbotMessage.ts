@@ -16,14 +16,12 @@ export const GetWbotMessage = async (
   const fetchWbotMessagesGradually = async (): Promise<
     proto.WebMessageInfo | Message | null | undefined
   > => {
+    const msgFound = await GetMessageService({
+      id: messageId,
+      ticketId: ticket.id
+    });
 
-      const msgFound = await GetMessageService({
-        id: messageId,
-        ticketId: ticket.id
-      });
-
-      return msgFound;
-    
+    return msgFound;
 
     return null;
   };

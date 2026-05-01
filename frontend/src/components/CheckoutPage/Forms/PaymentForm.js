@@ -1,39 +1,39 @@
-import React, { useState, useEffect, useReducer } from 'react';
-import Button from '@material-ui/core/Button';
-import Card from '@material-ui/core/Card';
-import CardActions from '@material-ui/core/CardActions';
-import CardContent from '@material-ui/core/CardContent';
-import CardHeader from '@material-ui/core/CardHeader';
-import Grid from '@material-ui/core/Grid';
-import StarIcon from '@material-ui/icons/StarBorder';
-import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
-
+import React, { useState, useEffect, useReducer } from "react";
+import Button from "@material-ui/core/Button";
+import Card from "@material-ui/core/Card";
+import CardActions from "@material-ui/core/CardActions";
+import CardContent from "@material-ui/core/CardContent";
+import CardHeader from "@material-ui/core/CardHeader";
+import Grid from "@material-ui/core/Grid";
+import StarIcon from "@material-ui/icons/StarBorder";
+import Typography from "@material-ui/core/Typography";
+import { makeStyles } from "@material-ui/core/styles";
 
 import usePlans from "../../../hooks/usePlans";
 import useCompanies from "../../../hooks/useCompanies";
 
 const useStyles = makeStyles((theme) => ({
-  '@global': {
+  "@global": {
     ul: {
       margin: 0,
       padding: 0,
-      listStyle: 'none',
+      listStyle: "none",
     },
   },
   margin: {
     margin: theme.spacing(1),
   },
 
-
   cardHeader: {
     backgroundColor:
-      theme.palette.type === 'light' ? theme.palette.grey[200] : theme.palette.grey[700],
+      theme.palette.type === "light"
+        ? theme.palette.grey[200]
+        : theme.palette.grey[700],
   },
   cardPricing: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'baseline',
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "baseline",
     marginBottom: theme.spacing(2),
   },
   footer: {
@@ -41,7 +41,7 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(8),
     paddingTop: theme.spacing(3),
     paddingBottom: theme.spacing(3),
-    [theme.breakpoints.up('sm')]: {
+    [theme.breakpoints.up("sm")]: {
       paddingTop: theme.spacing(6),
       paddingBottom: theme.spacing(6),
     },
@@ -57,18 +57,11 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-  }
+  },
 }));
 
-
 export default function Pricing(props) {
-  const {
-    setFieldValue,
-    setActiveStep,
-    activeStep,
-  } = props;
-
- 
+  const { setFieldValue, setActiveStep, activeStep } = props;
 
   const { list, finder } = usePlans();
   const { find } = useCompanies();
@@ -78,7 +71,7 @@ export default function Pricing(props) {
   const [companiesPlans, setCompaniesPlans] = useState(0);
   const [connectionsPlans, setConnectionsPlans] = React.useState(3);
   const [storagePlans, setStoragePlans] = React.useState([]);
-  const [customValuePlans, setCustomValuePlans] = React.useState(49.00);
+  const [customValuePlans, setCustomValuePlans] = React.useState(49.0);
   const [loading, setLoading] = React.useState(false);
   const companyId = localStorage.getItem("companyId");
 
@@ -87,7 +80,7 @@ export default function Pricing(props) {
       await loadCompanies();
     }
     fetchData();
-  }, [])
+  }, []);
 
   const loadCompanies = async () => {
     setLoading(true);
@@ -105,7 +98,7 @@ export default function Pricing(props) {
     setLoading(true);
     try {
       const plansCompanies = await finder(companiesPlans);
-      const plans = []
+      const plans = [];
 
       //plansCompanies.forEach((plan) => {
       plans.push({
@@ -115,14 +108,14 @@ export default function Pricing(props) {
         description: [
           `${plansCompanies.users} Usuários`,
           `${plansCompanies.connections} Conexão`,
-          `${plansCompanies.queues} Filas`
+          `${plansCompanies.queues} Filas`,
         ],
         users: plansCompanies.users,
         connections: plansCompanies.connections,
         queues: plansCompanies.queues,
-        buttonText: 'SELECIONAR',
-        buttonVariant: 'outlined',
-      })
+        buttonText: "SELECIONAR",
+        buttonVariant: "outlined",
+      });
 
       // setStoragePlans(data);
       //});
@@ -134,30 +127,37 @@ export default function Pricing(props) {
     setLoading(false);
   };
 
-
-  const tiers = storagePlans
+  const tiers = storagePlans;
   return (
     <React.Fragment>
       <Grid container spacing={3}>
         {tiers.map((tier) => (
           // Enterprise card is full width at sm breakpoint
-          <Grid item key={tier.title} xs={12} sm={tier.title === 'Enterprise' ? 12 : 12} md={12}>
+          <Grid
+            item
+            key={tier.title}
+            xs={12}
+            sm={tier.title === "Enterprise" ? 12 : 12}
+            md={12}
+          >
             <Card>
               <CardHeader
                 title={tier.title}
                 subheader={tier.subheader}
-                titleTypographyProps={{ align: 'center' }}
-                subheaderTypographyProps={{ align: 'center' }}
-                action={tier.title === 'Pro' ? <StarIcon /> : null}
+                titleTypographyProps={{ align: "center" }}
+                subheaderTypographyProps={{ align: "center" }}
+                action={tier.title === "Pro" ? <StarIcon /> : null}
                 className={classes.cardHeader}
               />
               <CardContent>
                 <div className={classes.cardPricing}>
                   <Typography component="h2" variant="h3" color="textPrimary">
                     {
-
                       <React.Fragment>
-                        R${tier.price.toLocaleString('pt-br', { minimumFractionDigits: 2 })}
+                        R$
+                        {tier.price.toLocaleString("pt-br", {
+                          minimumFractionDigits: 2,
+                        })}
                       </React.Fragment>
                     }
                   </Typography>
@@ -167,7 +167,12 @@ export default function Pricing(props) {
                 </div>
                 <ul>
                   {tier.description.map((line) => (
-                    <Typography component="li" variant="subtitle1" align="center" key={line}>
+                    <Typography
+                      component="li"
+                      variant="subtitle1"
+                      align="center"
+                      key={line}
+                    >
                       {line}
                     </Typography>
                   ))}
@@ -180,17 +185,19 @@ export default function Pricing(props) {
                   color="primary"
                   onClick={() => {
                     if (tier.custom) {
-                      setFieldValue("plan", JSON.stringify({
-                        users: usersPlans,
-                        connections: connectionsPlans,
-                        price: customValuePlans,
-                      }));
+                      setFieldValue(
+                        "plan",
+                        JSON.stringify({
+                          users: usersPlans,
+                          connections: connectionsPlans,
+                          price: customValuePlans,
+                        }),
+                      );
                     } else {
                       setFieldValue("plan", JSON.stringify(tier));
                     }
                     setActiveStep(activeStep + 1);
-                  }
-                  }
+                  }}
                 >
                   {tier.buttonText}
                 </Button>

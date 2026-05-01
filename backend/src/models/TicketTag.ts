@@ -11,7 +11,7 @@ import Tag from "./Tag";
 import Ticket from "./Ticket";
 
 @Table({
-  tableName: 'TicketTags'
+  tableName: "TicketTags"
 })
 class TicketTag extends Model<TicketTag> {
   @ForeignKey(() => Ticket)

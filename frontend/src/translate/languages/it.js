@@ -126,7 +126,6 @@ const messages = {
       },
       internalChat: {
         title: "Chat Interno",
-
       },
       whatsappModal: {
         title: {
@@ -299,7 +298,7 @@ const messages = {
           titleFileList: "Lista dei file",
         },
       },
-       todolist: {
+      todolist: {
         title: "Elenco attività",
         form: {
           name: "Nome attività",
@@ -689,12 +688,14 @@ const messages = {
         buttonclose: "Chiudi",
         title: "Informazioni su ticketz",
         abouttitle: "Origine e miglioramenti",
-        aboutdetail: "Il ticketz è derivato indirettamente dal progetto Whaticket con miglioramenti condivisi dagli sviluppatori del sistema EquipeChat attraverso il canale VemFazer su YouTube, successivamente migliorati da Claudemir Todo Bom",
+        aboutdetail:
+          "Il ticketz è derivato indirettamente dal progetto Whaticket con miglioramenti condivisi dagli sviluppatori del sistema EquipeChat attraverso il canale VemFazer su YouTube, successivamente migliorati da Claudemir Todo Bom",
         aboutauthorsite: "Sito dell'autore",
         aboutwhaticketsite: "Sito della comunità Whaticket su Github",
         aboutvemfazersite: "Sito del canale Vem Fazer su Github",
         licenseheading: "Licenza Open Source",
-        licensedetail: "Il ticketz è concesso in licenza sotto la GNU Affero General Public License versione 3, il che significa che qualsiasi utente che ha accesso a questa applicazione ha il diritto di ottenere l'accesso al codice sorgente. Maggiori informazioni nei link sottostanti:",
+        licensedetail:
+          "Il ticketz è concesso in licenza sotto la GNU Affero General Public License versione 3, il che significa che qualsiasi utente che ha accesso a questa applicazione ha il diritto di ottenere l'accesso al codice sorgente. Maggiori informazioni nei link sottostanti:",
         licensefulltext: "Testo completo della licenza",
         licensesourcecode: "Codice sorgente di ticketz",
       },
@@ -750,14 +751,17 @@ const messages = {
         logoHint: "Preferisci SVG e proporzioni 28:10",
         faviconHint: "Preferisci un'immagine SVG quadrata o PNG 512x512",
         loginLinks: "Link di login",
-        loginLinksHint: "Aggiungi coppie titolo e URL da mostrare sotto il box di login su desktop e mobile.",
+        loginLinksHint:
+          "Aggiungi coppie titolo e URL da mostrare sotto il box di login su desktop e mobile.",
         linkTitle: "Titolo del link",
         linkUrl: "URL del link",
         removeLink: "Rimuovi link",
         sidePanelImage: "Immagine laterale del login",
-        sidePanelImageHint: "Mostrata sul lato sinistro del modulo di login nei layout desktop.",
+        sidePanelImageHint:
+          "Mostrata sul lato sinistro del modulo di login nei layout desktop.",
         backgroundContent: "Contenuto di sfondo del login",
-        backgroundContentHint: "Supporta immagini, file SVG e video MP4 per lo sfondo della schermata di login.",
+        backgroundContentHint:
+          "Supporta immagini, file SVG e video MP4 per lo sfondo della schermata di login.",
         noFileSelected: "Nessun file selezionato.",
       },
       settings: {
@@ -1014,7 +1018,8 @@ const messages = {
         ERR_CONFIG_ERROR: "Errore di configurazione. Contatta il supporto.",
         ERR_CLOCK_OUT_OF_SYNC:
           "Orologio non sincronizzato. Controlla le impostazioni di data e ora del tuo dispositivo.",
-        ERR_BACKEND_UNREACHABLE: "Backend non raggiungibile. Riprova più tardi.",
+        ERR_BACKEND_UNREACHABLE:
+          "Backend non raggiungibile. Riprova più tardi.",
         ERR_BACKEND_NOT_READY:
           "Il backend si sta avviando e non è ancora pronto. Nuovo tentativo automatico.",
       },
@@ -1034,8 +1039,10 @@ const messages = {
         ERR_SENDING_WAPP_MSG:
           "Errore nell'invio del messaggio di WhatsApp. Controlla la pagina delle connessioni.",
         ERR_DELETE_WAPP_MSG: "Impossibile eliminare il messaggio di WhatsApp.",
-        ERR_EDITING_WAPP_MSG: "Impossibile modificare il messaggio di WhatsApp.",
-        ERR_OTHER_OPEN_TICKET: "Esiste già un ticket aperto per questo contatto.",
+        ERR_EDITING_WAPP_MSG:
+          "Impossibile modificare il messaggio di WhatsApp.",
+        ERR_OTHER_OPEN_TICKET:
+          "Esiste già un ticket aperto per questo contatto.",
         ERR_SESSION_EXPIRED: "Sessione scaduta. Per favore, accedi di nuovo.",
         ERR_USER_CREATION_DISABLED:
           "La creazione dell'utente è stata disabilitata dall'amministratore.",
@@ -1046,7 +1053,8 @@ const messages = {
         ERR_NO_TICKET_FOUND: "Nessun ticket trovato con questo ID.",
         ERR_NO_USER_FOUND: "Nessun utente trovato con questo ID.",
         ERR_NO_WAPP_FOUND: "Nessun WhatsApp trovato con questo ID.",
-        ERR_CREATING_MESSAGE: "Errore nella creazione del messaggio nel database.",
+        ERR_CREATING_MESSAGE:
+          "Errore nella creazione del messaggio nel database.",
         ERR_CREATING_TICKET: "Errore nella creazione del ticket nel database.",
         ERR_FETCH_WAPP_MSG:
           "Errore nel recupero del messaggio su WhatsApp, potrebbe essere troppo vecchio.",
@@ -1058,7 +1066,8 @@ const messages = {
       ticketz: {
         registration: {
           header: "Registrati nella base utenti di Ticketz",
-          description: "Compila i campi sottostanti per registrarti nella base utenti di Ticketz e ricevere aggiornamenti sul progetto.",
+          description:
+            "Compila i campi sottostanti per registrarti nella base utenti di Ticketz e ricevere aggiornamenti sul progetto.",
           name: "Nome",
           country: "Paese",
           phoneNumber: "Numero di WhatsApp",

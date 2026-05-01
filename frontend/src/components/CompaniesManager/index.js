@@ -71,18 +71,19 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(1),
   },
   inactive: {
-    color: "gray"
+    color: "gray",
   },
   gracePeriod: {
-    color: "orange"
+    color: "orange",
   },
   almostDue: {
-    color: theme.mode === "light" ? "blue" : "#38f"
+    color: theme.mode === "light" ? "blue" : "#38f",
   },
 }));
 
 export function CompanyForm(props) {
-  const { onSubmit, onDelete, onImpersonate, onCancel, initialValue, loading } = props;
+  const { onSubmit, onDelete, onImpersonate, onCancel, initialValue, loading } =
+    props;
   const classes = useStyles();
   const [plans, setPlans] = useState([]);
   const [modalUser, setModalUser] = useState(false);
@@ -116,7 +117,7 @@ export function CompanyForm(props) {
     setRecord((prev) => {
       if (moment(initialValue).isValid()) {
         initialValue.dueDate = moment(initialValue.dueDate).format(
-          "YYYY-MM-DD"
+          "YYYY-MM-DD",
         );
       }
       return {
@@ -357,19 +358,19 @@ export function CompanyForm(props) {
                   </Grid>
                   {record.id !== undefined ? (
                     <>
-                    <Grid xs={6} md={2} item>
-                      <ButtonWithSpinner
-                        style={{ marginTop: 7 }}
-                        className={classes.fullWidth}
-                        loading={loading}
-                        onClick={() => onImpersonate(record)}
-                        variant="outlined"
-                        color="primary"
-                      >
-                        Acessar como
-                      </ButtonWithSpinner>
-                    </Grid>
-                    <Grid xs={6} md={1} item>
+                      <Grid xs={6} md={2} item>
+                        <ButtonWithSpinner
+                          style={{ marginTop: 7 }}
+                          className={classes.fullWidth}
+                          loading={loading}
+                          onClick={() => onImpersonate(record)}
+                          variant="outlined"
+                          color="primary"
+                        >
+                          Acessar como
+                        </ButtonWithSpinner>
+                      </Grid>
+                      <Grid xs={6} md={1} item>
                         <ButtonWithSpinner
                           style={{ marginTop: 7 }}
                           className={classes.fullWidth}
@@ -435,7 +436,7 @@ export function CompaniesManagerGrid(props) {
   const { dateToClient } = useDate();
   const { getSetting } = useSettings();
   const [gracePeriod, setGracePeriod] = useState(5);
-  
+
   useEffect(() => {
     getSetting("gracePeriod").then((value) => {
       if (!isNaN(Number(value))) {
@@ -443,7 +444,7 @@ export function CompaniesManagerGrid(props) {
       }
     });
   }, [getSetting]);
-        
+
   const renderStatus = (row) => {
     return row.status === false ? "Não" : "Sim";
   };
@@ -514,13 +515,27 @@ export function CompaniesManagerGrid(props) {
                   <EditIcon />
                 </IconButton>
               </TableCell>
-              <TableCell align="left" style={{ color: "unset" }}>{row.name || "-"}</TableCell>
-              <TableCell align="left" style={{ color: "unset" }}>{row.email || "-"}</TableCell>
-              <TableCell align="left" style={{ color: "unset" }}>{row.phone || "-"}</TableCell>
-              <TableCell align="left" style={{ color: "unset" }}>{renderPlan(row)}</TableCell>
-              <TableCell align="left" style={{ color: "unset" }}>{renderCampaignsStatus(row)}</TableCell>
-              <TableCell align="left" style={{ color: "unset" }}>{renderStatus(row)}</TableCell>
-              <TableCell align="left" style={{ color: "unset" }}>{dateToClient(row.createdAt)}</TableCell>
+              <TableCell align="left" style={{ color: "unset" }}>
+                {row.name || "-"}
+              </TableCell>
+              <TableCell align="left" style={{ color: "unset" }}>
+                {row.email || "-"}
+              </TableCell>
+              <TableCell align="left" style={{ color: "unset" }}>
+                {row.phone || "-"}
+              </TableCell>
+              <TableCell align="left" style={{ color: "unset" }}>
+                {renderPlan(row)}
+              </TableCell>
+              <TableCell align="left" style={{ color: "unset" }}>
+                {renderCampaignsStatus(row)}
+              </TableCell>
+              <TableCell align="left" style={{ color: "unset" }}>
+                {renderStatus(row)}
+              </TableCell>
+              <TableCell align="left" style={{ color: "unset" }}>
+                {dateToClient(row.createdAt)}
+              </TableCell>
               <TableCell align="left" style={{ color: "unset" }}>
                 {dateToClient(row.dueDate)}
                 <br />
@@ -539,7 +554,8 @@ export default function CompaniesManager() {
   const { list, save, update, remove } = useCompanies();
 
   const [showConfirmDeleteDialog, setShowConfirmDeleteDialog] = useState(false);
-  const [showConfirmImpersonateDialog, setShowConfirmImpersonateDialog] = useState(false);
+  const [showConfirmImpersonateDialog, setShowConfirmImpersonateDialog] =
+    useState(false);
   const [loading, setLoading] = useState(false);
   const [records, setRecords] = useState([]);
   const [record, setRecord] = useState({
@@ -585,7 +601,7 @@ export default function CompaniesManager() {
       toast.success("Operação realizada com sucesso!");
     } catch (e) {
       toast.error(
-        "Não foi possível realizar a operação. Verifique se já existe uma empresa com o mesmo nome ou se os campos foram preenchidos corretamente"
+        "Não foi possível realizar a operação. Verifique se já existe uma empresa com o mesmo nome ou se os campos foram preenchidos corretamente",
       );
     }
     setLoading(false);
@@ -635,7 +651,7 @@ export default function CompaniesManager() {
     let campaignsEnabled = false;
 
     const setting = data.settings.find(
-      (s) => s.key.indexOf("campaignsEnabled") > -1
+      (s) => s.key.indexOf("campaignsEnabled") > -1,
     );
     if (setting) {
       campaignsEnabled =

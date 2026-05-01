@@ -51,11 +51,15 @@ export function PhoneCall() {
 
   return (
     <>
-      {currentCall &&
-        <IconButton ref={anchorEl} onClick={handleIconClick} aria-label="Phone Call">
+      {currentCall && (
+        <IconButton
+          ref={anchorEl}
+          onClick={handleIconClick}
+          aria-label="Phone Call"
+        >
           <FontAwesomeIcon icon={faPhone} className={classes.phoneIcon} />
         </IconButton>
-      }
+      )}
       <Popover
         open={isOpen}
         anchorEl={anchorEl.current}
@@ -64,7 +68,9 @@ export function PhoneCall() {
         transformOrigin={{ vertical: "top", horizontal: "center" }}
         classes={{ paper: classes.popoverPaper }}
       >
-        <div>{ currentCall?.contact?.name || currentCall?.contact?.number || "" }</div>
+        <div>
+          {currentCall?.contact?.name || currentCall?.contact?.number || ""}
+        </div>
         <Button variant="contained" color="secondary" onClick={handleEndCall}>
           <CallEnd style={{ marginRight: 8 }} />
           {i18n.t("phoneCall.hangup")}

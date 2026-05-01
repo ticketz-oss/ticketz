@@ -1,14 +1,14 @@
 export class CallingSound {
-  constructor(region = 'na') {
+  constructor(region = "na") {
     this.audioCtx = null;
     this.intervalId = null;
 
     // Set parameters based on region
-    if (region === 'na') {
-      this.toneDuration = 2.0;    // 2 seconds tone
+    if (region === "na") {
+      this.toneDuration = 2.0; // 2 seconds tone
       this.silenceDuration = 4.0; // 4 seconds silence
-    } else if (region === 'kr') {
-      this.toneDuration = 1.0;    // 1 second tone
+    } else if (region === "kr") {
+      this.toneDuration = 1.0; // 1 second tone
       this.silenceDuration = 2.0; // 2 seconds silence
     } else {
       this.toneDuration = 2.0;

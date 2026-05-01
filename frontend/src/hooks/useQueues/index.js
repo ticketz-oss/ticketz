@@ -1,12 +1,12 @@
 import api from "../../services/api";
 
 const useQueues = () => {
-	const findAll = async () => {
-        const { data } = await api.get("/queue");
-        return data;
-    }
+  const findAll = async () => {
+    const { data } = await api.get("/queue");
+    return data;
+  };
 
-	return { findAll };
+  return { findAll };
 };
 
 export default useQueues;

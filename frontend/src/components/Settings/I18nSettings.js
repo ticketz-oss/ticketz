@@ -165,7 +165,9 @@ const I18nSettings = () => {
               </TableCell>
               <TableCell>
                 <IconButton
-                  onClick={() => handleSaveTranslation(newRow.key, newRow.value)}
+                  onClick={() =>
+                    handleSaveTranslation(newRow.key, newRow.value)
+                  }
                 >
                   <Save />
                 </IconButton>
@@ -186,7 +188,7 @@ const I18nSettings = () => {
                   translation.value
                 )}
               </TableCell>
-              <TableCell style={{minWidth: 128}}>
+              <TableCell style={{ minWidth: 128 }}>
                 {editingKey === translation.key ? (
                   <IconButton
                     onClick={() =>

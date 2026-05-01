@@ -12,9 +12,7 @@ const SimpleListService = async ({ companyId }: Params): Promise<User[]> => {
       companyId
     },
     attributes: ["name", "id", "email"],
-    include: [
-      { model: Queue, as: 'queues' }
-    ],
+    include: [{ model: Queue, as: "queues" }],
     order: [["id", "ASC"]]
   });
 

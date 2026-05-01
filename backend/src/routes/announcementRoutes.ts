@@ -18,20 +18,32 @@ routes.get("/announcements/:id", isAuth, AnnouncementController.show);
 
 routes.post("/announcements", isAuth, isSuper, AnnouncementController.store);
 
-routes.put("/announcements/:id", isAuth, isSuper, AnnouncementController.update);
+routes.put(
+  "/announcements/:id",
+  isAuth,
+  isSuper,
+  AnnouncementController.update
+);
 
-routes.delete("/announcements/:id", isAuth, isSuper, AnnouncementController.remove);
+routes.delete(
+  "/announcements/:id",
+  isAuth,
+  isSuper,
+  AnnouncementController.remove
+);
 
 routes.post(
   "/announcements/:id/media-upload",
-  isAuth, isSuper,
+  isAuth,
+  isSuper,
   upload.array("file"),
   AnnouncementController.mediaUpload
 );
 
 routes.delete(
   "/announcements/:id/media-upload",
-  isAuth, isSuper,
+  isAuth,
+  isSuper,
   AnnouncementController.deleteMedia
 );
 

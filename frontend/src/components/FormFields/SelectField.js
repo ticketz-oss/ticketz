@@ -1,20 +1,20 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { at } from 'lodash';
-import { useField } from 'formik';
+import React from "react";
+import PropTypes from "prop-types";
+import { at } from "lodash";
+import { useField } from "formik";
 import {
   InputLabel,
   FormControl,
   Select,
   MenuItem,
-  FormHelperText
-} from '@material-ui/core';
+  FormHelperText,
+} from "@material-ui/core";
 
 function SelectField(props) {
   const { label, data, ...rest } = props;
   const [field, meta] = useField(props);
   const { value: selectedValue } = field;
-  const [touched, error] = at(meta, 'touched', 'error');
+  const [touched, error] = at(meta, "touched", "error");
   const isError = touched && error && true;
   function _renderHelperText() {
     if (isError) {
@@ -25,7 +25,7 @@ function SelectField(props) {
   return (
     <FormControl {...rest} error={isError}>
       <InputLabel>{label}</InputLabel>
-      <Select {...field} value={selectedValue ? selectedValue : ''}>
+      <Select {...field} value={selectedValue ? selectedValue : ""}>
         {data.map((item, index) => (
           <MenuItem key={index} value={item.value}>
             {item.label}
@@ -38,11 +38,11 @@ function SelectField(props) {
 }
 
 SelectField.defaultProps = {
-  data: []
+  data: [],
 };
 
 SelectField.propTypes = {
-  data: PropTypes.array.isRequired
+  data: PropTypes.array.isRequired,
 };
 
 export default SelectField;

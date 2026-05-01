@@ -95,7 +95,7 @@ const SettingsCustom = () => {
 
         if (Array.isArray(settingList)) {
           const scheduleType = settingList.find(
-            (d) => d.key === "scheduleType"
+            (d) => d.key === "scheduleType",
           );
           if (scheduleType) {
             setSchedulesEnabled(scheduleType.value === "company");
@@ -114,34 +114,34 @@ const SettingsCustom = () => {
   }, []);
 
   const handleTabChange = (event, newValue) => {
-      async function findData() {
-        setLoading(true);
-        try {
-          const companyId = localStorage.getItem("companyId");
-          const company = await find(companyId);
-          const settingList = await getAllSettings();
-          setCompany(company);
-          setSchedules(company.schedules);
-          setSettings(settingList);
-  
-          if (Array.isArray(settingList)) {
-            const scheduleType = settingList.find(
-              (d) => d.key === "scheduleType"
-            );
-            if (scheduleType) {
-              setSchedulesEnabled(scheduleType.value === "company");
-            }
+    async function findData() {
+      setLoading(true);
+      try {
+        const companyId = localStorage.getItem("companyId");
+        const company = await find(companyId);
+        const settingList = await getAllSettings();
+        setCompany(company);
+        setSchedules(company.schedules);
+        setSettings(settingList);
+
+        if (Array.isArray(settingList)) {
+          const scheduleType = settingList.find(
+            (d) => d.key === "scheduleType",
+          );
+          if (scheduleType) {
+            setSchedulesEnabled(scheduleType.value === "company");
           }
-  
-          const user = await getCurrentUserInfo();
-          setCurrentUser(user);
-        } catch (e) {
-          toast.error(e);
         }
-        setLoading(false);
+
+        const user = await getCurrentUserInfo();
+        setCurrentUser(user);
+      } catch (e) {
+        toast.error(e);
       }
-      findData();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+      setLoading(false);
+    }
+    findData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
 
     setTab(newValue);
   };
@@ -178,13 +178,39 @@ const SettingsCustom = () => {
           className={classes.tab}
         >
           <Tab label={i18n.t("settings.Options.title")} value={"options"} />
-          {schedulesEnabled && <Tab label={i18n.t("settings.schedules.title")} value={"schedules"} />}
-          {isSuper() ? <Tab label={i18n.t("settings.Companies.title")} value={"companies"} /> : null}
-          {isSuper() ? <Tab label={i18n.t("settings.Plans.title")} value={"plans"} /> : null}
-          {isSuper() ? <Tab label={i18n.t("settings.Help.title")} value={"helps"} /> : null}
-          {isSuper() ? <Tab label={i18n.t("settings.Whitelabel.title")} value={"whitelabel"} /> : null}
-          {isSuper() ? <Tab label={i18n.t("settings.PaymentGateways.title")} value={"paymentGateway"} /> : null}
-          {isSuper() ? <Tab label={i18n.t("settings.i18nSettings.title")} value={"i18n"} /> : null}
+          {schedulesEnabled && (
+            <Tab
+              label={i18n.t("settings.schedules.title")}
+              value={"schedules"}
+            />
+          )}
+          {isSuper() ? (
+            <Tab
+              label={i18n.t("settings.Companies.title")}
+              value={"companies"}
+            />
+          ) : null}
+          {isSuper() ? (
+            <Tab label={i18n.t("settings.Plans.title")} value={"plans"} />
+          ) : null}
+          {isSuper() ? (
+            <Tab label={i18n.t("settings.Help.title")} value={"helps"} />
+          ) : null}
+          {isSuper() ? (
+            <Tab
+              label={i18n.t("settings.Whitelabel.title")}
+              value={"whitelabel"}
+            />
+          ) : null}
+          {isSuper() ? (
+            <Tab
+              label={i18n.t("settings.PaymentGateways.title")}
+              value={"paymentGateway"}
+            />
+          ) : null}
+          {isSuper() ? (
+            <Tab label={i18n.t("settings.i18nSettings.title")} value={"i18n"} />
+          ) : null}
         </Tabs>
         <Paper className={classes.paper} elevation={0}>
           <TabPanel
@@ -194,18 +220,23 @@ const SettingsCustom = () => {
           >
             {isOpenHoursFormat(schedules) ? (
               <>
-                <OpenHoursEditor
-                  value={schedules}
-                  onChange={setSchedules}
-                />
-                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
+                <OpenHoursEditor value={schedules} onChange={setSchedules} />
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    marginTop: 16,
+                  }}
+                >
                   <Button
                     variant="contained"
                     color="primary"
                     onClick={() => handleSubmitSchedules(schedules)}
                     disabled={loading}
                   >
-                    {loading ? i18n.t("settings.saving") : i18n.t("common.save")}
+                    {loading
+                      ? i18n.t("settings.saving")
+                      : i18n.t("common.save")}
                   </Button>
                 </div>
               </>
@@ -220,7 +251,7 @@ const SettingsCustom = () => {
                         onClick={() => setSchedules({})}
                         disabled={loading}
                       >
-                      ⚠️ {i18n.t("settings.schedules.updateToNewFormat")}
+                        ⚠️ {i18n.t("settings.schedules.updateToNewFormat")}
                       </Button>
                     </div>
                   </Grid>
@@ -237,52 +268,48 @@ const SettingsCustom = () => {
             user={currentUser}
             yes={() => (
               <>
-              <TabPanel
-                className={classes.container}
-                value={tab}
-                name={"whitelabel"}
-              >
-                  <Whitelabel
-                    settings={settings}
-                  />
-              </TabPanel>
-              <TabPanel
-                className={classes.container}
-                value={tab}
-                name={"paymentGateway"}
-              >
-                  <PaymentGateway
-                    settings={settings}
-                  />
-              </TabPanel>
-              <TabPanel
-                className={classes.container}
-                value={tab}
-                name={"i18n"}
-              >
-                <I18nSettings />
-              </TabPanel>
-              <TabPanel
-                className={classes.container}
-                value={tab}
-                name={"companies"}
-              >
-                <CompaniesManager />
-              </TabPanel>
-              <TabPanel
-                className={classes.container}
-                value={tab}
-                name={"plans"}
-              >
-                <PlansManager />
-              </TabPanel>
-              <TabPanel
-                className={classes.container}
-                value={tab}
-                name={"helps"}
-              >
-                <HelpsManager />
-              </TabPanel>
+                <TabPanel
+                  className={classes.container}
+                  value={tab}
+                  name={"whitelabel"}
+                >
+                  <Whitelabel settings={settings} />
+                </TabPanel>
+                <TabPanel
+                  className={classes.container}
+                  value={tab}
+                  name={"paymentGateway"}
+                >
+                  <PaymentGateway settings={settings} />
+                </TabPanel>
+                <TabPanel
+                  className={classes.container}
+                  value={tab}
+                  name={"i18n"}
+                >
+                  <I18nSettings />
+                </TabPanel>
+                <TabPanel
+                  className={classes.container}
+                  value={tab}
+                  name={"companies"}
+                >
+                  <CompaniesManager />
+                </TabPanel>
+                <TabPanel
+                  className={classes.container}
+                  value={tab}
+                  name={"plans"}
+                >
+                  <PlansManager />
+                </TabPanel>
+                <TabPanel
+                  className={classes.container}
+                  value={tab}
+                  name={"helps"}
+                >
+                  <HelpsManager />
+                </TabPanel>
               </>
             )}
           />

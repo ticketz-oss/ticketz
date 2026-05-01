@@ -3,8 +3,8 @@ import { makeStyles } from "@material-ui/core/styles";
 
 import Paper from "@material-ui/core/Paper";
 import Button from "@material-ui/core/Button";
-import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
+import Grid from "@material-ui/core/Grid";
+import TextField from "@material-ui/core/TextField";
 
 import SubscriptionModal from "../../components/SubscriptionModal";
 import MainHeader from "../../components/MainHeader";
@@ -29,18 +29,17 @@ const _formatDate = (date) => {
   const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
 
   return days;
-}
+};
 
 const Contacts = () => {
   const classes = useStyles();
   const { user } = useContext(AuthContext);
 
-  const [loading,] = useState(false);
+  const [loading] = useState(false);
   const [, setPageNumber] = useState(1);
   const [selectedContactId, setSelectedContactId] = useState(null);
   const [contactModalOpen, setContactModalOpen] = useState(false);
-  const [hasMore,] = useState(false);
-
+  const [hasMore] = useState(false);
 
   const handleOpenContactModal = () => {
     setSelectedContactId(null);
@@ -82,7 +81,6 @@ const Contacts = () => {
           variant="outlined"
           onScroll={handleScroll}
         >
-
           <div>
             <TextField
               id="outlined-full-width"
@@ -98,7 +96,6 @@ const Contacts = () => {
               }}
               variant="outlined"
             />
-
           </div>
 
           <div>
@@ -116,7 +113,6 @@ const Contacts = () => {
               }}
               variant="outlined"
             />
-
           </div>
 
           <div>
@@ -129,7 +125,6 @@ const Contacts = () => {
               Assine Agora!
             </Button>
           </div>
-
         </Paper>
       </Grid>
     </MainContainer>

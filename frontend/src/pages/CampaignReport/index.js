@@ -90,10 +90,10 @@ const CampaignReport = () => {
           }, 5000);
         }
       }
-    }
+    };
 
     socket.on(`company-${companyId}-campaign`, onCampaign);
-    
+
     return () => {
       socket.disconnect();
     };

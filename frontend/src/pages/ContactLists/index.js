@@ -142,8 +142,8 @@ const ContactLists = () => {
       if (data.action === "delete") {
         dispatch({ type: "DELETE_CONTACTLIST", payload: +data.id });
       }
-    }
-    
+    };
+
     socket.on(`company-${companyId}-ContactList`, onContactList);
 
     return () => {
