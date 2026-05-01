@@ -5,10 +5,7 @@ export type TicketCounterSeries = {
   field: string;
   start: Date;
   end: Date;
-  counters: {
-    time: string;
-    counter: number;
-  }[];
+  counters: Counter[];
 };
 
 export async function listCounterSerie(
