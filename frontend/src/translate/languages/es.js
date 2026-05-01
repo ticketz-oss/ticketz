@@ -815,6 +815,16 @@ const messages = {
         appname: "Nombre de la aplicación",
         logoHint: "Prefiera SVG y aspecto de 28:10",
         faviconHint: "Prefiera imagen SVG cuadrada o PNG de 512x512",
+        loginLinks: "Enlaces del login",
+        loginLinksHint: "Agregue pares de título y URL para mostrarlos debajo de la caja de login en escritorio y móvil.",
+        linkTitle: "Título del enlace",
+        linkUrl: "URL del enlace",
+        removeLink: "Eliminar enlace",
+        sidePanelImage: "Imagen lateral del login",
+        sidePanelImageHint: "Se muestra a la izquierda del formulario de login en pantallas de escritorio.",
+        backgroundContent: "Contenido de fondo del login",
+        backgroundContentHint: "Acepta imágenes, archivos SVG y videos MP4 para el fondo de la pantalla de login.",
+        noFileSelected: "Todavía no hay archivo seleccionado.",
       },
       settings: {
         group: {

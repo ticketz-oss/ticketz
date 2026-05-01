@@ -784,6 +784,16 @@ const messages = {
         appname: "Nama aplikasi",
         logoHint: "Prefer SVG dan aspek 28:10",
         faviconHint: "Prefer gambar SVG persegi atau PNG 512x512",
+        loginLinks: "Tautan login",
+        loginLinksHint: "Tambahkan pasangan judul dan URL untuk ditampilkan di bawah kotak login pada desktop dan mobile.",
+        linkTitle: "Judul tautan",
+        linkUrl: "URL tautan",
+        removeLink: "Hapus tautan",
+        sidePanelImage: "Gambar panel samping login",
+        sidePanelImageHint: "Ditampilkan di sisi kiri formulir login pada tampilan desktop.",
+        backgroundContent: "Konten latar login",
+        backgroundContentHint: "Mendukung gambar, file SVG, dan video MP4 untuk latar layar login.",
+        noFileSelected: "Belum ada file yang dipilih.",
       },
       settings: {
         group: {

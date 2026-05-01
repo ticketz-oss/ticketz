@@ -48,4 +48,12 @@ settingRoutes.post(
   SettingController.storePrivateFile
 );
 
+settingRoutes.post(
+  "/settings/publicFile",
+  isAuth,
+  isSuper,
+  upload.single("file"),
+  SettingController.storePublicFile
+);
+
 export default settingRoutes;

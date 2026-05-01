@@ -1,44 +1,45 @@
-<!DOCTYPE html>
+<!doctype html>
 <html translate="no">
-	<head>
-		<link
-			rel="stylesheet"
-			href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
-		/>
-		<link rel="apple-touch-icon" href="%PUBLIC_URL%/favicon.ico" />
-		<link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-		<link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
-		<link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-		<meta name="theme-color" content="#000000" />
-		<meta
-			name="viewport"
-			content="minimum-scale=1, initial-scale=1, width=device-width"
-		/>
-		
-	  <style>
-			html, body {
-			  height: var(--vh, 100vh);
-			  margin: 0;
-			  padding: 0;
-			  overflow: hidden;
-			}
-			
-			svg.alertsign {
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+    />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/favicon.ico" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="viewport"
+      content="minimum-scale=1, initial-scale=1, width=device-width"
+    />
+
+    <style>
+      html,
+      body {
+        height: var(--vh, 100vh);
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+
+      svg.alertsign {
         width: 64px;
         height: 64px;
         margin-bottom: 16px;
       }
 
-			#root {
-		    position: fixed;
-		    top: 0;
-		    left: 0;
-		    width: 100%;
-		    height: var(--vh, 100vh);
-		    overflow-y: auto;
-		    -webkit-overflow-scrolling: touch;
-			}
-    
+      #root {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: var(--vh, 100vh);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
       :root {
         --background: #999;
         --splash: #777;
@@ -61,7 +62,9 @@
         }
       }
 
-      *, *::before, *::after {
+      *,
+      *::before,
+      *::after {
         box-sizing: border-box;
       }
 
@@ -71,246 +74,321 @@
         display: none;
         text-align: center;
       }
-      
       #app-logo {
         width: 100%;
         height: auto;
       }
-      
-      /* Basic styles for the splash screen background */ 
+
+      /* Basic styles for the splash screen background */
       #splash-background {
-	      position: fixed;
-	      top: 0;
-	      left: 0;
-	      width: 100%;
-	      height: 100%;
-        background: linear-gradient(to right, var(--background), var(--background), var(--primary), var(--background), var(--background));
-	      background-color: var(--background);
-	      z-index: 9998;
-	      display: flex;
-	      justify-content: center;
-	      align-items: center;
-      }	  
-	  
-	    /* Basic styles for the splash screen */
-			#splash-screen {
-			  position: fixed;
-			  top: 50%;
-			  left: 50%;
-        padding: 24px;
-			  transform: translate(-50%, -50%);
-			  width: 444px;
-        max-width: 90%;
-			  height: auto;
-			  display: flex;
-			  flex-direction: column;
-			  justify-content: center;
-			  align-items: center;
-			  background-color: var(--splash);
-			  z-index: 9999;
-			  border-radius: 12.5px;
-			}
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          to right,
+          var(--background),
+          var(--background),
+          var(--primary),
+          var(--background),
+          var(--background)
+        );
+        background-color: var(--background);
+        background-size: 200% 200%;
+        animation: splash-gradient-drift 18s ease-in-out infinite;
+        z-index: 9998;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
 
-	    .progress-bar {
-	      width: 80%;
-	      height: 20px;
-	      background-color: var(--background);
-	      border-radius: 10px;
-	      border-color: var(--primary);
-	      border-style: solid;
-	      border-width: 2px;
-	      overflow: hidden;
-	    }
-	
-	    .progress {
-	      height: 100%;
-	      background-color: var(--primary);
-	      border-color: var(--background);
-	      border-style: solid;
-	      border-width: 2px;
-	      border-radius: 8px;
-	      width: 0;
-	      transition: width 0.2s;
-	    }
-	  </style>
+      @keyframes splash-gradient-drift {
+        0% {
+          background-position: 0% 50%;
+        }
 
-		<!-- Issue workaround for React v16. -->
-		<script>
-			// See https://github.com/facebook/react/issues/20829#issuecomment-802088260
-			if (!crossOriginIsolated) SharedArrayBuffer = ArrayBuffer;
-		</script>
-	</head>
-	<body>
-    <div id="pixelAnchor" style="position:absolute; top:0; left:0; width:1px; height:1px; opacity:0;"></div>
-    <div id="splash-background">
-		  <div id="splash-screen">
-		    <div class="app-logo-div" id="app-logo-div">
-		       <img id="app-logo" alt="logo" />
-		    </div>
-		    <div class="progress-bar">
-		      <div class="progress" id="progress-bar"></div>
-		    </div>
-		  </div>
-	  </div>
-	  <div id="root"></div>
-	<script>
-		window.addEventListener("focusin", () => {
-			  setTimeout(() => window.scrollTo(0, 0), 0);
-			});
+        50% {
+          background-position: 100% 50%;
+        }
 
- 		window.visualViewport.addEventListener("scroll", () => {
-		  if (window.visualViewport.pageTop) {
-        const anchor = document.getElementById("pixelAnchor");
-         anchor.scrollIntoView({ block: "start", inline: "nearest" });
-		  }
-		});
-
-		if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-      function handleFocus(e) {
-        const root = document.getElementById("root");
-        const anchor = document.getElementById("pixelAnchor");
-        const el = e.target;
-        if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
-          setTimeout(() => {
-            el.scrollIntoView({
-              block: "center",
-              behavior: "auto",
-            });
-            setTimeout(() => {
-              anchor.scrollIntoView({ block: "start", inline: "nearest" });
-            }, 200);
-          }, 100);
+        100% {
+          background-position: 0% 50%;
         }
       }
 
-      root.addEventListener("focusin", handleFocus);
-		}
-		
-		// Simulate progress update
-		progress = 0;
-		const themes = {
-				"light": {
-					  "background": "#fff",
-					  "splash": "#fff",
-					  "primary": "#000"
-				},
-				"dark": {
-					  "background": "#333",
-					  "splash": "#424242",
-					  "primary": "#fff"
-			  }
-		}
-		
-		// Set the theme
-    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-		const theme = localStorage.getItem('preferredTheme') || systemTheme;
-		
-		if (theme) {
-			const root = document.documentElement;
-      root.style.setProperty('--background', themes[theme].background);
-      root.style.setProperty('--splash', themes[theme].splash);
-      root.style.setProperty('--primary', themes[theme].primary);
-		}
-		
-		window.renderError = (message) => {
-			const splashScreen = document.getElementById('splash-screen');
-      splashScreen.innerHTML = `
+      @media (prefers-reduced-motion: reduce) {
+        #splash-background {
+          animation: none;
+        }
+      }
+
+      /* Basic styles for the splash screen */
+      #splash-screen {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        padding: 24px;
+        transform: translate(-50%, -50%);
+        width: 444px;
+        max-width: 90%;
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-color: var(--splash);
+        z-index: 9999;
+        border-radius: 12.5px;
+      }
+
+      .progress-bar {
+        width: 80%;
+        height: 20px;
+        margin-left: auto;
+        margin-right: auto;
+        background-color: var(--background);
+        border-radius: 10px;
+        border-color: var(--primary);
+        border-style: solid;
+        border-width: 2px;
+        overflow: hidden;
+      }
+
+      .progress {
+        height: 100%;
+        background-color: var(--primary);
+        border-color: var(--background);
+        border-style: solid;
+        border-width: 2px;
+        border-radius: 8px;
+        width: 0;
+        transition: width 0.2s;
+      }
+
+      .progress.regress {
+        width: 100%;
+        transition: none;
+        animation-name: regress-progress;
+        animation-timing-function: linear;
+        animation-fill-mode: forwards;
+      }
+
+      @keyframes regress-progress {
+        from {
+          width: 100%;
+        }
+
+        to {
+          width: 0;
+        }
+      }
+    </style>
+
+    <!-- Issue workaround for React v16. -->
+    <script>
+      // See https://github.com/facebook/react/issues/20829#issuecomment-802088260
+      if (!crossOriginIsolated) SharedArrayBuffer = ArrayBuffer;
+    </script>
+  </head>
+  <body>
+    <div
+      id="pixelAnchor"
+      style="
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+      "
+    ></div>
+    <div id="splash-background">
+      <div id="splash-screen">
+        <div class="app-logo-div" id="app-logo-div">
+          <img id="app-logo" alt="logo" />
+        </div>
+        <div class="progress-bar">
+          <div class="progress" id="progress-bar"></div>
+        </div>
+      </div>
+    </div>
+    <div id="root"></div>
+    <script>
+      window.addEventListener("focusin", () => {
+        setTimeout(() => window.scrollTo(0, 0), 0);
+      });
+
+      window.visualViewport.addEventListener("scroll", () => {
+        if (window.visualViewport.pageTop) {
+          const anchor = document.getElementById("pixelAnchor");
+          anchor.scrollIntoView({ block: "start", inline: "nearest" });
+        }
+      });
+
+      if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        function handleFocus(e) {
+          const root = document.getElementById("root");
+          const anchor = document.getElementById("pixelAnchor");
+          const el = e.target;
+          if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
+            setTimeout(() => {
+              el.scrollIntoView({
+                block: "center",
+                behavior: "auto",
+              });
+              setTimeout(() => {
+                anchor.scrollIntoView({ block: "start", inline: "nearest" });
+              }, 200);
+            }, 100);
+          }
+        }
+
+        root.addEventListener("focusin", handleFocus);
+      }
+
+      // Simulate progress update
+      progress = 0;
+      const themes = {
+        light: {
+          background: "#fff",
+          splash: "#fff",
+          primary: "#000",
+        },
+        dark: {
+          background: "#333",
+          splash: "#424242",
+          primary: "#fff",
+        },
+      };
+
+      // Set the theme
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
+        .matches
+        ? "dark"
+        : "light";
+      const theme = localStorage.getItem("preferredTheme") || systemTheme;
+
+      if (theme) {
+        const root = document.documentElement;
+        root.style.setProperty("--background", themes[theme].background);
+        root.style.setProperty("--splash", themes[theme].splash);
+        root.style.setProperty("--primary", themes[theme].primary);
+      }
+
+      window.renderError = (message) => {
+        const splashScreen = document.getElementById("splash-screen");
+        splashScreen.innerHTML = `
             <div style="color: var(--primary); text-align: center;">
             <svg class="alertsign" id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 122.88 111.54"><defs><style>.cls-1{fill:#cf1f25;}.cls-2{fill:#fec901;fill-rule:evenodd;}.cls-3{fill:#010101;}</style></defs><title>warning</title><path class="cls-1" d="M2.35,84.42,45.28,10.2l.17-.27h0A23,23,0,0,1,52.5,2.69,17,17,0,0,1,61.57,0a16.7,16.7,0,0,1,9.11,2.69,22.79,22.79,0,0,1,7,7.26q.19.32.36.63l42.23,73.34.24.44h0a22.48,22.48,0,0,1,2.37,10.19,17.63,17.63,0,0,1-2.17,8.35,15.94,15.94,0,0,1-6.93,6.6c-.19.1-.39.18-.58.26a21.19,21.19,0,0,1-9.11,1.75v0H17.61c-.22,0-.44,0-.65,0a18.07,18.07,0,0,1-6.2-1.15A16.42,16.42,0,0,1,3,104.24a17.53,17.53,0,0,1-3-9.57,23,23,0,0,1,1.57-8.74,7.66,7.66,0,0,1,.77-1.51Z"/><path class="cls-2" d="M9,88.75,52.12,14.16c5.24-8.25,13.54-8.46,18.87,0l42.43,73.69c3.39,6.81,1.71,16-9.33,15.77H17.61C10.35,103.8,5.67,97.43,9,88.75Z"/><path class="cls-3" d="M57.57,83.78A5.53,5.53,0,0,1,61,82.2a5.6,5.6,0,0,1,2.4.36,5.7,5.7,0,0,1,2,1.3,5.56,5.56,0,0,1,1.54,5,6.23,6.23,0,0,1-.42,1.35,5.57,5.57,0,0,1-5.22,3.26,5.72,5.72,0,0,1-2.27-.53A5.51,5.51,0,0,1,56.28,90a5.18,5.18,0,0,1-.36-1.27,5.83,5.83,0,0,1-.06-1.31h0a6.53,6.53,0,0,1,.57-2,4.7,4.7,0,0,1,1.14-1.56Zm8.15-10.24c-.19,4.79-8.31,4.8-8.49,0-.82-8.21-2.92-29.34-2.86-37.05.07-2.38,2-3.79,4.56-4.33a12.83,12.83,0,0,1,5,0c2.61.56,4.65,2,4.65,4.44v.24L65.72,73.54Z"/></svg>
             <p>${message}</p>
             </div>
         `;
-      const root = document.documentElement;
-      root.style.setProperty('--primary', "#f44");
-      progress = 0;
-		}
-		
-		window.mentionClick = (mention) => {
-      console.log("mentionClick not implemented yet", mention);
-    }
+        const root = document.documentElement;
+        root.style.setProperty("--primary", "#f44");
+        progress = 0;
+      };
 
-		window.mentionRenderer = (mention) => {
-      return `<span class="ticketzMention" onclick='window.mentionClick(${JSON.stringify(mention).replace(/'/g, "\\'")})'>@` + (mention?.name || mention?.number || "invalid mention") + "</span>";
-		}
-		
-    const configureSplash = async (config) => {
-      const protocol = config.BACKEND_PROTOCOL || "https";
-      const hostname = config.BACKEND_HOST || window.location.hostname;
-      const port = config.BACKEND_PORT ? `:${config.BACKEND_PORT}` : "";
-      const path = config.BACKEND_PATH || ((hostname === "localhost" || hostname !== window.location.hostname) ? "" : "/backend");
-    	
-	    const backendUrl = `${protocol}://${hostname}${port}${path}`;
-	    const settingsBaseUrl = backendUrl + "/public-settings";
-	    
-	    fetch(settingsBaseUrl + "/primaryColor" + (theme === "dark" ? "Dark" : "Light"))
-	        .then(response => response.json())
-	        .then(data => {
-	          const root = document.documentElement;
-	          
-	          if (data) {
-	            root.style.setProperty('--primary', data);
-	            return;
-	          }
-	          
-	          root.style.setProperty('--primary', theme === "dark" ? "#39ACE7" : "#00f");
-	        });
-	    
-	    Promise.all([
-	        fetch(settingsBaseUrl + "/appLogoDark"),
-	        fetch(settingsBaseUrl + "/appLogoLight")
-	        ]).then(async responses => {
-	          const appLogo = document.getElementById('app-logo');
-	          
-	          const logoSrc =
-	            await (theme === "dark" ? responses[0] : responses[1]).json() ||
-	            await (theme === "dark" ? responses[1] : responses[0]).json();
-	          
-	          if (!logoSrc) {
-	            appLogo.src = `/vector/logo${theme === "dark" ? "-dark" : ""}.svg`;
-	          } else {
-	            appLogo.src = backendUrl + "/public/" + (logoSrc || logoAltSrc);
-	          }
-	          const appLogoDiv = document.getElementById('app-logo-div');
-	          appLogoDiv.style.display = "block";
-	        });
-	    
-	    fetch(settingsBaseUrl + "/appName")
-	        .then(response => response.json())
-	        .then(data => {
-	          document.title = data || "ticketz";
-	        });
-    };
-		
-		const settings = fetch("/config.json")
-        .then(async (response) => {
-          let config = {};
-        	response.json().then(config => {
-        		  configureSplash(config);
-        	});
-        })
-		
-		const progressBar = document.getElementById('progress-bar');
-		const interval = setInterval(() => {
-		  if (progress < 50) {
-		    progress += 10;
-		  } else if (progress < 80) {
-		    progress += 3;
-		  } else if (progress < 99) {
-		    progress += ( (99-progress) / 20 );
-		  }
-		  progressBar.style.width = progress + '%';
-		  
-		  if (progress >= 100) {
-        clearInterval(interval);
-		    setTimeout(() => {
-          const splashScreen = document.getElementById('splash-background');
-          splashScreen.remove();
-		    }, 500);
-		  }
-		}, 1000);
-    window.finishProgress=() => {
-      progress = 100;
-    }
-	</script>	  
-	</body>
+      window.mentionClick = (mention) => {
+        console.log("mentionClick not implemented yet", mention);
+      };
+
+      window.mentionRenderer = (mention) => {
+        return (
+          `<span class="ticketzMention" onclick='window.mentionClick(${JSON.stringify(mention).replace(/'/g, "\\'")})'>@` +
+          (mention?.name || mention?.number || "invalid mention") +
+          "</span>"
+        );
+      };
+
+      const configureSplash = async (config) => {
+        const protocol = config.BACKEND_PROTOCOL || "https";
+        const hostname = config.BACKEND_HOST || window.location.hostname;
+        const port = config.BACKEND_PORT ? `:${config.BACKEND_PORT}` : "";
+        const path =
+          config.BACKEND_PATH ||
+          (hostname === "localhost" || hostname !== window.location.hostname
+            ? ""
+            : "/backend");
+
+        const backendUrl = `${protocol}://${hostname}${port}${path}`;
+        const settingsBaseUrl = backendUrl + "/public-settings";
+
+        fetch(
+          settingsBaseUrl +
+            "/primaryColor" +
+            (theme === "dark" ? "Dark" : "Light"),
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            const root = document.documentElement;
+
+            if (data) {
+              root.style.setProperty("--primary", data);
+              return;
+            }
+
+            root.style.setProperty(
+              "--primary",
+              theme === "dark" ? "#39ACE7" : "#00f",
+            );
+          });
+
+        Promise.all([
+          fetch(settingsBaseUrl + "/appLogoDark"),
+          fetch(settingsBaseUrl + "/appLogoLight"),
+        ]).then(async (responses) => {
+          const appLogo = document.getElementById("app-logo");
+
+          const logoSrc =
+            (await (theme === "dark" ? responses[0] : responses[1]).json()) ||
+            (await (theme === "dark" ? responses[1] : responses[0]).json());
+
+          if (!logoSrc) {
+            appLogo.src = `/vector/logo${theme === "dark" ? "-dark" : ""}.svg`;
+          } else {
+            appLogo.src = backendUrl + "/public/" + (logoSrc || logoAltSrc);
+          }
+          const appLogoDiv = document.getElementById("app-logo-div");
+          appLogoDiv.style.display = "block";
+        });
+
+        fetch(settingsBaseUrl + "/appName")
+          .then((response) => response.json())
+          .then((data) => {
+            document.title = data || "ticketz";
+          });
+      };
+
+      fetch("/config.json").then(async (response) => {
+        response.json().then((config) => {
+          configureSplash(config);
+        });
+      });
+
+      const progressBar = document.getElementById("progress-bar");
+      const interval = setInterval(() => {
+        if (progress < 50) {
+          progress += 10;
+        } else if (progress < 80) {
+          progress += 3;
+        } else if (progress < 99) {
+          progress += (99 - progress) / 20;
+        }
+        progressBar.style.width = progress + "%";
+
+        if (progress >= 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            const splashScreen = document.getElementById("splash-background");
+            splashScreen.remove();
+          }, 500);
+        }
+      }, 1000);
+      window.finishProgress = () => {
+        progress = 100;
+      };
+    </script>
+    <script src="/notificame-gateway.js"></script>
+  </body>
 </html>

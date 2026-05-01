@@ -16,6 +16,12 @@ type PrivateFileRequest = {
   settingKey: string;
 };
 
+const publicFileValidators: Record<string, (mimetype: string) => boolean> = {
+  loginSidePanelImage: (mimetype: string) => mimetype.startsWith("image/"),
+  loginBackgroundContent: (mimetype: string) =>
+    mimetype.startsWith("image/") || mimetype.startsWith("video/")
+};
+
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const settings = await ListSettingsService(req.user);
 
@@ -104,6 +110,37 @@ export const storePrivateFile = async (
 
   const setting = await UpdateSettingService({
     key: `_${settingKey}`,
+    value: file.filename,
+    companyId
+  });
+
+  return res.status(200).json(setting.value);
+};
+
+export const storePublicFile = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const file = req.file as Express.Multer.File;
+  const { settingKey }: PrivateFileRequest = req.body;
+  const { companyId } = req.user;
+
+  if (!file || !settingKey) {
+    throw new AppError("ERR_INVALID_UPLOAD", 406);
+  }
+
+  const validateMimetype = publicFileValidators[settingKey];
+
+  if (!validateMimetype) {
+    throw new AppError("ERR_INVALID_SETTING", 406);
+  }
+
+  if (!validateMimetype(file.mimetype)) {
+    throw new AppError("ERR_INVALID_UPLOAD", 406);
+  }
+
+  const setting = await UpdateSettingService({
+    key: settingKey,
     value: file.filename,
     companyId
   });

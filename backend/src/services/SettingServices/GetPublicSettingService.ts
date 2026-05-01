@@ -11,7 +11,11 @@ const publicSettingsKeys = [
   "appLogoLight",
   "appLogoDark",
   "appLogoFavicon",
-  "appName"
+  "appName",
+  "loginPageLinks",
+  "loginSidePanelImage",
+  "loginBackgroundContent",
+  "vapidPublicKey"
 ];
 
 const GetPublicSettingService = async ({
