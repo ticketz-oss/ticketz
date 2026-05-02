@@ -11,6 +11,7 @@ import fs from "fs";
 import path from "path";
 import AppError from "../errors/AppError";
 import QueueOption from "../models/QueueOption";
+import saveMediaToFile from "../helpers/saveMediaFile";
 
 type FilterList = {
   queueId: string;
@@ -83,15 +84,32 @@ export const mediaUpload = async (
   const file = head(files);
 
   try {
-    const queue = await QueueOption.findByPk(queueOptionId);
+    const queueOption = await QueueOption.findOne(
+      QueueOption.withTopParentQueue({
+        where: { id: queueOptionId }
+      })
+    );
 
-    queue.update({
-      mediaPath: file.filename,
+    const savedFilePath = await saveMediaToFile(
+      {
+        data: fs.readFileSync(file.path),
+        mimetype: file.mimetype,
+        filename: file.originalname
+      },
+      {
+        destination: queueOption.topParentQueue.companyId
+      }
+    );
+
+    fs.unlinkSync(file.path);
+
+    queueOption.update({
+      mediaPath: savedFilePath,
       mediaName: file.originalname
     });
 
     return res.send({ mensagem: "Arquivo Salvo" });
-  } catch (err: any) {
+  } catch (err) {
     throw new AppError(err.message);
   }
 };
@@ -114,7 +132,7 @@ export const deleteMedia = async (
     queue.mediaName = null;
     await queue.save();
     return res.send({ mensagem: "Arquivo excluído" });
-  } catch (err: any) {
+  } catch (err) {
     throw new AppError(err.message);
   }
 };
