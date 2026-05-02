@@ -1,4 +1,5 @@
 import path from "path";
+import fs from "fs";
 import * as Sentry from "@sentry/node";
 import { isNil, head, keys } from "lodash";
 
@@ -1154,6 +1155,14 @@ export const startQueue = async (
 
   if (queue.mediaPath !== null && queue.mediaPath !== "") {
     filePath = path.resolve("public", queue.mediaPath);
+
+    // check if file not exists
+    if (!fs.existsSync(filePath)) {
+      filePath = null;
+    }
+  }
+
+  if (filePath) {
     optionsMsg = await getMessageFileOptions(queue.mediaName, filePath);
   }
 
@@ -1474,6 +1483,12 @@ const handleChartbot = async (
     let optionsMsg = null;
     if (currentOption.mediaPath !== null && currentOption.mediaPath !== "") {
       filePath = path.resolve("public", currentOption.mediaPath);
+      if (!fs.existsSync(filePath)) {
+        filePath = null;
+      }
+    }
+
+    if (filePath) {
       optionsMsg = await getMessageFileOptions(
         currentOption.mediaName,
         filePath
