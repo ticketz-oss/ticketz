@@ -43,7 +43,7 @@ const TicketInfo = ({ contact, ticket, onClick }) => {
           style={{
             backgroundColor: generateColor(contact?.number),
             color: "white",
-            fontWeight: "bold",
+            fontWeight: "bold"
           }}
           src={contact.profilePicUrl}
           alt="contact_image"

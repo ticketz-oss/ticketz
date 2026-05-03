@@ -4,28 +4,28 @@ import { Mutex } from "async-mutex";
 const cachedSettingsMutex = new Mutex();
 
 const useSettings = () => {
-  const getAll = async (params) => {
+  const getAll = async params => {
     const { data } = await api.request({
       url: "/settings",
       method: "GET",
-      params,
+      params
     });
     return data;
   };
 
-  const update = async (data) => {
+  const update = async data => {
     const { data: responseData } = await api.request({
       url: `/settings/${data.key}`,
       method: "PUT",
-      data,
+      data
     });
     return responseData;
   };
 
-  const getPublicSetting = async (key) => {
+  const getPublicSetting = async key => {
     const { data } = await openApi.request({
       url: `/public-settings/${key}`,
-      method: "GET",
+      method: "GET"
     });
     return data;
   };
@@ -36,7 +36,7 @@ const useSettings = () => {
     }
     const { data } = await api.request({
       url: `/settings/${key}`,
-      method: "GET",
+      method: "GET"
     });
 
     if (!data) {
@@ -71,7 +71,7 @@ const useSettings = () => {
     getPublicSetting,
     getSetting,
     getCachedSetting,
-    update,
+    update
   };
 };
 

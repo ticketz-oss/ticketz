@@ -5,7 +5,7 @@ import Container from "@material-ui/core/Container";
 import whatsBackground from "../../assets/wa-background.png";
 import whatsBackgroundDark from "../../assets/wa-background-dark.png";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   mainContainer: {
     flex: 1,
     padding: theme.spacing(2),
@@ -16,15 +16,15 @@ const useStyles = makeStyles((theme) => ({
         : `url(${whatsBackgroundDark})`,
     backgroundPosition: "center",
     backgroundSize: "cover",
-    backgroundRepeat: "no-repeat",
+    backgroundRepeat: "no-repeat"
   },
 
   contentWrapper: {
     height: "100%",
     overflowY: "hidden",
     display: "flex",
-    flexDirection: "column",
-  },
+    flexDirection: "column"
+  }
 }));
 
 const MainContainer = ({ children }) => {

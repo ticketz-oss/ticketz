@@ -4,7 +4,7 @@ import { useHistory } from "react-router-dom";
 import {
   makeStyles,
   createTheme,
-  ThemeProvider,
+  ThemeProvider
 } from "@material-ui/core/styles";
 import { IconButton } from "@material-ui/core";
 import { MoreVert, Replay } from "@material-ui/icons";
@@ -26,16 +26,16 @@ import { PhoneCallContext } from "../../context/PhoneCall/PhoneCallContext";
 import { wavoipAvailable, wavoipCall } from "../../helpers/wavoipCallManager";
 import { toBeChecked } from "@testing-library/jest-dom/matchers";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   actionButtons: {
     marginRight: 6,
     flex: "none",
     alignSelf: "center",
     marginLeft: "auto",
     "& > *": {
-      margin: theme.spacing(0.5),
-    },
-  },
+      margin: theme.spacing(0.5)
+    }
+  }
 }));
 
 const TicketActionButtonsCustom = ({ ticket, showTabGroups }) => {
@@ -50,15 +50,15 @@ const TicketActionButtonsCustom = ({ ticket, showTabGroups }) => {
 
   const customTheme = createTheme({
     palette: {
-      primary: green,
-    },
+      primary: green
+    }
   });
 
-  const handleOpenTicketOptionsMenu = (e) => {
+  const handleOpenTicketOptionsMenu = e => {
     setAnchorEl(e.currentTarget);
   };
 
-  const handleCloseTicketOptionsMenu = (e) => {
+  const handleCloseTicketOptionsMenu = e => {
     setAnchorEl(null);
   };
 
@@ -67,7 +67,7 @@ const TicketActionButtonsCustom = ({ ticket, showTabGroups }) => {
     try {
       await api.put(`/tickets/${ticket.id}`, {
         status: status,
-        userId: userId || null,
+        userId: userId || null
       });
 
       setLoading(false);
@@ -87,17 +87,17 @@ const TicketActionButtonsCustom = ({ ticket, showTabGroups }) => {
     wavoipCall(ticket, () => {
       phoneContext.disconnect();
     })
-      .then((wavoipInstance) => {
+      .then(wavoipInstance => {
         phoneContext.updateCurrentCall({
           contact: ticket.contact,
           whatsapp: ticket.whatsapp,
           disconnect: () => {
             window.wavoipCallingSound.stop();
             wavoipInstance.endCall();
-          },
+          }
         });
       })
-      .catch((err) => {
+      .catch(err => {
         toastError(err);
       });
   };
@@ -112,7 +112,7 @@ const TicketActionButtonsCustom = ({ ticket, showTabGroups }) => {
                 window.mentionClick({
                   contactId: ticket.contactId,
                   name: ticket.contact?.name,
-                  number: ticket.contact?.number,
+                  number: ticket.contact?.number
                 })
               }
             >
@@ -122,7 +122,7 @@ const TicketActionButtonsCustom = ({ ticket, showTabGroups }) => {
           {user.profile === "admin" && (
             <Tooltip title={i18n.t("messagesList.header.buttons.reopen")}>
               <IconButton
-                onClick={(e) => handleUpdateTicketStatus(e, "open", user?.id)}
+                onClick={e => handleUpdateTicketStatus(e, "open", user?.id)}
               >
                 <Replay />
               </IconButton>
@@ -160,7 +160,7 @@ const TicketActionButtonsCustom = ({ ticket, showTabGroups }) => {
             <>
               <Tooltip title={i18n.t("messagesList.header.buttons.return")}>
                 <IconButton
-                  onClick={(e) => handleUpdateTicketStatus(e, "pending", null)}
+                  onClick={e => handleUpdateTicketStatus(e, "pending", null)}
                 >
                   <UndoRoundedIcon />
                 </IconButton>
@@ -168,7 +168,7 @@ const TicketActionButtonsCustom = ({ ticket, showTabGroups }) => {
               <ThemeProvider theme={customTheme}>
                 <Tooltip title={i18n.t("messagesList.header.buttons.resolve")}>
                   <IconButton
-                    onClick={(e) =>
+                    onClick={e =>
                       handleUpdateTicketStatus(e, "closed", user?.id)
                     }
                     color="primary"
@@ -198,7 +198,7 @@ const TicketActionButtonsCustom = ({ ticket, showTabGroups }) => {
           size="small"
           variant="contained"
           color="primary"
-          onClick={(e) => handleUpdateTicketStatus(e, "open", user?.id)}
+          onClick={e => handleUpdateTicketStatus(e, "open", user?.id)}
         >
           {i18n.t("messagesList.header.buttons.accept")}
         </ButtonWithSpinner>

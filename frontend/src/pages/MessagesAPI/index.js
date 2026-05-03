@@ -9,31 +9,31 @@ import {
   CircularProgress,
   Grid,
   TextField,
-  Typography,
+  Typography
 } from "@material-ui/core";
 import { Field, Form, Formik } from "formik";
 import toastError from "../../errors/toastError";
 import { toast } from "react-toastify";
 import { getBackendURL } from "../../services/config";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   mainPaper: {
     flex: 1,
     padding: theme.spacing(2),
-    paddingBottom: 100,
+    paddingBottom: 100
   },
   mainHeader: {
-    marginTop: theme.spacing(1),
+    marginTop: theme.spacing(1)
   },
   elementMargin: {
-    marginTop: theme.spacing(2),
+    marginTop: theme.spacing(2)
   },
   formContainer: {
-    maxWidth: 500,
+    maxWidth: 500
   },
   textRight: {
-    textAlign: "right",
-  },
+    textAlign: "right"
+  }
 }));
 
 const MessagesAPI = () => {
@@ -43,7 +43,7 @@ const MessagesAPI = () => {
   const [formMessageMediaData] = useState({
     token: "",
     number: "",
-    medias: "",
+    medias: ""
   });
   const [file, setFile] = useState({});
 
@@ -51,7 +51,7 @@ const MessagesAPI = () => {
     return getBackendURL() + "/api/messages/send";
   };
 
-  const handleSendTextMessage = async (values) => {
+  const handleSendTextMessage = async values => {
     const { number, body } = values;
     const data = { number, body };
     var options = {
@@ -59,9 +59,9 @@ const MessagesAPI = () => {
       url: `${getBackendURL()}/api/messages/send`,
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${values.token}`,
+        Authorization: `Bearer ${values.token}`
       },
-      data,
+      data
     };
 
     axios
@@ -74,7 +74,7 @@ const MessagesAPI = () => {
       });
   };
 
-  const handleSendMediaMessage = async (values) => {
+  const handleSendMediaMessage = async values => {
     try {
       const firstFile = file[0];
       const data = new FormData();
@@ -86,9 +86,9 @@ const MessagesAPI = () => {
         url: `${getBackendURL()}/api/messages/send`,
         headers: {
           "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${values.token}`,
+          Authorization: `Bearer ${values.token}`
         },
-        data,
+        data
       };
 
       axios
@@ -235,7 +235,7 @@ const MessagesAPI = () => {
                   name="medias"
                   id="medias"
                   required
-                  onChange={(e) => setFile(e.target.files)}
+                  onChange={e => setFile(e.target.files)}
                 />
               </Grid>
               <Grid item xs={12} className={classes.textRight}>

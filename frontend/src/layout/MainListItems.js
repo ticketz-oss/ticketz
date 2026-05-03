@@ -48,12 +48,12 @@ import { loadJSON } from "../helpers/loadJSON";
 
 const gitinfo = loadJSON("/gitinfo.json");
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   ListSubheader: {
     height: 26,
     marginTop: "-15px",
-    marginBottom: "-10px",
-  },
+    marginBottom: "-10px"
+  }
 }));
 
 function ListItemLink(props) {
@@ -64,7 +64,7 @@ function ListItemLink(props) {
       React.forwardRef((itemProps, ref) => (
         <RouterLink to={to} ref={ref} {...itemProps} />
       )),
-    [to],
+    [to]
   );
 
   return (
@@ -83,8 +83,8 @@ const reducer = (state, action) => {
     const newChats = [];
 
     if (isArray(chats)) {
-      chats.forEach((chat) => {
-        const chatIndex = state.findIndex((u) => u.id === chat.id);
+      chats.forEach(chat => {
+        const chatIndex = state.findIndex(u => u.id === chat.id);
         if (chatIndex !== -1) {
           state[chatIndex] = chat;
         } else {
@@ -98,7 +98,7 @@ const reducer = (state, action) => {
 
   if (action.type === "UPDATE_CHATS") {
     const chat = action.payload;
-    const chatIndex = state.findIndex((u) => u.id === chat.id);
+    const chatIndex = state.findIndex(u => u.id === chat.id);
 
     if (chatIndex !== -1) {
       state[chatIndex] = chat;
@@ -111,7 +111,7 @@ const reducer = (state, action) => {
   if (action.type === "DELETE_CHAT") {
     const chatId = action.payload;
 
-    const chatIndex = state.findIndex((u) => u.id === chatId);
+    const chatIndex = state.findIndex(u => u.id === chatId);
     if (chatIndex !== -1) {
       state.splice(chatIndex, 1);
     }
@@ -123,7 +123,7 @@ const reducer = (state, action) => {
   }
 
   if (action.type === "CHANGE_CHAT") {
-    const changedChats = state.map((chat) => {
+    const changedChats = state.map(chat => {
       if (chat.id === action.payload.chat.id) {
         return action.payload.chat;
       }
@@ -133,7 +133,7 @@ const reducer = (state, action) => {
   }
 };
 
-const MainListItems = (props) => {
+const MainListItems = props => {
   const classes = useStyles();
   const { drawerClose, drawerOpen } = props;
   const { whatsApps } = useContext(WhatsAppsContext);
@@ -169,7 +169,7 @@ const MainListItems = (props) => {
     const companyId = localStorage.getItem("companyId");
     const socket = socketManager.GetSocket(companyId);
 
-    const onCompanyChatMainListItems = (data) => {
+    const onCompanyChatMainListItems = data => {
       if (data.action === "new-message") {
         dispatch({ type: "CHANGE_CHAT", payload: data });
       }
@@ -211,7 +211,7 @@ const MainListItems = (props) => {
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       if (whatsApps.length > 0) {
-        const offlineWhats = whatsApps.filter((whats) => {
+        const offlineWhats = whatsApps.filter(whats => {
           return (
             whats.status === "qrcode" ||
             whats.status === "PAIRING" ||
@@ -233,7 +233,7 @@ const MainListItems = (props) => {
   const fetchChats = async () => {
     try {
       const { data } = await api.get("/chats/", {
-        params: { searchParam, pageNumber },
+        params: { searchParam, pageNumber }
       });
       dispatch({ type: "LOAD_CHATS", payload: data.records });
     } catch (err) {
@@ -252,7 +252,7 @@ const MainListItems = (props) => {
         role={user.profile}
         perform={"drawer-service-items:view"}
         style={{
-          overflowY: "scroll",
+          overflowY: "scroll"
         }}
         no={() => (
           <>
@@ -262,7 +262,7 @@ const MainListItems = (props) => {
                 position: "relative",
                 fontSize: "17px",
                 textAlign: "left",
-                paddingLeft: 20,
+                paddingLeft: 20
               }}
               inset
               color="inherit"
@@ -331,7 +331,7 @@ const MainListItems = (props) => {
                 position: "relative",
                 fontSize: "17px",
                 textAlign: "left",
-                paddingLeft: 20,
+                paddingLeft: 20
               }}
               inset
               color="inherit"
@@ -359,7 +359,7 @@ const MainListItems = (props) => {
                 position: "relative",
                 fontSize: "17px",
                 textAlign: "left",
-                paddingLeft: 20,
+                paddingLeft: 20
               }}
               inset
               color="inherit"
@@ -371,7 +371,7 @@ const MainListItems = (props) => {
               <>
                 <ListItem
                   button
-                  onClick={() => setOpenCampaignSubmenu((prev) => !prev)}
+                  onClick={() => setOpenCampaignSubmenu(prev => !prev)}
                 >
                   <ListItemIcon>
                     <EventAvailableIcon />
@@ -471,7 +471,7 @@ const MainListItems = (props) => {
                     fontSize: "12px",
                     padding: "10px",
                     textAlign: "right",
-                    fontWeight: "bold",
+                    fontWeight: "bold"
                   }}
                 >
                   {`${gitinfo.tagName || gitinfo.branchName + " " + gitinfo.commitHash}`}

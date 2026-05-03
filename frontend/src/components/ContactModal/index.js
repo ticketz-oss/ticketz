@@ -28,25 +28,25 @@ import { TagsContainer } from "../TagsContainer";
 import { PhoneNumberInput } from "../PhoneNumberInput";
 import useSettings from "../../hooks/useSettings";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     display: "flex",
-    flexWrap: "wrap",
+    flexWrap: "wrap"
   },
   textField: {
     marginRight: theme.spacing(1),
     flex: 1,
-    width: "100%",
+    width: "100%"
   },
 
   extraAttr: {
     display: "flex",
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "center"
   },
 
   btnWrapper: {
-    position: "relative",
+    position: "relative"
   },
 
   buttonProgress: {
@@ -55,8 +55,8 @@ const useStyles = makeStyles((theme) => ({
     top: "50%",
     left: "50%",
     marginTop: -12,
-    marginLeft: -12,
-  },
+    marginLeft: -12
+  }
 }));
 
 const ContactSchema = Yup.object().shape({
@@ -65,7 +65,7 @@ const ContactSchema = Yup.object().shape({
     .max(50, "Too Long!")
     .required("Required"),
   number: Yup.string().min(8, "Too Short!").max(50, "Too Long!"),
-  email: Yup.string().email("Invalid email"),
+  email: Yup.string().email("Invalid email")
 });
 
 const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
@@ -77,20 +77,20 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
     number: "",
     email: "",
     language: localStorage.getItem("language") || "",
-    disableBot: false,
+    disableBot: false
   };
 
   const [contact, setContact] = useState(initialState);
   const [showTags, setShowTags] = useState(false);
 
   useEffect(() => {
-    getSetting("tagsMode").then((res) => {
+    getSetting("tagsMode").then(res => {
       setShowTags(["contact", "both"].includes(res));
     });
 
     const fetchContact = async () => {
       if (initialValues) {
-        setContact((prevState) => {
+        setContact(prevState => {
           return { ...prevState, ...initialValues };
         });
       }
@@ -113,7 +113,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
     setContact(initialState);
   };
 
-  const handleSaveContact = async (values) => {
+  const handleSaveContact = async values => {
     try {
       if (contactId) {
         await api.put(`/contacts/${contactId}`, values);
@@ -211,7 +211,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
                         onChange={() =>
                           setContact({
                             ...values,
-                            disableBot: !values.disableBot,
+                            disableBot: !values.disableBot
                           })
                         }
                         name="disableBot"

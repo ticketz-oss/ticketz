@@ -13,5 +13,5 @@ export const i18nToast = {
   },
   warn: (message, options) => {
     return realToast.warn(i18n.t(message), options);
-  },
+  }
 };

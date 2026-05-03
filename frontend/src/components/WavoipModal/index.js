@@ -8,31 +8,31 @@ import {
   Button,
   CircularProgress,
   Typography,
-  makeStyles,
+  makeStyles
 } from "@material-ui/core";
 import { toast } from "react-toastify";
 import api from "../../services/api";
 import { i18n } from "../../translate/i18n";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   wavoipTitle: {
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: theme.spacing(2),
+    marginBottom: theme.spacing(2)
   },
   wavoipInstructions: {
     textAlign: "center",
-    marginBottom: theme.spacing(2),
+    marginBottom: theme.spacing(2)
   },
   wavoipLink: {
     textDecoration: "none",
     color: theme.palette.primary.main,
     cursor: "pointer",
     "&:hover": {
-      textDecoration: "underline",
+      textDecoration: "underline"
     },
-    marginBottom: theme.spacing(2),
-  },
+    marginBottom: theme.spacing(2)
+  }
 }));
 
 const WavoipModal = ({ open, onClose, whatsappId }) => {
@@ -139,7 +139,7 @@ const WavoipModal = ({ open, onClose, whatsappId }) => {
             <TextField
               label="Token"
               value={token || ""}
-              onChange={(e) => setToken(e.target.value)}
+              onChange={e => setToken(e.target.value)}
               fullWidth
               variant="outlined"
             />

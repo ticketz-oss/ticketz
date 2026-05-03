@@ -8,7 +8,7 @@ import {
   ResponsiveContainer,
   Tooltip,
   XAxis,
-  YAxis,
+  YAxis
 } from "recharts";
 import CustomTooltip from "./CustomTooltip";
 import Title from "./Title";
@@ -18,7 +18,7 @@ import { numPad } from "../../helpers/numPad";
 
 function prepareChartData(emptyData, serie) {
   const ticketCreateData = JSON.parse(JSON.stringify(emptyData));
-  serie.counters.forEach((item) => {
+  serie.counters.forEach(item => {
     const date = new Date(item.time);
     const dateKey =
       serie.field === "day"
@@ -46,7 +46,7 @@ export function TicketCountersChart({ ticketCounters }) {
       six_hours: 360,
       three_hours: 180,
       hour: 60,
-      timestamp: 30,
+      timestamp: 30
     };
 
     const offset = new Date().getTimezoneOffset();
@@ -78,10 +78,10 @@ export function TicketCountersChart({ ticketCounters }) {
     const createData = prepareChartData(xAxisEmptyData, ticketCounters.create);
     const closeData = prepareChartData(xAxisEmptyData, ticketCounters.close);
 
-    const chartData = Object.keys(createData).map((key) => ({
+    const chartData = Object.keys(createData).map(key => ({
       time: key,
       created: createData[key] || 0,
-      closed: closeData[key] || 0,
+      closed: closeData[key] || 0
     }));
 
     setChartData(chartData);
@@ -100,7 +100,7 @@ export function TicketCountersChart({ ticketCounters }) {
             top: 16,
             right: 16,
             bottom: 0,
-            left: 0,
+            left: 0
           }}
         >
           <XAxis
@@ -115,7 +115,7 @@ export function TicketCountersChart({ ticketCounters }) {
                 ) {
                   return date.toLocaleTimeString(undefined, {
                     hour: "2-digit",
-                    minute: "2-digit",
+                    minute: "2-digit"
                   });
                 }
                 if (
@@ -127,7 +127,7 @@ export function TicketCountersChart({ ticketCounters }) {
                     .toLocaleDateString(undefined, {
                       weekday: "short",
                       hour: "2-digit",
-                      minute: "2-digit",
+                      minute: "2-digit"
                     })
                     .replace(",", "");
                 }
@@ -137,7 +137,7 @@ export function TicketCountersChart({ ticketCounters }) {
                       month: "2-digit",
                       day: "2-digit",
                       hour: "2-digit",
-                      minute: "2-digit",
+                      minute: "2-digit"
                     })
                     .replace(",", "");
                 }
@@ -147,7 +147,7 @@ export function TicketCountersChart({ ticketCounters }) {
                     month: "2-digit",
                     day: "2-digit",
                     hour: "2-digit",
-                    minute: "2-digit",
+                    minute: "2-digit"
                   })
                   .replace(",", "");
               } else {
@@ -156,13 +156,13 @@ export function TicketCountersChart({ ticketCounters }) {
                 if (date.getFullYear() === now.getFullYear()) {
                   return date.toLocaleDateString(undefined, {
                     month: "short",
-                    day: "2-digit",
+                    day: "2-digit"
                   });
                 }
                 return date.toLocaleDateString(undefined, {
                   year: "numeric",
                   month: "short",
-                  day: "2-digit",
+                  day: "2-digit"
                 });
               }
             }}

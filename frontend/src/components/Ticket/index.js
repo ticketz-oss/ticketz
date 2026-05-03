@@ -23,12 +23,12 @@ import useSettings from "../../hooks/useSettings";
 
 const drawerWidth = 320;
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     display: "flex",
     height: "100%",
     position: "relative",
-    overflow: "hidden",
+    overflow: "hidden"
   },
 
   mainWrapper: {
@@ -42,8 +42,8 @@ const useStyles = makeStyles((theme) => ({
     borderLeft: "0",
     transition: theme.transitions.create("margin", {
       easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
+      duration: theme.transitions.duration.leavingScreen
+    })
   },
 
   mainWrapperShift: {
@@ -51,9 +51,9 @@ const useStyles = makeStyles((theme) => ({
     borderBottomRightRadius: 0,
     transition: theme.transitions.create("margin", {
       easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
+      duration: theme.transitions.duration.enteringScreen
     }),
-    marginRight: 0,
+    marginRight: 0
   },
   drawerShade: {
     display: "none",
@@ -65,9 +65,9 @@ const useStyles = makeStyles((theme) => ({
       bottom: 0,
       left: 0,
       backdropFilter: "blur(2px)",
-      zIndex: 100,
-    },
-  },
+      zIndex: 100
+    }
+  }
 }));
 
 const Ticket = () => {
@@ -91,12 +91,12 @@ const Ticket = () => {
     Promise.all([getSetting("CheckMsgIsGroup"), getSetting("groupsTab")]).then(
       ([ignoreGroups, groupsTab]) => {
         setShowTabGroups(
-          ignoreGroups === "disabled" && groupsTab === "enabled",
+          ignoreGroups === "disabled" && groupsTab === "enabled"
         );
-      },
+      }
     );
 
-    getSetting("tagsMode", "ticket").then((tagsMode) => {
+    getSetting("tagsMode", "ticket").then(tagsMode => {
       setTagsMode(tagsMode);
     });
   }, []);
@@ -110,7 +110,7 @@ const Ticket = () => {
           const { queueId } = data;
           const { queues, profile } = user;
 
-          const queueAllowed = queues.find((q) => q.id === queueId);
+          const queueAllowed = queues.find(q => q.id === queueId);
           if (queueAllowed === undefined && profile !== "admin") {
             toast.error("Acesso não permitido");
             history.push("/tickets");
@@ -141,7 +141,7 @@ const Ticket = () => {
 
     socketManager.onConnect(onConnectTicket);
 
-    const onCompanyTicket = (data) => {
+    const onCompanyTicket = data => {
       if (data.action === "update" && data.ticket.id === ticket.id) {
         setTicket(data.ticket);
       }
@@ -151,9 +151,9 @@ const Ticket = () => {
       }
     };
 
-    const onCompanyContact = (data) => {
+    const onCompanyContact = data => {
       if (data.action === "update") {
-        setContact((prevState) => {
+        setContact(prevState => {
           if (prevState.id === data.contact?.id) {
             return { ...prevState, ...data.contact };
           }
@@ -210,12 +210,12 @@ const Ticket = () => {
         variant="outlined"
         elevation={0}
         className={clsx(classes.mainWrapper, {
-          [classes.mainWrapperShift]: drawerOpen,
+          [classes.mainWrapperShift]: drawerOpen
         })}
       >
         <div
           className={clsx({
-            [classes.drawerShade]: drawerOpen,
+            [classes.drawerShade]: drawerOpen
           })}
           onClick={() => setDrawerOpen(false)}
         ></div>

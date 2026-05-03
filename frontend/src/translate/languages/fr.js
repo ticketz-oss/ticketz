@@ -23,34 +23,34 @@ const messages = {
         contact: "Contact",
         serverTime: "Heure du serveur :",
         clientTime: "Heure du client :",
-        differenceMinutes: "Différence : {{count}} minute(s)",
+        differenceMinutes: "Différence : {{count}} minute(s)"
       },
       signup: {
         title: "S'inscrire",
         toasts: {
           success: "Utilisateur créé avec succès ! Connectez-vous !!!",
-          fail: "Erreur lors de la création de l'utilisateur. Vérifiez les informations fournies.",
+          fail: "Erreur lors de la création de l'utilisateur. Vérifiez les informations fournies."
         },
         form: {
           name: "Nom",
           email: "Email",
-          password: "Mot de passe",
+          password: "Mot de passe"
         },
         buttons: {
           submit: "S'inscrire",
-          login: "Vous avez déjà un compte ? Connectez-vous !",
-        },
+          login: "Vous avez déjà un compte ? Connectez-vous !"
+        }
       },
       login: {
         title: "Connexion",
         form: {
           email: "Email",
-          password: "Mot de passe",
+          password: "Mot de passe"
         },
         buttons: {
           submit: "Se connecter",
-          register: "Vous n'avez pas de compte ? Inscrivez-vous !",
-        },
+          register: "Vous n'avez pas de compte ? Inscrivez-vous !"
+        }
       },
       companies: {
         title: "Enregistrer une entreprise",
@@ -59,33 +59,33 @@ const messages = {
           plan: "Plan",
           token: "Jeton",
           submit: "Enregistrer",
-          success: "Entreprise créée avec succès !",
-        },
+          success: "Entreprise créée avec succès !"
+        }
       },
       auth: {
         toasts: {
-          success: "Connexion réussie !",
+          success: "Connexion réussie !"
         },
-        token: "Jeton",
+        token: "Jeton"
       },
       dashboard: {
         charts: {
           perDay: {
-            title: "Interventions aujourd'hui : ",
-          },
-        },
+            title: "Interventions aujourd'hui : "
+          }
+        }
       },
       connections: {
         title: "Connexions",
         toasts: {
-          deleted: "Connexion avec WhatsApp supprimée avec succès !",
+          deleted: "Connexion avec WhatsApp supprimée avec succès !"
         },
         confirmationModal: {
           deleteTitle: "Supprimer",
           deleteMessage: "Êtes-vous sûr ? Cette action est irréversible.",
           disconnectTitle: "Déconnecter",
           disconnectMessage:
-            "Êtes-vous sûr ? Vous devrez scanner à nouveau le QR Code.",
+            "Êtes-vous sûr ? Vous devrez scanner à nouveau le QR Code."
         },
         buttons: {
           add: "Ajouter WhatsApp",
@@ -93,27 +93,27 @@ const messages = {
           tryAgain: "Réessayer",
           qrcode: "QR CODE",
           newQr: "Nouveau QR CODE",
-          connecting: "Connexion en cours",
+          connecting: "Connexion en cours"
         },
         toolTips: {
           disconnected: {
             title: "Échec de la connexion à WhatsApp",
             content:
-              "Assurez-vous que votre téléphone est connecté à Internet et réessayez, ou demandez un nouveau QR Code",
+              "Assurez-vous que votre téléphone est connecté à Internet et réessayez, ou demandez un nouveau QR Code"
           },
           qrcode: {
             title: "En attente de la lecture du QR Code",
             content:
-              "Cliquez sur le bouton 'QR CODE' et scannez le QR Code avec votre téléphone pour démarrer la session",
+              "Cliquez sur le bouton 'QR CODE' et scannez le QR Code avec votre téléphone pour démarrer la session"
           },
           connected: {
-            title: "Connexion établie !",
+            title: "Connexion établie !"
           },
           timeout: {
             title: "Connexion avec le téléphone perdue",
             content:
-              "Assurez-vous que votre téléphone est connecté à Internet et que WhatsApp est ouvert, ou cliquez sur le bouton 'Déconnecter' pour obtenir un nouveau QR Code",
-          },
+              "Assurez-vous que votre téléphone est connecté à Internet et que WhatsApp est ouvert, ou cliquez sur le bouton 'Déconnecter' pour obtenir un nouveau QR Code"
+          }
         },
         table: {
           name: "Nom",
@@ -121,35 +121,35 @@ const messages = {
           lastUpdate: "Dernière mise à jour",
           default: "Par défaut",
           actions: "Actions",
-          session: "Session",
-        },
+          session: "Session"
+        }
       },
       internalChat: {
-        title: "Chat Interne",
+        title: "Chat Interne"
       },
       whatsappModal: {
         title: {
           add: "Ajouter WhatsApp",
-          edit: "Modifier WhatsApp",
+          edit: "Modifier WhatsApp"
         },
         form: {
           name: "Nom",
-          default: "Par défaut",
+          default: "Par défaut"
         },
         buttons: {
           okAdd: "Ajouter",
           okEdit: "Enregistrer",
-          cancel: "Annuler",
+          cancel: "Annuler"
         },
-        success: "WhatsApp enregistré avec succès.",
+        success: "WhatsApp enregistré avec succès."
       },
       qrCode: {
-        message: "Scannez le QR Code pour démarrer la session",
+        message: "Scannez le QR Code pour démarrer la session"
       },
       contacts: {
         title: "Contacts",
         toasts: {
-          deleted: "Contact supprimé avec succès !",
+          deleted: "Contact supprimé avec succès !"
         },
         searchPlaceholder: "Rechercher...",
         confirmationModal: {
@@ -157,24 +157,23 @@ const messages = {
           importTitlte: "Importer des contacts",
           deleteMessage:
             "Êtes-vous sûr de vouloir supprimer ce contact ? Toutes les interventions associées seront perdues.",
-          importMessage:
-            "Voulez-vous importer tous les contacts du téléphone ?",
+          importMessage: "Voulez-vous importer tous les contacts du téléphone ?"
         },
         buttons: {
           import: "Importer des Contacts",
-          add: "Ajouter un Contact",
+          add: "Ajouter un Contact"
         },
         table: {
           name: "Nom",
           whatsapp: "WhatsApp",
           email: "Email",
-          actions: "Actions",
-        },
+          actions: "Actions"
+        }
       },
       contactModal: {
         title: {
           add: "Ajouter un contact",
-          edit: "Modifier le contact",
+          edit: "Modifier le contact"
         },
         form: {
           mainInfo: "Informations du contact",
@@ -184,20 +183,20 @@ const messages = {
           email: "Email",
           extraName: "Nom du champ",
           extraValue: "Valeur",
-          disableBot: "Désactiver le chatbot",
+          disableBot: "Désactiver le chatbot"
         },
         buttons: {
           addExtraInfo: "Ajouter une information",
           okAdd: "Ajouter",
           okEdit: "Enregistrer",
-          cancel: "Annuler",
+          cancel: "Annuler"
         },
-        success: "Contact enregistré avec succès.",
+        success: "Contact enregistré avec succès."
       },
       queueModal: {
         title: {
           add: "Ajouter une file d'attente",
-          edit: "Modifier la file d'attente",
+          edit: "Modifier la file d'attente"
         },
         form: {
           name: "Nom",
@@ -207,16 +206,16 @@ const messages = {
           outOfHoursMessage: "Message hors des heures d'ouverture",
           ratingMessage: "Message d'évaluation",
           transferMessage: "Message de transfert",
-          token: "Jeton",
+          token: "Jeton"
         },
         toasts: {
-          saved: "File d'attente enregistrée avec succès",
+          saved: "File d'attente enregistrée avec succès"
         },
         buttons: {
           okAdd: "Ajouter",
           okEdit: "Enregistrer",
           cancel: "Annuler",
-          attach: "Joindre un fichier",
+          attach: "Joindre un fichier"
         },
         serviceHours: {
           dayWeek: "Jour de la semaine",
@@ -230,114 +229,114 @@ const messages = {
           thursday: "Jeudi",
           friday: "Vendredi",
           saturday: "Samedi",
-          sunday: "Dimanche",
-        },
+          sunday: "Dimanche"
+        }
       },
       userModal: {
         title: {
           add: "Ajouter un utilisateur",
-          edit: "Modifier l'utilisateur",
+          edit: "Modifier l'utilisateur"
         },
         form: {
           name: "Nom",
           email: "Email",
           password: "Mot de passe",
-          profile: "Profil",
+          profile: "Profil"
         },
         buttons: {
           okAdd: "Ajouter",
           okEdit: "Enregistrer",
-          cancel: "Annuler",
+          cancel: "Annuler"
         },
-        success: "Utilisateur enregistré avec succès.",
+        success: "Utilisateur enregistré avec succès."
       },
       scheduleModal: {
         title: {
           add: "Nouveau Planification",
-          edit: "Modifier Planification",
+          edit: "Modifier Planification"
         },
         form: {
           body: "Message",
           contact: "Contact",
           sendAt: "Date de Planification",
           sentAt: "Date d'Envoi",
-          saveMessage: "Enregistrer le Message dans le Ticket",
+          saveMessage: "Enregistrer le Message dans le Ticket"
         },
         buttons: {
           okAdd: "Ajouter",
           okEdit: "Enregistrer",
-          cancel: "Annuler",
+          cancel: "Annuler"
         },
-        success: "Planification enregistrée avec succès.",
+        success: "Planification enregistrée avec succès."
       },
       tagModal: {
         title: {
           add: "Nouvelle Étiquette",
           edit: "Modifier Étiquette",
           addKanban: "Nouvelle Lane",
-          editKanban: "Modifier Lane",
+          editKanban: "Modifier Lane"
         },
         form: {
           name: "Nom",
           color: "Couleur",
-          kanban: "Kanban",
+          kanban: "Kanban"
         },
         buttons: {
           okAdd: "Ajouter",
           okEdit: "Enregistrer",
-          cancel: "Annuler",
+          cancel: "Annuler"
         },
         success: "Étiquette enregistrée avec succès.",
-        successKanban: "Lane enregistrée avec succès.",
+        successKanban: "Lane enregistrée avec succès."
       },
       chat: {
-        noTicketMessage: "Sélectionnez un ticket pour commencer à discuter.",
+        noTicketMessage: "Sélectionnez un ticket pour commencer à discuter."
       },
       uploads: {
         titles: {
           titleUploadMsgDragDrop:
             "GLISSEZ ET DÉPOSEZ LES FICHIERS DANS LE CHAMP CI-DESSOUS",
-          titleFileList: "Liste des fichiers",
-        },
+          titleFileList: "Liste des fichiers"
+        }
       },
       todolist: {
         title: "Liste des tâches",
         form: {
-          name: "Nom de la tâche",
+          name: "Nom de la tâche"
         },
         buttons: {
           add: "Ajouter",
-          save: "Enregistrer",
-        },
+          save: "Enregistrer"
+        }
       },
       ticketsManager: {
         buttons: {
-          newTicket: "Nouveau",
-        },
+          newTicket: "Nouveau"
+        }
       },
       ticketsQueueSelect: {
-        placeholder: "Files d'attente",
+        placeholder: "Files d'attente"
       },
       tickets: {
         toasts: {
-          deleted: "L'intervention que vous gérez a été supprimée.",
+          deleted: "L'intervention que vous gérez a été supprimée."
         },
         notification: {
           message: "Message de",
-          nomessages: "Aucun message",
+          nomessages: "Aucun message"
         },
         tabs: {
           open: { title: "Ouverts" },
           closed: { title: "Résolus" },
           groups: { title: "Groupes" },
-          search: { title: "Recherche" },
+          search: { title: "Recherche" }
         },
         search: {
-          placeholder: "Rechercher des interventions et des messages",
+          placeholder: "Rechercher des interventions et des messages"
         },
         buttons: {
-          showAll: "Tous",
-        },
+          showAll: "Tous"
+        }
       },
       transferTicketModal: {
         title: "Transférer le Ticket",
@@ -347,8 +346,8 @@ const messages = {
         noOptions: "Aucun utilisateur trouvé avec ce nom",
         buttons: {
           ok: "Transférer",
-          cancel: "Annuler",
-        },
+          cancel: "Annuler"
+        }
       },
       ticketsList: {
         pendingHeader: "En attente",
@@ -357,8 +356,8 @@ const messages = {
         noTicketsMessage:
           "Aucune intervention trouvée avec ce statut ou ce terme de recherche",
         buttons: {
-          accept: "Accepter",
-        },
+          accept: "Accepter"
+        }
       },
       newTicketModal: {
         title: "Créer un Ticket",
@@ -366,8 +365,8 @@ const messages = {
         add: "Ajouter",
         buttons: {
           ok: "Enregistrer",
-          cancel: "Annuler",
-        },
+          cancel: "Annuler"
+        }
       },
       mainDrawer: {
         listItems: {
@@ -392,12 +391,12 @@ const messages = {
           logout: "Déconnexion",
           management: "Gestion",
           kanban: "Kanban",
-          tasks: "Tâches",
+          tasks: "Tâches"
         },
         appBar: {
           i18n: {
             language: "Français",
-            language_short: "FR",
+            language_short: "FR"
           },
           user: {
             profile: "Profil",
@@ -406,74 +405,74 @@ const messages = {
             lightmode: "Mode clair",
             language: "Sélectionner la langue",
             about: "À propos",
-            logout: "Déconnexion",
-          },
-        },
+            logout: "Déconnexion"
+          }
+        }
       },
       messagesAPI: {
         title: "API",
         textMessage: {
           number: "Numéro",
           body: "Message",
-          token: "Jeton enregistré",
+          token: "Jeton enregistré"
         },
         mediaMessage: {
           number: "Numéro",
           body: "Nom du fichier",
           media: "Fichier",
-          token: "Jeton enregistré",
-        },
+          token: "Jeton enregistré"
+        }
       },
       notifications: {
-        noTickets: "Aucune notification.",
+        noTickets: "Aucune notification."
       },
       quickMessages: {
         title: "Réponses Rapides",
         buttons: {
-          add: "Nouvelle Réponse",
+          add: "Nouvelle Réponse"
         },
         dialog: {
           shortcode: "Raccourci",
-          message: "Réponse",
-        },
+          message: "Réponse"
+        }
       },
       kanban: {
         title: "Kanban",
         searchPlaceholder: "Recherche",
         subMenus: {
           list: "Tableau",
-          tags: "Lanes",
-        },
+          tags: "Lanes"
+        }
       },
       tagsKanban: {
         title: "Lanes",
         laneDefault: "Ouvert",
         confirmationModal: {
           deleteTitle: "Êtes-vous sûr de vouloir supprimer cette Lane ?",
-          deleteMessage: "Cette action est irréversible.",
+          deleteMessage: "Cette action est irréversible."
         },
         table: {
           name: "Nom",
           color: "Couleur",
           tickets: "Tickets",
-          actions: "Actions",
+          actions: "Actions"
         },
         buttons: {
-          add: "Nouvelle Lane",
+          add: "Nouvelle Lane"
         },
         toasts: {
-          deleted: "Lane supprimée avec succès.",
-        },
+          deleted: "Lane supprimée avec succès."
+        }
       },
       contactLists: {
         title: "Listes de Contacts",
         table: {
           name: "Nom",
           contacts: "Contacts",
-          actions: "Actions",
+          actions: "Actions"
         },
         buttons: {
-          add: "Nouvelle Liste",
+          add: "Nouvelle Liste"
         },
         dialog: {
           name: "Nom",
@@ -482,16 +481,16 @@ const messages = {
           okAdd: "Ajouter",
           add: "Ajouter",
           edit: "Modifier",
-          cancel: "Annuler",
+          cancel: "Annuler"
         },
         confirmationModal: {
           deleteTitle: "Supprimer",
-          deleteMessage: "Cette action est irréversible.",
+          deleteMessage: "Cette action est irréversible."
         },
         toasts: {
           deleted: "Enregistrement supprimé",
-          created: "Enregistrement créé",
-        },
+          created: "Enregistrement créé"
+        }
       },
       contactListItems: {
         title: "Contacts",
@@ -499,7 +498,7 @@ const messages = {
         buttons: {
           add: "Nouveau",
           lists: "Listes",
-          import: "Importer",
+          import: "Importer"
         },
         dialog: {
           name: "Nom",
@@ -510,31 +509,31 @@ const messages = {
           okAdd: "Ajouter",
           add: "Ajouter",
           edit: "Modifier",
-          cancel: "Annuler",
+          cancel: "Annuler"
         },
         table: {
           name: "Nom",
           number: "Numéro",
           whatsapp: "WhatsApp",
           email: "Email",
-          actions: "Actions",
+          actions: "Actions"
         },
         confirmationModal: {
           deleteTitle: "Supprimer",
           deleteMessage: "Cette action est irréversible.",
           importMessage: "Voulez-vous importer les contacts de cette feuille ?",
-          importTitlte: "Importer",
+          importTitlte: "Importer"
         },
         toasts: {
-          deleted: "Enregistrement supprimé",
-        },
+          deleted: "Enregistrement supprimé"
+        }
       },
       campaigns: {
         title: "Campagnes",
         searchPlaceholder: "Recherche",
         buttons: {
           add: "Nouvelle Campagne",
-          contactLists: "Listes de Contacts",
+          contactLists: "Listes de Contacts"
         },
         table: {
           name: "Nom",
@@ -544,7 +543,7 @@ const messages = {
           scheduledAt: "Planification",
           completedAt: "Complétée",
           confirmation: "Confirmation",
-          actions: "Actions",
+          actions: "Actions"
         },
         dialog: {
           new: "Nouvelle Campagne",
@@ -567,7 +566,7 @@ const messages = {
             status: "Statut",
             scheduledAt: "Planification",
             confirmation: "Confirmation",
-            contactList: "Liste de Contacts",
+            contactList: "Liste de Contacts"
           },
           buttons: {
             add: "Ajouter",
@@ -576,26 +575,26 @@ const messages = {
             cancel: "Annuler les Envois",
             restart: "Redémarrer les Envois",
             close: "Fermer",
-            attach: "Joindre un Fichier",
-          },
+            attach: "Joindre un Fichier"
+          }
         },
         confirmationModal: {
           deleteTitle: "Supprimer",
-          deleteMessage: "Cette action est irréversible.",
+          deleteMessage: "Cette action est irréversible."
         },
         toasts: {
           success: "Opération réussie",
           cancel: "Campagne annulée",
           restart: "Campagne redémarrée",
-          deleted: "Enregistrement supprimé",
-        },
+          deleted: "Enregistrement supprimé"
+        }
       },
       announcements: {
         title: "Annonces",
         searchPlaceholder: "Recherche",
         buttons: {
           add: "Nouvelle Annonce",
-          contactLists: "Listes d'Annonces",
+          contactLists: "Listes d'Annonces"
         },
         table: {
           priority: "Priorité",
@@ -603,7 +602,7 @@ const messages = {
           text: "Texte",
           mediaName: "Fichier",
           status: "Statut",
-          actions: "Actions",
+          actions: "Actions"
         },
         dialog: {
           edit: "Modifier Annonce",
@@ -615,7 +614,7 @@ const messages = {
             title: "Titre",
             text: "Texte",
             mediaPath: "Fichier",
-            status: "Statut",
+            status: "Statut"
           },
           buttons: {
             add: "Ajouter",
@@ -623,20 +622,20 @@ const messages = {
             okadd: "Ok",
             cancel: "Annuler",
             close: "Fermer",
-            attach: "Joindre un Fichier",
-          },
+            attach: "Joindre un Fichier"
+          }
         },
         confirmationModal: {
           deleteTitle: "Supprimer",
-          deleteMessage: "Cette action est irréversible.",
+          deleteMessage: "Cette action est irréversible."
         },
         toasts: {
           success: "Opération réussie",
-          deleted: "Enregistrement supprimé",
-        },
+          deleted: "Enregistrement supprimé"
+        }
       },
       campaignsConfig: {
-        title: "Configurations des Campagnes",
+        title: "Configurations des Campagnes"
       },
       queues: {
         title: "Files d'attente & Chatbot",
@@ -644,22 +643,22 @@ const messages = {
           name: "Nom",
           color: "Couleur",
           greeting: "Message de bienvenue",
-          actions: "Actions",
+          actions: "Actions"
         },
         toasts: {
-          deleted: "File d'attente supprimée avec succès",
+          deleted: "File d'attente supprimée avec succès"
         },
         buttons: {
-          add: "Ajouter une file d'attente",
+          add: "Ajouter une file d'attente"
         },
         confirmationModal: {
           deleteTitle: "Supprimer",
           deleteMessage:
-            "Êtes-vous sûr ? Cette action est irréversible ! Les interventions de cette file d'attente continueront d'exister, mais n'auront plus de file d'attente attribuée.",
-        },
+            "Êtes-vous sûr ? Cette action est irréversible ! Les interventions de cette file d'attente continueront d'exister, mais n'auront plus de file d'attente attribuée."
+        }
       },
       queueSelect: {
-        inputLabel: "Files d'attente",
+        inputLabel: "Files d'attente"
       },
       users: {
         title: "Utilisateurs",
@@ -667,22 +666,22 @@ const messages = {
           name: "Nom",
           email: "Email",
           profile: "Profil",
-          actions: "Actions",
+          actions: "Actions"
         },
         buttons: {
-          add: "Ajouter un utilisateur",
+          add: "Ajouter un utilisateur"
         },
         toasts: {
-          deleted: "Utilisateur supprimé avec succès.",
+          deleted: "Utilisateur supprimé avec succès."
         },
         confirmationModal: {
           deleteTitle: "Supprimer",
           deleteMessage:
-            "Toutes les données de l'utilisateur seront perdues. Les interventions ouvertes de cet utilisateur seront déplacées vers la file d'attente.",
-        },
+            "Toutes les données de l'utilisateur seront perdues. Les interventions ouvertes de cet utilisateur seront déplacées vers la file d'attente."
+        }
       },
       helps: {
-        title: "Centre d'Aide",
+        title: "Centre d'Aide"
       },
       about: {
         aboutthe: "À propos de",
@@ -699,14 +698,14 @@ const messages = {
         licensedetail:
           "Le ticketz est sous licence GNU Affero General Public License version 3, ce qui signifie que tout utilisateur ayant accès à cette application a le droit d'accéder au code source. Plus d'informations dans les liens ci-dessous :",
         licensefulltext: "Texte complet de la licence",
-        licensesourcecode: "Code source de ticketz",
+        licensesourcecode: "Code source de ticketz"
       },
       schedules: {
         title: "Planifications",
         confirmationModal: {
           deleteTitle:
             "Êtes-vous sûr de vouloir supprimer cette Planification ?",
-          deleteMessage: "Cette action est irréversible.",
+          deleteMessage: "Cette action est irréversible."
         },
         table: {
           contact: "Contact",
@@ -714,20 +713,20 @@ const messages = {
           sendAt: "Date de Planification",
           sentAt: "Date d'Envoi",
           status: "Statut",
-          actions: "Actions",
+          actions: "Actions"
         },
         buttons: {
-          add: "Nouvelle Planification",
+          add: "Nouvelle Planification"
         },
         toasts: {
-          deleted: "Planification supprimée avec succès.",
-        },
+          deleted: "Planification supprimée avec succès."
+        }
       },
       tags: {
         title: "Étiquettes",
         confirmationModal: {
           deleteTitle: "Êtes-vous sûr de vouloir supprimer cette Étiquette ?",
-          deleteMessage: "Cette action est irréversible.",
+          deleteMessage: "Cette action est irréversible."
         },
         table: {
           name: "Nom",
@@ -735,14 +734,14 @@ const messages = {
           tickets: "Enregistrements",
           actions: "Actions",
           id: "Id",
-          kanban: "Kanban",
+          kanban: "Kanban"
         },
         buttons: {
-          add: "Nouvelle Étiquette",
+          add: "Nouvelle Étiquette"
         },
         toasts: {
-          deleted: "Étiquette supprimée avec succès.",
-        },
+          deleted: "Étiquette supprimée avec succès."
+        }
       },
       whitelabel: {
         primaryColorLight: "Couleur primaire claire",
@@ -765,7 +764,7 @@ const messages = {
         backgroundContent: "Contenu d'arrière-plan de connexion",
         backgroundContentHint:
           "Accepte les images, fichiers SVG et vidéos MP4 pour l'arrière-plan de l'écran de connexion.",
-        noFileSelected: "Aucun fichier sélectionné pour le moment.",
+        noFileSelected: "Aucun fichier sélectionné pour le moment."
       },
       settings: {
         group: {
@@ -775,7 +774,7 @@ const messages = {
           groups: "Groupes",
           confidenciality: "Confidentialité",
           api: "API",
-          serveradmin: "Administration du serveur",
+          serveradmin: "Administration du serveur"
         },
         success: "Paramètres enregistrés avec succès.",
         title: "Paramètres",
@@ -784,132 +783,132 @@ const messages = {
             name: "Création d'utilisateur",
             options: {
               enabled: "Activé",
-              disabled: "Désactivé",
-            },
-          },
+              disabled: "Désactivé"
+            }
+          }
         },
         validations: {
           title: "Évaluations",
           options: {
             enabled: "Activé",
-            disabled: "Désactivé",
-          },
+            disabled: "Désactivé"
+          }
         },
         OfficeManagement: {
           title: "Gestion des Heures de Bureau",
           options: {
             disabled: "Désactivé",
             ManagementByDepartment: "Gestion par File d'attente",
-            ManagementByCompany: "Gestion par Entreprise",
-          },
+            ManagementByCompany: "Gestion par Entreprise"
+          }
         },
         outOfHoursAction: {
           title: "Action hors des heures de bureau",
           options: {
             pending: "Laisser en attente",
-            closed: "Fermer le ticket",
-          },
+            closed: "Fermer le ticket"
+          }
         },
         IgnoreGroupMessages: {
           title: "Ignorer les Messages de Groupe",
           options: {
             enabled: "Activé",
-            disabled: "Désactivé",
-          },
+            disabled: "Désactivé"
+          }
         },
         soundGroupNotifications: {
           title: "Notifications sonores de groupe",
           options: {
             enabled: "Activé",
-            disabled: "Désactivé",
-          },
+            disabled: "Désactivé"
+          }
         },
         groupsTab: {
           title: "Onglet Groupes",
           options: {
             enabled: "Activé",
-            disabled: "Désactivé",
-          },
+            disabled: "Désactivé"
+          }
         },
         VoiceAndVideoCalls: {
           title: "Appels Vocaux et Vidéo",
           options: {
             enabled: "Ignorer",
-            disabled: "Informer de l'indisponibilité",
-          },
+            disabled: "Informer de l'indisponibilité"
+          }
         },
         AutomaticChatbotOutput: {
           title: "Sortie automatique du chatbot",
           options: {
             enabled: "Activé",
-            disabled: "Désactivé",
-          },
+            disabled: "Désactivé"
+          }
         },
         ShowNumericEmoticons: {
           title: "Afficher les émojis numériques dans la file d'attente",
           options: {
             enabled: "Activé",
-            disabled: "Désactivé",
-          },
+            disabled: "Désactivé"
+          }
         },
         QuickMessages: {
           title: "Messages Rapides",
           options: {
             enabled: "Par entreprise",
-            disabled: "Par Utilisateur",
-          },
+            disabled: "Par Utilisateur"
+          }
         },
         AllowRegistration: {
           title: "Autoriser l'inscription",
           options: {
             enabled: "Activé",
-            disabled: "Désactivé",
-          },
+            disabled: "Désactivé"
+          }
         },
         FileDownloadLimit: {
-          title: "Limite de Téléchargement de fichiers (MB)",
+          title: "Limite de Téléchargement de fichiers (MB)"
         },
         messageVisibility: {
           title: "Visibilité du message",
           options: {
             respectMessageQueue: "Respecter la file d'attente du message",
-            respectTicketQueue: "Respecter la file d'attente du ticket",
-          },
+            respectTicketQueue: "Respecter la file d'attente du ticket"
+          }
         },
         keepQueueAndUser: {
           title:
             "Maintenir la file d'attente et l'utilisateur dans le ticket fermé",
           options: {
             enabled: "Activé",
-            disabled: "Désactivé",
-          },
+            disabled: "Désactivé"
+          }
         },
         WelcomeGreeting: {
           greetings: "Bonjour",
           welcome: "Bienvenue à",
-          expirationTime: "Actif jusqu'à",
+          expirationTime: "Actif jusqu'à"
         },
         Options: {
-          title: "Options",
+          title: "Options"
         },
         Companies: {
-          title: "Entreprises",
+          title: "Entreprises"
         },
         schedules: {
-          title: "Horaires",
+          title: "Horaires"
         },
         Plans: {
-          title: "Plans",
+          title: "Plans"
         },
         Help: {
-          title: "Aide",
+          title: "Aide"
         },
         Whitelabel: {
-          title: "Marque blanche",
+          title: "Marque blanche"
         },
         PaymentGateways: {
-          title: "Passerelles de paiement",
-        },
+          title: "Passerelles de paiement"
+        }
       },
       messagesList: {
         header: {
@@ -918,9 +917,9 @@ const messages = {
             return: "Retourner",
             resolve: "Résoudre",
             reopen: "Rouvrir",
-            accept: "Accepter",
-          },
-        },
+            accept: "Accepter"
+          }
+        }
       },
       messagesInput: {
         placeholderOpen: "Tapez un message",
@@ -928,17 +927,17 @@ const messages = {
           "Rouvrez ou acceptez ce ticket pour envoyer un message.",
         signMessage: "Signer",
         replying: "Répondre",
-        editing: "Modifier",
+        editing: "Modifier"
       },
       message: {
-        edited: "Modifié",
+        edited: "Modifié"
       },
       contactDrawer: {
         header: "Informations du contact",
         buttons: {
-          edit: "Modifier le contact",
+          edit: "Modifier le contact"
         },
-        extraInfo: "Autres informations",
+        extraInfo: "Autres informations"
       },
       ticketOptionsMenu: {
         schedule: "Planification",
@@ -948,23 +947,22 @@ const messages = {
           title: "Observations du Service",
           textarea: "Observation",
           placeholder:
-            "Insérez ici les informations que vous souhaitez enregistrer",
+            "Insérez ici les informations que vous souhaitez enregistrer"
         },
         confirmationModal: {
           title: "Supprimer le ticket du contact",
-          message:
-            "Attention ! Tous les messages liés au ticket seront perdus.",
+          message: "Attention ! Tous les messages liés au ticket seront perdus."
         },
         buttons: {
           delete: "Supprimer",
-          cancel: "Annuler",
-        },
+          cancel: "Annuler"
+        }
       },
       confirmationModal: {
         buttons: {
           confirm: "Ok",
-          cancel: "Annuler",
-        },
+          cancel: "Annuler"
+        }
       },
       messageOptionsMenu: {
         delete: "Supprimer",
@@ -973,25 +971,25 @@ const messages = {
         reply: "Répondre",
         confirmationModal: {
           title: "Supprimer le message ?",
-          message: "Cette action est irréversible.",
-        },
+          message: "Cette action est irréversible."
+        }
       },
       messageHistoryModal: {
         close: "Fermer",
-        title: "Historique des modifications du message",
+        title: "Historique des modifications du message"
       },
       presence: {
         unavailable: "Indisponible",
         available: "Disponible",
         composing: "En train de taper...",
         recording: "En train d'enregistrer...",
-        paused: "En pause",
+        paused: "En pause"
       },
       privacyModal: {
         title: "Modifier la Confidentialité de WhatsApp",
         buttons: {
           cancel: "Annuler",
-          okEdit: "Enregistrer",
+          okEdit: "Enregistrer"
         },
         form: {
           menu: {
@@ -1004,7 +1002,7 @@ const messages = {
             disable: "Désactivé",
             hrs24: "24 Heures",
             dias7: "7 Jours",
-            dias90: "90 Jours",
+            dias90: "90 Jours"
           },
           readreceipts:
             "Pour mettre à jour la confidentialité des accusés de lecture",
@@ -1017,8 +1015,8 @@ const messages = {
             "Pour mettre à jour la confidentialité de l'ajout aux groupes",
           calladd:
             "Pour mettre à jour la confidentialité de l'ajout aux appels",
-          disappearing: "Pour mettre à jour le Mode Disparition par Défaut",
-        },
+          disappearing: "Pour mettre à jour le Mode Disparition par Défaut"
+        }
       },
       frontendErrors: {
         ERR_CONFIG_ERROR:
@@ -1028,7 +1026,7 @@ const messages = {
         ERR_BACKEND_UNREACHABLE:
           "Backend inaccessible. Veuillez réessayer plus tard.",
         ERR_BACKEND_NOT_READY:
-          "Le backend démarre et n'est pas encore prêt. Nouvelle tentative automatique.",
+          "Le backend démarre et n'est pas encore prêt. Nouvelle tentative automatique."
       },
       backendErrors: {
         ERR_NO_OTHER_WHATSAPP:
@@ -1069,7 +1067,7 @@ const messages = {
         ERR_QUEUE_COLOR_ALREADY_EXISTS:
           "Cette couleur est déjà utilisée, choisissez-en une autre.",
         ERR_WAPP_GREETING_REQUIRED:
-          "Le message de bienvenue est obligatoire lorsqu'il y a plus d'une file d'attente.",
+          "Le message de bienvenue est obligatoire lorsqu'il y a plus d'une file d'attente."
       },
       ticketz: {
         registration: {
@@ -1079,18 +1077,18 @@ const messages = {
           name: "Nom",
           country: "Pays",
           phoneNumber: "Numéro WhatsApp",
-          submit: "S'inscrire",
+          submit: "S'inscrire"
         },
         support: {
           title: "Soutenez le projet Ticketz Open Source",
           mercadopagotitle: "Carte de Crédit",
           recurringbrl: "Don récurrent en R$",
           paypaltitle: "Carte de Crédit",
-          international: "International en US$",
-        },
-      },
-    },
-  },
+          international: "International en US$"
+        }
+      }
+    }
+  }
 };
 
 export { messages };

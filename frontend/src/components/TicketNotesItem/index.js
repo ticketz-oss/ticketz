@@ -10,17 +10,17 @@ import { makeStyles } from "@material-ui/core/styles";
 import DeleteIcon from "@material-ui/icons/Delete";
 import moment from "moment";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   inline: {
-    width: "100%",
-  },
+    width: "100%"
+  }
 }));
 
 export default function TicketNotesItem(props) {
   const { note, deleteItem } = props;
   const classes = useStyles();
 
-  const handleDelete = (item) => {
+  const handleDelete = item => {
     deleteItem(item);
   };
 
@@ -64,5 +64,5 @@ export default function TicketNotesItem(props) {
 
 TicketNotesItem.propTypes = {
   note: PropTypes.object.isRequired,
-  deleteItem: PropTypes.func.isRequired,
+  deleteItem: PropTypes.func.isRequired
 };

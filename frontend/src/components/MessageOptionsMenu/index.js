@@ -24,7 +24,7 @@ const MessageOptionsMenu = ({
   data,
   menuOpen,
   handleClose,
-  anchorEl,
+  anchorEl
 }) => {
   const classes = useStyles();
   const { setReplyingMessage } = useContext(ReplyMessageContext);
@@ -56,14 +56,14 @@ const MessageOptionsMenu = ({
     }
   };
 
-  const handleReact = async (emoji) => {
+  const handleReact = async emoji => {
     handleClose();
     api
       .post(`/messages/react/${message.id}`, {
         ticketId: message.ticketId,
-        emoji,
+        emoji
       })
-      .catch((err) => {
+      .catch(err => {
         toastError(err);
       });
     setShowEmoji(false);
@@ -74,7 +74,7 @@ const MessageOptionsMenu = ({
     closeMenu();
   };
 
-  const handleOpenConfirmationModal = (e) => {
+  const handleOpenConfirmationModal = e => {
     setConfirmationOpen(true);
     closeMenu();
   };
@@ -84,12 +84,12 @@ const MessageOptionsMenu = ({
     closeMenu();
   };
 
-  const handleOpenMessageHistoryModal = (e) => {
+  const handleOpenMessageHistoryModal = e => {
     setMessageHistoryOpen(true);
     closeMenu();
   };
 
-  const handleOpenForwardModal = (e) => {
+  const handleOpenForwardModal = e => {
     setForwardModalOpen(true);
     closeMenu();
   };
@@ -122,7 +122,7 @@ const MessageOptionsMenu = ({
           perLine={16}
           showPreview={false}
           showSkinTones={false}
-          onSelect={(e) => handleReact(e.native)}
+          onSelect={e => handleReact(e.native)}
         />
       </Dialog>
       <Menu
@@ -130,11 +130,11 @@ const MessageOptionsMenu = ({
         getContentAnchorEl={null}
         anchorOrigin={{
           vertical: "bottom",
-          horizontal: "right",
+          horizontal: "right"
         }}
         transformOrigin={{
           vertical: "top",
-          horizontal: "right",
+          horizontal: "right"
         }}
         open={menuOpen}
         onClose={closeMenu}
@@ -162,7 +162,7 @@ const MessageOptionsMenu = ({
               <MenuItem key="edit" onClick={handleEditMessage}>
                 {i18n.t("messageOptionsMenu.edit")}
               </MenuItem>
-            ),
+            )
           ]}
           {!isSticker && message.oldMessages?.length > 0 && (
             <MenuItem key="history" onClick={handleOpenMessageHistoryModal}>
@@ -185,7 +185,7 @@ MessageOptionsMenu.propTypes = {
   message: PropTypes.object,
   menuOpen: PropTypes.bool.isRequired,
   handleClose: PropTypes.func.isRequired,
-  anchorEl: PropTypes.object,
+  anchorEl: PropTypes.object
 };
 
 export default MessageOptionsMenu;

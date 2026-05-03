@@ -16,27 +16,27 @@ const useStyles = makeStyles({
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    margin: "2rem",
+    margin: "2rem"
   },
   inputContainer: {
     display: "flex",
     width: "100%",
-    marginBottom: "1rem",
+    marginBottom: "1rem"
   },
   input: {
     flexGrow: 1,
-    marginRight: "1rem",
+    marginRight: "1rem"
   },
   listContainer: {
     width: "100%",
     height: "100%",
     marginTop: "1rem",
     borderRadius: "5px",
-    color: "#888",
+    color: "#888"
   },
   list: {
-    marginBottom: "5px",
-  },
+    marginBottom: "5px"
+  }
 });
 
 const ToDoList = () => {
@@ -57,7 +57,7 @@ const ToDoList = () => {
     localStorage.setItem("tasks", JSON.stringify(tasks));
   }, [tasks]);
 
-  const handleTaskChange = (event) => {
+  const handleTaskChange = event => {
     setTask(event.target.value);
   };
 
@@ -74,7 +74,7 @@ const ToDoList = () => {
       newTasks[editIndex] = {
         text: task,
         updatedAt: now,
-        createdAt: newTasks[editIndex].createdAt,
+        createdAt: newTasks[editIndex].createdAt
       };
       setTasks(newTasks);
       setTask("");
@@ -86,12 +86,12 @@ const ToDoList = () => {
     }
   };
 
-  const handleEditTask = (index) => {
+  const handleEditTask = index => {
     setTask(tasks[index].text);
     setEditIndex(index);
   };
 
-  const handleDeleteTask = (index) => {
+  const handleDeleteTask = index => {
     const newTasks = [...tasks];
     newTasks.splice(index, 1);
     setTasks(newTasks);

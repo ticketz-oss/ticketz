@@ -1,6 +1,6 @@
 import * as React from "react";
 import LinearProgress, {
-  LinearProgressProps,
+  LinearProgressProps
 } from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";

@@ -23,13 +23,13 @@ import { Tooltip } from "@material-ui/core";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   ticket: {
-    position: "relative",
+    position: "relative"
   },
 
   pendingTicket: {
-    cursor: "unset",
+    cursor: "unset"
   },
 
   noTicketsDiv: {
@@ -38,57 +38,57 @@ const useStyles = makeStyles((theme) => ({
     margin: 40,
     flexDirection: "column",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "center"
   },
 
   noTicketsText: {
     textAlign: "center",
     color: "rgb(104, 121, 146)",
     fontSize: "14px",
-    lineHeight: "1.4",
+    lineHeight: "1.4"
   },
 
   noTicketsTitle: {
     textAlign: "center",
     fontSize: "16px",
     fontWeight: "600",
-    margin: "0px",
+    margin: "0px"
   },
 
   contactNameWrapper: {
     display: "flex",
-    justifyContent: "space-between",
+    justifyContent: "space-between"
   },
 
   lastMessageTime: {
-    justifySelf: "flex-end",
+    justifySelf: "flex-end"
   },
 
   closedBadge: {
     alignSelf: "center",
     justifySelf: "flex-end",
     marginRight: 32,
-    marginLeft: "auto",
+    marginLeft: "auto"
   },
 
   contactLastMessage: {
-    paddingRight: 20,
+    paddingRight: 20
   },
 
   newMessagesCount: {
     alignSelf: "center",
     marginRight: 8,
-    marginLeft: "auto",
+    marginLeft: "auto"
   },
 
   badgeStyle: {
     color: "white",
-    backgroundColor: green[500],
+    backgroundColor: green[500]
   },
 
   acceptButton: {
     position: "absolute",
-    left: "50%",
+    left: "50%"
   },
 
   ticketQueueColor: {
@@ -97,8 +97,8 @@ const useStyles = makeStyles((theme) => ({
     height: "100%",
     position: "absolute",
     top: "0%",
-    left: "0%",
-  },
+    left: "0%"
+  }
 }));
 
 const TicketListItem = ({ ticket, groupActionButtons }) => {
@@ -115,12 +115,12 @@ const TicketListItem = ({ ticket, groupActionButtons }) => {
     };
   }, []);
 
-  const handleAcepptTicket = async (ticket) => {
+  const handleAcepptTicket = async ticket => {
     setLoading(true);
     try {
       await api.put(`/tickets/${ticket.id}`, {
         status: "open",
-        userId: user?.id,
+        userId: user?.id
       });
     } catch (err) {
       setLoading(false);
@@ -132,7 +132,7 @@ const TicketListItem = ({ ticket, groupActionButtons }) => {
     history.push(`/tickets/${ticket.uuid}`);
   };
 
-  const handleSelectTicket = (ticket) => {
+  const handleSelectTicket = ticket => {
     history.push(`/tickets/${ticket.uuid}`);
   };
 
@@ -141,7 +141,7 @@ const TicketListItem = ({ ticket, groupActionButtons }) => {
       <ListItem
         dense
         button
-        onClick={(e) => {
+        onClick={e => {
           if (
             ticket.status === "pending" &&
             (groupActionButtons || !ticket.isGroup)
@@ -151,7 +151,7 @@ const TicketListItem = ({ ticket, groupActionButtons }) => {
         }}
         selected={ticketId && +ticketId === ticket.id}
         className={clsx(classes.ticket, {
-          [classes.pendingTicket]: ticket.status === "pending",
+          [classes.pendingTicket]: ticket.status === "pending"
         })}
       >
         <Tooltip
@@ -226,7 +226,7 @@ const TicketListItem = ({ ticket, groupActionButtons }) => {
                 className={classes.newMessagesCount}
                 badgeContent={ticket.unreadMessages}
                 classes={{
-                  badge: classes.badgeStyle,
+                  badge: classes.badgeStyle
                 }}
               />
             </span>
@@ -240,7 +240,7 @@ const TicketListItem = ({ ticket, groupActionButtons }) => {
               className={classes.acceptButton}
               size="small"
               loading={loading}
-              onClick={(e) => handleAcepptTicket(ticket)}
+              onClick={e => handleAcepptTicket(ticket)}
             >
               {i18n.t("ticketsList.buttons.accept")}
             </ButtonWithSpinner>

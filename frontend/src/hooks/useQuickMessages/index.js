@@ -1,28 +1,28 @@
 import api from "../../services/api";
 
 const useQuickMessages = () => {
-  const save = async (data) => {
+  const save = async data => {
     const { data: responseData } = await api.request({
       url: "/quick-messages",
       method: "POST",
-      data,
+      data
     });
     return responseData;
   };
 
-  const update = async (data) => {
+  const update = async data => {
     const { data: responseData } = await api.request({
       url: `/quick-messages/${data.id}`,
       method: "PUT",
-      data,
+      data
     });
     return responseData;
   };
 
-  const deleteRecord = async (id) => {
+  const deleteRecord = async id => {
     const { data } = await api.request({
       url: `/quick-messages/${id}`,
-      method: "DELETE",
+      method: "DELETE"
     });
     return data;
   };
@@ -30,7 +30,7 @@ const useQuickMessages = () => {
   const list = async () => {
     const { data } = await api.request({
       url: "/quick-messages/list",
-      method: "GET",
+      method: "GET"
     });
     return data;
   };
@@ -39,7 +39,7 @@ const useQuickMessages = () => {
     save,
     update,
     deleteRecord,
-    list,
+    list
   };
 };
 

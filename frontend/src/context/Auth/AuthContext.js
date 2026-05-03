@@ -11,7 +11,7 @@ const AuthProvider = ({ children }) => {
     isAuth,
     handleLogin,
     handleImpersonate,
-    handleLogout,
+    handleLogout
   } = useAuth();
 
   return (
@@ -22,7 +22,7 @@ const AuthProvider = ({ children }) => {
         isAuth,
         handleLogin,
         handleImpersonate,
-        handleLogout,
+        handleLogout
       }}
     >
       {children}

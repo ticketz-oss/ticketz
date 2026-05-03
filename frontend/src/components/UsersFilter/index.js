@@ -9,7 +9,7 @@ export function UsersFilter({
   onFiltered,
   initialUsers,
   excludeId,
-  multiple = false,
+  multiple = false
 }) {
   const [users, setUsers] = useState([]);
   const [selected, setSelected] = useState(multiple ? [] : null);
@@ -49,9 +49,9 @@ export function UsersFilter({
   const loadUsers = async () => {
     try {
       const { data } = await api.get(`/users/list`);
-      let userList = data.map((u) => ({ id: u.id, name: u.name }));
+      let userList = data.map(u => ({ id: u.id, name: u.name }));
       if (excludeId) {
-        userList = userList.filter((user) => user.id !== excludeId);
+        userList = userList.filter(user => user.id !== excludeId);
       }
       setUsers(userList);
     } catch (err) {
@@ -59,7 +59,7 @@ export function UsersFilter({
     }
   };
 
-  const onChange = async (value) => {
+  const onChange = async value => {
     setSelected(value);
     onFiltered(multiple ? value || [] : value ? [value] : []);
   };
@@ -72,7 +72,7 @@ export function UsersFilter({
         options={users}
         value={selected}
         onChange={(e, v, r) => onChange(v)}
-        getOptionLabel={(option) => option.name}
+        getOptionLabel={option => option.name}
         getOptionSelected={(option, value) => {
           return (
             option?.id === value?.id ||
@@ -88,7 +88,7 @@ export function UsersFilter({
                   style={{
                     backgroundColor: "#bfbfbf",
                     textShadow: "1px 1px 1px #000",
-                    color: "white",
+                    color: "white"
                   }}
                   label={v.name}
                   {...getUserProps({ index: idx })}
@@ -103,16 +103,16 @@ export function UsersFilter({
                     style={{
                       backgroundColor: "#bfbfbf",
                       textShadow: "1px 1px 1px #000",
-                      color: "white",
+                      color: "white"
                     }}
                     label={value.name}
                     {...getUserProps({ index: 0 })}
                     size="small"
-                  />,
+                  />
                 ]
               : []
         }
-        renderInput={(params) => (
+        renderInput={params => (
           <TextField
             {...params}
             variant="outlined"

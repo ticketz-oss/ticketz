@@ -24,19 +24,19 @@ import { useDate } from "../../hooks/useDate";
 
 import { SocketContext } from "../../context/Socket/SocketContext";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   mainPaper: {
     flex: 1,
     padding: theme.spacing(2),
     overflowY: "scroll",
-    ...theme.scrollbarStyles,
+    ...theme.scrollbarStyles
   },
   textRight: {
-    textAlign: "right",
+    textAlign: "right"
   },
   tabPanelsContainer: {
-    padding: theme.spacing(2),
-  },
+    padding: theme.spacing(2)
+  }
 }));
 
 const CampaignReport = () => {
@@ -76,7 +76,7 @@ const CampaignReport = () => {
     const companyId = localStorage.getItem("companyId");
     const socket = socketManager.GetSocket(companyId);
 
-    const onCampaign = (data) => {
+    const onCampaign = data => {
       if (data.campaign?.id === +campaignId) {
         setCampaign(data.campaign);
         setValidContacts(data.valids);
@@ -111,7 +111,7 @@ const CampaignReport = () => {
     setLoading(false);
   };
 
-  const formatStatus = (val) => {
+  const formatStatus = val => {
     switch (val) {
       case "INATIVA":
         return "Inativa";

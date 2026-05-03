@@ -26,30 +26,30 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Typography,
+  Typography
 } from "@material-ui/core";
 import ConfirmationModal from "../../components/ConfirmationModal";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   mainPaper: {
     flex: 1,
     padding: theme.spacing(1),
     overflowY: "scroll",
-    ...theme.scrollbarStyles,
+    ...theme.scrollbarStyles
   },
   textRight: {
-    textAlign: "right",
+    textAlign: "right"
   },
   tabPanelsContainer: {
-    padding: theme.spacing(2),
-  },
+    padding: theme.spacing(2)
+  }
 }));
 
 const initialSettings = {
   messageInterval: 20,
   longerIntervalAfter: 20,
   greaterInterval: 60,
-  variables: [],
+  variables: []
 };
 
 const CampaignsConfig = () => {
@@ -65,7 +65,7 @@ const CampaignsConfig = () => {
     api.get("/campaign-settings").then(({ data }) => {
       const settingsList = [];
       if (Array.isArray(data) && data.length > 0) {
-        data.forEach((item) => {
+        data.forEach(item => {
           settingsList.push([item.key, JSON.parse(item.value)]);
         });
         setSettings(Object.fromEntries(settingsList));
@@ -73,24 +73,24 @@ const CampaignsConfig = () => {
     });
   }, []);
 
-  const handleOnChangeVariable = (e) => {
+  const handleOnChangeVariable = e => {
     if (e.target.value !== null) {
       const changedProp = {};
       changedProp[e.target.name] = e.target.value;
-      setVariable((prev) => ({ ...prev, ...changedProp }));
+      setVariable(prev => ({ ...prev, ...changedProp }));
     }
   };
 
-  const handleOnChangeSettings = (e) => {
+  const handleOnChangeSettings = e => {
     const changedProp = {};
     changedProp[e.target.name] = e.target.value;
-    setSettings((prev) => ({ ...prev, ...changedProp }));
+    setSettings(prev => ({ ...prev, ...changedProp }));
   };
 
   const addVariable = () => {
-    setSettings((prev) => {
+    setSettings(prev => {
       const variablesExists = settings.variables.filter(
-        (v) => v.key === variable.key,
+        v => v.key === variable.key
       );
       const variables = prev.variables;
       if (variablesExists.length === 0) {
@@ -102,8 +102,8 @@ const CampaignsConfig = () => {
   };
 
   const removeVariable = () => {
-    const newList = settings.variables.filter((v) => v.key !== selectedKey);
-    setSettings((prev) => ({ ...prev, variables: newList }));
+    const newList = settings.variables.filter(v => v.key !== selectedKey);
+    setSettings(prev => ({ ...prev, variables: newList }));
     setSelectedKey(null);
   };
 
@@ -172,7 +172,7 @@ const CampaignsConfig = () => {
                   labelId="longerIntervalAfter-label"
                   label="Intervalo Maior Após"
                   value={settings.longerIntervalAfter}
-                  onChange={(e) => handleOnChangeSettings(e)}
+                  onChange={e => handleOnChangeSettings(e)}
                 >
                   <MenuItem value={0}>{i18n.t("common.undefined")}</MenuItem>
                   <MenuItem value={5}>5 {i18n.t("common.messages")}</MenuItem>

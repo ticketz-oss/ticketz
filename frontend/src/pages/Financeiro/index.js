@@ -23,8 +23,8 @@ const reducer = (state, action) => {
     const invoices = action.payload;
     const newUsers = [];
 
-    invoices.forEach((user) => {
-      const userIndex = state.findIndex((u) => u.id === user.id);
+    invoices.forEach(user => {
+      const userIndex = state.findIndex(u => u.id === user.id);
       if (userIndex !== -1) {
         state[userIndex] = user;
       } else {
@@ -37,7 +37,7 @@ const reducer = (state, action) => {
 
   if (action.type === "UPDATE_USERS") {
     const user = action.payload;
-    const userIndex = state.findIndex((u) => u.id === user.id);
+    const userIndex = state.findIndex(u => u.id === user.id);
 
     if (userIndex !== -1) {
       state[userIndex] = user;
@@ -50,7 +50,7 @@ const reducer = (state, action) => {
   if (action.type === "DELETE_USER") {
     const userId = action.payload;
 
-    const userIndex = state.findIndex((u) => u.id === userId);
+    const userIndex = state.findIndex(u => u.id === userId);
     if (userIndex !== -1) {
       state.splice(userIndex, 1);
     }
@@ -62,13 +62,13 @@ const reducer = (state, action) => {
   }
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   mainPaper: {
     flex: 1,
     padding: theme.spacing(1),
     overflowY: "scroll",
-    ...theme.scrollbarStyles,
-  },
+    ...theme.scrollbarStyles
+  }
 }));
 
 const Invoices = () => {
@@ -83,7 +83,7 @@ const Invoices = () => {
   const [selectedContactId, setSelectedContactId] = useState(null);
   const [contactModalOpen, setContactModalOpen] = useState(false);
 
-  const handleOpenContactModal = (invoices) => {
+  const handleOpenContactModal = invoices => {
     setStoragePlans(invoices);
     setSelectedContactId(null);
     setContactModalOpen(true);
@@ -104,7 +104,7 @@ const Invoices = () => {
       const fetchInvoices = async () => {
         try {
           const { data } = await api.get("/invoices/all", {
-            params: { searchParam, pageNumber },
+            params: { searchParam, pageNumber }
           });
           dispatch({ type: "LOAD_INVOICES", payload: data });
           setHasMore(data.hasMore);
@@ -119,21 +119,21 @@ const Invoices = () => {
   }, [searchParam, pageNumber]);
 
   const loadMore = () => {
-    setPageNumber((prevState) => prevState + 1);
+    setPageNumber(prevState => prevState + 1);
   };
 
-  const handleScroll = (e) => {
+  const handleScroll = e => {
     if (!hasMore || loading) return;
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
     if (scrollHeight - (scrollTop + 100) < clientHeight) {
       loadMore();
     }
   };
-  const rowStyle = (record) => {
+  const rowStyle = record => {
     const hoje = moment(moment()).format("DD/MM/yyyy");
     const vencimento = moment(record.dueDate).format("DD/MM/yyyy");
     var diff = moment(vencimento, "DD/MM/yyyy").diff(
-      moment(hoje, "DD/MM/yyyy"),
+      moment(hoje, "DD/MM/yyyy")
     );
     var dias = moment.duration(diff).asDays();
     if (dias < 0 && record.status !== "paid") {
@@ -141,11 +141,11 @@ const Invoices = () => {
     }
   };
 
-  const rowStatus = (record) => {
+  const rowStatus = record => {
     const hoje = moment(moment()).format("DD/MM/yyyy");
     const vencimento = moment(record.dueDate).format("DD/MM/yyyy");
     var diff = moment(vencimento, "DD/MM/yyyy").diff(
-      moment(hoje, "DD/MM/yyyy"),
+      moment(hoje, "DD/MM/yyyy")
     );
     var dias = moment.duration(diff).asDays();
     const status = record.status;
@@ -189,7 +189,7 @@ const Invoices = () => {
           </TableHead>
           <TableBody>
             <>
-              {invoices.map((invoices) => (
+              {invoices.map(invoices => (
                 <TableRow style={rowStyle(invoices)} key={invoices.id}>
                   <TableCell align="center">{invoices.id}</TableCell>
                   <TableCell align="center">{invoices.detail}</TableCell>

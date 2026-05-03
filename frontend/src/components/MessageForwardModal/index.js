@@ -7,7 +7,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import Autocomplete, {
-  createFilterOptions,
+  createFilterOptions
 } from "@material-ui/lab/Autocomplete";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { Grid } from "@material-ui/core";
@@ -19,7 +19,7 @@ import toastError from "../../errors/toastError";
 import { i18n } from "../../translate/i18n";
 
 const filter = createFilterOptions({
-  trim: true,
+  trim: true
 });
 
 const MessageForwardModal = ({
@@ -27,7 +27,7 @@ const MessageForwardModal = ({
   onClose,
   ticketId,
   messageId,
-  initialContact,
+  initialContact
 }) => {
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -53,7 +53,7 @@ const MessageForwardModal = ({
       const fetchContacts = async () => {
         try {
           const { data } = await api.get("contacts", {
-            params: { searchParam },
+            params: { searchParam }
           });
           setOptions(data.contacts);
           setLoading(false);
@@ -83,7 +83,7 @@ const MessageForwardModal = ({
         contactId: contact.id,
         ticketId,
         messageId,
-        queueId: queue?.id,
+        queueId: queue?.id
       });
 
       onClose();
@@ -99,7 +99,7 @@ const MessageForwardModal = ({
     }
   };
 
-  const renderOption = (option) => {
+  const renderOption = option => {
     if (option.number) {
       return `${option.name} - ${option.number}`;
     } else {
@@ -107,7 +107,7 @@ const MessageForwardModal = ({
     }
   };
 
-  const renderOptionLabel = (option) => {
+  const renderOptionLabel = option => {
     if (option.number) {
       return `${option.name} - ${option.number}`;
     } else {
@@ -135,13 +135,13 @@ const MessageForwardModal = ({
               renderOption={renderOption}
               filterOptions={filter}
               onChange={(e, newValue) => handleSelectOption(e, newValue)}
-              renderInput={(params) => (
+              renderInput={params => (
                 <TextField
                   {...params}
                   label={i18n.t("newTicketModal.fieldLabel")}
                   variant="outlined"
                   autoFocus
-                  onChange={(e) => setSearchParam(e.target.value)}
+                  onChange={e => setSearchParam(e.target.value)}
                   InputProps={{
                     ...params.InputProps,
                     endAdornment: (
@@ -151,7 +151,7 @@ const MessageForwardModal = ({
                         ) : null}
                         {params.InputProps.endAdornment}
                       </React.Fragment>
-                    ),
+                    )
                   }}
                 />
               )}
@@ -162,9 +162,9 @@ const MessageForwardModal = ({
               <Autocomplete
                 fullWidth
                 options={user.queues}
-                getOptionLabel={(option) => option.name}
+                getOptionLabel={option => option.name}
                 onChange={(e, newValue) => setSelectedQueue(newValue)}
-                renderInput={(params) => (
+                renderInput={params => (
                   <TextField
                     {...params}
                     label={i18n.t("transferTicketModal.fieldQueuePlaceholder")}

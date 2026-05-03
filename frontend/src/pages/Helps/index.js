@@ -15,22 +15,22 @@ import AccordionDetails from "@material-ui/core/AccordionDetails";
 import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   mainPaper: {
     width: "100%",
     minHeight: "200px",
     overflowY: "scroll",
-    ...theme.scrollbarStyles,
+    ...theme.scrollbarStyles
   },
   heading: {
     fontSize: theme.typography.pxToRem(15),
     flexBasis: "33.33%",
-    flexShrink: 0,
+    flexShrink: 0
   },
   secondaryHeading: {
     fontSize: theme.typography.pxToRem(15),
-    color: theme.palette.text.secondary,
-  },
+    color: theme.palette.text.secondary
+  }
 }));
 
 const Helps = () => {
@@ -48,7 +48,7 @@ const Helps = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const renderVideo = (record) => {
+  const renderVideo = record => {
     const url = `https://www.youtube.com/embed/${record.video}`;
     return (
       <iframe

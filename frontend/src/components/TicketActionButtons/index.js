@@ -12,7 +12,7 @@ import ButtonWithSpinner from "../ButtonWithSpinner";
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   actionButtons: {
     marginRight: 6,
     flex: "none",
@@ -20,9 +20,9 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: "auto",
     "& > *": {
       marginRight: theme.spacing(1),
-      marginLeft: theme.spacing(1),
-    },
-  },
+      marginLeft: theme.spacing(1)
+    }
+  }
 }));
 
 const TicketActionButtons = ({ ticket }) => {
@@ -33,11 +33,11 @@ const TicketActionButtons = ({ ticket }) => {
   const ticketOptionsMenuOpen = Boolean(anchorEl);
   const { user } = useContext(AuthContext);
 
-  const handleOpenTicketOptionsMenu = (e) => {
+  const handleOpenTicketOptionsMenu = e => {
     setAnchorEl(e.currentTarget);
   };
 
-  const handleCloseTicketOptionsMenu = (e) => {
+  const handleCloseTicketOptionsMenu = e => {
     setAnchorEl(null);
   };
 
@@ -46,7 +46,7 @@ const TicketActionButtons = ({ ticket }) => {
     try {
       await api.put(`/tickets/${ticket.id}`, {
         status: status,
-        userId: userId || null,
+        userId: userId || null
       });
 
       setLoading(false);
@@ -68,7 +68,7 @@ const TicketActionButtons = ({ ticket }) => {
           loading={loading}
           startIcon={<Replay />}
           size="small"
-          onClick={(e) => handleUpdateTicketStatus(e, "open", user?.id)}
+          onClick={e => handleUpdateTicketStatus(e, "open", user?.id)}
         >
           {i18n.t("messagesList.header.buttons.reopen")}
         </ButtonWithSpinner>
@@ -79,7 +79,7 @@ const TicketActionButtons = ({ ticket }) => {
             loading={loading}
             startIcon={<Replay />}
             size="small"
-            onClick={(e) => handleUpdateTicketStatus(e, "pending", null)}
+            onClick={e => handleUpdateTicketStatus(e, "pending", null)}
           >
             {i18n.t("messagesList.header.buttons.return")}
           </ButtonWithSpinner>
@@ -88,7 +88,7 @@ const TicketActionButtons = ({ ticket }) => {
             size="small"
             variant="contained"
             color="primary"
-            onClick={(e) => handleUpdateTicketStatus(e, "closed", user?.id)}
+            onClick={e => handleUpdateTicketStatus(e, "closed", user?.id)}
           >
             {i18n.t("messagesList.header.buttons.resolve")}
           </ButtonWithSpinner>
@@ -109,7 +109,7 @@ const TicketActionButtons = ({ ticket }) => {
           size="small"
           variant="contained"
           color="primary"
-          onClick={(e) => handleUpdateTicketStatus(e, "open", user?.id)}
+          onClick={e => handleUpdateTicketStatus(e, "open", user?.id)}
         >
           {i18n.t("messagesList.header.buttons.accept")}
         </ButtonWithSpinner>

@@ -2,7 +2,7 @@ import {
   format,
   isToday,
   isYesterday,
-  differenceInCalendarDays,
+  differenceInCalendarDays
 } from "date-fns";
 import { de, enUS, es, fr, id, it, pt } from "date-fns/locale";
 import { i18n } from "../translate/i18n";

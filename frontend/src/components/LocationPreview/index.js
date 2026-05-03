@@ -18,7 +18,7 @@ const LocationPreview = ({ image, link, description }) => {
     <>
       <div
         style={{
-          minWidth: "250px",
+          minWidth: "250px"
         }}
       >
         <div>
@@ -37,7 +37,7 @@ const LocationPreview = ({ image, link, description }) => {
                   marginTop: "12px",
                   marginLeft: "15px",
                   marginRight: "15px",
-                  float: "left",
+                  float: "left"
                 }}
                 variant="subtitle1"
                 color="primary"
@@ -45,7 +45,7 @@ const LocationPreview = ({ image, link, description }) => {
               >
                 <div
                   dangerouslySetInnerHTML={{
-                    __html: description.replace("\\n", "<br />"),
+                    __html: description.replace("\\n", "<br />")
                   }}
                 ></div>
               </Typography>

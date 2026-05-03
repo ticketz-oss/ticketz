@@ -26,7 +26,7 @@ import OnlyForSuperUser from "../../components/OnlyForSuperUser";
 import OpenHoursEditor from "../../components/OpenHoursEditor";
 
 // Helper to check if value is OpenHours format or empty
-const isOpenHoursFormat = (schedules) => {
+const isOpenHoursFormat = schedules => {
   if (!schedules || Object.keys(schedules).length === 0) return true;
   return (
     typeof schedules === "object" &&
@@ -35,18 +35,18 @@ const isOpenHoursFormat = (schedules) => {
   );
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     flex: 1,
-    backgroundColor: theme.palette.background.paper,
+    backgroundColor: theme.palette.background.paper
   },
   mainPaper: {
     ...theme.scrollbarStyles,
     overflowY: "scroll",
-    flex: 1,
+    flex: 1
   },
   tab: {
-    borderRadius: 4,
+    borderRadius: 4
   },
   paper: {
     ...theme.scrollbarStyles,
@@ -54,18 +54,18 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(2),
     display: "flex",
     alignItems: "center",
-    width: "100%",
+    width: "100%"
   },
   container: {
     width: "100%",
-    maxHeight: "100%",
+    maxHeight: "100%"
   },
   control: {
-    padding: theme.spacing(1),
+    padding: theme.spacing(1)
   },
   textfield: {
-    width: "100%",
-  },
+    width: "100%"
+  }
 }));
 
 const SettingsCustom = () => {
@@ -94,9 +94,7 @@ const SettingsCustom = () => {
         setSettings(settingList);
 
         if (Array.isArray(settingList)) {
-          const scheduleType = settingList.find(
-            (d) => d.key === "scheduleType",
-          );
+          const scheduleType = settingList.find(d => d.key === "scheduleType");
           if (scheduleType) {
             setSchedulesEnabled(scheduleType.value === "company");
           }
@@ -125,9 +123,7 @@ const SettingsCustom = () => {
         setSettings(settingList);
 
         if (Array.isArray(settingList)) {
-          const scheduleType = settingList.find(
-            (d) => d.key === "scheduleType",
-          );
+          const scheduleType = settingList.find(d => d.key === "scheduleType");
           if (scheduleType) {
             setSchedulesEnabled(scheduleType.value === "company");
           }
@@ -146,7 +142,7 @@ const SettingsCustom = () => {
     setTab(newValue);
   };
 
-  const handleSubmitSchedules = async (data) => {
+  const handleSubmitSchedules = async data => {
     setLoading(true);
     try {
       setSchedules(data);
@@ -225,7 +221,7 @@ const SettingsCustom = () => {
                   style={{
                     display: "flex",
                     justifyContent: "flex-end",
-                    marginTop: 16,
+                    marginTop: 16
                   }}
                 >
                   <Button
@@ -316,7 +312,7 @@ const SettingsCustom = () => {
           <TabPanel className={classes.container} value={tab} name={"options"}>
             <Options
               settings={settings}
-              scheduleTypeChanged={(value) =>
+              scheduleTypeChanged={value =>
                 setSchedulesEnabled(value === "company")
               }
             />

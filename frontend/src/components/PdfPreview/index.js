@@ -7,20 +7,20 @@ import {
   IconButton,
   makeStyles,
   Tooltip,
-  Typography,
+  Typography
 } from "@material-ui/core";
 import {
   Close,
   GetApp,
   NavigateBefore,
-  NavigateNext,
+  NavigateNext
 } from "@material-ui/icons";
 import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
 
 GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   // ── Thumbnail ──────────────────────────────────────────────────────────
   thumbnail: {
     position: "relative",
@@ -30,12 +30,12 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: "#f5f5f5",
     cursor: "pointer",
     "&:hover $thumbnailOverlay": {
-      opacity: 1,
-    },
+      opacity: 1
+    }
   },
   thumbnailCanvas: {
     display: "block",
-    width: "100%",
+    width: "100%"
   },
   thumbnailOverlay: {
     position: "absolute",
@@ -50,7 +50,7 @@ const useStyles = makeStyles((theme) => ({
     fontSize: "0.8rem",
     fontWeight: 600,
     letterSpacing: "0.05em",
-    pointerEvents: "none",
+    pointerEvents: "none"
   },
   thumbnailFade: {
     position: "absolute",
@@ -59,24 +59,24 @@ const useStyles = makeStyles((theme) => ({
     right: 0,
     height: "30px",
     background: "linear-gradient(transparent, rgba(0,0,0,0.12))",
-    pointerEvents: "none",
+    pointerEvents: "none"
   },
   thumbnailMessage: {
     padding: "6px 8px",
     fontSize: "0.75rem",
-    color: "#666",
+    color: "#666"
   },
   // ── Full-screen dialog ─────────────────────────────────────────────────
   dialogTitle: {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: "8px 16px",
+    padding: "8px 16px"
   },
   dialogTitleButtons: {
     display: "flex",
     alignItems: "center",
-    gap: 4,
+    gap: 4
   },
   dialogContent: {
     padding: 0,
@@ -85,21 +85,21 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     backgroundColor: "#525659",
     minHeight: "60vh",
-    overflowY: "auto",
+    overflowY: "auto"
   },
   pageCanvas: {
     display: "block",
     maxWidth: "100%",
     boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
     margin: "16px auto",
-    backgroundColor: "#fff",
+    backgroundColor: "#fff"
   },
   pageNav: {
     display: "flex",
     alignItems: "center",
     gap: 8,
     padding: "8px 0",
-    color: "#fff",
+    color: "#fff"
   },
   spinnerWrap: {
     display: "flex",
@@ -107,8 +107,8 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "center",
     minHeight: 200,
     width: "100%",
-    color: "#fff",
-  },
+    color: "#fff"
+  }
 }));
 
 // ── Shared PDF loader ─────────────────────────────────────────────────────────
@@ -122,7 +122,7 @@ async function renderPageToCanvas(pdf, pageNum, canvas) {
   canvas.height = scaledViewport.height;
   await page.render({
     canvasContext: canvas.getContext("2d"),
-    viewport: scaledViewport,
+    viewport: scaledViewport
   }).promise;
 }
 
@@ -170,7 +170,7 @@ const Thumbnail = ({ url, onOpen }) => {
         canvas.height = Math.floor(scaledViewport.height / 2); // top half only
         await page.render({
           canvasContext: canvas.getContext("2d"),
-          viewport: scaledViewport,
+          viewport: scaledViewport
         }).promise;
 
         if (!cancelled) setStatus("done");
@@ -310,7 +310,7 @@ const PdfViewerDialog = ({ url, fileName, open, onClose }) => {
                   <IconButton
                     size="small"
                     disabled={currentPage <= 1}
-                    onClick={() => setCurrentPage((p) => p - 1)}
+                    onClick={() => setCurrentPage(p => p - 1)}
                   >
                     <NavigateBefore />
                   </IconButton>
@@ -324,7 +324,7 @@ const PdfViewerDialog = ({ url, fileName, open, onClose }) => {
                   <IconButton
                     size="small"
                     disabled={currentPage >= numPages}
-                    onClick={() => setCurrentPage((p) => p + 1)}
+                    onClick={() => setCurrentPage(p => p + 1)}
                   >
                     <NavigateNext />
                   </IconButton>

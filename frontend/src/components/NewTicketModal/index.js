@@ -17,7 +17,7 @@ import {
   Select,
   TextField,
   FormControl,
-  InputLabel,
+  InputLabel
 } from "@material-ui/core";
 import { toast } from "react-toastify";
 import { ContactSelect } from "../ContactSelect";
@@ -47,7 +47,7 @@ const NewTicketModal = ({ modalOpen, onClose, contact }) => {
     setSelectedContact(null);
   };
 
-  const handleSaveTicket = async (contactId) => {
+  const handleSaveTicket = async contactId => {
     if (!contactId) return;
     if (selectedQueue === "" && user.profile !== "admin") {
       toast.error("Selecione uma fila");
@@ -60,7 +60,7 @@ const NewTicketModal = ({ modalOpen, onClose, contact }) => {
         contactId: contactId,
         queueId,
         userId: user.id,
-        status: "open",
+        status: "open"
       });
       onClose(ticket);
     } catch (err) {
@@ -69,7 +69,7 @@ const NewTicketModal = ({ modalOpen, onClose, contact }) => {
     setLoading(false);
   };
 
-  const handleSelectedContact = (contactId) => {
+  const handleSelectedContact = contactId => {
     if (contactId) {
       setSelectedContact({ id: contactId });
     } else {
@@ -77,7 +77,7 @@ const NewTicketModal = ({ modalOpen, onClose, contact }) => {
     }
   };
 
-  const handleCreateContact = (name) => {
+  const handleCreateContact = name => {
     setNewContact({ name });
     setContactModalOpen(true);
   };
@@ -86,7 +86,7 @@ const NewTicketModal = ({ modalOpen, onClose, contact }) => {
     setContactModalOpen(false);
   };
 
-  const handleAddNewContactTicket = (contact) => {
+  const handleAddNewContactTicket = contact => {
     setSelectedContact(contact);
   };
 
@@ -134,27 +134,25 @@ const NewTicketModal = ({ modalOpen, onClose, contact }) => {
                   margin="dense"
                   value={selectedQueue || ""}
                   label={i18n.t("common.queue")}
-                  onChange={(e) => {
+                  onChange={e => {
                     setSelectedQueue(e.target.value);
                   }}
                   MenuProps={{
                     anchorOrigin: {
                       vertical: "bottom",
-                      horizontal: "left",
+                      horizontal: "left"
                     },
                     transformOrigin: {
                       vertical: "top",
-                      horizontal: "left",
+                      horizontal: "left"
                     },
-                    getContentAnchorEl: null,
+                    getContentAnchorEl: null
                   }}
                   renderValue={() => {
                     if (!selectedQueue) {
                       return;
                     }
-                    const queue = user.queues.find(
-                      (q) => q.id === selectedQueue,
-                    );
+                    const queue = user.queues.find(q => q.id === selectedQueue);
                     return queue.name;
                   }}
                 >

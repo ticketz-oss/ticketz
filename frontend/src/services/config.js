@@ -10,7 +10,7 @@ if (!config && ["localhost", "127.0.0.1"].includes(window.location.hostname)) {
       BACKEND_PROTOCOL: "http",
       BACKEND_HOST: "localhost",
       BACKEND_PORT: "8080",
-      LOG_LEVEL: "debug",
+      LOG_LEVEL: "debug"
     };
   }
 }

@@ -55,38 +55,38 @@ import { validateCNPJ } from "validations-br";
 import { isValidPhoneNumber } from "libphonenumber-js";
 import { getBackendURL } from "../../../services/config";
 
-const useStyles = makeStyles((_) => ({
+const useStyles = makeStyles(_ => ({
   fieldContainer: {
     width: "100%",
-    textAlign: "left",
+    textAlign: "left"
   },
 
   uploadInput: {
-    display: "none",
+    display: "none"
   },
 
   createAccount: {
     paddingTop: "10px",
-    paddingBottom: "5px",
+    paddingBottom: "5px"
   },
 
   title: {
-    paddingTop: "10px",
-  },
+    paddingTop: "10px"
+  }
 }));
 
 const createSchema = Yup.object().shape({
   nome: Yup.string().min(2, "Too Short!").required("Required"),
   cnpj: Yup.string()
-    .test("is-cnpj", "CNPJ is not valid", (value) => validateCNPJ(value))
+    .test("is-cnpj", "CNPJ is not valid", value => validateCNPJ(value))
     .required("Required"),
   email: Yup.string().email("Invalid email").required("Required"),
   whatsapp: Yup.string()
     .min(10)
-    .test("is-phone", "Whatsapp is not valid", (value) =>
-      isValidPhoneNumber(value, "BR"),
+    .test("is-phone", "Whatsapp is not valid", value =>
+      isValidPhoneNumber(value, "BR")
     )
-    .required("Required"),
+    .required("Required")
 });
 
 export default function PixTicketzSettings(props) {
@@ -101,7 +101,7 @@ export default function PixTicketzSettings(props) {
   useEffect(() => {
     if (Array.isArray(settings)) {
       const newSettings = {};
-      settings.forEach((setting) => {
+      settings.forEach(setting => {
         if (setting.key.startsWith("_owen")) {
           newSettings[setting.key.substring(1)] = setting.value;
         }
@@ -121,7 +121,7 @@ export default function PixTicketzSettings(props) {
   async function storeSetting(key, value) {
     await update({
       key,
-      value,
+      value
     });
   }
 
@@ -138,7 +138,7 @@ export default function PixTicketzSettings(props) {
       const r = await axios.post(
         "https://n8n.ticke.tz/webhook/8ff6a058-ca7c-453f-87e7-0764974ad510",
         values,
-        { timeout: 3000 },
+        { timeout: 3000 }
       );
       console.debug("createFormResult", r);
       toast.success(r.data.message);
@@ -173,12 +173,12 @@ export default function PixTicketzSettings(props) {
                   variant="standard"
                   name="owenCnpj"
                   value={pixTicketzSettings.owenCnpj || ""}
-                  onChange={(e) => {
+                  onChange={e => {
                     const newSettings = { ...pixTicketzSettings };
                     newSettings.owenCnpj = e.target.value;
                     setPixTicketzSettings(newSettings);
                   }}
-                  onBlur={async (_) => {
+                  onBlur={async _ => {
                     await handleSaveSetting("owenCnpj");
                   }}
                 />
@@ -192,12 +192,12 @@ export default function PixTicketzSettings(props) {
                   variant="standard"
                   name="owenToken"
                   value={pixTicketzSettings.owenToken || ""}
-                  onChange={(e) => {
+                  onChange={e => {
                     const newSettings = { ...pixTicketzSettings };
                     newSettings.owenToken = e.target.value;
                     setPixTicketzSettings(newSettings);
                   }}
-                  onBlur={async (_) => {
+                  onBlur={async _ => {
                     await handleSaveSetting("owenToken");
                   }}
                 />
@@ -211,12 +211,12 @@ export default function PixTicketzSettings(props) {
                   variant="standard"
                   name="owenSecretKey"
                   value={pixTicketzSettings.owenSecretKey || ""}
-                  onChange={(e) => {
+                  onChange={e => {
                     const newSettings = { ...pixTicketzSettings };
                     newSettings.owenSecretKey = e.target.value;
                     setPixTicketzSettings(newSettings);
                   }}
-                  onBlur={async (_) => {
+                  onBlur={async _ => {
                     await handleSaveSetting("owenSecretKey");
                   }}
                 />

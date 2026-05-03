@@ -40,7 +40,7 @@ function getRetryMessage(error) {
 
 function showRetryProgress(message, onRetry) {
   window.renderError(
-    `${message}<br><br><div class="progress-bar" style="margin: 8px auto 0 auto;"><div class="progress regress" style="animation-duration: ${BACKEND_RETRY_INTERVAL_SECONDS}s;"></div></div>`,
+    `${message}<br><br><div class="progress-bar" style="margin: 8px auto 0 auto;"><div class="progress regress" style="animation-duration: ${BACKEND_RETRY_INTERVAL_SECONDS}s;"></div></div>`
   );
 
   clearBackendRetryTimers();
@@ -62,7 +62,7 @@ function renderApp() {
     document.getElementById("root"),
     () => {
       window.finishProgress();
-    },
+    }
   );
 }
 
@@ -71,7 +71,7 @@ function probeBackendAndRender(config, attempt = 1) {
 
   axios
     .get(backendUrl, { timeout: BACKEND_PROBE_TIMEOUT_MS })
-    .then((response) => {
+    .then(response => {
       const serverDate = new Date(response.headers["date"]);
       const clientDate = new Date();
       const diff = Math.abs(serverDate - clientDate);
@@ -88,7 +88,7 @@ function probeBackendAndRender(config, attempt = 1) {
 
       renderApp();
     })
-    .catch((error) => {
+    .catch(error => {
       const retryMessage = getRetryMessage(error);
       showRetryProgress(retryMessage, () => {
         probeBackendAndRender(config, attempt + 1);

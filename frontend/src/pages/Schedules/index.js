@@ -3,7 +3,7 @@ import React, {
   useEffect,
   useReducer,
   useCallback,
-  useContext,
+  useContext
 } from "react";
 import { toast } from "react-toastify";
 
@@ -41,7 +41,7 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 
 // A custom hook that builds on useLocation to parse
 // the query string for you.
-const getUrlParam = (param) => {
+const getUrlParam = param => {
   return new URLSearchParams(window.location.search).get(param);
 };
 
@@ -50,8 +50,8 @@ const reducer = (state, action) => {
     const schedules = action.payload;
     const newSchedules = [];
 
-    schedules.forEach((schedule) => {
-      const scheduleIndex = state.findIndex((s) => s.id === schedule.id);
+    schedules.forEach(schedule => {
+      const scheduleIndex = state.findIndex(s => s.id === schedule.id);
       if (scheduleIndex !== -1) {
         state[scheduleIndex] = schedule;
       } else {
@@ -64,7 +64,7 @@ const reducer = (state, action) => {
 
   if (action.type === "UPDATE_SCHEDULES") {
     const schedule = action.payload;
-    const scheduleIndex = state.findIndex((s) => s.id === schedule.id);
+    const scheduleIndex = state.findIndex(s => s.id === schedule.id);
 
     if (scheduleIndex !== -1) {
       state[scheduleIndex] = schedule;
@@ -77,7 +77,7 @@ const reducer = (state, action) => {
   if (action.type === "DELETE_SCHEDULE") {
     const scheduleId = action.payload;
 
-    const scheduleIndex = state.findIndex((s) => s.id === scheduleId);
+    const scheduleIndex = state.findIndex(s => s.id === scheduleId);
     if (scheduleIndex !== -1) {
       state.splice(scheduleIndex, 1);
     }
@@ -89,13 +89,13 @@ const reducer = (state, action) => {
   }
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   mainPaper: {
     flex: 1,
     padding: theme.spacing(1),
     overflowY: "scroll",
-    ...theme.scrollbarStyles,
-  },
+    ...theme.scrollbarStyles
+  }
 }));
 
 const Schedules = () => {
@@ -117,7 +117,7 @@ const Schedules = () => {
   const fetchSchedules = useCallback(async () => {
     try {
       const { data } = await api.get("/schedules/", {
-        params: { searchParam, pageNumber },
+        params: { searchParam, pageNumber }
       });
       dispatch({ type: "LOAD_SCHEDULES", payload: data.schedules });
       setHasMore(data.hasMore);
@@ -151,18 +151,18 @@ const Schedules = () => {
     pageNumber,
     contactId,
     fetchSchedules,
-    handleOpenScheduleModalFromContactId,
+    handleOpenScheduleModalFromContactId
   ]);
 
   useEffect(() => {
     handleOpenScheduleModalFromContactId();
     const socket = socketManager.GetSocket(user.companyId);
 
-    const onSchedule = (data) => {
+    const onSchedule = data => {
       if (data.action === "update" || data.action === "create") {
         dispatch({
           type: "UPDATE_SCHEDULES",
-          payload: data?.schedules || data?.schedule,
+          payload: data?.schedules || data?.schedule
         });
       }
 
@@ -192,16 +192,16 @@ const Schedules = () => {
     setScheduleModalOpen(false);
   };
 
-  const handleSearch = (event) => {
+  const handleSearch = event => {
     setSearchParam(event.target.value.toLowerCase());
   };
 
-  const handleEditSchedule = (schedule) => {
+  const handleEditSchedule = schedule => {
     setSelectedSchedule(schedule);
     setScheduleModalOpen(true);
   };
 
-  const handleDeleteSchedule = async (scheduleId) => {
+  const handleDeleteSchedule = async scheduleId => {
     try {
       await api.delete(`/schedules/${scheduleId}`);
       toast.success(i18n.t("schedules.toasts.deleted"));
@@ -218,10 +218,10 @@ const Schedules = () => {
   };
 
   const loadMore = () => {
-    setPageNumber((prevState) => prevState + 1);
+    setPageNumber(prevState => prevState + 1);
   };
 
-  const handleScroll = (e) => {
+  const handleScroll = e => {
     if (!hasMore || loading) return;
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
     if (scrollHeight - (scrollTop + 100) < clientHeight) {
@@ -271,7 +271,7 @@ const Schedules = () => {
                 <InputAdornment position="start">
                   <SearchIcon style={{ color: "gray" }} />
                 </InputAdornment>
-              ),
+              )
             }}
           />
           <Button
@@ -310,7 +310,7 @@ const Schedules = () => {
           </TableHead>
           <TableBody>
             <>
-              {schedules.map((schedule) => (
+              {schedules.map(schedule => (
                 <TableRow key={schedule.id}>
                   <TableCell align="center">{schedule.contact.name}</TableCell>
                   <TableCell align="center" title={schedule.body}>
@@ -332,7 +332,7 @@ const Schedules = () => {
 
                     <IconButton
                       size="small"
-                      onClick={(e) => {
+                      onClick={e => {
                         setConfirmModalOpen(true);
                         setDeletingSchedule(schedule);
                       }}

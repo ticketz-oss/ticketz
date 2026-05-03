@@ -25,20 +25,20 @@ import moment from "moment";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { isArray, capitalize } from "lodash";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     display: "flex",
-    flexWrap: "wrap",
+    flexWrap: "wrap"
   },
   multFieldLine: {
     display: "flex",
     "& > *:not(:last-child)": {
-      marginRight: theme.spacing(1),
-    },
+      marginRight: theme.spacing(1)
+    }
   },
 
   btnWrapper: {
-    position: "relative",
+    position: "relative"
   },
 
   buttonProgress: {
@@ -47,19 +47,19 @@ const useStyles = makeStyles((theme) => ({
     top: "50%",
     left: "50%",
     marginTop: -12,
-    marginLeft: -12,
+    marginLeft: -12
   },
   formControl: {
     margin: theme.spacing(1),
-    minWidth: 120,
-  },
+    minWidth: 120
+  }
 }));
 
 const ScheduleSchema = Yup.object().shape({
   body: Yup.string().min(5, "Mensagem muito curta").required("Obrigatório"),
   contactId: Yup.number().required("Obrigatório"),
   sendAt: Yup.string().required("Obrigatório"),
-  saveMessage: Yup.bool(),
+  saveMessage: Yup.bool()
 });
 
 const ScheduleModal = ({
@@ -68,7 +68,7 @@ const ScheduleModal = ({
   scheduleId,
   contactId,
   cleanContact,
-  reload,
+  reload
 }) => {
   const classes = useStyles();
   const history = useHistory();
@@ -79,12 +79,12 @@ const ScheduleModal = ({
     contactId: "",
     sendAt: moment().add(1, "hour").format("YYYY-MM-DDTHH:mm"),
     sentAt: "",
-    saveMessage: false,
+    saveMessage: false
   };
 
   const initialContact = {
     id: "",
-    name: "",
+    name: ""
   };
 
   const [schedule, setSchedule] = useState(initialState);
@@ -93,7 +93,7 @@ const ScheduleModal = ({
 
   useEffect(() => {
     if (contactId && contacts.length) {
-      const contact = contacts.find((c) => c.id === contactId);
+      const contact = contacts.find(c => c.id === contactId);
       if (contact) {
         setCurrentContact(contact);
       }
@@ -106,14 +106,14 @@ const ScheduleModal = ({
       try {
         (async () => {
           const { data: contactList } = await api.get("/contacts/list", {
-            params: { companyId: companyId },
+            params: { companyId: companyId }
           });
-          let customList = contactList.map((c) => ({ id: c.id, name: c.name }));
+          let customList = contactList.map(c => ({ id: c.id, name: c.name }));
           if (isArray(customList)) {
             setContacts([{ id: "", name: "" }, ...customList]);
           }
           if (contactId) {
-            setSchedule((prevState) => {
+            setSchedule(prevState => {
               return { ...prevState, contactId };
             });
           }
@@ -121,11 +121,11 @@ const ScheduleModal = ({
           if (!scheduleId) return;
 
           const { data } = await api.get(`/schedules/${scheduleId}`);
-          setSchedule((prevState) => {
+          setSchedule(prevState => {
             return {
               ...prevState,
               ...data,
-              sendAt: moment(data.sendAt).format("YYYY-MM-DDTHH:mm"),
+              sendAt: moment(data.sendAt).format("YYYY-MM-DDTHH:mm")
             };
           });
           setCurrentContact(data.contact);
@@ -141,7 +141,7 @@ const ScheduleModal = ({
     setSchedule(initialState);
   };
 
-  const handleSaveSchedule = async (values) => {
+  const handleSaveSchedule = async values => {
     const scheduleData = { ...values, userId: user.id };
     try {
       if (scheduleId) {
@@ -206,11 +206,11 @@ const ScheduleModal = ({
                         setSchedule({ ...schedule, contactId });
                         setCurrentContact(contact ? contact : initialContact);
                       }}
-                      getOptionLabel={(option) => option.name}
+                      getOptionLabel={option => option.name}
                       getOptionSelected={(option, value) => {
                         return value.id === option.id;
                       }}
-                      renderInput={(params) => (
+                      renderInput={params => (
                         <TextField
                           {...params}
                           variant="outlined"
@@ -243,7 +243,7 @@ const ScheduleModal = ({
                     type="datetime-local"
                     name="sendAt"
                     InputLabelProps={{
-                      shrink: true,
+                      shrink: true
                     }}
                     error={touched.sendAt && Boolean(errors.sendAt)}
                     helperText={touched.sendAt && errors.sendAt}
@@ -262,7 +262,7 @@ const ScheduleModal = ({
                         onChange={() =>
                           setSchedule({
                             ...values,
-                            saveMessage: !values.saveMessage,
+                            saveMessage: !values.saveMessage
                           })
                         }
                         name="saveMessage"

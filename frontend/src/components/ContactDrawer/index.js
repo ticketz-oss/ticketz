@@ -25,7 +25,7 @@ import useSettings from "../../hooks/useSettings";
 
 const drawerWidth = 320;
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   drawer: {
     width: drawerWidth,
     flexShrink: 0,
@@ -33,12 +33,12 @@ const useStyles = makeStyles((theme) => ({
       position: "absolute",
       top: 0,
       right: 0,
-      bottom: 0,
-    },
+      bottom: 0
+    }
   },
 
   drawerHidden: {
-    display: "none",
+    display: "none"
   },
 
   drawerPaper: {
@@ -48,7 +48,7 @@ const useStyles = makeStyles((theme) => ({
     borderRight: "1px solid rgba(0, 0, 0, 0.12)",
     borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
     borderTopRightRadius: 4,
-    borderBottomRightRadius: 4,
+    borderBottomRightRadius: 4
   },
   header: {
     display: "flex",
@@ -56,7 +56,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     padding: theme.spacing(0, 1),
     minHeight: "73px",
-    justifyContent: "flex-start",
+    justifyContent: "flex-start"
   },
   content: {
     display: "flex",
@@ -65,13 +65,13 @@ const useStyles = makeStyles((theme) => ({
     padding: "8px 0px 8px 8px",
     height: "100%",
     overflowY: "scroll",
-    ...theme.scrollbarStyles,
+    ...theme.scrollbarStyles
   },
 
   contactAvatar: {
     margin: 15,
     width: 100,
-    height: 100,
+    height: 100
   },
 
   contactHeader: {
@@ -81,20 +81,20 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     justifyContent: "center",
     "& > *": {
-      margin: 4,
-    },
+      margin: 4
+    }
   },
 
   contactDetails: {
     marginTop: 8,
     padding: 8,
     display: "flex",
-    flexDirection: "column",
+    flexDirection: "column"
   },
   contactExtraInfo: {
     marginTop: 4,
-    padding: 6,
-  },
+    padding: 6
+  }
 }));
 
 const ContactDrawer = ({
@@ -102,7 +102,7 @@ const ContactDrawer = ({
   handleDrawerClose,
   contact,
   ticket,
-  loading,
+  loading
 }) => {
   const classes = useStyles();
   const { getSetting } = useSettings();
@@ -112,7 +112,7 @@ const ContactDrawer = ({
   const [showTags, setShowTags] = useState(false);
 
   useEffect(() => {
-    getSetting("tagsMode").then((res) => {
+    getSetting("tagsMode").then(res => {
       setShowTags(["contact", "both"].includes(res));
     });
 
@@ -130,10 +130,10 @@ const ContactDrawer = ({
         BackdropProps={{ style: { position: "absolute" } }}
         ModalProps={{
           container: document.getElementById("drawer-container"),
-          style: { position: "absolute" },
+          style: { position: "absolute" }
         }}
         classes={{
-          paper: classes.drawerPaper,
+          paper: classes.drawerPaper
         }}
       >
         <div className={classes.header}>
@@ -163,7 +163,7 @@ const ContactDrawer = ({
                       height: 60,
                       backgroundColor: generateColor(contact?.number),
                       color: "white",
-                      fontWeight: "bold",
+                      fontWeight: "bold"
                     }}
                   >
                     {getInitials(contact?.name)}
@@ -196,7 +196,7 @@ const ContactDrawer = ({
                 <Typography variant="subtitle1">
                   {i18n.t("contactModal.form.extraInfo")}
                 </Typography>
-                {contact?.extraInfo?.map((info) => (
+                {contact?.extraInfo?.map(info => (
                   <WhatsMarked>{`*${info?.name}:* ${info?.value}`}</WhatsMarked>
                 ))}
               </div>

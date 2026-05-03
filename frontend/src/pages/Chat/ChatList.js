@@ -6,7 +6,7 @@ import {
   ListItem,
   ListItemSecondaryAction,
   ListItemText,
-  makeStyles,
+  makeStyles
 } from "@material-ui/core";
 
 import { useHistory, useParams } from "react-router-dom";
@@ -19,7 +19,7 @@ import EditIcon from "@material-ui/icons/Edit";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import api from "../../services/api";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   mainContainer: {
     display: "flex",
     flexDirection: "column",
@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
     flex: 1,
     height: "calc(100% - 58px)",
     overflow: "hidden",
-    borderRadius: 0,
+    borderRadius: 0
     //backgroundColor: "inherit",
   },
   chatList: {
@@ -36,11 +36,11 @@ const useStyles = makeStyles((theme) => ({
     position: "relative",
     flex: 1,
     overflowY: "scroll",
-    ...theme.scrollbarStyles,
+    ...theme.scrollbarStyles
   },
   listItem: {
-    cursor: "pointer",
-  },
+    cursor: "pointer"
+  }
 }));
 
 export default function ChatList({
@@ -49,7 +49,7 @@ export default function ChatList({
   handleDeleteChat,
   handleEditChat,
   pageInfo,
-  loading,
+  loading
 }) {
   const classes = useStyles();
   const history = useHistory();
@@ -61,7 +61,7 @@ export default function ChatList({
 
   const { id } = useParams();
 
-  const goToMessages = async (chat) => {
+  const goToMessages = async chat => {
     if (unreadMessages(chat) > 0) {
       try {
         await api.post(`/chats/${chat.id}/read`, { userId: user.id });
@@ -78,12 +78,12 @@ export default function ChatList({
     handleDeleteChat(selectedChat);
   };
 
-  const unreadMessages = (chat) => {
-    const currentUser = chat.users.find((u) => u.userId === user.id);
+  const unreadMessages = chat => {
+    const currentUser = chat.users.find(u => u.userId === user.id);
     return currentUser.unreads;
   };
 
-  const getPrimaryText = (chat) => {
+  const getPrimaryText = chat => {
     const mainText = chat.title;
     const unreads = unreadMessages(chat);
     return (
@@ -101,15 +101,15 @@ export default function ChatList({
     );
   };
 
-  const getSecondaryText = (chat) => {
+  const getSecondaryText = chat => {
     return chat.lastMessage !== ""
       ? `${datetimeToClient(chat.updatedAt)}: ${chat.lastMessage}`
       : "";
   };
 
-  const getItemStyle = (chat) => {
+  const getItemStyle = chat => {
     return {
-      borderLeft: chat.uuid === id ? "6px solid #002d6e" : null,
+      borderLeft: chat.uuid === id ? "6px solid #002d6e" : null
       // backgroundColor: chat.uuid === id ? "#eee" : null,
     };
   };

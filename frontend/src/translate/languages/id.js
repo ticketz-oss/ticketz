@@ -22,34 +22,34 @@ const messages = {
         contact: "Kontak",
         serverTime: "Waktu server:",
         clientTime: "Waktu klien:",
-        differenceMinutes: "Selisih: {{count}} menit",
+        differenceMinutes: "Selisih: {{count}} menit"
       },
       signup: {
         title: "Daftar",
         toasts: {
           success: "Pengguna berhasil dibuat! Masuk sekarang!",
-          fail: "Kesalahan saat membuat pengguna. Periksa data yang diberikan.",
+          fail: "Kesalahan saat membuat pengguna. Periksa data yang diberikan."
         },
         form: {
           name: "Nama",
           email: "Email",
-          password: "Kata Sandi",
+          password: "Kata Sandi"
         },
         buttons: {
           submit: "Daftar",
-          login: "Sudah punya akun? Masuk!",
-        },
+          login: "Sudah punya akun? Masuk!"
+        }
       },
       login: {
         title: "Masuk",
         form: {
           email: "Email",
-          password: "Kata Sandi",
+          password: "Kata Sandi"
         },
         buttons: {
           submit: "Masuk",
-          register: "Belum punya akun? Daftar!",
-        },
+          register: "Belum punya akun? Daftar!"
+        }
       },
       companies: {
         title: "Daftar Perusahaan",
@@ -58,26 +58,26 @@ const messages = {
           plan: "Paket",
           token: "Token",
           submit: "Daftar",
-          success: "Perusahaan berhasil dibuat!",
-        },
+          success: "Perusahaan berhasil dibuat!"
+        }
       },
       auth: {
         toasts: {
-          success: "Login berhasil!",
+          success: "Login berhasil!"
         },
-        token: "Token",
+        token: "Token"
       },
       dashboard: {
         charts: {
           perDay: {
-            title: "Interaksi Hari Ini: ",
-          },
-        },
+            title: "Interaksi Hari Ini: "
+          }
+        }
       },
       connections: {
         title: "Koneksi",
         toasts: {
-          deleted: "Koneksi WhatsApp berhasil dihapus!",
+          deleted: "Koneksi WhatsApp berhasil dihapus!"
         },
         confirmationModal: {
           deleteTitle: "Hapus",
@@ -85,7 +85,7 @@ const messages = {
             "Apakah Anda yakin? Tindakan ini tidak bisa dibatalkan.",
           disconnectTitle: "Putuskan Koneksi",
           disconnectMessage:
-            "Apakah Anda yakin? Anda perlu memindai Kode QR lagi.",
+            "Apakah Anda yakin? Anda perlu memindai Kode QR lagi."
         },
         buttons: {
           add: "Tambah WhatsApp",
@@ -93,32 +93,32 @@ const messages = {
           tryAgain: "Coba Lagi",
           qrcode: "KODE QR",
           newQr: "Kode QR Baru",
-          connecting: "Menghubungkan",
+          connecting: "Menghubungkan"
         },
         toolTips: {
           disconnected: {
             title: "Gagal memulai sesi WhatsApp",
             content:
-              "Pastikan ponsel Anda terhubung ke internet dan coba lagi, atau minta Kode QR baru.",
+              "Pastikan ponsel Anda terhubung ke internet dan coba lagi, atau minta Kode QR baru."
           },
           qrcode: {
             title: "Menunggu pemindaian Kode QR",
             content:
-              "Klik tombol 'KODE QR' dan pindai Kode QR dengan ponsel Anda untuk memulai sesi.",
+              "Klik tombol 'KODE QR' dan pindai Kode QR dengan ponsel Anda untuk memulai sesi."
           },
           connected: {
-            title: "Koneksi berhasil!",
+            title: "Koneksi berhasil!"
           },
           timeout: {
             title: "Koneksi ke ponsel telah terputus",
             content:
-              "Pastikan ponsel Anda terhubung ke internet dan WhatsApp terbuka, atau klik 'Putuskan' untuk mendapatkan Kode QR baru.",
+              "Pastikan ponsel Anda terhubung ke internet dan WhatsApp terbuka, atau klik 'Putuskan' untuk mendapatkan Kode QR baru."
           },
           refresh: "Muat ulang",
           disconnect: "Putuskan",
           scan: "Pindai",
           newQr: "Kode QR Baru",
-          retry: "Coba Lagi",
+          retry: "Coba Lagi"
         },
         table: {
           name: "Nama",
@@ -126,35 +126,35 @@ const messages = {
           lastUpdate: "Pembaruan Terakhir",
           default: "Default",
           actions: "Aksi",
-          session: "Sesi",
-        },
+          session: "Sesi"
+        }
       },
       internalChat: {
-        title: "Obrolan Internal",
+        title: "Obrolan Internal"
       },
       whatsappModal: {
         title: {
           add: "Tambah WhatsApp",
-          edit: "Edit WhatsApp",
+          edit: "Edit WhatsApp"
         },
         form: {
           name: "Nama",
-          default: "Default",
+          default: "Default"
         },
         buttons: {
           okAdd: "Tambah",
           okEdit: "Simpan",
-          cancel: "Batal",
+          cancel: "Batal"
         },
-        success: "WhatsApp berhasil disimpan.",
+        success: "WhatsApp berhasil disimpan."
       },
       qrCode: {
-        message: "Pindai Kode QR untuk memulai sesi",
+        message: "Pindai Kode QR untuk memulai sesi"
       },
       contacts: {
         title: "Kontak",
         toasts: {
-          deleted: "Kontak berhasil dihapus!",
+          deleted: "Kontak berhasil dihapus!"
         },
         searchPlaceholder: "Cari...",
         confirmationModal: {
@@ -162,24 +162,23 @@ const messages = {
           importTitlte: "Impor Kontak",
           deleteMessage:
             "Apakah Anda yakin ingin menghapus kontak ini? Semua interaksi terkait akan hilang.",
-          importMessage:
-            "Apakah Anda ingin mengimpor semua kontak dari ponsel?",
+          importMessage: "Apakah Anda ingin mengimpor semua kontak dari ponsel?"
         },
         buttons: {
           import: "Impor Kontak",
-          add: "Tambah Kontak",
+          add: "Tambah Kontak"
         },
         table: {
           name: "Nama",
           whatsapp: "WhatsApp",
           email: "Email",
-          actions: "Aksi",
-        },
+          actions: "Aksi"
+        }
       },
       contactModal: {
         title: {
           add: "Tambah Kontak",
-          edit: "Edit Kontak",
+          edit: "Edit Kontak"
         },
         form: {
           mainInfo: "Informasi Kontak",
@@ -189,20 +188,20 @@ const messages = {
           email: "Email",
           extraName: "Nama Bidang",
           extraValue: "Nilai",
-          disableBot: "Nonaktifkan chatbot",
+          disableBot: "Nonaktifkan chatbot"
         },
         buttons: {
           addExtraInfo: "Tambah Informasi",
           okAdd: "Tambah",
           okEdit: "Simpan",
-          cancel: "Batal",
+          cancel: "Batal"
         },
-        success: "Kontak berhasil disimpan.",
+        success: "Kontak berhasil disimpan."
       },
       queueModal: {
         title: {
           add: "Tambah Antrian",
-          edit: "Edit Antrian",
+          edit: "Edit Antrian"
         },
         form: {
           name: "Nama",
@@ -212,23 +211,23 @@ const messages = {
           outOfHoursMessage: "Pesan Di Luar Jam Kerja",
           ratingMessage: "Pesan Penilaian",
           transferMessage: "Pesan Transfer",
-          token: "Token",
+          token: "Token"
         },
         outOfHoursAction: {
           title: "Tindakan Di Luar Jam Kerja",
           options: {
             pending: "Biarkan tertunda",
-            closed: "Tutup tiket",
-          },
+            closed: "Tutup tiket"
+          }
         },
         toasts: {
-          deleted: "Antrean berhasil disimpan",
+          deleted: "Antrean berhasil disimpan"
         },
         buttons: {
           okAdd: "Tambah",
           okEdit: "Simpan",
           cancel: "Batal",
-          attach: "Lampirkan File",
+          attach: "Lampirkan File"
         },
         serviceHours: {
           dayWeek: "Hari dalam Minggu",
@@ -242,121 +241,121 @@ const messages = {
           thursday: "Kamis",
           friday: "Jumat",
           saturday: "Sabtu",
-          sunday: "Minggu",
-        },
+          sunday: "Minggu"
+        }
       },
       userModal: {
         title: {
           add: "Tambah Pengguna",
-          edit: "Edit Pengguna",
+          edit: "Edit Pengguna"
         },
         form: {
           name: "Nama",
           email: "Email",
           password: "Kata Sandi",
-          profile: "Profil",
+          profile: "Profil"
         },
         buttons: {
           okAdd: "Tambah",
           okEdit: "Simpan",
-          cancel: "Batal",
+          cancel: "Batal"
         },
-        success: "Pengguna berhasil disimpan.",
+        success: "Pengguna berhasil disimpan."
       },
       scheduleModal: {
         title: {
           add: "Jadwal Baru",
-          edit: "Edit Jadwal",
+          edit: "Edit Jadwal"
         },
         form: {
           body: "Pesan",
           contact: "Kontak",
           sendAt: "Tanggal Dijadwalkan",
           sentAt: "Tanggal Terkirim",
-          saveMessage: "Simpan Pesan di Tiket",
+          saveMessage: "Simpan Pesan di Tiket"
         },
         buttons: {
           okAdd: "Tambah",
           okEdit: "Simpan",
-          cancel: "Batal",
+          cancel: "Batal"
         },
-        success: "Jadwal berhasil disimpan.",
+        success: "Jadwal berhasil disimpan."
       },
       tagModal: {
         title: {
           add: "Tag Baru",
           edit: "Edit Tag",
           addKanban: "Lorong Baru",
-          editKanban: "Edit Lorong",
+          editKanban: "Edit Lorong"
         },
         form: {
           name: "Nama",
           color: "Warna",
-          kanban: "Kanban",
+          kanban: "Kanban"
         },
         buttons: {
           okAdd: "Tambah",
           okEdit: "Simpan",
-          cancel: "Batal",
+          cancel: "Batal"
         },
         success: "Tag berhasil disimpan.",
-        successKanban: "Lorong berhasil disimpan.",
+        successKanban: "Lorong berhasil disimpan."
       },
       chat: {
-        noTicketMessage: "Pilih tiket untuk memulai percakapan.",
+        noTicketMessage: "Pilih tiket untuk memulai percakapan."
       },
       uploads: {
         titles: {
           titleUploadMsgDragDrop: "SERET DAN LETAKKAN FILE DI KOLOM DI BAWAH",
-          titleFileList: "Daftar file(s)",
-        },
+          titleFileList: "Daftar file(s)"
+        }
       },
       todolist: {
         title: "Daftar tugas",
         form: {
-          name: "Nama tugas",
+          name: "Nama tugas"
         },
         buttons: {
           add: "Tambah",
-          save: "GuaSimpanrdar",
-        },
+          save: "GuaSimpanrdar"
+        }
       },
       ticketsManager: {
         buttons: {
-          newTicket: "Baru",
-        },
+          newTicket: "Baru"
+        }
       },
       ticketsQueueSelect: {
-        placeholder: "Antrian",
+        placeholder: "Antrian"
       },
       tickets: {
         toasts: {
-          deleted: "Tiket yang Anda kerjakan telah dihapus.",
+          deleted: "Tiket yang Anda kerjakan telah dihapus."
         },
         notification: {
           message: "Pesan dari",
-          nomessages: "Tidak ada pesan",
+          nomessages: "Tidak ada pesan"
         },
         tabs: {
           open: {
-            title: "Buka",
+            title: "Buka"
           },
           closed: {
-            title: "Tutup",
+            title: "Tutup"
           },
           groups: {
-            title: "Grup",
+            title: "Grup"
           },
           search: {
-            title: "Cari",
-          },
+            title: "Cari"
+          }
         },
         search: {
-          placeholder: "Cari tiket dan pesan",
+          placeholder: "Cari tiket dan pesan"
         },
         buttons: {
-          showAll: "Semua",
-        },
+          showAll: "Semua"
+        }
       },
       transferTicketModal: {
         title: "Transfer Tiket",
@@ -366,8 +365,8 @@ const messages = {
         noOptions: "Tidak ada pengguna yang ditemukan dengan nama itu",
         buttons: {
           ok: "Transfer",
-          cancel: "Batal",
-        },
+          cancel: "Batal"
+        }
       },
       ticketsList: {
         pendingHeader: "Tertunda",
@@ -376,8 +375,8 @@ const messages = {
         noTicketsMessage:
           "Tidak ada tiket yang ditemukan dengan status ini atau istilah pencarian",
         buttons: {
-          accept: "Terima",
-        },
+          accept: "Terima"
+        }
       },
       newTicketModal: {
         title: "Buat Tiket",
@@ -385,8 +384,8 @@ const messages = {
         add: "Tambah",
         buttons: {
           ok: "Simpan",
-          cancel: "Batal",
-        },
+          cancel: "Batal"
+        }
       },
       mainDrawer: {
         listItems: {
@@ -411,12 +410,12 @@ const messages = {
           logout: "Logout",
           management: "Management",
           kanban: "Kanban",
-          tasks: "Tugas",
+          tasks: "Tugas"
         },
         appBar: {
           i18n: {
             language: "Indonesian",
-            language_short: "ID",
+            language_short: "ID"
           },
           user: {
             profile: "Profile",
@@ -425,104 +424,74 @@ const messages = {
             lightmode: "Light mode",
             language: "Select language",
             about: "About",
-            logout: "Keluar",
-          },
-        },
+            logout: "Keluar"
+          }
+        }
       },
       messagesAPI: {
         title: "API",
         textMessage: {
           number: "Nomor",
           body: "Pesan",
-          token: "Token Terdaftar",
+          token: "Token Terdaftar"
         },
         mediaMessage: {
           number: "Nomor",
           body: "Nama File",
           media: "File",
-          token: "Token Terdaftar",
-        },
+          token: "Token Terdaftar"
+        }
       },
       notifications: {
-        noTickets: "Tidak ada notifikasi.",
+        noTickets: "Tidak ada notifikasi."
       },
       quickMessages: {
         title: "Respon Cepat",
         buttons: {
-          add: "Respon Baru",
+          add: "Respon Baru"
         },
         dialog: {
           shortcode: "Pintasan",
-          message: "Respon",
-        },
+          message: "Respon"
+        }
       },
       kanban: {
         title: "Kanban",
         searchPlaceholder: "Cari",
         subMenus: {
           list: "Panel",
-          tags: "Jalur",
-        },
+          tags: "Jalur"
+        }
       },
       tagsKanban: {
         title: "Jalur",
         laneDefault: "Buka",
         confirmationModal: {
           deleteTitle: "Apakah Anda yakin ingin menghapus Jalur ini?",
-          deleteMessage: "Tindakan ini tidak dapat dibatalkan.",
+          deleteMessage: "Tindakan ini tidak dapat dibatalkan."
         },
         table: {
           name: "Nama",
           color: "Warna",
           tickets: "Tiket",
-          actions: "Aksi",
+          actions: "Aksi"
         },
         buttons: {
-          add: "Jalur Baru",
+          add: "Jalur Baru"
         },
         toasts: {
-          deleted: "Jalur berhasil dihapus.",
-        },
-      },
-      queues: {
-        title: "Antrian",
-        table: {
-          name: "Nama",
-          color: "Warna",
-          actions: "Aksi",
-        },
-        toasts: {
-          deleted: "Antrian berhasil dihapus",
-        },
-        buttons: {
-          add: "Daftar Baru",
-        },
-        dialog: {
-          name: "Nama",
-          company: "Perusahaan",
-          okEdit: "Edit",
-          okAdd: "Tambah",
-          add: "Tambah",
-          edit: "Edit",
-          cancel: "Batal",
-        },
-        confirmationModal: {
-          deleteTitle: "Hapus",
-          deleteMessage: "Tindakan ini tidak dapat dibatalkan.",
-        },
-        toasts: {
-          deleted: "Data berhasil dihapus",
-        },
+          deleted: "Jalur berhasil dihapus."
+        }
       },
       contactLists: {
         title: "Daftar Kontak",
         table: {
           name: "Nama",
           contacts: "Kontak",
-          actions: "Tindakan",
+          actions: "Tindakan"
         },
         buttons: {
-          add: "Daftar Baru",
+          add: "Daftar Baru"
         },
         dialog: {
           name: "Nama",
@@ -531,16 +500,16 @@ const messages = {
           okAdd: "Tambah",
           add: "Tambah",
           edit: "Edit",
-          cancel: "Batal",
+          cancel: "Batal"
         },
         confirmationModal: {
           deleteTitle: "Hapus",
-          deleteMessage: "Tindakan ini tidak dapat dibatalkan.",
+          deleteMessage: "Tindakan ini tidak dapat dibatalkan."
         },
         toasts: {
           deleted: "Rekam dihapus",
-          created: "Rekam dibuat",
-        },
+          created: "Rekam dibuat"
+        }
       },
       contactListItems: {
         title: "Kontak",
@@ -548,7 +517,7 @@ const messages = {
         buttons: {
           add: "Baru",
           lists: "Daftar",
-          import: "Impor",
+          import: "Impor"
         },
         dialog: {
           name: "Nama",
@@ -559,32 +528,32 @@ const messages = {
           okAdd: "Tambah",
           add: "Tambah",
           edit: "Edit",
-          cancel: "Batal",
+          cancel: "Batal"
         },
         table: {
           name: "Nama",
           number: "Nomor",
           whatsapp: "WhatsApp",
           email: "Email",
-          actions: "Aksi",
+          actions: "Aksi"
         },
         confirmationModal: {
           deleteTitle: "Hapus",
           deleteMessage: "Tindakan ini tidak dapat dibatalkan.",
           importMessage:
             "Apakah Anda ingin mengimpor kontak dari spreadsheet ini?",
-          importTitlte: "Impor",
+          importTitlte: "Impor"
         },
         toasts: {
-          deleted: "Data berhasil dihapus",
-        },
+          deleted: "Data berhasil dihapus"
+        }
       },
       campaigns: {
         title: "Kampanye",
         searchPlaceholder: "Cari",
         buttons: {
           add: "Kampanye Baru",
-          contactLists: "Daftar Kontak",
+          contactLists: "Daftar Kontak"
         },
         table: {
           name: "Nama",
@@ -594,7 +563,7 @@ const messages = {
           scheduledAt: "Dijadwalkan",
           completedAt: "Selesai",
           confirmation: "Konfirmasi",
-          actions: "Aksi",
+          actions: "Aksi"
         },
         dialog: {
           new: "Kampanye Baru",
@@ -617,7 +586,7 @@ const messages = {
             status: "Status",
             scheduledAt: "Dijadwalkan",
             confirmation: "Konfirmasi",
-            contactList: "Daftar Kontak",
+            contactList: "Daftar Kontak"
           },
           buttons: {
             add: "Tambah",
@@ -626,26 +595,26 @@ const messages = {
             cancel: "Batalkan Pengiriman",
             restart: "Mulai Ulang Pengiriman",
             close: "Tutup",
-            attach: "Lampirkan File",
-          },
+            attach: "Lampirkan File"
+          }
         },
         confirmationModal: {
           deleteTitle: "Hapus",
-          deleteMessage: "Tindakan ini tidak dapat dibatalkan.",
+          deleteMessage: "Tindakan ini tidak dapat dibatalkan."
         },
         toasts: {
           success: "Operasi berhasil diselesaikan",
           cancel: "Kampanye dibatalkan",
           restart: "Kampanye dimulai ulang",
-          deleted: "Data berhasil dihapus",
-        },
+          deleted: "Data berhasil dihapus"
+        }
       },
       announcements: {
         title: "Pengumuman",
         searchPlaceholder: "Cari",
         buttons: {
           add: "Pengumuman Baru",
-          contactLists: "Daftar Pengumuman",
+          contactLists: "Daftar Pengumuman"
         },
         table: {
           priority: "Prioritas",
@@ -653,7 +622,7 @@ const messages = {
           text: "Teks",
           mediaName: "File",
           status: "Status",
-          actions: "Aksi",
+          actions: "Aksi"
         },
         dialog: {
           edit: "Edit Pengumuman",
@@ -665,7 +634,7 @@ const messages = {
             title: "Judul",
             text: "Teks",
             mediaPath: "File",
-            status: "Status",
+            status: "Status"
           },
           buttons: {
             add: "Tambah",
@@ -673,20 +642,20 @@ const messages = {
             okadd: "Oke",
             cancel: "Batal",
             close: "Tutup",
-            attach: "Lampirkan File",
-          },
+            attach: "Lampirkan File"
+          }
         },
         confirmationModal: {
           deleteTitle: "Hapus",
-          deleteMessage: "Tindakan ini tidak dapat dibatalkan.",
+          deleteMessage: "Tindakan ini tidak dapat dibatalkan."
         },
         toasts: {
           success: "Operasi berhasil diselesaikan",
-          deleted: "Data berhasil dihapus",
-        },
+          deleted: "Data berhasil dihapus"
+        }
       },
       campaignsConfig: {
-        title: "Konfigurasi Kampanye",
+        title: "Konfigurasi Kampanye"
       },
       queues: {
         title: "Antrian & Chatbot",
@@ -694,19 +663,19 @@ const messages = {
           name: "Nama",
           color: "Warna",
           greeting: "Pesan Sambutan",
-          actions: "Aksi",
+          actions: "Aksi"
         },
         buttons: {
-          add: "Tambah Antrian",
+          add: "Tambah Antrian"
         },
         confirmationModal: {
           deleteTitle: "Hapus",
           deleteMessage:
-            "Apakah Anda yakin? Tindakan ini tidak dapat dibatalkan! Tiket dari antrian ini akan tetap ada tetapi tidak akan lagi ditugaskan ke antrian mana pun.",
-        },
+            "Apakah Anda yakin? Tindakan ini tidak dapat dibatalkan! Tiket dari antrian ini akan tetap ada tetapi tidak akan lagi ditugaskan ke antrian mana pun."
+        }
       },
       queueSelect: {
-        inputLabel: "Antrian",
+        inputLabel: "Antrian"
       },
       users: {
         title: "Pengguna",
@@ -714,22 +683,22 @@ const messages = {
           name: "Nama",
           email: "Email",
           profile: "Profil",
-          actions: "Aksi",
+          actions: "Aksi"
         },
         buttons: {
-          add: "Tambah Pengguna",
+          add: "Tambah Pengguna"
         },
         toasts: {
-          deleted: "Pengguna berhasil dihapus.",
+          deleted: "Pengguna berhasil dihapus."
         },
         confirmationModal: {
           deleteTitle: "Hapus",
           deleteMessage:
-            "Semua data pengguna akan hilang. Tiket terbuka dari pengguna ini akan dipindahkan ke antrian.",
-        },
+            "Semua data pengguna akan hilang. Tiket terbuka dari pengguna ini akan dipindahkan ke antrian."
+        }
       },
       helps: {
-        title: "Pusat Bantuan",
+        title: "Pusat Bantuan"
       },
       about: {
         aboutthe: "Tentang",
@@ -746,14 +715,14 @@ const messages = {
         licensedetail:
           "ticketz dilisensikan di bawah GNU Affero General Public License versi 3, yang berarti bahwa setiap pengguna yang memiliki akses ke aplikasi ini berhak untuk mendapatkan akses ke kode sumbernya. Informasi lebih lanjut di tautan berikut:",
         licensefulltext: "Teks lengkap lisensi",
-        licensesourcecode: "Kode sumber Ticketz",
+        licensesourcecode: "Kode sumber Ticketz"
       },
       schedules: {
         title: "Jadwal",
         confirmationModal: {
           deleteTitle: "Hapus",
           deleteMessage:
-            "Apakah Anda yakin ingin menghapus kampanye ini? Tindakan ini tidak dapat dibatalkan.",
+            "Apakah Anda yakin ingin menghapus kampanye ini? Tindakan ini tidak dapat dibatalkan."
         },
         table: {
           contact: "Kontak",
@@ -761,20 +730,20 @@ const messages = {
           sendAt: "Tanggal Penjadwalan",
           sentAt: "Tanggal Pengiriman",
           status: "Status",
-          actions: "Aksi",
+          actions: "Aksi"
         },
         buttons: {
-          add: "Jadwal Baru",
+          add: "Jadwal Baru"
         },
         toasts: {
-          deleted: "Jadwal berhasil dihapus.",
-        },
+          deleted: "Jadwal berhasil dihapus."
+        }
       },
       tags: {
         title: "Tag",
         confirmationModal: {
           deleteTitle: "Apakah Anda yakin ingin menghapus Tag ini?",
-          deleteMessage: "Tindakan ini tidak dapat dibatalkan.",
+          deleteMessage: "Tindakan ini tidak dapat dibatalkan."
         },
         table: {
           name: "Nama",
@@ -782,14 +751,14 @@ const messages = {
           tickets: "Catatan",
           actions: "Aksi",
           id: "Id",
-          kanban: "Kanban",
+          kanban: "Kanban"
         },
         buttons: {
-          add: "Tag Baru",
+          add: "Tag Baru"
         },
         toasts: {
-          deleted: "Tag berhasil dihapus.",
-        },
+          deleted: "Tag berhasil dihapus."
+        }
       },
       whitelabel: {
         primaryColorLight: "Warna Utama Terang",
@@ -812,7 +781,7 @@ const messages = {
         backgroundContent: "Konten latar login",
         backgroundContentHint:
           "Mendukung gambar, file SVG, dan video MP4 untuk latar layar login.",
-        noFileSelected: "Belum ada file yang dipilih.",
+        noFileSelected: "Belum ada file yang dipilih."
       },
       settings: {
         group: {
@@ -822,7 +791,7 @@ const messages = {
           groups: "Grup",
           confidenciality: "Kerahasiaan",
           api: "API",
-          serveradmin: "Administrasi Server",
+          serveradmin: "Administrasi Server"
         },
         success: "Pengaturan berhasil disimpan.",
         copiedToClipboard: "Disalin ke clipboard",
@@ -832,141 +801,141 @@ const messages = {
             name: "Pembuatan pengguna",
             options: {
               enabled: "Diaktifkan",
-              disabled: "Dinonaktifkan",
-            },
-          },
+              disabled: "Dinonaktifkan"
+            }
+          }
         },
         validations: {
           title: "validasi",
           options: {
             enabled: "Diaktifkan",
-            disabled: "Dinonaktifkan",
-          },
+            disabled: "Dinonaktifkan"
+          }
         },
         OfficeManagement: {
           title: "Manajemen kantor",
           options: {
             disabled: "Dinonaktifkan",
             ManagementByDepartment: "Manajemen berdasarkan departemen",
-            ManagementByCompany: "Manajemen oleh perusahaan",
-          },
+            ManagementByCompany: "Manajemen oleh perusahaan"
+          }
         },
         IgnoreGroupMessages: {
           title: "Abaikan pesan grup",
           options: {
             enabled: "Diaktifkan",
-            disabled: "Dinonaktifkan",
-          },
+            disabled: "Dinonaktifkan"
+          }
         },
         soundGroupNotifications: {
           title: "Notifikasi grup suara",
           options: {
             enabled: "Diaktifkan",
-            disabled: "Dinonaktifkan",
-          },
+            disabled: "Dinonaktifkan"
+          }
         },
         groupsTab: {
           title: "Tab grup",
           options: {
             enabled: "Diaktifkan",
-            disabled: "Dinonaktifkan",
-          },
+            disabled: "Dinonaktifkan"
+          }
         },
         VoiceAndVideoCalls: {
           title: "Panggilan suara dan video",
           options: {
             enabled: "Abaikan.",
-            disabled: "laporan ketidaktersediaan",
-          },
+            disabled: "laporan ketidaktersediaan"
+          }
         },
         AutomaticChatbotOutput: {
           title: "Output chatbot otomatis",
           options: {
             enabled: "Diaktifkan",
-            disabled: "Dinonaktifkan",
-          },
+            disabled: "Dinonaktifkan"
+          }
         },
         ShowNumericEmoticons: {
           title: "Menampilkan emoji numerik dalam antrean",
           options: {
             enabled: "Diaktifkan",
-            disabled: "Dinonaktifkan",
-          },
+            disabled: "Dinonaktifkan"
+          }
         },
         QuickMessages: {
           title: "Pesan cepat",
           options: {
             enabled: "Berdasarkan perusahaan",
-            disabled: "Oleh Pengguna",
-          },
+            disabled: "Oleh Pengguna"
+          }
         },
         AllowRegistration: {
           title: "Izinkan pendaftaran",
           options: {
             enabled: "Diaktifkan",
-            disabled: "Dinonaktifkan",
-          },
+            disabled: "Dinonaktifkan"
+          }
         },
         FileDownloadLimit: {
-          title: "Batas unduhan file (MB)",
+          title: "Batas unduhan file (MB)"
         },
         messageVisibility: {
           title: "Visibilitas Pesan",
           options: {
             respectMessageQueue: "Hormati Antrian Pesan",
-            respectTicketQueue: "Hormati Antrian Tiket",
-          },
+            respectTicketQueue: "Hormati Antrian Tiket"
+          }
         },
         keepQueueAndUser: {
           title_id: "Simpan antrian dan pengguna pada tiket tertutup",
           options: {
             enabled: "Diaktifkan",
-            disabled: "Dinonaktifkan",
-          },
+            disabled: "Dinonaktifkan"
+          }
         },
         GracePeriod: {
-          title: "Periode penundaan langganan berakhir (hari)",
+          title: "Periode penundaan langganan berakhir (hari)"
         },
         ticketAcceptedMessage: {
           title: "Pesan Tiket Diterima",
-          placeholder: "Masukkan pesan tiket diterima di sini",
+          placeholder: "Masukkan pesan tiket diterima di sini"
         },
         transferMessage: {
           title: "Pesan Transfer",
-          placeholder: "Masukkan pesan transfer di sini",
+          placeholder: "Masukkan pesan transfer di sini"
         },
         mustacheVariables: {
-          title: "Variabel yang tersedia:",
+          title: "Variabel yang tersedia:"
         },
         WelcomeGreeting: {
           greetings: "halo",
           welcome: "selamat datang di",
-          expirationTime: "Aktif sampai",
+          expirationTime: "Aktif sampai"
         },
         Options: {
-          title: "Pilihan",
+          title: "Pilihan"
         },
         Companies: {
-          title: "Perusahaan",
+          title: "Perusahaan"
         },
         schedules: {
-          title: "Jadwal",
+          title: "Jadwal"
         },
         Plans: {
-          title: "Rencana",
+          title: "Rencana"
         },
         Help: {
-          title: "Bantuan",
+          title: "Bantuan"
         },
         Whitelabel: {
-          title: "Whitelabel",
+          title: "Whitelabel"
         },
         PaymentGateways: {
-          title: "Payment Gateways",
+          title: "Payment Gateways"
         },
         i18nSettings: {
-          title: "Terjemahan",
-        },
+          title: "Terjemahan"
+        }
       },
       messagesList: {
         header: {
@@ -975,9 +944,9 @@ const messages = {
             return: "Kembali",
             resolve: "Selesaikan",
             reopen: "Buka Kembali",
-            accept: "Terima",
-          },
-        },
+            accept: "Terima"
+          }
+        }
       },
       messagesInput: {
         placeholderOpen: "Ketik pesan",
@@ -985,19 +954,19 @@ const messages = {
           "Buka kembali atau terima tiket ini untuk mengirim pesan.",
         signMessage: "Tandatangani",
         replying: "Membalas",
-        editing: "Mengedit",
+        editing: "Mengedit"
       },
       message: {
         edited: "Diedit",
-        forwarded: "Diteruskan",
+        forwarded: "Diteruskan"
       },
 
       contactDrawer: {
         header: "Informasi Kontak",
         buttons: {
-          edit: "Edit Kontak",
+          edit: "Edit Kontak"
         },
-        extraInfo: "Informasi lainnya",
+        extraInfo: "Informasi lainnya"
       },
       ticketOptionsMenu: {
         schedule: "Jadwal",
@@ -1006,23 +975,23 @@ const messages = {
         appointmentsModal: {
           title_id: "Catatan Tiket",
           textarea: "Catatan",
-          placeholder: "Masukkan informasi yang ingin Anda catat di sini",
+          placeholder: "Masukkan informasi yang ingin Anda catat di sini"
         },
         confirmationModal: {
           title: "Hapus tiket kontak",
           message:
-            "Perhatian! Semua pesan yang terkait dengan tiket akan hilang.",
+            "Perhatian! Semua pesan yang terkait dengan tiket akan hilang."
         },
         buttons: {
           delete: "Hapus",
-          cancel: "Batal",
-        },
+          cancel: "Batal"
+        }
       },
       confirmationModal: {
         buttons: {
           confirm: "Oke",
-          cancel: "Batal",
-        },
+          cancel: "Batal"
+        }
       },
       messageOptionsMenu: {
         delete: "Hapus",
@@ -1032,25 +1001,25 @@ const messages = {
         reply: "Balas",
         confirmationModal: {
           title: "Hapus pesan?",
-          message: "Tindakan ini tidak dapat dibatalkan.",
-        },
+          message: "Tindakan ini tidak dapat dibatalkan."
+        }
       },
       messageHistoryModal: {
         close: "Tutup",
-        title: "Riwayat edit pesan",
+        title: "Riwayat edit pesan"
       },
       presence: {
         unavailable: "Tidak tersedia",
         available: "Tersedia",
         composing: "Menulis...",
         recording: "Merekam...",
-        paused: "Jeda",
+        paused: "Jeda"
       },
       privacyModal: {
         title: "Edit Privasi Whatsapp",
         buttons: {
           cancel: "Membatalkan",
-          okEdit: "Menyimpan",
+          okEdit: "Menyimpan"
         },
         form: {
           menu: {
@@ -1063,7 +1032,7 @@ const messages = {
             disable: "Dengan disabilitas",
             hrs24: "24 Jam",
             dias7: "7 Hari",
-            dias90: "90 Hari",
+            dias90: "90 Hari"
           },
           readreceipts: "Untuk memperbarui privasi Tanda Terima Baca",
           profile: "Untuk memperbarui privasi Gambar Profil",
@@ -1072,8 +1041,8 @@ const messages = {
           last: "Untuk memperbarui privasi Terakhir terlihat",
           groupadd: "Untuk memperbarui Grup Tambahkan privasi",
           calladd: "Untuk memperbarui Panggilan Tambahkan privasi",
-          disappearing: "Untuk memperbarui Mode Hilang Default",
-        },
+          disappearing: "Untuk memperbarui Mode Hilang Default"
+        }
       },
       frontendErrors: {
         ERR_CONFIG_ERROR: "Kesalahan konfigurasi. Silakan hubungi dukungan.",
@@ -1082,7 +1051,7 @@ const messages = {
         ERR_BACKEND_UNREACHABLE:
           "Backend tidak dapat dijangkau. Silakan coba lagi nanti.",
         ERR_BACKEND_NOT_READY:
-          "Backend sedang memulai dan belum siap. Mencoba lagi secara otomatis.",
+          "Backend sedang memulai dan belum siap. Mencoba lagi secara otomatis."
       },
       backendErrors: {
         ERR_FORBIDDEN: "Akses ditolak. Periksa izin Anda.",
@@ -1121,7 +1090,7 @@ const messages = {
         ERR_QUEUE_COLOR_ALREADY_EXISTS:
           "Warna ini sudah digunakan, pilih yang lain.",
         ERR_WAPP_GREETING_REQUIRED:
-          "Pesan sambutan wajib jika ada lebih dari satu antrian.",
+          "Pesan sambutan wajib jika ada lebih dari satu antrian."
       },
       ticketz: {
         registration: {
@@ -1131,18 +1100,18 @@ const messages = {
           name: "Nama",
           country: "Negara",
           phoneNumber: "Nomor Telepon",
-          submit: "Daftar",
+          submit: "Daftar"
         },
         support: {
           title: "Dukung proyek Ticketz",
           mercadopagotitle: "Kartu Kredit",
           recurringbrl: "Donasi berulang dalam BRL",
           paypaltitle: "Kartu Kredit",
-          international: "Donasi dalam USD",
-        },
-      },
-    },
-  },
+          international: "Donasi dalam USD"
+        }
+      }
+    }
+  }
 };
 
 export { messages };

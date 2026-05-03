@@ -23,72 +23,72 @@ import useQueues from "../../hooks/useQueues";
 import { i18n } from "../../translate/i18n.js";
 import { SelectLanguage } from "../SelectLanguage";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   container: {
     paddingTop: theme.spacing(4),
-    paddingBottom: theme.spacing(4),
+    paddingBottom: theme.spacing(4)
   },
   fixedHeightPaper: {
     padding: theme.spacing(2),
     display: "flex",
     overflow: "auto",
     flexDirection: "column",
-    height: 240,
+    height: 240
   },
   tab: {
     borderRadius: 4,
     width: "100%",
     "& .MuiTab-wrapper": {
-      color: "#128c7e",
+      color: "#128c7e"
     },
     "& .MuiTabs-flexContainer": {
-      justifyContent: "center",
-    },
+      justifyContent: "center"
+    }
   },
   paper: {
     padding: theme.spacing(2),
     display: "flex",
     alignItems: "center",
     marginBottom: 12,
-    width: "100%",
+    width: "100%"
   },
   cardAvatar: {
     fontSize: "55px",
     color: grey[500],
     backgroundColor: "#ffffff",
     width: theme.spacing(7),
-    height: theme.spacing(7),
+    height: theme.spacing(7)
   },
   cardTitle: {
     fontSize: "18px",
-    color: blue[700],
+    color: blue[700]
   },
   cardSubtitle: {
     color: grey[600],
-    fontSize: "14px",
+    fontSize: "14px"
   },
   alignRight: {
-    textAlign: "right",
+    textAlign: "right"
   },
   fullWidth: {
-    width: "100%",
+    width: "100%"
   },
   selectContainer: {
     width: "100%",
-    textAlign: "left",
+    textAlign: "left"
   },
   colorAdorment: {
     width: 20,
-    height: 20,
+    height: 20
   },
 
   groupTitle: {
-    marginBottom: 0,
+    marginBottom: 0
   },
 
   uploadInput: {
-    display: "none",
-  },
+    display: "none"
+  }
 }));
 
 export default function Options(props) {
@@ -152,140 +152,134 @@ export default function Options(props) {
   }, []);
 
   useEffect(() => {
-    getCurrentUserInfo().then((u) => {
+    getCurrentUserInfo().then(u => {
       setCurrentUser(u);
     });
 
     if (Array.isArray(settings) && settings.length) {
-      const userRating = settings.find((s) => s.key === "userRating");
+      const userRating = settings.find(s => s.key === "userRating");
       if (userRating) {
         setUserRating(userRating.value);
       }
-      const scheduleType = settings.find((s) => s.key === "scheduleType");
+      const scheduleType = settings.find(s => s.key === "scheduleType");
       if (scheduleType) {
         setScheduleType(scheduleType.value);
       }
 
-      const outOfHoursAction = settings.find(
-        (s) => s.key === "outOfHoursAction",
-      );
+      const outOfHoursAction = settings.find(s => s.key === "outOfHoursAction");
       setOutOfHoursAction(outOfHoursAction?.value || "pending");
 
-      const callType = settings.find((s) => s.key === "call");
+      const callType = settings.find(s => s.key === "call");
       if (callType) {
         setCallType(callType.value);
       }
-      const CheckMsgIsGroup = settings.find((s) => s.key === "CheckMsgIsGroup");
+      const CheckMsgIsGroup = settings.find(s => s.key === "CheckMsgIsGroup");
       if (CheckMsgIsGroup) {
         setCheckMsgIsGroupType(CheckMsgIsGroup.value);
       }
 
       const soundGroupNotifications = settings.find(
-        (s) => s.key === "soundGroupNotifications",
+        s => s.key === "soundGroupNotifications"
       );
       setSoundGroupNotifications(soundGroupNotifications?.value || "disabled");
 
-      const groupsTab = settings.find((s) => s.key === "groupsTab");
+      const groupsTab = settings.find(s => s.key === "groupsTab");
       setGroupsTab(groupsTab?.value || "disabled");
 
-      const chatbotAutoExit = settings.find((s) => s.key === "chatbotAutoExit");
+      const chatbotAutoExit = settings.find(s => s.key === "chatbotAutoExit");
       if (chatbotAutoExit) {
         setChatbotAutoExit(chatbotAutoExit.value);
       }
 
-      const showNumericIcons = settings.find(
-        (s) => s.key === "showNumericIcons",
-      );
+      const showNumericIcons = settings.find(s => s.key === "showNumericIcons");
       setShowNumericIcons(showNumericIcons?.value || "disabled");
 
-      const defaultLanguage = settings.find((s) => s.key === "defaultLanguage");
+      const defaultLanguage = settings.find(s => s.key === "defaultLanguage");
       setDefaultLanguage(defaultLanguage?.value);
 
-      const allowSignup = settings.find((s) => s.key === "allowSignup");
+      const allowSignup = settings.find(s => s.key === "allowSignup");
       if (allowSignup) {
         setAllowSignup(allowSignup.value);
       }
-      const quickMessages = settings.find((s) => s.key === "quickMessages");
+      const quickMessages = settings.find(s => s.key === "quickMessages");
       setQuickMessages(quickMessages?.value || "individual");
 
-      const keepUserAndQueue = settings.find(
-        (s) => s.key === "keepUserAndQueue",
-      );
+      const keepUserAndQueue = settings.find(s => s.key === "keepUserAndQueue");
       setKeepUserAndQueue(keepUserAndQueue?.value || "enabled");
 
-      const apiToken = settings.find((s) => s.key === "apiToken");
+      const apiToken = settings.find(s => s.key === "apiToken");
       setApiToken(apiToken?.value || "");
 
-      const openAiKey = settings.find((s) => s.key === "openAiKey");
+      const openAiKey = settings.find(s => s.key === "openAiKey");
       setOpenAiKey(openAiKey?.value || "");
 
-      const aiProvider = settings.find((s) => s.key === "aiProvider");
+      const aiProvider = settings.find(s => s.key === "aiProvider");
       setAiProvider(aiProvider?.value || "openai");
 
       const audioTranscriptions = settings.find(
-        (s) => s.key === "audioTranscriptions",
+        s => s.key === "audioTranscriptions"
       );
       setAudioTranscriptions(audioTranscriptions?.value || "disabled");
 
-      const uploadLimit = settings.find((s) => s.key === "uploadLimit");
+      const uploadLimit = settings.find(s => s.key === "uploadLimit");
       setUploadLimit(uploadLimit?.value || "");
 
-      const downloadLimit = settings.find((s) => s.key === "downloadLimit");
+      const downloadLimit = settings.find(s => s.key === "downloadLimit");
       setDownloadLimit(downloadLimit?.value || "");
 
       const messageVisibility = settings.find(
-        (s) => s.key === "messageVisibility",
+        s => s.key === "messageVisibility"
       );
       setMessageVisibility(messageVisibility?.value || "message");
 
-      const ratingsTimeout = settings.find((s) => s.key === "ratingsTimeout");
+      const ratingsTimeout = settings.find(s => s.key === "ratingsTimeout");
       setRatingsTimeout(ratingsTimeout?.value || "5");
 
       const autoReopenTimeout = settings.find(
-        (s) => s.key === "autoReopenTimeout",
+        s => s.key === "autoReopenTimeout"
       );
       setAutoReopenTimeout(autoReopenTimeout?.value || "0");
 
-      const noQueueTimeout = settings.find((s) => s.key === "noQueueTimeout");
+      const noQueueTimeout = settings.find(s => s.key === "noQueueTimeout");
       setNoQueueTimeout(noQueueTimeout?.value || "0");
 
       const noQueueTimeoutAction = settings.find(
-        (s) => s.key === "noQueueTimeoutAction",
+        s => s.key === "noQueueTimeoutAction"
       );
       setNoQueueTimeoutAction(noQueueTimeoutAction?.value || "0");
 
       const openTicketTimeout = settings.find(
-        (s) => s.key === "openTicketTimeout",
+        s => s.key === "openTicketTimeout"
       );
       setOpenTicketTimeout(openTicketTimeout?.value || "0");
 
       const openTicketTimeoutAction = settings.find(
-        (s) => s.key === "openTicketTimeoutAction",
+        s => s.key === "openTicketTimeoutAction"
       );
       setOpenTicketTimeoutAction(openTicketTimeoutAction?.value || "pending");
 
       const chatbotTicketTimeout = settings.find(
-        (s) => s.key === "chatbotTicketTimeout",
+        s => s.key === "chatbotTicketTimeout"
       );
       setChatbotTicketTimeout(chatbotTicketTimeout?.value || "0");
 
       const chatbotTicketTimeoutAction = settings.find(
-        (s) => s.key === "chatbotTicketTimeoutAction",
+        s => s.key === "chatbotTicketTimeoutAction"
       );
       setChatbotTicketTimeoutAction(chatbotTicketTimeoutAction?.value || "0");
 
-      const gracePeriod = settings.find((s) => s.key === "gracePeriod");
+      const gracePeriod = settings.find(s => s.key === "gracePeriod");
       setGracePeriod(gracePeriod?.value || 0);
 
-      const tagsMode = settings.find((s) => s.key === "tagsMode");
+      const tagsMode = settings.find(s => s.key === "tagsMode");
       setTagsMode(tagsMode?.value || "ticket");
 
       const ticketAcceptedMessage = settings.find(
-        (s) => s.key === "ticketAcceptedMessage",
+        s => s.key === "ticketAcceptedMessage"
       );
       setTicketAcceptedMessage(ticketAcceptedMessage?.value || "");
 
-      const transferMessage = settings.find((s) => s.key === "transferMessage");
+      const transferMessage = settings.find(s => s.key === "transferMessage");
       setTransferMessage(transferMessage?.value || "");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -305,7 +299,7 @@ export default function Options(props) {
     setUserRating(value);
     await update({
       key: "userRating",
-      value,
+      value
     });
     i18nToast.success("settings.success");
   }
@@ -314,7 +308,7 @@ export default function Options(props) {
     setScheduleType(value);
     await update({
       key: "scheduleType",
-      value,
+      value
     });
     i18nToast.success("settings.success");
     if (typeof scheduleTypeChanged === "function") {
@@ -326,7 +320,7 @@ export default function Options(props) {
     setCallType(value);
     await update({
       key: "call",
-      value,
+      value
     });
     i18nToast.success("settings.success");
   }
@@ -335,7 +329,7 @@ export default function Options(props) {
     setChatbotAutoExit(value);
     await update({
       key: "chatbotAutoExit",
-      value,
+      value
     });
     i18nToast.success("settings.success");
   }
@@ -344,7 +338,7 @@ export default function Options(props) {
     setQuickMessages(value);
     await update({
       key: "quickMessages",
-      value,
+      value
     });
     i18nToast.success("settings.success");
   }
@@ -353,7 +347,7 @@ export default function Options(props) {
     setAllowSignup(value);
     await update({
       key: "allowSignup",
-      value,
+      value
     });
     i18nToast.success("settings.success");
   }
@@ -362,7 +356,7 @@ export default function Options(props) {
     setDownloadLimit(value);
     await update({
       key: "downloadLimit",
-      value,
+      value
     });
     i18nToast.success("settings.success");
   }
@@ -371,7 +365,7 @@ export default function Options(props) {
     setRatingsTimeout(value);
     await update({
       key: "ratingsTimeout",
-      value,
+      value
     });
     i18nToast.success("settings.success");
   }
@@ -380,7 +374,7 @@ export default function Options(props) {
     setAutoReopenTimeout(value);
     await update({
       key: "autoReopenTimeout",
-      value,
+      value
     });
     i18nToast.success("settings.success");
   }
@@ -391,7 +385,7 @@ export default function Options(props) {
     }
     await update({
       key,
-      value,
+      value
     });
     i18nToast.success("settings.success");
   }
@@ -401,7 +395,7 @@ export default function Options(props) {
     setApiToken(newToken);
     await update({
       key: "apiToken",
-      value: newToken,
+      value: newToken
     });
     i18nToast.success("settings.success");
   }
@@ -410,7 +404,7 @@ export default function Options(props) {
     setApiToken("");
     await update({
       key: "apiToken",
-      value: "",
+      value: ""
     });
     i18nToast.success("settings.success");
   }
@@ -424,7 +418,7 @@ export default function Options(props) {
     setCheckMsgIsGroupType(value);
     await update({
       key: "CheckMsgIsGroup",
-      value,
+      value
     });
     i18nToast.success("settings.success");
     /*     if (typeof scheduleTypeChanged === "function") {
@@ -449,7 +443,7 @@ export default function Options(props) {
             <Select
               labelId="ratings-label"
               value={userRating}
-              onChange={async (e) => {
+              onChange={async e => {
                 handleChangeUserRating(e.target.value);
               }}
             >
@@ -471,7 +465,7 @@ export default function Options(props) {
             <Select
               labelId="call-type-label"
               value={callType}
-              onChange={async (e) => {
+              onChange={async e => {
                 handleCallType(e.target.value);
               }}
             >
@@ -493,7 +487,7 @@ export default function Options(props) {
             <Select
               labelId="chatbot-autoexit"
               value={chatbotAutoExit}
-              onChange={async (e) => {
+              onChange={async e => {
                 handleChatbotAutoExit(e.target.value);
               }}
             >
@@ -515,7 +509,7 @@ export default function Options(props) {
             <Select
               labelId="quickmessages-label"
               value={quickMessages}
-              onChange={async (e) => {
+              onChange={async e => {
                 handleQuickMessages(e.target.value);
               }}
             >
@@ -537,7 +531,7 @@ export default function Options(props) {
             <Select
               labelId="tags-mode-label"
               value={tagsMode}
-              onChange={async (e) => {
+              onChange={async e => {
                 handleSetting("tagsMode", e.target.value, setTagsMode);
               }}
             >
@@ -562,11 +556,11 @@ export default function Options(props) {
             <Select
               labelId="shownumericicons-label"
               value={showNumericIcons}
-              onChange={async (e) => {
+              onChange={async e => {
                 handleSetting(
                   "showNumericIcons",
                   e.target.value,
-                  setShowNumericIcons,
+                  setShowNumericIcons
                 );
               }}
             >
@@ -588,10 +582,10 @@ export default function Options(props) {
               multiline
               rows={4}
               value={ticketAcceptedMessage}
-              onChange={(e) => {
+              onChange={e => {
                 setTicketAcceptedMessage(e.target.value);
               }}
-              onBlur={(e) => {
+              onBlur={e => {
                 handleSetting("ticketAcceptedMessage", ticketAcceptedMessage);
               }}
             />
@@ -612,10 +606,10 @@ export default function Options(props) {
               multiline
               rows={4}
               value={transferMessage}
-              onChange={(e) => {
+              onChange={e => {
                 setTransferMessage(e.target.value);
               }}
-              onBlur={(e) => {
+              onBlur={e => {
                 handleSetting("transferMessage", transferMessage);
               }}
             />
@@ -640,10 +634,10 @@ export default function Options(props) {
               name="ratingsTimeout"
               type="number"
               value={ratingsTimeout}
-              onChange={(e) => {
+              onChange={e => {
                 setRatingsTimeout(e.target.value);
               }}
-              onBlur={async (_) => {
+              onBlur={async _ => {
                 await handleRatingsTimeout(ratingsTimeout);
               }}
             />
@@ -659,10 +653,10 @@ export default function Options(props) {
               name="autoReopenTimeout"
               type="number"
               value={autoReopenTimeout}
-              onChange={(e) => {
+              onChange={e => {
                 setAutoReopenTimeout(e.target.value);
               }}
-              onBlur={async (_) => {
+              onBlur={async _ => {
                 await handleAutoReopenTimeout(autoReopenTimeout);
               }}
             />
@@ -678,10 +672,10 @@ export default function Options(props) {
               name="noQueueTimeout"
               type="number"
               value={noQueueTimeout}
-              onChange={(e) => {
+              onChange={e => {
                 setNoQueueTimeout(e.target.value);
               }}
-              onBlur={async (_) => {
+              onBlur={async _ => {
                 await handleSetting("noQueueTimeout", noQueueTimeout);
               }}
             />
@@ -696,16 +690,16 @@ export default function Options(props) {
             <Select
               labelId="open-timeout-action-label"
               value={noQueueTimeoutAction}
-              onChange={async (e) => {
+              onChange={async e => {
                 handleSetting(
                   "noQueueTimeoutAction",
                   e.target.value,
-                  setNoQueueTimeoutAction,
+                  setNoQueueTimeoutAction
                 );
               }}
             >
               <MenuItem value={"0"}>Fechar</MenuItem>
-              {queues.map((queue) => (
+              {queues.map(queue => (
                 <MenuItem key={queue.id} value={queue.id}>
                   Transferir para {queue.name}
                 </MenuItem>
@@ -723,10 +717,10 @@ export default function Options(props) {
               name="openTicketTimeout"
               type="number"
               value={openTicketTimeout}
-              onChange={(e) => {
+              onChange={e => {
                 setOpenTicketTimeout(e.target.value);
               }}
-              onBlur={async (_) => {
+              onBlur={async _ => {
                 await handleSetting("openTicketTimeout", openTicketTimeout);
               }}
             />
@@ -741,11 +735,11 @@ export default function Options(props) {
             <Select
               labelId="open-timeout-action-label"
               value={openTicketTimeoutAction}
-              onChange={async (e) => {
+              onChange={async e => {
                 handleSetting(
                   "openTicketTimeoutAction",
                   e.target.value,
-                  setOpenTicketTimeoutAction,
+                  setOpenTicketTimeoutAction
                 );
               }}
             >
@@ -764,13 +758,13 @@ export default function Options(props) {
               name="chatbotTicketTimeout"
               type="number"
               value={chatbotTicketTimeout}
-              onChange={(e) => {
+              onChange={e => {
                 setChatbotTicketTimeout(e.target.value);
               }}
-              onBlur={async (_) => {
+              onBlur={async _ => {
                 await handleSetting(
                   "chatbotTicketTimeout",
-                  chatbotTicketTimeout,
+                  chatbotTicketTimeout
                 );
               }}
             />
@@ -785,16 +779,16 @@ export default function Options(props) {
             <Select
               labelId="chatbot-ticket-timeout-action-label"
               value={chatbotTicketTimeoutAction}
-              onChange={async (e) => {
+              onChange={async e => {
                 handleSetting(
                   "chatbotTicketTimeoutAction",
                   e.target.value,
-                  setChatbotTicketTimeoutAction,
+                  setChatbotTicketTimeoutAction
                 );
               }}
             >
               <MenuItem value={"0"}>{i18n.t("common.close")}</MenuItem>
-              {queues.map((queue) => (
+              {queues.map(queue => (
                 <MenuItem key={queue.id} value={queue.id}>
                   {i18n.t("common.transferTo")} {queue.name}
                 </MenuItem>
@@ -816,7 +810,7 @@ export default function Options(props) {
             <Select
               labelId="schedule-type-label"
               value={scheduleType}
-              onChange={async (e) => {
+              onChange={async e => {
                 handleScheduleType(e.target.value);
               }}
             >
@@ -825,12 +819,12 @@ export default function Options(props) {
               </MenuItem>
               <MenuItem value={"queue"}>
                 {i18n.t(
-                  "settings.OfficeManagement.options.ManagementByDepartment",
+                  "settings.OfficeManagement.options.ManagementByDepartment"
                 )}
               </MenuItem>
               <MenuItem value={"company"}>
                 {i18n.t(
-                  "settings.OfficeManagement.options.ManagementByCompany",
+                  "settings.OfficeManagement.options.ManagementByCompany"
                 )}
               </MenuItem>
             </Select>
@@ -845,11 +839,11 @@ export default function Options(props) {
             <Select
               labelId="out-of-hours-action-label"
               value={outOfHoursAction}
-              onChange={async (e) => {
+              onChange={async e => {
                 await handleSetting(
                   "outOfHoursAction",
                   e.target.value,
-                  setOutOfHoursAction,
+                  setOutOfHoursAction
                 );
               }}
             >
@@ -876,7 +870,7 @@ export default function Options(props) {
             <Select
               labelId="group-type-label"
               value={CheckMsgIsGroup}
-              onChange={async (e) => {
+              onChange={async e => {
                 handleGroupType(e.target.value);
               }}
             >
@@ -898,11 +892,11 @@ export default function Options(props) {
             <Select
               labelId="sound-group-notifications-label"
               value={soundGroupNotifications}
-              onChange={async (e) => {
+              onChange={async e => {
                 await handleSetting(
                   "soundGroupNotifications",
                   e.target.value,
-                  setSoundGroupNotifications,
+                  setSoundGroupNotifications
                 );
               }}
             >
@@ -925,7 +919,7 @@ export default function Options(props) {
               labelId="groups-tab-label"
               value={groupsTab}
               disabled={CheckMsgIsGroup === "enabled"}
-              onChange={async (e) => {
+              onChange={async e => {
                 await handleSetting("groupsTab", e.target.value, setGroupsTab);
               }}
             >
@@ -953,22 +947,22 @@ export default function Options(props) {
             <Select
               labelId="message-visibility-label"
               value={messageVisibility}
-              onChange={async (e) => {
+              onChange={async e => {
                 await handleSetting(
                   "messageVisibility",
                   e.target.value,
-                  setMessageVisibility,
+                  setMessageVisibility
                 );
               }}
             >
               <MenuItem value={"message"}>
                 {i18n.t(
-                  "settings.messageVisibility.options.respectMessageQueue",
+                  "settings.messageVisibility.options.respectMessageQueue"
                 )}
               </MenuItem>
               <MenuItem value={"ticket"}>
                 {i18n.t(
-                  "settings.messageVisibility.options.respectTicketQueue",
+                  "settings.messageVisibility.options.respectTicketQueue"
                 )}
               </MenuItem>
             </Select>
@@ -983,11 +977,11 @@ export default function Options(props) {
             <Select
               labelId="keep-queue-and-user-label"
               value={keepUserAndQueue}
-              onChange={async (e) => {
+              onChange={async e => {
                 await handleSetting(
                   "keepUserAndQueue",
                   e.target.value,
-                  setKeepUserAndQueue,
+                  setKeepUserAndQueue
                 );
               }}
             >
@@ -1049,7 +1043,7 @@ export default function Options(props) {
                       </IconButton>
                     )}
                   </>
-                ),
+                )
               }}
             />
           </FormControl>
@@ -1069,7 +1063,7 @@ export default function Options(props) {
             <Select
               labelId="ai-provider-label"
               value={aiProvider}
-              onChange={async (e) => {
+              onChange={async e => {
                 handleSetting("aiProvider", e.target.value, setAiProvider);
               }}
             >
@@ -1086,10 +1080,10 @@ export default function Options(props) {
               label="AI Key"
               variant="standard"
               value={openAiKey}
-              onChange={(e) => {
+              onChange={e => {
                 setOpenAiKey(e.target.value);
               }}
-              onBlur={async (_) => {
+              onBlur={async _ => {
                 await handleSetting("openAiKey", openAiKey);
               }}
             />
@@ -1104,11 +1098,11 @@ export default function Options(props) {
             <Select
               labelId="audio-transcriptions-label"
               value={audioTranscriptions}
-              onChange={async (e) => {
+              onChange={async e => {
                 handleSetting(
                   "audioTranscriptions",
                   e.target.value,
-                  setAudioTranscriptions,
+                  setAudioTranscriptions
                 );
               }}
             >
@@ -1133,11 +1127,11 @@ export default function Options(props) {
                   className={classes.selectContainer}
                   fullWidth
                   value={defaultLanguage}
-                  onChange={async (e) => {
+                  onChange={async e => {
                     handleSetting(
                       "defaultLanguage",
                       e.target.value,
-                      setDefaultLanguage,
+                      setDefaultLanguage
                     );
                   }}
                 />
@@ -1151,7 +1145,7 @@ export default function Options(props) {
                   <Select
                     labelId="allow-signup"
                     value={allowSignup}
-                    onChange={async (e) => {
+                    onChange={async e => {
                       handleAllowSignup(e.target.value);
                     }}
                   >
@@ -1173,10 +1167,10 @@ export default function Options(props) {
                     variant="standard"
                     name="uploadLimit"
                     value={uploadLimit}
-                    onChange={(e) => {
+                    onChange={e => {
                       setUploadLimit(e.target.value);
                     }}
-                    onBlur={async (_) => {
+                    onBlur={async _ => {
                       await handleSetting("uploadLimit", uploadLimit);
                     }}
                   />
@@ -1192,10 +1186,10 @@ export default function Options(props) {
                     name="appName"
                     value={downloadLimit}
                     inputRef={downloadLimitInput}
-                    onChange={(e) => {
+                    onChange={e => {
                       setDownloadLimit(e.target.value);
                     }}
-                    onBlur={async (_) => {
+                    onBlur={async _ => {
                       await handleDownloadLimit(downloadLimit);
                     }}
                   />
@@ -1211,10 +1205,10 @@ export default function Options(props) {
                     name="gracePeriod"
                     type="number"
                     value={gracePeriod}
-                    onChange={(e) => {
+                    onChange={e => {
                       setGracePeriod(e.target.value);
                     }}
-                    onBlur={async (_) => {
+                    onBlur={async _ => {
                       await handleSetting("gracePeriod", gracePeriod);
                     }}
                   />

@@ -9,7 +9,7 @@ import {
   Code,
   FormatListNumbered,
   FormatListBulleted,
-  FormatQuote,
+  FormatQuote
 } from "@material-ui/icons";
 
 import { makeStyles } from "@material-ui/core/styles";
@@ -33,7 +33,7 @@ import {
   Tooltip,
   InputAdornment,
   Typography,
-  Popper,
+  Popper
 } from "@material-ui/core";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { isString, isEmpty, isObject, has } from "lodash";
@@ -59,19 +59,19 @@ import { SocketContext } from "../../context/Socket/SocketContext";
 
 const Mp3Recorder = new MicRecorder({ bitRate: 128 });
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   mainWrapper: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    borderTop: "1px solid rgba(0, 0, 0, 0.12)",
+    borderTop: "1px solid rgba(0, 0, 0, 0.12)"
   },
 
   newMessageBox: {
     width: "100%",
     display: "flex",
     padding: "7px",
-    alignItems: "center",
+    alignItems: "center"
   },
 
   messageInputWrapper: {
@@ -81,25 +81,25 @@ const useStyles = makeStyles((theme) => ({
     border: "1px solid #ccc",
     display: "flex",
     borderRadius: 20,
-    flex: 1,
+    flex: 1
   },
 
   messageInput: {
     paddingLeft: 10,
     flex: 1,
-    border: "none",
+    border: "none"
   },
 
   cameraIcon: {
-    color: "grey",
+    color: "grey"
   },
 
   sendMessageIcons: {
-    color: "grey",
+    color: "grey"
   },
 
   uploadInput: {
-    display: "none",
+    display: "none"
   },
 
   viewMediaInputWrapper: {
@@ -109,14 +109,14 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "space-between",
     alignItems: "center",
     backgroundColor: "#eee",
-    borderTop: "1px solid rgba(0, 0, 0, 0.12)",
+    borderTop: "1px solid rgba(0, 0, 0, 0.12)"
   },
 
   emojiBox: {
     position: "absolute",
     bottom: 63,
     width: 40,
-    borderTop: "1px solid #e8e8e8",
+    borderTop: "1px solid #e8e8e8"
   },
 
   circleLoading: {
@@ -125,26 +125,26 @@ const useStyles = makeStyles((theme) => ({
     position: "absolute",
     top: "20%",
     left: "50%",
-    marginLeft: -12,
+    marginLeft: -12
   },
 
   audioLoading: {
     color: green[500],
-    opacity: "70%",
+    opacity: "70%"
   },
 
   recorderWrapper: {
     display: "flex",
     alignItems: "center",
-    alignContent: "middle",
+    alignContent: "middle"
   },
 
   cancelAudioIcon: {
-    color: "red",
+    color: "red"
   },
 
   sendAudioIcon: {
-    color: "green",
+    color: "green"
   },
 
   replyginMsgWrapper: {
@@ -154,7 +154,7 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "center",
     paddingTop: 8,
     paddingLeft: 73,
-    paddingRight: 7,
+    paddingRight: 7
   },
 
   replyginMsgContainer: {
@@ -164,7 +164,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: "rgba(0, 0, 0, 0.05)",
     borderRadius: "7.5px",
     display: "flex",
-    position: "relative",
+    position: "relative"
   },
 
   replyginMsgBody: {
@@ -172,31 +172,31 @@ const useStyles = makeStyles((theme) => ({
     height: "auto",
     display: "block",
     whiteSpace: "pre-wrap",
-    overflow: "hidden",
+    overflow: "hidden"
   },
 
   replyginContactMsgSideColor: {
     flex: "none",
     width: "4px",
-    backgroundColor: "#35cd96",
+    backgroundColor: "#35cd96"
   },
 
   replyginSelfMsgSideColor: {
     flex: "none",
     width: "4px",
-    backgroundColor: "#6bcbef",
+    backgroundColor: "#6bcbef"
   },
 
   messageContactName: {
     display: "flex",
     color: "#6bcbef",
-    fontWeight: 500,
+    fontWeight: 500
   },
 
   iconSwitch: {
-    color: (props) => (props.value ? theme.palette.primary.main : "gray"),
+    color: props => (props.value ? theme.palette.primary.main : "gray"),
     width: 48,
-    height: 48,
+    height: 48
   },
 
   formatMenu: {
@@ -206,11 +206,11 @@ const useStyles = makeStyles((theme) => ({
     boxShadow: theme.shadows[2],
     padding: "4px 8px",
     display: "flex",
-    alignItems: "center",
-  },
+    alignItems: "center"
+  }
 }));
 
-const EmojiOptions = (props) => {
+const EmojiOptions = props => {
   const { disabled, showEmoji, setShowEmoji, handleAddEmoji } = props;
   const classes = useStyles();
   return (
@@ -219,7 +219,7 @@ const EmojiOptions = (props) => {
         aria-label="emojiPicker"
         component="span"
         disabled={disabled}
-        onClick={(e) => setShowEmoji((prevState) => !prevState)}
+        onClick={e => setShowEmoji(prevState => !prevState)}
       >
         <MoodIcon className={classes.sendMessageIcons} />
       </IconButton>
@@ -237,7 +237,7 @@ const EmojiOptions = (props) => {
   );
 };
 
-const SignSwitch = (props) => {
+const SignSwitch = props => {
   const { setSignMessage, signMessage } = props;
   const classes = useStyles({ signMessage });
 
@@ -251,7 +251,7 @@ const SignSwitch = (props) => {
   );
 };
 
-const IconSwitch = (props) => {
+const IconSwitch = props => {
   const { setter, value, icon, tooltip } = props;
   const classes = useStyles({ value });
 
@@ -264,7 +264,7 @@ const IconSwitch = (props) => {
   );
 };
 
-const FileInput = (props) => {
+const FileInput = props => {
   const { handleChangeMedias, disableOption } = props;
   const classes = useStyles();
   return (
@@ -290,7 +290,7 @@ const FileInput = (props) => {
   );
 };
 
-const ActionButtons = (props) => {
+const ActionButtons = props => {
   const {
     inputMessage,
     loading,
@@ -300,7 +300,7 @@ const ActionButtons = (props) => {
     handleCancelAudio,
     handleUploadAudio,
     handleStartRecording,
-    disableOption,
+    disableOption
   } = props;
   const classes = useStyles();
   if (inputMessage) {
@@ -365,13 +365,13 @@ function UpwardPopper(props) {
       placement="top-start" // force always upwards
       modifiers={{
         flip: { enabled: false }, // disable flipping
-        preventOverflow: { enabled: false }, // disable overflow adjustment
+        preventOverflow: { enabled: false } // disable overflow adjustment
       }}
     />
   );
 }
 
-const CustomInput = (props) => {
+const CustomInput = props => {
   const {
     loading,
     inputRef,
@@ -382,7 +382,7 @@ const CustomInput = (props) => {
     handleInputPaste,
     handleChangeMedias,
     handlePresenceUpdate,
-    disableOption,
+    disableOption
   } = props;
   const classes = useStyles();
   const [quickMessages, setQuickMessages] = useState([]);
@@ -394,7 +394,7 @@ const CustomInput = (props) => {
   const { list: listQuickMessages } = useQuickMessages();
 
   useEffect(() => {
-    const handleClickAway = (event) => {
+    const handleClickAway = event => {
       const menu = document.getElementById("format-menu");
       if (menu && !menu.contains(event.target)) {
         menu.style.display = "none";
@@ -407,14 +407,14 @@ const CustomInput = (props) => {
   useEffect(() => {
     async function fetchData() {
       const messages = await listQuickMessages();
-      const options = messages.map((m) => {
+      const options = messages.map(m => {
         let truncatedMessage = m.message;
         if (isString(truncatedMessage) && truncatedMessage.length > 35) {
           truncatedMessage = m.message.substring(0, 35) + "...";
         }
         return {
           value: m.message,
-          label: `/${m.shortcode} - ${truncatedMessage}`,
+          label: `/${m.shortcode} - ${truncatedMessage}`
         };
       });
       setQuickMessages(options);
@@ -433,7 +433,7 @@ const CustomInput = (props) => {
       setPopupOpen(firstWord.indexOf("/") > -1);
 
       const filteredOptions = quickMessages.filter(
-        (m) => m.label.toLowerCase().indexOf(inputMessage.toLowerCase()) > -1,
+        m => m.label.toLowerCase().indexOf(inputMessage.toLowerCase()) > -1
       );
       setOptions(filteredOptions);
     } else {
@@ -442,7 +442,7 @@ const CustomInput = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputMessage]);
 
-  const onKeyPress = (e) => {
+  const onKeyPress = e => {
     if (loading) return;
     else if (!e.shiftKey && e.key === "Enter" && !isMobile()) {
       e.preventDefault();
@@ -452,7 +452,7 @@ const CustomInput = (props) => {
     handlePresenceUpdate && handlePresenceUpdate("composing");
   };
 
-  const onPaste = (e) => {
+  const onPaste = e => {
     if (ticketStatus === "open") {
       handleInputPaste(e);
     }
@@ -465,7 +465,7 @@ const CustomInput = (props) => {
     return i18n.t("messagesInput.placeholderClosed");
   };
 
-  const setInputRef = (input) => {
+  const setInputRef = input => {
     if (input) {
       inputRef.current = input;
       inputRef.current.spellcheck = true;
@@ -511,7 +511,7 @@ const CustomInput = (props) => {
         textArea.focus();
         textArea.setSelectionRange(
           start + prefix.length - 1,
-          start + prefix.length + formattedText.length - 1,
+          start + prefix.length + formattedText.length - 1
         );
         showFormatMenu();
       }, 0);
@@ -556,7 +556,7 @@ const CustomInput = (props) => {
         textArea.focus();
         textArea.setSelectionRange(
           textBefore.length,
-          textBefore.length + formattedText.length,
+          textBefore.length + formattedText.length
         );
         showFormatMenu();
       }, 0);
@@ -567,7 +567,7 @@ const CustomInput = (props) => {
     const { lines, textBefore, textAfter } = splitSelectionLines();
     if (lines.length > 0) {
       const formattedLines = lines.map(
-        (line, index) => `${index + 1}. ${line}`,
+        (line, index) => `${index + 1}. ${line}`
       );
       const formattedText = formattedLines.join("\n");
 
@@ -577,7 +577,7 @@ const CustomInput = (props) => {
         textArea.focus();
         textArea.setSelectionRange(
           textBefore.length,
-          textBefore.length + formattedText.length,
+          textBefore.length + formattedText.length
         );
         showFormatMenu();
       }, 0);
@@ -587,7 +587,7 @@ const CustomInput = (props) => {
   const formatListBulleted = () => {
     const { lines, textBefore, textAfter } = splitSelectionLines();
     if (lines.length > 0) {
-      const formattedLines = lines.map((line) => `* ${line}`);
+      const formattedLines = lines.map(line => `* ${line}`);
       const formattedText = formattedLines.join("\n");
 
       setInputMessage(textBefore + formattedText + textAfter);
@@ -596,7 +596,7 @@ const CustomInput = (props) => {
         textArea.focus();
         textArea.setSelectionRange(
           textBefore.length,
-          textBefore.length + formattedText.length,
+          textBefore.length + formattedText.length
         );
         showFormatMenu();
       }, 0);
@@ -606,7 +606,7 @@ const CustomInput = (props) => {
   const formatQuote = () => {
     const { lines, textBefore, textAfter } = splitSelectionLines();
     if (lines.length > 0) {
-      const formattedLines = lines.map((line) => `> ${line}`);
+      const formattedLines = lines.map(line => `> ${line}`);
       const formattedText = formattedLines.join("\n");
 
       setInputMessage(textBefore + formattedText + textAfter);
@@ -615,7 +615,7 @@ const CustomInput = (props) => {
         textArea.focus();
         textArea.setSelectionRange(
           textBefore.length,
-          textBefore.length + formattedText.length,
+          textBefore.length + formattedText.length
         );
         showFormatMenu();
       }, 0);
@@ -633,7 +633,7 @@ const CustomInput = (props) => {
         value={inputMessage}
         options={options}
         closeIcon={null}
-        getOptionLabel={(option) => {
+        getOptionLabel={option => {
           if (isObject(option)) {
             return option.label;
           } else {
@@ -656,7 +656,7 @@ const CustomInput = (props) => {
         onPaste={onPaste}
         onKeyPress={onKeyPress}
         style={{ width: "100%" }}
-        renderInput={(params) => {
+        renderInput={params => {
           const { InputLabelProps, InputProps, ...rest } = params;
           return (
             <>
@@ -664,7 +664,7 @@ const CustomInput = (props) => {
                 {...params.InputProps}
                 {...rest}
                 disabled={disableOption}
-                inputRef={(input) => setInputRef(input)}
+                inputRef={input => setInputRef(input)}
                 placeholder={renderPlaceholder()}
                 multiline
                 className={classes.messageInput}
@@ -692,7 +692,7 @@ const CustomInput = (props) => {
                     </InputAdornment>
                   )
                 }
-                onKeyDownCapture={(e) => {
+                onKeyDownCapture={e => {
                   if (
                     !popupOpen &&
                     (e.key === "ArrowUp" || e.key === "ArrowDown")
@@ -702,7 +702,7 @@ const CustomInput = (props) => {
                 }}
                 onMouseUp={showFormatMenu}
                 onKeyUp={showFormatMenu}
-                onKeyDown={(e) => {
+                onKeyDown={e => {
                   if (e.ctrlKey && e.key === "b") {
                     e.preventDefault();
                     formatText("*", "*");
@@ -798,7 +798,7 @@ const CustomInput = (props) => {
   );
 };
 
-const MessageInputCustom = (props) => {
+const MessageInputCustom = props => {
   const { ticket, showTabGroups } = props;
   const { status: ticketStatus, id: ticketId } = ticket;
   const classes = useStyles();
@@ -852,7 +852,7 @@ const MessageInputCustom = (props) => {
     if (editingMessage) {
       if (signMessage && editingMessage.body.startsWith(`*${user.name}:*\n`)) {
         setInputMessage(
-          editingMessage.body.substr(editingMessage.body.indexOf("\n") + 1),
+          editingMessage.body.substr(editingMessage.body.indexOf("\n") + 1)
         );
       } else {
         setInputMessage(editingMessage.body);
@@ -883,12 +883,12 @@ const MessageInputCustom = (props) => {
   // 	}
   // };
 
-  const handleAddEmoji = (e) => {
+  const handleAddEmoji = e => {
     let emoji = e.native;
-    setInputMessage((prevState) => prevState + emoji);
+    setInputMessage(prevState => prevState + emoji);
   };
 
-  const handleChangeMedias = (e) => {
+  const handleChangeMedias = e => {
     if (!e.target.files) {
       return;
     }
@@ -897,13 +897,13 @@ const MessageInputCustom = (props) => {
     setMedias(selectedMedias);
   };
 
-  const handleInputPaste = (e) => {
+  const handleInputPaste = e => {
     if (e.clipboardData.files[0]) {
       setMedias([e.clipboardData.files[0]]);
     }
   };
 
-  const handleUploadMedia = async (e) => {
+  const handleUploadMedia = async e => {
     setLoading(true);
     e.preventDefault();
 
@@ -932,7 +932,7 @@ const MessageInputCustom = (props) => {
           error(err) {
             alert("erro");
             console.log(err.message);
-          },
+          }
         });
       } else {
         formData.append("medias", media);
@@ -944,17 +944,17 @@ const MessageInputCustom = (props) => {
       try {
         await api
           .post(`/messages/${ticketId}`, formData, {
-            onUploadProgress: (event) => {
+            onUploadProgress: event => {
               let progress = Math.round((event.loaded * 100) / event.total);
               setPercentLoading(progress);
-            },
+            }
           })
-          .then((response) => {
+          .then(response => {
             setLoading(false);
             setMedias([]);
             setPercentLoading(0);
           })
-          .catch((err) => {
+          .catch(err => {
             setLoading(false);
             setMedias([]);
             setPercentLoading(0);
@@ -966,7 +966,7 @@ const MessageInputCustom = (props) => {
     }, 2000);
   };
 
-  const handlePresenceUpdate = (presence) => {
+  const handlePresenceUpdate = presence => {
     if (!socket || currentPresence === presence) return;
 
     if (presenceTimeout) {
@@ -978,7 +978,7 @@ const MessageInputCustom = (props) => {
       setCurrentPresence(null);
       socket.emit("presenceUpdate", {
         ticketId,
-        presence: "paused",
+        presence: "paused"
       });
       return;
     }
@@ -986,7 +986,7 @@ const MessageInputCustom = (props) => {
     setCurrentPresence(presence);
     socket.emit("presenceUpdate", {
       ticketId,
-      presence,
+      presence
     });
 
     if (presence === "composing") {
@@ -995,9 +995,9 @@ const MessageInputCustom = (props) => {
           setCurrentPresence(null);
           socket.emit("presenceUpdate", {
             ticketId,
-            presence: "paused",
+            presence: "paused"
           });
-        }, 5000),
+        }, 5000)
       );
     }
   };
@@ -1014,7 +1014,7 @@ const MessageInputCustom = (props) => {
       body: signMessage
         ? `*${user?.name}:*\n${inputMessage.trim()}`
         : inputMessage.trim(),
-      quotedMsg: replyingMessage,
+      quotedMsg: replyingMessage
     };
 
     handlePresenceUpdate(null);
@@ -1023,7 +1023,7 @@ const MessageInputCustom = (props) => {
       editingMessage !== null
         ? `/messages/edit/${editingMessage.id}`
         : `/messages/${ticketId}`;
-    api.post(url, message).catch((err) => {
+    api.post(url, message).catch(err => {
       toastError(err);
     });
 
@@ -1090,13 +1090,13 @@ const MessageInputCustom = (props) => {
   const disableOption =
     (!isGroup && loading) || recording || ticketStatus === "closed";
 
-  const renderReplyingMessage = (message) => {
+  const renderReplyingMessage = message => {
     return (
       <div className={classes.replyginMsgWrapper}>
         <div className={classes.replyginMsgContainer}>
           <span
             className={clsx(classes.replyginContactMsgSideColor, {
-              [classes.replyginSelfMsgSideColor]: !message.fromMe,
+              [classes.replyginSelfMsgSideColor]: !message.fromMe
             })}
           ></span>
           {replyingMessage && (
@@ -1143,7 +1143,7 @@ const MessageInputCustom = (props) => {
           aria-label="cancel-upload"
           component="span"
           disabled={disableOption}
-          onClick={(e) => setMedias([])}
+          onClick={e => setMedias([])}
         >
           <CancelIcon className={classes.sendMessageIcons} />
         </IconButton>

@@ -3,7 +3,7 @@ import { useField } from "formik";
 import Grid from "@material-ui/core/Grid";
 import {
   MuiPickersUtilsProvider,
-  KeyboardDatePicker,
+  KeyboardDatePicker
 } from "@material-ui/pickers";
 import DateFnsUtils from "@date-io/date-fns";
 

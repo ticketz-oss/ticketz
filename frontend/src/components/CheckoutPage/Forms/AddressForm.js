@@ -6,32 +6,32 @@ import { AuthContext } from "../../../context/Auth/AuthContext";
 const countries = [
   {
     value: "BR",
-    label: "Brasil",
+    label: "Brasil"
   },
   {
     value: "usa",
-    label: "United States",
-  },
+    label: "United States"
+  }
 ];
 
 export default function AddressForm(props) {
   const { user } = useContext(AuthContext);
   const [billingName, setBillingName] = useState(user.company.billingName);
   const [addressZipCode, setAddressZipCode] = useState(
-    user.company.addressZipCode,
+    user.company.addressZipCode
   );
   const [addressStreet, setAddressStreet] = useState(
-    user.company.addressStreet,
+    user.company.addressStreet
   );
   const [addressState, setAddressState] = useState(user.company.addressState);
   const [addressCity, setAddressCity] = useState(user.company.addressCity);
   const [addressDistrict, setAddressDistrict] = useState(
-    user.company.addressDistrict,
+    user.company.addressDistrict
   );
 
   const {
     formField: { firstName, address1, city, state, zipcode, country },
-    setFieldValue,
+    setFieldValue
   } = props;
   useEffect(() => {
     setFieldValue("firstName", billingName);
@@ -55,7 +55,7 @@ export default function AddressForm(props) {
             label={firstName.label}
             fullWidth
             value={billingName}
-            onChange={(e) => {
+            onChange={e => {
               setBillingName(e.target.value);
               setFieldValue("firstName", e.target.value);
             }}
@@ -68,7 +68,7 @@ export default function AddressForm(props) {
             data={countries}
             fullWidth
             value={addressDistrict}
-            onChange={(e) => {
+            onChange={e => {
               setAddressDistrict(e.target.value);
               setFieldValue("country", e.target.value);
             }}
@@ -81,7 +81,7 @@ export default function AddressForm(props) {
             label={zipcode.label}
             fullWidth
             value={addressZipCode}
-            onChange={(e) => {
+            onChange={e => {
               setAddressZipCode(e.target.value);
               setFieldValue("zipcode", e.target.value);
             }}
@@ -93,7 +93,7 @@ export default function AddressForm(props) {
             label={address1.label}
             fullWidth
             value={addressStreet}
-            onChange={(e) => {
+            onChange={e => {
               setAddressStreet(e.target.value);
               setFieldValue("address2", e.target.value);
             }}
@@ -106,7 +106,7 @@ export default function AddressForm(props) {
             label={state.label}
             fullWidth
             value={addressState}
-            onChange={(e) => {
+            onChange={e => {
               setAddressState(e.target.value);
               setFieldValue("state", e.target.value);
             }}
@@ -118,7 +118,7 @@ export default function AddressForm(props) {
             label={city.label}
             fullWidth
             value={addressCity}
-            onChange={(e) => {
+            onChange={e => {
               setAddressCity(e.target.value);
               setFieldValue("city", e.target.value);
             }}

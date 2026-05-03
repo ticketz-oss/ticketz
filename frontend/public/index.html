@@ -235,7 +235,7 @@
             setTimeout(() => {
               el.scrollIntoView({
                 block: "center",
-                behavior: "auto",
+                behavior: "auto"
               });
               setTimeout(() => {
                 anchor.scrollIntoView({ block: "start", inline: "nearest" });
@@ -253,13 +253,13 @@
         light: {
           background: "#fff",
           splash: "#fff",
-          primary: "#000",
+          primary: "#000"
         },
         dark: {
           background: "#333",
           splash: "#424242",
-          primary: "#fff",
-        },
+          primary: "#fff"
+        }
       };
 
       // Set the theme
@@ -276,7 +276,7 @@
         root.style.setProperty("--primary", themes[theme].primary);
       }
 
-      window.renderError = (message) => {
+      window.renderError = message => {
         const splashScreen = document.getElementById("splash-screen");
         splashScreen.innerHTML = `
             <div style="color: var(--primary); text-align: center;">
@@ -289,11 +289,11 @@
         progress = 0;
       };
 
-      window.mentionClick = (mention) => {
+      window.mentionClick = mention => {
         console.log("mentionClick not implemented yet", mention);
       };
 
-      window.mentionRenderer = (mention) => {
+      window.mentionRenderer = mention => {
         return (
           `<span class="ticketzMention" onclick='window.mentionClick(${JSON.stringify(mention).replace(/'/g, "\\'")})'>@` +
           (mention?.name || mention?.number || "invalid mention") +
@@ -301,7 +301,7 @@
         );
       };
 
-      const configureSplash = async (config) => {
+      const configureSplash = async config => {
         const protocol = config.BACKEND_PROTOCOL || "https";
         const hostname = config.BACKEND_HOST || window.location.hostname;
         const port = config.BACKEND_PORT ? `:${config.BACKEND_PORT}` : "";
@@ -317,10 +317,10 @@
         fetch(
           settingsBaseUrl +
             "/primaryColor" +
-            (theme === "dark" ? "Dark" : "Light"),
+            (theme === "dark" ? "Dark" : "Light")
         )
-          .then((response) => response.json())
-          .then((data) => {
+          .then(response => response.json())
+          .then(data => {
             const root = document.documentElement;
 
             if (data) {
@@ -330,14 +330,14 @@
 
             root.style.setProperty(
               "--primary",
-              theme === "dark" ? "#39ACE7" : "#00f",
+              theme === "dark" ? "#39ACE7" : "#00f"
             );
           });
 
         Promise.all([
           fetch(settingsBaseUrl + "/appLogoDark"),
-          fetch(settingsBaseUrl + "/appLogoLight"),
-        ]).then(async (responses) => {
+          fetch(settingsBaseUrl + "/appLogoLight")
+        ]).then(async responses => {
           const appLogo = document.getElementById("app-logo");
 
           const logoSrc =
@@ -354,14 +354,14 @@
         });
 
         fetch(settingsBaseUrl + "/appName")
-          .then((response) => response.json())
-          .then((data) => {
+          .then(response => response.json())
+          .then(data => {
             document.title = data || "ticketz";
           });
       };
 
-      fetch("/config.json").then(async (response) => {
-        response.json().then((config) => {
+      fetch("/config.json").then(async response => {
+        response.json().then(config => {
           configureSplash(config);
         });
       });

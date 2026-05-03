@@ -13,7 +13,7 @@ export async function downloadFile(fileurl) {
 
   try {
     const response = await axios.get(url.toString(), {
-      responseType: "blob",
+      responseType: "blob"
     });
     const blob = new Blob([response.data]);
     downloadUrl = window.URL.createObjectURL(blob);

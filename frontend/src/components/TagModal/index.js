@@ -23,20 +23,20 @@ import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { IconButton, InputAdornment, FormControl } from "@material-ui/core";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     display: "flex",
-    flexWrap: "wrap",
+    flexWrap: "wrap"
   },
   multFieldLine: {
     display: "flex",
     "& > *:not(:last-child)": {
-      marginRight: theme.spacing(1),
-    },
+      marginRight: theme.spacing(1)
+    }
   },
 
   btnWrapper: {
-    position: "relative",
+    position: "relative"
   },
 
   buttonProgress: {
@@ -45,25 +45,25 @@ const useStyles = makeStyles((theme) => ({
     top: "50%",
     left: "50%",
     marginTop: -12,
-    marginLeft: -12,
+    marginLeft: -12
   },
   formControl: {
     margin: theme.spacing(1),
-    minWidth: 120,
+    minWidth: 120
   },
   colorAdorment: {
     width: 20,
-    height: 20,
+    height: 20
   },
   multFieldLine: {
     display: "flex",
     flexDirection: "row",
-    alignItems: "center",
-  },
+    alignItems: "center"
+  }
 }));
 
 const TagSchema = Yup.object().shape({
-  name: Yup.string().min(3, "Mensagem muito curta").required("Obrigatório"),
+  name: Yup.string().min(3, "Mensagem muito curta").required("Obrigatório")
 });
 
 const TagModal = ({ open, onClose, tagId, reload, kanban }) => {
@@ -75,7 +75,7 @@ const TagModal = ({ open, onClose, tagId, reload, kanban }) => {
   const initialState = {
     name: "",
     color: "",
-    kanban: kanban,
+    kanban: kanban
   };
 
   const [tag, setTag] = useState(initialState);
@@ -87,7 +87,7 @@ const TagModal = ({ open, onClose, tagId, reload, kanban }) => {
 
         const { data } = await api.get(`/tags/${tagId}`);
         //console.log(data);
-        setTag((prevState) => {
+        setTag(prevState => {
           return { ...prevState, ...data };
         });
       })();
@@ -102,7 +102,7 @@ const TagModal = ({ open, onClose, tagId, reload, kanban }) => {
     onClose();
   };
 
-  const handleSaveTag = async (values) => {
+  const handleSaveTag = async values => {
     const tagData = { ...values, userId: user.id, kanban: kanban };
     try {
       if (tagId) {
@@ -113,7 +113,7 @@ const TagModal = ({ open, onClose, tagId, reload, kanban }) => {
       toast.success(
         kanban === 0
           ? `${i18n.t("tagModal.success")}`
-          : `${i18n.t("tagModal.successKanban")}`,
+          : `${i18n.t("tagModal.successKanban")}`
       );
       if (typeof reload == "function") {
         reload();
@@ -165,8 +165,8 @@ const TagModal = ({ open, onClose, tagId, reload, kanban }) => {
                     helperText={touched.name && errors.name}
                     variant="outlined"
                     margin="dense"
-                    onChange={(e) =>
-                      setTag((prev) => ({ ...prev, name: e.target.value }))
+                    onChange={e =>
+                      setTag(prev => ({ ...prev, name: e.target.value }))
                     }
                     fullWidth
                   />
@@ -200,7 +200,7 @@ const TagModal = ({ open, onClose, tagId, reload, kanban }) => {
                         >
                           <Colorize />
                         </IconButton>
-                      ),
+                      )
                     }}
                     variant="outlined"
                     margin="dense"
@@ -214,8 +214,8 @@ const TagModal = ({ open, onClose, tagId, reload, kanban }) => {
                       hslGradient={false}
                       style={{ margin: "20px auto 0" }}
                       value={tag.color}
-                      onChange={(val) => {
-                        setTag((prev) => ({ ...prev, color: `#${val.hex}` }));
+                      onChange={val => {
+                        setTag(prev => ({ ...prev, color: `#${val.hex}` }));
                       }}
                     />
                   </div>

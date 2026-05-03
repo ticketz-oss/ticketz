@@ -26,20 +26,20 @@ import QueueSelect from "../QueueSelect";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { Can } from "../Can";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     display: "flex",
-    flexWrap: "wrap",
+    flexWrap: "wrap"
   },
   multFieldLine: {
     display: "flex",
     "& > *:not(:last-child)": {
-      marginRight: theme.spacing(1),
-    },
+      marginRight: theme.spacing(1)
+    }
   },
 
   btnWrapper: {
-    position: "relative",
+    position: "relative"
   },
 
   buttonProgress: {
@@ -48,12 +48,12 @@ const useStyles = makeStyles((theme) => ({
     top: "50%",
     left: "50%",
     marginTop: -12,
-    marginLeft: -12,
+    marginLeft: -12
   },
   formControl: {
     margin: theme.spacing(1),
-    minWidth: 120,
-  },
+    minWidth: 120
+  }
 }));
 
 const UserSchema = Yup.object().shape({
@@ -62,7 +62,7 @@ const UserSchema = Yup.object().shape({
     .max(50, "Too Long!")
     .required("Required"),
   password: Yup.string().min(5, "Too Short!").max(50, "Too Long!"),
-  email: Yup.string().email("Invalid email").required("Required"),
+  email: Yup.string().email("Invalid email").required("Required")
 });
 
 const UserModal = ({ open, onClose, userId }) => {
@@ -72,7 +72,7 @@ const UserModal = ({ open, onClose, userId }) => {
     name: "",
     email: "",
     password: "",
-    profile: "user",
+    profile: "user"
   };
 
   const { user: loggedInUser } = useContext(AuthContext);
@@ -85,10 +85,10 @@ const UserModal = ({ open, onClose, userId }) => {
       if (!userId) return;
       try {
         const { data } = await api.get(`/users/${userId}`);
-        setUser((prevState) => {
+        setUser(prevState => {
           return { ...prevState, ...data };
         });
-        const userQueueIds = data.queues?.map((queue) => queue.id);
+        const userQueueIds = data.queues?.map(queue => queue.id);
         setSelectedQueueIds(userQueueIds);
       } catch (err) {
         toastError(err);
@@ -103,7 +103,7 @@ const UserModal = ({ open, onClose, userId }) => {
     setUser(initialState);
   };
 
-  const handleSaveUser = async (values) => {
+  const handleSaveUser = async values => {
     const userData = { ...values, queueIds: selectedQueueIds };
     try {
       if (userId) {
@@ -169,7 +169,7 @@ const UserModal = ({ open, onClose, userId }) => {
                     margin="dense"
                     fullWidth
                     inputProps={{
-                      autoComplete: "off",
+                      autoComplete: "off"
                     }}
                   />
                 </div>
@@ -225,7 +225,7 @@ const UserModal = ({ open, onClose, userId }) => {
                   yes={() => (
                     <QueueSelect
                       selectedQueueIds={selectedQueueIds}
-                      onChange={(values) => setSelectedQueueIds(values)}
+                      onChange={values => setSelectedQueueIds(values)}
                     />
                   )}
                 />

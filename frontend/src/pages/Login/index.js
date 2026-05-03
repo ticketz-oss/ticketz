@@ -29,7 +29,7 @@ import { loadJSON } from "../../helpers/loadJSON";
 
 const gitinfo = loadJSON("/gitinfo.json");
 
-const parseLoginLinks = (value) => {
+const parseLoginLinks = value => {
   if (!value) {
     return [];
   }
@@ -42,8 +42,7 @@ const parseLoginLinks = (value) => {
     }
 
     return parsedValue.filter(
-      (link) =>
-        typeof link?.title === "string" && typeof link?.url === "string",
+      link => typeof link?.title === "string" && typeof link?.url === "string"
     );
   } catch (error) {
     return [];
@@ -52,7 +51,7 @@ const parseLoginLinks = (value) => {
 
 const isVideoFile = (filename = "") => /\.(mp4|webm|ogg)$/i.test(filename);
 
-const getPublicAssetUrl = (filename) => {
+const getPublicAssetUrl = filename => {
   if (!filename) {
     return "";
   }
@@ -60,13 +59,13 @@ const getPublicAssetUrl = (filename) => {
   return `${getBackendURL()}/public/${filename}`;
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     position: "fixed",
     inset: 0,
     display: "flex",
     flexDirection: "column",
-    overflow: "hidden",
+    overflow: "hidden"
   },
   backgroundLayer: {
     position: "absolute",
@@ -77,8 +76,8 @@ const useStyles = makeStyles((theme) => ({
     animation: "$gradientDrift 18s ease-in-out infinite",
     willChange: "background-position",
     "@media (prefers-reduced-motion: reduce)": {
-      animation: "none",
-    },
+      animation: "none"
+    }
   },
   backgroundLayerImage: {
     position: "absolute",
@@ -86,14 +85,14 @@ const useStyles = makeStyles((theme) => ({
     backgroundSize: "cover",
     backgroundPosition: "center",
     animation: "none",
-    willChange: "auto",
+    willChange: "auto"
   },
   backgroundVideo: {
     position: "absolute",
     inset: 0,
     width: "100%",
     height: "100%",
-    objectFit: "cover",
+    objectFit: "cover"
   },
   content: {
     position: "relative",
@@ -105,8 +104,8 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "center",
     padding: theme.spacing(3),
     [theme.breakpoints.down("xs")]: {
-      padding: theme.spacing(1.5),
-    },
+      padding: theme.spacing(1.5)
+    }
   },
   themeToggle: {
     position: "absolute",
@@ -127,12 +126,12 @@ const useStyles = makeStyles((theme) => ({
       background:
         theme.palette.type === "light"
           ? "rgba(255,255,255,0.84)"
-          : "rgba(10,18,31,0.68)",
+          : "rgba(10,18,31,0.68)"
     },
     [theme.breakpoints.down("xs")]: {
       top: theme.spacing(1),
-      right: theme.spacing(1),
-    },
+      right: theme.spacing(1)
+    }
   },
   languageToggle: {
     position: "absolute",
@@ -153,22 +152,22 @@ const useStyles = makeStyles((theme) => ({
       background:
         theme.palette.type === "light"
           ? "rgba(255,255,255,0.84)"
-          : "rgba(10,18,31,0.68)",
+          : "rgba(10,18,31,0.68)"
     },
     [theme.breakpoints.down("xs")]: {
       top: theme.spacing(1),
-      right: theme.spacing(7),
-    },
+      right: theme.spacing(7)
+    }
   },
   langMenu: {
-    zIndex: 3,
+    zIndex: 3
   },
   langMenuPaper: {
     minWidth: 160,
     borderRadius: theme.spacing(1),
     overflow: "hidden",
     transformOrigin: "top center",
-    transition: "transform 180ms ease, opacity 180ms ease",
+    transition: "transform 180ms ease, opacity 180ms ease"
   },
   layout: {
     width: "100%",
@@ -178,8 +177,8 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     gap: theme.spacing(2),
     [theme.breakpoints.down("sm")]: {
-      maxWidth: 440,
-    },
+      maxWidth: 440
+    }
   },
   loginBox: {
     width: "fit-content",
@@ -196,8 +195,8 @@ const useStyles = makeStyles((theme) => ({
     border: `1px solid ${theme.palette.backgroundContrast.border}`,
     [theme.breakpoints.down("sm")]: {
       display: "block",
-      maxWidth: 420,
-    },
+      maxWidth: 420
+    }
   },
   mediaPane: {
     position: "relative",
@@ -207,8 +206,8 @@ const useStyles = makeStyles((theme) => ({
     overflow: "hidden",
     backgroundColor: theme.palette.background.default,
     [theme.breakpoints.down("sm")]: {
-      display: "none",
-    },
+      display: "none"
+    }
   },
   sidePanelImage: {
     position: "absolute",
@@ -216,7 +215,7 @@ const useStyles = makeStyles((theme) => ({
     display: "block",
     width: "100%",
     height: "100%",
-    objectFit: "cover",
+    objectFit: "cover"
   },
   formColumn: {
     flex: "0 0 420px",
@@ -225,11 +224,11 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     gap: theme.spacing(2),
     [theme.breakpoints.down("sm")]: {
-      width: "100%",
-    },
+      width: "100%"
+    }
   },
   formCardWrap: {
-    width: "100%",
+    width: "100%"
   },
   paper: {
     width: "100%",
@@ -245,24 +244,24 @@ const useStyles = makeStyles((theme) => ({
     border: "none",
     [theme.breakpoints.down("xs")]: {
       padding: "24px 16px 20px",
-      borderRadius: 16,
+      borderRadius: 16
     },
     [theme.breakpoints.down("sm")]: {
-      borderRadius: 24,
-    },
+      borderRadius: 24
+    }
   },
   form: {
     width: "100%",
-    marginTop: theme.spacing(1),
+    marginTop: theme.spacing(1)
   },
   submit: {
-    margin: theme.spacing(2, 0, 1),
+    margin: theme.spacing(2, 0, 1)
   },
   logoImg: {
     width: "100%",
     maxWidth: 200,
     margin: "0 auto 8px",
-    content: `url("${theme.calculatedLogo()}")`,
+    content: `url("${theme.calculatedLogo()}")`
   },
   linksContainer: {
     width: "100%",
@@ -272,8 +271,8 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "center",
     gap: theme.spacing(1),
     [theme.breakpoints.down("sm")]: {
-      maxWidth: 420,
-    },
+      maxWidth: 420
+    }
   },
   footerLink: {
     display: "inline-flex",
@@ -309,8 +308,8 @@ const useStyles = makeStyles((theme) => ({
         theme.palette.type === "light"
           ? "rgba(255,255,255,0.9)"
           : "rgba(10,18,31,0.78)",
-      textDecoration: "none",
-    },
+      textDecoration: "none"
+    }
   },
   versionInfo: {
     position: "absolute",
@@ -328,20 +327,20 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.down("xs")]: {
       right: theme.spacing(1),
       bottom: theme.spacing(0.75),
-      fontSize: "11px",
-    },
+      fontSize: "11px"
+    }
   },
   "@keyframes gradientDrift": {
     "0%": {
-      backgroundPosition: "0% 50%",
+      backgroundPosition: "0% 50%"
     },
     "50%": {
-      backgroundPosition: "100% 50%",
+      backgroundPosition: "100% 50%"
     },
     "100%": {
-      backgroundPosition: "0% 50%",
-    },
-  },
+      backgroundPosition: "0% 50%"
+    }
+  }
 }));
 
 const Login = () => {
@@ -354,7 +353,7 @@ const Login = () => {
   const currentLanguage =
     localStorage.getItem("language") || i18n.language || "en";
 
-  const handleChooseLanguage = (lang) => {
+  const handleChooseLanguage = lang => {
     setLangMenuAnchor(null);
     localStorage.setItem("language", lang);
     window.location.reload(false);
@@ -368,14 +367,14 @@ const Login = () => {
 
   const { handleLogin } = useContext(AuthContext);
 
-  const handleChangeInput = (event) => {
-    setUser((prevUser) => ({
+  const handleChangeInput = event => {
+    setUser(prevUser => ({
       ...prevUser,
-      [event.target.name]: event.target.value.trim(),
+      [event.target.name]: event.target.value.trim()
     }));
   };
 
-  const handlSubmit = (event) => {
+  const handlSubmit = event => {
     event.preventDefault();
     handleLogin(user);
   };
@@ -385,22 +384,22 @@ const Login = () => {
       getPublicSetting("allowSignup"),
       getPublicSetting("loginPageLinks"),
       getPublicSetting("loginSidePanelImage"),
-      getPublicSetting("loginBackgroundContent"),
+      getPublicSetting("loginBackgroundContent")
     ])
       .then(
         ([
           allowSignupValue,
           loginLinksValue,
           sidePanelImageValue,
-          backgroundContentValue,
+          backgroundContentValue
         ]) => {
           setAllowSignup(allowSignupValue === "enabled");
           setLoginLinks(parseLoginLinks(loginLinksValue));
           setSidePanelImage(sidePanelImageValue || "");
           setBackgroundContent(backgroundContentValue || "");
-        },
+        }
       )
-      .catch((error) => {
+      .catch(error => {
         console.log("Error reading setting", error);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -417,7 +416,7 @@ const Login = () => {
       <CssBaseline />
       <IconButton
         className={classes.languageToggle}
-        onClick={(event) => setLangMenuAnchor(event.currentTarget)}
+        onClick={event => setLangMenuAnchor(event.currentTarget)}
         aria-label={i18n.t("mainDrawer.appBar.i18n.language")}
       >
         <LanguageIcon />
@@ -436,20 +435,20 @@ const Login = () => {
             marginTop: 6,
             overflow: "visible",
             background: "transparent",
-            boxShadow: "none",
-          },
+            boxShadow: "none"
+          }
         }}
         disableScrollLock
       >
         <Paper className={classes.langMenuPaper} elevation={4}>
           <MenuList>
-            {Object.keys(messages).map((lang) => (
+            {Object.keys(messages).map(lang => (
               <MenuItem
                 key={lang}
                 onClick={() => handleChooseLanguage(lang)}
                 selected={currentLanguage === lang}
                 style={{
-                  fontWeight: currentLanguage === lang ? "bold" : "normal",
+                  fontWeight: currentLanguage === lang ? "bold" : "normal"
                 }}
               >
                 {messages[lang].translations.mainDrawer.appBar.i18n.language}

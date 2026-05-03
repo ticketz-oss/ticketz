@@ -1,6 +1,6 @@
 const rules = {
   user: {
-    static: [],
+    static: []
   },
 
   admin: {
@@ -14,9 +14,9 @@ const rules = {
       "contacts-page:deleteContact",
       "connections-page:actionButtons",
       "connections-page:addConnection",
-      "connections-page:editOrDeleteConnection",
-    ],
-  },
+      "connections-page:editOrDeleteConnection"
+    ]
+  }
 };
 
 export default rules;

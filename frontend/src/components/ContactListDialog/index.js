@@ -19,20 +19,20 @@ import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     display: "flex",
-    flexWrap: "wrap",
+    flexWrap: "wrap"
   },
   multFieldLine: {
     display: "flex",
     "& > *:not(:last-child)": {
-      marginRight: theme.spacing(1),
-    },
+      marginRight: theme.spacing(1)
+    }
   },
 
   btnWrapper: {
-    position: "relative",
+    position: "relative"
   },
 
   buttonProgress: {
@@ -41,26 +41,26 @@ const useStyles = makeStyles((theme) => ({
     top: "50%",
     left: "50%",
     marginTop: -12,
-    marginLeft: -12,
+    marginLeft: -12
   },
   formControl: {
     margin: theme.spacing(1),
-    minWidth: 120,
-  },
+    minWidth: 120
+  }
 }));
 
 const ContactListSchema = Yup.object().shape({
   name: Yup.string()
     .min(2, "Too Short!")
     .max(50, "Too Long!")
-    .required("Required"),
+    .required("Required")
 });
 
 const ContactListModal = ({ open, onClose, contactListId }) => {
   const classes = useStyles();
 
   const initialState = {
-    name: "",
+    name: ""
   };
 
   const [contactList, setContactList] = useState(initialState);
@@ -70,7 +70,7 @@ const ContactListModal = ({ open, onClose, contactListId }) => {
       if (!contactListId) return;
       try {
         const { data } = await api.get(`/contact-lists/${contactListId}`);
-        setContactList((prevState) => {
+        setContactList(prevState => {
           return { ...prevState, ...data };
         });
       } catch (err) {
@@ -86,7 +86,7 @@ const ContactListModal = ({ open, onClose, contactListId }) => {
     setContactList(initialState);
   };
 
-  const handleSaveContactList = async (values) => {
+  const handleSaveContactList = async values => {
     const contactListData = { ...values };
     try {
       if (contactListId) {

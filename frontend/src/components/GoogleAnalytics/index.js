@@ -14,7 +14,7 @@ const GoogleAnalytics = () => {
     gtag("js", new Date());
 
     gtag("config", ga4Tag, {
-      page_title: window.location.host,
+      page_title: window.location.host
     });
   }, []);
 

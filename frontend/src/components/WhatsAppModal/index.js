@@ -22,7 +22,7 @@ import {
   Tooltip,
   Paper,
   Grid,
-  Checkbox,
+  Checkbox
 } from "@material-ui/core";
 
 import api from "../../services/api";
@@ -33,21 +33,21 @@ import HelpOutlineOutlinedIcon from "@material-ui/icons/HelpOutlineOutlined";
 
 import { SelectLanguage } from "../SelectLanguage";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     display: "flex",
-    flexWrap: "wrap",
+    flexWrap: "wrap"
   },
 
   multFieldLine: {
     display: "flex",
     "& > *:not(:last-child)": {
-      marginRight: theme.spacing(1),
-    },
+      marginRight: theme.spacing(1)
+    }
   },
 
   btnWrapper: {
-    position: "relative",
+    position: "relative"
   },
 
   buttonProgress: {
@@ -56,15 +56,15 @@ const useStyles = makeStyles((theme) => ({
     top: "50%",
     left: "50%",
     marginTop: -12,
-    marginLeft: -12,
-  },
+    marginLeft: -12
+  }
 }));
 
 const SessionSchema = Yup.object().shape({
   name: Yup.string()
     .min(2, "Too Short!")
     .max(50, "Too Long!")
-    .required("Required"),
+    .required("Required")
 });
 
 const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
@@ -79,7 +79,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
     isDefault: false,
     token: "",
     provider: "beta",
-    language: localStorage.getItem("language") || "",
+    language: localStorage.getItem("language") || ""
   };
   const [whatsApp, setWhatsApp] = useState(initialState);
   const [selectedQueueIds, setSelectedQueueIds] = useState([]);
@@ -92,7 +92,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
         const { data } = await api.get(`whatsapp/${whatsAppId}?session=0`);
         setWhatsApp(data);
 
-        const whatsQueueIds = data.queues?.map((queue) => queue.id);
+        const whatsQueueIds = data.queues?.map(queue => queue.id);
         setSelectedQueueIds(whatsQueueIds);
       } catch (err) {
         toastError(err);
@@ -101,7 +101,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
     fetchSession();
   }, [whatsAppId]);
 
-  const handleSaveWhatsApp = async (values) => {
+  const handleSaveWhatsApp = async values => {
     const whatsappData = { ...values, queueIds: selectedQueueIds };
     delete whatsappData["queues"];
     delete whatsappData["session"];
@@ -302,7 +302,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                 </div>
                 <QueueSelect
                   selectedQueueIds={selectedQueueIds}
-                  onChange={(selectedIds) => setSelectedQueueIds(selectedIds)}
+                  onChange={selectedIds => setSelectedQueueIds(selectedIds)}
                 />
                 <div>
                   <Field

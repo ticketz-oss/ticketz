@@ -9,7 +9,7 @@ import {
   TableBody,
   TableCell,
   TableRow,
-  IconButton,
+  IconButton
 } from "@material-ui/core";
 import { Formik, Form, Field } from "formik";
 import ButtonWithSpinner from "../ButtonWithSpinner";
@@ -20,41 +20,41 @@ import { Edit as EditIcon } from "@material-ui/icons";
 import { toast } from "react-toastify";
 import useHelps from "../../hooks/useHelps";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
-    width: "100%",
+    width: "100%"
   },
   mainPaper: {
     width: "100%",
     flex: 1,
-    padding: theme.spacing(2),
+    padding: theme.spacing(2)
   },
   fullWidth: {
-    width: "100%",
+    width: "100%"
   },
   tableContainer: {
     width: "100%",
     overflowX: "scroll",
-    ...theme.scrollbarStyles,
+    ...theme.scrollbarStyles
   },
   textfield: {
-    width: "100%",
+    width: "100%"
   },
   textRight: {
-    textAlign: "right",
+    textAlign: "right"
   },
   row: {
     paddingTop: theme.spacing(2),
-    paddingBottom: theme.spacing(2),
+    paddingBottom: theme.spacing(2)
   },
   control: {
     paddingRight: theme.spacing(1),
-    paddingLeft: theme.spacing(1),
+    paddingLeft: theme.spacing(1)
   },
   buttonContainer: {
     textAlign: "right",
-    padding: theme.spacing(1),
-  },
+    padding: theme.spacing(1)
+  }
 }));
 
 export function HelpManagerForm(props) {
@@ -67,7 +67,7 @@ export function HelpManagerForm(props) {
     setRecord(initialValue);
   }, [initialValue]);
 
-  const handleSubmit = async (data) => {
+  const handleSubmit = async data => {
     onSubmit(data);
   };
 
@@ -83,7 +83,7 @@ export function HelpManagerForm(props) {
         }, 500)
       }
     >
-      {(values) => (
+      {values => (
         <Form className={classes.fullWidth}>
           <Grid spacing={2} justifyContent="flex-end" container>
             <Grid xs={12} sm={6} md={3} item>
@@ -179,7 +179,7 @@ export function HelpsManagerGrid(props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {records.map((row) => (
+          {records.map(row => (
             <TableRow key={row.id}>
               <TableCell align="center" style={{ width: "1%" }}>
                 <IconButton onClick={() => onSelect(row)} aria-label="delete">
@@ -207,7 +207,7 @@ export default function HelpsManager() {
   const [record, setRecord] = useState({
     title: "",
     description: "",
-    video: "",
+    video: ""
   });
 
   useEffect(() => {
@@ -229,7 +229,7 @@ export default function HelpsManager() {
     setLoading(false);
   };
 
-  const handleSubmit = async (data) => {
+  const handleSubmit = async data => {
     setLoading(true);
     try {
       if (data.id !== undefined) {
@@ -242,7 +242,7 @@ export default function HelpsManager() {
       toast.success("Operação realizada com sucesso!");
     } catch (e) {
       toast.error(
-        "Não foi possível realizar a operação. Verifique se já existe uma helpo com o mesmo nome ou se os campos foram preenchidos corretamente",
+        "Não foi possível realizar a operação. Verifique se já existe uma helpo com o mesmo nome ou se os campos foram preenchidos corretamente"
       );
     }
     setLoading(false);
@@ -269,16 +269,16 @@ export default function HelpsManager() {
     setRecord({
       title: "",
       description: "",
-      video: "",
+      video: ""
     });
   };
 
-  const handleSelect = (data) => {
+  const handleSelect = data => {
     setRecord({
       id: data.id,
       title: data.title || "",
       description: data.description || "",
-      video: data.video || "",
+      video: data.video || ""
     });
   };
 

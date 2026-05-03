@@ -1,69 +1,69 @@
 import api from "../../services/api";
 
 const useCompanies = () => {
-  const save = async (data) => {
+  const save = async data => {
     const { data: responseData } = await api.request({
       url: "/companies",
       method: "POST",
-      data,
+      data
     });
     return responseData;
   };
 
-  const findAll = async (id) => {
+  const findAll = async id => {
     const { data } = await api.request({
       url: `/companies`,
-      method: "GET",
+      method: "GET"
     });
     return data;
   };
 
-  const list = async (id) => {
+  const list = async id => {
     const { data } = await api.request({
       url: `/companies/list`,
-      method: "GET",
+      method: "GET"
     });
     return data;
   };
 
-  const find = async (id) => {
+  const find = async id => {
     const { data } = await api.request({
       url: `/companies/${id}`,
-      method: "GET",
+      method: "GET"
     });
     return data;
   };
 
-  const finding = async (id) => {
+  const finding = async id => {
     const { data } = await api.request({
       url: `/companies/${id}`,
-      method: "GET",
+      method: "GET"
     });
     return data;
   };
 
-  const update = async (data) => {
+  const update = async data => {
     const { data: responseData } = await api.request({
       url: `/companies/${data.id}`,
       method: "PUT",
-      data,
+      data
     });
     return responseData;
   };
 
-  const remove = async (id) => {
+  const remove = async id => {
     const { data } = await api.request({
       url: `/companies/${id}`,
-      method: "DELETE",
+      method: "DELETE"
     });
     return data;
   };
 
-  const updateSchedules = async (data) => {
+  const updateSchedules = async data => {
     const { data: responseData } = await api.request({
       url: `/companies/${data.id}/schedules`,
       method: "PUT",
-      data,
+      data
     });
     return responseData;
   };
@@ -76,7 +76,7 @@ const useCompanies = () => {
     find,
     finding,
     findAll,
-    updateSchedules,
+    updateSchedules
   };
 };
 

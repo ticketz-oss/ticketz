@@ -6,11 +6,11 @@ import {
   TableBody,
   TableCell,
   TableRow,
-  IconButton,
+  IconButton
 } from "@material-ui/core";
 import {
   Edit as EditIcon,
-  DeleteOutline as DeleteOutlineIcon,
+  DeleteOutline as DeleteOutlineIcon
 } from "@material-ui/icons";
 
 import TableRowSkeleton from "../../components/TableRowSkeleton";
@@ -29,16 +29,16 @@ function QuickMessagesTable(props) {
     }
   }, [messages, showLoading]);
 
-  const handleEdit = (message) => {
+  const handleEdit = message => {
     editMessage(message);
   };
 
-  const handleDelete = (message) => {
+  const handleDelete = message => {
     deleteMessage(message);
   };
 
   const renderRows = () => {
-    return rows.map((message) => {
+    return rows.map(message => {
       return (
         <TableRow key={message.id}>
           <TableCell align="center">{message.shortcode}</TableCell>
@@ -83,7 +83,7 @@ QuickMessagesTable.propTypes = {
   messages: PropTypes.array.isRequired,
   showLoading: PropTypes.bool,
   editMessage: PropTypes.func.isRequired,
-  deleteMessage: PropTypes.func.isRequired,
+  deleteMessage: PropTypes.func.isRequired
 };
 
 export default QuickMessagesTable;

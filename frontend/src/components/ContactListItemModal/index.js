@@ -22,24 +22,24 @@ import toastError from "../../errors/toastError";
 import { useParams } from "react-router-dom";
 import { AuthContext } from "../../context/Auth/AuthContext";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     display: "flex",
-    flexWrap: "wrap",
+    flexWrap: "wrap"
   },
   textField: {
     marginRight: theme.spacing(1),
-    flex: 1,
+    flex: 1
   },
 
   extraAttr: {
     display: "flex",
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "center"
   },
 
   btnWrapper: {
-    position: "relative",
+    position: "relative"
   },
 
   buttonProgress: {
@@ -48,8 +48,8 @@ const useStyles = makeStyles((theme) => ({
     top: "50%",
     left: "50%",
     marginTop: -12,
-    marginLeft: -12,
-  },
+    marginLeft: -12
+  }
 }));
 
 const ContactSchema = Yup.object().shape({
@@ -58,7 +58,7 @@ const ContactSchema = Yup.object().shape({
     .max(50, "Too Long!")
     .required("Required"),
   number: Yup.string().min(8, "Too Short!").max(50, "Too Long!"),
-  email: Yup.string().email("Invalid email"),
+  email: Yup.string().email("Invalid email")
 });
 
 const ContactListItemModal = ({
@@ -66,20 +66,20 @@ const ContactListItemModal = ({
   onClose,
   contactId,
   initialValues,
-  onSave,
+  onSave
 }) => {
   const classes = useStyles();
   const isMounted = useRef(true);
 
   const {
-    user: { companyId },
+    user: { companyId }
   } = useContext(AuthContext);
   const { contactListId } = useParams();
 
   const initialState = {
     name: "",
     number: "",
-    email: "",
+    email: ""
   };
 
   const [contact, setContact] = useState(initialState);
@@ -93,7 +93,7 @@ const ContactListItemModal = ({
   useEffect(() => {
     const fetchContact = async () => {
       if (initialValues) {
-        setContact((prevState) => {
+        setContact(prevState => {
           return { ...prevState, ...initialValues };
         });
       }
@@ -118,20 +118,20 @@ const ContactListItemModal = ({
     setContact(initialState);
   };
 
-  const handleSaveContact = async (values) => {
+  const handleSaveContact = async values => {
     try {
       if (contactId) {
         await api.put(`/contact-list-items/${contactId}`, {
           ...values,
           companyId,
-          contactListId,
+          contactListId
         });
         handleClose();
       } else {
         const { data } = await api.post("/contact-list-items", {
           ...values,
           companyId,
-          contactListId,
+          contactListId
         });
         if (onSave) {
           onSave(data);

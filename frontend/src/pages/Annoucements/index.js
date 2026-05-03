@@ -37,9 +37,9 @@ const reducer = (state, action) => {
     const newAnnouncements = [];
 
     if (isArray(announcements)) {
-      announcements.forEach((announcement) => {
+      announcements.forEach(announcement => {
         const announcementIndex = state.findIndex(
-          (u) => u.id === announcement.id,
+          u => u.id === announcement.id
         );
         if (announcementIndex !== -1) {
           state[announcementIndex] = announcement;
@@ -54,7 +54,7 @@ const reducer = (state, action) => {
 
   if (action.type === "UPDATE_ANNOUNCEMENTS") {
     const announcement = action.payload;
-    const announcementIndex = state.findIndex((u) => u.id === announcement.id);
+    const announcementIndex = state.findIndex(u => u.id === announcement.id);
 
     if (announcementIndex !== -1) {
       state[announcementIndex] = announcement;
@@ -67,7 +67,7 @@ const reducer = (state, action) => {
   if (action.type === "DELETE_ANNOUNCEMENT") {
     const announcementId = action.payload;
 
-    const announcementIndex = state.findIndex((u) => u.id === announcementId);
+    const announcementIndex = state.findIndex(u => u.id === announcementId);
     if (announcementIndex !== -1) {
       state.splice(announcementIndex, 1);
     }
@@ -79,13 +79,13 @@ const reducer = (state, action) => {
   }
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   mainPaper: {
     flex: 1,
     padding: theme.spacing(1),
     overflowY: "scroll",
-    ...theme.scrollbarStyles,
-  },
+    ...theme.scrollbarStyles
+  }
 }));
 
 const Announcements = () => {
@@ -121,7 +121,7 @@ const Announcements = () => {
     const companyId = localStorage.getItem("companyId");
     const socket = socketManager.GetSocket(companyId);
 
-    const onAnnouncement = (data) => {
+    const onAnnouncement = data => {
       if (data.action === "update" || data.action === "create") {
         dispatch({ type: "UPDATE_ANNOUNCEMENTS", payload: data.record });
       }
@@ -140,7 +140,7 @@ const Announcements = () => {
   const fetchAnnouncements = async () => {
     try {
       const { data } = await api.get("/announcements/", {
-        params: { searchParam, pageNumber },
+        params: { searchParam, pageNumber }
       });
       dispatch({ type: "LOAD_ANNOUNCEMENTS", payload: data.records });
       setHasMore(data.hasMore);
@@ -160,16 +160,16 @@ const Announcements = () => {
     setAnnouncementModalOpen(false);
   };
 
-  const handleSearch = (event) => {
+  const handleSearch = event => {
     setSearchParam(event.target.value.toLowerCase());
   };
 
-  const handleEditAnnouncement = (announcement) => {
+  const handleEditAnnouncement = announcement => {
     setSelectedAnnouncement(announcement);
     setAnnouncementModalOpen(true);
   };
 
-  const handleDeleteAnnouncement = async (announcementId) => {
+  const handleDeleteAnnouncement = async announcementId => {
     try {
       await api.delete(`/announcements/${announcementId}`);
       toast.success(i18n.t("announcements.toasts.deleted"));
@@ -182,10 +182,10 @@ const Announcements = () => {
   };
 
   const loadMore = () => {
-    setPageNumber((prevState) => prevState + 1);
+    setPageNumber(prevState => prevState + 1);
   };
 
-  const handleScroll = (e) => {
+  const handleScroll = e => {
     if (!hasMore || loading) return;
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
     if (scrollHeight - (scrollTop + 100) < clientHeight) {
@@ -193,7 +193,7 @@ const Announcements = () => {
     }
   };
 
-  const translatePriority = (val) => {
+  const translatePriority = val => {
     if (val === 1) {
       return "Alta";
     }
@@ -249,7 +249,7 @@ const Announcements = () => {
                       <InputAdornment position="start">
                         <SearchIcon style={{ color: "gray" }} />
                       </InputAdornment>
-                    ),
+                    )
                   }}
                 />
               </Grid>
@@ -294,7 +294,7 @@ const Announcements = () => {
           </TableHead>
           <TableBody>
             <>
-              {announcements.map((announcement) => (
+              {announcements.map(announcement => (
                 <TableRow key={announcement.id}>
                   <TableCell align="center">{announcement.title}</TableCell>
                   <TableCell align="center">
@@ -316,7 +316,7 @@ const Announcements = () => {
 
                     <IconButton
                       size="small"
-                      onClick={(e) => {
+                      onClick={e => {
                         setConfirmModalOpen(true);
                         setDeletingAnnouncement(announcement);
                       }}

@@ -6,29 +6,29 @@ import NumberFormat from "react-number-format";
 import ButtonWithSpinner from "../ButtonWithSpinner";
 import { i18n } from "../../translate/i18n";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
-    width: "100%",
+    width: "100%"
   },
   fullWidth: {
-    width: "100%",
+    width: "100%"
   },
   textfield: {
     width: "100%",
-    fontSize: "0.875em",
+    fontSize: "0.875em"
   },
   row: {
     paddingTop: theme.spacing(2),
-    paddingBottom: theme.spacing(2),
+    paddingBottom: theme.spacing(2)
   },
   control: {
     paddingRight: theme.spacing(1),
-    paddingLeft: theme.spacing(1),
+    paddingLeft: theme.spacing(1)
   },
   buttonContainer: {
     textAlign: "right",
-    padding: theme.spacing(1),
-  },
+    padding: theme.spacing(1)
+  }
 }));
 
 function SchedulesForm(props) {
@@ -42,7 +42,7 @@ function SchedulesForm(props) {
       startTimeA: "",
       endTimeA: "",
       startTimeB: "",
-      endTimeB: "",
+      endTimeB: ""
     },
     {
       weekday: i18n.t("queueModal.serviceHours.tuesday"),
@@ -50,7 +50,7 @@ function SchedulesForm(props) {
       startTimeA: "",
       endTimeA: "",
       startTimeB: "",
-      endTimeB: "",
+      endTimeB: ""
     },
     {
       weekday: i18n.t("queueModal.serviceHours.wednesday"),
@@ -58,7 +58,7 @@ function SchedulesForm(props) {
       startTimeA: "",
       endTimeA: "",
       startTimeB: "",
-      endTimeB: "",
+      endTimeB: ""
     },
     {
       weekday: i18n.t("queueModal.serviceHours.thursday"),
@@ -66,7 +66,7 @@ function SchedulesForm(props) {
       startTimeA: "",
       endTimeA: "",
       startTimeB: "",
-      endTimeB: "",
+      endTimeB: ""
     },
     {
       weekday: i18n.t("queueModal.serviceHours.friday"),
@@ -74,7 +74,7 @@ function SchedulesForm(props) {
       startTimeA: "",
       endTimeA: "",
       startTimeB: "",
-      endTimeB: "",
+      endTimeB: ""
     },
     {
       weekday: i18n.t("queueModal.serviceHours.saturday"),
@@ -82,7 +82,7 @@ function SchedulesForm(props) {
       startTimeA: "",
       endTimeA: "",
       startTimeB: "",
-      endTimeB: "",
+      endTimeB: ""
     },
     {
       weekday: i18n.t("queueModal.serviceHours.sunday"),
@@ -90,8 +90,8 @@ function SchedulesForm(props) {
       startTimeA: "",
       endTimeA: "",
       startTimeB: "",
-      endTimeB: "",
-    },
+      endTimeB: ""
+    }
   ]);
 
   useEffect(() => {
@@ -101,7 +101,7 @@ function SchedulesForm(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialValues]);
 
-  const handleSubmit = (data) => {
+  const handleSubmit = data => {
     onSubmit(data);
   };
 
@@ -120,7 +120,7 @@ function SchedulesForm(props) {
         <Form className={classes.fullWidth}>
           <FieldArray
             name="schedules"
-            render={(arrayHelpers) => (
+            render={arrayHelpers => (
               <Grid spacing={4} container>
                 {values.schedules.map((item, index) => {
                   return (
@@ -151,7 +151,7 @@ function SchedulesForm(props) {
                                 format="##:##"
                                 className={classes.fullWidth}
                                 label={i18n.t(
-                                  "queueModal.serviceHours.startTimeA",
+                                  "queueModal.serviceHours.startTimeA"
                                 )}
                               />
                             )}
@@ -171,7 +171,7 @@ function SchedulesForm(props) {
                                 format="##:##"
                                 className={classes.fullWidth}
                                 label={i18n.t(
-                                  "queueModal.serviceHours.endTimeA",
+                                  "queueModal.serviceHours.endTimeA"
                                 )}
                               />
                             )}
@@ -191,7 +191,7 @@ function SchedulesForm(props) {
                                 format="##:##"
                                 className={classes.fullWidth}
                                 label={i18n.t(
-                                  "queueModal.serviceHours.startTimeB",
+                                  "queueModal.serviceHours.startTimeB"
                                 )}
                               />
                             )}
@@ -211,7 +211,7 @@ function SchedulesForm(props) {
                                 format="##:##"
                                 className={classes.fullWidth}
                                 label={i18n.t(
-                                  "queueModal.serviceHours.endTimeB",
+                                  "queueModal.serviceHours.endTimeB"
                                 )}
                               />
                             )}

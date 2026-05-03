@@ -44,7 +44,7 @@ export function TagsContainer({ ticket, contact }) {
     }
   }, [contact]);
 
-  const createTag = async (data) => {
+  const createTag = async data => {
     try {
       const { data: responseData } = await api.post(`/tags`, data);
       return responseData;
@@ -62,7 +62,7 @@ export function TagsContainer({ ticket, contact }) {
     }
   };
 
-  const syncTags = async (data) => {
+  const syncTags = async data => {
     try {
       const { data: responseData } = await api.post(`/tags/sync`, data);
       return responseData;
@@ -94,7 +94,7 @@ export function TagsContainer({ ticket, contact }) {
     await syncTags({
       ticketId: ticket?.id,
       contactId: contact?.id,
-      tags: optionsChanged,
+      tags: optionsChanged
     });
   };
 
@@ -106,7 +106,7 @@ export function TagsContainer({ ticket, contact }) {
       value={selecteds}
       freeSolo
       onChange={(e, v, r) => onChange(v, r)}
-      getOptionLabel={(option) => option.name}
+      getOptionLabel={option => option.name}
       renderTags={(value, getTagProps) =>
         value.map((option, index) => (
           <Chip
@@ -115,7 +115,7 @@ export function TagsContainer({ ticket, contact }) {
               color: "white",
               backgroundColor: option.color || "#eee",
               textShadow:
-                "-1px 0 #808080, 0 1px #808080, 1px 0 #808080, 0 -1px #808080",
+                "-1px 0 #808080, 0 1px #808080, 1px 0 #808080, 0 -1px #808080"
             }}
             label={option.name}
             {...getTagProps({ index })}
@@ -123,7 +123,7 @@ export function TagsContainer({ ticket, contact }) {
           />
         ))
       }
-      renderInput={(params) => (
+      renderInput={params => (
         <TextField {...params} variant="outlined" placeholder="Tags" />
       )}
       PaperComponent={({ children }) => (

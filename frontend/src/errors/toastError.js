@@ -2,7 +2,7 @@ import { toast } from "react-toastify";
 import { i18n } from "../translate/i18n";
 import { isString } from "lodash";
 
-const toastError = (err) => {
+const toastError = err => {
   const errorMsg =
     typeof err === "string"
       ? err
@@ -21,7 +21,7 @@ const toastError = (err) => {
         pauseOnHover: false,
         draggable: true,
         progress: undefined,
-        theme: "light",
+        theme: "light"
       });
       return;
     } else {
@@ -33,7 +33,7 @@ const toastError = (err) => {
         pauseOnHover: false,
         draggable: true,
         progress: undefined,
-        theme: "light",
+        theme: "light"
       });
       return;
     }

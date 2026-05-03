@@ -16,7 +16,7 @@ import {
   Tooltip,
   Typography,
   CircularProgress,
-  Checkbox,
+  Checkbox
 } from "@material-ui/core";
 import {
   Edit,
@@ -28,14 +28,14 @@ import {
   DeleteOutline,
   Lock,
   Refresh,
-  Replay,
+  Replay
 } from "@material-ui/icons";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPhoneSlash,
   faQrcode,
-  faWandMagicSparkles,
+  faWandMagicSparkles
 } from "@fortawesome/free-solid-svg-icons";
 
 import MainContainer from "../../components/MainContainer";
@@ -56,31 +56,31 @@ import wavoipIcon from "../../assets/wavoip.webp";
 import WavoipModal from "../../components/WavoipModal";
 import { wavoipAvailable } from "../../helpers/wavoipCallManager";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   mainPaper: {
     flex: 1,
     padding: theme.spacing(1),
     overflowY: "scroll",
-    ...theme.scrollbarStyles,
+    ...theme.scrollbarStyles
   },
   customTableCell: {
     display: "flex",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "center"
   },
   tooltip: {
     backgroundColor: "#f5f5f9",
     color: "rgba(0, 0, 0, 0.87)",
     fontSize: theme.typography.pxToRem(14),
     border: "1px solid #dadde9",
-    maxWidth: 450,
+    maxWidth: 450
   },
   tooltipPopper: {
-    textAlign: "center",
+    textAlign: "center"
   },
   buttonProgress: {
-    color: green[500],
-  },
+    color: green[500]
+  }
 }));
 
 const CustomToolTip = ({ title, content, children }) => {
@@ -91,7 +91,7 @@ const CustomToolTip = ({ title, content, children }) => {
       arrow
       classes={{
         tooltip: classes.tooltip,
-        popper: classes.tooltipPopper,
+        popper: classes.tooltipPopper
       }}
       title={
         <React.Fragment>
@@ -121,14 +121,14 @@ const Connections = () => {
     title: "",
     message: "",
     whatsAppId: "",
-    open: false,
+    open: false
   };
   const [confirmModalInfo, setConfirmModalInfo] = useState(
-    confirmationModalInitialState,
+    confirmationModalInitialState
   );
   const [wavoipModalOpen, setWavoipModalOpen] = useState(false);
 
-  const handleStartWhatsAppSession = async (whatsAppId) => {
+  const handleStartWhatsAppSession = async whatsAppId => {
     try {
       await api.post(`/whatsappsession/${whatsAppId}`);
     } catch (err) {
@@ -136,7 +136,7 @@ const Connections = () => {
     }
   };
 
-  const handleRequestNewQrCode = async (whatsAppId) => {
+  const handleRequestNewQrCode = async whatsAppId => {
     try {
       await api.put(`/whatsappsession/${whatsAppId}`);
     } catch (err) {
@@ -154,7 +154,7 @@ const Connections = () => {
     setSelectedWhatsApp(null);
   }, [setSelectedWhatsApp, setWhatsAppModalOpen]);
 
-  const handleOpenQrModal = (whatsApp) => {
+  const handleOpenQrModal = whatsApp => {
     setSelectedWhatsApp(whatsApp);
     setQrModalOpen(true);
   };
@@ -164,12 +164,12 @@ const Connections = () => {
     setQrModalOpen(false);
   }, [setQrModalOpen, setSelectedWhatsApp]);
 
-  const handleEditWhatsApp = (whatsApp) => {
+  const handleEditWhatsApp = whatsApp => {
     setSelectedWhatsApp(whatsApp);
     setWhatsAppModalOpen(true);
   };
 
-  const handleOpenPrivacyWhatsApp = (whatsApp) => {
+  const handleOpenPrivacyWhatsApp = whatsApp => {
     setSelectedWhatsApp(whatsApp);
     setPrivacyModalOpen(true);
   };
@@ -185,7 +185,7 @@ const Connections = () => {
         action: action,
         title: i18n.t("connections.confirmationModal.disconnectTitle"),
         message: i18n.t("connections.confirmationModal.disconnectMessage"),
-        whatsAppId: whatsAppId,
+        whatsAppId: whatsAppId
       });
     }
 
@@ -194,13 +194,13 @@ const Connections = () => {
         action: action,
         title: i18n.t("connections.confirmationModal.deleteTitle"),
         message: i18n.t("connections.confirmationModal.deleteMessage"),
-        whatsAppId: whatsAppId,
+        whatsAppId: whatsAppId
       });
     }
     setConfirmModalOpen(true);
   };
 
-  const handleSubmitConfirmationModal = async (checked) => {
+  const handleSubmitConfirmationModal = async checked => {
     if (confirmModalInfo.action === "disconnect") {
       try {
         await api.delete(`/whatsappsession/${confirmModalInfo.whatsAppId}`);
@@ -212,7 +212,7 @@ const Connections = () => {
     if (confirmModalInfo.action === "delete") {
       try {
         await api.delete(`/whatsapp/${confirmModalInfo.whatsAppId}`, {
-          params: { closeTickets: checked },
+          params: { closeTickets: checked }
         });
         toast.success(i18n.t("connections.toasts.deleted"));
       } catch (err) {
@@ -224,7 +224,7 @@ const Connections = () => {
   };
 
   // Add a handler to open the WavoipModal
-  const handleOpenWavoipModal = (whatsApp) => {
+  const handleOpenWavoipModal = whatsApp => {
     setSelectedWhatsApp(whatsApp);
     setWavoipModalOpen(true);
   };
@@ -234,7 +234,7 @@ const Connections = () => {
     setSelectedWhatsApp(null);
   }, [setWavoipModalOpen, setSelectedWhatsApp]);
 
-  const refreshWhatsApp = async (whatsApp) => {
+  const refreshWhatsApp = async whatsApp => {
     try {
       await api.get(`/whatsappsession/refresh/${whatsApp.id}`);
     } catch (err) {
@@ -242,7 +242,7 @@ const Connections = () => {
     }
   };
 
-  const renderActionButtons = (whatsApp) => {
+  const renderActionButtons = whatsApp => {
     return (
       <>
         {whatsApp.status === "qrcode" && (
@@ -301,7 +301,7 @@ const Connections = () => {
     );
   };
 
-  const renderStatusToolTips = (whatsApp) => {
+  const renderStatusToolTips = whatsApp => {
     return (
       <div className={classes.customTableCell}>
         {whatsApp.status === "DISCONNECTED" && (
@@ -419,7 +419,7 @@ const Connections = () => {
             ) : (
               <>
                 {whatsApps?.length > 0 &&
-                  whatsApps.map((whatsApp) => (
+                  whatsApps.map(whatsApp => (
                     <TableRow key={whatsApp.id}>
                       <TableCell align="center">{whatsApp.name}</TableCell>
                       <TableCell align="center">
@@ -472,7 +472,7 @@ const Connections = () => {
 
                         <IconButton
                           size="small"
-                          onClick={(e) => {
+                          onClick={e => {
                             handleOpenConfirmationModal("delete", whatsApp.id);
                           }}
                         >

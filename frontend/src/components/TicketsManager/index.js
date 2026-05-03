@@ -22,7 +22,7 @@ import { Can } from "../Can";
 import TicketsQueueSelect from "../TicketsQueueSelect";
 import { Button } from "@material-ui/core";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   ticketsWrapper: {
     position: "relative",
     display: "flex",
@@ -30,23 +30,23 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "column",
     overflow: "hidden",
     borderTopRightRadius: 0,
-    borderBottomRightRadius: 0,
+    borderBottomRightRadius: 0
   },
 
   tabsHeader: {
     flex: "none",
-    backgroundColor: "#eee",
+    backgroundColor: "#eee"
   },
 
   settingsIcon: {
     alignSelf: "center",
     marginLeft: "auto",
-    padding: 8,
+    padding: 8
   },
 
   tab: {
     minWidth: 120,
-    width: 120,
+    width: 120
   },
 
   ticketOptionsBox: {
@@ -54,7 +54,7 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "space-between",
     alignItems: "center",
     background: "#fafafa",
-    padding: theme.spacing(1),
+    padding: theme.spacing(1)
   },
 
   serachInputWrapper: {
@@ -63,21 +63,21 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     borderRadius: 40,
     padding: 4,
-    marginRight: theme.spacing(1),
+    marginRight: theme.spacing(1)
   },
 
   searchIcon: {
     color: "grey",
     marginLeft: 6,
     marginRight: 6,
-    alignSelf: "center",
+    alignSelf: "center"
   },
 
   searchInput: {
     flex: 1,
     border: "none",
-    borderRadius: 30,
-  },
+    borderRadius: 30
+  }
 }));
 
 const TicketsManager = () => {
@@ -90,7 +90,7 @@ const TicketsManager = () => {
   const searchInputRef = useRef();
   const { user } = useContext(AuthContext);
 
-  const userQueueIds = user.queues.map((q) => q.id);
+  const userQueueIds = user.queues.map(q => q.id);
   const [selectedQueueIds, setSelectedQueueIds] = useState(userQueueIds || []);
 
   useEffect(() => {
@@ -101,7 +101,7 @@ const TicketsManager = () => {
 
   let searchTimeout;
 
-  const handleSearch = (e) => {
+  const handleSearch = e => {
     const searchedTerm = e.target.value.toLowerCase();
 
     clearTimeout(searchTimeout);
@@ -125,7 +125,7 @@ const TicketsManager = () => {
     <Paper elevation={0} variant="outlined" className={classes.ticketsWrapper}>
       <NewTicketModal
         modalOpen={newTicketModalOpen}
-        onClose={(e) => setNewTicketModalOpen(false)}
+        onClose={e => setNewTicketModalOpen(false)}
       />
       <Paper elevation={0} square className={classes.tabsHeader}>
         <Tabs
@@ -189,7 +189,7 @@ const TicketsManager = () => {
                       size="small"
                       checked={showAllTickets}
                       onChange={() =>
-                        setShowAllTickets((prevState) => !prevState)
+                        setShowAllTickets(prevState => !prevState)
                       }
                       name="showAllTickets"
                       color="primary"
@@ -204,7 +204,7 @@ const TicketsManager = () => {
           style={{ marginLeft: 6 }}
           selectedQueueIds={selectedQueueIds}
           userQueues={user?.queues}
-          onChange={(values) => setSelectedQueueIds(values)}
+          onChange={values => setSelectedQueueIds(values)}
         />
       </Paper>
       <TabPanel value={tab} name="open" className={classes.ticketsWrapper}>

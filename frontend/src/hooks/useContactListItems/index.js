@@ -1,46 +1,46 @@
 import api from "../../services/api";
 
 const useContactListItems = () => {
-  const findAll = async (params) => {
+  const findAll = async params => {
     const { data } = await api.request({
       url: "/contact-list-items",
       method: "GET",
-      params,
+      params
     });
     return data;
   };
 
-  const save = async (data) => {
+  const save = async data => {
     const { data: responseData } = await api.request({
       url: "/contact-list-items",
       method: "POST",
-      data,
+      data
     });
     return responseData;
   };
 
-  const update = async (data) => {
+  const update = async data => {
     const { data: responseData } = await api.request({
       url: `/contact-list-items/${data.id}`,
       method: "PUT",
-      data,
+      data
     });
     return responseData;
   };
 
-  const deleteRecord = async (id) => {
+  const deleteRecord = async id => {
     const { data } = await api.request({
       url: `/contact-list-items/${id}`,
-      method: "DELETE",
+      method: "DELETE"
     });
     return data;
   };
 
-  const list = async (params) => {
+  const list = async params => {
     const { data } = await api.request({
       url: `/contact-list-items/list`,
       method: "GET",
-      params,
+      params
     });
     return data;
   };
@@ -50,7 +50,7 @@ const useContactListItems = () => {
     update,
     deleteRecord,
     list,
-    findAll,
+    findAll
   };
 };
 

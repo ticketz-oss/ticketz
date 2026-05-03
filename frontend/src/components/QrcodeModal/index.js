@@ -7,17 +7,17 @@ import {
   DialogContent,
   Paper,
   Typography,
-  makeStyles,
+  makeStyles
 } from "@material-ui/core";
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import { SocketContext } from "../../context/Socket/SocketContext";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   qrcodeFrame: {
     padding: "10px",
-    backgroundColor: "#fff",
-  },
+    backgroundColor: "#fff"
+  }
 }));
 
 const QrcodeModal = ({ open, onClose, whatsAppId }) => {
@@ -45,7 +45,7 @@ const QrcodeModal = ({ open, onClose, whatsAppId }) => {
     const companyId = localStorage.getItem("companyId");
     const socket = socketManager.GetSocket(companyId);
 
-    const onCompanyWhatsappSession = (data) => {
+    const onCompanyWhatsappSession = data => {
       if (data.action === "update" && data.session.id === whatsAppId) {
         setQrCode(data.session.qrcode);
       }

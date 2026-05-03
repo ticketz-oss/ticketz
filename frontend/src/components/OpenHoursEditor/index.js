@@ -16,14 +16,14 @@ import {
   InputLabel,
   Tabs,
   Tab,
-  Box,
+  Box
 } from "@material-ui/core";
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
   Event as EventIcon,
   Schedule as ScheduleIcon,
-  Public as PublicIcon,
+  Public as PublicIcon
 } from "@material-ui/icons";
 import { format, startOfWeek, addDays } from "date-fns";
 import { enUS, es, id, pt } from "date-fns/locale";
@@ -33,59 +33,59 @@ import { timeZonesNames } from "@vvo/tzdb";
 
 const availableLocales = { en: enUS, es, pt, id };
 
-const ALL_TIMEZONES = timeZonesNames.map((tz) => ({
+const ALL_TIMEZONES = timeZonesNames.map(tz => ({
   value: tz,
-  label: tz.replace(/_/g, " "),
+  label: tz.replace(/_/g, " ")
 }));
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
-    padding: theme.spacing(3),
+    padding: theme.spacing(3)
   },
   section: {
-    marginBottom: theme.spacing(3),
+    marginBottom: theme.spacing(3)
   },
   sectionTitle: {
     marginBottom: theme.spacing(2),
     fontWeight: 500,
     display: "flex",
     alignItems: "center",
-    gap: theme.spacing(1),
+    gap: theme.spacing(1)
   },
   ruleCard: {
     padding: theme.spacing(2),
     marginBottom: theme.spacing(2),
-    border: `1px solid ${theme.palette.divider}`,
+    border: `1px solid ${theme.palette.divider}`
   },
   dayChip: {
-    margin: theme.spacing(0.5),
+    margin: theme.spacing(0.5)
   },
   timeField: {
-    width: 120,
+    width: 120
   },
   hourRow: {
     display: "flex",
     alignItems: "center",
     gap: theme.spacing(2),
-    marginBottom: theme.spacing(1),
+    marginBottom: theme.spacing(1)
   },
   addButton: {
-    marginTop: theme.spacing(1),
+    marginTop: theme.spacing(1)
   },
   overrideCard: {
     padding: theme.spacing(2),
     marginBottom: theme.spacing(2),
-    border: `1px solid ${theme.palette.divider}`,
+    border: `1px solid ${theme.palette.divider}`
   },
   tabPanel: {
-    paddingTop: theme.spacing(2),
+    paddingTop: theme.spacing(2)
   },
   timezoneSection: {
     padding: theme.spacing(2),
     marginBottom: theme.spacing(2),
     backgroundColor: theme.palette.background.default,
-    borderRadius: theme.shape.borderRadius,
-  },
+    borderRadius: theme.shape.borderRadius
+  }
 }));
 
 const ALL_DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
@@ -118,14 +118,14 @@ const OpenHoursEditor = ({ value = {}, onChange }) => {
     value.weeklyRules || [
       {
         days: ["mon", "tue", "wed", "thu", "fri"],
-        hours: [{ from: "09:00", to: "18:00" }],
-      },
-    ],
+        hours: [{ from: "09:00", to: "18:00" }]
+      }
+    ]
   );
 
   const [overrides, setOverrides] = useState(value.overrides || []);
   const [timezone, setTimezone] = useState(
-    value.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+    value.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone
   );
 
   // Gera os nomes dos dias da semana usando date-fns com locale do navegador
@@ -136,7 +136,7 @@ const OpenHoursEditor = ({ value = {}, onChange }) => {
       onChange({
         weeklyRules,
         overrides,
-        timezone,
+        timezone
       });
     }
   }, [weeklyRules, overrides, timezone]);
@@ -147,12 +147,12 @@ const OpenHoursEditor = ({ value = {}, onChange }) => {
       ...weeklyRules,
       {
         days: [],
-        hours: [{ from: "09:00", to: "18:00" }],
-      },
+        hours: [{ from: "09:00", to: "18:00" }]
+      }
     ]);
   };
 
-  const handleRemoveWeeklyRule = (index) => {
+  const handleRemoveWeeklyRule = index => {
     setWeeklyRules(weeklyRules.filter((_, i) => i !== index));
   };
 
@@ -161,7 +161,7 @@ const OpenHoursEditor = ({ value = {}, onChange }) => {
     const rule = newRules[ruleIndex];
 
     if (rule.days.includes(day)) {
-      rule.days = rule.days.filter((d) => d !== day);
+      rule.days = rule.days.filter(d => d !== day);
     } else {
       rule.days = [...rule.days, day];
     }
@@ -169,7 +169,7 @@ const OpenHoursEditor = ({ value = {}, onChange }) => {
     setWeeklyRules(newRules);
   };
 
-  const handleAddHourToRule = (ruleIndex) => {
+  const handleAddHourToRule = ruleIndex => {
     const newRules = [...weeklyRules];
     newRules[ruleIndex].hours.push({ from: "09:00", to: "18:00" });
     setWeeklyRules(newRules);
@@ -178,7 +178,7 @@ const OpenHoursEditor = ({ value = {}, onChange }) => {
   const handleRemoveHourFromRule = (ruleIndex, hourIndex) => {
     const newRules = [...weeklyRules];
     newRules[ruleIndex].hours = newRules[ruleIndex].hours.filter(
-      (_, i) => i !== hourIndex,
+      (_, i) => i !== hourIndex
     );
     setWeeklyRules(newRules);
   };
@@ -197,12 +197,12 @@ const OpenHoursEditor = ({ value = {}, onChange }) => {
         date: new Date().toISOString().split("T")[0],
         closed: false,
         hours: [{ from: "09:00", to: "18:00" }],
-        label: "",
-      },
+        label: ""
+      }
     ]);
   };
 
-  const handleRemoveOverride = (index) => {
+  const handleRemoveOverride = index => {
     setOverrides(overrides.filter((_, i) => i !== index));
   };
 
@@ -218,7 +218,7 @@ const OpenHoursEditor = ({ value = {}, onChange }) => {
     setOverrides(newOverrides);
   };
 
-  const handleAddHourToOverride = (overrideIndex) => {
+  const handleAddHourToOverride = overrideIndex => {
     const newOverrides = [...overrides];
     if (!newOverrides[overrideIndex].hours) {
       newOverrides[overrideIndex].hours = [];
@@ -246,15 +246,15 @@ const OpenHoursEditor = ({ value = {}, onChange }) => {
       <Grid container spacing={2} alignItems="center">
         <Grid item xs={12}>
           <Autocomplete
-            value={ALL_TIMEZONES.find((tz) => tz.value === timezone) || null}
+            value={ALL_TIMEZONES.find(tz => tz.value === timezone) || null}
             onChange={(event, newValue) => {
               if (newValue) {
                 setTimezone(newValue.value);
               }
             }}
             options={ALL_TIMEZONES}
-            getOptionLabel={(option) => option.label}
-            renderInput={(params) => (
+            getOptionLabel={option => option.label}
+            renderInput={params => (
               <TextField
                 {...params}
                 label={i18n.t("openHours.timezone.placeholder")}
@@ -323,7 +323,7 @@ const OpenHoursEditor = ({ value = {}, onChange }) => {
                       {i18n.t("openHours.weekly.days")}:
                     </Typography>
                     <Box>
-                      {ALL_DAYS.map((day) => (
+                      {ALL_DAYS.map(day => (
                         <Chip
                           key={day}
                           label={DAYS_MAP[day]}
@@ -352,12 +352,12 @@ const OpenHoursEditor = ({ value = {}, onChange }) => {
                             type="time"
                             label={i18n.t("openHours.weekly.from")}
                             value={hour.from}
-                            onChange={(e) =>
+                            onChange={e =>
                               handleUpdateHour(
                                 ruleIndex,
                                 hourIndex,
                                 "from",
-                                e.target.value,
+                                e.target.value
                               )
                             }
                             className={classes.timeField}
@@ -371,12 +371,12 @@ const OpenHoursEditor = ({ value = {}, onChange }) => {
                             type="time"
                             label={i18n.t("openHours.weekly.to")}
                             value={hour.to}
-                            onChange={(e) =>
+                            onChange={e =>
                               handleUpdateHour(
                                 ruleIndex,
                                 hourIndex,
                                 "to",
-                                e.target.value,
+                                e.target.value
                               )
                             }
                             className={classes.timeField}
@@ -465,11 +465,11 @@ const OpenHoursEditor = ({ value = {}, onChange }) => {
                       type="date"
                       label={i18n.t("openHours.overrides.date")}
                       value={override.date}
-                      onChange={(e) =>
+                      onChange={e =>
                         handleUpdateOverride(
                           overrideIndex,
                           "date",
-                          e.target.value,
+                          e.target.value
                         )
                       }
                       InputLabelProps={{ shrink: true }}
@@ -481,14 +481,14 @@ const OpenHoursEditor = ({ value = {}, onChange }) => {
                       fullWidth
                       label={i18n.t("openHours.overrides.label")}
                       placeholder={i18n.t(
-                        "openHours.overrides.labelPlaceholder",
+                        "openHours.overrides.labelPlaceholder"
                       )}
                       value={override.label || ""}
-                      onChange={(e) =>
+                      onChange={e =>
                         handleUpdateOverride(
                           overrideIndex,
                           "label",
-                          e.target.value,
+                          e.target.value
                         )
                       }
                     />
@@ -501,13 +501,13 @@ const OpenHoursEditor = ({ value = {}, onChange }) => {
                       </InputLabel>
                       <Select
                         value={override.repeat || "none"}
-                        onChange={(e) =>
+                        onChange={e =>
                           handleUpdateOverride(
                             overrideIndex,
                             "repeat",
                             e.target.value === "none"
                               ? undefined
-                              : e.target.value,
+                              : e.target.value
                           )
                         }
                       >
@@ -526,11 +526,11 @@ const OpenHoursEditor = ({ value = {}, onChange }) => {
                       control={
                         <Checkbox
                           checked={override.closed || false}
-                          onChange={(e) =>
+                          onChange={e =>
                             handleUpdateOverride(
                               overrideIndex,
                               "closed",
-                              e.target.checked,
+                              e.target.checked
                             )
                           }
                           color="primary"
@@ -551,12 +551,12 @@ const OpenHoursEditor = ({ value = {}, onChange }) => {
                             type="time"
                             label={i18n.t("openHours.overrides.from")}
                             value={hour.from}
-                            onChange={(e) =>
+                            onChange={e =>
                               handleUpdateOverrideHour(
                                 overrideIndex,
                                 hourIndex,
                                 "from",
-                                e.target.value,
+                                e.target.value
                               )
                             }
                             className={classes.timeField}
@@ -570,12 +570,12 @@ const OpenHoursEditor = ({ value = {}, onChange }) => {
                             type="time"
                             label={i18n.t("openHours.overrides.to")}
                             value={hour.to}
-                            onChange={(e) =>
+                            onChange={e =>
                               handleUpdateOverrideHour(
                                 overrideIndex,
                                 hourIndex,
                                 "to",
-                                e.target.value,
+                                e.target.value
                               )
                             }
                             className={classes.timeField}
@@ -587,7 +587,7 @@ const OpenHoursEditor = ({ value = {}, onChange }) => {
                             onClick={() =>
                               handleRemoveHourFromOverride(
                                 overrideIndex,
-                                hourIndex,
+                                hourIndex
                               )
                             }
                             color="secondary"

@@ -1,4 +1,4 @@
-const copyToClipboard = (text) => {
+const copyToClipboard = text => {
   console.log("text", text);
   var textField = document.createElement("textarea");
   textField.innerText = text;

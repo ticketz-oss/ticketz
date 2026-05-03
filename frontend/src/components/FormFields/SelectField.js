@@ -7,7 +7,7 @@ import {
   FormControl,
   Select,
   MenuItem,
-  FormHelperText,
+  FormHelperText
 } from "@material-ui/core";
 
 function SelectField(props) {
@@ -38,11 +38,11 @@ function SelectField(props) {
 }
 
 SelectField.defaultProps = {
-  data: [],
+  data: []
 };
 
 SelectField.propTypes = {
-  data: PropTypes.array.isRequired,
+  data: PropTypes.array.isRequired
 };
 
 export default SelectField;

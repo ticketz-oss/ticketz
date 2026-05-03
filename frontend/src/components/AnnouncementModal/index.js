@@ -27,24 +27,24 @@ import {
   Grid,
   InputLabel,
   MenuItem,
-  Select,
+  Select
 } from "@material-ui/core";
 import ConfirmationModal from "../ConfirmationModal";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     display: "flex",
-    flexWrap: "wrap",
+    flexWrap: "wrap"
   },
   multFieldLine: {
     display: "flex",
     "& > *:not(:last-child)": {
-      marginRight: theme.spacing(1),
-    },
+      marginRight: theme.spacing(1)
+    }
   },
 
   btnWrapper: {
-    position: "relative",
+    position: "relative"
   },
 
   buttonProgress: {
@@ -53,21 +53,21 @@ const useStyles = makeStyles((theme) => ({
     top: "50%",
     left: "50%",
     marginTop: -12,
-    marginLeft: -12,
+    marginLeft: -12
   },
   formControl: {
     margin: theme.spacing(1),
-    minWidth: 120,
+    minWidth: 120
   },
   colorAdorment: {
     width: 20,
-    height: 20,
-  },
+    height: 20
+  }
 }));
 
 const AnnouncementSchema = Yup.object().shape({
   title: Yup.string().required("Obrigatório"),
-  text: Yup.string().required("Obrigatório"),
+  text: Yup.string().required("Obrigatório")
 });
 
 const AnnouncementModal = ({ open, onClose, announcementId, reload }) => {
@@ -77,7 +77,7 @@ const AnnouncementModal = ({ open, onClose, announcementId, reload }) => {
     title: "",
     text: "",
     priority: 3,
-    status: true,
+    status: true
   };
 
   const [confirmationOpen, setConfirmationOpen] = useState(false);
@@ -91,7 +91,7 @@ const AnnouncementModal = ({ open, onClose, announcementId, reload }) => {
         if (!announcementId) return;
 
         const { data } = await api.get(`/announcements/${announcementId}`);
-        setAnnouncement((prevState) => {
+        setAnnouncement(prevState => {
           return { ...prevState, ...data };
         });
       })();
@@ -106,14 +106,14 @@ const AnnouncementModal = ({ open, onClose, announcementId, reload }) => {
     onClose();
   };
 
-  const handleAttachmentFile = (e) => {
+  const handleAttachmentFile = e => {
     const file = head(e.target.files);
     if (file) {
       setAttachment(file);
     }
   };
 
-  const handleSaveAnnouncement = async (values) => {
+  const handleSaveAnnouncement = async values => {
     const announcementData = { ...values };
     try {
       if (announcementId) {
@@ -123,7 +123,7 @@ const AnnouncementModal = ({ open, onClose, announcementId, reload }) => {
           formData.append("file", attachment);
           await api.post(
             `/announcements/${announcementId}/media-upload`,
-            formData,
+            formData
           );
         }
       } else {
@@ -152,9 +152,9 @@ const AnnouncementModal = ({ open, onClose, announcementId, reload }) => {
 
     if (announcement.mediaPath) {
       await api.delete(`/announcements/${announcement.id}/media-upload`);
-      setAnnouncement((prev) => ({
+      setAnnouncement(prev => ({
         ...prev,
-        mediaPath: null,
+        mediaPath: null
       }));
       toast.success(i18n.t("announcements.toasts.deleted"));
       if (typeof reload == "function") {
@@ -190,7 +190,7 @@ const AnnouncementModal = ({ open, onClose, announcementId, reload }) => {
             type="file"
             accept=".png,.jpg,.jpeg"
             ref={attachmentFile}
-            onChange={(e) => handleAttachmentFile(e)}
+            onChange={e => handleAttachmentFile(e)}
           />
         </div>
         <Formik
@@ -262,7 +262,7 @@ const AnnouncementModal = ({ open, onClose, announcementId, reload }) => {
                         as={Select}
                         label={i18n.t("announcements.dialog.form.priority")}
                         placeholder={i18n.t(
-                          "announcements.dialog.form.priority",
+                          "announcements.dialog.form.priority"
                         )}
                         labelId="priority-selection-label"
                         id="priority"

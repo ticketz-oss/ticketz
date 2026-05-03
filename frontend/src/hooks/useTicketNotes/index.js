@@ -1,28 +1,28 @@
 import api from "../../services/api";
 
 const useTicketNotes = () => {
-  const saveNote = async (data) => {
+  const saveNote = async data => {
     const { data: responseData } = await api.request({
       url: "/ticket-notes",
       method: "POST",
-      data,
+      data
     });
     return responseData;
   };
 
-  const deleteNote = async (id) => {
+  const deleteNote = async id => {
     const { data } = await api.request({
       url: `/ticket-notes/${id}`,
-      method: "DELETE",
+      method: "DELETE"
     });
     return data;
   };
 
-  const listNotes = async (params) => {
+  const listNotes = async params => {
     const { data } = await api.request({
       url: "/ticket-notes/list",
       method: "GET",
-      params,
+      params
     });
     return data;
   };
@@ -30,7 +30,7 @@ const useTicketNotes = () => {
   return {
     saveNote,
     deleteNote,
-    listNotes,
+    listNotes
   };
 };
 

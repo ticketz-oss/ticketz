@@ -52,7 +52,7 @@ const App = () => {
     .matches;
   const preferredTheme = window.localStorage.getItem("preferredTheme");
   const [mode, setMode] = useState(
-    preferredTheme ? preferredTheme : prefersDarkMode ? "dark" : "light",
+    preferredTheme ? preferredTheme : prefersDarkMode ? "dark" : "light"
   );
   const [primaryColorLight, setPrimaryColorLight] = useState("#888");
   const [primaryColorDark, setPrimaryColorDark] = useState("#888");
@@ -65,28 +65,28 @@ const App = () => {
   const colorMode = useMemo(
     () => ({
       toggleColorMode: () => {
-        setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
+        setMode(prevMode => (prevMode === "light" ? "dark" : "light"));
       },
-      setPrimaryColorLight: (color) => {
+      setPrimaryColorLight: color => {
         setPrimaryColorLight(color);
       },
-      setPrimaryColorDark: (color) => {
+      setPrimaryColorDark: color => {
         setPrimaryColorDark(color);
       },
-      setAppLogoLight: (file) => {
+      setAppLogoLight: file => {
         setAppLogoLight(file);
       },
-      setAppLogoDark: (file) => {
+      setAppLogoDark: file => {
         setAppLogoDark(file);
       },
-      setAppLogoFavicon: (file) => {
+      setAppLogoFavicon: file => {
         setAppLogoFavicon(file);
       },
-      setAppName: (name) => {
+      setAppName: name => {
         setAppName(name);
-      },
+      }
     }),
-    [],
+    []
   );
 
   const calculatedLogoDark = () => {
@@ -109,26 +109,26 @@ const App = () => {
           scrollbarStyles: {
             "&::-webkit-scrollbar": {
               width: "8px",
-              height: "8px",
+              height: "8px"
             },
             "&::-webkit-scrollbar-thumb": {
               boxShadow: "inset 0 0 6px rgba(0, 0, 0, 0.3)",
               backgroundColor:
-                mode === "light" ? primaryColorLight : primaryColorDark,
-            },
+                mode === "light" ? primaryColorLight : primaryColorDark
+            }
           },
           scrollbarStylesSoft: {
             "&::-webkit-scrollbar": {
-              width: "8px",
+              width: "8px"
             },
             "&::-webkit-scrollbar-thumb": {
-              backgroundColor: mode === "light" ? "#F3F3F3" : "#333333",
-            },
+              backgroundColor: mode === "light" ? "#F3F3F3" : "#333333"
+            }
           },
           palette: {
             type: mode,
             primary: {
-              main: mode === "light" ? primaryColorLight : primaryColorDark,
+              main: mode === "light" ? primaryColorLight : primaryColorDark
             },
             textPrimary:
               mode === "light" ? primaryColorLight : primaryColorDark,
@@ -137,17 +137,17 @@ const App = () => {
               mode === "light" ? primaryColorLight : primaryColorDark,
             background: {
               default: mode === "light" ? "#fafafa" : "#303030",
-              paper: mode === "light" ? "#fff" : "#424242",
+              paper: mode === "light" ? "#fff" : "#424242"
             },
             backgroundContrast: {
               default: mode === "light" ? "#ddd" : "#888",
               paper: mode === "light" ? "#ddd" : "#888",
-              border: mode === "light" ? "#aaa" : "#444",
+              border: mode === "light" ? "#aaa" : "#444"
             },
             dark: { main: mode === "light" ? "#333333" : "#666" },
             light: { main: mode === "light" ? "#F3F3F3" : "#333333" },
             chatBubbleFromMe: {
-              main: mode === "light" ? "#dcf8c6" : "#005c4b",
+              main: mode === "light" ? "#dcf8c6" : "#005c4b"
             },
             chatBubbleReceived: { main: mode === "light" ? "#fff" : "#024481" },
             chatBackground: { main: mode === "light" ? "#f3f3f3" : "#333" },
@@ -172,7 +172,7 @@ const App = () => {
             barraSuperior: mode === "light" ? primaryColorLight : "#666",
             boxticket: mode === "light" ? "#EEE" : "#666",
             campaigntab: mode === "light" ? "#ededed" : "#666",
-            ticketzproad: { main: "#39ACE7", contrastText: "white" },
+            ticketzproad: { main: "#39ACE7", contrastText: "white" }
           },
           mode,
           appLogoLight,
@@ -186,9 +186,9 @@ const App = () => {
               return calculatedLogoLight();
             }
             return calculatedLogoDark();
-          },
+          }
         },
-        locale,
+        locale
       ),
     [
       appLogoLight,
@@ -198,8 +198,8 @@ const App = () => {
       locale,
       mode,
       primaryColorDark,
-      primaryColorLight,
-    ],
+      primaryColorLight
+    ]
   );
 
   useEffect(() => {
@@ -222,52 +222,52 @@ const App = () => {
 
   useEffect(() => {
     getPublicSetting("primaryColorLight")
-      .then((color) => {
+      .then(color => {
         setPrimaryColorLight(color || "#0000FF");
       })
-      .catch((error) => {
+      .catch(error => {
         console.log("Error reading setting", error);
       });
     getPublicSetting("primaryColorDark")
-      .then((color) => {
+      .then(color => {
         setPrimaryColorDark(color || "#39ACE7");
       })
-      .catch((error) => {
+      .catch(error => {
         console.log("Error reading setting", error);
       });
     getPublicSetting("appLogoLight")
       .then(
-        (file) => {
+        file => {
           setAppLogoLight(
-            file ? `${getBackendURL()}/public/${file}` : defaultLogoLight,
+            file ? `${getBackendURL()}/public/${file}` : defaultLogoLight
           );
         },
-        (_) => {},
+        _ => {}
       )
-      .catch((error) => {
+      .catch(error => {
         console.log("Error reading setting", error);
       });
     getPublicSetting("appLogoDark")
-      .then((file) => {
+      .then(file => {
         setAppLogoDark(
-          file ? `${getBackendURL()}/public/${file}` : defaultLogoDark,
+          file ? `${getBackendURL()}/public/${file}` : defaultLogoDark
         );
       })
-      .catch((error) => {
+      .catch(error => {
         console.log("Error reading setting", error);
       });
     getPublicSetting("appLogoFavicon")
-      .then((file) => {
+      .then(file => {
         setAppLogoFavicon(file ? `${getBackendURL()}/public/${file}` : null);
       })
-      .catch((error) => {
+      .catch(error => {
         console.log("Error reading setting", error);
       });
     getPublicSetting("appName")
-      .then((name) => {
+      .then(name => {
         setAppName(name || "ticketz");
       })
-      .catch((error) => {
+      .catch(error => {
         console.log("Error reading setting", error);
         setAppName("whitelabel chat");
       });

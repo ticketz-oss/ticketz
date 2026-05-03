@@ -12,7 +12,7 @@ import {
   TableCell,
   TableHead,
   TableRow,
-  IconButton,
+  IconButton
 } from "@material-ui/core";
 import { Edit, Save, Delete } from "@material-ui/icons";
 import { toast } from "react-toastify";
@@ -50,7 +50,7 @@ const I18nSettings = () => {
   const fetchTranslations = async () => {
     try {
       const { data } = await api.get("/translations", {
-        params: { namespace: "backend", language: selectedLanguage },
+        params: { namespace: "backend", language: selectedLanguage }
       });
       setTranslations(data.translations);
     } catch (error) {
@@ -66,7 +66,7 @@ const I18nSettings = () => {
         namespace: "backend",
         language: selectedLanguage,
         key,
-        value,
+        value
       });
       fetchTranslations();
       setEditingKey(null);
@@ -78,7 +78,7 @@ const I18nSettings = () => {
     }
   };
 
-  const handleDeleteTranslation = async (key) => {
+  const handleDeleteTranslation = async key => {
     await handleSaveTranslation(key, "");
   };
 
@@ -92,7 +92,7 @@ const I18nSettings = () => {
         <Grid item xs={3}>
           <SelectLanguage
             value={selectedLanguage}
-            onChange={(e) => setSelectedLanguage(e.target.value)}
+            onChange={e => setSelectedLanguage(e.target.value)}
             fullWidth
             variant="outlined"
           />
@@ -148,8 +148,8 @@ const I18nSettings = () => {
               <TableCell>
                 <TextField
                   value={newRow.key}
-                  onChange={(e) =>
-                    setNewRow((prev) => ({ ...prev, key: e.target.value }))
+                  onChange={e =>
+                    setNewRow(prev => ({ ...prev, key: e.target.value }))
                   }
                   fullWidth
                 />
@@ -157,8 +157,8 @@ const I18nSettings = () => {
               <TableCell>
                 <TextField
                   value={newRow.value}
-                  onChange={(e) =>
-                    setNewRow((prev) => ({ ...prev, value: e.target.value }))
+                  onChange={e =>
+                    setNewRow(prev => ({ ...prev, value: e.target.value }))
                   }
                   fullWidth
                 />
@@ -174,14 +174,14 @@ const I18nSettings = () => {
               </TableCell>
             </TableRow>
           )}
-          {translations.map((translation) => (
+          {translations.map(translation => (
             <TableRow key={translation.key}>
               <TableCell>{translation.key}</TableCell>
               <TableCell>
                 {editingKey === translation.key ? (
                   <TextField
                     value={editingValue}
-                    onChange={(e) => setEditingValue(e.target.value)}
+                    onChange={e => setEditingValue(e.target.value)}
                     fullWidth
                   />
                 ) : (

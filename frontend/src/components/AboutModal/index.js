@@ -8,7 +8,7 @@ import {
   Typography,
   DialogActions,
   DialogContent,
-  DialogTitle,
+  DialogTitle
 } from "@material-ui/core";
 
 import { i18n } from "../../translate/i18n";
@@ -22,30 +22,30 @@ const frontendGitInfo = loadJSON("/gitinfo.json");
 const logo = "/vector/logo.svg";
 const logoDark = "/vector/logo-dark.svg";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     display: "flex",
-    flexWrap: "wrap",
+    flexWrap: "wrap"
   },
   multFieldLine: {
     display: "flex",
     "& > *:not(:last-child)": {
-      marginRight: theme.spacing(1),
-    },
+      marginRight: theme.spacing(1)
+    }
   },
   logoImg: {
     width: "100%",
     margin: "0 auto",
-    content: `url("${theme.calculatedLogo()}")`,
+    content: `url("${theme.calculatedLogo()}")`
   },
   ticketzLogoImg: {
     width: "100%",
     margin: "0 auto",
-    content: "url(" + (theme.mode === "light" ? logo : logoDark) + ")",
+    content: "url(" + (theme.mode === "light" ? logo : logoDark) + ")"
   },
   textCenter: {
-    textAlign: "center",
-  },
+    textAlign: "center"
+  }
 }));
 
 const AboutModal = ({ open, onClose }) => {
@@ -60,11 +60,11 @@ const AboutModal = ({ open, onClose }) => {
   };
 
   useEffect(() => {
-    getCurrentUserInfo().then((user) => {
+    getCurrentUserInfo().then(user => {
       setCurrentUser(user);
     });
 
-    api.get("/").then((response) => {
+    api.get("/").then(response => {
       setBackendGitInfo(response.data);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps

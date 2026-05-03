@@ -1,7 +1,7 @@
 import * as Yup from "yup";
 import checkoutFormModel from "./checkoutFormModel";
 const {
-  formField: { firstName, address1, city, zipcode, country },
+  formField: { firstName, address1, city, zipcode, country }
 } = checkoutFormModel;
 
 export default [
@@ -13,6 +13,6 @@ export default [
 
     [country.name]: Yup.string()
       .nullable()
-      .required(`${country.requiredErrorMsg}`),
-  }),
+      .required(`${country.requiredErrorMsg}`)
+  })
 ];

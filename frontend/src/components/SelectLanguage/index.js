@@ -5,7 +5,7 @@ import { messages } from "../../translate/languages";
 
 const languageOptions = {};
 
-Object.keys(messages).forEach((key) => {
+Object.keys(messages).forEach(key => {
   languageOptions[key] =
     messages[key].translations.mainDrawer.appBar.i18n.language;
 });
@@ -20,9 +20,9 @@ export function SelectLanguage({
   form,
   variant,
   margin,
-  fullWidth,
+  fullWidth
 }) {
-  const handleChange = (event) => {
+  const handleChange = event => {
     if (form && field) {
       form.setFieldValue(field.name, event.target.value);
     } else if (onChange) {

@@ -15,10 +15,10 @@ async function getWavoipInstance(token, disconnect) {
     window.wavoipInstances[token] = {
       instance,
       disconnect,
-      ready: false,
+      ready: false
     };
 
-    instance.socket.on("signaling", (signal) => {
+    instance.socket.on("signaling", signal => {
       if (signal?.tag === "accept") {
         window.wavoipCallingSound.stop();
       }
@@ -35,7 +35,7 @@ async function getWavoipInstance(token, disconnect) {
       window.wavoipInstances[token].ready = true;
     });
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       instance.socket.once("connect", () => {
         resolve(instance);
       });
@@ -54,12 +54,12 @@ export async function wavoipCall(ticket, disconnect) {
 
   const wavoipInstance = await getWavoipInstance(
     ticket.whatsapp.wavoip.token,
-    disconnect,
+    disconnect
   );
 
   wavoipInstance
     .callStart({
-      whatsappid: ticket.contact.number,
+      whatsappid: ticket.contact.number
     })
     .then(() => {
       window.wavoipCallingSound.start();

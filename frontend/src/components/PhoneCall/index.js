@@ -9,23 +9,23 @@ import { CallEnd } from "@material-ui/icons";
 import { PhoneCallContext } from "../../context/PhoneCall/PhoneCallContext";
 import { i18n } from "../../translate/i18n";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   "@keyframes fadeInOut": {
     "0%": { opacity: 1 },
     "50%": { opacity: 0.3 },
-    "100%": { opacity: 1 },
+    "100%": { opacity: 1 }
   },
   popoverPaper: {
     padding: theme.spacing(2),
     display: "flex",
     flexDirection: "column",
-    alignItems: "center",
+    alignItems: "center"
   },
   phoneIcon: {
     color: "#ffffff",
     fontSize: "24px",
-    animation: "$fadeInOut 2s infinite",
-  },
+    animation: "$fadeInOut 2s infinite"
+  }
 }));
 
 export function PhoneCall() {

@@ -8,7 +8,7 @@ import {
   InputAdornment,
   makeStyles,
   Paper,
-  Typography,
+  Typography
 } from "@material-ui/core";
 import SendIcon from "@material-ui/icons/Send";
 
@@ -31,10 +31,10 @@ import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import RecordingTimer from "../../components/MessageInputCustom/RecordingTimer";
 import MediaGalleryLightbox, {
-  buildMediaGalleryData,
+  buildMediaGalleryData
 } from "../../components/MediaGalleryLightbox";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   mainContainer: {
     display: "flex",
     flexDirection: "column",
@@ -43,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
     overflow: "hidden",
     borderRadius: 0,
     height: "100%",
-    borderLeft: "1px solid rgba(0, 0, 0, 0.12)",
+    borderLeft: "1px solid rgba(0, 0, 0, 0.12)"
   },
   messageList: {
     position: "relative",
@@ -52,17 +52,17 @@ const useStyles = makeStyles((theme) => ({
     overflowY: "auto",
     height: "100%",
     ...theme.scrollbarStyles,
-    backgroundColor: theme.palette.chatlist.main,
+    backgroundColor: theme.palette.chatlist.main
   },
   inputArea: {
     position: "relative",
-    height: "auto",
+    height: "auto"
   },
   input: {
-    padding: "20px",
+    padding: "20px"
   },
   buttonSend: {
-    margin: theme.spacing(1),
+    margin: theme.spacing(1)
   },
   boxLeft: {
     padding: "10px 10px 5px",
@@ -77,7 +77,7 @@ const useStyles = makeStyles((theme) => ({
     borderBottomLeftRadius: 0,
     border: "1px solid rgba(0, 0, 0, 0.12)",
     boxShadow:
-      theme.mode === "light" ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000",
+      theme.mode === "light" ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000"
   },
   boxRight: {
     padding: "10px 10px 5px",
@@ -92,14 +92,14 @@ const useStyles = makeStyles((theme) => ({
     borderBottomRightRadius: 0,
     border: "1px solid rgba(0, 0, 0, 0.12)",
     boxShadow:
-      theme.mode === "light" ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000",
+      theme.mode === "light" ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000"
   },
 
   sendMessageIcons: {
-    color: "grey",
+    color: "grey"
   },
   uploadInput: {
-    display: "none",
+    display: "none"
   },
   circleLoading: {
     color: green[500],
@@ -107,7 +107,7 @@ const useStyles = makeStyles((theme) => ({
     position: "absolute",
     top: "20%",
     left: "50%",
-    marginLeft: -12,
+    marginLeft: -12
   },
   viewMediaInputWrapper: {
     display: "flex",
@@ -116,7 +116,7 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "space-between",
     alignItems: "center",
     backgroundColor: "#eee",
-    borderTop: "1px solid rgba(0, 0, 0, 0.12)",
+    borderTop: "1px solid rgba(0, 0, 0, 0.12)"
   },
 
   downloadMedia: {
@@ -124,7 +124,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "inherit",
-    padding: 10,
+    padding: 10
   },
   messageMedia: {
     objectFit: "cover",
@@ -133,7 +133,7 @@ const useStyles = makeStyles((theme) => ({
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
     borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
+    borderBottomRightRadius: 8
   },
   videoPreviewWrapper: {
     width: 250,
@@ -141,13 +141,13 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: 8,
     overflow: "hidden",
     position: "relative",
-    backgroundColor: "#000",
+    backgroundColor: "#000"
   },
   videoPreviewMedia: {
     width: "100%",
     height: "100%",
     objectFit: "cover",
-    display: "block",
+    display: "block"
   },
   videoPreviewActions: {
     position: "absolute",
@@ -155,35 +155,35 @@ const useStyles = makeStyles((theme) => ({
     bottom: 8,
     display: "flex",
     gap: 8,
-    zIndex: 1,
+    zIndex: 1
   },
   videoPreviewActionButton: {
     backgroundColor: "rgba(15, 23, 42, 0.65)",
     color: "#fff",
     "&:hover": {
-      backgroundColor: "rgba(15, 23, 42, 0.82)",
-    },
+      backgroundColor: "rgba(15, 23, 42, 0.82)"
+    }
   },
 
   recorderWrapper: {
     display: "flex",
     alignItems: "center",
     alignContent: "middle",
-    justifyContent: "flex-end",
+    justifyContent: "flex-end"
   },
 
   cancelAudioIcon: {
-    color: "red",
+    color: "red"
   },
 
   audioLoading: {
     color: green[500],
-    opacity: "70%",
+    opacity: "70%"
   },
 
   sendAudioIcon: {
-    color: "green",
-  },
+    color: "green"
+  }
 }));
 
 const Mp3Recorder = new MicRecorder({ bitRate: 128 });
@@ -194,7 +194,7 @@ export default function ChatMessages({
   handleSendMessage,
   handleLoadMore,
   scrollToBottomRef,
-  pageInfo,
+  pageInfo
 }) {
   const classes = useStyles();
   const { user } = useContext(AuthContext);
@@ -212,11 +212,11 @@ export default function ChatMessages({
 
   const lightboxMedia = useMemo(() => {
     return buildMediaGalleryData(messages, {
-      getMediaUrl: (message) => message?.mediaPath,
+      getMediaUrl: message => message?.mediaPath
     });
   }, [messages]);
 
-  const openLightboxForMessage = (messageId) => {
+  const openLightboxForMessage = messageId => {
     const index = lightboxMedia.byMessageId[messageId];
     if (index === undefined) {
       return;
@@ -236,9 +236,9 @@ export default function ChatMessages({
     }
   };
 
-  const unreadMessages = (chat) => {
+  const unreadMessages = chat => {
     if (chat !== undefined) {
-      const currentUser = chat.users.find((u) => u.userId === user.id);
+      const currentUser = chat.users.find(u => u.userId === user.id);
       return currentUser.unreads > 0;
     }
     return 0;
@@ -254,7 +254,7 @@ export default function ChatMessages({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleScroll = (e) => {
+  const handleScroll = e => {
     const { scrollTop } = e.currentTarget;
     if (!pageInfo.hasMore || loading) return;
     if (scrollTop < 600) {
@@ -262,7 +262,7 @@ export default function ChatMessages({
     }
   };
 
-  const handleChangeMedias = (e) => {
+  const handleChangeMedias = e => {
     if (!e.target.files) {
       return;
     }
@@ -287,7 +287,7 @@ export default function ChatMessages({
     previewVideo.pause();
   };
 
-  const pausePreviewVideo = (messageId) => {
+  const pausePreviewVideo = messageId => {
     const previewVideo = previewVideoRefs.current[messageId];
     if (!previewVideo) {
       return;
@@ -296,7 +296,7 @@ export default function ChatMessages({
     previewVideo.pause();
   };
 
-  const checkMessageMedia = (message) => {
+  const checkMessageMedia = message => {
     const mediaUrl = message.mediaPath;
 
     if (message.mediaType === "image") {
@@ -322,7 +322,7 @@ export default function ChatMessages({
       return (
         <div className={classes.videoPreviewWrapper}>
           <video
-            ref={(element) => {
+            ref={element => {
               if (element) {
                 previewVideoRefs.current[message.id] = element;
               } else {
@@ -334,21 +334,21 @@ export default function ChatMessages({
             preload="metadata"
             playsInline
             onPlay={() => {
-              setPreviewVideoPlayingById((previous) => ({
+              setPreviewVideoPlayingById(previous => ({
                 ...previous,
-                [message.id]: true,
+                [message.id]: true
               }));
             }}
             onPause={() => {
-              setPreviewVideoPlayingById((previous) => ({
+              setPreviewVideoPlayingById(previous => ({
                 ...previous,
-                [message.id]: false,
+                [message.id]: false
               }));
             }}
             onEnded={() => {
-              setPreviewVideoPlayingById((previous) => ({
+              setPreviewVideoPlayingById(previous => ({
                 ...previous,
-                [message.id]: false,
+                [message.id]: false
               }));
             }}
           />
@@ -356,9 +356,7 @@ export default function ChatMessages({
             <IconButton
               className={classes.videoPreviewActionButton}
               aria-label="play preview"
-              onClick={(event) =>
-                handleVideoPreviewPlayClick(event, message.id)
-              }
+              onClick={event => handleVideoPreviewPlayClick(event, message.id)}
             >
               {previewVideoPlayingById[message.id] ? (
                 <PauseIcon />
@@ -369,7 +367,7 @@ export default function ChatMessages({
             <IconButton
               className={classes.videoPreviewActionButton}
               aria-label="open video lightbox"
-              onClick={(event) => {
+              onClick={event => {
                 event.stopPropagation();
                 pausePreviewVideo(message.id);
                 openLightboxForMessage(message.id);
@@ -400,13 +398,13 @@ export default function ChatMessages({
     }
   };
 
-  const handleSendMedia = async (e) => {
+  const handleSendMedia = async e => {
     setLoading(true);
     e.preventDefault();
 
     const formData = new FormData();
     formData.append("fromMe", true);
-    medias.forEach((media) => {
+    medias.forEach(media => {
       formData.append("medias", media);
       formData.append("body", media.name);
     });
@@ -548,7 +546,7 @@ export default function ChatMessages({
                     <IconButton
                       aria-label="cancel-upload"
                       component="span"
-                      onClick={(e) => setMedias([])}
+                      onClick={e => setMedias([])}
                     >
                       <CancelIcon className={classes.sendMessageIcons} />
                     </IconButton>
@@ -575,13 +573,13 @@ export default function ChatMessages({
                   <Input
                     multiline
                     value={contentMessage}
-                    onKeyUp={(e) => {
+                    onKeyUp={e => {
                       if (e.key === "Enter" && contentMessage.trim() !== "") {
                         handleSendMessage(contentMessage);
                         setContentMessage("");
                       }
                     }}
-                    onChange={(e) => setContentMessage(e.target.value)}
+                    onChange={e => setContentMessage(e.target.value)}
                     className={classes.input}
                     startAdornment={
                       <InputAdornment position="start">
@@ -634,7 +632,7 @@ export default function ChatMessages({
   );
 }
 
-const FileInput = (props) => {
+const FileInput = props => {
   const { handleChangeMedias, disableOption } = props;
   const classes = useStyles();
   return (

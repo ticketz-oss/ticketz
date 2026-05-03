@@ -10,17 +10,17 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  makeStyles,
+  makeStyles
 } from "@material-ui/core";
 
 import { parseISO, format } from "date-fns";
 
 import { i18n } from "../../translate/i18n";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   timestamp: {
-    minWidth: 250,
-  },
+    minWidth: 250
+  }
 }));
 
 const MessageHistoryModal = ({ open, onClose, oldMessages }) => {
@@ -40,7 +40,7 @@ const MessageHistoryModal = ({ open, onClose, oldMessages }) => {
           <Table aria-label="message-history-table">
             <TableBody>
               {oldMessages &&
-                oldMessages.map((oldMessage) => (
+                oldMessages.map(oldMessage => (
                   <TableRow key={oldMessage.id}>
                     <TableCell component="th" scope="row">
                       {oldMessage.body}

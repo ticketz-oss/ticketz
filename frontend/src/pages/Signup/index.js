@@ -27,30 +27,30 @@ import useSettings from "../../hooks/useSettings";
 import { safeValueFormat } from "../../helpers/safeValueFormat";
 import { PhoneNumberInput } from "../../components/PhoneNumberInput";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   paper: {
     marginTop: theme.spacing(8),
     display: "flex",
     flexDirection: "column",
-    alignItems: "center",
+    alignItems: "center"
   },
   avatar: {
     margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main,
+    backgroundColor: theme.palette.secondary.main
   },
   form: {
     width: "100%",
-    marginTop: theme.spacing(3),
+    marginTop: theme.spacing(3)
   },
   submit: {
-    margin: theme.spacing(3, 0, 2),
+    margin: theme.spacing(3, 0, 2)
   },
 
   logoImg: {
     width: "100%",
     margin: "0 auto",
-    content: `url("${theme.calculatedLogo()}")`,
-  },
+    content: `url("${theme.calculatedLogo()}")`
+  }
 }));
 
 const UserSchema = Yup.object().shape({
@@ -64,7 +64,7 @@ const UserSchema = Yup.object().shape({
     .required(i18n.t("common.validations.required")),
   email: Yup.string()
     .email(i18n.t("common.validations.invalidEmail"))
-    .required(i18n.t("common.validations.required")),
+    .required(i18n.t("common.validations.required"))
 });
 
 const SignUp = () => {
@@ -86,15 +86,15 @@ const SignUp = () => {
     email: "",
     phone: "",
     password: "",
-    planId: "",
+    planId: ""
   };
 
   const [user] = useState(initialState);
 
-  const handleSignUp = async (values) => {
+  const handleSignUp = async values => {
     if (config.RECAPTCHA_SITE_KEY) {
       Object.assign(values, {
-        captchaToken: await captchaRef.current.executeAsync(),
+        captchaToken: await captchaRef.current.executeAsync()
       });
     }
 
@@ -124,7 +124,7 @@ const SignUp = () => {
 
   const captchaRef = useRef(null);
 
-  getPublicSetting("allowSignup").then((data) => {
+  getPublicSetting("allowSignup").then(data => {
     setAllowSignup(data === "enabled");
   });
 

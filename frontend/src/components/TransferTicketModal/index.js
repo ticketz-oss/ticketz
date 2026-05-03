@@ -9,7 +9,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import Autocomplete, {
-  createFilterOptions,
+  createFilterOptions
 } from "@material-ui/lab/Autocomplete";
 import CircularProgress from "@material-ui/core/CircularProgress";
 
@@ -19,7 +19,7 @@ import ButtonWithSpinner from "../ButtonWithSpinner";
 import toastError from "../../errors/toastError";
 
 const filterOptions = createFilterOptions({
-  trim: true,
+  trim: true
 });
 
 const TransferTicketModal = ({ modalOpen, onClose, ticketid }) => {
@@ -39,7 +39,7 @@ const TransferTicketModal = ({ modalOpen, onClose, ticketid }) => {
       const fetchUsers = async () => {
         try {
           const { data } = await api.get("/users/", {
-            params: { searchParam },
+            params: { searchParam }
           });
           setOptions(data.users);
           setLoading(false);
@@ -60,7 +60,7 @@ const TransferTicketModal = ({ modalOpen, onClose, ticketid }) => {
     setSelectedUser(null);
   };
 
-  const handleSaveTicket = async (e) => {
+  const handleSaveTicket = async e => {
     e.preventDefault();
     if (!ticketid || !selectedUser) return;
     setLoading(true);
@@ -68,7 +68,7 @@ const TransferTicketModal = ({ modalOpen, onClose, ticketid }) => {
       await api.put(`/tickets/${ticketid}`, {
         userId: selectedUser.id,
         queueId: null,
-        status: "open",
+        status: "open"
       });
       setLoading(false);
       history.push(`/tickets`);
@@ -87,7 +87,7 @@ const TransferTicketModal = ({ modalOpen, onClose, ticketid }) => {
         <DialogContent dividers>
           <Autocomplete
             style={{ width: 300 }}
-            getOptionLabel={(option) => `${option.name}`}
+            getOptionLabel={option => `${option.name}`}
             onChange={(e, newValue) => {
               setSelectedUser(newValue);
             }}
@@ -97,14 +97,14 @@ const TransferTicketModal = ({ modalOpen, onClose, ticketid }) => {
             autoHighlight
             noOptionsText={i18n.t("transferTicketModal.noOptions")}
             loading={loading}
-            renderInput={(params) => (
+            renderInput={params => (
               <TextField
                 {...params}
                 label={i18n.t("transferTicketModal.fieldLabel")}
                 variant="outlined"
                 required
                 autoFocus
-                onChange={(e) => setSearchParam(e.target.value)}
+                onChange={e => setSearchParam(e.target.value)}
                 InputProps={{
                   ...params.InputProps,
                   endAdornment: (
@@ -114,7 +114,7 @@ const TransferTicketModal = ({ modalOpen, onClose, ticketid }) => {
                       ) : null}
                       {params.InputProps.endAdornment}
                     </React.Fragment>
-                  ),
+                  )
                 }}
               />
             )}

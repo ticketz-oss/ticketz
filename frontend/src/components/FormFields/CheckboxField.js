@@ -5,7 +5,7 @@ import {
   Checkbox,
   FormControl,
   FormControlLabel,
-  FormHelperText,
+  FormHelperText
 } from "@material-ui/core";
 
 export default function CheckboxField(props) {

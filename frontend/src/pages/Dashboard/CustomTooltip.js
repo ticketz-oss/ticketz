@@ -9,7 +9,7 @@ const CustomTooltip = ({ payload, label, active, i18nBase }) => {
           backgroundColor: "#333",
           borderRadius: "4px",
           outline: "none",
-          padding: "10px",
+          padding: "10px"
         }}
       >
         <div style={{ color: "white", fontWeight: "600", fontSize: "13px" }}>

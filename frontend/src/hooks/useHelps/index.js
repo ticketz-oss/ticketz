@@ -1,46 +1,46 @@
 import api from "../../services/api";
 
 const usePlans = () => {
-  const findAll = async (params) => {
+  const findAll = async params => {
     const { data } = await api.request({
       url: `/helps`,
       method: "GET",
-      params,
+      params
     });
     return data;
   };
 
-  const list = async (params) => {
+  const list = async params => {
     const { data } = await api.request({
       url: "/helps/list",
       method: "GET",
-      params,
+      params
     });
     return data;
   };
 
-  const save = async (data) => {
+  const save = async data => {
     const { data: responseData } = await api.request({
       url: "/helps",
       method: "POST",
-      data,
+      data
     });
     return responseData;
   };
 
-  const update = async (data) => {
+  const update = async data => {
     const { data: responseData } = await api.request({
       url: `/helps/${data.id}`,
       method: "PUT",
-      data,
+      data
     });
     return responseData;
   };
 
-  const remove = async (id) => {
+  const remove = async id => {
     const { data } = await api.request({
       url: `/helps/${id}`,
-      method: "DELETE",
+      method: "DELETE"
     });
     return data;
   };
@@ -50,7 +50,7 @@ const usePlans = () => {
     list,
     save,
     update,
-    remove,
+    remove
   };
 };
 

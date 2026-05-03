@@ -39,18 +39,18 @@ import { getInitials } from "../../helpers/getInitials";
 import pastRelativeDate from "../../helpers/pastRelativeDate";
 import TagsLine from "../TagsLine";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   ticket: {
     position: "relative",
     height: 98,
     paddingHorizontal: 10,
     paddingVertical: 0,
     paddingTop: 0,
-    paddingBottom: 0,
+    paddingBottom: 0
   },
 
   pendingTicket: {
-    cursor: "unset",
+    cursor: "unset"
   },
 
   noTicketsDiv: {
@@ -59,26 +59,26 @@ const useStyles = makeStyles((theme) => ({
     margin: 40,
     flexDirection: "column",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "center"
   },
 
   noTicketsText: {
     textAlign: "center",
     color: "rgb(104, 121, 146)",
     fontSize: "14px",
-    lineHeight: "1.4",
+    lineHeight: "1.4"
   },
 
   noTicketsTitle: {
     textAlign: "center",
     fontSize: "16px",
     fontWeight: "600",
-    margin: "0px",
+    margin: "0px"
   },
 
   contactNameWrapper: {
     display: "grid",
-    justifyContent: "space-between",
+    justifyContent: "space-between"
   },
 
   lastMessageTime: {
@@ -86,14 +86,14 @@ const useStyles = makeStyles((theme) => ({
     textAlign: "right",
     position: "relative",
     top: -23,
-    fontSize: 12,
+    fontSize: 12
   },
 
   closedBadge: {
     alignSelf: "center",
     justifySelf: "flex-end",
     marginRight: 32,
-    marginLeft: "auto",
+    marginLeft: "auto"
   },
 
   contactLastMessage: {},
@@ -103,19 +103,19 @@ const useStyles = makeStyles((theme) => ({
     marginRight: 0,
     marginLeft: "auto",
     top: -10,
-    right: 10,
+    right: 10
   },
 
   badgeStyle: {
     color: "white",
     backgroundColor: green[500],
     right: 0,
-    top: 10,
+    top: 10
   },
 
   acceptButton: {
     position: "absolute",
-    right: "108px",
+    right: "108px"
   },
 
   ticketQueueColor: {
@@ -124,18 +124,18 @@ const useStyles = makeStyles((theme) => ({
     height: "100%",
     position: "absolute",
     top: "0%",
-    left: "0%",
+    left: "0%"
   },
 
   ticketInfo: {
     position: "relative",
-    top: 0,
+    top: 0
   },
 
   ticketInfo1: {
     position: "relative",
     top: 40,
-    right: 0,
+    right: 0
   },
   Radiusdot: {
     "& .MuiBadge-badge": {
@@ -144,16 +144,16 @@ const useStyles = makeStyles((theme) => ({
       height: 16,
       margin: 2,
       padding: 3,
-      fontSize: 10,
+      fontSize: 10
     },
     "& .MuiBadge-anchorOriginTopRightRectangle": {
-      transform: "scale(1) translate(0%, -40%)",
-    },
+      transform: "scale(1) translate(0%, -40%)"
+    }
   },
   presence: {
     color: theme.mode === "light" ? "green" : "lightgreen",
-    fontWeight: "bold",
-  },
+    fontWeight: "bold"
+  }
 }));
 
 const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
@@ -183,12 +183,12 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
     };
   }, [ticket]);
 
-  const handleCloseTicket = async (id) => {
+  const handleCloseTicket = async id => {
     try {
       await api.put(`/tickets/${id}`, {
         status: "closed",
         justClose: true,
-        userId: user?.id,
+        userId: user?.id
       });
     } catch (err) {
       toastError(err);
@@ -196,11 +196,11 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
     history.push(`/tickets/`);
   };
 
-  const handleAcceptTicket = async (id) => {
+  const handleAcceptTicket = async id => {
     try {
       await api.put(`/tickets/${id}`, {
         status: "open",
-        userId: user?.id,
+        userId: user?.id
       });
     } catch (err) {
       toastError(err);
@@ -210,7 +210,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
     setTabOpen("open");
   };
 
-  const handleSelectTicket = (ticket) => {
+  const handleSelectTicket = ticket => {
     const code = uuidv4();
     const { id, uuid } = ticket;
     setCurrentTicket({ id, uuid, code });
@@ -232,7 +232,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
               borderRadius: 7,
               color: "#fff",
               top: -6,
-              marginRight: 3,
+              marginRight: 3
             }}
           />
 
@@ -248,7 +248,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
                 borderRadius: 7,
                 color: "white",
                 top: -6,
-                marginRight: 3,
+                marginRight: 3
               }}
             />
           )}
@@ -264,7 +264,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
                 borderRadius: 7,
                 color: "white",
                 top: -6,
-                marginRight: 3,
+                marginRight: 3
               }}
               badgeContent={ticket.queue?.name || "Sem fila"}
               //color="primary"
@@ -287,7 +287,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
                   borderRadius: 50,
                   position: "absolute",
                   right: 0,
-                  top: -8,
+                  top: -8
                 }}
               />
             </Tooltip>
@@ -295,7 +295,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
           {profile === "admin" && (
             <Tooltip title="Espiar Conversa">
               <VisibilityIcon
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   setOpenTicketMessageDialog(true);
                 }}
@@ -311,7 +311,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
                   borderRadius: 50,
                   position: "absolute",
                   right: 28,
-                  top: -8,
+                  top: -8
                 }}
               />
             </Tooltip>
@@ -341,7 +341,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
                 borderRadius: 7,
                 color: "white",
                 top: -6,
-                marginRight: 3,
+                marginRight: 3
               }}
             />
           )}
@@ -358,7 +358,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
                 borderRadius: 7,
                 color: "white",
                 top: -6,
-                marginRight: 2,
+                marginRight: 2
               }}
               badgeContent={ticket.queue?.name || "Sem fila"}
               //color=
@@ -382,7 +382,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
                     fontSize: 12,
                     borderRadius: 50,
                     top: -8,
-                    position: "absolute",
+                    position: "absolute"
                   }}
                 />
               </Tooltip>
@@ -407,7 +407,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
                     marginRight: 5,
                     right: 49,
                     top: -8,
-                    position: "absolute",
+                    position: "absolute"
                   }}
                 />
               </Tooltip>
@@ -430,7 +430,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
                     borderRadius: 50,
                     right: 25,
                     top: -8,
-                    position: "absolute",
+                    position: "absolute"
                   }}
                 />
               </Tooltip>
@@ -439,7 +439,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
           {profile === "admin" && (groupActionButtons || !ticket.isGroup) && (
             <Tooltip title="Espiar Conversa">
               <VisibilityIcon
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   setOpenTicketMessageDialog(true);
                 }}
@@ -455,7 +455,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
                   borderRadius: 50,
                   right: 0,
                   top: -8,
-                  position: "absolute",
+                  position: "absolute"
                 }}
               />
             </Tooltip>
@@ -475,7 +475,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
       <ListItem
         dense
         button
-        onClick={(e) => {
+        onClick={e => {
           if (
             (groupActionButtons || !ticket.isGroup) &&
             ticket.status === "pending"
@@ -485,7 +485,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
         }}
         selected={ticketId && +ticketId === ticket.id}
         className={clsx(classes.ticket, {
-          [classes.pendingTicket]: ticket.status === "pending",
+          [classes.pendingTicket]: ticket.status === "pending"
         })}
       >
         <Tooltip
@@ -503,7 +503,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
             style={{
               backgroundColor: generateColor(ticket?.contact?.number),
               color: "white",
-              fontWeight: "bold",
+              fontWeight: "bold"
             }}
             src={ticket?.contact?.profilePicUrl}
           >
@@ -581,7 +581,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
                 borderRadius: 7,
                 color: "white",
                 top: -28,
-                marginRight: 5,
+                marginRight: 5
               }}
             />
           )}
@@ -603,7 +603,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
                   ticket.unreadMessages ? ticket.unreadMessages : null
                 }
                 classes={{
-                  badge: classes.badgeStyle,
+                  badge: classes.badgeStyle
                 }}
               />
               <br />

@@ -55,7 +55,7 @@ const ColorPicker = ({ onChange, currentColor, handleClose, open }) => {
     "#0C797D",
     "#0062B1",
     "#653294",
-    "#AB149E",
+    "#AB149E"
   ];
 
   return (
@@ -65,14 +65,14 @@ const ColorPicker = ({ onChange, currentColor, handleClose, open }) => {
         hslGradient={false}
         style={{ margin: "20px auto 0" }}
         value={selectedColor}
-        onChange={(color) => setSelectedColor(`#${color.hex}`)}
+        onChange={color => setSelectedColor(`#${color.hex}`)}
         palette={colors}
         inputFormats={[]}
       />
       <Input
         type="text"
         value={selectedColor}
-        onChange={(e) => setSelectedColor(e.target.value)}
+        onChange={e => setSelectedColor(e.target.value)}
         style={{ margin: "20px auto 0", width: "80%" }}
         inputProps={{ maxLength: 7 }}
       />

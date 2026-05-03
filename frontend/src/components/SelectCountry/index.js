@@ -10,7 +10,7 @@ export function getCountryes() {
 }
 
 export function getPhoneCode(iso2) {
-  const country = loadedCountryes.find((country) => country.iso2 === iso2);
+  const country = loadedCountryes.find(country => country.iso2 === iso2);
   return country ? country.phonecode : "";
 }
 
@@ -33,7 +33,7 @@ export function SelectCountry({ className, label, value, name, onChange }) {
         value={value}
         onChange={onChange}
       >
-        {countries.map((country) => (
+        {countries.map(country => (
           <MenuItem key={country.iso2} value={country.iso2}>
             {country.emoji} {country.name}
           </MenuItem>

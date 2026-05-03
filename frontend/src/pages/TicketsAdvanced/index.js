@@ -16,22 +16,22 @@ import { TicketsContext } from "../../context/Tickets/TicketsContext";
 
 import { i18n } from "../../translate/i18n";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   header: {},
   content: {
-    overflow: "auto",
+    overflow: "auto"
   },
   placeholderContainer: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    height: "100%",
+    height: "100%"
   },
-  placeholderItem: {},
+  placeholderItem: {}
 }));
 
-const TicketAdvanced = (props) => {
+const TicketAdvanced = props => {
   const classes = useStyles();
   const { ticketId } = useParams();
   const [option, setOption] = useState(0);

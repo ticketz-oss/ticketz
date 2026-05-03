@@ -4,12 +4,12 @@ import TableRow from "@material-ui/core/TableRow";
 import Skeleton from "@material-ui/lab/Skeleton";
 import { makeStyles } from "@material-ui/core";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   customTableCell: {
     display: "flex",
     alignItems: "center",
-    justifyContent: "center",
-  },
+    justifyContent: "center"
+  }
 }));
 
 const TableRowSkeleton = ({ avatar, columns }) => {

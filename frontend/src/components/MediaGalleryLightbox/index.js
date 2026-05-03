@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Lightbox, {
-  IconButton as YarlIconButton,
+  IconButton as YarlIconButton
 } from "yet-another-react-lightbox";
 import Captions from "yet-another-react-lightbox/plugins/captions";
 import Download from "yet-another-react-lightbox/plugins/download";
@@ -11,7 +11,7 @@ import "yet-another-react-lightbox/plugins/captions.css";
 import "yet-another-react-lightbox/plugins/thumbnails.css";
 import "yet-another-react-lightbox/styles.css";
 
-const RotateLeftIcon = (props) => (
+const RotateLeftIcon = props => (
   <svg
     viewBox="0 0 24 24"
     width="24"
@@ -28,7 +28,7 @@ const RotateLeftIcon = (props) => (
   </svg>
 );
 
-const RotateRightIcon = (props) => (
+const RotateRightIcon = props => (
   <svg
     viewBox="0 0 24 24"
     width="24"
@@ -45,7 +45,7 @@ const RotateRightIcon = (props) => (
   </svg>
 );
 
-const normalizeRotation = (value) => ((value % 360) + 360) % 360;
+const normalizeRotation = value => ((value % 360) + 360) % 360;
 
 const buildCacheBustedUrl = (url, seed) => {
   if (!url) {
@@ -79,21 +79,21 @@ const extractFileName = (url, fallback) => {
 };
 
 const VIDEO_THUMBNAIL_FALLBACK = `data:image/svg+xml,${encodeURIComponent(
-  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180"><rect width="320" height="180" fill="#0f172a"/><circle cx="160" cy="90" r="42" fill="#ffffff" fill-opacity="0.92"/><polygon points="148,68 148,112 186,90" fill="#0f172a"/></svg>',
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180"><rect width="320" height="180" fill="#0f172a"/><circle cx="160" cy="90" r="42" fill="#ffffff" fill-opacity="0.92"/><polygon points="148,68 148,112 186,90" fill="#0f172a"/></svg>'
 )}`;
 
 export const buildMediaGalleryData = (
   messages,
   {
-    getId = (message) => message?.id,
-    getMediaType = (message) => message?.mediaType,
-    getMediaUrl = (message) => message?.mediaUrl,
-    getThumbnailUrl = (message) => message?.thumbnailUrl,
-    getDescription = (message) => message?.body,
-    getUpdatedAt = (message) => message?.updatedAt,
-    getCreatedAt = (message) => message?.createdAt,
-    getDataJson = (message) => message?.dataJson,
-  } = {},
+    getId = message => message?.id,
+    getMediaType = message => message?.mediaType,
+    getMediaUrl = message => message?.mediaUrl,
+    getThumbnailUrl = message => message?.thumbnailUrl,
+    getDescription = message => message?.body,
+    getUpdatedAt = message => message?.updatedAt,
+    getCreatedAt = message => message?.createdAt,
+    getDataJson = message => message?.dataJson
+  } = {}
 ) => {
   return messages.reduce(
     (acc, message) => {
@@ -139,9 +139,9 @@ export const buildMediaGalleryData = (
           poster: thumbnailUrl || mediaUrl,
           download: {
             url: downloadUrl,
-            filename: extractFileName(mediaUrl, `video-${messageId}`),
+            filename: extractFileName(mediaUrl, `video-${messageId}`)
           },
-          sources: [{ src: mediaUrl }],
+          sources: [{ src: mediaUrl }]
         });
       } else {
         acc.slides.push({
@@ -151,14 +151,14 @@ export const buildMediaGalleryData = (
           description,
           download: {
             url: downloadUrl,
-            filename: extractFileName(mediaUrl, `image-${messageId}`),
-          },
+            filename: extractFileName(mediaUrl, `image-${messageId}`)
+          }
         });
       }
 
       return acc;
     },
-    { slides: [], byMessageId: {} },
+    { slides: [], byMessageId: {} }
   );
 };
 
@@ -167,7 +167,7 @@ const MediaGalleryLightbox = ({
   index,
   slides,
   onClose,
-  onViewIndexChange,
+  onViewIndexChange
 }) => {
   const [currentIndex, setCurrentIndex] = useState(index || 0);
   const [rotationBySlide, setRotationBySlide] = useState({});
@@ -182,16 +182,16 @@ const MediaGalleryLightbox = ({
     }
   }, [open]);
 
-  const rotateCurrentSlide = (degrees) => {
+  const rotateCurrentSlide = degrees => {
     const currentSlide = slides[currentIndex];
     const slideKey = currentSlide?.key;
     if (!slideKey) {
       return;
     }
 
-    setRotationBySlide((previous) => ({
+    setRotationBySlide(previous => ({
       ...previous,
-      [slideKey]: normalizeRotation((previous[slideKey] || 0) + degrees),
+      [slideKey]: normalizeRotation((previous[slideKey] || 0) + degrees)
     }));
   };
 
@@ -207,7 +207,7 @@ const MediaGalleryLightbox = ({
           if (onViewIndexChange) {
             onViewIndexChange(viewedIndex);
           }
-        },
+        }
       }}
       render={{
         slideContainer: ({ slide, children }) => {
@@ -220,17 +220,17 @@ const MediaGalleryLightbox = ({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                transform: `rotate(${rotation}deg)`,
+                transform: `rotate(${rotation}deg)`
               }}
             >
               {children}
             </div>
           );
-        },
+        }
       }}
       captions={{
         descriptionTextAlign: "start",
-        descriptionMaxLines: 4,
+        descriptionMaxLines: 4
       }}
       thumbnails={{
         position: "bottom",
@@ -240,7 +240,7 @@ const MediaGalleryLightbox = ({
         borderRadius: 8,
         padding: 2,
         gap: 10,
-        vignette: false,
+        vignette: false
       }}
       toolbar={{
         buttons: [
@@ -260,8 +260,8 @@ const MediaGalleryLightbox = ({
             onClick={() => rotateCurrentSlide(90)}
             disabled={!slides.length}
           />,
-          "close",
-        ],
+          "close"
+        ]
       }}
       plugins={[Video, Zoom, Download, Thumbnails, Captions]}
     />

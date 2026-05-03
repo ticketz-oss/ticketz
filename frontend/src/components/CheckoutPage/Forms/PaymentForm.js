@@ -12,29 +12,29 @@ import { makeStyles } from "@material-ui/core/styles";
 import usePlans from "../../../hooks/usePlans";
 import useCompanies from "../../../hooks/useCompanies";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   "@global": {
     ul: {
       margin: 0,
       padding: 0,
-      listStyle: "none",
-    },
+      listStyle: "none"
+    }
   },
   margin: {
-    margin: theme.spacing(1),
+    margin: theme.spacing(1)
   },
 
   cardHeader: {
     backgroundColor:
       theme.palette.type === "light"
         ? theme.palette.grey[200]
-        : theme.palette.grey[700],
+        : theme.palette.grey[700]
   },
   cardPricing: {
     display: "flex",
     justifyContent: "center",
     alignItems: "baseline",
-    marginBottom: theme.spacing(2),
+    marginBottom: theme.spacing(2)
   },
   footer: {
     borderTop: `1px solid ${theme.palette.divider}`,
@@ -43,21 +43,21 @@ const useStyles = makeStyles((theme) => ({
     paddingBottom: theme.spacing(3),
     [theme.breakpoints.up("sm")]: {
       paddingTop: theme.spacing(6),
-      paddingBottom: theme.spacing(6),
-    },
+      paddingBottom: theme.spacing(6)
+    }
   },
 
   customCard: {
     display: "flex",
     marginTop: "16px",
     alignItems: "center",
-    flexDirection: "column",
+    flexDirection: "column"
   },
   custom: {
     display: "flex",
     alignItems: "center",
-    justifyContent: "space-between",
-  },
+    justifyContent: "space-between"
+  }
 }));
 
 export default function Pricing(props) {
@@ -94,7 +94,7 @@ export default function Pricing(props) {
     }
     setLoading(false);
   };
-  const loadPlans = async (companiesPlans) => {
+  const loadPlans = async companiesPlans => {
     setLoading(true);
     try {
       const plansCompanies = await finder(companiesPlans);
@@ -108,13 +108,13 @@ export default function Pricing(props) {
         description: [
           `${plansCompanies.users} Usuários`,
           `${plansCompanies.connections} Conexão`,
-          `${plansCompanies.queues} Filas`,
+          `${plansCompanies.queues} Filas`
         ],
         users: plansCompanies.users,
         connections: plansCompanies.connections,
         queues: plansCompanies.queues,
         buttonText: "SELECIONAR",
-        buttonVariant: "outlined",
+        buttonVariant: "outlined"
       });
 
       // setStoragePlans(data);
@@ -131,7 +131,7 @@ export default function Pricing(props) {
   return (
     <React.Fragment>
       <Grid container spacing={3}>
-        {tiers.map((tier) => (
+        {tiers.map(tier => (
           // Enterprise card is full width at sm breakpoint
           <Grid
             item
@@ -156,7 +156,7 @@ export default function Pricing(props) {
                       <React.Fragment>
                         R$
                         {tier.price.toLocaleString("pt-br", {
-                          minimumFractionDigits: 2,
+                          minimumFractionDigits: 2
                         })}
                       </React.Fragment>
                     }
@@ -166,7 +166,7 @@ export default function Pricing(props) {
                   </Typography>
                 </div>
                 <ul>
-                  {tier.description.map((line) => (
+                  {tier.description.map(line => (
                     <Typography
                       component="li"
                       variant="subtitle1"
@@ -190,8 +190,8 @@ export default function Pricing(props) {
                         JSON.stringify({
                           users: usersPlans,
                           connections: connectionsPlans,
-                          price: customValuePlans,
-                        }),
+                          price: customValuePlans
+                        })
                       );
                     } else {
                       setFieldValue("plan", JSON.stringify(tier));

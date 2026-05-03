@@ -37,7 +37,7 @@ const ConfirmationModal = ({
   onClose,
   onConfirm,
   okEnabled = true,
-  checkbox,
+  checkbox
 }) => {
   const [checked, setChecked] = React.useState(false);
 
@@ -57,7 +57,7 @@ const ConfirmationModal = ({
             control={
               <Switch
                 checked={checked}
-                onChange={(e) => setChecked(e.target.checked)}
+                onChange={e => setChecked(e.target.checked)}
                 name="confirmSwitch"
                 color="primary"
               />

@@ -6,24 +6,24 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogContent from "@material-ui/core/DialogContent";
 import CheckoutPage from "../CheckoutPage/";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     display: "flex",
-    flexWrap: "wrap",
+    flexWrap: "wrap"
   },
   textField: {
     marginRight: theme.spacing(1),
-    flex: 1,
+    flex: 1
   },
 
   extraAttr: {
     display: "flex",
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "center"
   },
 
   btnWrapper: {
-    position: "relative",
+    position: "relative"
   },
 
   buttonProgress: {
@@ -32,8 +32,8 @@ const useStyles = makeStyles((theme) => ({
     top: "50%",
     left: "50%",
     marginTop: -12,
-    marginLeft: -12,
-  },
+    marginLeft: -12
+  }
 }));
 
 const ContactModal = ({
@@ -42,7 +42,7 @@ const ContactModal = ({
   Invoice,
   contactId,
   initialValues,
-  onSave,
+  onSave
 }) => {
   const classes = useStyles();
   const isMounted = useRef(true);

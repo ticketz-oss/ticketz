@@ -14,7 +14,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  makeStyles,
+  makeStyles
 } from "@material-ui/core";
 import { green } from "@material-ui/core/colors";
 
@@ -22,22 +22,22 @@ import api from "../../services/api";
 import { i18n } from "../../translate/i18n";
 import toastError from "../../errors/toastError";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     display: "flex",
     flexWrap: "wrap",
-    backgroundColor: theme.palette.tabHeaderBackground,
+    backgroundColor: theme.palette.tabHeaderBackground
   },
 
   multFieldLine: {
     display: "flex",
     "& > *:not(:last-child)": {
-      marginRight: theme.spacing(1),
-    },
+      marginRight: theme.spacing(1)
+    }
   },
 
   btnWrapper: {
-    position: "relative",
+    position: "relative"
   },
 
   buttonProgress: {
@@ -46,8 +46,8 @@ const useStyles = makeStyles((theme) => ({
     top: "50%",
     left: "50%",
     marginTop: -12,
-    marginLeft: -12,
-  },
+    marginLeft: -12
+  }
 }));
 
 const PrivacyModal = ({ open, onClose, whatsAppId }) => {
@@ -60,7 +60,7 @@ const PrivacyModal = ({ open, onClose, whatsAppId }) => {
     last: "all",
     groupadd: "all",
     calladd: "all",
-    disappearing: "0",
+    disappearing: "0"
   };
   const [privacy, setPrivacy] = useState(initialState);
 
@@ -78,7 +78,7 @@ const PrivacyModal = ({ open, onClose, whatsAppId }) => {
     fetchSession();
   }, [whatsAppId]);
 
-  const handleSavePrivacy = async (values) => {
+  const handleSavePrivacy = async values => {
     const privacyData = { ...values };
 
     try {

@@ -23,10 +23,10 @@ function CheckoutSuccess(props) {
     const companyId = localStorage.getItem("companyId");
     const socket = socketManager.GetSocket(companyId);
 
-    const onCompanyPayment = (data) => {
+    const onCompanyPayment = data => {
       if (data.action === "CONCLUIDA") {
         toast.success(
-          `Sua licença foi renovada até ${dateToClient(data.company.dueDate)}!`,
+          `Sua licença foi renovada até ${dateToClient(data.company.dueDate)}!`
         );
         setTimeout(() => {
           history.push("/");
@@ -60,7 +60,7 @@ function CheckoutSuccess(props) {
         <strong>
           R$
           {pix.valor.original.toLocaleString("pt-br", {
-            minimumFractionDigits: 2,
+            minimumFractionDigits: 2
           })}
         </strong>
       </Total>
@@ -74,7 +74,7 @@ function CheckoutSuccess(props) {
             borderColor: "black",
             backgroundColor: "white",
             height: "auto",
-            maxWidth: "100%",
+            maxWidth: "100%"
           }}
         />
         <CopyToClipboard text={pixString} onCopy={handleCopyQR}>

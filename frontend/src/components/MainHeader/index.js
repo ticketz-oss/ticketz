@@ -4,7 +4,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import whatsBackground from "../../assets/wa-background.png";
 import whatsBackgroundDark from "../../assets/wa-background-dark.png";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   contactsHeader: {
     display: "flex",
     alignItems: "center",
@@ -15,8 +15,8 @@ const useStyles = makeStyles((theme) => ({
         : `url(${whatsBackgroundDark})`,
     backgroundPosition: "center",
     backgroundSize: "cover",
-    backgroundRepeat: "no-repeat",
-  },
+    backgroundRepeat: "no-repeat"
+  }
 }));
 
 const MainHeader = ({ children }) => {

@@ -81,7 +81,7 @@ class ManagedSocket {
 
   off(event, callback) {
     const i = this.callbacks.findIndex(
-      (c) => c.event === event && c.callback === callback,
+      c => c.event === event && c.callback === callback
     );
     this.callbacks.splice(i, 1);
     return this.rawSocket.off(event, callback);
@@ -150,7 +150,7 @@ const socketManager = {
       if (isExpired(token)) {
         console.debug("Expired token, refreshing token");
 
-        api.get("/auth/me").then((response) => {
+        api.get("/auth/me").then(response => {
           console.debug("Token refreshed", response);
           window.location.reload();
         });
@@ -165,7 +165,7 @@ const socketManager = {
         transports: ["websocket"],
         pingTimeout: 18000,
         pingInterval: 18000,
-        query: { token },
+        query: { token }
       });
 
       this.currentSocket.io.on("reconnect_attempt", () => {
@@ -180,7 +180,7 @@ const socketManager = {
         }
       });
 
-      this.currentSocket.on("disconnect", (reason) => {
+      this.currentSocket.on("disconnect", reason => {
         console.debug(`socket disconnected because: ${reason}`);
         if (reason.startsWith("io server disconnect")) {
           console.debug("tryng to reconnect", this.currentSocket);
@@ -234,7 +234,7 @@ const socketManager = {
 
   onConnect: function (callbackReady) {
     this.onReady(callbackReady);
-  },
+  }
 };
 
 const SocketContext = createContext();

@@ -2,11 +2,11 @@ import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Chip from "@material-ui/core/Chip";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     overflow: "hidden",
     whiteSpace: "nowrap",
-    textOverflow: "ellipsis",
+    textOverflow: "ellipsis"
   },
 
   tag: {
@@ -14,8 +14,8 @@ const useStyles = makeStyles((theme) => ({
     color: "#fff",
     fontSize: 10,
     height: 20,
-    marginTop: 0,
-  },
+    marginTop: 0
+  }
 }));
 
 const TagsLine = ({ ticket }) => {
@@ -32,7 +32,7 @@ const TagsLine = ({ ticket }) => {
           style={{
             backgroundColor: tag.color,
             textShadow:
-              "-1px 0 #808080, 0 1px #808080, 1px 0 #808080, 0 -1px #808080",
+              "-1px 0 #808080, 0 1px #808080, 1px 0 #808080, 0 -1px #808080"
           }}
           className={classes.tag}
         />

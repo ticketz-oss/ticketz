@@ -18,7 +18,7 @@ const useTickets = ({
   queueIds,
   withUnreadMessages,
   notClosed,
-  all,
+  all
 }) => {
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
@@ -45,8 +45,8 @@ const useTickets = ({
               queueIds,
               withUnreadMessages,
               notClosed,
-              all,
-            },
+              all
+            }
           });
           setTickets(data.tickets);
           setHasMore(data.hasMore);
@@ -71,7 +71,7 @@ const useTickets = ({
     updatedAt,
     showAll,
     queueIds,
-    withUnreadMessages,
+    withUnreadMessages
   ]);
 
   return { tickets, loading, hasMore };

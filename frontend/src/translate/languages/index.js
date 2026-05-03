@@ -15,7 +15,7 @@ const messages = {
   ...frenchMessages,
   ...germanMessages,
   ...italianMessages,
-  ...indonesianMessages,
+  ...indonesianMessages
 };
 
 export { messages };

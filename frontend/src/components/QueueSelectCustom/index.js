@@ -9,14 +9,14 @@ import toastError from "../../errors/toastError";
 import api from "../../services/api";
 import { i18n } from "../../translate/i18n";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   chips: {
     display: "flex",
-    flexWrap: "wrap",
+    flexWrap: "wrap"
   },
   chip: {
-    margin: 2,
-  },
+    margin: 2
+  }
 }));
 
 const QueueSelectCustom = ({ selectedQueueIds, companyId, onChange }) => {
@@ -27,7 +27,7 @@ const QueueSelectCustom = ({ selectedQueueIds, companyId, onChange }) => {
     (async () => {
       try {
         const { data } = await api.get("/queue", {
-          params: { companyId },
+          params: { companyId }
         });
         setQueues(data);
       } catch (err) {
@@ -36,7 +36,7 @@ const QueueSelectCustom = ({ selectedQueueIds, companyId, onChange }) => {
     })();
   }, [companyId]);
 
-  const handleChange = (e) => {
+  const handleChange = e => {
     onChange(e.target.value);
   };
 
@@ -52,19 +52,19 @@ const QueueSelectCustom = ({ selectedQueueIds, companyId, onChange }) => {
           MenuProps={{
             anchorOrigin: {
               vertical: "bottom",
-              horizontal: "left",
+              horizontal: "left"
             },
             transformOrigin: {
               vertical: "top",
-              horizontal: "left",
+              horizontal: "left"
             },
-            getContentAnchorEl: null,
+            getContentAnchorEl: null
           }}
-          renderValue={(selected) => (
+          renderValue={selected => (
             <div className={classes.chips}>
               {selected?.length > 0 &&
-                selected.map((id) => {
-                  const queue = queues.find((q) => q.id === id);
+                selected.map(id => {
+                  const queue = queues.find(q => q.id === id);
                   return queue ? (
                     <Chip
                       key={id}
@@ -78,7 +78,7 @@ const QueueSelectCustom = ({ selectedQueueIds, companyId, onChange }) => {
             </div>
           )}
         >
-          {queues.map((queue) => (
+          {queues.map(queue => (
             <MenuItem key={queue.id} value={queue.id}>
               {queue.name}
             </MenuItem>

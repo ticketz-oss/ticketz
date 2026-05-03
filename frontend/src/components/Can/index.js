@@ -33,7 +33,7 @@ const Can = ({ role, perform, data, yes, no }) =>
 
 Can.defaultProps = {
   yes: () => null,
-  no: () => null,
+  no: () => null
 };
 
 export { Can };

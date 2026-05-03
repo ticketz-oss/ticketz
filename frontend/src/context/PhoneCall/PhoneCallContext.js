@@ -5,11 +5,11 @@ export const PhoneCallContext = createContext();
 export function PhoneCallProvider({ children }) {
   const [currentCall, setCurrentCall] = useState(null);
 
-  const updateCurrentCall = (call) => {
-    setCurrentCall((prevCall) => {
+  const updateCurrentCall = call => {
+    setCurrentCall(prevCall => {
       if (prevCall && call) {
         throw new Error(
-          "A call is already in progress. Please disconnect before starting a new call.",
+          "A call is already in progress. Please disconnect before starting a new call."
         );
       }
       return call;
@@ -17,7 +17,7 @@ export function PhoneCallProvider({ children }) {
   };
 
   const disconnect = () => {
-    setCurrentCall((call) => {
+    setCurrentCall(call => {
       call?.disconnect();
       return null;
     });

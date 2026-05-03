@@ -25,7 +25,7 @@ export function TagsFilter({ onFiltered }) {
     }
   };
 
-  const onChange = async (value) => {
+  const onChange = async value => {
     setSelecteds(value);
     onFiltered(value);
   };
@@ -38,7 +38,7 @@ export function TagsFilter({ onFiltered }) {
         options={tags}
         value={selecteds}
         onChange={(e, v, r) => onChange(v)}
-        getOptionLabel={(option) => option.name}
+        getOptionLabel={option => option.name}
         renderTags={(value, getTagProps) =>
           value.map((option, index) => (
             <Chip
@@ -46,7 +46,7 @@ export function TagsFilter({ onFiltered }) {
               style={{
                 backgroundColor: option.color || "#eee",
                 textShadow: "1px 1px 1px #000",
-                color: "white",
+                color: "white"
               }}
               label={option.name}
               {...getTagProps({ index })}
@@ -54,7 +54,7 @@ export function TagsFilter({ onFiltered }) {
             />
           ))
         }
-        renderInput={(params) => (
+        renderInput={params => (
           <TextField
             {...params}
             variant="outlined"

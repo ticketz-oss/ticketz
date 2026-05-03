@@ -4,7 +4,7 @@ import {
   TextField,
   DialogContent,
   DialogActions,
-  Grid,
+  Grid
 } from "@material-ui/core";
 import PropType from "prop-types";
 import Dialog from "../Dialog";
@@ -22,25 +22,25 @@ const MessageSchema = Yup.object().shape({
     .min(3, "Too Short!")
     .max(50, "Too Long!")
     .required("Required"),
-  message: Yup.string().min(3, "Too Short!").required("Required"),
+  message: Yup.string().min(3, "Too Short!").required("Required")
 });
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     "& .MuiTextField-root": {
       margin: theme.spacing(1),
-      width: "350px",
-    },
+      width: "350px"
+    }
   },
   list: {
     width: "100%",
     maxWidth: "350px",
     maxHeight: "200px",
-    backgroundColor: theme.palette.background.paper,
+    backgroundColor: theme.palette.background.paper
   },
   inline: {
-    width: "100%",
-  },
+    width: "100%"
+  }
 }));
 
 function QuickMessageDialog(props) {
@@ -49,7 +49,7 @@ function QuickMessageDialog(props) {
   const initialMessage = {
     id: null,
     shortcode: "",
-    message: "",
+    message: ""
   };
 
   const { modalOpen, saveMessage, editMessage, onClose, messageSelected } =
@@ -93,17 +93,17 @@ function QuickMessageDialog(props) {
     setLoading(false);
   };
 
-  const handleSave = async (values) => {
+  const handleSave = async values => {
     if (messageSelectedIsValid()) {
       editMessage({
         ...messageSelected,
         ...values,
-        userId: user.id,
+        userId: user.id
       });
     } else {
       saveMessage({
         ...values,
-        userId: user.id,
+        userId: user.id
       });
     }
     handleClose();
@@ -179,7 +179,7 @@ function QuickMessageDialog(props) {
 
 QuickMessageDialog.propType = {
   modalOpen: PropType.bool,
-  onClose: PropType.func,
+  onClose: PropType.func
 };
 
 export default QuickMessageDialog;

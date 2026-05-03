@@ -6,22 +6,22 @@ import Skeleton from "@material-ui/lab/Skeleton";
 import { makeStyles } from "@material-ui/core/styles";
 import { grey } from "@material-ui/core/colors";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   cardAvatar: {
     fontSize: "55px",
     color: grey[500],
     backgroundColor: "#ffffff",
     width: theme.spacing(7),
-    height: theme.spacing(7),
+    height: theme.spacing(7)
   },
   cardTitle: {
     fontSize: "18px",
-    color: theme.palette.text.primary,
+    color: theme.palette.text.primary
   },
   cardSubtitle: {
     color: grey[600],
-    fontSize: "14px",
-  },
+    fontSize: "14px"
+  }
 }));
 
 export default function CardCounter(props) {

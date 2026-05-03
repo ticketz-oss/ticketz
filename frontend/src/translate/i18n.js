@@ -8,12 +8,12 @@ i18n.use(LanguageDetector).init({
   detection: {
     order: ["localStorage", "navigator"],
     lookupLocalStorage: "language",
-    caches: ["localStorage"],
+    caches: ["localStorage"]
   },
   defaultNS: ["translations"],
   fallbackLng: "en",
   ns: ["translations"],
-  resources: messages,
+  resources: messages
 });
 
 export { i18n };

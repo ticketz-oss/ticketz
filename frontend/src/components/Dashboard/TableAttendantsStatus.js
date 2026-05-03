@@ -20,18 +20,18 @@ import Rating from "@material-ui/lab/Rating";
 import { i18n } from "../../translate/i18n";
 import { formatTimeInterval } from "../../helpers/formatTimeInterval.js";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   on: {
     color: green[600],
-    fontSize: "20px",
+    fontSize: "20px"
   },
   off: {
     color: red[600],
-    fontSize: "20px",
+    fontSize: "20px"
   },
   pointer: {
-    cursor: "pointer",
-  },
+    cursor: "pointer"
+  }
 }));
 
 export function RatingBox({ rating }) {
@@ -52,12 +52,12 @@ export default function TableAttendantsStatus(props) {
   const socketManager = useContext(SocketContext);
   const [attendants, setAttendants] = useState(loadedAttendants || []);
 
-  const updateStatus = (data) => {
+  const updateStatus = data => {
     const { userId, online } = data;
-    setAttendants((prevAttendants) =>
-      prevAttendants.map((attendant) =>
-        attendant.id === userId ? { ...attendant, online } : attendant,
-      ),
+    setAttendants(prevAttendants =>
+      prevAttendants.map(attendant =>
+        attendant.id === userId ? { ...attendant, online } : attendant
+      )
     );
   };
 
@@ -78,7 +78,7 @@ export default function TableAttendantsStatus(props) {
   }, [socketManager]);
 
   function renderList() {
-    return attendants.map((a) => (
+    return attendants.map(a => (
       <TableRow key={a.id}>
         <TableCell>{a.name}</TableCell>
         <TableCell align="center" className={classes.pointer}>

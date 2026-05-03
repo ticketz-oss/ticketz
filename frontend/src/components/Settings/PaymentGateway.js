@@ -52,11 +52,11 @@ import { makeStyles } from "@material-ui/core/styles";
 import EfiSettings from "../PaymentGateways/Efi/EfiSettings";
 import PixTicketzSettings from "../PaymentGateways/PixTicketz/PixTicketzSettings";
 
-const useStyles = makeStyles((_) => ({
+const useStyles = makeStyles(_ => ({
   fieldContainer: {
     width: "100%",
-    textAlign: "left",
-  },
+    textAlign: "left"
+  }
 }));
 
 export default function PaymentGateway(props) {
@@ -69,7 +69,7 @@ export default function PaymentGateway(props) {
   useEffect(() => {
     if (Array.isArray(settings) && settings.length) {
       const paymentGatewaySetting = settings.find(
-        (s) => s.key === "_paymentGateway",
+        s => s.key === "_paymentGateway"
       );
       if (paymentGatewaySetting) {
         setPaymentGateway(paymentGatewaySetting.value);
@@ -81,7 +81,7 @@ export default function PaymentGateway(props) {
     setPaymentGateway(value);
     await update({
       key: "_paymentGateway",
-      value,
+      value
     });
     toast.success("Operação atualizada com sucesso.");
   }
@@ -95,7 +95,7 @@ export default function PaymentGateway(props) {
             <Select
               labelId="paymentgateway-label"
               value={paymentGateway}
-              onChange={async (e) => {
+              onChange={async e => {
                 handleChangePaymentGateway(e.target.value);
               }}
             >

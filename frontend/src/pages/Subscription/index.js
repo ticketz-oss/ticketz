@@ -13,16 +13,16 @@ import MainContainer from "../../components/MainContainer";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   mainPaper: {
     flex: 1,
     padding: theme.spacing(1),
     overflowY: "scroll",
-    ...theme.scrollbarStyles,
-  },
+    ...theme.scrollbarStyles
+  }
 }));
 
-const _formatDate = (date) => {
+const _formatDate = date => {
   const now = new Date();
   const past = new Date(date);
   const diff = Math.abs(now.getTime() - past.getTime());
@@ -52,10 +52,10 @@ const Contacts = () => {
   };
 
   const loadMore = () => {
-    setPageNumber((prevState) => prevState + 1);
+    setPageNumber(prevState => prevState + 1);
   };
 
-  const handleScroll = (e) => {
+  const handleScroll = e => {
     if (!hasMore || loading) return;
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
     if (scrollHeight - (scrollTop + 100) < clientHeight) {
@@ -89,10 +89,10 @@ const Contacts = () => {
               fullWidth
               margin="normal"
               InputLabelProps={{
-                shrink: true,
+                shrink: true
               }}
               InputProps={{
-                readOnly: true,
+                readOnly: true
               }}
               variant="outlined"
             />
@@ -106,10 +106,10 @@ const Contacts = () => {
               fullWidth
               margin="normal"
               InputLabelProps={{
-                shrink: true,
+                shrink: true
               }}
               InputProps={{
-                readOnly: true,
+                readOnly: true
               }}
               variant="outlined"
             />

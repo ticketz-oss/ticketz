@@ -28,6 +28,6 @@ export function useDate() {
   return {
     dateToClient,
     datetimeToClient,
-    dateToDatabase,
+    dateToDatabase
   };
 }

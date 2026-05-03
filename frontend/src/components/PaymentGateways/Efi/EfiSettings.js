@@ -51,15 +51,15 @@ import { AttachFile, Delete } from "@material-ui/icons";
 import { IconButton, InputAdornment } from "@material-ui/core";
 import api from "../../../services/api";
 
-const useStyles = makeStyles((_) => ({
+const useStyles = makeStyles(_ => ({
   fieldContainer: {
     width: "100%",
-    textAlign: "left",
+    textAlign: "left"
   },
 
   uploadInput: {
-    display: "none",
-  },
+    display: "none"
+  }
 }));
 
 export default function EfiSettings(props) {
@@ -84,17 +84,17 @@ export default function EfiSettings(props) {
 
     api
       .post("/settings/privateFile", formData, {
-        onUploadProgress: (event) => {
+        onUploadProgress: event => {
           let progress = Math.round((event.loaded * 100) / event.total);
           console.log(`Upload ${progress}%`);
-        },
+        }
       })
-      .then((response) => {
+      .then(response => {
         const newSettings = { ...efiSettings };
         newSettings[key] = response.data;
         setEfiSettings(newSettings);
       })
-      .catch((err) => {
+      .catch(err => {
         console.error(`Houve um problema ao realizar o upload da imagem.`);
         console.log(err);
       });
@@ -103,7 +103,7 @@ export default function EfiSettings(props) {
   useEffect(() => {
     if (Array.isArray(settings)) {
       const newSettings = {};
-      settings.forEach((setting) => {
+      settings.forEach(setting => {
         if (setting.key.startsWith("_efi")) {
           newSettings[setting.key.substring(1)] = setting.value;
         }
@@ -116,7 +116,7 @@ export default function EfiSettings(props) {
   async function storeSetting(key, value) {
     await update({
       key,
-      value,
+      value
     });
   }
 
@@ -169,7 +169,7 @@ export default function EfiSettings(props) {
                       id="upload-efi-certificate-button"
                       ref={efiCertificateFileInput}
                       className={classes.uploadInput}
-                      onChange={(e) => uploadPrivate(e, "efiCertFile")}
+                      onChange={e => uploadPrivate(e, "efiCertFile")}
                     />
                     <label htmlFor="upload-efi-certificate-button">
                       <IconButton
@@ -183,7 +183,7 @@ export default function EfiSettings(props) {
                       </IconButton>
                     </label>
                   </>
-                ),
+                )
               }}
             />
           </FormControl>
@@ -197,12 +197,12 @@ export default function EfiSettings(props) {
               variant="standard"
               name="efiClientId"
               value={efiSettings.efiClientId || ""}
-              onChange={(e) => {
+              onChange={e => {
                 const newSettings = { ...efiSettings };
                 newSettings.efiClientId = e.target.value;
                 setEfiSettings(newSettings);
               }}
-              onBlur={async (_) => {
+              onBlur={async _ => {
                 await handleSaveSetting("efiClientId");
               }}
             />
@@ -216,10 +216,10 @@ export default function EfiSettings(props) {
               variant="standard"
               name="efiClientSecret"
               value={efiSettings.efiClientSecret || ""}
-              onChange={(e) => {
+              onChange={e => {
                 setSetting("efiClientSecret", e.target.value);
               }}
-              onBlur={async (_) => {
+              onBlur={async _ => {
                 await handleSaveSetting("efiClientSecret");
               }}
             />
@@ -233,12 +233,12 @@ export default function EfiSettings(props) {
               variant="standard"
               name="efiPixKey"
               value={efiSettings.efiPixKey || ""}
-              onChange={(e) => {
+              onChange={e => {
                 const newSettings = { ...efiSettings };
                 newSettings.efiPixKey = e.target.value;
                 setEfiSettings(newSettings);
               }}
-              onBlur={async (_) => {
+              onBlur={async _ => {
                 await handleSaveSetting("efiPixKey");
               }}
             />

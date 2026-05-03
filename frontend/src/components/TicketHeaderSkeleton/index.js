@@ -4,12 +4,12 @@ import { makeStyles } from "@material-ui/core/styles";
 import { Avatar, Card, CardHeader } from "@material-ui/core";
 import Skeleton from "@material-ui/lab/Skeleton";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   ticketHeader: {
     display: "flex",
     flex: "none",
-    borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
-  },
+    borderBottom: "1px solid rgba(0, 0, 0, 0.12)"
+  }
 }));
 
 const TicketHeaderSkeleton = () => {

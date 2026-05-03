@@ -48,8 +48,8 @@ const reducer = (state, action) => {
     const newCampaigns = [];
 
     if (isArray(campaigns)) {
-      campaigns.forEach((campaign) => {
-        const campaignIndex = state.findIndex((u) => u.id === campaign.id);
+      campaigns.forEach(campaign => {
+        const campaignIndex = state.findIndex(u => u.id === campaign.id);
         if (campaignIndex !== -1) {
           state[campaignIndex] = campaign;
         } else {
@@ -63,7 +63,7 @@ const reducer = (state, action) => {
 
   if (action.type === "UPDATE_CAMPAIGNS") {
     const campaign = action.payload;
-    const campaignIndex = state.findIndex((u) => u.id === campaign.id);
+    const campaignIndex = state.findIndex(u => u.id === campaign.id);
 
     if (campaignIndex !== -1) {
       state[campaignIndex] = campaign;
@@ -76,7 +76,7 @@ const reducer = (state, action) => {
   if (action.type === "DELETE_CAMPAIGN") {
     const campaignId = action.payload;
 
-    const campaignIndex = state.findIndex((u) => u.id === campaignId);
+    const campaignIndex = state.findIndex(u => u.id === campaignId);
     if (campaignIndex !== -1) {
       state.splice(campaignIndex, 1);
     }
@@ -88,13 +88,13 @@ const reducer = (state, action) => {
   }
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   mainPaper: {
     flex: 1,
     padding: theme.spacing(1),
     overflowY: "scroll",
-    ...theme.scrollbarStyles,
-  },
+    ...theme.scrollbarStyles
+  }
 }));
 
 const Campaigns = () => {
@@ -134,7 +134,7 @@ const Campaigns = () => {
     const companyId = localStorage.getItem("companyId");
     const socket = socketManager.GetSocket(companyId);
 
-    const onCompanyCampaign = (data) => {
+    const onCompanyCampaign = data => {
       if (data.action === "update" || data.action === "create") {
         dispatch({ type: "UPDATE_CAMPAIGNS", payload: data.record });
       }
@@ -152,7 +152,7 @@ const Campaigns = () => {
   const fetchCampaigns = async () => {
     try {
       const { data } = await api.get("/campaigns/", {
-        params: { searchParam, pageNumber },
+        params: { searchParam, pageNumber }
       });
       dispatch({ type: "LOAD_CAMPAIGNS", payload: data.records });
       setHasMore(data.hasMore);
@@ -172,16 +172,16 @@ const Campaigns = () => {
     setCampaignModalOpen(false);
   };
 
-  const handleSearch = (event) => {
+  const handleSearch = event => {
     setSearchParam(event.target.value.toLowerCase());
   };
 
-  const handleEditCampaign = (campaign) => {
+  const handleEditCampaign = campaign => {
     setSelectedCampaign(campaign);
     setCampaignModalOpen(true);
   };
 
-  const handleDeleteCampaign = async (campaignId) => {
+  const handleDeleteCampaign = async campaignId => {
     try {
       await api.delete(`/campaigns/${campaignId}`);
       toast.success(i18n.t("campaigns.toasts.deleted"));
@@ -194,10 +194,10 @@ const Campaigns = () => {
   };
 
   const loadMore = () => {
-    setPageNumber((prevState) => prevState + 1);
+    setPageNumber(prevState => prevState + 1);
   };
 
-  const handleScroll = (e) => {
+  const handleScroll = e => {
     if (!hasMore || loading) return;
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
     if (scrollHeight - (scrollTop + 100) < clientHeight) {
@@ -205,7 +205,7 @@ const Campaigns = () => {
     }
   };
 
-  const formatStatus = (val) => {
+  const formatStatus = val => {
     switch (val) {
       case "INATIVA":
         return "Inativa";
@@ -222,7 +222,7 @@ const Campaigns = () => {
     }
   };
 
-  const cancelCampaign = async (campaign) => {
+  const cancelCampaign = async campaign => {
     try {
       await api.post(`/campaigns/${campaign.id}/cancel`);
       toast.success(i18n.t("campaigns.toasts.cancel"));
@@ -233,7 +233,7 @@ const Campaigns = () => {
     }
   };
 
-  const restartCampaign = async (campaign) => {
+  const restartCampaign = async campaign => {
     try {
       await api.post(`/campaigns/${campaign.id}/restart`);
       toast.success(i18n.t("campaigns.toasts.restart"));
@@ -288,7 +288,7 @@ const Campaigns = () => {
                       <InputAdornment position="start">
                         <SearchIcon style={{ color: "gray" }} />
                       </InputAdornment>
-                    ),
+                    )
                   }}
                 />
               </Grid>
@@ -342,7 +342,7 @@ const Campaigns = () => {
           </TableHead>
           <TableBody>
             <>
-              {campaigns.map((campaign) => {
+              {campaigns.map(campaign => {
                 const canEdit =
                   campaign.status === "INATIVA" ||
                   (campaign.status === "PROGRAMADA" &&
@@ -409,7 +409,7 @@ const Campaigns = () => {
 
                       <IconButton
                         size="small"
-                        onClick={(e) => {
+                        onClick={e => {
                           setConfirmModalOpen(true);
                           setDeletingCampaign(campaign);
                         }}

@@ -9,9 +9,9 @@ import { i18n } from "../../translate/i18n";
 const TicketsQueueSelect = ({
   userQueues,
   selectedQueueIds = [],
-  onChange,
+  onChange
 }) => {
-  const handleChange = (e) => {
+  const handleChange = e => {
     onChange(e.target.value);
   };
 
@@ -27,22 +27,22 @@ const TicketsQueueSelect = ({
           MenuProps={{
             anchorOrigin: {
               vertical: "bottom",
-              horizontal: "left",
+              horizontal: "left"
             },
             transformOrigin: {
               vertical: "top",
-              horizontal: "left",
+              horizontal: "left"
             },
-            getContentAnchorEl: null,
+            getContentAnchorEl: null
           }}
           renderValue={() => i18n.t("ticketsQueueSelect.placeholder")}
         >
           {userQueues?.length > 0 &&
-            userQueues.map((queue) => (
+            userQueues.map(queue => (
               <MenuItem dense key={queue.id} value={queue.id}>
                 <Checkbox
                   style={{
-                    color: queue.color,
+                    color: queue.color
                   }}
                   size="small"
                   color="primary"

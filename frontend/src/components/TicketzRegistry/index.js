@@ -5,16 +5,16 @@ import {
   Button,
   Grid,
   InputAdornment,
-  Typography,
+  Typography
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   fullWidth: {
-    width: "100%",
-  },
+    width: "100%"
+  }
 }));
 
 const TicketzRegistry = ({ onRegister }) => {
@@ -23,14 +23,14 @@ const TicketzRegistry = ({ onRegister }) => {
   const [formData, setFormData] = useState({
     name: "",
     country: "BR",
-    phoneNumber: "",
+    phoneNumber: ""
   });
 
-  const handleChange = (e) => {
+  const handleChange = e => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value,
+      [name]: value
     });
 
     if (name === "country") {
@@ -38,12 +38,12 @@ const TicketzRegistry = ({ onRegister }) => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     try {
       const registryData = {
         name: formData.name,
-        whatsapp: `${getPhoneCode(formData.country)}${formData.phoneNumber}`,
+        whatsapp: `${getPhoneCode(formData.country)}${formData.phoneNumber}`
       };
       const response = await api.post("/ticketz/registry", registryData);
       console.debug("Form submitted successfully:", response.data);
@@ -97,7 +97,7 @@ const TicketzRegistry = ({ onRegister }) => {
                 <InputAdornment position="start">
                   {getPhoneCode(formData.country)}
                 </InputAdornment>
-              ),
+              )
             }}
           />
         </Grid>

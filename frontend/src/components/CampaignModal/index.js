@@ -31,30 +31,30 @@ import {
   MenuItem,
   Select,
   Tab,
-  Tabs,
+  Tabs
 } from "@material-ui/core";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import ConfirmationModal from "../ConfirmationModal";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     display: "flex",
-    flexWrap: "wrap",
+    flexWrap: "wrap"
   },
 
   textField: {
     marginRight: theme.spacing(1),
-    flex: 1,
+    flex: 1
   },
 
   extraAttr: {
     display: "flex",
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "center"
   },
 
   btnWrapper: {
-    position: "relative",
+    position: "relative"
   },
 
   buttonProgress: {
@@ -63,15 +63,15 @@ const useStyles = makeStyles((theme) => ({
     top: "50%",
     left: "50%",
     marginTop: -12,
-    marginLeft: -12,
-  },
+    marginLeft: -12
+  }
 }));
 
 const CampaignSchema = Yup.object().shape({
   name: Yup.string()
     .min(2, "Too Short!")
     .max(50, "Too Long!")
-    .required("Required"),
+    .required("Required")
 });
 
 const CampaignModal = ({
@@ -80,7 +80,7 @@ const CampaignModal = ({
   campaignId,
   initialValues,
   onSave,
-  resetPagination,
+  resetPagination
 }) => {
   const classes = useStyles();
   const isMounted = useRef(true);
@@ -104,7 +104,7 @@ const CampaignModal = ({
     scheduledAt: "",
     whatsappId: "",
     contactListId: "",
-    companyId,
+    companyId
   };
 
   const [campaign, setCampaign] = useState(initialState);
@@ -125,7 +125,7 @@ const CampaignModal = ({
   useEffect(() => {
     if (isMounted.current) {
       if (initialValues) {
-        setCampaign((prevState) => {
+        setCampaign(prevState => {
           return { ...prevState, ...initialValues };
         });
       }
@@ -141,7 +141,7 @@ const CampaignModal = ({
       if (!campaignId) return;
 
       api.get(`/campaigns/${campaignId}`).then(({ data }) => {
-        setCampaign((prev) => {
+        setCampaign(prev => {
           let prevCampaignData = Object.assign({}, prev);
 
           Object.entries(data.campaign).forEach(([key, value]) => {
@@ -175,14 +175,14 @@ const CampaignModal = ({
     setCampaign(initialState);
   };
 
-  const handleAttachmentFile = (e) => {
+  const handleAttachmentFile = e => {
     const file = head(e.target.files);
     if (file) {
       setAttachment(file);
     }
   };
 
-  const handleSaveCampaign = async (values) => {
+  const handleSaveCampaign = async values => {
     try {
       const dataValues = {};
       Object.entries(values).forEach(([key, value]) => {
@@ -230,12 +230,12 @@ const CampaignModal = ({
 
     if (campaign.mediaPath) {
       await api.delete(`/campaigns/${campaign.id}/media-upload`);
-      setCampaign((prev) => ({ ...prev, mediaPath: null, mediaName: null }));
+      setCampaign(prev => ({ ...prev, mediaPath: null, mediaName: null }));
       toast.success(i18n.t("campaigns.toasts.deleted"));
     }
   };
 
-  const renderMessageField = (identifier) => {
+  const renderMessageField = identifier => {
     return (
       <Field
         as={TextField}
@@ -254,7 +254,7 @@ const CampaignModal = ({
     );
   };
 
-  const renderConfirmationMessageField = (identifier) => {
+  const renderConfirmationMessageField = identifier => {
     return (
       <Field
         as={TextField}
@@ -276,7 +276,7 @@ const CampaignModal = ({
     try {
       await api.post(`/campaigns/${campaign.id}/cancel`);
       toast.success(i18n.t("campaigns.toasts.cancel"));
-      setCampaign((prev) => ({ ...prev, status: "CANCELADA" }));
+      setCampaign(prev => ({ ...prev, status: "CANCELADA" }));
       resetPagination();
     } catch (err) {
       toast.error(err.message);
@@ -287,7 +287,7 @@ const CampaignModal = ({
     try {
       await api.post(`/campaigns/${campaign.id}/restart`);
       toast.success(i18n.t("campaigns.toasts.restart"));
-      setCampaign((prev) => ({ ...prev, status: "EM_ANDAMENTO" }));
+      setCampaign(prev => ({ ...prev, status: "EM_ANDAMENTO" }));
       resetPagination();
     } catch (err) {
       toast.error(err.message);
@@ -326,7 +326,7 @@ const CampaignModal = ({
           <input
             type="file"
             ref={attachmentFile}
-            onChange={(e) => handleAttachmentFile(e)}
+            onChange={e => handleAttachmentFile(e)}
           />
         </div>
         <Formik
@@ -372,7 +372,7 @@ const CampaignModal = ({
                         as={Select}
                         label={i18n.t("campaigns.dialog.form.confirmation")}
                         placeholder={i18n.t(
-                          "campaigns.dialog.form.confirmation",
+                          "campaigns.dialog.form.confirmation"
                         )}
                         labelId="confirmation-selection-label"
                         id="confirmation"
@@ -401,7 +401,7 @@ const CampaignModal = ({
                         as={Select}
                         label={i18n.t("campaigns.dialog.form.contactList")}
                         placeholder={i18n.t(
-                          "campaigns.dialog.form.contactList",
+                          "campaigns.dialog.form.contactList"
                         )}
                         labelId="contactList-selection-label"
                         id="contactListId"
@@ -413,7 +413,7 @@ const CampaignModal = ({
                       >
                         <MenuItem value="">Nenhuma</MenuItem>
                         {contactLists &&
-                          contactLists.map((contactList) => (
+                          contactLists.map(contactList => (
                             <MenuItem
                               key={contactList.id}
                               value={contactList.id}
@@ -446,7 +446,7 @@ const CampaignModal = ({
                       >
                         <MenuItem value="">Nenhuma</MenuItem>
                         {whatsapps &&
-                          whatsapps.map((whatsapp) => (
+                          whatsapps.map(whatsapp => (
                             <MenuItem key={whatsapp.id} value={whatsapp.id}>
                               {whatsapp.name}
                             </MenuItem>
@@ -465,7 +465,7 @@ const CampaignModal = ({
                       margin="dense"
                       type="datetime-local"
                       InputLabelProps={{
-                        shrink: true,
+                        shrink: true
                       }}
                       fullWidth
                       className={classes.textField}
@@ -498,7 +498,7 @@ const CampaignModal = ({
                               <Grid xs={12} md={4} item>
                                 <>
                                   {renderConfirmationMessageField(
-                                    "confirmationMessage1",
+                                    "confirmationMessage1"
                                   )}
                                 </>
                               </Grid>
@@ -518,7 +518,7 @@ const CampaignModal = ({
                               <Grid xs={12} md={4} item>
                                 <>
                                   {renderConfirmationMessageField(
-                                    "confirmationMessage2",
+                                    "confirmationMessage2"
                                   )}
                                 </>
                               </Grid>
@@ -538,7 +538,7 @@ const CampaignModal = ({
                               <Grid xs={12} md={4} item>
                                 <>
                                   {renderConfirmationMessageField(
-                                    "confirmationMessage3",
+                                    "confirmationMessage3"
                                   )}
                                 </>
                               </Grid>
@@ -558,7 +558,7 @@ const CampaignModal = ({
                               <Grid xs={12} md={4} item>
                                 <>
                                   {renderConfirmationMessageField(
-                                    "confirmationMessage4",
+                                    "confirmationMessage4"
                                   )}
                                 </>
                               </Grid>
@@ -578,7 +578,7 @@ const CampaignModal = ({
                               <Grid xs={12} md={4} item>
                                 <>
                                   {renderConfirmationMessageField(
-                                    "confirmationMessage5",
+                                    "confirmationMessage5"
                                   )}
                                 </>
                               </Grid>

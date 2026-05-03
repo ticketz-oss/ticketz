@@ -1,55 +1,55 @@
 import api, { openApi } from "../../services/api";
 
 const useInvoices = () => {
-  const getInvoicesList = async (params) => {
+  const getInvoicesList = async params => {
     const { data } = await openApi.request({
       url: "/invoices/list",
       method: "GET",
-      params,
+      params
     });
     return data;
   };
 
-  const list = async (params) => {
+  const list = async params => {
     const { data } = await api.request({
       url: "/invoices/all",
       method: "GET",
-      params,
+      params
     });
     return data;
   };
 
-  const save = async (data) => {
+  const save = async data => {
     const { data: responseData } = await api.request({
       url: "/invoices",
       method: "POST",
-      data,
+      data
     });
     return responseData;
   };
 
-  const show = async (data) => {
+  const show = async data => {
     const { data: responseData } = await api.request({
       url: "/invoices/${id}",
       method: "GET",
-      data,
+      data
     });
     return responseData;
   };
 
-  const update = async (data) => {
+  const update = async data => {
     const { data: responseData } = await api.request({
       url: `/invoices/${data.id}`,
       method: "PUT",
-      data,
+      data
     });
     return responseData;
   };
 
-  const remove = async (id) => {
+  const remove = async id => {
     const { data } = await api.request({
       url: `/invoices/${id}`,
-      method: "DELETE",
+      method: "DELETE"
     });
     return data;
   };
@@ -59,7 +59,7 @@ const useInvoices = () => {
     list,
     save,
     update,
-    remove,
+    remove
   };
 };
 

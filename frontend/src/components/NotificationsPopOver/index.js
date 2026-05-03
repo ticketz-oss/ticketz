@@ -26,11 +26,11 @@ import useSettings from "../../hooks/useSettings";
 
 const defaultLogoFavicon = "/vector/favicon.svg";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   tabContainer: {
     overflowY: "auto",
     maxHeight: 350,
-    ...theme.scrollbarStyles,
+    ...theme.scrollbarStyles
   },
   popoverPaper: {
     width: "100%",
@@ -38,15 +38,15 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: theme.spacing(2),
     marginRight: theme.spacing(1),
     [theme.breakpoints.down("sm")]: {
-      maxWidth: 270,
-    },
+      maxWidth: 270
+    }
   },
   noShadow: {
-    boxShadow: "none !important",
-  },
+    boxShadow: "none !important"
+  }
 }));
 
-const NotificationsPopOver = (props) => {
+const NotificationsPopOver = props => {
   const classes = useStyles();
   const theme = useTheme();
 
@@ -60,13 +60,13 @@ const NotificationsPopOver = (props) => {
   const [soundGroupNotifications, setSoundGroupNotifications] = useState(false);
   const [showTabGroups, setShowTabGroups] = useState(false);
   const { profile, queues } = user;
-  const [queueIds, setQueueIds] = useState(queues.map((q) => q.id));
+  const [queueIds, setQueueIds] = useState(queues.map(q => q.id));
 
   const [, setDesktopNotifications] = useState([]);
 
   const { tickets } = useTickets({
     notClosed: "true",
-    withUnreadMessages: "true",
+    withUnreadMessages: "true"
   });
   const [play] = useSound(alertSound, { volume: props.volume });
   const soundAlertRef = useRef();
@@ -77,8 +77,8 @@ const NotificationsPopOver = (props) => {
   const socketManager = useContext(SocketContext);
 
   function clearTicket(ticketId) {
-    setNotifications((prevState) => {
-      const ticketIndex = prevState.findIndex((t) => t.id === ticketId);
+    setNotifications(prevState => {
+      const ticketIndex = prevState.findIndex(t => t.id === ticketId);
       if (ticketIndex !== -1) {
         prevState.splice(ticketIndex, 1);
         return [...prevState];
@@ -86,9 +86,9 @@ const NotificationsPopOver = (props) => {
       return prevState;
     });
 
-    setDesktopNotifications((prevState) => {
+    setDesktopNotifications(prevState => {
       const notfiticationIndex = prevState.findIndex(
-        (n) => n.tag === String(ticketId),
+        n => n.tag === String(ticketId)
       );
       if (notfiticationIndex !== -1) {
         prevState[notfiticationIndex].close();
@@ -100,16 +100,16 @@ const NotificationsPopOver = (props) => {
   }
 
   useEffect(() => {
-    getSetting("soundGroupNotifications").then((soundGroupNotifications) => {
+    getSetting("soundGroupNotifications").then(soundGroupNotifications => {
       setSoundGroupNotifications(soundGroupNotifications === "enabled");
     });
 
     Promise.all([getSetting("CheckMsgIsGroup"), getSetting("groupsTab")]).then(
       ([ignoreGroups, groupsTab]) => {
         setShowTabGroups(
-          ignoreGroups === "disabled" && groupsTab === "enabled",
+          ignoreGroups === "disabled" && groupsTab === "enabled"
         );
-      },
+      }
     );
   }, []);
 
@@ -132,7 +132,7 @@ const NotificationsPopOver = (props) => {
   }, [ticketIdUrl]);
 
   useEffect(() => {
-    setQueueIds(queues.map((q) => q.id));
+    setQueueIds(queues.map(q => q.id));
   }, [queues]);
 
   useEffect(() => {
@@ -143,7 +143,7 @@ const NotificationsPopOver = (props) => {
       socket.emit("joinNotification");
     };
 
-    const onCompanyTicketNotificationsPopover = (data) => {
+    const onCompanyTicketNotificationsPopover = data => {
       if (data.action === "update" || data.ticket?.status === "closed") {
         clearTicket(data.ticket.id);
       }
@@ -153,7 +153,7 @@ const NotificationsPopOver = (props) => {
       }
     };
 
-    const onCompanyAppMessageNotificationsPopover = (data) => {
+    const onCompanyAppMessageNotificationsPopover = data => {
       if (
         data.action === "create" &&
         !data.message.read &&
@@ -162,10 +162,8 @@ const NotificationsPopOver = (props) => {
             (queueIds.includes(data.ticket.queueId) ||
               (!data.ticket.queueId && profile === "admin"))))
       ) {
-        setNotifications((prevState) => {
-          const ticketIndex = prevState.findIndex(
-            (t) => t.id === data.ticket.id,
-          );
+        setNotifications(prevState => {
+          const ticketIndex = prevState.findIndex(t => t.id === data.ticket.id);
           if (ticketIndex !== -1) {
             prevState[ticketIndex] = data.ticket;
             return [...prevState];
@@ -188,11 +186,11 @@ const NotificationsPopOver = (props) => {
     socketManager.onConnect(onConnectNotificationsPopover);
     socket.on(
       `company-${companyId}-ticket`,
-      onCompanyTicketNotificationsPopover,
+      onCompanyTicketNotificationsPopover
     );
     socket.on(
       `company-${companyId}-appMessage`,
-      onCompanyAppMessageNotificationsPopover,
+      onCompanyAppMessageNotificationsPopover
     );
 
     return () => {
@@ -200,7 +198,7 @@ const NotificationsPopOver = (props) => {
     };
   }, [user, profile, queues, soundGroupNotifications, socketManager]);
 
-  const handleNotifications = (data) => {
+  const handleNotifications = data => {
     const { message, contact, ticket } = data;
 
     const body = message.body.startsWith('{"ticketzvCard"')
@@ -211,24 +209,24 @@ const NotificationsPopOver = (props) => {
       body: `${format(new Date(), "HH:mm")}\n${body}`,
       icon: contact.profilePicUrl,
       tag: ticket.id,
-      renotify: true,
+      renotify: true
     };
 
     try {
       const notification = new Notification(
         `${i18n.t("tickets.notification.message")} ${contact.name}`,
-        options,
+        options
       );
 
-      notification.onclick = (e) => {
+      notification.onclick = e => {
         e.preventDefault();
         window.focus();
         historyRef.current.push(`/tickets/${ticket.uuid}`);
       };
 
-      setDesktopNotifications((prevState) => {
+      setDesktopNotifications(prevState => {
         const notfiticationIndex = prevState.findIndex(
-          (n) => n.tag === notification.tag,
+          n => n.tag === notification.tag
         );
         if (notfiticationIndex !== -1) {
           prevState[notfiticationIndex] = notification;
@@ -244,7 +242,7 @@ const NotificationsPopOver = (props) => {
   };
 
   const handleClick = () => {
-    setIsOpen((prevState) => !prevState);
+    setIsOpen(prevState => !prevState);
   };
 
   const handleClickAway = () => {
@@ -310,11 +308,11 @@ const NotificationsPopOver = (props) => {
         anchorEl={anchorEl.current}
         anchorOrigin={{
           vertical: "bottom",
-          horizontal: "right",
+          horizontal: "right"
         }}
         transformOrigin={{
           vertical: "top",
-          horizontal: "right",
+          horizontal: "right"
         }}
         classes={{ paper: classes.popoverPaper }}
         onClose={handleClickAway}
@@ -325,7 +323,7 @@ const NotificationsPopOver = (props) => {
               <ListItemText>{i18n.t("notifications.noTickets")}</ListItemText>
             </ListItem>
           ) : (
-            notifications.map((ticket) => (
+            notifications.map(ticket => (
               <NotificationTicket key={ticket.id}>
                 <TicketListItem
                   ticket={ticket}

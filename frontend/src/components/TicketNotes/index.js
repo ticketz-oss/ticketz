@@ -14,26 +14,26 @@ import { i18n } from "../../translate/i18n";
 import useTicketNotes from "../../hooks/useTicketNotes";
 import { Grid } from "@material-ui/core";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     "& .MuiTextField-root": {
       margin: theme.spacing(1),
-      width: "350px",
-    },
+      width: "350px"
+    }
   },
   list: {
     width: "100%",
     maxWidth: "350px",
     maxHeight: "200px",
     backgroundColor: theme.palette.background.paper,
-    overflow: "auto",
+    overflow: "auto"
   },
   inline: {
-    width: "100%",
+    width: "100%"
   },
   textFieldWrapper: {
     position: "relative",
-    width: "100%",
+    width: "100%"
   },
   adornment: {
     position: "absolute",
@@ -43,15 +43,15 @@ const useStyles = makeStyles((theme) => ({
     zIndex: 3,
     marginTop: -12,
     marginRight: 10,
-    background: theme.palette.background.paper,
+    background: theme.palette.background.paper
   },
   smallIcon: {
-    fontSize: 24,
-  },
+    fontSize: 24
+  }
 }));
 
 const NoteSchema = Yup.object().shape({
-  note: Yup.string().min(2, "Too Short!").required("Required"),
+  note: Yup.string().min(2, "Too Short!").required("Required")
 });
 
 export function TicketNotes({ ticket }) {
@@ -77,7 +77,7 @@ export function TicketNotes({ ticket }) {
       await saveNote({
         note,
         ticketId,
-        contactId,
+        contactId
       });
       await loadNotes();
       resetForm();
@@ -88,7 +88,7 @@ export function TicketNotes({ ticket }) {
     setLoading(false);
   };
 
-  const handleOpenDialogDelete = (item) => {
+  const handleOpenDialogDelete = item => {
     setSelectedNote(item);
     setShowOnDeleteDialog(true);
   };
@@ -118,7 +118,7 @@ export function TicketNotes({ ticket }) {
   };
 
   const renderNoteList = () => {
-    return notes.map((note) => {
+    return notes.map(note => {
       return (
         <TicketNotesItem
           note={note}
@@ -152,7 +152,7 @@ export function TicketNotes({ ticket }) {
                   rows={3}
                   label={i18n.t("ticketOptionsMenu.appointmentsModal.textarea")}
                   placeholder={i18n.t(
-                    "ticketOptionsMenu.appointmentsModal.placeholder",
+                    "ticketOptionsMenu.appointmentsModal.placeholder"
                   )}
                   multiline
                   value={values.note}
@@ -160,7 +160,7 @@ export function TicketNotes({ ticket }) {
                   onBlur={handleBlur}
                   variant="outlined"
                   fullWidth
-                  onKeyDown={(e) => {
+                  onKeyDown={e => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
                       submitForm();

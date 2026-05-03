@@ -18,7 +18,7 @@ const TicketOptionsMenu = ({
   menuOpen,
   handleClose,
   anchorEl,
-  showTabGroups,
+  showTabGroups
 }) => {
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [transferTicketModalOpen, setTransferTicketModalOpen] = useState(false);
@@ -42,12 +42,12 @@ const TicketOptionsMenu = ({
     }
   };
 
-  const handleOpenConfirmationModal = (e) => {
+  const handleOpenConfirmationModal = e => {
     setConfirmationOpen(true);
     handleClose();
   };
 
-  const handleOpenTransferModal = (e) => {
+  const handleOpenTransferModal = e => {
     setTransferTicketModalOpen(true);
     handleClose();
   };
@@ -77,12 +77,12 @@ const TicketOptionsMenu = ({
         getContentAnchorEl={null}
         anchorOrigin={{
           vertical: "bottom",
-          horizontal: "right",
+          horizontal: "right"
         }}
         keepMounted
         transformOrigin={{
           vertical: "top",
-          horizontal: "right",
+          horizontal: "right"
         }}
         open={menuOpen}
         onClose={handleClose}

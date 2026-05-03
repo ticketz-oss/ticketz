@@ -16,24 +16,24 @@ import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import { Grid } from "@material-ui/core";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     display: "flex",
-    flexWrap: "wrap",
+    flexWrap: "wrap"
   },
   textField: {
     marginRight: theme.spacing(1),
-    flex: 1,
+    flex: 1
   },
 
   extraAttr: {
     display: "flex",
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "center"
   },
 
   btnWrapper: {
-    position: "relative",
+    position: "relative"
   },
 
   buttonProgress: {
@@ -42,12 +42,12 @@ const useStyles = makeStyles((theme) => ({
     top: "50%",
     left: "50%",
     marginTop: -12,
-    marginLeft: -12,
+    marginLeft: -12
   },
 
   textCenter: {
-    backgroundColor: "red",
-  },
+    backgroundColor: "red"
+  }
 }));
 
 const ContactSchema = Yup.object().shape({
@@ -56,7 +56,7 @@ const ContactSchema = Yup.object().shape({
     .max(50, "Too Long!")
     .required("Required"),
   number: Yup.string().min(8, "Too Short!").max(50, "Too Long!"),
-  email: Yup.string().email("Invalid email"),
+  email: Yup.string().email("Invalid email")
 });
 
 export function ContactForm({ initialContact, onSave, onCancel }) {
@@ -68,7 +68,7 @@ export function ContactForm({ initialContact, onSave, onCancel }) {
     setContact(initialContact);
   }, [initialContact]);
 
-  const handleSaveContact = async (values) => {
+  const handleSaveContact = async values => {
     try {
       if (contact.id) {
         await api.put(`/contacts/${contact.id}`, values);

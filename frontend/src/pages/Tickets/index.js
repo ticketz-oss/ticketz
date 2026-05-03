@@ -10,7 +10,7 @@ import Ticket from "../../components/Ticket/";
 import { i18n } from "../../translate/i18n";
 import WhatsappBackground from "../../assets/wa-background.png";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   chatContainer: {
     flex: 1,
     // backgroundColor: "#eee",
@@ -20,25 +20,25 @@ const useStyles = makeStyles((theme) => ({
     backgroundImage: `url(${WhatsappBackground})`,
     backgroundPosition: "center",
     backgroundSize: "cover",
-    backgroundRepeat: "no-repeat",
+    backgroundRepeat: "no-repeat"
   },
 
   chatPapper: {
     // backgroundColor: "red",
     display: "flex",
-    height: "100%",
+    height: "100%"
   },
 
   contactsWrapper: {
     display: "flex",
     height: "100%",
     flexDirection: "column",
-    overflowY: "hidden",
+    overflowY: "hidden"
   },
   messagessWrapper: {
     display: "flex",
     height: "100%",
-    flexDirection: "column",
+    flexDirection: "column"
   },
   welcomeMsg: {
     backgroundColor: "#eee",
@@ -46,8 +46,8 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "space-evenly",
     alignItems: "center",
     height: "100%",
-    textAlign: "center",
-  },
+    textAlign: "center"
+  }
 }));
 
 const Chat = () => {

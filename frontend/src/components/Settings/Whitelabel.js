@@ -69,7 +69,7 @@ const LOGIN_BACKGROUND_CONTENT_KEY = "loginBackgroundContent";
 
 const createEmptyLink = () => ({ title: "", url: "" });
 
-const parseLinksSetting = (value) => {
+const parseLinksSetting = value => {
   if (!value) {
     return [createEmptyLink()];
   }
@@ -81,28 +81,28 @@ const parseLinksSetting = (value) => {
       return [createEmptyLink()];
     }
 
-    return parsedValue.map((link) => ({
+    return parsedValue.map(link => ({
       title: typeof link?.title === "string" ? link.title : "",
-      url: typeof link?.url === "string" ? link.url : "",
+      url: typeof link?.url === "string" ? link.url : ""
     }));
   } catch (error) {
     return [createEmptyLink()];
   }
 };
 
-const serializeLinksSetting = (links) =>
+const serializeLinksSetting = links =>
   JSON.stringify(
     links
-      .map((link) => ({
+      .map(link => ({
         title: link.title.trim(),
-        url: link.url.trim(),
+        url: link.url.trim()
       }))
-      .filter((link) => link.title && link.url),
+      .filter(link => link.title && link.url)
   );
 
 const isVideoFile = (filename = "") => /\.(mp4|webm|ogg)$/i.test(filename);
 
-const getPublicFileUrl = (filename) => {
+const getPublicFileUrl = filename => {
   if (!filename) {
     return "";
   }
@@ -110,33 +110,33 @@ const getPublicFileUrl = (filename) => {
   return `${getBackendURL()}/public/${filename}`;
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   container: {
     paddingTop: theme.spacing(4),
-    paddingBottom: theme.spacing(4),
+    paddingBottom: theme.spacing(4)
   },
   selectContainer: {
     width: "100%",
-    textAlign: "left",
+    textAlign: "left"
   },
   colorAdorment: {
     width: 20,
-    height: 20,
+    height: 20
   },
   uploadInput: {
-    display: "none",
+    display: "none"
   },
   helperText: {
-    fontSize: "11px",
+    fontSize: "11px"
   },
   sectionTitle: {
-    fontWeight: 600,
+    fontWeight: 600
   },
   sectionDescription: {
-    opacity: 0.75,
+    opacity: 0.75
   },
   linkRow: {
-    marginBottom: theme.spacing(1),
+    marginBottom: theme.spacing(1)
   },
   linkActions: {
     display: "flex",
@@ -146,15 +146,15 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(2),
     [theme.breakpoints.down("xs")]: {
       flexDirection: "column",
-      alignItems: "stretch",
-    },
+      alignItems: "stretch"
+    }
   },
   linksActionsGroup: {
     display: "flex",
     gap: theme.spacing(1),
     [theme.breakpoints.down("xs")]: {
-      flexDirection: "column",
-    },
+      flexDirection: "column"
+    }
   },
   previewBox: {
     minHeight: 180,
@@ -166,20 +166,20 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    padding: theme.spacing(2),
+    padding: theme.spacing(2)
   },
   previewContent: {
     width: "100%",
     height: "100%",
-    objectFit: "contain",
+    objectFit: "contain"
   },
   previewContentCover: {
     width: "100%",
     height: "100%",
-    objectFit: "cover",
+    objectFit: "cover"
   },
   emptyPreview: {
-    opacity: 0.6,
+    opacity: 0.6
   },
   appLogoLightPreviewDiv: {
     backgroundColor: "white",
@@ -187,7 +187,7 @@ const useStyles = makeStyles((theme) => ({
     borderStyle: "solid",
     borderWidth: "1px",
     borderColor: "#424242",
-    textAlign: "center",
+    textAlign: "center"
   },
 
   appLogoDarkPreviewDiv: {
@@ -196,7 +196,7 @@ const useStyles = makeStyles((theme) => ({
     borderStyle: "solid",
     borderWidth: "1px",
     borderColor: "white",
-    textAlign: "center",
+    textAlign: "center"
   },
 
   appLogoFaviconPreviewDiv: {
@@ -204,24 +204,24 @@ const useStyles = makeStyles((theme) => ({
     borderStyle: "solid",
     borderWidth: "1px",
     borderColor: "black",
-    textAlign: "center",
+    textAlign: "center"
   },
 
   appLogoLightPreviewImg: {
     width: "100%",
     maxHeight: 72,
-    content: `url("${theme.calculatedLogoLight()}")`,
+    content: `url("${theme.calculatedLogoLight()}")`
   },
   appLogoDarkPreviewImg: {
     width: "100%",
     maxHeight: 72,
-    content: `url("${theme.calculatedLogoDark()}")`,
+    content: `url("${theme.calculatedLogoDark()}")`
   },
   appLogoFaviconPreviewImg: {
     width: "100%",
     maxHeight: 72,
-    content: `url("${theme.appLogoFavicon ? theme.appLogoFavicon : "/vector/favicon.svg"}")`,
-  },
+    content: `url("${theme.appLogoFavicon ? theme.appLogoFavicon : "/vector/favicon.svg"}")`
+  }
 }));
 
 export default function Whitelabel(props) {
@@ -249,7 +249,7 @@ export default function Whitelabel(props) {
   const { update } = useSettings();
 
   useEffect(() => {
-    getCurrentUserInfo().then((user) => {
+    getCurrentUserInfo().then(user => {
       setCurrentUser(user);
     });
   }, [getCurrentUserInfo]);
@@ -260,31 +260,31 @@ export default function Whitelabel(props) {
     }
 
     const primaryColorLight = settings.find(
-      (setting) => setting.key === "primaryColorLight",
+      setting => setting.key === "primaryColorLight"
     )?.value;
     const primaryColorDark = settings.find(
-      (setting) => setting.key === "primaryColorDark",
+      setting => setting.key === "primaryColorDark"
     )?.value;
     const appLogoLight = settings.find(
-      (setting) => setting.key === "appLogoLight",
+      setting => setting.key === "appLogoLight"
     )?.value;
     const appLogoDark = settings.find(
-      (setting) => setting.key === "appLogoDark",
+      setting => setting.key === "appLogoDark"
     )?.value;
     const appLogoFavicon = settings.find(
-      (setting) => setting.key === "appLogoFavicon",
+      setting => setting.key === "appLogoFavicon"
     )?.value;
     const loadedAppName = settings.find(
-      (setting) => setting.key === "appName",
+      setting => setting.key === "appName"
     )?.value;
     const loadedLoginLinks = settings.find(
-      (setting) => setting.key === LOGIN_LINKS_KEY,
+      setting => setting.key === LOGIN_LINKS_KEY
     )?.value;
     const loginSidePanelImage = settings.find(
-      (setting) => setting.key === LOGIN_SIDE_PANEL_IMAGE_KEY,
+      setting => setting.key === LOGIN_SIDE_PANEL_IMAGE_KEY
     )?.value;
     const loginBackgroundContent = settings.find(
-      (setting) => setting.key === LOGIN_BACKGROUND_CONTENT_KEY,
+      setting => setting.key === LOGIN_BACKGROUND_CONTENT_KEY
     )?.value;
 
     setAppName(loadedAppName || "");
@@ -298,21 +298,21 @@ export default function Whitelabel(props) {
       appName: loadedAppName,
       loginPageLinks: loadedLoginLinks,
       loginSidePanelImage,
-      loginBackgroundContent,
+      loginBackgroundContent
     });
   }, [settings]);
 
   const updateSettingsLoaded = (key, value) => {
-    setSettingsLoaded((currentSettings) => ({
+    setSettingsLoaded(currentSettings => ({
       ...currentSettings,
-      [key]: value,
+      [key]: value
     }));
   };
 
   const handleSaveSetting = async (key, value) => {
     await update({
       key,
-      value,
+      value
     });
     updateSettingsLoaded(key, value);
     i18nToast.success("settings.success");
@@ -331,21 +331,21 @@ export default function Whitelabel(props) {
 
     api
       .post("/settings/logo", formData, {
-        onUploadProgress: (progressEvent) => {
+        onUploadProgress: progressEvent => {
           const progress = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total,
+            (progressEvent.loaded * 100) / progressEvent.total
           );
           console.log(`A imagem está ${progress}% carregada... `);
-        },
+        }
       })
-      .then((response) => {
+      .then(response => {
         updateSettingsLoaded(`appLogo${mode}`, response.data);
         colorMode[`setAppLogo${mode}`](
-          `${getBackendURL()}/public/${response.data}`,
+          `${getBackendURL()}/public/${response.data}`
         );
         i18nToast.success("settings.success");
       })
-      .catch((error) => {
+      .catch(error => {
         console.error("Houve um problema ao realizar o upload da imagem.");
         console.log(error);
       })
@@ -367,18 +367,18 @@ export default function Whitelabel(props) {
 
     api
       .post("/settings/publicFile", formData, {
-        onUploadProgress: (progressEvent) => {
+        onUploadProgress: progressEvent => {
           const progress = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total,
+            (progressEvent.loaded * 100) / progressEvent.total
           );
           console.log(`O arquivo está ${progress}% carregado... `);
-        },
+        }
       })
-      .then((response) => {
+      .then(response => {
         updateSettingsLoaded(settingKey, response.data);
         i18nToast.success("settings.success");
       })
-      .catch((error) => {
+      .catch(error => {
         console.error("Houve um problema ao realizar o upload do arquivo.");
         console.log(error);
       })
@@ -388,19 +388,19 @@ export default function Whitelabel(props) {
   };
 
   const handleLinkChange = (index, field, value) => {
-    setLoginLinks((currentLinks) =>
+    setLoginLinks(currentLinks =>
       currentLinks.map((link, linkIndex) =>
-        linkIndex === index ? { ...link, [field]: value } : link,
-      ),
+        linkIndex === index ? { ...link, [field]: value } : link
+      )
     );
   };
 
   const handleAddLink = () => {
-    setLoginLinks((currentLinks) => [...currentLinks, createEmptyLink()]);
+    setLoginLinks(currentLinks => [...currentLinks, createEmptyLink()]);
   };
 
-  const handleRemoveLink = (index) => {
-    setLoginLinks((currentLinks) => {
+  const handleRemoveLink = index => {
+    setLoginLinks(currentLinks => {
       if (currentLinks.length === 1) {
         return [createEmptyLink()];
       }
@@ -464,7 +464,7 @@ export default function Whitelabel(props) {
                         <InputAdornment position="start">
                           <div
                             style={{
-                              backgroundColor: settingsLoaded.primaryColorLight,
+                              backgroundColor: settingsLoaded.primaryColorLight
                             }}
                             className={classes.colorAdorment}
                           />
@@ -478,14 +478,14 @@ export default function Whitelabel(props) {
                         >
                           <Colorize />
                         </IconButton>
-                      ),
+                      )
                     }}
                   />
                 </FormControl>
                 <ColorPicker
                   open={primaryColorLightModalOpen}
                   handleClose={() => setPrimaryColorDarkModalOpen(false)}
-                  onChange={(color) => {
+                  onChange={color => {
                     setPrimaryColorLightModalOpen(false);
                     handleSaveSetting("primaryColorLight", color);
                     colorMode.setPrimaryColorLight(color);
@@ -505,7 +505,7 @@ export default function Whitelabel(props) {
                         <InputAdornment position="start">
                           <div
                             style={{
-                              backgroundColor: settingsLoaded.primaryColorDark,
+                              backgroundColor: settingsLoaded.primaryColorDark
                             }}
                             className={classes.colorAdorment}
                           />
@@ -519,14 +519,14 @@ export default function Whitelabel(props) {
                         >
                           <Colorize />
                         </IconButton>
-                      ),
+                      )
                     }}
                   />
                 </FormControl>
                 <ColorPicker
                   open={primaryColorDarkModalOpen}
                   handleClose={() => setPrimaryColorDarkModalOpen(false)}
-                  onChange={(color) => {
+                  onChange={color => {
                     setPrimaryColorDarkModalOpen(false);
                     handleSaveSetting("primaryColorDark", color);
                     colorMode.setPrimaryColorDark(color);
@@ -541,7 +541,7 @@ export default function Whitelabel(props) {
                     variant="standard"
                     name="appName"
                     value={appName}
-                    onChange={(event) => {
+                    onChange={event => {
                       setAppName(event.target.value);
                     }}
                     onBlur={async () => {
@@ -578,7 +578,7 @@ export default function Whitelabel(props) {
                             id="upload-logo-light-button"
                             ref={logoLightInput}
                             className={classes.uploadInput}
-                            onChange={(event) => uploadLogo(event, "Light")}
+                            onChange={event => uploadLogo(event, "Light")}
                           />
                           <label htmlFor="upload-logo-light-button">
                             <IconButton
@@ -592,7 +592,7 @@ export default function Whitelabel(props) {
                             </IconButton>
                           </label>
                         </>
-                      ),
+                      )
                     }}
                   />
                 </FormControl>
@@ -627,7 +627,7 @@ export default function Whitelabel(props) {
                             id="upload-logo-dark-button"
                             ref={logoDarkInput}
                             className={classes.uploadInput}
-                            onChange={(event) => uploadLogo(event, "Dark")}
+                            onChange={event => uploadLogo(event, "Dark")}
                           />
                           <label htmlFor="upload-logo-dark-button">
                             <IconButton
@@ -641,7 +641,7 @@ export default function Whitelabel(props) {
                             </IconButton>
                           </label>
                         </>
-                      ),
+                      )
                     }}
                   />
                 </FormControl>
@@ -676,7 +676,7 @@ export default function Whitelabel(props) {
                             id="upload-logo-favicon-button"
                             ref={logoFaviconInput}
                             className={classes.uploadInput}
-                            onChange={(event) => uploadLogo(event, "Favicon")}
+                            onChange={event => uploadLogo(event, "Favicon")}
                           />
                           <label htmlFor="upload-logo-favicon-button">
                             <IconButton
@@ -690,7 +690,7 @@ export default function Whitelabel(props) {
                             </IconButton>
                           </label>
                         </>
-                      ),
+                      )
                     }}
                   />
                 </FormControl>
@@ -750,7 +750,7 @@ export default function Whitelabel(props) {
                         variant="outlined"
                         label={i18n.t("whitelabel.linkTitle")}
                         value={link.title}
-                        onChange={(event) =>
+                        onChange={event =>
                           handleLinkChange(index, "title", event.target.value)
                         }
                       />
@@ -761,7 +761,7 @@ export default function Whitelabel(props) {
                         variant="outlined"
                         label={i18n.t("whitelabel.linkUrl")}
                         value={link.url}
-                        onChange={(event) =>
+                        onChange={event =>
                           handleLinkChange(index, "url", event.target.value)
                         }
                       />
@@ -814,7 +814,7 @@ export default function Whitelabel(props) {
                               onClick={() =>
                                 handleSaveSetting(
                                   LOGIN_SIDE_PANEL_IMAGE_KEY,
-                                  "",
+                                  ""
                                 )
                               }
                             >
@@ -827,10 +827,10 @@ export default function Whitelabel(props) {
                             ref={loginSidePanelImageInput}
                             className={classes.uploadInput}
                             accept="image/*"
-                            onChange={(event) =>
+                            onChange={event =>
                               uploadPublicFile(
                                 event,
-                                LOGIN_SIDE_PANEL_IMAGE_KEY,
+                                LOGIN_SIDE_PANEL_IMAGE_KEY
                               )
                             }
                           />
@@ -846,7 +846,7 @@ export default function Whitelabel(props) {
                             </IconButton>
                           </label>
                         </>
-                      ),
+                      )
                     }}
                   />
                 </FormControl>
@@ -871,7 +871,7 @@ export default function Whitelabel(props) {
                               onClick={() =>
                                 handleSaveSetting(
                                   LOGIN_BACKGROUND_CONTENT_KEY,
-                                  "",
+                                  ""
                                 )
                               }
                             >
@@ -884,10 +884,10 @@ export default function Whitelabel(props) {
                             ref={loginBackgroundContentInput}
                             className={classes.uploadInput}
                             accept="image/*,video/mp4,video/webm,video/ogg"
-                            onChange={(event) =>
+                            onChange={event =>
                               uploadPublicFile(
                                 event,
-                                LOGIN_BACKGROUND_CONTENT_KEY,
+                                LOGIN_BACKGROUND_CONTENT_KEY
                               )
                             }
                           />
@@ -903,7 +903,7 @@ export default function Whitelabel(props) {
                             </IconButton>
                           </label>
                         </>
-                      ),
+                      )
                     }}
                   />
                 </FormControl>
@@ -920,7 +920,7 @@ export default function Whitelabel(props) {
                 <div className={classes.previewBox}>
                   {renderMediaPreview(
                     settingsLoaded.loginBackgroundContent,
-                    "cover",
+                    "cover"
                   )}
                 </div>
               </Grid>

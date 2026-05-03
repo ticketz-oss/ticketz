@@ -3,7 +3,7 @@ import React, {
   useEffect,
   useReducer,
   useCallback,
-  useContext,
+  useContext
 } from "react";
 import { toast } from "react-toastify";
 
@@ -45,8 +45,8 @@ const reducer = (state, action) => {
     const tags = action.payload;
     const newTags = [];
 
-    tags.forEach((tag) => {
-      const tagIndex = state.findIndex((s) => s.id === tag.id);
+    tags.forEach(tag => {
+      const tagIndex = state.findIndex(s => s.id === tag.id);
       if (tagIndex !== -1) {
         state[tagIndex] = tag;
       } else {
@@ -59,7 +59,7 @@ const reducer = (state, action) => {
 
   if (action.type === "UPDATE_TAGS") {
     const tag = action.payload;
-    const tagIndex = state.findIndex((s) => s.id === tag.id);
+    const tagIndex = state.findIndex(s => s.id === tag.id);
 
     if (tagIndex !== -1) {
       state[tagIndex] = tag;
@@ -72,7 +72,7 @@ const reducer = (state, action) => {
   if (action.type === "DELETE_TAG") {
     const tagId = action.payload;
 
-    const tagIndex = state.findIndex((s) => s.id === tagId);
+    const tagIndex = state.findIndex(s => s.id === tagId);
     if (tagIndex !== -1) {
       state.splice(tagIndex, 1);
     }
@@ -84,13 +84,13 @@ const reducer = (state, action) => {
   }
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   mainPaper: {
     flex: 1,
     padding: theme.spacing(1),
     overflowY: "scroll",
-    ...theme.scrollbarStyles,
-  },
+    ...theme.scrollbarStyles
+  }
 }));
 
 const Tags = () => {
@@ -113,7 +113,7 @@ const Tags = () => {
   const fetchTags = useCallback(async () => {
     try {
       const { data } = await api.get("/tags/", {
-        params: { searchParam, pageNumber },
+        params: { searchParam, pageNumber }
       });
       dispatch({ type: "LOAD_TAGS", payload: data.tags, kanban: 0 });
       setHasMore(data.hasMore);
@@ -141,14 +141,14 @@ const Tags = () => {
 
   useEffect(() => {
     if (needMore && hasMore && !loading) {
-      setPageNumber((prevPage) => prevPage + 1);
+      setPageNumber(prevPage => prevPage + 1);
     }
   }, [needMore]);
 
   useEffect(() => {
     const socket = socketManager.GetSocket(user.companyId);
 
-    const onTag = (data) => {
+    const onTag = data => {
       if (searchParam) {
         return;
       }
@@ -179,16 +179,16 @@ const Tags = () => {
     setTagModalOpen(false);
   };
 
-  const handleSearch = (event) => {
+  const handleSearch = event => {
     setSearchParam(event.target.value.toLowerCase());
   };
 
-  const handleEditTag = (tag) => {
+  const handleEditTag = tag => {
     setSelectedTag(tag);
     setTagModalOpen(true);
   };
 
-  const handleDeleteTag = async (tagId) => {
+  const handleDeleteTag = async tagId => {
     try {
       await api.delete(`/tags/${tagId}`);
       toast.success(i18n.t("tags.toasts.deleted"));
@@ -208,7 +208,7 @@ const Tags = () => {
     setNeedMore(true);
   };
 
-  const handleScroll = (e) => {
+  const handleScroll = e => {
     if (!hasMore || loading) return;
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
     if (scrollHeight - (scrollTop + 100) < clientHeight) {
@@ -247,7 +247,7 @@ const Tags = () => {
                 <InputAdornment position="start">
                   <SearchIcon style={{ color: "gray" }} />
                 </InputAdornment>
-              ),
+              )
             }}
           />
           <Button
@@ -282,7 +282,7 @@ const Tags = () => {
           </TableHead>
           <TableBody>
             <>
-              {tags.map((tag) => (
+              {tags.map(tag => (
                 <TableRow key={tag.id}>
                   <TableCell align="center">{tag.id}</TableCell>
                   <TableCell align="center">
@@ -291,7 +291,7 @@ const Tags = () => {
                       style={{
                         backgroundColor: tag.color,
                         textShadow: "1px 1px 1px #000",
-                        color: "white",
+                        color: "white"
                       }}
                       label={tag.name}
                       size="small"
@@ -315,7 +315,7 @@ const Tags = () => {
                         user.profile === "supervisor") && (
                         <IconButton
                           size="small"
-                          onClick={(e) => {
+                          onClick={e => {
                             setConfirmModalOpen(true);
                             setDeletingTag(tag);
                           }}

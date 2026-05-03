@@ -14,7 +14,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import Autocomplete, {
-  createFilterOptions,
+  createFilterOptions
 } from "@material-ui/lab/Autocomplete";
 import CircularProgress from "@material-ui/core/CircularProgress";
 
@@ -24,14 +24,14 @@ import ButtonWithSpinner from "../ButtonWithSpinner";
 import toastError from "../../errors/toastError";
 import useQueues from "../../hooks/useQueues";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   maxWidth: {
-    width: "100%",
-  },
+    width: "100%"
+  }
 }));
 
 const filterOptions = createFilterOptions({
-  trim: true,
+  trim: true
 });
 
 const TransferTicketModalCustom = ({ modalOpen, onClose, ticketid }) => {
@@ -75,7 +75,7 @@ const TransferTicketModalCustom = ({ modalOpen, onClose, ticketid }) => {
       const fetchUsers = async () => {
         try {
           const { data } = await api.get("/users/", {
-            params: { searchParam },
+            params: { searchParam }
           });
           setOptions(data.users);
           setLoading(false);
@@ -96,7 +96,7 @@ const TransferTicketModalCustom = ({ modalOpen, onClose, ticketid }) => {
     setSelectedUser(null);
   };
 
-  const handleSaveTicket = async (e) => {
+  const handleSaveTicket = async e => {
     e.preventDefault();
     if (!ticketid) return;
     if (!selectedQueue || selectedQueue === "") return;
@@ -136,7 +136,7 @@ const TransferTicketModalCustom = ({ modalOpen, onClose, ticketid }) => {
         <DialogContent dividers>
           <Autocomplete
             style={{ width: 300, marginBottom: 20 }}
-            getOptionLabel={(option) => `${option.name}`}
+            getOptionLabel={option => `${option.name}`}
             onChange={(e, newValue) => {
               setSelectedUser(newValue);
               if (newValue != null && Array.isArray(newValue.queues)) {
@@ -152,13 +152,13 @@ const TransferTicketModalCustom = ({ modalOpen, onClose, ticketid }) => {
             autoHighlight
             noOptionsText={i18n.t("transferTicketModal.noOptions")}
             loading={loading}
-            renderInput={(params) => (
+            renderInput={params => (
               <TextField
                 {...params}
                 label={i18n.t("transferTicketModal.fieldLabel")}
                 variant="outlined"
                 autoFocus
-                onChange={(e) => setSearchParam(e.target.value)}
+                onChange={e => setSearchParam(e.target.value)}
                 InputProps={{
                   ...params.InputProps,
                   endAdornment: (
@@ -168,7 +168,7 @@ const TransferTicketModalCustom = ({ modalOpen, onClose, ticketid }) => {
                       ) : null}
                       {params.InputProps.endAdornment}
                     </React.Fragment>
-                  ),
+                  )
                 }}
               />
             )}
@@ -179,10 +179,10 @@ const TransferTicketModalCustom = ({ modalOpen, onClose, ticketid }) => {
             </InputLabel>
             <Select
               value={selectedQueue}
-              onChange={(e) => setSelectedQueue(e.target.value)}
+              onChange={e => setSelectedQueue(e.target.value)}
               label={i18n.t("transferTicketModal.fieldQueuePlaceholder")}
             >
-              {queues.map((queue) => (
+              {queues.map(queue => (
                 <MenuItem key={queue.id} value={queue.id}>
                   {queue.name}
                 </MenuItem>

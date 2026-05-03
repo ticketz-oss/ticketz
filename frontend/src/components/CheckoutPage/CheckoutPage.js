@@ -5,7 +5,7 @@ import {
   StepLabel,
   Button,
   Typography,
-  CircularProgress,
+  CircularProgress
 } from "@material-ui/core";
 import { Formik, Form } from "formik";
 
@@ -85,7 +85,7 @@ export default function CheckoutPage(props) {
         price: plan.price,
         users: plan.users,
         connections: plan.connections,
-        invoiceId: invoiceId,
+        invoiceId: invoiceId
       };
 
       const { data } = await api.post("/subscription", newValues);
@@ -93,7 +93,7 @@ export default function CheckoutPage(props) {
       actions.setSubmitting(true);
       setActiveStep(activeStep + 1);
       toast.success(
-        "Assinatura realizada com sucesso!, aguardando a realização do pagamento",
+        "Assinatura realizada com sucesso!, aguardando a realização do pagamento"
       );
     } catch (err) {
       actions.setSubmitting(false);
@@ -122,7 +122,7 @@ export default function CheckoutPage(props) {
         Falta pouco!
       </Typography>
       <Stepper activeStep={activeStep} className={classes.stepper}>
-        {steps.map((label) => (
+        {steps.map(label => (
           <Step key={label}>
             <StepLabel>{label}</StepLabel>
           </Step>
@@ -135,7 +135,7 @@ export default function CheckoutPage(props) {
           <Formik
             initialValues={{
               ...user,
-              ...formInitialValues,
+              ...formInitialValues
             }}
             validationSchema={currentValidationSchema}
             onSubmit={_handleSubmit}
@@ -146,7 +146,7 @@ export default function CheckoutPage(props) {
                   activeStep,
                   setFieldValue,
                   setActiveStep,
-                  values,
+                  values
                 )}
 
                 <div className={classes.buttons}>

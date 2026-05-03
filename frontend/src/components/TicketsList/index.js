@@ -13,7 +13,7 @@ import { ListSubheader } from "@material-ui/core";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { SocketContext } from "../../context/Socket/SocketContext";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   ticketsListWrapper: {
     position: "relative",
     display: "flex",
@@ -21,14 +21,14 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "column",
     overflow: "hidden",
     borderTopRightRadius: 0,
-    borderBottomRightRadius: 0,
+    borderBottomRightRadius: 0
   },
 
   ticketsList: {
     flex: 1,
     overflowY: "scroll",
     ...theme.scrollbarStyles,
-    borderTop: "2px solid rgba(0, 0, 0, 0.12)",
+    borderTop: "2px solid rgba(0, 0, 0, 0.12)"
   },
 
   ticketsListHeader: {
@@ -38,28 +38,28 @@ const useStyles = makeStyles((theme) => ({
     borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
     display: "flex",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "space-between"
   },
 
   ticketsCount: {
     fontWeight: "normal",
     color: "rgb(104, 121, 146)",
     marginLeft: "8px",
-    fontSize: "14px",
+    fontSize: "14px"
   },
 
   noTicketsText: {
     textAlign: "center",
     color: "rgb(104, 121, 146)",
     fontSize: "14px",
-    lineHeight: "1.4",
+    lineHeight: "1.4"
   },
 
   noTicketsTitle: {
     textAlign: "center",
     fontSize: "16px",
     fontWeight: "600",
-    margin: "0px",
+    margin: "0px"
   },
 
   noTicketsDiv: {
@@ -68,16 +68,16 @@ const useStyles = makeStyles((theme) => ({
     margin: 40,
     flexDirection: "column",
     alignItems: "center",
-    justifyContent: "center",
-  },
+    justifyContent: "center"
+  }
 }));
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_TICKETS") {
     const newTickets = action.payload;
 
-    newTickets.forEach((ticket) => {
-      const ticketIndex = state.findIndex((t) => t.id === ticket.id);
+    newTickets.forEach(ticket => {
+      const ticketIndex = state.findIndex(t => t.id === ticket.id);
       if (ticketIndex !== -1) {
         state[ticketIndex] = ticket;
         if (ticket.unreadMessages > 0) {
@@ -94,7 +94,7 @@ const reducer = (state, action) => {
   if (action.type === "RESET_UNREAD") {
     const ticketId = action.payload;
 
-    const ticketIndex = state.findIndex((t) => t.id === ticketId);
+    const ticketIndex = state.findIndex(t => t.id === ticketId);
     if (ticketIndex !== -1) {
       state[ticketIndex].unreadMessages = 0;
     }
@@ -105,7 +105,7 @@ const reducer = (state, action) => {
   if (action.type === "UPDATE_TICKET") {
     const ticket = action.payload;
 
-    const ticketIndex = state.findIndex((t) => t.id === ticket.id);
+    const ticketIndex = state.findIndex(t => t.id === ticket.id);
     if (ticketIndex !== -1) {
       state[ticketIndex] = ticket;
     } else {
@@ -118,7 +118,7 @@ const reducer = (state, action) => {
   if (action.type === "UPDATE_TICKET_UNREAD_MESSAGES") {
     const ticket = action.payload;
 
-    const ticketIndex = state.findIndex((t) => t.id === ticket.id);
+    const ticketIndex = state.findIndex(t => t.id === ticket.id);
     if (ticketIndex !== -1) {
       state[ticketIndex] = ticket;
       state.unshift(state.splice(ticketIndex, 1)[0]);
@@ -131,7 +131,7 @@ const reducer = (state, action) => {
 
   if (action.type === "UPDATE_TICKET_CONTACT") {
     const contact = action.payload;
-    const ticketIndex = state.findIndex((t) => t.contactId === contact.id);
+    const ticketIndex = state.findIndex(t => t.contactId === contact.id);
     if (ticketIndex !== -1) {
       state[ticketIndex].contact = contact;
     }
@@ -140,7 +140,7 @@ const reducer = (state, action) => {
 
   if (action.type === "DELETE_TICKET") {
     const ticketId = action.payload;
-    const ticketIndex = state.findIndex((t) => t.id === ticketId);
+    const ticketIndex = state.findIndex(t => t.id === ticketId);
     if (ticketIndex !== -1) {
       state.splice(ticketIndex, 1);
     }
@@ -158,7 +158,7 @@ const TicketsList = ({
   searchParam,
   tags,
   showAll,
-  selectedQueueIds,
+  selectedQueueIds
 }) => {
   const classes = useStyles();
   const [pageNumber, setPageNumber] = useState(1);
@@ -178,14 +178,14 @@ const TicketsList = ({
     tags: JSON.stringify(tags),
     status,
     showAll,
-    queueIds: JSON.stringify(selectedQueueIds),
+    queueIds: JSON.stringify(selectedQueueIds)
   });
 
   useEffect(() => {
     if (!status && !searchParam) return;
     dispatch({
       type: "LOAD_TICKETS",
-      payload: tickets,
+      payload: tickets
     });
   }, [tickets, status, searchParam]);
 
@@ -193,14 +193,14 @@ const TicketsList = ({
     const companyId = localStorage.getItem("companyId");
     const socket = socketManager.GetSocket(companyId);
 
-    const shouldUpdateTicket = (ticket) =>
+    const shouldUpdateTicket = ticket =>
       (!ticket.userId || ticket.userId === user?.id || showAll) &&
       (!ticket.queueId || selectedQueueIds.indexOf(ticket.queueId) > -1);
 
-    const notBelongsToUserQueues = (ticket) =>
+    const notBelongsToUserQueues = ticket =>
       ticket.queueId && selectedQueueIds.indexOf(ticket.queueId) === -1;
 
-    const onConnect = (data) => {
+    const onConnect = data => {
       if (status) {
         socket.emit("joinTickets", status);
       } else {
@@ -208,18 +208,18 @@ const TicketsList = ({
       }
     };
 
-    const onTicket = (data) => {
+    const onTicket = data => {
       if (data.action === "updateUnread") {
         dispatch({
           type: "RESET_UNREAD",
-          payload: data.ticketId,
+          payload: data.ticketId
         });
       }
 
       if (data.action === "update" && shouldUpdateTicket(data.ticket)) {
         dispatch({
           type: "UPDATE_TICKET",
-          payload: data.ticket,
+          payload: data.ticket
         });
       }
 
@@ -232,20 +232,20 @@ const TicketsList = ({
       }
     };
 
-    const onAppMessage = (data) => {
+    const onAppMessage = data => {
       if (data.action === "create" && shouldUpdateTicket(data.ticket)) {
         dispatch({
           type: "UPDATE_TICKET_UNREAD_MESSAGES",
-          payload: data.ticket,
+          payload: data.ticket
         });
       }
     };
 
-    const onContact = (data) => {
+    const onContact = data => {
       if (data.action === "update") {
         dispatch({
           type: "UPDATE_TICKET_CONTACT",
-          payload: data.contact,
+          payload: data.contact
         });
       }
     };
@@ -261,10 +261,10 @@ const TicketsList = ({
   }, [status, showAll, user, selectedQueueIds, socketManager]);
 
   const loadMore = () => {
-    setPageNumber((prevState) => prevState + 1);
+    setPageNumber(prevState => prevState + 1);
   };
 
-  const handleScroll = (e) => {
+  const handleScroll = e => {
     if (!hasMore || loading) return;
 
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
@@ -315,7 +315,7 @@ const TicketsList = ({
             </div>
           ) : (
             <>
-              {ticketsList.map((ticket) => (
+              {ticketsList.map(ticket => (
                 <TicketListItem ticket={ticket} key={ticket.id} />
               ))}
             </>

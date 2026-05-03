@@ -42,10 +42,10 @@ import { formatTimeInterval } from "../../helpers/formatTimeInterval.js";
 
 const gitinfo = loadJSON("/gitinfo.json");
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   container: {
     paddingTop: theme.spacing(4),
-    paddingBottom: theme.spacing(4),
+    paddingBottom: theme.spacing(4)
   },
   fixedHeightPaper: {
     padding: theme.spacing(2),
@@ -53,14 +53,14 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "column",
     height: 240,
     overflowY: "auto",
-    ...theme.scrollbarStyles,
+    ...theme.scrollbarStyles
   },
   pixkey: {
-    fontSize: "9pt",
+    fontSize: "9pt"
   },
   paymentimg: {
     maxWidth: "75%",
-    marginTop: 10,
+    marginTop: 10
   },
   paymentpix: {
     maxWidth: "100%",
@@ -69,7 +69,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: "white",
     borderColor: "black",
     borderStyle: "solid",
-    borderWidth: "2px",
+    borderWidth: "2px"
   },
   supportPaper: {
     padding: theme.spacing(2),
@@ -79,7 +79,7 @@ const useStyles = makeStyles((theme) => ({
     height: 300,
     backgroundColor: theme.palette.secondary.main,
     color: theme.palette.secondary.contrastText,
-    ...theme.scrollbarStyles,
+    ...theme.scrollbarStyles
   },
   supportBox: {
     backgroundColor: theme.palette.secondary.light,
@@ -89,32 +89,32 @@ const useStyles = makeStyles((theme) => ({
     borderWidth: "3px",
     borderStyle: "solid",
     transition: "max-height 0.5s ease",
-    overflow: "clip",
+    overflow: "clip"
   },
   cardAvatar: {
     fontSize: "55px",
     color: grey[500],
     backgroundColor: "#ffffff",
     width: theme.spacing(7),
-    height: theme.spacing(7),
+    height: theme.spacing(7)
   },
   cardTitle: {
     fontSize: "18px",
-    color: blue[700],
+    color: blue[700]
   },
   cardSubtitle: {
     color: grey[600],
-    fontSize: "14px",
+    fontSize: "14px"
   },
   alignRight: {
-    textAlign: "right",
+    textAlign: "right"
   },
   fullWidth: {
-    width: "100%",
+    width: "100%"
   },
   selectContainer: {
     width: "100%",
-    textAlign: "left",
+    textAlign: "left"
   },
   cardSolid: {
     padding: theme.spacing(2),
@@ -123,7 +123,7 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "row",
     height: "100%",
     backgroundColor: theme.palette.primary.main,
-    color: theme.palette.primary.contrastText,
+    color: theme.palette.primary.contrastText
   },
   cardGray: {
     padding: theme.spacing(2),
@@ -131,24 +131,24 @@ const useStyles = makeStyles((theme) => ({
     overflow: "hidden",
     flexDirection: "row",
     height: "100%",
-    color: theme.palette.primary.main,
+    color: theme.palette.primary.main
   },
   cardData: {
     display: "block",
     width: "100%",
-    zIndex: 1,
+    zIndex: 1
   },
   cardIcon: {
     width: 100,
     color: theme.palette.primary.light,
     position: "sticky",
     opacity: 0.4,
-    right: 0,
+    right: 0
   },
   cardRingGraph: {
     width: 100,
     position: "sticky",
-    right: 0,
+    right: 0
   },
   ticketzProPaper: {
     padding: theme.spacing(2),
@@ -158,7 +158,7 @@ const useStyles = makeStyles((theme) => ({
     minHeight: 300,
     backgroundColor: theme.palette.ticketzproad.main,
     color: theme.palette.ticketzproad.contrastText,
-    ...theme.scrollbarStyles,
+    ...theme.scrollbarStyles
   },
   ticketzRegistryPaper: {
     padding: theme.spacing(2),
@@ -171,30 +171,30 @@ const useStyles = makeStyles((theme) => ({
     borderWidth: "3px",
     borderStyle: "solid",
     marginBottom: "1em",
-    ...theme.scrollbarStyles,
+    ...theme.scrollbarStyles
   },
   ticketzProBox: {
     textAlign: "center",
-    alignContent: "center",
+    alignContent: "center"
   },
   ticketzProTitle: {
-    fontWeight: "bold",
+    fontWeight: "bold"
   },
   ticketzProScreen: {
     maxHeight: "300px",
-    maxWidth: "100%",
+    maxWidth: "100%"
   },
   ticketzProFeatures: {
     padding: 0,
-    listStyleType: "none",
+    listStyleType: "none"
   },
   ticketzProCommand: {
     fontFamily: "monospace",
-    backgroundColor: "#00000080",
+    backgroundColor: "#00000080"
   },
   clickpointer: {
-    cursor: "pointer",
-  },
+    cursor: "pointer"
+  }
 }));
 
 const InfoCard = ({ title, value, icon }) => {
@@ -243,10 +243,10 @@ const Dashboard = () => {
   const [period, setPeriod] = useState(0);
   const [currentUser, setCurrentUser] = useState({});
   const [dateFrom, setDateFrom] = useState(
-    moment("1", "D").format("YYYY-MM-DDTHH") + ":00",
+    moment("1", "D").format("YYYY-MM-DDTHH") + ":00"
   );
   const [dateTo, setDateTo] = useState(
-    moment().format("YYYY-MM-DDTHH") + ":59",
+    moment().format("YYYY-MM-DDTHH") + ":59"
   );
   const { getCurrentUserInfo } = useAuth();
 
@@ -280,8 +280,8 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetch("https://ipapi.co/json/")
-      .then((res) => res.json())
-      .then((data) => {
+      .then(res => res.json())
+      .then(data => {
         if (data.country === "BR") {
           setSupportPix(true);
           setSupportIsBr(true);
@@ -302,7 +302,7 @@ const Dashboard = () => {
   }, [socketManager]);
 
   useEffect(() => {
-    getCurrentUserInfo().then((user) => {
+    getCurrentUserInfo().then(user => {
       if (user?.profile !== "admin") {
         window.location.href = "/tickets";
       }
@@ -328,14 +328,14 @@ const Dashboard = () => {
   async function updateStatus() {
     api
       .get("/dashboard/status")
-      .then((result) => {
+      .then(result => {
         const { data } = result;
 
         if (!data) return;
 
         let usersOnlineTotal = 0;
         let usersOfflineTotal = 0;
-        data.usersStatusSummary.forEach((item) => {
+        data.usersStatusSummary.forEach(item => {
           if (item.online) {
             usersOnlineTotal++;
           } else {
@@ -347,13 +347,13 @@ const Dashboard = () => {
           {
             name: "Online",
             value: usersOnlineTotal,
-            color: "#00ff00",
+            color: "#00ff00"
           },
           {
             name: "Offline",
             value: usersOfflineTotal,
-            color: "#ff0000",
-          },
+            color: "#ff0000"
+          }
         ]);
 
         setUsersOnlineTotal(usersOnlineTotal);
@@ -363,13 +363,13 @@ const Dashboard = () => {
         let openedTotal = 0;
         const pendingChartData = [];
         const openedChartData = [];
-        data.ticketsStatusSummary.forEach((item) => {
+        data.ticketsStatusSummary.forEach(item => {
           if (item.status === "pending") {
             pendingTotal += Number(item.count);
             pendingChartData.push({
               name: item.queue?.name || i18n.t("common.noqueue"),
               value: Number(item.count),
-              color: item.queue?.color || "#888",
+              color: item.queue?.color || "#888"
             });
             return;
           }
@@ -378,7 +378,7 @@ const Dashboard = () => {
             openedChartData.push({
               name: item.queue?.name || i18n.t("common.noqueue"),
               value: Number(item.count),
-              color: item.queue?.color || "#888",
+              color: item.queue?.color || "#888"
             });
           }
         });
@@ -398,7 +398,7 @@ const Dashboard = () => {
     if (days) {
       params = {
         date_from: moment().subtract(days, "days").format("YYYY-MM-DD"),
-        date_to: moment().format("YYYY-MM-DD"),
+        date_to: moment().format("YYYY-MM-DD")
       };
     }
 
@@ -406,7 +406,7 @@ const Dashboard = () => {
       params = {
         ...params,
         date_from: moment(dateFrom).format("YYYY-MM-DD"),
-        hour_from: moment(dateFrom).format("HH:mm:ss"),
+        hour_from: moment(dateFrom).format("HH:mm:ss")
       };
     }
 
@@ -414,7 +414,7 @@ const Dashboard = () => {
       params = {
         ...params,
         date_to: moment(dateTo).format("YYYY-MM-DD"),
-        hour_to: moment(dateTo).format("HH:mm:ss"),
+        hour_to: moment(dateTo).format("HH:mm:ss")
       };
     }
 
@@ -425,7 +425,7 @@ const Dashboard = () => {
 
     api
       .get("/dashboard/tickets", { params })
-      .then((result) => {
+      .then(result => {
         if (result?.data) {
           setTicketsData(result.data);
         }
@@ -435,7 +435,7 @@ const Dashboard = () => {
     setLoadingUsers(true);
     api
       .get("/dashboard/users", { params })
-      .then((result) => {
+      .then(result => {
         if (result?.data) {
           setUsersData(result.data);
           setLoadingUsers(false);
@@ -462,7 +462,7 @@ const Dashboard = () => {
               labelId="period-selector-label"
               id="period-selector"
               value={period}
-              onChange={(e) => handleChangePeriod(e.target.value)}
+              onChange={e => handleChangePeriod(e.target.value)}
             >
               <MenuItem value={0}>{i18n.t("dashboard.filter.custom")}</MenuItem>
               <MenuItem value={3}>
@@ -490,11 +490,11 @@ const Dashboard = () => {
                 label={i18n.t("dashboard.date.start")}
                 type="datetime-local"
                 value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
+                onChange={e => setDateFrom(e.target.value)}
                 onBlur={fetchData}
                 className={classes.fullWidth}
                 InputLabelProps={{
-                  shrink: true,
+                  shrink: true
                 }}
               />
             </Grid>
@@ -503,11 +503,11 @@ const Dashboard = () => {
                 label={i18n.t("dashboard.date.end")}
                 type="datetime-local"
                 value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
+                onChange={e => setDateTo(e.target.value)}
                 onBlur={fetchData}
                 className={classes.fullWidth}
                 InputLabelProps={{
-                  shrink: true,
+                  shrink: true
                 }}
               />
             </Grid>
@@ -541,7 +541,7 @@ const Dashboard = () => {
                   <Grid item xs={12} md={8}>
                     <Paper
                       className={clsx(classes.ticketzProPaper, {
-                        [classes.clickpointer]: !proInstructionsOpen,
+                        [classes.clickpointer]: !proInstructionsOpen
                       })}
                       onClick={() => showProInstructions()}
                     >
@@ -698,7 +698,7 @@ const Dashboard = () => {
                           className={classes.clickpointer}
                           onClick={() => {
                             copyToClipboard(
-                              "1ab11506-9480-4303-8e1e-988e7c49ed4d",
+                              "1ab11506-9480-4303-8e1e-988e7c49ed4d"
                             );
                             toast.success("Chave PIX copiada");
                           }}
@@ -824,7 +824,7 @@ const Dashboard = () => {
           <InfoCard
             title={i18n.t("dashboard.avgServiceTime")}
             value={formatTimeInterval(
-              ticketsData.ticketStatistics?.avgServiceTime,
+              ticketsData.ticketStatistics?.avgServiceTime
             )}
             icon={<TimerIcon style={{ fontSize: 100 }} />}
           />
@@ -833,7 +833,7 @@ const Dashboard = () => {
           <InfoCard
             title={i18n.t("dashboard.avgWaitTime")}
             value={formatTimeInterval(
-              ticketsData.ticketStatistics?.avgWaitTime,
+              ticketsData.ticketStatistics?.avgWaitTime
             )}
             icon={<HourglassEmptyIcon style={{ fontSize: 100 }} />}
           />

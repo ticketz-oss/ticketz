@@ -4,9 +4,9 @@ import { makeStyles } from "@material-ui/core/styles";
 import { green } from "@material-ui/core/colors";
 import { CircularProgress, Button } from "@material-ui/core";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   button: {
-    position: "relative",
+    position: "relative"
   },
 
   buttonProgress: {
@@ -15,8 +15,8 @@ const useStyles = makeStyles((theme) => ({
     top: "50%",
     left: "50%",
     marginTop: -12,
-    marginLeft: -12,
-  },
+    marginLeft: -12
+  }
 }));
 
 const ButtonWithSpinner = ({ loading, children, ...rest }) => {

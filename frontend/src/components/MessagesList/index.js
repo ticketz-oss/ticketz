@@ -4,7 +4,7 @@ import React, {
   useReducer,
   useRef,
   useContext,
-  useMemo,
+  useMemo
 } from "react";
 
 import { isSameDay, parseISO, format } from "date-fns";
@@ -19,7 +19,7 @@ import {
   IconButton,
   makeStyles,
   Tooltip,
-  Typography,
+  Typography
 } from "@material-ui/core";
 
 import {
@@ -39,7 +39,7 @@ import {
   LocationOn,
   PlayArrow,
   Pause,
-  CropFree,
+  CropFree
 } from "@material-ui/icons";
 
 import WhatsMarked from "react-whatsmarked";
@@ -48,7 +48,7 @@ import MessageOptionsMenu from "../MessageOptionsMenu";
 import whatsBackground from "../../assets/wa-background.png";
 import whatsBackgroundDark from "../../assets/wa-background-dark.png";
 import MediaGalleryLightbox, {
-  buildMediaGalleryData,
+  buildMediaGalleryData
 } from "../MediaGalleryLightbox";
 
 import api from "../../services/api";
@@ -63,19 +63,19 @@ import { Mutex } from "async-mutex";
 
 const loadPageMutex = new Mutex();
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   messageContainer: {
     "& a": {
       color: theme.palette.primary.main,
       fontWeight: "bold",
-      textDecoration: "none",
+      textDecoration: "none"
     },
     "& span.ticketzMention": {
       color: theme.palette.primary.main,
       fontWeight: "bold",
-      cursor: "pointer",
+      cursor: "pointer"
     },
-    marginBottom: 5,
+    marginBottom: 5
   },
 
   stickedMessages: {
@@ -94,7 +94,7 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
     maxHeight: "250px",
     zIndex: 10,
-    borderTop: `1px solid ${theme.palette.divider}`,
+    borderTop: `1px solid ${theme.palette.divider}`
   },
 
   messagesListWrapper: {
@@ -105,7 +105,7 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
     width: "100%",
     minWidth: 300,
-    minHeight: 150,
+    minHeight: 150
   },
 
   messagesList: {
@@ -118,7 +118,7 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
     padding: "20px 20px 20px 20px",
     overflowY: "scroll",
-    ...theme.scrollbarStyles,
+    ...theme.scrollbarStyles
   },
 
   circleLoading: {
@@ -127,7 +127,7 @@ const useStyles = makeStyles((theme) => ({
     opacity: "70%",
     top: 0,
     left: "50%",
-    marginTop: 12,
+    marginTop: 12
   },
 
   messageLeft: {
@@ -142,7 +142,7 @@ const useStyles = makeStyles((theme) => ({
       display: "flex",
       position: "absolute",
       top: 0,
-      right: 0,
+      right: 0
     },
 
     whiteSpace: "pre-wrap",
@@ -159,7 +159,7 @@ const useStyles = makeStyles((theme) => ({
     paddingBottom: 0,
     boxShadow:
       theme.mode === "light" ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000",
-    transition: "background-color 0.5s ease-in-out",
+    transition: "background-color 0.5s ease-in-out"
   },
 
   quotedContainerLeft: {
@@ -169,7 +169,7 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: "7.5px",
     display: "flex",
     position: "relative",
-    cursor: "pointer",
+    cursor: "pointer"
   },
 
   quotedMsg: {
@@ -179,18 +179,18 @@ const useStyles = makeStyles((theme) => ({
     height: "auto",
     display: "block",
     whiteSpace: "pre-wrap",
-    overflow: "hidden",
+    overflow: "hidden"
   },
 
   quotedSideColorLeft: {
     flex: "none",
     width: "4px",
-    backgroundColor: "#6bcbef",
+    backgroundColor: "#6bcbef"
   },
 
   quotedThumbnail: {
     maxWidth: "180px",
-    height: "90px",
+    height: "90px"
   },
 
   messageRight: {
@@ -205,7 +205,7 @@ const useStyles = makeStyles((theme) => ({
       display: "flex",
       position: "absolute",
       top: 0,
-      right: 0,
+      right: 0
     },
     whiteSpace: "pre-wrap",
     backgroundColor: theme.mode === "light" ? "#dcf8c6" : "#005c4b",
@@ -221,7 +221,7 @@ const useStyles = makeStyles((theme) => ({
     paddingBottom: 0,
     boxShadow:
       theme.mode === "light" ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000",
-    transition: "background-color 0.5s ease-in-out",
+    transition: "background-color 0.5s ease-in-out"
   },
 
   quotedContainerRight: {
@@ -230,20 +230,20 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.mode === "light" ? "#cfe9ba" : "#075e54",
     borderRadius: "7.5px",
     display: "flex",
-    position: "relative",
+    position: "relative"
   },
 
   quotedMsgRight: {
     padding: 10,
     // maxWidth: 300,
     height: "auto",
-    whiteSpace: "pre-wrap",
+    whiteSpace: "pre-wrap"
   },
 
   quotedSideColorRight: {
     flex: "none",
     width: "4px",
-    backgroundColor: "#35cd96",
+    backgroundColor: "#35cd96"
   },
 
   messageActionsButton: {
@@ -253,39 +253,39 @@ const useStyles = makeStyles((theme) => ({
     zIndex: 1,
     backgroundColor: "inherit",
     opacity: "90%",
-    "&:hover, &.Mui-focusVisible": { backgroundColor: "inherit" },
+    "&:hover, &.Mui-focusVisible": { backgroundColor: "inherit" }
   },
 
   messageContactName: {
     display: "flex",
     color: "#6bcbef",
     fontWeight: 500,
-    cursor: "pointer",
+    cursor: "pointer"
   },
 
   forwardedMessage: {
     display: "flex",
     color: theme.mode === "light" ? "#999" : "#d0d0d0",
     fontSize: 11,
-    fontWeight: "bold",
+    fontWeight: "bold"
   },
 
   forwardedIcon: {
     color: theme.mode === "light" ? "#999" : "#d0d0d0",
     fontSize: 15,
     verticalAlign: "middle",
-    marginLeft: 4,
+    marginLeft: 4
   },
 
   textContentItem: {
     overflowWrap: "break-word",
-    padding: "3px 80px 6px 6px",
+    padding: "3px 80px 6px 6px"
   },
 
   messageLocation: {
     display: "flex",
     padding: 5,
-    cursor: "pointer",
+    cursor: "pointer"
   },
 
   messageLocationText: {
@@ -293,23 +293,23 @@ const useStyles = makeStyles((theme) => ({
     paddingLeft: 5,
     minWidth: 200,
     marginTop: "auto",
-    marginBottom: "auto",
+    marginBottom: "auto"
   },
 
   textContentItemDeleted: {
     fontStyle: "italic",
     color: "rgba(0, 0, 0, 0.36)",
     overflowWrap: "break-word",
-    padding: "3px 80px 6px 6px",
+    padding: "3px 80px 6px 6px"
   },
 
   textContentItemEdited: {
     overflowWrap: "break-word",
-    padding: "3px 120px 6px 6px",
+    padding: "3px 120px 6px 6px"
   },
   messageMediaDeleted: {
     filter: "grayscale(1)",
-    opacity: 0.4,
+    opacity: 0.4
   },
 
   messageVideo: {
@@ -318,7 +318,7 @@ const useStyles = makeStyles((theme) => ({
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
     borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
+    borderBottomRightRadius: 8
   },
   videoPreviewWrapper: {
     width: 250,
@@ -329,12 +329,12 @@ const useStyles = makeStyles((theme) => ({
     borderBottomRightRadius: 8,
     overflow: "hidden",
     position: "relative",
-    backgroundColor: "#000",
+    backgroundColor: "#000"
   },
   videoPreviewMedia: {
     width: "100%",
     maxHeight: 445,
-    display: "block",
+    display: "block"
   },
   videoPreviewActions: {
     position: "absolute",
@@ -342,14 +342,14 @@ const useStyles = makeStyles((theme) => ({
     bottom: 8,
     display: "flex",
     gap: 8,
-    zIndex: 1,
+    zIndex: 1
   },
   videoPreviewActionButton: {
     backgroundColor: "rgba(15, 23, 42, 0.65)",
     color: "#fff",
     "&:hover": {
-      backgroundColor: "rgba(15, 23, 42, 0.82)",
-    },
+      backgroundColor: "rgba(15, 23, 42, 0.82)"
+    }
   },
 
   messageMedia: {
@@ -359,16 +359,16 @@ const useStyles = makeStyles((theme) => ({
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
     borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
+    borderBottomRightRadius: 8
   },
 
   messageMediaClickable: {
-    cursor: "pointer",
+    cursor: "pointer"
   },
 
   messageMediaSticker: {
     backgroundColor: "unset",
-    boxShadow: "unset",
+    boxShadow: "unset"
   },
 
   timestamp: {
@@ -376,7 +376,7 @@ const useStyles = makeStyles((theme) => ({
     position: "absolute",
     bottom: 0,
     right: 5,
-    color: theme.mode === "light" ? "#999" : "#d0d0d0",
+    color: theme.mode === "light" ? "#999" : "#d0d0d0"
   },
 
   timestampStickerLeft: {
@@ -384,7 +384,7 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: 8,
     padding: 5,
     boxShadow:
-      theme.mode === "light" ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000",
+      theme.mode === "light" ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000"
   },
 
   timestampStickerRight: {
@@ -398,7 +398,7 @@ const useStyles = makeStyles((theme) => ({
     paddingTop: 5,
     paddingBottom: 0,
     boxShadow:
-      theme.mode === "light" ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000",
+      theme.mode === "light" ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000"
   },
 
   dailyTimestamp: {
@@ -409,33 +409,33 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.backgroundContrast.paper,
     margin: "10px",
     borderRadius: "10px",
-    boxShadow: `0 1px 1px ${theme.palette.backgroundContrast.border}`,
+    boxShadow: `0 1px 1px ${theme.palette.backgroundContrast.border}`
   },
 
   dailyTimestampText: {
     color: theme.palette.textCommon.main,
     padding: 8,
     alignSelf: "center",
-    marginLeft: "0px",
+    marginLeft: "0px"
   },
 
   ackIcons: {
     fontSize: 18,
     verticalAlign: "middle",
-    marginLeft: 4,
+    marginLeft: 4
   },
 
   deletedIcon: {
     fontSize: 18,
     verticalAlign: "middle",
-    marginRight: 4,
+    marginRight: 4
   },
 
   ackDoneReadIcon: {
     color: blue[500],
     fontSize: 18,
     verticalAlign: "middle",
-    marginLeft: 4,
+    marginLeft: 4
   },
 
   downloadMedia: {
@@ -443,58 +443,58 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "inherit",
-    padding: 10,
+    padding: 10
   },
   imageLocation: {
     position: "relative",
     color: "red",
     width: 100,
     height: 100,
-    borderRadius: 5,
+    borderRadius: 5
   },
 
   "@global": {
     "@keyframes wave": {
       "0%, 60%, 100%": {
-        transform: "initial",
+        transform: "initial"
       },
       "30%": {
-        transform: "translateY(-15px)",
-      },
+        transform: "translateY(-15px)"
+      }
     },
     "@keyframes quiet": {
       "25%": {
-        transform: "scaleY(.6)",
+        transform: "scaleY(.6)"
       },
       "50%": {
-        transform: "scaleY(.4)",
+        transform: "scaleY(.4)"
       },
       "75%": {
-        transform: "scaleY(.8)",
-      },
+        transform: "scaleY(.8)"
+      }
     },
     "@keyframes normal": {
       "25%": {
-        transform: "scaleY(.1)",
+        transform: "scaleY(.1)"
       },
       "50%": {
-        transform: "scaleY(.4)",
+        transform: "scaleY(.4)"
       },
       "75%": {
-        transform: "scaleY(.6)",
-      },
+        transform: "scaleY(.6)"
+      }
     },
     "@keyframes loud": {
       "25%": {
-        transform: "scaleY(1)",
+        transform: "scaleY(1)"
       },
       "50%": {
-        transform: "scaleY(.4)",
+        transform: "scaleY(.4)"
       },
       "75%": {
-        transform: "scaleY(1.2)",
-      },
-    },
+        transform: "scaleY(1.2)"
+      }
+    }
   },
   wave: {
     position: "relative",
@@ -502,7 +502,7 @@ const useStyles = makeStyles((theme) => ({
     height: "30px",
     marginTop: "10px",
     marginLeft: "auto",
-    marginRight: "auto",
+    marginRight: "auto"
   },
   dot: {
     display: "inline-block",
@@ -513,11 +513,11 @@ const useStyles = makeStyles((theme) => ({
     background: theme.mode === "light" ? "#303030" : "#ffffff",
     animation: "wave 1.3s linear infinite",
     "&:nth-child(2)": {
-      animationDelay: "-1.1s",
+      animationDelay: "-1.1s"
     },
     "&:nth-child(3)": {
-      animationDelay: "-0.9s",
-    },
+      animationDelay: "-0.9s"
+    }
   },
 
   wavebarsContainer: {
@@ -530,7 +530,7 @@ const useStyles = makeStyles((theme) => ({
     marginRight: "auto",
     "--boxSize": "5px",
     "--gutter": "4px",
-    width: "calc((var(--boxSize) + var(--gutter)) * 5)",
+    width: "calc((var(--boxSize) + var(--gutter)) * 5)"
   },
 
   wavebars: {
@@ -541,57 +541,57 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.mode === "light" ? "#303030" : "#ffffff",
     animationTimingFunction: "ease-in-out",
     animationIterationCount: "infinite",
-    borderRadius: "8px",
+    borderRadius: "8px"
   },
 
   wavebar1: {
-    animationName: "quiet",
+    animationName: "quiet"
   },
   wavebar2: {
-    animationName: "normal",
+    animationName: "normal"
   },
   wavebar3: {
-    animationName: "quiet",
+    animationName: "quiet"
   },
   wavebar4: {
-    animationName: "loud",
+    animationName: "loud"
   },
   wavebar5: {
-    animationName: "quiet",
+    animationName: "quiet"
   },
   linkPreviewThumbnail: {
     width: "328px",
-    height: "172px",
+    height: "172px"
   },
   linkPreviewTitle: {
     fontWeight: "bold",
-    marginBottom: "4px",
+    marginBottom: "4px"
   },
   linkPreviewDescription: {
-    marginBottom: "4px",
+    marginBottom: "4px"
   },
   linkPreviewUrl: {
-    opacity: 0.6,
+    opacity: 0.6
   },
   linkPreviewAnchor: {
     textDecoration: "none",
-    color: theme.mode === "light" ? "#303030" : "#ffffff",
+    color: theme.mode === "light" ? "#303030" : "#ffffff"
   },
   messageHighlighted: {
-    backgroundColor: theme.palette.primary.main,
+    backgroundColor: theme.palette.primary.main
   },
   previewThumbnail: {
     width: "383px",
-    maxWidth: "100%",
+    maxWidth: "100%"
   },
   audioBottom: {
-    marginBottom: "12px",
+    marginBottom: "12px"
   },
   reactionsContainer: {
     width: "fit-content",
     height: 1,
     marginLeft: "auto",
-    marginRight: "auto",
+    marginRight: "auto"
   },
   reactions: {
     top: -8,
@@ -605,20 +605,20 @@ const useStyles = makeStyles((theme) => ({
     paddingBottom: 3,
     borderRadius: 15,
     backgroundColor: "gray",
-    cursor: "default",
+    cursor: "default"
   },
   mediaDescription: {
     padding: 5,
     marginBottom: 5,
     borderLeft: "5px solid",
-    borderColor: theme.mode === "light" ? "#000" : "#fff",
+    borderColor: theme.mode === "light" ? "#000" : "#fff"
   },
   messageButton: {
     display: "flex",
     width: "100%",
     textTransform: "none",
-    margin: "auto",
-  },
+    margin: "auto"
+  }
 }));
 
 const reducer = (state, action) => {
@@ -626,8 +626,8 @@ const reducer = (state, action) => {
     const messages = action.payload;
     const newMessages = [];
 
-    messages.forEach((message) => {
-      const messageIndex = state.findIndex((m) => m.id === message.id);
+    messages.forEach(message => {
+      const messageIndex = state.findIndex(m => m.id === message.id);
       if (messageIndex !== -1) {
         state[messageIndex] = message;
       } else {
@@ -640,7 +640,7 @@ const reducer = (state, action) => {
 
   if (action.type === "ADD_MESSAGE") {
     const newMessage = action.payload;
-    const messageIndex = state.findIndex((m) => m.id === newMessage.id);
+    const messageIndex = state.findIndex(m => m.id === newMessage.id);
 
     if (messageIndex !== -1) {
       state[messageIndex] = newMessage;
@@ -650,7 +650,7 @@ const reducer = (state, action) => {
 
     if (newMessage.mediaType === "reactionMessage") {
       const reactionIndex = state.findIndex(
-        (m) => m.id === newMessage.quotedMsgId,
+        m => m.id === newMessage.quotedMsgId
       );
       if (reactionIndex !== -1) {
         state[reactionIndex].replies = state[reactionIndex].replies || [];
@@ -662,7 +662,7 @@ const reducer = (state, action) => {
   }
 
   if (action.type === "RESET_STICKY") {
-    state.forEach((message) => {
+    state.forEach(message => {
       delete message.bottomStick;
     });
     return [...state];
@@ -670,7 +670,7 @@ const reducer = (state, action) => {
 
   if (action.type === "UPDATE_MESSAGE") {
     const messageToUpdate = action.payload;
-    const messageIndex = state.findIndex((m) => m.id === messageToUpdate.id);
+    const messageIndex = state.findIndex(m => m.id === messageToUpdate.id);
 
     if (messageIndex !== -1) {
       state[messageIndex] = messageToUpdate;
@@ -715,7 +715,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
         if (ticketId === undefined) return;
         try {
           const { data } = await api.get("/messages/" + ticketId, {
-            params: { pageNumber: thisPageNumber, markAsRead },
+            params: { pageNumber: thisPageNumber, markAsRead }
           });
 
           if (currentTicketId.current === ticketId) {
@@ -766,7 +766,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
 
     socketManager.onConnect(onConnect);
 
-    const onAppMessage = (data) => {
+    const onAppMessage = data => {
       if (data.message.ticketId === currentTicketId.current) {
         setContactPresence("available");
         if (data.action === "create") {
@@ -795,13 +795,13 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
 
     socket.on(`company-${companyId}-appMessage`, onAppMessage);
 
-    socket.on(`company-${companyId}-presence`, (data) => {
+    socket.on(`company-${companyId}-presence`, data => {
       const { scrollTop, clientHeight, scrollHeight } = scrollRef.current;
       console.log({
         presence: data.presence,
         scrollTop,
         clientHeight,
-        scrollHeight,
+        scrollHeight
       });
       const isAtBottom =
         scrollTop + clientHeight >= scrollHeight - clientHeight / 4;
@@ -839,7 +839,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
     }
   };
 
-  const handleScroll = (e) => {
+  const handleScroll = e => {
     const messagesList = e.currentTarget;
     const sticky = document.querySelector(`.${classes.stickedMessages}`);
     if (sticky && sticky.style.display !== "none") {
@@ -873,7 +873,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
     setSelectedMessageData(data);
   };
 
-  const handleCloseMessageOptionsMenu = (e) => {
+  const handleCloseMessageOptionsMenu = e => {
     setAnchorEl(null);
   };
 
@@ -881,7 +881,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
     return buildMediaGalleryData(messagesList);
   }, [messagesList]);
 
-  const openLightboxForMessage = (messageId) => {
+  const openLightboxForMessage = messageId => {
     const index = lightboxMedia.byMessageId[messageId];
     if (index === undefined) {
       return;
@@ -911,7 +911,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
     previewVideo.pause();
   };
 
-  const pausePreviewVideo = (messageId) => {
+  const pausePreviewVideo = messageId => {
     const previewVideo = previewVideoRefs.current[messageId];
     if (!previewVideo) {
       return;
@@ -928,7 +928,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
       return (
         <img
           className={clsx(classes.messageMedia, {
-            [classes.messageMediaDeleted]: message.isDeleted,
+            [classes.messageMediaDeleted]: message.isDeleted
           })}
           src={message.mediaUrl}
           alt="sticker"
@@ -944,8 +944,8 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
               classes.messageMedia,
               classes.messageMediaClickable,
               {
-                [classes.messageMediaDeleted]: message.isDeleted,
-              },
+                [classes.messageMediaDeleted]: message.isDeleted
+              }
             )}
             src={message.mediaUrl}
             alt="midia da mensagem"
@@ -956,8 +956,8 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
               className={[
                 clsx({
                   [classes.textContentItemDeleted]: message.isDeleted,
-                  [classes.textContentItem]: !message.isDeleted,
-                }),
+                  [classes.textContentItem]: !message.isDeleted
+                })
               ]}
             >
               {message.body && (
@@ -988,11 +988,11 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
         <>
           <div
             className={clsx(classes.videoPreviewWrapper, {
-              [classes.messageMediaDeleted]: message.isDeleted,
+              [classes.messageMediaDeleted]: message.isDeleted
             })}
           >
             <video
-              ref={(element) => {
+              ref={element => {
                 if (element) {
                   previewVideoRefs.current[message.id] = element;
                 } else {
@@ -1004,21 +1004,21 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
               preload="metadata"
               playsInline
               onPlay={() => {
-                setPreviewVideoPlayingById((previous) => ({
+                setPreviewVideoPlayingById(previous => ({
                   ...previous,
-                  [message.id]: true,
+                  [message.id]: true
                 }));
               }}
               onPause={() => {
-                setPreviewVideoPlayingById((previous) => ({
+                setPreviewVideoPlayingById(previous => ({
                   ...previous,
-                  [message.id]: false,
+                  [message.id]: false
                 }));
               }}
               onEnded={() => {
-                setPreviewVideoPlayingById((previous) => ({
+                setPreviewVideoPlayingById(previous => ({
                   ...previous,
-                  [message.id]: false,
+                  [message.id]: false
                 }));
               }}
             />
@@ -1026,7 +1026,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
               <IconButton
                 className={classes.videoPreviewActionButton}
                 aria-label="play preview"
-                onClick={(event) =>
+                onClick={event =>
                   handleVideoPreviewPlayClick(event, message.id)
                 }
               >
@@ -1039,7 +1039,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
               <IconButton
                 className={classes.videoPreviewActionButton}
                 aria-label="open video lightbox"
-                onClick={(event) => {
+                onClick={event => {
                   event.stopPropagation();
                   pausePreviewVideo(message.id);
                   openLightboxForMessage(message.id);
@@ -1053,8 +1053,8 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
             className={[
               clsx({
                 [classes.textContentItemDeleted]: message.isDeleted,
-                [classes.textContentItem]: !message.isDeleted,
-              }),
+                [classes.textContentItem]: !message.isDeleted
+              })
             ]}
           >
             {message.body && (
@@ -1092,8 +1092,8 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
               <div
                 className={[
                   clsx({
-                    [classes.textContentItemDeleted]: message.isDeleted,
-                  }),
+                    [classes.textContentItemDeleted]: message.isDeleted
+                  })
                 ]}
               >
                 <WhatsMarked>{message.body}</WhatsMarked>
@@ -1105,7 +1105,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
     }
   };
 
-  const renderMessageAck = (message) => {
+  const renderMessageAck = message => {
     if (message.ack === 0) {
       return <Warning fontSize="small" className={classes.ackIcons} />;
     }
@@ -1168,7 +1168,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
     }
   };
 
-  const scrollToMessage = (id) => {
+  const scrollToMessage = id => {
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
@@ -1183,7 +1183,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
     }
   };
 
-  const getQuotedMessageText = (quotedMsg) => {
+  const getQuotedMessageText = quotedMsg => {
     if (!quotedMsg?.body && quotedMsg?.mediaUrl) {
       return "📎 " + quotedMsg.mediaUrl.split("/").pop();
     }
@@ -1195,7 +1195,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
     return quotedMsg?.body;
   };
 
-  const renderQuotedMessage = (message) => {
+  const renderQuotedMessage = message => {
     const data = JSON.parse(message.quotedMsg.dataJson);
 
     const thumbnail = data?.message?.imageMessage?.jpegThumbnail;
@@ -1209,13 +1209,13 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
     return (
       <div
         className={clsx(classes.quotedContainerLeft, {
-          [classes.quotedContainerRight]: message.fromMe,
+          [classes.quotedContainerRight]: message.fromMe
         })}
         onClick={() => scrollToMessage(message.quotedMsg.id)}
       >
         <span
           className={clsx(classes.quotedSideColorLeft, {
-            [classes.quotedSideColorRight]: message.quotedMsg?.fromMe,
+            [classes.quotedSideColorRight]: message.quotedMsg?.fromMe
           })}
         ></span>
         <div className={classes.quotedMsg}>
@@ -1231,12 +1231,12 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
     );
   };
 
-  const renderReplies = (replies) => {
+  const renderReplies = replies => {
     const reactions =
       replies &&
       replies
-        .filter((reply) => reply?.mediaType === "reactionMessage")
-        .map((reply) => {
+        .filter(reply => reply?.mediaType === "reactionMessage")
+        .map(reply => {
           return reply.contact?.name ? (
             <Tooltip title={reply.contact?.name} placement="top" arrow>
               <div key={reply.id}>{reply.body}</div>
@@ -1255,7 +1255,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
     );
   };
 
-  const renderLinkPreview = (message) => {
+  const renderLinkPreview = message => {
     const data = JSON.parse(message.dataJson);
 
     const title = data?.message?.extendedTextMessage?.title;
@@ -1277,7 +1277,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
       >
         <div
           className={clsx(classes.quotedContainerLeft, {
-            [classes.quotedContainerRight]: message.fromMe,
+            [classes.quotedContainerRight]: message.fromMe
           })}
         >
           <div className={classes.quotedMsg}>
@@ -1299,20 +1299,20 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
     );
   };
 
-  const sendReply = async (body) => {
+  const sendReply = async body => {
     const message = {
       read: 1,
       fromMe: true,
       mediaUrl: "",
-      body,
+      body
     };
 
-    api.post(`/messages/${ticketId}`, message).catch((err) => {
+    api.post(`/messages/${ticketId}`, message).catch(err => {
       toastError(err);
     });
   };
 
-  const renderReplyButton = (text) => {
+  const renderReplyButton = text => {
     return (
       <Button
         className={classes.messageButton}
@@ -1354,7 +1354,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
     </Button>
   );
 
-  const renderButtons = (message) => {
+  const renderButtons = message => {
     const objects =
       message?.buttonsMessage?.buttons ||
       message?.listMessage?.sections ||
@@ -1364,11 +1364,11 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
 
     if (!objects) return <></>;
 
-    return objects.map((item) => {
+    return objects.map(item => {
       if (item.urlButton) {
         return renderUrlButton({
           displayText: item.urlButton.displayText,
-          url: item.urlButton.url,
+          url: item.urlButton.url
         });
       } else if (item.quickReplyButton) {
         return renderReplyButton(item.quickReplyButton.displayText);
@@ -1379,14 +1379,14 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
         if (params?.url && params.display_text) {
           return renderUrlButton({
             displayText: params.display_text,
-            url: params.url,
+            url: params.url
           });
         }
         if (params?.display_text) {
           return renderReplyButton(params.display_text);
         }
       } else if (item.rows) {
-        return item.rows.map((row) => {
+        return item.rows.map(row => {
           return renderReplyButton(row.title);
         });
       }
@@ -1395,7 +1395,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
     });
   };
 
-  const formatVCardN = (n) => {
+  const formatVCardN = n => {
     return (
       (n[3] ? n[3] + " " : "") +
       (n[1] ? n[1] + " " : "") +
@@ -1405,11 +1405,11 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
     );
   };
 
-  const isVCard = (message) => {
+  const isVCard = message => {
     return message.startsWith('{"ticketzvCard":');
   };
 
-  const stringOrFirstElement = (data) => {
+  const stringOrFirstElement = data => {
     if (!data) {
       return "";
     }
@@ -1423,26 +1423,26 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
     api
       .post(`/contacts/findOrInsert`, {
         name,
-        number,
+        number
       })
-      .then((response) => {
+      .then(response => {
         if (response?.data?.id) {
           window.mentionClick(response.data);
         }
       })
-      .catch((err) => {
+      .catch(err => {
         toastError(err);
       });
   };
 
-  const renderVCard = (vcardJson) => {
+  const renderVCard = vcardJson => {
     const cardArray = JSON.parse(vcardJson)?.ticketzvCard;
 
     if (!cardArray || !Array.isArray(cardArray)) {
       return <div>Invalid VCARD data</div>;
     }
 
-    return cardArray.map((item) => {
+    return cardArray.map(item => {
       const message = item?.vcard;
       if (!message) {
         return <></>;
@@ -1453,10 +1453,10 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
       const name = stringOrFirstElement(
         parsedVCard["X-WA-BIZ-NAME"]?.[0]?.value ||
           parsedVCard.fn?.[0]?.value ||
-          formatVCardN(parsedVCard.n?.[0]?.value),
+          formatVCardN(parsedVCard.n?.[0]?.value)
       );
       const description = stringOrFirstElement(
-        parsedVCard["X-WA-BIZ-DESCRIPTION"]?.[0]?.value || "",
+        parsedVCard["X-WA-BIZ-DESCRIPTION"]?.[0]?.value || ""
       );
       const number = stringOrFirstElement(parsedVCard?.tel?.[0]?.value);
       const metaNumber =
@@ -1470,7 +1470,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
               flexDirection: "row",
               alignItems: "center",
               marginTop: 20,
-              marginBottom: 20,
+              marginBottom: 20
             }}
           >
             <Avatar
@@ -1481,7 +1481,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
                 width: 60,
                 height: 60,
                 color: "white",
-                fontWeight: "bold",
+                fontWeight: "bold"
               }}
             >
               {getInitials(name)}
@@ -1532,7 +1532,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
     });
   };
 
-  const convertToDMS = (degrees) => {
+  const convertToDMS = degrees => {
     const deg = Math.floor(degrees);
     const minFloat = (degrees - deg) * 60;
     const min = Math.floor(minFloat);
@@ -1605,7 +1605,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
           )}
           {convertCoordinates(
             location.degreesLatitude,
-            location.degreesLongitude,
+            location.degreesLongitude
           )}
         </div>
         <span className={classes.timestamp}>
@@ -1615,7 +1615,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
     );
   };
 
-  const getDataContextInfo = (data) => {
+  const getDataContextInfo = data => {
     if (!data) {
       return null;
     }
@@ -1662,8 +1662,8 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
               id={message.id}
               className={[
                 clsx(classes.messageContainer, classes.messageLeft, {
-                  [classes.messageMediaSticker]: isSticker,
-                }),
+                  [classes.messageMediaSticker]: isSticker
+                })
               ]}
               title={message.queueId && message.queue?.name}
             >
@@ -1674,9 +1674,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
                   id={`messageActionsButton-${message.id}`}
                   disabled={message.isDeleted}
                   className={classes.messageActionsButton}
-                  onClick={(e) =>
-                    handleOpenMessageOptionsMenu(e, message, data)
-                  }
+                  onClick={e => handleOpenMessageOptionsMenu(e, message, data)}
                 >
                   <ExpandMore />
                 </IconButton>
@@ -1694,7 +1692,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
                     window.mentionClick({
                       contactId: message.contact?.id,
                       name: message.contact?.name,
-                      number: message.contact?.number,
+                      number: message.contact?.number
                     });
                   }}
                 >
@@ -1715,9 +1713,9 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
                 <div
                   className={[
                     clsx(classes.textContentItem, {
-                      [classes.textContentItemEdited]: message.isEdited,
+                      [classes.textContentItemEdited]: message.isEdited
                     }),
-                    { marginRight: 0 },
+                    { marginRight: 0 }
                   ]}
                 >
                   {renderVCard(message.body)}
@@ -1727,8 +1725,8 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
                   className={[
                     clsx(classes.textContentItem, {
                       [classes.textContentItemDeleted]: message.isDeleted,
-                      [classes.textContentItemEdited]: message.isEdited,
-                    }),
+                      [classes.textContentItemEdited]: message.isEdited
+                    })
                   ]}
                 >
                   {message.quotedMsg && renderQuotedMessage(message)}
@@ -1751,8 +1749,8 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
                   <span
                     className={[
                       clsx(classes.timestamp, {
-                        [classes.timestampStickerLeft]: isSticker,
-                      }),
+                        [classes.timestampStickerLeft]: isSticker
+                      })
                     ]}
                   >
                     {message.isEdited && (
@@ -1783,8 +1781,8 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
               id={message.id}
               className={[
                 clsx(classes.messageContainer, classes.messageRight, {
-                  [classes.messageMediaSticker]: isSticker,
-                }),
+                  [classes.messageMediaSticker]: isSticker
+                })
               ]}
               title={message.queueId && message.queue?.name}
             >
@@ -1795,9 +1793,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
                   id={`messageActionsButton-${message.id}`}
                   disabled={message.isDeleted}
                   className={classes.messageActionsButton}
-                  onClick={(e) =>
-                    handleOpenMessageOptionsMenu(e, message, data)
-                  }
+                  onClick={e => handleOpenMessageOptionsMenu(e, message, data)}
                 >
                   <ExpandMore />
                 </IconButton>
@@ -1820,7 +1816,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
               <div
                 className={clsx(classes.textContentItem, {
                   [classes.textContentItemDeleted]: message.isDeleted,
-                  [classes.textContentItemEdited]: message.isEdited,
+                  [classes.textContentItemEdited]: message.isEdited
                 })}
               >
                 {message.isDeleted && (
@@ -1850,8 +1846,8 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
                 <span
                   className={[
                     clsx(classes.timestamp, {
-                      [classes.timestampStickerRight]: isSticker,
-                    }),
+                      [classes.timestampStickerRight]: isSticker
+                    })
                   ]}
                 >
                   {message.isEdited && (
@@ -1927,7 +1923,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
               display: "flex",
               padding: "10px",
               alignItems: "center",
-              backgroundColor: "#E1F3FB",
+              backgroundColor: "#E1F3FB"
             }}
           >
             {ticket?.channel === "facebook" ? (

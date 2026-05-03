@@ -9,9 +9,9 @@ import VolumeDownIcon from "@material-ui/icons/VolumeDown";
 
 import { Grid, Slider } from "@material-ui/core";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   tabContainer: {
-    padding: theme.spacing(2),
+    padding: theme.spacing(2)
   },
   popoverPaper: {
     width: "100%",
@@ -19,19 +19,19 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: theme.spacing(2),
     marginRight: theme.spacing(1),
     [theme.breakpoints.down("sm")]: {
-      maxWidth: 270,
-    },
+      maxWidth: 270
+    }
   },
   noShadow: {
-    boxShadow: "none !important",
+    boxShadow: "none !important"
   },
   icons: {
-    color: "#fff",
+    color: "#fff"
   },
   customBadge: {
     backgroundColor: "#f44336",
-    color: "#fff",
-  },
+    color: "#fff"
+  }
 }));
 
 const NotificationsVolume = ({ volume, setVolume }) => {
@@ -41,14 +41,14 @@ const NotificationsVolume = ({ volume, setVolume }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleClick = () => {
-    setIsOpen((prevState) => !prevState);
+    setIsOpen(prevState => !prevState);
   };
 
   const handleClickAway = () => {
     setIsOpen(false);
   };
 
-  const handleVolumeChange = (value) => {
+  const handleVolumeChange = value => {
     setVolume(value);
     localStorage.setItem("volume", value);
   };
@@ -71,11 +71,11 @@ const NotificationsVolume = ({ volume, setVolume }) => {
         anchorEl={anchorEl.current}
         anchorOrigin={{
           vertical: "bottom",
-          horizontal: "right",
+          horizontal: "right"
         }}
         transformOrigin={{
           vertical: "top",
-          horizontal: "right",
+          horizontal: "right"
         }}
         classes={{ paper: classes.popoverPaper }}
         onClose={handleClickAway}

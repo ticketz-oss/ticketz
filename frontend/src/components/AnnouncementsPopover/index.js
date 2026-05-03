@@ -18,7 +18,7 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  DialogContentText,
+  DialogContentText
 } from "@material-ui/core";
 import api from "../../services/api";
 import { isArray } from "lodash";
@@ -27,7 +27,7 @@ import { SocketContext } from "../../context/Socket/SocketContext";
 import { getBackendURL } from "../../services/config";
 import { i18n } from "../../translate/i18n";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   contend: { minWidth: 300, maxWidth: 500 },
   mainPaper: {
     flex: 1,
@@ -35,13 +35,13 @@ const useStyles = makeStyles((theme) => ({
     maxWidth: 500,
     padding: theme.spacing(1),
     overflowY: "scroll",
-    ...theme.scrollbarStyles,
-  },
+    ...theme.scrollbarStyles
+  }
 }));
 
 function AnnouncementDialog({ announcement, open, handleClose }) {
   const classes = useStyles();
-  const getMediaPath = (filename) => {
+  const getMediaPath = filename => {
     return `${getBackendURL()}}/public/${filename}`;
   };
   return (
@@ -64,7 +64,7 @@ function AnnouncementDialog({ announcement, open, handleClose }) {
               backgroundImage: `url(${getMediaPath(announcement.mediaPath)})`,
               backgroundRepeat: "no-repeat",
               backgroundSize: "contain",
-              backgroundPosition: "center",
+              backgroundPosition: "center"
             }}
           ></div>
         )}
@@ -87,9 +87,9 @@ const reducer = (state, action) => {
     const newAnnouncements = [];
 
     if (isArray(announcements)) {
-      announcements.forEach((announcement) => {
+      announcements.forEach(announcement => {
         const announcementIndex = state.findIndex(
-          (u) => u.id === announcement.id,
+          u => u.id === announcement.id
         );
         if (announcementIndex !== -1) {
           state[announcementIndex] = announcement;
@@ -104,7 +104,7 @@ const reducer = (state, action) => {
 
   if (action.type === "UPDATE_ANNOUNCEMENTS") {
     const announcement = action.payload;
-    const announcementIndex = state.findIndex((u) => u.id === announcement.id);
+    const announcementIndex = state.findIndex(u => u.id === announcement.id);
 
     if (announcementIndex !== -1) {
       state[announcementIndex] = announcement;
@@ -117,7 +117,7 @@ const reducer = (state, action) => {
   if (action.type === "DELETE_ANNOUNCEMENT") {
     const announcementId = action.payload;
 
-    const announcementIndex = state.findIndex((u) => u.id === announcementId);
+    const announcementIndex = state.findIndex(u => u.id === announcementId);
     if (announcementIndex !== -1) {
       state.splice(announcementIndex, 1);
     }
@@ -162,7 +162,7 @@ export default function AnnouncementsPopover() {
     const companyId = localStorage.getItem("companyId");
     const socket = socketManager.GetSocket(companyId);
 
-    const onCompanyAnnouncement = (data) => {
+    const onCompanyAnnouncement = data => {
       if (data.action === "update" || data.action === "create") {
         dispatch({ type: "UPDATE_ANNOUNCEMENTS", payload: data.record });
         setInvisible(false);
@@ -182,7 +182,7 @@ export default function AnnouncementsPopover() {
   const fetchAnnouncements = async () => {
     try {
       const { data } = await api.get("/announcements/", {
-        params: { searchParam, pageNumber },
+        params: { searchParam, pageNumber }
       });
       dispatch({ type: "LOAD_ANNOUNCEMENTS", payload: data.records });
       setHasMore(data.hasMore);
@@ -193,10 +193,10 @@ export default function AnnouncementsPopover() {
   };
 
   const loadMore = () => {
-    setPageNumber((prevState) => prevState + 1);
+    setPageNumber(prevState => prevState + 1);
   };
 
-  const handleScroll = (e) => {
+  const handleScroll = e => {
     if (!hasMore || loading) return;
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
     if (scrollHeight - (scrollTop + 100) < clientHeight) {
@@ -204,7 +204,7 @@ export default function AnnouncementsPopover() {
     }
   };
 
-  const handleClick = (event) => {
+  const handleClick = event => {
     setAnchorEl(event.currentTarget);
     setInvisible(true);
   };
@@ -213,7 +213,7 @@ export default function AnnouncementsPopover() {
     setAnchorEl(null);
   };
 
-  const borderPriority = (priority) => {
+  const borderPriority = priority => {
     if (priority === 1) {
       return "4px solid #b81111";
     }
@@ -225,11 +225,11 @@ export default function AnnouncementsPopover() {
     }
   };
 
-  const getMediaPath = (filename) => {
+  const getMediaPath = filename => {
     return `${getBackendURL()}/public/${filename}`;
   };
 
-  const handleShowAnnouncementDialog = (record) => {
+  const handleShowAnnouncementDialog = record => {
     setAnnouncement(record);
     setShowAnnouncementDialog(true);
     setAnchorEl(null);
@@ -265,11 +265,11 @@ export default function AnnouncementsPopover() {
         onClose={handleClose}
         anchorOrigin={{
           vertical: "bottom",
-          horizontal: "center",
+          horizontal: "center"
         }}
         transformOrigin={{
           vertical: "top",
-          horizontal: "center",
+          horizontal: "center"
         }}
       >
         <Paper
@@ -290,7 +290,7 @@ export default function AnnouncementsPopover() {
                     // background: key % 2 === 0 ? "#ededed" : "white",
                     border: "1px solid #eee",
                     borderLeft: borderPriority(item.priority),
-                    cursor: "pointer",
+                    cursor: "pointer"
                   }}
                   onClick={() => handleShowAnnouncementDialog(item)}
                 >

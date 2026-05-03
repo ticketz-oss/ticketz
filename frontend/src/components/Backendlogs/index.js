@@ -10,7 +10,7 @@ import {
   faBug,
   faTrash,
   faFileImport,
-  faFileExport,
+  faFileExport
 } from "@fortawesome/free-solid-svg-icons";
 import { i18n } from "../../translate/i18n";
 import { SocketContext } from "../../context/Socket/SocketContext";
@@ -23,12 +23,12 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  TextField,
+  TextField
 } from "@material-ui/core";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   tabContainer: {
-    padding: theme.spacing(2),
+    padding: theme.spacing(2)
   },
   popoverPaper: {
     width: "80%",
@@ -36,18 +36,18 @@ const useStyles = makeStyles((theme) => ({
     marginRight: theme.spacing(1),
     padding: theme.spacing(2),
     [theme.breakpoints.down("sm")]: {
-      maxWidth: "100%",
-    },
+      maxWidth: "100%"
+    }
   },
   noShadow: {
-    boxShadow: "none !important",
+    boxShadow: "none !important"
   },
   icons: {
-    color: "#fff",
+    color: "#fff"
   },
   customBadge: {
     backgroundColor: "#f44336",
-    color: "#fff",
+    color: "#fff"
   },
   console: {
     height: "400px",
@@ -60,35 +60,35 @@ const useStyles = makeStyles((theme) => ({
     fontFamily: "monospace",
     "&::-webkit-scrollbar": {
       width: "6px",
-      height: "6px",
+      height: "6px"
     },
     "&::-webkit-scrollbar-thumb": {
       backgroundColor: "#555",
-      borderRadius: "3px",
+      borderRadius: "3px"
     },
     "&::-webkit-scrollbar-thumb:hover": {
-      backgroundColor: "#888",
+      backgroundColor: "#888"
     },
     "&::-webkit-scrollbar-button": {
-      display: "none",
-    },
+      display: "none"
+    }
   },
   logline: {
     display: "flex",
     alignItems: "flex-start",
     cursor: "text",
     "&:hover": {
-      backgroundColor: "#333",
-    },
+      backgroundColor: "#333"
+    }
   },
   logMetadata: {
     flexShrink: 0,
-    margin: 0,
+    margin: 0
   },
   logExpand: {
     flexShrink: 0,
     marginLeft: 8,
-    cursor: "pointer",
+    cursor: "pointer"
   },
   logMessage: {
     flexGrow: 1,
@@ -96,7 +96,7 @@ const useStyles = makeStyles((theme) => ({
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
     margin: 0,
-    marginLeft: 8,
+    marginLeft: 8
   },
   logDetails: {
     flexGrow: 1,
@@ -106,43 +106,43 @@ const useStyles = makeStyles((theme) => ({
     maxHeight: 200,
     "&::-webkit-scrollbar": {
       width: "6px",
-      height: "6px",
+      height: "6px"
     },
     "&::-webkit-scrollbar-thumb": {
       backgroundColor: "#555",
-      borderRadius: "3px",
+      borderRadius: "3px"
     },
     "&::-webkit-scrollbar-thumb:hover": {
       backgroundColor: "#888",
-      cursor: "default",
+      cursor: "default"
     },
     "&::-webkit-scrollbar-button": {
-      display: "none",
-    },
+      display: "none"
+    }
   },
   grid: {
-    padding: theme.spacing(2),
+    padding: theme.spacing(2)
   },
   error: {
     fontWeight: "bold",
-    color: "red",
+    color: "red"
   },
   warn: {
     fontWeight: "bold",
-    color: "yellow",
+    color: "yellow"
   },
   info: {
     fontWeight: "bold",
-    color: "green",
+    color: "green"
   },
   debug: {
     fontWeight: "bold",
-    color: "blue",
+    color: "blue"
   },
   trace: {
     fontWeight: "bold",
-    color: "gray",
-  },
+    color: "gray"
+  }
 }));
 
 function processLogInfo(logInfo) {
@@ -154,7 +154,7 @@ function processLogInfo(logInfo) {
     return { details, message: "" };
   }
 
-  logs.forEach((log) => {
+  logs.forEach(log => {
     if (typeof log === "string") {
       message += log + "\n";
     } else {
@@ -203,7 +203,7 @@ function LogLine({ logInfo, filter }) {
   }
 
   const toggleExpand = () => {
-    setExpanded((prevExpanded) => !prevExpanded);
+    setExpanded(prevExpanded => !prevExpanded);
   };
 
   return (
@@ -213,7 +213,7 @@ function LogLine({ logInfo, filter }) {
         <span className={levelClass}>{levelName}</span>
       </pre>
       {details?.length ? (
-        <div className={classes.logExpand} onClick={(e) => toggleExpand()}>
+        <div className={classes.logExpand} onClick={e => toggleExpand()}>
           {expanded ? "▼" : "▶"}
         </div>
       ) : (
@@ -249,11 +249,11 @@ export function Backendlogs() {
   useEffect(() => {
     const socket = socketManager.GetSocket();
 
-    socket.on("backendlog", (logInfo) => {
+    socket.on("backendlog", logInfo => {
       const isAtBottom =
         consoleRef.current &&
         parseInt(
-          consoleRef.current.scrollHeight - consoleRef.current.scrollTop,
+          consoleRef.current.scrollHeight - consoleRef.current.scrollTop
         ) <= consoleRef.current.clientHeight;
 
       consoleRef.current &&
@@ -263,13 +263,13 @@ export function Backendlogs() {
           position:
             consoleRef.current.scrollHeight - consoleRef.current.scrollTop,
           clientHeight: consoleRef.current.clientHeight,
-          isAtBottom,
+          isAtBottom
         });
 
       if (logInfo.logs?.[0].currentLevel) {
         setLogLevel(logInfo.logs[0].currentLevel);
       }
-      setLogs((prevLogs) => [...prevLogs, logInfo]);
+      setLogs(prevLogs => [...prevLogs, logInfo]);
 
       if (isAtBottom) {
         consoleRef.current.scrollTop = consoleRef.current.scrollHeight;
@@ -296,7 +296,7 @@ export function Backendlogs() {
   }, [isOpen]);
 
   const handleClick = () => {
-    setIsOpen((prevState) => !prevState);
+    setIsOpen(prevState => !prevState);
   };
 
   const handleClickAway = () => {
@@ -310,7 +310,7 @@ export function Backendlogs() {
     }
   };
 
-  const handleLoggingToggle = (event) => {
+  const handleLoggingToggle = event => {
     const socket = socketManager.GetSocket();
 
     if (event.target.checked) {
@@ -323,7 +323,7 @@ export function Backendlogs() {
     }
   };
 
-  const handleLogLevelChange = (event) => {
+  const handleLogLevelChange = event => {
     setLogLevel(event.target.value);
   };
 
@@ -331,15 +331,15 @@ export function Backendlogs() {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = ".json";
-    input.onchange = (event) => {
+    input.onchange = event => {
       const file = event.target.files[0];
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = e => {
         try {
           const importedLogs = JSON.parse(e.target.result);
-          setLogs((prevLogs) => [...prevLogs, ...importedLogs]);
+          setLogs(prevLogs => [...prevLogs, ...importedLogs]);
         } catch (error) {
           console.error("Failed to import logs:", error);
         }
@@ -379,11 +379,11 @@ export function Backendlogs() {
         anchorEl={anchorEl.current}
         anchorOrigin={{
           vertical: "bottom",
-          horizontal: "right",
+          horizontal: "right"
         }}
         transformOrigin={{
           vertical: "top",
-          horizontal: "right",
+          horizontal: "right"
         }}
         classes={{ paper: classes.popoverPaper }}
         onClose={handleClickAway}
@@ -406,7 +406,7 @@ export function Backendlogs() {
                 label={i18n.t("common.filter")}
                 name="filter"
                 variant="standard"
-                onChange={(e) => setFilter(e.target.value)}
+                onChange={e => setFilter(e.target.value)}
               />
             </FormControl>
           </Grid>
