@@ -273,7 +273,11 @@ const UpdateTicketService = async ({
       ticketTraking.queuedAt = moment().toDate();
     }
 
-    if (ticket.chatbot && !chatbot) {
+    // Only stamp chatbotendAt on the first chatbot→human hand-off, i.e. before
+    // the ticket has ever been accepted (startedAt not yet set). Subsequent
+    // transfers that go through a chatbot queue and then back should not
+    // overwrite this field; they belong to serviceTime, not waitTime.
+    if (ticket.chatbot && !chatbot && !ticketTraking.startedAt) {
       ticketTraking.chatbotendAt = moment().toDate();
     }
 
