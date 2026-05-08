@@ -66,6 +66,7 @@ import { parseToMilliseconds } from "../../helpers/parseToMilliseconds";
 import { randomValue } from "../../helpers/randomValue";
 import { getJidOf } from "./getJidOf";
 import { verifyContact } from "./verifyContact";
+import { decryptMessageEdit } from "./decryptMessageEdit";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
 import saveMediaToFile from "../../helpers/saveMediaFile";
 import { _t } from "../TranslationServices/i18nService";
@@ -888,8 +889,8 @@ export const verifyEditedMessage = async (
     msg.extendedTextMessage?.text ||
     msg.imageMessage?.caption ||
     msg.videoMessage?.caption ||
-    msg.documentMessage.caption ||
-    msg.documentWithCaptionMessage?.message.documentMessage.caption;
+    msg.documentMessage?.caption ||
+    msg.documentWithCaptionMessage?.message?.documentMessage?.caption;
 
   if (!editedText) return;
 
@@ -920,6 +921,58 @@ export const verifyEditedMessage = async (
 
   await ticket.update({
     lastMessage: messageData.body
+  });
+
+  await CreateMessageService({ messageData, companyId: ticket.companyId });
+
+  const io = getIO();
+
+  io.to(ticket.status)
+    .to(ticket.id.toString())
+    .emit(`company-${ticket.companyId}-ticket`, {
+      action: "update",
+      ticket,
+      ticketId: ticket.id
+    });
+};
+
+const markEditedMessageWithError = async (ticket: Ticket, msgId: string) => {
+  const editedMsg = await Message.findByPk(msgId);
+  if (!editedMsg) {
+    return;
+  }
+
+  const editErrorLabel = _t("Failed to process message edit", ticket);
+  const errorBody = editedMsg.body
+    ? `${editedMsg.body}\n[${editErrorLabel}]`
+    : `[${editErrorLabel}]`;
+
+  const messageData = {
+    id: editedMsg.id,
+    ticketId: editedMsg.ticketId,
+    contactId: editedMsg.contactId,
+    body: errorBody,
+    fromMe: editedMsg.fromMe,
+    mediaType: editedMsg.mediaType,
+    read: editedMsg.read,
+    quotedMsgId: editedMsg.quotedMsgId,
+    ack: editedMsg.ack,
+    remoteJid: editedMsg.remoteJid,
+    participant: editedMsg.participant,
+    dataJson: editedMsg.dataJson,
+    isEdited: true
+  };
+
+  const oldMessage = {
+    messageId: messageData.id,
+    body: editedMsg.body,
+    ticketId: editedMsg.ticketId
+  };
+
+  await OldMessage.upsert(oldMessage);
+
+  await ticket.update({
+    lastMessage: messageData.body.substring(0, 255).replace(/\n/g, " ")
   });
 
   await CreateMessageService({ messageData, companyId: ticket.companyId });
@@ -1005,6 +1058,7 @@ const isValidMsg = (msg: proto.IWebMessageInfo): boolean => {
     const ifType =
       msgType === "conversation" ||
       msgType === "editedMessage" ||
+      msgType === "secretEncryptedMessage" ||
       msgType === "extendedTextMessage" ||
       msgType === "audioMessage" ||
       msgType === "videoMessage" ||
@@ -1805,6 +1859,58 @@ const handleMessage = async (
         ticket,
         msg.message.protocolMessage.key.id
       );
+    } else if (msg.message?.secretEncryptedMessage) {
+      // message edited using secret encrypted payload
+      const targetId = msg.message.secretEncryptedMessage.targetMessageKey?.id;
+
+      if (!targetId) {
+        logger.warn("[secretEnc] Message edit received without target id");
+      } else {
+        try {
+          const originalDbMessage = await Message.findByPk(targetId);
+
+          if (!originalDbMessage?.dataJson) {
+            await markEditedMessageWithError(ticket, targetId);
+          } else {
+            let originalMsg: proto.IWebMessageInfo | null = null;
+
+            try {
+              originalMsg = JSON.parse(originalDbMessage.dataJson);
+            } catch (error) {
+              logger.warn(
+                { error, targetId },
+                "[secretEnc] Failed to parse original message dataJson"
+              );
+              throw error;
+            }
+
+            if (!originalMsg) {
+              await markEditedMessageWithError(ticket, targetId);
+            } else {
+              const decryptedMessage = decryptMessageEdit(msg, originalMsg);
+
+              if (
+                decryptedMessage &&
+                decryptedMessage.protocolMessage?.editedMessage
+              ) {
+                await verifyEditedMessage(
+                  decryptedMessage.protocolMessage.editedMessage,
+                  ticket,
+                  targetId
+                );
+              } else {
+                await markEditedMessageWithError(ticket, targetId);
+              }
+            }
+          }
+        } catch (error) {
+          logger.error(
+            { error, targetId },
+            "[secretEnc] Failed to decrypt message edit"
+          );
+          await markEditedMessageWithError(ticket, targetId);
+        }
+      }
     } else if (msg.message?.protocolMessage?.type === 0) {
       await verifyDeleteMessage(msg.message.protocolMessage, ticket);
     } else {
