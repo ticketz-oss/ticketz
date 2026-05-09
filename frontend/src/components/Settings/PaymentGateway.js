@@ -121,7 +121,7 @@ export default function PaymentGateway(props) {
 
       {/* NFS-e disponível independente do gateway de pagamento */}
       <Divider className={classes.divider} />
-      <Typography variant="h6">Nota Fiscal de Serviço (NFS-e)</Typography>
+      <Typography variant="h6">Nota Fiscal de Serviço (NFS-e) — Focus NFe</Typography>
       <NfseSettings settings={settings} />
     </>
   );

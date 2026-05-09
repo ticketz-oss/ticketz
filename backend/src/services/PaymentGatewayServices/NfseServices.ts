@@ -1,7 +1,8 @@
 /*
-  Integração com WebmaniaBR para emissão de NFS-e após pagamento confirmado.
-  Plano gratuito: 100 NFS-e/mês sem custo.
-  Docs: https://webmaniabr.com/docs/rest-api-nfse/
+  Integração com Focus NFe para emissão de NFS-e após pagamento confirmado.
+  Docs: https://doc.focusnfe.com.br/reference/introducao
+  Auth: HTTP Basic com API token como username, senha vazia.
+  Preço: ~R$ 0,05/NFS-e em produção; sandbox gratuito para testes.
 */
 
 import axios from "axios";
@@ -10,58 +11,54 @@ import Invoices from "../../models/Invoices";
 import Company from "../../models/Company";
 import GetSuperSettingService from "../SettingServices/GetSuperSettingService";
 
-interface WebmaniaBRConfig {
-  consumerKey: string;
-  consumerSecret: string;
-  accessToken: string;
-  accessTokenSecret: string;
+interface FocusNfseConfig {
+  apiToken: string;
+  sandbox: boolean;
   cnpjEmitente: string;
+  inscricaoMunicipal: string;
+  codigoMunicipio: string;
   regimeTributario: string; // "1"=Simples, "2"=Lucro Presumido, "3"=Lucro Real
-  naturezaOperacao: string; // código IBGE do município
-  codigoServico: string;   // código LC116 ex: "1.07"
+  codigoServico: string;    // item LC116, ex: "0107"
   descricaoServico: string;
-  aliquotaIss: number;     // ex: 2.0 para 2%
+  aliquotaIss: number;      // ex: 2.0 para 2%
 }
 
-async function getNfseConfig(): Promise<WebmaniaBRConfig | null> {
+async function getNfseConfig(): Promise<FocusNfseConfig | null> {
   try {
     const [
-      consumerKey,
-      consumerSecret,
-      accessToken,
-      accessTokenSecret,
+      apiToken,
+      sandboxRaw,
       cnpjEmitente,
+      inscricaoMunicipal,
+      codigoMunicipio,
       regimeTributario,
-      naturezaOperacao,
       codigoServico,
       descricaoServico,
       aliquotaIss
     ] = await Promise.all([
-      GetSuperSettingService({ key: "_nfseConsumerKey" }),
-      GetSuperSettingService({ key: "_nfseConsumerSecret" }),
-      GetSuperSettingService({ key: "_nfseAccessToken" }),
-      GetSuperSettingService({ key: "_nfseAccessTokenSecret" }),
+      GetSuperSettingService({ key: "_nfseApiToken" }),
+      GetSuperSettingService({ key: "_nfseSandbox" }),
       GetSuperSettingService({ key: "_nfseCnpjEmitente" }),
+      GetSuperSettingService({ key: "_nfseInscricaoMunicipal" }),
+      GetSuperSettingService({ key: "_nfseCodigoMunicipio" }),
       GetSuperSettingService({ key: "_nfseRegimeTributario" }),
-      GetSuperSettingService({ key: "_nfseNaturezaOperacao" }),
       GetSuperSettingService({ key: "_nfseCodigoServico" }),
       GetSuperSettingService({ key: "_nfseDescricaoServico" }),
       GetSuperSettingService({ key: "_nfseAliquotaIss" })
     ]);
 
-    if (!consumerKey || !consumerSecret || !accessToken || !accessTokenSecret) {
+    if (!apiToken) {
       return null;
     }
 
     return {
-      consumerKey,
-      consumerSecret,
-      accessToken,
-      accessTokenSecret,
+      apiToken,
+      sandbox: sandboxRaw === "true",
       cnpjEmitente: cnpjEmitente || "",
+      inscricaoMunicipal: inscricaoMunicipal || "",
+      codigoMunicipio: codigoMunicipio || "",
       regimeTributario: regimeTributario || "1",
-      naturezaOperacao: naturezaOperacao || "Prestação de Serviço",
-      codigoServico: codigoServico || "1.07",
+      codigoServico: codigoServico || "0107",
       descricaoServico: descricaoServico || "Licença de uso de software SaaS",
       aliquotaIss: Number(aliquotaIss) || 2.0
     };
@@ -82,70 +79,75 @@ export const emitirNfse = async (
     return;
   }
 
+  const baseUrl = config.sandbox
+    ? "https://homologacao.focusnfe.com.br"
+    : "https://api.focusnfe.com.br";
+
   try {
+    const valor = Number(invoice.value);
+    const valorIss = parseFloat((valor * (config.aliquotaIss / 100)).toFixed(2));
+    const valorLiquido = parseFloat((valor - valorIss).toFixed(2));
+
     const tomadorDoc = (company as any).document?.replace(/\D/g, "") || "";
     const isCnpj = tomadorDoc.length === 14;
 
-    const body: Record<string, any> = {
-      natureza_operacao: config.naturezaOperacao,
-      regime_tributario: config.regimeTributario,
-      data_emissao: new Date().toISOString(),
-      prestador: {
-        cnpj: config.cnpjEmitente.replace(/\D/g, ""),
-        inscricao_municipal: await GetSuperSettingService({
-          key: "_nfseInscricaoMunicipal"
-        })
-      },
-      tomador: {
-        razao_social: company.name || "Cliente",
-        email: company.email || ""
-      },
-      itens: [
-        {
-          descricao: `${config.descricaoServico} - Fatura #${invoice.id}`,
-          codigo_servico: config.codigoServico,
-          aliquota_iss: config.aliquotaIss,
-          valor_unitario: Number(invoice.value),
-          quantidade: 1
-        }
-      ]
+    const tomador: Record<string, any> = {
+      razao_social: company.name || "Cliente",
+      email: company.email || ""
     };
 
     if (tomadorDoc) {
       if (isCnpj) {
-        body.tomador.cnpj = tomadorDoc;
+        tomador.cnpj = tomadorDoc;
       } else {
-        body.tomador.cpf = tomadorDoc;
+        tomador.cpf = tomadorDoc;
       }
     }
 
-    const response = await axios.post(
-      "https://webmaniabr.com/api/2/nfse/emissao/",
-      body,
-      {
-        auth: {
-          username: config.consumerKey,
-          password: config.consumerSecret
-        },
-        headers: {
-          "X-Access-Token": config.accessToken,
-          "X-Access-Token-Secret": config.accessTokenSecret,
-          "Content-Type": "application/json"
-        },
-        timeout: 30000
+    const body = {
+      data_emissao: new Date().toISOString(),
+      prestador: {
+        cnpj: config.cnpjEmitente.replace(/\D/g, ""),
+        inscricao_municipal: config.inscricaoMunicipal,
+        codigo_municipio: config.codigoMunicipio
+      },
+      tomador,
+      servico: {
+        aliquota: config.aliquotaIss,
+        base_calculo: valor,
+        discriminacao: `${config.descricaoServico} - Fatura #${invoice.id}`,
+        iss_retido: false,
+        item_lista_servico: config.codigoServico,
+        valor_servicos: valor,
+        valor_iss: valorIss,
+        valor_liquido: valorLiquido
       }
-    );
+    };
+
+    const response = await axios.post(`${baseUrl}/v2/nfse`, body, {
+      auth: {
+        username: config.apiToken,
+        password: ""
+      },
+      headers: { "Content-Type": "application/json" },
+      timeout: 30000
+    });
 
     const nfseData = response.data;
-    const nfseId = nfseData?.uuid || nfseData?.id || "";
-    const nfseUrl = nfseData?.url_pdf || nfseData?.url || "";
-    const nfseStatus = nfseData?.status || "emitida";
+    const nfseId =
+      nfseData?.uuid || nfseData?.ref || nfseData?.numero_nfse || "";
+    const nfseUrl =
+      nfseData?.caminho_xml_nota_fiscal ||
+      nfseData?.url_danfse ||
+      nfseData?.caminho_danfse ||
+      "";
+    const nfseStatus = nfseData?.status || "autorizado";
 
     await invoice.update({ nfseId, nfseUrl, nfseStatus });
 
     logger.info(
-      { invoiceId: invoice.id, nfseId, nfseUrl },
-      "NFS-e emitida com sucesso"
+      { invoiceId: invoice.id, nfseId, nfseStatus },
+      "NFS-e emitida com sucesso via Focus NFe"
     );
   } catch (error) {
     // Não falha o pagamento se a NFS-e der erro — apenas loga

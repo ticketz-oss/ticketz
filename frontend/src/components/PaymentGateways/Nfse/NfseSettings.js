@@ -6,24 +6,24 @@ import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
+import Switch from "@material-ui/core/Switch";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
 import { makeStyles } from "@material-ui/core/styles";
 import useSettings from "../../../hooks/useSettings";
 import { toast } from "react-toastify";
 
 const useStyles = makeStyles(_ => ({
   fieldContainer: { width: "100%", textAlign: "left" },
-  sectionTitle: { marginTop: 24, marginBottom: 8 }
+  sectionTitle: { marginTop: 24, marginBottom: 4 }
 }));
 
 const NFSE_KEYS = [
-  "_nfseConsumerKey",
-  "_nfseConsumerSecret",
-  "_nfseAccessToken",
-  "_nfseAccessTokenSecret",
+  "_nfseApiToken",
+  "_nfseSandbox",
   "_nfseCnpjEmitente",
   "_nfseInscricaoMunicipal",
+  "_nfseCodigoMunicipio",
   "_nfseRegimeTributario",
-  "_nfseNaturezaOperacao",
   "_nfseCodigoServico",
   "_nfseDescricaoServico",
   "_nfseAliquotaIss"
@@ -71,19 +71,35 @@ export default function NfseSettings({ settings }) {
   return (
     <>
       <Typography variant="subtitle1" className={classes.sectionTitle}>
-        NFS-e — WebmaniaBR (100 grátis/mês)
+        NFS-e — Focus NFe
       </Typography>
       <Typography variant="caption" color="textSecondary">
-        Cadastre-se em webmaniabr.com e obtenha as credenciais OAuth1 no painel
-        da API.
+        Cadastre-se em focusnfe.com.br, crie uma empresa e gere o token de API.
+        Sandbox gratuito para testes; produção ~R$ 0,05 por NFS-e emitida.
       </Typography>
+
       <Grid spacing={3} container style={{ marginTop: 8 }}>
-        {field("_nfseConsumerKey", "Consumer Key")}
-        {field("_nfseConsumerSecret", "Consumer Secret")}
-        {field("_nfseAccessToken", "Access Token")}
-        {field("_nfseAccessTokenSecret", "Access Token Secret")}
+        {field("_nfseApiToken", "Token da API Focus NFe")}
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={cfg["_nfseSandbox"] === "true"}
+                onChange={e => {
+                  const val = e.target.checked ? "true" : "false";
+                  set("_nfseSandbox", val);
+                  update({ key: "_nfseSandbox", value: val });
+                }}
+              />
+            }
+            label="Usar Sandbox (homologação)"
+          />
+        </Grid>
+
         {field("_nfseCnpjEmitente", "CNPJ Emitente")}
         {field("_nfseInscricaoMunicipal", "Inscrição Municipal")}
+        {field("_nfseCodigoMunicipio", "Código IBGE do Município")}
 
         <Grid xs={12} sm={6} md={4} item>
           <FormControl className={classes.fieldContainer}>
@@ -92,10 +108,7 @@ export default function NfseSettings({ settings }) {
               value={cfg["_nfseRegimeTributario"] || "1"}
               onChange={e => {
                 set("_nfseRegimeTributario", e.target.value);
-                update({
-                  key: "_nfseRegimeTributario",
-                  value: e.target.value
-                });
+                update({ key: "_nfseRegimeTributario", value: e.target.value });
               }}
             >
               <MenuItem value="1">Simples Nacional</MenuItem>
@@ -105,9 +118,8 @@ export default function NfseSettings({ settings }) {
           </FormControl>
         </Grid>
 
-        {field("_nfseNaturezaOperacao", "Natureza da Operação")}
-        {field("_nfseCodigoServico", "Código do Serviço (LC116)")}
-        {field("_nfseDescricaoServico", "Descrição do Serviço")}
+        {field("_nfseCodigoServico", "Item Lista Serviço (LC116, ex: 0107)")}
+        {field("_nfseDescricaoServico", "Discriminação do Serviço")}
         {field("_nfseAliquotaIss", "Alíquota ISS (%)", "number")}
       </Grid>
     </>
