@@ -504,8 +504,8 @@ export const efiCreateBoleto = async (
 
     const charge = await (efiPay as any).createOneStepCharge([], body);
 
-    const chargeId = charge?.data?.charge?.id;
-    const boletoUrl = charge?.data?.link || charge?.data?.billet_link || "";
+    const chargeId = charge?.data?.charge_id;
+    const boletoUrl = charge?.data?.billet_link || charge?.data?.link || "";
     const boletoBarcode = charge?.data?.barcode || "";
 
     await invoice.update({
