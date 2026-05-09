@@ -3,6 +3,8 @@ import { Request, Response } from "express";
 // import { getIO } from "../libs/socket";
 import AppError from "../errors/AppError";
 import Invoices from "../models/Invoices";
+import Company from "../models/Company";
+import { emitirNfse } from "../services/PaymentGatewayServices/NfseServices";
 
 import CreatePlanService from "../services/PlanService/CreatePlanService";
 import UpdatePlanService from "../services/PlanService/UpdatePlanService";
@@ -55,6 +57,30 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
 export const list = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.user;
   const invoice: Invoices[] = await FindAllInvoiceService(companyId);
+
+  return res.status(200).json(invoice);
+};
+
+export const emitNfse = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { id } = req.params;
+
+  const invoice = await Invoices.findByPk(id, {
+    include: { model: Company, as: "company" }
+  });
+
+  if (!invoice) {
+    throw new AppError("Fatura não encontrada", 404);
+  }
+
+  if (invoice.status !== "paid") {
+    throw new AppError("Nota fiscal só pode ser emitida para faturas pagas", 400);
+  }
+
+  await emitirNfse(invoice, invoice.company);
+  await invoice.reload();
 
   return res.status(200).json(invoice);
 };

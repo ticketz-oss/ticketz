@@ -158,12 +158,6 @@ export const processInvoicePaid = async (invoice: Invoices) => {
     await invoice.update({ status: "paid" });
     await company.reload();
 
-    // Emite NFS-e de forma assíncrona sem bloquear a confirmação do pagamento
-    emitirNfse(invoice, company).catch(err =>
-      // já logado internamente, apenas previne unhandled rejection
-      void err
-    );
-
     const io = getIO();
 
     io.to(`company-${invoice.companyId}-mainchannel`)

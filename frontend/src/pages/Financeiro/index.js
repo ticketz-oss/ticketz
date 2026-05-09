@@ -2,6 +2,7 @@ import React, { useState, useEffect, useReducer } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
 import Button from "@material-ui/core/Button";
+import { toast } from "react-toastify";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -92,6 +93,20 @@ const Invoices = () => {
   const handleCloseContactModal = () => {
     setSelectedContactId(null);
     setContactModalOpen(false);
+  };
+
+  const handleEmitNfse = async invoice => {
+    try {
+      const { data } = await api.post(`/invoices/${invoice.id}/nfse`);
+      dispatch({ type: "UPDATE_USERS", payload: data });
+      if (data.nfseUrl) {
+        window.open(data.nfseUrl, "_blank");
+      } else {
+        toast.success("Nota fiscal emitida! Aguarde o processamento.");
+      }
+    } catch (err) {
+      toastError(err);
+    }
   };
   useEffect(() => {
     dispatch({ type: "RESET" });
@@ -215,14 +230,34 @@ const Invoices = () => {
                         PAGAR
                       </Button>
                     ) : (
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        /* color="secondary"
-                        disabled */
-                      >
-                        PAGO
-                      </Button>
+                      <>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          style={{ marginRight: 4 }}
+                        >
+                          PAGO
+                        </Button>
+                        {invoices.nfseUrl ? (
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            color="primary"
+                            onClick={() => window.open(invoices.nfseUrl, "_blank")}
+                          >
+                            VER NOTA
+                          </Button>
+                        ) : (
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            color="primary"
+                            onClick={() => handleEmitNfse(invoices)}
+                          >
+                            EMITIR NOTA
+                          </Button>
+                        )}
+                      </>
                     )}
                   </TableCell>
                 </TableRow>

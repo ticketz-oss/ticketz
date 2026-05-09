@@ -10,5 +10,6 @@ invoiceRoutes.get("/invoices/list", isAuth, InvoicesController.list);
 invoiceRoutes.get("/invoices/all", isAuth, InvoicesController.list);
 invoiceRoutes.get("/invoices/:Invoiceid", isAuth, InvoicesController.show);
 invoiceRoutes.put("/invoices/:id", isAuth, InvoicesController.update);
+invoiceRoutes.post("/invoices/:id/nfse", isAuth, InvoicesController.emitNfse);
 
 export default invoiceRoutes;
