@@ -60,6 +60,7 @@ const privateFolder = __dirname.endsWith("/dist")
   ? path.resolve(__dirname, "..", "private")
   : path.resolve(__dirname, "..", "..", "..", "private");
 
+// Opções para PIX (requer certificado mTLS)
 async function getEfiOptions(): Promise<EfiCredentials> {
   const cert = `${privateFolder}/${await GetSuperSettingService({
     key: "_efiCertFile"
@@ -71,6 +72,24 @@ async function getEfiOptions(): Promise<EfiCredentials> {
     client_secret: await GetSuperSettingService({ key: "_efiClientSecret" }),
     pix_cert: cert,
     validateMtls: false
+  };
+}
+
+// Opções para Boleto (OAuth2 puro, sem certificado mTLS)
+// Usa credenciais de produção separadas configuradas no painel Efí
+async function getEfiBoletoOptions(): Promise<EfiCredentials> {
+  const clientId = await GetSuperSettingService({ key: "_efiBoletoClientId" });
+  const clientSecret = await GetSuperSettingService({
+    key: "_efiBoletoClientSecret"
+  });
+
+  // Fallback para as credenciais PIX se as de boleto não estiverem configuradas
+  return {
+    sandbox: false,
+    client_id: clientId || (await GetSuperSettingService({ key: "_efiClientId" })),
+    client_secret:
+      clientSecret ||
+      (await GetSuperSettingService({ key: "_efiClientSecret" }))
   };
 }
 
@@ -422,7 +441,7 @@ export const efiCreateBoleto = async (
     throw new AppError("CPF/CNPJ é obrigatório para emissão de boleto.", 400);
   }
 
-  const efiOptions = await getEfiOptions();
+  const efiOptions = await getEfiBoletoOptions();
 
   try {
     const invoice = await Invoices.findByPk(invoiceId, {
@@ -502,7 +521,10 @@ export const efiCreateBoleto = async (
       expireAt
     });
   } catch (error) {
-    logger.error({ efiOptions, error }, "efiCreateBoleto error");
+    logger.error(
+      { clientId: efiOptions.client_id, error: (error as any)?.message || error },
+      "efiCreateBoleto error"
+    );
     throw new AppError(
       "Não foi possível gerar o boleto. Verifique os dados e tente novamente.",
       400
