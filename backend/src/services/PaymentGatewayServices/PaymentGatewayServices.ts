@@ -4,18 +4,18 @@
 
    VERSÃO EM PORTUGUÊS MAIS ABAIXO
 
-   
+
    BASIC LICENSE INFORMATION:
 
    Author: Claudemir Todo Bom
    Email: claudemir@todobom.com
-   
+
    Licensed under the AGPLv3 as stated on LICENSE.md file
-   
-   Any work that uses code from this file is obligated to 
+
+   Any work that uses code from this file is obligated to
    give access to its source code to all of its users (not only
    the system's owner running it)
-   
+
    EXCLUSIVE LICENSE to use on closed source derived work can be
    purchased from the author and put at the root of the source
    code tree as proof-of-purchase.
@@ -28,15 +28,15 @@
    Email: claudemir@todobom.com
 
    Licenciado sob a licença AGPLv3 conforme arquivo LICENSE.md
-    
+
    Qualquer sistema que inclua este código deve ter o seu código
    fonte fornecido a todos os usuários do sistema (não apenas ao
    proprietário da infraestrutura que o executa)
-   
+
    LICENÇA EXCLUSIVA para uso em produto derivado em código fechado
    pode ser adquirida com o autor e colocada na raiz do projeto
-   como prova de compra. 
-   
+   como prova de compra.
+
  */
 
 import { Request, Response } from "express";
@@ -45,7 +45,10 @@ import moment from "moment";
 import AppError from "../../errors/AppError";
 import GetSuperSettingService from "../SettingServices/GetSuperSettingService";
 import {
+  efiCheckBoletoStatus,
   efiCheckStatus,
+  efiBoletoWebhook,
+  efiCreateBoleto,
   efiCreateSubscription,
   efiInitialize,
   efiWebhook
@@ -55,6 +58,7 @@ import {
   owenCreateSubscription,
   owenWebhook
 } from "./OwenServices";
+import { emitirNfse } from "./NfseServices";
 import Invoices from "../../models/Invoices";
 import { getIO } from "../../libs/socket";
 import Company from "../../models/Company";
@@ -78,8 +82,13 @@ export const payGatewayCreateSubscription = async (
     key: "_paymentGateway"
   });
 
+  const paymentMethod = req.body.paymentMethod || "pix";
+
   switch (paymentGateway) {
     case "efi": {
+      if (paymentMethod === "boleto") {
+        return efiCreateBoleto(req, res);
+      }
       return efiCreateSubscription(req, res);
     }
     case "pixTicketz": {
@@ -99,8 +108,14 @@ export const payGatewayReceiveWebhook = async (
     key: "_paymentGateway"
   });
 
+  // type param diferencia boleto de PIX no webhook Efí
+  const webhookType = req.params?.type || "";
+
   switch (paymentGateway) {
     case "efi": {
+      if (webhookType === "boleto") {
+        return efiBoletoWebhook(req, res);
+      }
       return efiWebhook(req, res);
     }
     case "pixTicketz": {
@@ -139,13 +154,16 @@ export const processInvoicePaid = async (invoice: Invoices) => {
         break;
     }
 
-    await company.update({
-      dueDate
-    });
-    await invoice.update({
-      status: "paid"
-    });
+    await company.update({ dueDate });
+    await invoice.update({ status: "paid" });
     await company.reload();
+
+    // Emite NFS-e de forma assíncrona sem bloquear a confirmação do pagamento
+    emitirNfse(invoice, company).catch(err =>
+      // já logado internamente, apenas previne unhandled rejection
+      void err
+    );
+
     const io = getIO();
 
     io.to(`company-${invoice.companyId}-mainchannel`)
@@ -180,7 +198,11 @@ export const processInvoiceExpired = async (invoice: Invoices) => {
 
 export const checkInvoicePayment = async (invoice: Invoices) => {
   if (invoice.payGw === "efi") {
-    efiCheckStatus(invoice);
+    if (invoice.paymentMethod === "boleto") {
+      efiCheckBoletoStatus(invoice);
+    } else {
+      efiCheckStatus(invoice);
+    }
   } else if (invoice.payGw === "owen") {
     owenCheckStatus(invoice);
   }

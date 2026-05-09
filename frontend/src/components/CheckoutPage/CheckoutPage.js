@@ -5,7 +5,15 @@ import {
   StepLabel,
   Button,
   Typography,
-  CircularProgress
+  CircularProgress,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  TextField,
+  FormControl,
+  FormLabel,
+  Grid,
+  Divider
 } from "@material-ui/core";
 import { Formik, Form } from "formik";
 
@@ -33,6 +41,8 @@ export default function CheckoutPage(props) {
   const [activeStep, setActiveStep] = useState(1);
   const [datePayment, setDatePayment] = useState(null);
   const [invoiceId] = useState(props.Invoice.id);
+  const [paymentMethod, setPaymentMethod] = useState("pix");
+  const [cpfCnpj, setCpfCnpj] = useState("");
   const onClose = props.onClose;
   const currentValidationSchema = validationSchema[activeStep];
   const isLastStep = activeStep === steps.length - 1;
@@ -60,13 +70,58 @@ export default function CheckoutPage(props) {
           />
         );
       case 2:
-        return <ReviewOrder />;
+        return (
+          <>
+            <ReviewOrder />
+            <Divider style={{ margin: "24px 0 16px" }} />
+            <FormControl component="fieldset">
+              <FormLabel component="legend">
+                <Typography variant="subtitle1">Forma de Pagamento</Typography>
+              </FormLabel>
+              <RadioGroup
+                row
+                value={paymentMethod}
+                onChange={e => setPaymentMethod(e.target.value)}
+              >
+                <FormControlLabel value="pix" control={<Radio />} label="PIX" />
+                <FormControlLabel
+                  value="boleto"
+                  control={<Radio />}
+                  label="Boleto Bancário"
+                />
+              </RadioGroup>
+            </FormControl>
+
+            {paymentMethod === "boleto" && (
+              <Grid container spacing={2} style={{ marginTop: 8 }}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="CPF / CNPJ do pagador"
+                    variant="outlined"
+                    fullWidth
+                    required
+                    value={cpfCnpj}
+                    onChange={e => setCpfCnpj(e.target.value)}
+                    helperText="Necessário para emissão do boleto"
+                    inputProps={{ maxLength: 18 }}
+                  />
+                </Grid>
+              </Grid>
+            )}
+          </>
+        );
       default:
         return <div>Not Found</div>;
     }
   }
 
   async function _submitForm(values, actions) {
+    if (paymentMethod === "boleto" && !cpfCnpj.trim()) {
+      toast.error("Informe o CPF/CNPJ para gerar o boleto.");
+      actions.setSubmitting(false);
+      return;
+    }
+
     try {
       const plan = JSON.parse(values.plan);
       const newValues = {
@@ -85,19 +140,27 @@ export default function CheckoutPage(props) {
         price: plan.price,
         users: plan.users,
         connections: plan.connections,
-        invoiceId: invoiceId
+        invoiceId,
+        paymentMethod,
+        cpfCnpj: cpfCnpj.trim() || undefined,
+        customerName: `${values.firstName || ""} ${values.lastName || ""}`.trim() || undefined,
+        customerEmail: user?.email || undefined
       };
 
       const { data } = await api.post("/subscription", newValues);
       setDatePayment(data);
       actions.setSubmitting(true);
       setActiveStep(activeStep + 1);
-      toast.success(
-        "Assinatura realizada com sucesso!, aguardando a realização do pagamento"
-      );
+
+      if (paymentMethod === "boleto") {
+        toast.success("Boleto gerado! Efetue o pagamento até o vencimento.");
+      } else {
+        toast.success(
+          "Assinatura realizada com sucesso! Aguardando a realização do pagamento."
+        );
+      }
     } catch (err) {
       actions.setSubmitting(false);
-
       toastError(err);
     }
   }

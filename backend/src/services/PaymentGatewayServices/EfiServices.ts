@@ -4,18 +4,18 @@
 
    VERSÃO EM PORTUGUÊS MAIS ABAIXO
 
-   
+
    BASIC LICENSE INFORMATION:
 
    Author: Claudemir Todo Bom
    Email: claudemir@todobom.com
-   
+
    Licensed under the AGPLv3 as stated on LICENSE.md file
-   
-   Any work that uses code from this file is obligated to 
+
+   Any work that uses code from this file is obligated to
    give access to its source code to all of its users (not only
    the system's owner running it)
-   
+
    EXCLUSIVE LICENSE to use on closed source derived work can be
    purchased from the author and put at the root of the source
    code tree as proof-of-purchase.
@@ -28,20 +28,21 @@
    Email: claudemir@todobom.com
 
    Licenciado sob a licença AGPLv3 conforme arquivo LICENSE.md
-    
+
    Qualquer sistema que inclua este código deve ter o seu código
    fonte fornecido a todos os usuários do sistema (não apenas ao
    proprietário da infraestrutura que o executa)
-   
+
    LICENÇA EXCLUSIVA para uso em produto derivado em código fechado
    pode ser adquirida com o autor e colocada na raiz do projeto
-   como prova de compra. 
-   
+   como prova de compra.
+
  */
 
 import { Request, Response } from "express";
 import EfiPay, { EfiCredentials } from "sdk-typescript-apis-efi";
 import path from "path";
+import moment from "moment";
 import GetSuperSettingService from "../SettingServices/GetSuperSettingService";
 import { logger } from "../../utils/logger";
 import Invoices from "../../models/Invoices";
@@ -53,6 +54,7 @@ import {
 } from "./PaymentGatewayServices";
 
 const webhookUrl = `${process.env.BACKEND_URL}/subscription/ticketz/webhook`;
+const boletoWebhookUrl = `${process.env.BACKEND_URL}/subscription/ticketz/webhook/boleto`;
 
 const privateFolder = __dirname.endsWith("/dist")
   ? path.resolve(__dirname, "..", "private")
@@ -153,7 +155,7 @@ export const efiWebhook = async (
   if (req.body.pix) {
     req.body.pix.forEach(
       async (pix: { status: string; txid: string; valor: number }) => {
-        logger.debug(pix, "Processando pagamento");
+        logger.debug(pix, "Processando pagamento PIX");
 
         const invoice = await Invoices.findOne({
           where: {
@@ -177,6 +179,55 @@ export const efiWebhook = async (
         return true;
       }
     );
+  }
+
+  return res.json({ ok: true });
+};
+
+// Boleto webhook: Efí envia POST com token, consultamos a notificação para obter status
+export const efiBoletoWebhook = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { token } = req.body;
+
+  if (!token) {
+    return res.json({ ok: true });
+  }
+
+  try {
+    const efiPay = await newEfiPayInstance();
+    const notification = await (efiPay as any).getNotification({ token });
+
+    if (!notification?.data) {
+      return res.json({ ok: true });
+    }
+
+    for (const item of notification.data) {
+      const chargeId = item.identifiers?.charge_id;
+      if (!chargeId) continue;
+
+      const isPaid =
+        item.status?.current === "paid" || item.situation === "pago";
+
+      if (!isPaid) continue;
+
+      const invoice = await Invoices.findOne({
+        where: { txId: String(chargeId), status: "open" },
+        include: { model: Company, as: "company" }
+      });
+
+      if (!invoice) {
+        logger.debug(
+          `efiBoletoWebhook: invoice not found for chargeId ${chargeId}`
+        );
+        continue;
+      }
+
+      await processInvoicePaid(invoice);
+    }
+  } catch (error) {
+    logger.error(error, "efiBoletoWebhook error");
   }
 
   return res.json({ ok: true });
@@ -206,6 +257,30 @@ export const efiCheckStatus = async (
     return false;
   } catch (error) {
     logger.error(error, "Error getting detail of txid");
+  }
+
+  return false;
+};
+
+export const efiCheckBoletoStatus = async (
+  invoice: Invoices,
+  efiPay: EfiPay = null
+): Promise<boolean> => {
+  try {
+    if (!efiPay) {
+      efiPay = await newEfiPayInstance();
+    }
+
+    const detail = await (efiPay as any).detailCharge({ id: invoice.txId });
+
+    if (detail?.data?.status === "paid" || detail?.data?.situation === "pago") {
+      await processInvoicePaid(invoice);
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    logger.error(error, "efiCheckBoletoStatus: Error checking boleto status");
   }
 
   return false;
@@ -250,6 +325,40 @@ const efiPollCheckStatus = async (
   return pollStatus();
 };
 
+// Polling para boleto: verifica até 2 dias (288 tentativas * 10 min = 2880 min = 48h)
+const efiPollBoletStatus = async (
+  invoice: Invoices,
+  retries = 288,
+  interval = 600000
+) => {
+  let attempts = 0;
+
+  async function pollStatus(): Promise<void> {
+    await invoice.reload();
+
+    if (invoice.status === "paid") {
+      return;
+    }
+
+    const successful = await efiCheckBoletoStatus(invoice);
+    if (successful) {
+      return;
+    }
+
+    attempts += 1;
+
+    if (attempts >= retries) {
+      processInvoiceExpired(invoice);
+      return;
+    }
+
+    await new Promise(resolve => setTimeout(resolve, interval));
+    await pollStatus();
+  }
+
+  return pollStatus();
+};
+
 export const efiCreateSubscription = async (
   req: Request,
   res: Response
@@ -281,7 +390,8 @@ export const efiCreateSubscription = async (
       value: price,
       txId: pix.txid,
       payGw: "efi",
-      payGwData: JSON.stringify(pix)
+      payGwData: JSON.stringify(pix),
+      paymentMethod: "pix"
     });
 
     await invoice.reload();
@@ -289,6 +399,7 @@ export const efiCreateSubscription = async (
     efiPollCheckStatus(efiPay, invoice);
 
     return res.json({
+      paymentMethod: "pix",
       qrcode: { qrcode: pix.pixCopiaECola },
       valor: { original: price }
     });
@@ -296,6 +407,104 @@ export const efiCreateSubscription = async (
     logger.error({ efiOptions, error }, "efiCreateSubscription error");
     throw new AppError(
       "Problema encontrado, entre em contato com o suporte!",
+      400
+    );
+  }
+};
+
+export const efiCreateBoleto = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { price, invoiceId, cpfCnpj, customerName, customerEmail } = req.body;
+
+  if (!cpfCnpj) {
+    throw new AppError("CPF/CNPJ é obrigatório para emissão de boleto.", 400);
+  }
+
+  const efiOptions = await getEfiOptions();
+
+  try {
+    const invoice = await Invoices.findByPk(invoiceId, {
+      include: { model: Company, as: "company" }
+    });
+    if (!invoice) {
+      throw new Error("Invoice not found");
+    }
+
+    const efiPay = new EfiPay(efiOptions);
+
+    const expireAt = moment().add(3, "days").format("YYYY-MM-DD");
+    const valueInCents = Math.round(Number(price) * 100);
+
+    const docClean = cpfCnpj.replace(/\D/g, "");
+    const isCnpj = docClean.length === 14;
+
+    const customer = isCnpj
+      ? {
+          juridical_person: {
+            corporate_name: customerName || invoice.company?.name || "Cliente",
+            cnpj: docClean
+          },
+          email: customerEmail || invoice.company?.email
+        }
+      : {
+          name: customerName || invoice.company?.name || "Cliente",
+          cpf: docClean,
+          email: customerEmail || invoice.company?.email
+        };
+
+    const body = {
+      items: [
+        {
+          name: invoice.detail || "Assinatura Ticketz",
+          value: valueInCents,
+          amount: 1
+        }
+      ],
+      metadata: {
+        notification_url: boletoWebhookUrl,
+        custom_id: String(invoiceId)
+      },
+      payment: {
+        banking_billet: {
+          expire_at: expireAt,
+          customer
+        }
+      }
+    };
+
+    const charge = await (efiPay as any).createOneStepCharge([], body);
+
+    const chargeId = charge?.data?.charge?.id;
+    const boletoUrl = charge?.data?.link || charge?.data?.billet_link || "";
+    const boletoBarcode = charge?.data?.barcode || "";
+
+    await invoice.update({
+      value: price,
+      txId: String(chargeId),
+      payGw: "efi",
+      payGwData: JSON.stringify(charge),
+      paymentMethod: "boleto",
+      boletoUrl,
+      boletoBarcode
+    });
+
+    await invoice.reload();
+
+    efiPollBoletStatus(invoice);
+
+    return res.json({
+      paymentMethod: "boleto",
+      boletoUrl,
+      boletoBarcode,
+      valor: { original: price },
+      expireAt
+    });
+  } catch (error) {
+    logger.error({ efiOptions, error }, "efiCreateBoleto error");
+    throw new AppError(
+      "Não foi possível gerar o boleto. Verifique os dados e tente novamente.",
       400
     );
   }
