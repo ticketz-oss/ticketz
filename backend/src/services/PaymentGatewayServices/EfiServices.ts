@@ -227,7 +227,7 @@ export const efiBoletoWebhook = async (
       if (!chargeId) continue;
 
       const isPaid =
-        item.status?.current === "paid" || item.situation === "pago";
+        item.status?.current === "paid" || item.status?.current === "settled" || item.situation === "pago";
 
       if (!isPaid) continue;
 
@@ -292,7 +292,7 @@ export const efiCheckBoletoStatus = async (
 
     const detail = await (efiPay as any).detailCharge({ id: Number(invoice.txId) });
 
-    if (detail?.data?.status === "paid" || detail?.data?.situation === "pago") {
+    if (detail?.data?.status === "paid" || detail?.data?.status === "settled" || detail?.data?.situation === "pago") {
       await processInvoicePaid(invoice);
       return true;
     }
