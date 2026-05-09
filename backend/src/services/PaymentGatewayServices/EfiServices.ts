@@ -344,11 +344,11 @@ const efiPollCheckStatus = async (
   return pollStatus();
 };
 
-// Polling para boleto: verifica até 2 dias (288 tentativas * 10 min = 2880 min = 48h)
-const efiPollBoletStatus = async (
+// Polling para boleto: verifica até 2 dias (1440 tentativas * 2 min = 2880 min = 48h)
+export const efiPollBoletStatus = async (
   invoice: Invoices,
-  retries = 288,
-  interval = 600000
+  retries = 1440,
+  interval = 120000
 ) => {
   let attempts = 0;
 

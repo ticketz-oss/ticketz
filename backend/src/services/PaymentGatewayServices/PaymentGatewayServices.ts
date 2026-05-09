@@ -51,6 +51,7 @@ import {
   efiCreateBoleto,
   efiCreateSubscription,
   efiInitialize,
+  efiPollBoletStatus,
   efiWebhook
 } from "./EfiServices";
 import {
@@ -193,7 +194,7 @@ export const processInvoiceExpired = async (invoice: Invoices) => {
 export const checkInvoicePayment = async (invoice: Invoices) => {
   if (invoice.payGw === "efi") {
     if (invoice.paymentMethod === "boleto") {
-      efiCheckBoletoStatus(invoice);
+      efiPollBoletStatus(invoice);
     } else {
       efiCheckStatus(invoice);
     }
