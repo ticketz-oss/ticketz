@@ -290,7 +290,7 @@ export const efiCheckBoletoStatus = async (
       efiPay = await newEfiPayInstance();
     }
 
-    const detail = await (efiPay as any).detailCharge({ id: invoice.txId });
+    const detail = await (efiPay as any).detailCharge({ id: Number(invoice.txId) });
 
     if (detail?.data?.status === "paid" || detail?.data?.situation === "pago") {
       await processInvoicePaid(invoice);
