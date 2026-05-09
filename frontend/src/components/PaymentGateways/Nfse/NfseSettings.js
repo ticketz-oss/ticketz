@@ -111,6 +111,7 @@ export default function NfseSettings({ settings }) {
                 update({ key: "_nfseRegimeTributario", value: e.target.value });
               }}
             >
+              <MenuItem value="MEI">MEI (ISS pago via DAS)</MenuItem>
               <MenuItem value="1">Simples Nacional</MenuItem>
               <MenuItem value="2">Lucro Presumido</MenuItem>
               <MenuItem value="3">Lucro Real</MenuItem>

@@ -85,7 +85,8 @@ export const emitirNfse = async (
 
   try {
     const valor = Number(invoice.value);
-    const valorIss = parseFloat((valor * (config.aliquotaIss / 100)).toFixed(2));
+    const aliquota = config.regimeTributario === "MEI" ? 0 : config.aliquotaIss;
+    const valorIss = parseFloat((valor * (aliquota / 100)).toFixed(2));
     const valorLiquido = parseFloat((valor - valorIss).toFixed(2));
 
     const tomadorDoc = (company as any).document?.replace(/\D/g, "") || "";
@@ -104,6 +105,12 @@ export const emitirNfse = async (
       }
     }
 
+    // MEI paga ISS via DAS (valor fixo mensal), então a NFS-e não retém ISS
+    const isMei = config.regimeTributario === "MEI";
+    const regimeTributarioCode = isMei ? "1" : config.regimeTributario;
+    const valorIssNota = isMei ? 0 : valorIss;
+    const valorLiquidoNota = isMei ? valor : valorLiquido;
+
     const body = {
       data_emissao: new Date().toISOString(),
       prestador: {
@@ -113,15 +120,20 @@ export const emitirNfse = async (
       },
       tomador,
       servico: {
-        aliquota: config.aliquotaIss,
+        aliquota: isMei ? 0 : config.aliquotaIss,
         base_calculo: valor,
         discriminacao: `${config.descricaoServico} - Fatura #${invoice.id}`,
         iss_retido: false,
         item_lista_servico: config.codigoServico,
+        optante_simples_nacional: true,
         valor_servicos: valor,
-        valor_iss: valorIss,
-        valor_liquido: valorLiquido
-      }
+        valor_iss: valorIssNota,
+        valor_liquido: valorLiquidoNota
+      },
+      // regime_especial_tributacao 6 = MEI (suportado por alguns municípios)
+      ...(isMei ? { regime_especial_tributacao: "6" } : {}),
+      regime_tributario: regimeTributarioCode,
+      optante_simples_nacional: true
     };
 
     const response = await axios.post(`${baseUrl}/v2/nfse`, body, {
