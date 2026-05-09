@@ -4,7 +4,7 @@ import { Request, Response } from "express";
 import AppError from "../errors/AppError";
 import Invoices from "../models/Invoices";
 import Company from "../models/Company";
-import { emitirNfse } from "../services/PaymentGatewayServices/NfseServices";
+import { asaasEmitNfse } from "../services/PaymentGatewayServices/AsaasServices";
 
 import CreatePlanService from "../services/PlanService/CreatePlanService";
 import UpdatePlanService from "../services/PlanService/UpdatePlanService";
@@ -79,7 +79,7 @@ export const emitNfse = async (
     throw new AppError("Nota fiscal só pode ser emitida para faturas pagas", 400);
   }
 
-  await emitirNfse(invoice, invoice.company);
+  await asaasEmitNfse(invoice, invoice.company);
   await invoice.reload();
 
   return res.status(200).json(invoice);

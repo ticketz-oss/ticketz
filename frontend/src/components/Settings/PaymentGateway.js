@@ -46,23 +46,17 @@ import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
-import Divider from "@material-ui/core/Divider";
-import Typography from "@material-ui/core/Typography";
 import useSettings from "../../hooks/useSettings";
 import { toast } from "react-toastify";
 import { makeStyles } from "@material-ui/core/styles";
 import EfiSettings from "../PaymentGateways/Efi/EfiSettings";
 import PixTicketzSettings from "../PaymentGateways/PixTicketz/PixTicketzSettings";
-import NfseSettings from "../PaymentGateways/Nfse/NfseSettings";
+import AsaasSettings from "../PaymentGateways/Asaas/AsaasSettings";
 
 const useStyles = makeStyles(_ => ({
   fieldContainer: {
     width: "100%",
     textAlign: "left"
-  },
-  divider: {
-    marginTop: 32,
-    marginBottom: 16
   }
 }));
 
@@ -109,6 +103,7 @@ export default function PaymentGateway(props) {
               <MenuItem value={""}>None</MenuItem>
               <MenuItem value={"pixTicketz"}>Pix Ticketz 💎</MenuItem>
               <MenuItem value={"efi"}>Efí / Gerencianet (PIX + Boleto)</MenuItem>
+              <MenuItem value={"asaas"}>Asaas (PIX + Boleto + NFS-e)</MenuItem>
             </Select>
           </FormControl>
         </Grid>
@@ -118,11 +113,7 @@ export default function PaymentGateway(props) {
       {paymentGateway === "pixTicketz" && (
         <PixTicketzSettings settings={settings} />
       )}
-
-      {/* NFS-e disponível independente do gateway de pagamento */}
-      <Divider className={classes.divider} />
-      <Typography variant="h6">Nota Fiscal de Serviço (NFS-e) — Focus NFe</Typography>
-      <NfseSettings settings={settings} />
+      {paymentGateway === "asaas" && <AsaasSettings settings={settings} />}
     </>
   );
 }

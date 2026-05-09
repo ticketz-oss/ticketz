@@ -59,7 +59,13 @@ import {
   owenCreateSubscription,
   owenWebhook
 } from "./OwenServices";
-import { emitirNfse } from "./NfseServices";
+import {
+  asaasCheckStatus,
+  asaasCreateBoleto,
+  asaasCreatePix,
+  asaasPollStatus,
+  asaasWebhook
+} from "./AsaasServices";
 import Invoices from "../../models/Invoices";
 import { getIO } from "../../libs/socket";
 import Company from "../../models/Company";
@@ -92,6 +98,12 @@ export const payGatewayCreateSubscription = async (
       }
       return efiCreateSubscription(req, res);
     }
+    case "asaas": {
+      if (paymentMethod === "boleto") {
+        return asaasCreateBoleto(req, res);
+      }
+      return asaasCreatePix(req, res);
+    }
     case "pixTicketz": {
       return owenCreateSubscription(req, res);
     }
@@ -118,6 +130,9 @@ export const payGatewayReceiveWebhook = async (
         return efiBoletoWebhook(req, res);
       }
       return efiWebhook(req, res);
+    }
+    case "asaas": {
+      return asaasWebhook(req, res);
     }
     case "pixTicketz": {
       return owenWebhook(req, res);
@@ -198,6 +213,8 @@ export const checkInvoicePayment = async (invoice: Invoices) => {
     } else {
       efiCheckStatus(invoice);
     }
+  } else if (invoice.payGw === "asaas") {
+    asaasPollStatus(invoice);
   } else if (invoice.payGw === "owen") {
     owenCheckStatus(invoice);
   }
