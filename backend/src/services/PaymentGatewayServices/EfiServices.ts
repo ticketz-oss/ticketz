@@ -459,18 +459,27 @@ export const efiCreateBoleto = async (
     const docClean = cpfCnpj.replace(/\D/g, "");
     const isCnpj = docClean.length === 14;
 
+    // Efí exige nome com pelo menos duas palavras (nome + sobrenome)
+    const ensureTwoWords = (name: string) => {
+      const trimmed = (name || "").trim();
+      return trimmed.includes(" ") ? trimmed : `${trimmed} Empresa`;
+    };
+
+    const rawName =
+      customerName || invoice.company?.name || "Cliente Ticketz";
+
     const customer = isCnpj
       ? {
           juridical_person: {
-            corporate_name: customerName || invoice.company?.name || "Cliente",
+            corporate_name: ensureTwoWords(rawName),
             cnpj: docClean
           },
-          email: customerEmail || invoice.company?.email
+          email: customerEmail || invoice.company?.email || ""
         }
       : {
-          name: customerName || invoice.company?.name || "Cliente",
+          name: ensureTwoWords(rawName),
           cpf: docClean,
-          email: customerEmail || invoice.company?.email
+          email: customerEmail || invoice.company?.email || ""
         };
 
     const body = {
