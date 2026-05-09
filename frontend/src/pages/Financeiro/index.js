@@ -220,45 +220,63 @@ const Invoices = () => {
                     {rowStatus(invoices)}
                   </TableCell>
                   <TableCell align="center">
-                    {rowStatus(invoices) !== "Pago" ? (
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        color="secondary"
-                        onClick={() => handleOpenContactModal(invoices)}
-                      >
-                        PAGAR
-                      </Button>
-                    ) : (
-                      <>
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          style={{ marginRight: 4 }}
-                        >
-                          PAGO
-                        </Button>
-                        {invoices.nfseUrl ? (
+                    <div style={{ display: "flex", gap: 4, justifyContent: "center", flexWrap: "wrap" }}>
+                      {rowStatus(invoices) !== "Pago" ? (
+                        <>
                           <Button
                             size="small"
                             variant="outlined"
-                            color="primary"
-                            onClick={() => window.open(invoices.nfseUrl, "_blank")}
+                            color="secondary"
+                            onClick={() => handleOpenContactModal(invoices)}
                           >
-                            VER NOTA
+                            PAGAR
                           </Button>
-                        ) : (
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            color="primary"
-                            onClick={() => handleEmitNfse(invoices)}
-                          >
-                            EMITIR NOTA
+                          {invoices.paymentMethod === "boleto" && invoices.boletoUrl && (
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              onClick={() => window.open(invoices.boletoUrl, "_blank")}
+                            >
+                              VER BOLETO
+                            </Button>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <Button size="small" variant="outlined">
+                            PAGO
                           </Button>
-                        )}
-                      </>
-                    )}
+                          {invoices.paymentMethod === "boleto" && invoices.boletoUrl && (
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              onClick={() => window.open(invoices.boletoUrl, "_blank")}
+                            >
+                              VER BOLETO
+                            </Button>
+                          )}
+                          {invoices.nfseUrl ? (
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              color="primary"
+                              onClick={() => window.open(invoices.nfseUrl, "_blank")}
+                            >
+                              VER NOTA
+                            </Button>
+                          ) : (
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              color="primary"
+                              onClick={() => handleEmitNfse(invoices)}
+                            >
+                              EMITIR NOTA
+                            </Button>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
