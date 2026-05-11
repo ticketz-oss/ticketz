@@ -310,6 +310,7 @@ export const asaasEmitNfse = async (
 
   const body: Record<string, any> = {
     serviceDescription: description,
+    municipalServiceName: description,
     municipalServiceDescription: description,
     value: valor,
     deductions: 0,
@@ -322,13 +323,15 @@ export const asaasEmitNfse = async (
 
   if (serviceCode) {
     body.municipalServiceId = serviceCode;
+    body.municipalServiceExternalId = serviceCode;
   }
+
+  // Sempre inclui customer (dados do tomador) — obrigatório para emissão
+  const customerId = await findOrCreateCustomer(api, company);
+  body.customer = customerId;
 
   if (invoice.payGw === "asaas" && invoice.txId) {
     body.payment = invoice.txId;
-  } else {
-    const customerId = await findOrCreateCustomer(api, company);
-    body.customer = customerId;
   }
 
   try {
