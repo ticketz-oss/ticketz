@@ -64,6 +64,33 @@ class Company extends Model<Company> {
   @Column
   language: string;
 
+  @Column
+  document: string;
+
+  @Column
+  postalCode: string;
+
+  @Column
+  address: string;
+
+  @Column
+  city: string;
+
+  @Column
+  state: string;
+
+  @Column
+  municipalRegistration: string;
+
+  @Column
+  stateRegistration: string;
+
+  @Column
+  fiscalEmail: string;
+
+  @Column
+  asaasCustomerId: string;
+
   @CreatedAt
   createdAt: Date;
 
