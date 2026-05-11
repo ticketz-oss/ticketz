@@ -29,28 +29,7 @@ async function getAsaasApi(): Promise<{ api: AxiosInstance; sandbox: boolean }> 
   return { api, sandbox };
 }
 
-async function findOrCreateCustomer(
-  api: AxiosInstance,
-  company: Company
-): Promise<string> {
-  const c = company as any;
-
-  // Retorna ID já cacheado
-  if (c.asaasCustomerId) {
-    return c.asaasCustomerId;
-  }
-
-  const doc = (c.document || "").replace(/\D/g, "");
-  if (!doc) throw new Error("CPF/CNPJ não cadastrado nos dados fiscais da empresa");
-
-  // Tenta encontrar cliente existente no Asaas
-  const search = await api.get("/customers", { params: { cpfCnpj: doc } });
-  if (search.data?.data?.length > 0) {
-    const customerId = search.data.data[0].id;
-    await company.update({ asaasCustomerId: customerId } as any);
-    return customerId;
-  }
-
+async function buildCustomerPayload(c: any): Promise<Record<string, any>> {
   const ensureTwoWords = (n: string) => {
     const t = (n || "").trim();
     return t.includes(" ") ? t : `${t} Empresa`;
@@ -58,7 +37,7 @@ async function findOrCreateCustomer(
 
   const payload: Record<string, any> = {
     name: ensureTwoWords(c.name || "Cliente"),
-    cpfCnpj: doc,
+    cpfCnpj: (c.document || "").replace(/\D/g, ""),
     email: c.fiscalEmail || c.email || "",
     notificationDisabled: true
   };
@@ -70,6 +49,37 @@ async function findOrCreateCustomer(
   if (c.municipalRegistration) payload.municipalInscription = c.municipalRegistration;
   if (c.stateRegistration) payload.stateInscription = c.stateRegistration;
 
+  return payload;
+}
+
+async function findOrCreateCustomer(
+  api: AxiosInstance,
+  company: Company
+): Promise<string> {
+  const c = company as any;
+
+  const doc = (c.document || "").replace(/\D/g, "");
+  if (!doc) throw new Error("CPF/CNPJ não cadastrado nos dados fiscais da empresa");
+
+  const payload = await buildCustomerPayload(c);
+
+  // Se já tem ID cacheado, atualiza os dados e retorna
+  if (c.asaasCustomerId) {
+    await api.put(`/customers/${c.asaasCustomerId}`, payload).catch(() => {});
+    return c.asaasCustomerId;
+  }
+
+  // Busca por CPF/CNPJ no Asaas
+  const search = await api.get("/customers", { params: { cpfCnpj: doc } });
+  if (search.data?.data?.length > 0) {
+    const customerId = search.data.data[0].id;
+    // Atualiza endereço e dados fiscais do cliente existente
+    await api.put(`/customers/${customerId}`, payload).catch(() => {});
+    await company.update({ asaasCustomerId: customerId } as any);
+    return customerId;
+  }
+
+  // Cria novo cliente
   const customer = await api.post("/customers", payload);
   const customerId: string = customer.data.id;
 
