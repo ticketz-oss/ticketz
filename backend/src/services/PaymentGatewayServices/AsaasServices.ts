@@ -308,12 +308,15 @@ export const asaasEmitNfse = async (
   const description =
     serviceDesc || `Licença de uso de software SaaS - Fatura #${invoice.id}`;
 
+  const effectiveDate = moment(invoice.updatedAt || new Date()).format("YYYY-MM-DD");
+
   const body: Record<string, any> = {
     serviceDescription: description,
     municipalServiceName: description,
     municipalServiceDescription: description,
     value: valor,
     deductions: 0,
+    effectiveDate,
     observations: `Fatura #${invoice.id}`,
     taxes: {
       retainIss: false,
