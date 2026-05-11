@@ -4,7 +4,7 @@ module.exports = {
   up: async (queryInterface: QueryInterface) => {
     const tableDesc = await queryInterface.describeTable("Companies");
 
-    const addIfMissing = async (col: string, def: object) => {
+    const addIfMissing = async (col: string, def: any) => {
       if (!tableDesc[col]) {
         await queryInterface.addColumn("Companies", col, def);
       }
