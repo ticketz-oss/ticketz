@@ -279,76 +279,85 @@ export const asaasEmitNfse = async (
   invoice: Invoices,
   company: Company
 ): Promise<void> => {
+  const [apiKey, sandbox, serviceDesc, serviceCode, issRate] =
+    await Promise.all([
+      GetSuperSettingService({ key: "_asaasApiKey" }),
+      GetSuperSettingService({ key: "_asaasSandbox" }),
+      GetSuperSettingService({ key: "_asaasNfseServiceDesc" }),
+      GetSuperSettingService({ key: "_asaasNfseServiceCode" }),
+      GetSuperSettingService({ key: "_asaasNfseIssRate" })
+    ]);
+
+  if (!apiKey) {
+    throw new AppError("Asaas não configurado. Cadastre a API Key nas configurações.", 400);
+  }
+
+  const baseUrl =
+    sandbox === "true"
+      ? "https://sandbox.asaas.com/api/v3"
+      : "https://www.asaas.com/api/v3";
+
+  const api = axios.create({
+    baseURL: baseUrl,
+    headers: { access_token: apiKey, "Content-Type": "application/json" },
+    timeout: 30000
+  });
+
+  const valor = Number(invoice.value);
+
+  const body: Record<string, any> = {
+    serviceDescription:
+      serviceDesc || `Licença de uso de software SaaS - Fatura #${invoice.id}`,
+    value: valor,
+    deductions: 0,
+    observations: `Fatura #${invoice.id}`,
+    taxes: {
+      retainIss: false,
+      iss: Number(issRate) || 0
+    }
+  };
+
+  if (serviceCode) {
+    body.municipalServiceId = serviceCode;
+  }
+
+  if (invoice.payGw === "asaas" && invoice.txId) {
+    body.payment = invoice.txId;
+  } else {
+    const customerId = await findOrCreateCustomer(api, company);
+    body.customer = customerId;
+  }
+
   try {
-    const [apiKey, sandbox, serviceDesc, serviceCode, issRate] =
-      await Promise.all([
-        GetSuperSettingService({ key: "_asaasApiKey" }),
-        GetSuperSettingService({ key: "_asaasSandbox" }),
-        GetSuperSettingService({ key: "_asaasNfseServiceDesc" }),
-        GetSuperSettingService({ key: "_asaasNfseServiceCode" }),
-        GetSuperSettingService({ key: "_asaasNfseIssRate" })
-      ]);
-
-    if (!apiKey) {
-      logger.debug("asaasEmitNfse: Asaas não configurado, pulando emissão");
-      return;
-    }
-
-    const baseUrl =
-      sandbox === "true"
-        ? "https://sandbox.asaas.com/api/v3"
-        : "https://www.asaas.com/api/v3";
-
-    const api = axios.create({
-      baseURL: baseUrl,
-      headers: { access_token: apiKey, "Content-Type": "application/json" },
-      timeout: 30000
-    });
-
-    const valor = Number(invoice.value);
-
-    const body: Record<string, any> = {
-      serviceDescription:
-        serviceDesc || `Licença de uso de software SaaS - Fatura #${invoice.id}`,
-      value: valor,
-      deductions: 0,
-      observations: `Fatura #${invoice.id}`,
-      taxes: {
-        retainIss: false,
-        iss: Number(issRate) || 0
-      }
-    };
-
-    if (serviceCode) {
-      body.municipalServiceId = serviceCode;
-    }
-
-    // Vincula ao pagamento Asaas se disponível
-    if (invoice.payGw === "asaas" && invoice.txId) {
-      body.payment = invoice.txId;
-    } else {
-      // NFS-e avulsa: encontra/cria cliente com dados fiscais
-      const customerId = await findOrCreateCustomer(api, company);
-      body.customer = customerId;
-    }
-
     const response = await api.post("/invoices", body);
     const nfseData = response.data;
 
-    await invoice.update({
-      nfseId: nfseData.id || "",
-      nfseUrl: nfseData.pdfUrl || nfseData.invoiceUrl || "",
-      nfseStatus: nfseData.status || "pending"
-    });
-
     logger.info(
-      { invoiceId: invoice.id, nfseId: nfseData.id },
+      { invoiceId: invoice.id, nfseId: nfseData.id, nfseData },
       "NFS-e Asaas emitida"
     );
+
+    const nfseUrl =
+      nfseData.invoiceUrl ||
+      nfseData.pdfUrl ||
+      nfseData.bankSlipUrl ||
+      "";
+
+    await invoice.update({
+      nfseId: nfseData.id || "",
+      nfseUrl,
+      nfseStatus: nfseData.status || "pending"
+    });
   } catch (error) {
+    const asaasError = (error as any)?.response?.data;
     logger.error(
-      { error: (error as any)?.response?.data || error },
-      `asaasEmitNfse: erro para fatura ${invoice.id}`
+      { asaasError, invoiceId: invoice.id },
+      "asaasEmitNfse: erro na API Asaas"
     );
+    const msg =
+      asaasError?.errors?.[0]?.description ||
+      asaasError?.description ||
+      "Erro ao emitir NFS-e no Asaas.";
+    throw new AppError(msg, 400);
   }
 };
