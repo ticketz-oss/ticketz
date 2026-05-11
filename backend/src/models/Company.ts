@@ -74,6 +74,12 @@ class Company extends Model<Company> {
   address: string;
 
   @Column
+  addressNumber: string;
+
+  @Column
+  province: string;
+
+  @Column
   city: string;
 
   @Column

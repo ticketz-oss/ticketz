@@ -44,6 +44,8 @@ async function buildCustomerPayload(c: any): Promise<Record<string, any>> {
 
   if (c.postalCode) payload.postalCode = c.postalCode.replace(/\D/g, "");
   if (c.address) payload.address = c.address;
+  if (c.addressNumber) payload.addressNumber = c.addressNumber;
+  if (c.province) payload.province = c.province;
   if (c.city) payload.city = c.city;
   if (c.state) payload.state = c.state;
   if (c.municipalRegistration) payload.municipalInscription = c.municipalRegistration;

@@ -93,7 +93,7 @@ const Invoices = () => {
   const [contactModalOpen, setContactModalOpen] = useState(false);
 
   const [fiscal, setFiscal] = useState({
-    name: "", document: "", postalCode: "", address: "",
+    name: "", document: "", postalCode: "", address: "", addressNumber: "", province: "",
     city: "", state: "", municipalRegistration: "", stateRegistration: "", fiscalEmail: ""
   });
   const [fiscalLoading, setFiscalLoading] = useState(false);
@@ -116,6 +116,8 @@ const Invoices = () => {
         document: data.document || "",
         postalCode: data.postalCode || "",
         address: data.address || "",
+        addressNumber: data.addressNumber || "",
+        province: data.province || "",
         city: data.city || "",
         state: data.state || "",
         municipalRegistration: data.municipalRegistration || "",
@@ -134,9 +136,10 @@ const Invoices = () => {
       if (!data.erro) {
         setFiscal(prev => ({
           ...prev,
-          address: `${data.logradouro}${data.bairro ? ", " + data.bairro : ""}`,
-          city: data.localidade,
-          state: data.uf
+          address: data.logradouro || prev.address,
+          province: data.bairro || prev.province,
+          city: data.localidade || prev.city,
+          state: data.uf || prev.state
         }));
       }
     } catch (_) {}
@@ -263,11 +266,19 @@ const Invoices = () => {
               onChange={e => setFiscal(p => ({ ...p, postalCode: e.target.value }))}
               onBlur={handleCepBlur} />
           </Grid>
-          <Grid item xs={12} sm={7}>
-            <TextField fullWidth label="Endereço (Rua, Número, Bairro)" value={fiscal.address}
+          <Grid item xs={12} sm={6}>
+            <TextField fullWidth label="Rua / Logradouro" value={fiscal.address}
               onChange={e => setFiscal(p => ({ ...p, address: e.target.value }))} />
           </Grid>
-          <Grid item xs={12} sm={5}>
+          <Grid item xs={12} sm={3}>
+            <TextField fullWidth label="Número" value={fiscal.addressNumber}
+              onChange={e => setFiscal(p => ({ ...p, addressNumber: e.target.value }))} />
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <TextField fullWidth label="Bairro" value={fiscal.province}
+              onChange={e => setFiscal(p => ({ ...p, province: e.target.value }))} />
+          </Grid>
+          <Grid item xs={12} sm={6}>
             <TextField fullWidth label="Cidade" value={fiscal.city}
               onChange={e => setFiscal(p => ({ ...p, city: e.target.value }))} />
           </Grid>

@@ -137,8 +137,8 @@ export const update = async (
 };
 
 const FISCAL_FIELDS = [
-  "document", "postalCode", "address", "city", "state",
-  "municipalRegistration", "stateRegistration", "fiscalEmail"
+  "name", "document", "postalCode", "address", "addressNumber", "province",
+  "city", "state", "municipalRegistration", "stateRegistration", "fiscalEmail"
 ] as const;
 
 export const getFiscal = async (
