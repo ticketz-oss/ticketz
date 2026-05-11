@@ -305,9 +305,12 @@ export const asaasEmitNfse = async (
 
   const valor = Number(invoice.value);
 
+  const description =
+    serviceDesc || `Licença de uso de software SaaS - Fatura #${invoice.id}`;
+
   const body: Record<string, any> = {
-    serviceDescription:
-      serviceDesc || `Licença de uso de software SaaS - Fatura #${invoice.id}`,
+    serviceDescription: description,
+    municipalServiceDescription: description,
     value: valor,
     deductions: 0,
     observations: `Fatura #${invoice.id}`,
