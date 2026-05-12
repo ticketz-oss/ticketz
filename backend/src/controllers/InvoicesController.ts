@@ -1,10 +1,11 @@
 import * as Yup from "yup";
 import { Request, Response } from "express";
+import moment from "moment";
 // import { getIO } from "../libs/socket";
 import AppError from "../errors/AppError";
 import Invoices from "../models/Invoices";
 import Company from "../models/Company";
-import { asaasEmitNfse } from "../services/PaymentGatewayServices/AsaasServices";
+import { asaasEmitNfse, asaasFetchNfseUrl } from "../services/PaymentGatewayServices/AsaasServices";
 
 import CreatePlanService from "../services/PlanService/CreatePlanService";
 import UpdatePlanService from "../services/PlanService/UpdatePlanService";
@@ -77,6 +78,26 @@ export const emitNfse = async (
 
   if (invoice.status !== "paid") {
     throw new AppError("Nota fiscal só pode ser emitida para faturas pagas", 400);
+  }
+
+  // Restrição: emissão apenas no mês corrente do pagamento
+  const paidAt = moment(invoice.updatedAt);
+  const now = moment();
+  if (!paidAt.isSame(now, "month")) {
+    throw new AppError(
+      `Nota fiscal só pode ser emitida no mês do pagamento (${paidAt.format("MM/YYYY")}). Entre em contato para emissão retroativa.`,
+      400
+    );
+  }
+
+  // Se já emitiu, tenta buscar a URL no Asaas em vez de emitir de novo
+  if ((invoice as any).nfseId) {
+    const url = await asaasFetchNfseUrl((invoice as any).nfseId);
+    if (url) {
+      await invoice.update({ nfseUrl: url } as any);
+    }
+    await invoice.reload();
+    return res.status(200).json(invoice);
   }
 
   await asaasEmitNfse(invoice, invoice.company);

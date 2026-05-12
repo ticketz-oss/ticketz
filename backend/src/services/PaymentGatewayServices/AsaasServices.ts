@@ -375,15 +375,23 @@ export const asaasEmitNfse = async (
     const nfseData = response.data;
 
     logger.info(
-      { invoiceId: invoice.id, nfseId: nfseData.id, nfseData },
+      { invoiceId: invoice.id, nfseId: nfseData.id, nfseStatus: nfseData.status },
       "NFS-e Asaas emitida"
     );
 
-    const nfseUrl =
+    // URL pode não estar disponível imediatamente — tenta buscar no detalhe
+    let nfseUrl =
       nfseData.invoiceUrl ||
       nfseData.pdfUrl ||
-      nfseData.bankSlipUrl ||
       "";
+
+    if (!nfseUrl && nfseData.id) {
+      try {
+        const detail = await api.get(`/invoices/${nfseData.id}`);
+        nfseUrl = detail.data?.invoiceUrl || detail.data?.pdfUrl || "";
+        logger.debug({ nfseUrl }, "asaasEmitNfse: URL buscada no detalhe");
+      } catch {}
+    }
 
     await invoice.update({
       nfseId: nfseData.id || "",
@@ -401,5 +409,20 @@ export const asaasEmitNfse = async (
       asaasError?.description ||
       "Erro ao emitir NFS-e no Asaas.";
     throw new AppError(msg, 400);
+  }
+};
+
+/**
+ * Busca a URL de uma NFS-e já emitida no Asaas pelo ID.
+ * Útil quando a URL não estava disponível no momento da emissão.
+ */
+export const asaasFetchNfseUrl = async (nfseId: string): Promise<string> => {
+  try {
+    const { api } = await getAsaasApi();
+    const detail = await api.get(`/invoices/${nfseId}`);
+    return detail.data?.invoiceUrl || detail.data?.pdfUrl || "";
+  } catch (err) {
+    logger.warn({ err, nfseId }, "asaasFetchNfseUrl: não foi possível buscar URL");
+    return "";
   }
 };
