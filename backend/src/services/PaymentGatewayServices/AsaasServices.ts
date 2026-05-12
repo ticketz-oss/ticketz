@@ -193,16 +193,25 @@ export const asaasCreateBoleto = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const { price, invoiceId, cpfCnpj, customerName, customerEmail } = req.body;
+  const { price, invoiceId } = req.body;
 
-  if (!cpfCnpj) {
-    throw new AppError("CPF/CNPJ é obrigatório para emissão de boleto.", 400);
-  }
+  logger.debug({ invoiceId, price }, "asaasCreateBoleto: iniciando");
 
   const invoice = await Invoices.findByPk(invoiceId, {
     include: { model: Company, as: "company" }
   });
-  if (!invoice) throw new AppError("Invoice not found", 404);
+  if (!invoice) {
+    logger.error({ invoiceId }, "asaasCreateBoleto: fatura não encontrada");
+    throw new AppError("Fatura não encontrada. Recarregue a página e tente novamente.", 404);
+  }
+
+  const c = invoice.company as any;
+  if (!c?.document) {
+    throw new AppError(
+      "CPF/CNPJ não cadastrado. Preencha os dados fiscais em Financeiro → Configurações antes de gerar o boleto.",
+      400
+    );
+  }
 
   const { api } = await getAsaasApi();
 

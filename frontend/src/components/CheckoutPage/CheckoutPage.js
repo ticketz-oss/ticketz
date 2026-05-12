@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Stepper,
   Step,
@@ -42,8 +42,16 @@ export default function CheckoutPage(props) {
   const [datePayment, setDatePayment] = useState(null);
   const [invoiceId] = useState(props.Invoice.id);
   const [paymentMethod, setPaymentMethod] = useState("pix");
-  const [cpfCnpj, setCpfCnpj] = useState("");
   const onClose = props.onClose;
+
+  // Carrega CPF/CNPJ dos dados fiscais cadastrados
+  useEffect(() => {
+    api.get("/companies/fiscal/me").then(({ data }) => {
+      if (data.document) {
+        // usado internamente — backend usa company.document diretamente
+      }
+    }).catch(() => {});
+  }, []);
   const currentValidationSchema = validationSchema[activeStep];
   const isLastStep = activeStep === steps.length - 1;
   const { user } = useContext(AuthContext);
@@ -93,20 +101,9 @@ export default function CheckoutPage(props) {
             </FormControl>
 
             {paymentMethod === "boleto" && (
-              <Grid container spacing={2} style={{ marginTop: 8 }}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    label="CPF / CNPJ do pagador"
-                    variant="outlined"
-                    fullWidth
-                    required
-                    value={cpfCnpj}
-                    onChange={e => setCpfCnpj(e.target.value)}
-                    helperText="Necessário para emissão do boleto"
-                    inputProps={{ maxLength: 18 }}
-                  />
-                </Grid>
-              </Grid>
+              <Typography variant="body2" color="textSecondary" style={{ marginTop: 8 }}>
+                O CPF/CNPJ será utilizado dos dados fiscais cadastrados em Financeiro → Configurações.
+              </Typography>
             )}
           </>
         );
@@ -116,34 +113,15 @@ export default function CheckoutPage(props) {
   }
 
   async function _submitForm(values, actions) {
-    if (paymentMethod === "boleto" && !cpfCnpj.trim()) {
-      toast.error("Informe o CPF/CNPJ para gerar o boleto.");
-      actions.setSubmitting(false);
-      return;
-    }
-
     try {
       const plan = JSON.parse(values.plan);
       const newValues = {
-        firstName: values.firstName,
-        lastName: values.lastName,
-        address2: values.address2,
-        city: values.city,
-        state: values.state,
-        zipcode: values.zipcode,
-        country: values.country,
-        useAddressForPaymentDetails: values.useAddressForPaymentDetails,
-        nameOnCard: values.nameOnCard,
-        cardNumber: values.cardNumber,
-        cvv: values.cvv,
         plan: values.plan,
         price: plan.price,
         users: plan.users,
         connections: plan.connections,
         invoiceId,
         paymentMethod,
-        cpfCnpj: cpfCnpj.trim() || undefined,
-        customerName: `${values.firstName || ""} ${values.lastName || ""}`.trim() || undefined,
         customerEmail: user?.email || undefined
       };
 

@@ -2,10 +2,6 @@ import React, { useState, useEffect, useReducer } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
 import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
-import Grid from "@material-ui/core/Grid";
-import Typography from "@material-ui/core/Typography";
-import Divider from "@material-ui/core/Divider";
 import { toast } from "react-toastify";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -73,10 +69,6 @@ const useStyles = makeStyles(theme => ({
     padding: theme.spacing(1),
     overflowY: "scroll",
     ...theme.scrollbarStyles
-  },
-  fiscalPaper: {
-    padding: theme.spacing(2),
-    marginBottom: theme.spacing(2)
   }
 }));
 
@@ -92,12 +84,6 @@ const Invoices = () => {
   const [selectedContactId, setSelectedContactId] = useState(null);
   const [contactModalOpen, setContactModalOpen] = useState(false);
 
-  const [fiscal, setFiscal] = useState({
-    name: "", document: "", postalCode: "", address: "", addressNumber: "", province: "",
-    city: "", state: "", municipalRegistration: "", stateRegistration: "", fiscalEmail: ""
-  });
-  const [fiscalLoading, setFiscalLoading] = useState(false);
-
   const handleOpenContactModal = invoices => {
     setStoragePlans(invoices);
     setSelectedContactId(null);
@@ -107,53 +93,6 @@ const Invoices = () => {
   const handleCloseContactModal = () => {
     setSelectedContactId(null);
     setContactModalOpen(false);
-  };
-
-  useEffect(() => {
-    api.get("/companies/fiscal/me").then(({ data }) => {
-      setFiscal({
-        name: data.name || "",
-        document: data.document || "",
-        postalCode: data.postalCode || "",
-        address: data.address || "",
-        addressNumber: data.addressNumber || "",
-        province: data.province || "",
-        city: data.city || "",
-        state: data.state || "",
-        municipalRegistration: data.municipalRegistration || "",
-        stateRegistration: data.stateRegistration || "",
-        fiscalEmail: data.fiscalEmail || ""
-      });
-    }).catch(() => {});
-  }, []);
-
-  const handleCepBlur = async () => {
-    const cep = fiscal.postalCode.replace(/\D/g, "");
-    if (cep.length !== 8) return;
-    try {
-      const { data } = await fetch(`https://viacep.com.br/ws/${cep}/json/`)
-        .then(r => r.json());
-      if (!data.erro) {
-        setFiscal(prev => ({
-          ...prev,
-          address: data.logradouro || prev.address,
-          province: data.bairro || prev.province,
-          city: data.localidade || prev.city,
-          state: data.uf || prev.state
-        }));
-      }
-    } catch (_) {}
-  };
-
-  const handleSaveFiscal = async () => {
-    setFiscalLoading(true);
-    try {
-      await api.put("/companies/fiscal/me", fiscal);
-      toast.success("Dados fiscais salvos com sucesso.");
-    } catch (err) {
-      toastError(err);
-    }
-    setFiscalLoading(false);
   };
 
   const handleEmitNfse = async invoice => {
@@ -247,66 +186,6 @@ const Invoices = () => {
       <MainHeader>
         <Title>Faturas</Title>
       </MainHeader>
-
-      <Paper className={classes.fiscalPaper} variant="outlined">
-        <Typography variant="subtitle1" style={{ fontWeight: 600, marginBottom: 12 }}>
-          Dados para Nota Fiscal
-        </Typography>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
-            <TextField fullWidth label="Nome / Razão Social" value={fiscal.name}
-              onChange={e => setFiscal(p => ({ ...p, name: e.target.value }))} />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField fullWidth label="CPF / CNPJ" value={fiscal.document}
-              onChange={e => setFiscal(p => ({ ...p, document: e.target.value }))} />
-          </Grid>
-          <Grid item xs={12} sm={3}>
-            <TextField fullWidth label="CEP" value={fiscal.postalCode}
-              onChange={e => setFiscal(p => ({ ...p, postalCode: e.target.value }))}
-              onBlur={handleCepBlur} />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField fullWidth label="Rua / Logradouro" value={fiscal.address}
-              onChange={e => setFiscal(p => ({ ...p, address: e.target.value }))} />
-          </Grid>
-          <Grid item xs={12} sm={3}>
-            <TextField fullWidth label="Número" value={fiscal.addressNumber}
-              onChange={e => setFiscal(p => ({ ...p, addressNumber: e.target.value }))} />
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <TextField fullWidth label="Bairro" value={fiscal.province}
-              onChange={e => setFiscal(p => ({ ...p, province: e.target.value }))} />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField fullWidth label="Cidade" value={fiscal.city}
-              onChange={e => setFiscal(p => ({ ...p, city: e.target.value }))} />
-          </Grid>
-          <Grid item xs={12} sm={2}>
-            <TextField fullWidth label="UF" value={fiscal.state}
-              onChange={e => setFiscal(p => ({ ...p, state: e.target.value }))}
-              inputProps={{ maxLength: 2 }} />
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <TextField fullWidth label="Inscrição Municipal (opcional)" value={fiscal.municipalRegistration}
-              onChange={e => setFiscal(p => ({ ...p, municipalRegistration: e.target.value }))} />
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <TextField fullWidth label="Inscrição Estadual (opcional)" value={fiscal.stateRegistration}
-              onChange={e => setFiscal(p => ({ ...p, stateRegistration: e.target.value }))} />
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <TextField fullWidth label="E-mail para NF (opcional)" value={fiscal.fiscalEmail}
-              onChange={e => setFiscal(p => ({ ...p, fiscalEmail: e.target.value }))} />
-          </Grid>
-          <Grid item xs={12}>
-            <Button variant="contained" color="primary" onClick={handleSaveFiscal} disabled={fiscalLoading}>
-              Salvar Dados Fiscais
-            </Button>
-          </Grid>
-        </Grid>
-        <Divider style={{ marginTop: 16 }} />
-      </Paper>
 
       <Paper
         className={classes.mainPaper}

@@ -10,6 +10,7 @@ import Login from "../pages/Login/";
 import Connections from "../pages/Connections/";
 import SettingsCustom from "../pages/SettingsCustom/";
 import Financeiro from "../pages/Financeiro/";
+import FinanceiroConfig from "../pages/FinanceiroConfig/";
 import Users from "../pages/Users";
 import Contacts from "../pages/Contacts/";
 import Queues from "../pages/Queues/";
@@ -99,6 +100,12 @@ const Routes = () => {
                   exact
                   path="/financeiro"
                   component={Financeiro}
+                  isPrivate
+                />
+                <Route
+                  exact
+                  path="/financeiro-config"
+                  component={FinanceiroConfig}
                   isPrivate
                 />
                 <Route exact path="/queues" component={Queues} isPrivate />
