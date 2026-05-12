@@ -99,10 +99,18 @@ const Invoices = () => {
     try {
       const { data } = await api.post(`/invoices/${invoice.id}/nfse`);
       dispatch({ type: "UPDATE_USERS", payload: data });
-      if (data.nfseUrl) {
-        window.open(data.nfseUrl, "_blank");
+
+      if (data._msg === "url_found" || data._msg === "nfse_emitted") {
+        if (data.nfseUrl) {
+          toast.success("Nota fiscal disponível! Abrindo...");
+          window.open(data.nfseUrl, "_blank");
+        } else {
+          toast.success("Nota fiscal emitida! Aguarde alguns minutos e tente novamente para baixar o PDF.");
+        }
+      } else if (data._msg === "nfse_pending") {
+        toast.info("Nota fiscal já emitida, mas ainda em processamento no Asaas. Tente novamente em alguns minutos.");
       } else {
-        toast.success("Nota fiscal emitida! Aguarde o processamento.");
+        toast.success("Nota fiscal processada.");
       }
     } catch (err) {
       toastError(err);

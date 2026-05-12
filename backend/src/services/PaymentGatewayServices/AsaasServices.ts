@@ -82,11 +82,29 @@ async function findOrCreateCustomer(
   }
 
   // Cria novo cliente
-  const customer = await api.post("/customers", payload);
-  const customerId: string = customer.data.id;
-
-  await company.update({ asaasCustomerId: customerId } as any);
-  return customerId;
+  try {
+    const customer = await api.post("/customers", payload);
+    const customerId: string = customer.data.id;
+    await company.update({ asaasCustomerId: customerId } as any);
+    return customerId;
+  } catch (createErr) {
+    // Se cliente já existe (conflito de CPF/CNPJ), busca novamente
+    const errData = (createErr as any)?.response?.data;
+    const isDuplicate = errData?.errors?.some((e: any) =>
+      e.code === "invalid_action" || (e.description || "").toLowerCase().includes("já cadastrado") ||
+      (e.description || "").toLowerCase().includes("already")
+    );
+    if (isDuplicate) {
+      const retry = await api.get("/customers", { params: { cpfCnpj: doc } });
+      if (retry.data?.data?.length > 0) {
+        const customerId = retry.data.data[0].id;
+        await api.put(`/customers/${customerId}`, payload).catch(() => {});
+        await company.update({ asaasCustomerId: customerId } as any);
+        return customerId;
+      }
+    }
+    throw createErr;
+  }
 }
 
 export const asaasCheckStatus = async (
@@ -255,14 +273,14 @@ export const asaasCreateBoleto = async (
       expireAt
     });
   } catch (error) {
-    logger.error(
-      { error: (error as any)?.response?.data || error },
-      "asaasCreateBoleto error"
-    );
-    throw new AppError(
-      "Erro ao gerar boleto. Verifique as configurações do Asaas.",
-      400
-    );
+    const asaasError = (error as any)?.response?.data;
+    logger.error({ asaasError, invoiceId }, "asaasCreateBoleto error");
+    const msg =
+      asaasError?.errors?.[0]?.description ||
+      asaasError?.description ||
+      asaasError?.message ||
+      "Erro ao gerar boleto no Asaas.";
+    throw new AppError(msg, 400);
   }
 };
 

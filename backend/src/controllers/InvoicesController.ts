@@ -90,20 +90,24 @@ export const emitNfse = async (
     );
   }
 
-  // Se já emitiu, tenta buscar a URL no Asaas em vez de emitir de novo
-  if ((invoice as any).nfseId) {
-    const url = await asaasFetchNfseUrl((invoice as any).nfseId);
-    if (url) {
+  const inv = invoice as any;
+
+  // Se já emitiu (nfseId existe), tenta buscar/atualizar a URL
+  if (inv.nfseId) {
+    const url = await asaasFetchNfseUrl(inv.nfseId);
+    if (url && url !== inv.nfseUrl) {
       await invoice.update({ nfseUrl: url } as any);
+      await invoice.reload();
+      return res.status(200).json({ ...invoice.toJSON(), _msg: "url_found" });
     }
+    // URL ainda não disponível — retorna status atual
     await invoice.reload();
-    return res.status(200).json(invoice);
+    return res.status(200).json({ ...invoice.toJSON(), _msg: "nfse_pending" });
   }
 
   await asaasEmitNfse(invoice, invoice.company);
   await invoice.reload();
-
-  return res.status(200).json(invoice);
+  return res.status(200).json({ ...invoice.toJSON(), _msg: "nfse_emitted" });
 };
 
 export const update = async (
