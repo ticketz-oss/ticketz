@@ -288,6 +288,19 @@ export const asaasWebhook = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
+  // Valida o token do webhook para prevenir requisições fraudulentas
+  const storedToken = await GetSuperSettingService({ key: "_asaasWebhookToken" }).catch(() => null);
+  if (storedToken) {
+    const receivedToken = req.headers["asaas-access-token"] as string | undefined;
+    if (!receivedToken || receivedToken !== storedToken) {
+      logger.warn(
+        { receivedToken: receivedToken ? "[present]" : "[missing]" },
+        "asaasWebhook: token inválido ou ausente — requisição rejeitada"
+      );
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+  }
+
   const { event, payment } = req.body;
 
   if (!event || !payment) return res.json({ ok: true });

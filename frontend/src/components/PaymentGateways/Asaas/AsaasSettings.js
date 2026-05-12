@@ -74,6 +74,20 @@ export default function AsaasSettings({ settings }) {
         </FormControl>
       </Grid>
 
+      <Grid xs={12} md={12} item>
+        <FormControl className={classes.fieldContainer}>
+          <TextField
+            label="Token do Webhook"
+            variant="standard"
+            value={s.asaasWebhookToken || ""}
+            onChange={e => setSetting("asaasWebhookToken", e.target.value)}
+            onBlur={() => save("asaasWebhookToken")}
+            placeholder="whsec_..."
+            helperText="Cole aqui o Token de autenticação gerado no painel Asaas → Integrações → Webhooks"
+          />
+        </FormControl>
+      </Grid>
+
       <Grid xs={12} item>
         <Divider style={{ margin: "16px 0 8px" }} />
         <Typography variant="subtitle1" style={{ fontWeight: 600 }}>
