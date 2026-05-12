@@ -5,7 +5,7 @@ import moment from "moment";
 import AppError from "../errors/AppError";
 import Invoices from "../models/Invoices";
 import Company from "../models/Company";
-import { asaasEmitNfse, asaasFetchNfseUrl } from "../services/PaymentGatewayServices/AsaasServices";
+import { asaasEmitNfse, asaasFetchNfseUrl, asaasCheckStatus } from "../services/PaymentGatewayServices/AsaasServices";
 
 import CreatePlanService from "../services/PlanService/CreatePlanService";
 import UpdatePlanService from "../services/PlanService/UpdatePlanService";
@@ -92,15 +92,35 @@ export const emitNfse = async (
 
   const inv = invoice as any;
 
-  // Se já emitiu (nfseId existe), tenta buscar/atualizar a URL
+  // Se já emitiu (nfseId existe), verifica o status atual no Asaas
   if (inv.nfseId) {
-    const url = await asaasFetchNfseUrl(inv.nfseId);
-    if (url && url !== inv.nfseUrl) {
-      await invoice.update({ nfseUrl: url } as any);
+    const { url, status } = await asaasFetchNfseUrl(inv.nfseId);
+
+    // Nota em erro ou cancelada → limpa e reemite
+    if (["ERROR", "CANCELLED"].includes(status)) {
+      await invoice.update({ nfseId: null, nfseUrl: null, nfseStatus: null } as any);
+      await asaasEmitNfse(invoice, invoice.company);
       await invoice.reload();
-      return res.status(200).json({ ...invoice.toJSON(), _msg: "url_found" });
+      return res.status(200).json({ ...invoice.toJSON(), _msg: "nfse_emitted" });
     }
-    // URL ainda não disponível — retorna status atual
+
+    // Nota autorizada → atualiza URL se mudou
+    if (status === "AUTHORIZED" || url) {
+      if (url && url !== inv.nfseUrl) {
+        await invoice.update({ nfseUrl: url, nfseStatus: status } as any);
+        await invoice.reload();
+        return res.status(200).json({ ...invoice.toJSON(), _msg: "url_found" });
+      }
+      // URL ainda indisponível mesmo autorizado — retorna o que tem
+      await invoice.reload();
+      const current = invoice as any;
+      return res.status(200).json({
+        ...invoice.toJSON(),
+        _msg: current.nfseUrl ? "url_found" : "nfse_pending"
+      });
+    }
+
+    // SCHEDULED ou status desconhecido — ainda processando
     await invoice.reload();
     return res.status(200).json({ ...invoice.toJSON(), _msg: "nfse_pending" });
   }
@@ -219,3 +239,30 @@ export const remove = async (
 
   return res.status(200).json(plan);
 }; */
+
+export const checkPayment = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { id } = req.params;
+
+  const invoice = await Invoices.findByPk(id, {
+    include: { model: Company, as: "company" }
+  });
+
+  if (!invoice) {
+    throw new AppError("Fatura não encontrada", 404);
+  }
+
+  if (invoice.status === "paid") {
+    return res.status(200).json({ ...invoice.toJSON(), _paid: true });
+  }
+
+  if (!invoice.txId || invoice.payGw !== "asaas") {
+    throw new AppError("Verificação automática disponível apenas para pagamentos Asaas", 400);
+  }
+
+  const paid = await asaasCheckStatus(invoice);
+  await invoice.reload();
+  return res.status(200).json({ ...invoice.toJSON(), _paid: paid });
+};

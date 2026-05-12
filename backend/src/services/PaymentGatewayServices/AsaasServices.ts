@@ -440,16 +440,21 @@ export const asaasEmitNfse = async (
 };
 
 /**
- * Busca a URL de uma NFS-e já emitida no Asaas pelo ID.
- * Útil quando a URL não estava disponível no momento da emissão.
+ * Busca o status e URL de uma NFS-e já emitida no Asaas pelo ID.
+ * Retorna { url, status } onde status é ex: AUTHORIZED, SCHEDULED, ERROR, CANCELLED.
  */
-export const asaasFetchNfseUrl = async (nfseId: string): Promise<string> => {
+export const asaasFetchNfseUrl = async (
+  nfseId: string
+): Promise<{ url: string; status: string }> => {
   try {
     const { api } = await getAsaasApi();
     const detail = await api.get(`/invoices/${nfseId}`);
-    return detail.data?.invoiceUrl || detail.data?.pdfUrl || "";
+    const url = detail.data?.invoiceUrl || detail.data?.pdfUrl || "";
+    const status = detail.data?.status || "";
+    logger.debug({ nfseId, url, status }, "asaasFetchNfseUrl: resultado");
+    return { url, status };
   } catch (err) {
-    logger.warn({ err, nfseId }, "asaasFetchNfseUrl: não foi possível buscar URL");
-    return "";
+    logger.warn({ err, nfseId }, "asaasFetchNfseUrl: não foi possível buscar detalhes");
+    return { url: "", status: "" };
   }
 };

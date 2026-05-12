@@ -95,6 +95,20 @@ const Invoices = () => {
     setContactModalOpen(false);
   };
 
+  const handleCheckPayment = async invoice => {
+    try {
+      const { data } = await api.post(`/invoices/${invoice.id}/check-payment`);
+      dispatch({ type: "UPDATE_USERS", payload: data });
+      if (data._paid) {
+        toast.success("Pagamento confirmado!");
+      } else {
+        toast.info("Pagamento ainda não identificado no Asaas. Tente novamente em instantes.");
+      }
+    } catch (err) {
+      toastError(err);
+    }
+  };
+
   const handleEmitNfse = async invoice => {
     try {
       const { data } = await api.post(`/invoices/${invoice.id}/nfse`);
@@ -247,6 +261,16 @@ const Invoices = () => {
                               onClick={() => window.open(invoices.boletoUrl, "_blank")}
                             >
                               VER BOLETO
+                            </Button>
+                          )}
+                          {invoices.txId && invoices.payGw === "asaas" && (
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              color="primary"
+                              onClick={() => handleCheckPayment(invoices)}
+                            >
+                              VERIFICAR PGTO
                             </Button>
                           )}
                         </>
