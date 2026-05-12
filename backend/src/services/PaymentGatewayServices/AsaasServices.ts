@@ -322,10 +322,23 @@ export const asaasEmitNfse = async (
 
   const effectiveDate = moment().format("YYYY-MM-DD");
 
+  // Busca o serviço padrão já configurado no painel do Asaas
+  // para evitar criar serviços duplicados a cada emissão
+  let configuredServiceId: string | null = null;
+  try {
+    const servicesResp = await api.get("/invoices/services");
+    const services: any[] = servicesResp.data?.data || servicesResp.data || [];
+    // Prefere o marcado como padrão (isDefault), senão o primeiro da lista
+    const svc =
+      services.find((s: any) => s.isDefault === true) || services[0];
+    if (svc?.id) configuredServiceId = svc.id;
+    logger.debug({ configuredServiceId }, "asaasEmitNfse: serviço Asaas encontrado");
+  } catch (err) {
+    logger.warn({ err }, "asaasEmitNfse: não foi possível buscar serviços Asaas, usando campos inline");
+  }
+
   const body: Record<string, any> = {
     serviceDescription: description,
-    municipalServiceName: description,
-    municipalServiceDescription: description,
     value: valor,
     deductions: 0,
     effectiveDate,
@@ -336,9 +349,17 @@ export const asaasEmitNfse = async (
     }
   };
 
-  if (serviceCode) {
-    body.municipalServiceId = serviceCode;
-    body.municipalServiceExternalId = serviceCode;
+  if (configuredServiceId) {
+    // Usa o serviço já cadastrado no Asaas — NÃO cria novo
+    body.serviceId = configuredServiceId;
+  } else {
+    // Fallback: envia campos inline (pode criar novo serviço no Asaas)
+    body.municipalServiceName = description;
+    body.municipalServiceDescription = description;
+    if (serviceCode) {
+      body.municipalServiceId = serviceCode;
+      body.municipalServiceExternalId = serviceCode;
+    }
   }
 
   // Sempre inclui customer (dados do tomador) — obrigatório para emissão
