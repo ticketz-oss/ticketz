@@ -160,10 +160,23 @@ export const asaasCreatePix = async (
 ): Promise<Response> => {
   const { price, invoiceId } = req.body;
 
+  logger.debug({ invoiceId, price }, "asaasCreatePix: iniciando");
+
   const invoice = await Invoices.findByPk(invoiceId, {
     include: { model: Company, as: "company" }
   });
-  if (!invoice) throw new AppError("Invoice not found", 404);
+  if (!invoice) {
+    logger.error({ invoiceId }, "asaasCreatePix: fatura não encontrada");
+    throw new AppError("Fatura não encontrada. Recarregue a página e tente novamente.", 404);
+  }
+
+  const c = invoice.company as any;
+  if (!c?.document) {
+    throw new AppError(
+      "CPF/CNPJ não cadastrado. Preencha os dados fiscais em Financeiro → Configurações antes de gerar o PIX.",
+      400
+    );
+  }
 
   const { api } = await getAsaasApi();
 
@@ -199,11 +212,18 @@ export const asaasCreatePix = async (
       valor: { original: price }
     });
   } catch (error) {
+    const asaasError = (error as any)?.response?.data;
     logger.error(
-      { error: (error as any)?.response?.data || error },
+      { asaasError, invoiceId, errorMsg: (error as any)?.message },
       "asaasCreatePix error"
     );
-    throw new AppError("Erro ao gerar PIX. Verifique as configurações do Asaas.", 400);
+    const msg =
+      asaasError?.errors?.[0]?.description ||
+      asaasError?.description ||
+      asaasError?.message ||
+      (error as any)?.message ||
+      "Erro ao gerar PIX no Asaas.";
+    throw new AppError(msg, 400);
   }
 };
 
