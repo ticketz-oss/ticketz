@@ -34,7 +34,12 @@ const filterOptions = createFilterOptions({
   trim: true
 });
 
-const TransferTicketModalCustom = ({ modalOpen, onClose, ticketid }) => {
+const TransferTicketModalCustom = ({
+  modalOpen,
+  onClose,
+  ticketid,
+  hideUserSelection = false
+}) => {
   const history = useHistory();
   const [options, setOptions] = useState([]);
   const [queues, setQueues] = useState([]);
@@ -66,7 +71,7 @@ const TransferTicketModalCustom = ({ modalOpen, onClose, ticketid }) => {
   }, []);
 
   useEffect(() => {
-    if (!modalOpen || searchParam.length < 3) {
+    if (hideUserSelection || !modalOpen || searchParam.length < 3) {
       setLoading(false);
       return;
     }
@@ -88,7 +93,7 @@ const TransferTicketModalCustom = ({ modalOpen, onClose, ticketid }) => {
       fetchUsers();
     }, 500);
     return () => clearTimeout(delayDebounceFn);
-  }, [searchParam, modalOpen]);
+  }, [searchParam, modalOpen, hideUserSelection]);
 
   const handleClose = () => {
     onClose();
@@ -134,45 +139,47 @@ const TransferTicketModalCustom = ({ modalOpen, onClose, ticketid }) => {
           {i18n.t("transferTicketModal.title")}
         </DialogTitle>
         <DialogContent dividers>
-          <Autocomplete
-            style={{ width: 300, marginBottom: 20 }}
-            getOptionLabel={option => `${option.name}`}
-            onChange={(e, newValue) => {
-              setSelectedUser(newValue);
-              if (newValue != null && Array.isArray(newValue.queues)) {
-                setQueues(newValue.queues);
-              } else {
-                setQueues(allQueues);
-                setSelectedQueue("");
-              }
-            }}
-            options={options}
-            filterOptions={filterOptions}
-            freeSolo
-            autoHighlight
-            noOptionsText={i18n.t("transferTicketModal.noOptions")}
-            loading={loading}
-            renderInput={params => (
-              <TextField
-                {...params}
-                label={i18n.t("transferTicketModal.fieldLabel")}
-                variant="outlined"
-                autoFocus
-                onChange={e => setSearchParam(e.target.value)}
-                InputProps={{
-                  ...params.InputProps,
-                  endAdornment: (
-                    <React.Fragment>
-                      {loading ? (
-                        <CircularProgress color="inherit" size={20} />
-                      ) : null}
-                      {params.InputProps.endAdornment}
-                    </React.Fragment>
-                  )
-                }}
-              />
-            )}
-          />
+          {!hideUserSelection && (
+            <Autocomplete
+              style={{ width: 300, marginBottom: 20 }}
+              getOptionLabel={option => `${option.name}`}
+              onChange={(e, newValue) => {
+                setSelectedUser(newValue);
+                if (newValue != null && Array.isArray(newValue.queues)) {
+                  setQueues(newValue.queues);
+                } else {
+                  setQueues(allQueues);
+                  setSelectedQueue("");
+                }
+              }}
+              options={options}
+              filterOptions={filterOptions}
+              freeSolo
+              autoHighlight
+              noOptionsText={i18n.t("transferTicketModal.noOptions")}
+              loading={loading}
+              renderInput={params => (
+                <TextField
+                  {...params}
+                  label={i18n.t("transferTicketModal.fieldLabel")}
+                  variant="outlined"
+                  autoFocus
+                  onChange={e => setSearchParam(e.target.value)}
+                  InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                      <React.Fragment>
+                        {loading ? (
+                          <CircularProgress color="inherit" size={20} />
+                        ) : null}
+                        {params.InputProps.endAdornment}
+                      </React.Fragment>
+                    )
+                  }}
+                />
+              )}
+            />
+          )}
           <FormControl variant="outlined" className={classes.maxWidth}>
             <InputLabel>
               {i18n.t("transferTicketModal.fieldQueueLabel")}

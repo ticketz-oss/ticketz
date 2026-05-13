@@ -119,6 +119,7 @@ const TicketOptionsMenu = ({
         modalOpen={transferTicketModalOpen}
         onClose={handleCloseTransferTicketModal}
         ticketid={ticket.id}
+        hideUserSelection={showTabGroups && ticket.isGroup}
       />
       <ScheduleModal
         open={scheduleModalOpen}
