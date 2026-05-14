@@ -377,8 +377,16 @@ export const asaasEmitNfse = async (
 
   const valor = Number(invoice.value);
 
-  const description =
-    serviceDesc || `Licença de uso de software SaaS - Fatura #${invoice.id}`;
+  // Mês de referência vem do dueDate da fatura
+  const invoiceMonth = moment(invoice.dueDate)
+    .locale("pt-br")
+    .format("MMMM");
+  const invoiceMonthCapitalized =
+    invoiceMonth.charAt(0).toUpperCase() + invoiceMonth.slice(1);
+  const monthRef = `Referente ao mês de ${invoiceMonthCapitalized}`;
+
+  const baseDesc = serviceDesc || "Licença de uso de software SaaS";
+  const description = `${baseDesc} - ${monthRef}`;
 
   const effectiveDate = moment().format("YYYY-MM-DD");
 

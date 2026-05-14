@@ -80,12 +80,12 @@ export const emitNfse = async (
     throw new AppError("Nota fiscal só pode ser emitida para faturas pagas", 400);
   }
 
-  // Restrição: emissão apenas no mês corrente do pagamento
-  const paidAt = moment(invoice.updatedAt);
-  const now = moment();
-  if (!paidAt.isSame(now, "month")) {
+  // Restrição: NFS-e disponível apenas para faturas a partir de Maio/2026
+  const NFSE_CUTOFF = moment("2026-05-01", "YYYY-MM-DD");
+  const invoiceDue = moment(invoice.dueDate);
+  if (invoiceDue.isBefore(NFSE_CUTOFF, "month")) {
     throw new AppError(
-      `Nota fiscal só pode ser emitida no mês do pagamento (${paidAt.format("MM/YYYY")}). Entre em contato para emissão retroativa.`,
+      `Emissão de nota fiscal disponível apenas para faturas a partir de ${NFSE_CUTOFF.format("MM/YYYY")}. Entre em contato para notas retroativas.`,
       400
     );
   }
