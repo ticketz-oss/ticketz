@@ -180,6 +180,27 @@ export const asaasCreatePix = async (
 
   const { api } = await getAsaasApi();
 
+  // Se já existe PIX Asaas para essa fatura, reutiliza o QR code em vez de criar novo
+  if (invoice.txId && invoice.payGw === "asaas" && invoice.paymentMethod === "pix") {
+    try {
+      const existing = await api.get(`/payments/${invoice.txId}`);
+      const st = existing.data?.status || "";
+      if (!["RECEIVED", "CONFIRMED", "REFUNDED", "CANCELLED", "OVERDUE"].includes(st)) {
+        const qrCode = await api.get(`/payments/${invoice.txId}/pixQrCode`);
+        logger.info({ invoiceId, txId: invoice.txId }, "asaasCreatePix: reutilizando PIX existente");
+        return res.json({
+          paymentMethod: "pix",
+          qrcode: { qrcode: qrCode.data.payload },
+          valor: { original: invoice.value },
+          _reused: true
+        });
+      }
+      logger.info({ invoiceId, status: st }, "asaasCreatePix: PIX anterior inativo, criando novo");
+    } catch (err) {
+      logger.warn({ err, invoiceId }, "asaasCreatePix: erro ao buscar PIX existente, criando novo");
+    }
+  }
+
   try {
     const customerId = await findOrCreateCustomer(api, invoice.company);
 
@@ -252,6 +273,34 @@ export const asaasCreateBoleto = async (
   }
 
   const { api } = await getAsaasApi();
+
+  // Se já existe boleto Asaas para essa fatura, reutiliza em vez de criar novo
+  if (invoice.txId && invoice.payGw === "asaas" && invoice.paymentMethod === "boleto") {
+    try {
+      const existing = await api.get(`/payments/${invoice.txId}`);
+      const st = existing.data?.status || "";
+      // Se está pendente, retorna o mesmo boleto
+      if (!["RECEIVED", "CONFIRMED", "REFUNDED", "CANCELLED", "OVERDUE"].includes(st)) {
+        const boletoUrl = (invoice as any).boletoUrl ||
+          existing.data?.bankSlipUrl || existing.data?.invoiceUrl || "";
+        const boletoBarcode = (invoice as any).boletoBarcode || existing.data?.nossoNumero || "";
+        const expireAt = existing.data?.dueDate || moment().add(3, "days").format("YYYY-MM-DD");
+        logger.info({ invoiceId, txId: invoice.txId }, "asaasCreateBoleto: reutilizando boleto existente");
+        return res.json({
+          paymentMethod: "boleto",
+          boletoUrl,
+          boletoBarcode,
+          valor: { original: invoice.value },
+          expireAt,
+          _reused: true
+        });
+      }
+      // Boleto vencido/cancelado → segue criando novo abaixo
+      logger.info({ invoiceId, status: st }, "asaasCreateBoleto: boleto anterior inativo, criando novo");
+    } catch (err) {
+      logger.warn({ err, invoiceId }, "asaasCreateBoleto: erro ao buscar boleto existente, criando novo");
+    }
+  }
 
   try {
     const customerId = await findOrCreateCustomer(api, invoice.company);
