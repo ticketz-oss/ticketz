@@ -1189,7 +1189,48 @@ const messages = {
         ERR_QUEUE_COLOR_ALREADY_EXISTS:
           "Este color ya está en uso, elija otro.",
         ERR_WAPP_GREETING_REQUIRED:
-          "El mensaje de saludo es obligatorio cuando hay más de una cola."
+          "El mensaje de saludo es obligatorio cuando hay más de una cola.",
+        ERR_ASAAS_INVOICE_NOT_FOUND: "Factura no encontrada. Recargue la página e intente nuevamente.",
+        ERR_ASAAS_DOCUMENT_MISSING: "CPF/CNPJ no registrado. Complete los datos fiscales en Financiero → Configuraciones.",
+        ERR_ASAAS_PIX_CREATE: "Error al generar el PIX. Verifique la configuración de Asaas e intente nuevamente.",
+        ERR_ASAAS_BOLETO_CREATE: "Error al generar el boleto. Verifique la configuración de Asaas e intente nuevamente.",
+        ERR_ASAAS_NFSE_NOT_PAID: "La nota fiscal solo puede emitirse para facturas pagadas.",
+        ERR_ASAAS_NFSE_CUTOFF: "Emisión de nota fiscal disponible solo para facturas a partir de Mayo/2026. Contacte soporte para notas retroactivas.",
+        ERR_ASAAS_CHECK_UNAVAILABLE: "Verificación automática no disponible para este pago.",
+        ERR_EFI_DOCUMENT_MISSING: "CPF/CNPJ es obligatorio para emitir un boleto.",
+        ERR_EFI_PIX_CREATE: "Error al generar el PIX. Contacte al soporte.",
+        ERR_EFI_BOLETO_CREATE: "No fue posible generar el boleto. Verifique los datos e intente nuevamente."
+      },
+      invoices: {
+        title: "Facturas",
+        columns: {
+          details: "Detalles",
+          value: "Valor",
+          dueDate: "Vencimiento",
+          status: "Estado",
+          action: "Acción"
+        },
+        status: {
+          paid: "Pagado",
+          overdue: "Vencido",
+          open: "Abierto"
+        },
+        buttons: {
+          pay: "PAGAR",
+          paid: "PAGADO",
+          viewBoleto: "VER BOLETO",
+          checkPayment: "VERIFICAR PAGO",
+          emitNfse: "EMITIR NOTA",
+          viewNfse: "VER NOTA"
+        },
+        toasts: {
+          paymentConfirmed: "¡Pago confirmado!",
+          paymentNotFound: "Pago aún no identificado. Intente nuevamente en un momento.",
+          nfseAvailable: "¡Nota fiscal disponible! Abriendo...",
+          nfseEmitted: "¡Nota fiscal emitida! Espere unos minutos e intente nuevamente para descargar el PDF.",
+          nfsePending: "Nota fiscal ya emitida, pero aún en procesamiento. Intente nuevamente en unos minutos.",
+          nfseProcessed: "Nota fiscal procesada."
+        }
       },
       phoneCall: {
         hangup: "Cortar"

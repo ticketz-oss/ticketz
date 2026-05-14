@@ -167,15 +167,12 @@ export const asaasCreatePix = async (
   });
   if (!invoice) {
     logger.error({ invoiceId }, "asaasCreatePix: fatura não encontrada");
-    throw new AppError("Fatura não encontrada. Recarregue a página e tente novamente.", 404);
+    throw new AppError("ERR_ASAAS_INVOICE_NOT_FOUND", 404);
   }
 
   const c = invoice.company as any;
   if (!c?.document) {
-    throw new AppError(
-      "CPF/CNPJ não cadastrado. Preencha os dados fiscais em Financeiro → Configurações antes de gerar o PIX.",
-      400
-    );
+    throw new AppError("ERR_ASAAS_DOCUMENT_MISSING", 400);
   }
 
   const { api } = await getAsaasApi();
@@ -229,7 +226,6 @@ export const asaasCreatePix = async (
     });
 
     await invoice.reload();
-    asaasPollStatus(invoice);
 
     return res.json({
       paymentMethod: "pix",
@@ -242,13 +238,7 @@ export const asaasCreatePix = async (
       { asaasError, invoiceId, errorMsg: (error as any)?.message },
       "asaasCreatePix error"
     );
-    const msg =
-      asaasError?.errors?.[0]?.description ||
-      asaasError?.description ||
-      asaasError?.message ||
-      (error as any)?.message ||
-      "Erro ao gerar PIX no Asaas.";
-    throw new AppError(msg, 400);
+    throw new AppError("ERR_ASAAS_PIX_CREATE", 400);
   }
 };
 
@@ -265,15 +255,12 @@ export const asaasCreateBoleto = async (
   });
   if (!invoice) {
     logger.error({ invoiceId }, "asaasCreateBoleto: fatura não encontrada");
-    throw new AppError("Fatura não encontrada. Recarregue a página e tente novamente.", 404);
+    throw new AppError("ERR_ASAAS_INVOICE_NOT_FOUND", 404);
   }
 
   const c = invoice.company as any;
   if (!c?.document) {
-    throw new AppError(
-      "CPF/CNPJ não cadastrado. Preencha os dados fiscais em Financeiro → Configurações antes de gerar o boleto.",
-      400
-    );
+    throw new AppError("ERR_ASAAS_DOCUMENT_MISSING", 400);
   }
 
   const { api } = await getAsaasApi();
@@ -338,7 +325,6 @@ export const asaasCreateBoleto = async (
     });
 
     await invoice.reload();
-    asaasPollStatus(invoice);
 
     return res.json({
       paymentMethod: "boleto",
@@ -350,12 +336,7 @@ export const asaasCreateBoleto = async (
   } catch (error) {
     const asaasError = (error as any)?.response?.data;
     logger.error({ asaasError, invoiceId }, "asaasCreateBoleto error");
-    const msg =
-      asaasError?.errors?.[0]?.description ||
-      asaasError?.description ||
-      asaasError?.message ||
-      "Erro ao gerar boleto no Asaas.";
-    throw new AppError(msg, 400);
+    throw new AppError("ERR_ASAAS_BOLETO_CREATE", 400);
   }
 };
 

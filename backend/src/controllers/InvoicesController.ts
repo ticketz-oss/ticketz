@@ -6,6 +6,7 @@ import AppError from "../errors/AppError";
 import Invoices from "../models/Invoices";
 import Company from "../models/Company";
 import { asaasEmitNfse, asaasFetchNfseUrl, asaasCheckStatus } from "../services/PaymentGatewayServices/AsaasServices";
+import { efiCheckBoletoStatus } from "../services/PaymentGatewayServices/EfiServices";
 
 import CreatePlanService from "../services/PlanService/CreatePlanService";
 import UpdatePlanService from "../services/PlanService/UpdatePlanService";
@@ -73,21 +74,18 @@ export const emitNfse = async (
   });
 
   if (!invoice) {
-    throw new AppError("Fatura não encontrada", 404);
+    throw new AppError("ERR_ASAAS_INVOICE_NOT_FOUND", 404);
   }
 
   if (invoice.status !== "paid") {
-    throw new AppError("Nota fiscal só pode ser emitida para faturas pagas", 400);
+    throw new AppError("ERR_ASAAS_NFSE_NOT_PAID", 400);
   }
 
   // Restrição: NFS-e disponível apenas para faturas a partir de Maio/2026
   const NFSE_CUTOFF = moment("2026-05-01", "YYYY-MM-DD");
   const invoiceDue = moment(invoice.dueDate);
   if (invoiceDue.isBefore(NFSE_CUTOFF, "month")) {
-    throw new AppError(
-      `Emissão de nota fiscal disponível apenas para faturas a partir de ${NFSE_CUTOFF.format("MM/YYYY")}. Entre em contato para notas retroativas.`,
-      400
-    );
+    throw new AppError("ERR_ASAAS_NFSE_CUTOFF", 400);
   }
 
   const inv = invoice as any;
@@ -251,18 +249,26 @@ export const checkPayment = async (
   });
 
   if (!invoice) {
-    throw new AppError("Fatura não encontrada", 404);
+    throw new AppError("ERR_ASAAS_INVOICE_NOT_FOUND", 404);
   }
 
   if (invoice.status === "paid") {
     return res.status(200).json({ ...invoice.toJSON(), _paid: true });
   }
 
-  if (!invoice.txId || invoice.payGw !== "asaas") {
-    throw new AppError("Verificação automática disponível apenas para pagamentos Asaas", 400);
+  if (!invoice.txId) {
+    throw new AppError("ERR_ASAAS_CHECK_UNAVAILABLE", 400);
   }
 
-  const paid = await asaasCheckStatus(invoice);
+  let paid = false;
+  if (invoice.payGw === "asaas") {
+    paid = await asaasCheckStatus(invoice);
+  } else if (invoice.payGw === "efi" && invoice.paymentMethod === "boleto") {
+    paid = await efiCheckBoletoStatus(invoice);
+  } else {
+    throw new AppError("ERR_ASAAS_CHECK_UNAVAILABLE", 400);
+  }
+
   await invoice.reload();
   return res.status(200).json({ ...invoice.toJSON(), _paid: paid });
 };

@@ -51,7 +51,6 @@ import {
   efiCreateBoleto,
   efiCreateSubscription,
   efiInitialize,
-  efiPollBoletStatus,
   efiWebhook
 } from "./EfiServices";
 import {
@@ -63,7 +62,6 @@ import {
   asaasCheckStatus,
   asaasCreateBoleto,
   asaasCreatePix,
-  asaasPollStatus,
   asaasWebhook
 } from "./AsaasServices";
 import Invoices from "../../models/Invoices";
@@ -209,12 +207,12 @@ export const processInvoiceExpired = async (invoice: Invoices) => {
 export const checkInvoicePayment = async (invoice: Invoices) => {
   if (invoice.payGw === "efi") {
     if (invoice.paymentMethod === "boleto") {
-      efiPollBoletStatus(invoice);
+      efiCheckBoletoStatus(invoice);
     } else {
       efiCheckStatus(invoice);
     }
   } else if (invoice.payGw === "asaas") {
-    asaasPollStatus(invoice);
+    asaasCheckStatus(invoice);
   } else if (invoice.payGw === "owen") {
     owenCheckStatus(invoice);
   }

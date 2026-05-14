@@ -102,7 +102,7 @@ export default function PaymentGateway(props) {
             >
               <MenuItem value={""}>None</MenuItem>
               <MenuItem value={"pixTicketz"}>Pix Ticketz 💎</MenuItem>
-              <MenuItem value={"efi"}>Efí / Gerencianet (PIX + Boleto)</MenuItem>
+              <MenuItem value={"efi"}>Efí Pay (PIX + Boleto)</MenuItem>
               <MenuItem value={"asaas"}>Asaas (PIX + Boleto + NFS-e)</MenuItem>
             </Select>
           </FormControl>

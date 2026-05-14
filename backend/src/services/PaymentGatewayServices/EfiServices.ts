@@ -424,10 +424,7 @@ export const efiCreateSubscription = async (
     });
   } catch (error) {
     logger.error({ efiOptions, error }, "efiCreateSubscription error");
-    throw new AppError(
-      "Problema encontrado, entre em contato com o suporte!",
-      400
-    );
+    throw new AppError("ERR_EFI_PIX_CREATE", 400);
   }
 };
 
@@ -438,7 +435,7 @@ export const efiCreateBoleto = async (
   const { price, invoiceId, cpfCnpj, customerName, customerEmail } = req.body;
 
   if (!cpfCnpj) {
-    throw new AppError("CPF/CNPJ é obrigatório para emissão de boleto.", 400);
+    throw new AppError("ERR_EFI_DOCUMENT_MISSING", 400);
   }
 
   const efiOptions = await getEfiBoletoOptions();
@@ -520,8 +517,6 @@ export const efiCreateBoleto = async (
 
     await invoice.reload();
 
-    efiPollBoletStatus(invoice);
-
     return res.json({
       paymentMethod: "boleto",
       boletoUrl,
@@ -534,9 +529,6 @@ export const efiCreateBoleto = async (
       { clientId: efiOptions.client_id, error: (error as any)?.message || error },
       "efiCreateBoleto error"
     );
-    throw new AppError(
-      "Não foi possível gerar o boleto. Verifique os dados e tente novamente.",
-      400
-    );
+    throw new AppError("ERR_EFI_BOLETO_CREATE", 400);
   }
 };

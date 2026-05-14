@@ -1188,7 +1188,48 @@ const messages = {
         ERR_SUBSCRIPTION_CHECK_FAILED: "Subscription check failed.",
         ERR_WAPP_NOT_FOUND: "Connection unavailable.",
         ERR_SUBSCRIPTION_EXPIRED: "Your subscription has expired.",
-        ERR_UNKOWN: "Unknown error."
+        ERR_UNKOWN: "Unknown error.",
+        ERR_ASAAS_INVOICE_NOT_FOUND: "Invoice not found. Reload the page and try again.",
+        ERR_ASAAS_DOCUMENT_MISSING: "CPF/CNPJ not registered. Fill in fiscal data under Financial → Settings.",
+        ERR_ASAAS_PIX_CREATE: "Error generating PIX. Check Asaas settings and try again.",
+        ERR_ASAAS_BOLETO_CREATE: "Error generating boleto. Check Asaas settings and try again.",
+        ERR_ASAAS_NFSE_NOT_PAID: "Invoice must be paid before issuing a fiscal note.",
+        ERR_ASAAS_NFSE_CUTOFF: "Fiscal note issuance available only for invoices from May/2026 onwards. Contact support for retroactive notes.",
+        ERR_ASAAS_CHECK_UNAVAILABLE: "Automatic payment check not available for this payment.",
+        ERR_EFI_DOCUMENT_MISSING: "CPF/CNPJ is required to generate a boleto.",
+        ERR_EFI_PIX_CREATE: "Error generating PIX. Please contact support.",
+        ERR_EFI_BOLETO_CREATE: "Could not generate boleto. Check the data and try again."
+      },
+      invoices: {
+        title: "Invoices",
+        columns: {
+          details: "Details",
+          value: "Amount",
+          dueDate: "Due Date",
+          status: "Status",
+          action: "Action"
+        },
+        status: {
+          paid: "Paid",
+          overdue: "Overdue",
+          open: "Open"
+        },
+        buttons: {
+          pay: "PAY",
+          paid: "PAID",
+          viewBoleto: "VIEW BOLETO",
+          checkPayment: "CHECK PAYMENT",
+          emitNfse: "ISSUE INVOICE",
+          viewNfse: "VIEW INVOICE"
+        },
+        toasts: {
+          paymentConfirmed: "Payment confirmed!",
+          paymentNotFound: "Payment not yet identified. Try again in a moment.",
+          nfseAvailable: "Fiscal note available! Opening...",
+          nfseEmitted: "Fiscal note issued! Wait a few minutes and try again to download the PDF.",
+          nfsePending: "Fiscal note already issued but still processing. Try again in a few minutes.",
+          nfseProcessed: "Fiscal note processed."
+        }
       },
       phoneCall: {
         hangup: "Hang up"
