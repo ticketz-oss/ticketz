@@ -226,6 +226,7 @@ export const asaasCreatePix = async (
     });
 
     await invoice.reload();
+    asaasPollStatus(invoice);
 
     return res.json({
       paymentMethod: "pix",

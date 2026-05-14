@@ -62,6 +62,7 @@ import {
   asaasCheckStatus,
   asaasCreateBoleto,
   asaasCreatePix,
+  asaasPollStatus,
   asaasWebhook
 } from "./AsaasServices";
 import Invoices from "../../models/Invoices";
@@ -212,7 +213,11 @@ export const checkInvoicePayment = async (invoice: Invoices) => {
       efiCheckStatus(invoice);
     }
   } else if (invoice.payGw === "asaas") {
-    asaasCheckStatus(invoice);
+    if (invoice.paymentMethod === "boleto") {
+      asaasCheckStatus(invoice);
+    } else {
+      asaasPollStatus(invoice);
+    }
   } else if (invoice.payGw === "owen") {
     owenCheckStatus(invoice);
   }
