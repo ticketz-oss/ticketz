@@ -80,7 +80,79 @@ const useStyles = makeStyles(theme => ({
     }
   },
   avatar: {
-    width: "100%"
+    width: 30,
+    height: 30,
+    fontSize: theme.typography.pxToRem(14),
+    display: "block",
+    boxSizing: "border-box",
+    flexShrink: 0
+  },
+  userInfoWrapper: {
+    display: "flex",
+    alignItems: "center"
+  },
+  profileTrigger: {
+    display: "flex",
+    alignItems: "center",
+    width: "fit-content",
+    minWidth: 40,
+    maxWidth: 160,
+    borderRadius: 20,
+    overflow: "hidden",
+    cursor: "pointer",
+    backgroundColor:
+      theme.mode === "dark"
+        ? "rgba(0, 0, 0, 0.2)"
+        : "rgba(255, 255, 255, 0.15)",
+    [theme.breakpoints.down("xs")]: {
+      borderRadius: 20
+    }
+  },
+  profileAvatarSlot: {
+    width: 40,
+    height: 40,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+    borderRadius: "0 20px 20px 0"
+  },
+  userInfoPanel: {
+    display: "none",
+    [theme.breakpoints.up("sm")]: {
+      display: "flex",
+      flex: 1,
+      minWidth: 0,
+      maxWidth: 120,
+      flexDirection: "column",
+      justifyContent: "center",
+      height: 40,
+      paddingLeft: 14,
+      paddingRight: 8,
+      borderRadius: "20px 0 0 20px",
+      boxSizing: "border-box",
+      overflow: "hidden"
+    }
+  },
+  userInfoName: {
+    color: theme.palette.primary.contrastText,
+    fontSize: 11,
+    lineHeight: "15px",
+    fontWeight: 600,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    maxWidth: "100%"
+  },
+  userInfoCompany: {
+    color: theme.palette.primary.contrastText,
+    fontSize: 11,
+    lineHeight: "15px",
+    opacity: 0.75,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    maxWidth: "100%"
   },
   toolbar: {
     paddingRight: 24, // keep right padding when drawer closed
@@ -537,17 +609,37 @@ const LoggedInLayout = ({ children, themeToggle }) => {
 
           <ChatPopover />
 
-          <div>
-            <IconButton
+          <div className={classes.userInfoWrapper}>
+            <div
               aria-label="account of current user"
               aria-controls="menu-appbar"
               aria-haspopup="true"
               onClick={handleProfileMenu}
-              variant="contained"
-              style={{ color: "white" }}
+              onKeyDown={event => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  handleProfileMenu(event);
+                }
+              }}
+              role="button"
+              tabIndex={0}
+              className={classes.profileTrigger}
             >
-              <AccountCircle />
-            </IconButton>
+              <div className={classes.userInfoPanel}>
+                <Typography noWrap className={classes.userInfoName}>
+                  {user?.name || currentUser?.name || "-"}
+                </Typography>
+                <Typography noWrap className={classes.userInfoCompany}>
+                  {user?.company?.name || "-"}
+                </Typography>
+              </div>
+              <div className={classes.profileAvatarSlot}>
+                <AccountCircle
+                  className={classes.avatar}
+                  style={{ color: theme.palette.primary.contrastText }}
+                />
+              </div>
+            </div>
             <Menu
               id="menu-appbar"
               anchorEl={anchorEl}
