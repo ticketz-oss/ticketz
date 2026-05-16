@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7-labs
 
 # Stage 1: Build the application
-FROM node:22.22.3 AS build
+FROM node:24 AS build
 
 WORKDIR /usr/src/app
 COPY . .
@@ -10,7 +10,7 @@ RUN --mount=type=cache,target=/root/.npm \
     npm ci && npm run generate:i18nkeys && npm run build
 
 # Stage 2: Create the final image without source files
-FROM ghcr.io/ticketz-oss/ticketz-node-22
+FROM ghcr.io/ticketz-oss/ticketz-node-24
 
 ARG TICKETZ_REGISTRY_URL
 
