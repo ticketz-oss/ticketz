@@ -6,8 +6,6 @@ import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
 import Drawer from "@material-ui/core/Drawer";
 import Link from "@material-ui/core/Link";
-import InputLabel from "@material-ui/core/InputLabel";
-import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import Paper from "@material-ui/core/Paper";
 
@@ -18,10 +16,9 @@ import WhatsMarked from "react-whatsmarked";
 import { CardHeader } from "@material-ui/core";
 import ContactModal from "../ContactModal";
 import { TicketNotes } from "../TicketNotes";
-import { generateColor } from "../../helpers/colorGenerator";
-import { getInitials } from "../../helpers/getInitials";
 import { TagsContainer } from "../TagsContainer";
 import useSettings from "../../hooks/useSettings";
+import ClickableContactAvatar from "../ClickableContactAvatar";
 
 const drawerWidth = 320;
 
@@ -117,7 +114,7 @@ const ContactDrawer = ({
     });
 
     setOpenForm(false);
-  }, [open, contact]);
+  }, [contact, getSetting, open]);
 
   return (
     <>
@@ -150,24 +147,19 @@ const ContactDrawer = ({
           <div className={classes.content}>
             <div className={classes.contactHeader}>
               <CardHeader
-                onClick={() => {}}
-                style={{ cursor: "pointer", width: "100%", padding: 0 }}
+                style={{ width: "100%", padding: 0 }}
                 titleTypographyProps={{ noWrap: true }}
                 subheaderTypographyProps={{ noWrap: true }}
                 avatar={
-                  <Avatar
-                    src={contact.profilePicUrl}
-                    alt="contact_image"
-                    style={{
-                      width: 60,
-                      height: 60,
-                      backgroundColor: generateColor(contact?.number),
-                      color: "white",
-                      fontWeight: "bold"
+                  <ClickableContactAvatar
+                    contact={contact}
+                    avatarProps={{
+                      style: {
+                        width: 60,
+                        height: 60
+                      }
                     }}
-                  >
-                    {getInitials(contact?.name)}
-                  </Avatar>
+                  />
                 }
                 title={
                   <>
