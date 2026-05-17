@@ -552,6 +552,11 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   };
 
   const userCompanyId = Number(user?.companyId ?? user?.company?.id ?? 0);
+  const currentUserCompanyId = Number(
+    currentUser?.companyId ?? currentUser?.company?.id ?? userCompanyId
+  );
+  const canSelectThemeVariant =
+    Boolean(currentUser?.super) && currentUserCompanyId === 1;
   const shouldShowCompanyDueDate =
     user?.profile === "admin" && userCompanyId !== 1;
   const companyDueDateText = user?.company?.dueDate
@@ -734,23 +739,27 @@ const LoggedInLayout = ({ children, themeToggle }) => {
                   </MenuItem>
                 ))}
               </NestedMenuItem>
-              <NestedMenuItem label="Tema visual" parentMenuOpen={menuOpen}>
-                {availableThemeVariants.map(variant => (
-                  <MenuItem
-                    key={variant.value}
-                    onClick={() => handleChooseThemeVariant(variant.value)}
-                  >
-                    <div
-                      style={{
-                        fontWeight:
-                          currentThemeVariant === variant.value ? "bold" : "normal"
-                      }}
+              {canSelectThemeVariant && (
+                <NestedMenuItem label="Tema visual" parentMenuOpen={menuOpen}>
+                  {availableThemeVariants.map(variant => (
+                    <MenuItem
+                      key={variant.value}
+                      onClick={() => handleChooseThemeVariant(variant.value)}
                     >
-                      {variant.label}
-                    </div>
-                  </MenuItem>
-                ))}
-              </NestedMenuItem>
+                      <div
+                        style={{
+                          fontWeight:
+                            currentThemeVariant === variant.value
+                              ? "bold"
+                              : "normal"
+                        }}
+                      >
+                        {variant.label}
+                      </div>
+                    </MenuItem>
+                  ))}
+                </NestedMenuItem>
+              )}
               <MenuItem onClick={handleOpenAboutModal}>
                 {i18n.t("about.aboutthe")}{" "}
                 {currentUser?.super ? "ticketz" : theme.appName}
