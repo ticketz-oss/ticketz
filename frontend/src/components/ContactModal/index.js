@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 
 import * as Yup from "yup";
 import { Formik, FieldArray, Form, Field } from "formik";
@@ -18,6 +18,7 @@ import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Switch from "@material-ui/core/Switch";
+import Paper from "@material-ui/core/Paper";
 
 import { i18n } from "../../translate/i18n";
 
@@ -27,6 +28,7 @@ import { SelectLanguage } from "../SelectLanguage";
 import { TagsContainer } from "../TagsContainer";
 import { PhoneNumberInput } from "../PhoneNumberInput";
 import useSettings from "../../hooks/useSettings";
+import ClickableContactAvatar from "../ClickableContactAvatar";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -56,6 +58,31 @@ const useStyles = makeStyles(theme => ({
     left: "50%",
     marginTop: -12,
     marginLeft: -12
+  },
+
+  profileSummary: {
+    display: "flex",
+    alignItems: "center",
+    gap: theme.spacing(2),
+    padding: theme.spacing(2),
+    marginBottom: theme.spacing(2),
+    backgroundColor: theme.palette.action.hover
+  },
+
+  profileSummaryInfo: {
+    display: "flex",
+    flexDirection: "column",
+    minWidth: 0,
+    gap: theme.spacing(0.5)
+  },
+
+  profileAvatar: {
+    width: 72,
+    height: 72
+  },
+
+  mutedText: {
+    color: theme.palette.text.secondary
   }
 }));
 
@@ -106,7 +133,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
     };
 
     fetchContact();
-  }, [contactId, open, initialValues]);
+  }, [contactId, getSetting, initialValues, open]);
 
   const handleClose = () => {
     onClose();
@@ -133,7 +160,13 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 
   return (
     <div className={classes.root}>
-      <Dialog open={open} onClose={handleClose} maxWidth="lg" scroll="paper">
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        maxWidth="md"
+        fullWidth
+        scroll="paper"
+      >
         <DialogTitle id="form-dialog-title">
           {contactId
             ? `${i18n.t("contactModal.title.edit")}`
@@ -153,6 +186,30 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
           {({ values, errors, touched, isSubmitting }) => (
             <Form>
               <DialogContent dividers>
+                {contactId && contact?.name && (
+                  <Paper variant="outlined" className={classes.profileSummary}>
+                    <ClickableContactAvatar
+                      contact={contact}
+                      avatarProps={{
+                        style: classes.profileAvatar
+                      }}
+                    />
+                    <div className={classes.profileSummaryInfo}>
+                      <Typography variant="subtitle2">
+                        {i18n.t("contactModal.form.profile")}
+                      </Typography>
+                      <Typography variant="h6" noWrap>
+                        {contact.name}
+                      </Typography>
+                      <Typography variant="body2" className={classes.mutedText}>
+                        {contact.number || "-"}
+                      </Typography>
+                      <Typography variant="body2" className={classes.mutedText}>
+                        {contact.email || i18n.t("contacts.details.emptyEmail")}
+                      </Typography>
+                    </div>
+                  </Paper>
+                )}
                 <Typography variant="subtitle1" gutterBottom>
                   {i18n.t("contactModal.form.mainInfo")}
                 </Typography>

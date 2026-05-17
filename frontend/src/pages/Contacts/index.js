@@ -20,10 +20,12 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 import IconButton from "@material-ui/core/IconButton";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
 import EditIcon from "@material-ui/icons/Edit";
+import VisibilityOutlinedIcon from "@material-ui/icons/VisibilityOutlined";
 
 import api from "../../services/api";
 import TableRowSkeleton from "../../components/TableRowSkeleton";
 import ContactModal from "../../components/ContactModal";
+import ContactDetailsModal from "../../components/ContactDetailsModal";
 import ConfirmationModal from "../../components/ConfirmationModal/";
 
 import { i18n } from "../../translate/i18n";
@@ -136,6 +138,8 @@ const Contacts = () => {
   const [contacts, dispatch] = useReducer(reducer, []);
   const [selectedContactId, setSelectedContactId] = useState(null);
   const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [viewContactId, setViewContactId] = useState(null);
+  const [contactDetailsOpen, setContactDetailsOpen] = useState(false);
   const [deletingContact, setDeletingContact] = useState(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [importConfirmOpen, setImportConfirmOpen] = useState(false);
@@ -148,11 +152,13 @@ const Contacts = () => {
   useEffect(() => {
     api.get("/whatsapp").then(({ data }) => {
       setConnections(data);
-      data.map(connection => {
-        if (connection.channel === "whatsapp" && connection.isDefault) {
-          setImportConnectionId(connection.id);
-        }
+      const defaultConnection = data.find(connection => {
+        return connection.channel === "whatsapp" && connection.isDefault;
       });
+
+      if (defaultConnection) {
+        setImportConnectionId(defaultConnection.id);
+      }
     });
   }, []);
 
@@ -216,9 +222,24 @@ const Contacts = () => {
     setContactModalOpen(false);
   };
 
+  const handleOpenContactDetails = contactId => {
+    setViewContactId(contactId);
+    setContactDetailsOpen(true);
+  };
+
+  const handleCloseContactDetails = () => {
+    setViewContactId(null);
+    setContactDetailsOpen(false);
+  };
+
   const hadleEditContact = contactId => {
     setSelectedContactId(contactId);
     setContactModalOpen(true);
+  };
+
+  const handleEditFromDetails = contactId => {
+    handleCloseContactDetails();
+    hadleEditContact(contactId);
   };
 
   const handleDeleteContact = async contactId => {
@@ -306,6 +327,12 @@ const Contacts = () => {
         aria-labelledby="form-dialog-title"
         contactId={selectedContactId}
       ></ContactModal>
+      <ContactDetailsModal
+        open={contactDetailsOpen}
+        onClose={handleCloseContactDetails}
+        contactId={viewContactId}
+        onEdit={handleEditFromDetails}
+      />
       <ConfirmationModal
         title={`${i18n.t("contacts.confirmationModal.deleteTitle")} ${deletingContact?.name}?`}
         open={deleteConfirmOpen}
@@ -483,6 +510,14 @@ const Contacts = () => {
                         <WhatsAppIcon />
                       </IconButton>
                     )}
+                    <Tooltip title={i18n.t("contacts.toolTips.view")}>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleOpenContactDetails(contact.id)}
+                      >
+                        <VisibilityOutlinedIcon />
+                      </IconButton>
+                    </Tooltip>
                     <IconButton
                       size="small"
                       onClick={() => hadleEditContact(contact.id)}
