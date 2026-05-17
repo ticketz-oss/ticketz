@@ -224,11 +224,15 @@ const App = () => {
   const preferredThemeVariant = window.localStorage.getItem(
     "preferredThemeVariant"
   );
+  const userCompanyId = Number(window.localStorage.getItem("companyId") || 0);
+  const canUseThemeVariantSelection = userCompanyId === 1;
   const [mode, setMode] = useState(
     preferredTheme ? preferredTheme : prefersDarkMode ? "dark" : "light"
   );
   const [themeVariant, setThemeVariant] = useState(
-    preferredThemeVariant && THEME_VARIANT_TOKENS[preferredThemeVariant]
+    canUseThemeVariantSelection &&
+      preferredThemeVariant &&
+      THEME_VARIANT_TOKENS[preferredThemeVariant]
       ? preferredThemeVariant
       : "attenditop"
   );
@@ -240,7 +244,9 @@ const App = () => {
   const [appName, setAppName] = useState("");
   const { getPublicSetting } = useSettings();
 
-  const availableThemeVariants = Object.keys(THEME_VARIANT_TOKENS);
+  const availableThemeVariants = canUseThemeVariantSelection
+    ? Object.keys(THEME_VARIANT_TOKENS)
+    : ["attenditop"];
 
   const activeTokens =
     THEME_VARIANT_TOKENS[themeVariant]?.[mode] || ATTENDITOP_LIGHT;
@@ -251,7 +257,7 @@ const App = () => {
         setMode(prevMode => (prevMode === "light" ? "dark" : "light"));
       },
       setThemeVariant: variant => {
-        if (THEME_VARIANT_TOKENS[variant]) {
+        if (canUseThemeVariantSelection && THEME_VARIANT_TOKENS[variant]) {
           setThemeVariant(variant);
         }
       },
@@ -279,7 +285,7 @@ const App = () => {
         setAppName(name);
       }
     }),
-    [themeVariant]
+    [canUseThemeVariantSelection, themeVariant]
   );
 
   const calculatedLogoDark = () => {
@@ -467,6 +473,13 @@ const App = () => {
   useEffect(() => {
     window.localStorage.setItem("preferredTheme", mode);
   }, [mode]);
+
+  useEffect(() => {
+    if (!canUseThemeVariantSelection && themeVariant !== "attenditop") {
+      setThemeVariant("attenditop");
+      window.localStorage.setItem("preferredThemeVariant", "attenditop");
+    }
+  }, [canUseThemeVariantSelection, themeVariant]);
 
   useEffect(() => {
     window.localStorage.setItem("preferredThemeVariant", themeVariant);
