@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useReducer, useState } from "react";
-import { Link as RouterLink, useHistory } from "react-router-dom";
+import { Link as RouterLink, useHistory, useLocation } from "react-router-dom";
+import clsx from "clsx";
 
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
@@ -53,11 +54,83 @@ const useStyles = makeStyles(theme => ({
     height: 26,
     marginTop: "-15px",
     marginBottom: "-10px"
+  },
+  sectionHeader: {
+    position: "relative",
+    fontSize: "0.72rem",
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+    fontWeight: 700,
+    color: theme.palette.messageIcons,
+    backgroundColor: "transparent",
+    lineHeight: 1.2,
+    padding: theme.spacing(1.5, 2, 0.75)
+  },
+  navItem: {
+    margin: theme.spacing(0.5, 1),
+    borderRadius: 10,
+    minHeight: 42,
+    transition: "background-color 160ms ease, transform 160ms ease",
+    "&:hover": {
+      backgroundColor: theme.palette.mode === "light" ? "#F2F2EE" : "#2B2D33"
+    }
+  },
+  navItemActive: {
+    backgroundColor:
+      theme.palette.mode === "light" ? "rgba(255,122,0,0.12)" : "rgba(255,154,47,0.22)",
+    border: `1px solid ${
+      theme.palette.mode === "light"
+        ? "rgba(255,122,0,0.28)"
+        : "rgba(255,154,47,0.36)"
+    }`,
+    "&:hover": {
+      backgroundColor:
+        theme.palette.mode === "light" ? "rgba(255,122,0,0.16)" : "rgba(255,154,47,0.28)"
+    }
+  },
+  navItemCollapsed: {
+    margin: theme.spacing(0.5),
+    justifyContent: "center"
+  },
+  navItemIcon: {
+    minWidth: 34,
+    color: theme.palette.mode === "light" ? "#565660" : "#C3C3CB"
+  },
+  navItemText: {
+    "& .MuiListItemText-primary": {
+      fontSize: "0.84rem",
+      fontWeight: 600,
+      color: theme.palette.textCommon
+    }
+  },
+  nestedList: {
+    paddingLeft: 0,
+    paddingBottom: theme.spacing(0.5)
+  },
+  nestedItem: {
+    margin: theme.spacing(0.25, 1, 0.25, 2.5),
+    borderRadius: 8,
+    minHeight: 36,
+    "& .MuiListItemIcon-root": {
+      minWidth: 32,
+      color: theme.palette.messageIcons
+    },
+    "& .MuiListItemText-primary": {
+      fontSize: "0.8rem"
+    }
+  },
+  versionText: {
+    fontSize: "11px",
+    padding: "10px",
+    textAlign: "right",
+    fontWeight: 700,
+    color: theme.palette.messageIcons
   }
 }));
 
 function ListItemLink(props) {
-  const { icon, primary, to, className } = props;
+  const { icon, primary, to, className, selected } = props;
+  const classes = useStyles();
 
   const renderLink = React.useMemo(
     () =>
@@ -69,9 +142,14 @@ function ListItemLink(props) {
 
   return (
     <li>
-      <ListItem button dense component={renderLink} className={className}>
-        {icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
-        <ListItemText primary={primary} />
+      <ListItem
+        button
+        dense
+        component={renderLink}
+        className={clsx(classes.navItem, className, selected && classes.navItemActive)}
+      >
+        {icon ? <ListItemIcon className={classes.navItemIcon}>{icon}</ListItemIcon> : null}
+        <ListItemText className={classes.navItemText} primary={primary} />
       </ListItem>
     </li>
   );
@@ -136,6 +214,7 @@ const reducer = (state, action) => {
 const MainListItems = props => {
   const classes = useStyles();
   const { drawerClose, drawerOpen } = props;
+  const location = useLocation();
   const { whatsApps } = useContext(WhatsAppsContext);
   const { user, handleLogout } = useContext(AuthContext);
   const [connectionWarning, setConnectionWarning] = useState(false);
@@ -258,12 +337,7 @@ const MainListItems = props => {
           <>
             <ListSubheader
               hidden={!drawerOpen}
-              style={{
-                position: "relative",
-                fontSize: "17px",
-                textAlign: "left",
-                paddingLeft: 20
-              }}
+              className={classes.sectionHeader}
               inset
               color="inherit"
             >
@@ -274,31 +348,43 @@ const MainListItems = props => {
                 to="/tickets"
                 primary={i18n.t("mainDrawer.listItems.tickets")}
                 icon={<WhatsAppIcon />}
+                selected={location.pathname.startsWith("/tickets")}
+                className={!drawerOpen ? classes.navItemCollapsed : undefined}
               />
               <ListItemLink
                 to="/todolist"
                 primary={i18n.t("mainDrawer.listItems.tasks")}
                 icon={<BorderColorIcon />}
+                selected={location.pathname.startsWith("/todolist")}
+                className={!drawerOpen ? classes.navItemCollapsed : undefined}
               />
               <ListItemLink
                 to="/quick-messages"
                 primary={i18n.t("mainDrawer.listItems.quickMessages")}
                 icon={<FlashOnIcon />}
+                selected={location.pathname.startsWith("/quick-messages")}
+                className={!drawerOpen ? classes.navItemCollapsed : undefined}
               />
               <ListItemLink
                 to="/contacts"
                 primary={i18n.t("mainDrawer.listItems.contacts")}
                 icon={<ContactPhoneOutlinedIcon />}
+                selected={location.pathname.startsWith("/contacts")}
+                className={!drawerOpen ? classes.navItemCollapsed : undefined}
               />
               <ListItemLink
                 to="/schedules"
                 primary={i18n.t("mainDrawer.listItems.schedules")}
                 icon={<EventIcon />}
+                selected={location.pathname.startsWith("/schedules")}
+                className={!drawerOpen ? classes.navItemCollapsed : undefined}
               />
               <ListItemLink
                 to="/tags"
                 primary={i18n.t("mainDrawer.listItems.tags")}
                 icon={<LocalOfferIcon />}
+                selected={location.pathname.startsWith("/tags")}
+                className={!drawerOpen ? classes.navItemCollapsed : undefined}
               />
               <ListItemLink
                 to="/chats"
@@ -308,11 +394,15 @@ const MainListItems = props => {
                     <ForumIcon />
                   </Badge>
                 }
+                selected={location.pathname.startsWith("/chats")}
+                className={!drawerOpen ? classes.navItemCollapsed : undefined}
               />
               <ListItemLink
                 to="/helps"
                 primary={i18n.t("mainDrawer.listItems.helps")}
                 icon={<HelpOutlineIcon />}
+                selected={location.pathname.startsWith("/helps")}
+                className={!drawerOpen ? classes.navItemCollapsed : undefined}
               />
             </>
           </>
@@ -327,12 +417,7 @@ const MainListItems = props => {
             <Divider />
             <ListSubheader
               hidden={!drawerOpen}
-              style={{
-                position: "relative",
-                fontSize: "17px",
-                textAlign: "left",
-                paddingLeft: 20
-              }}
+              className={classes.sectionHeader}
               inset
               color="inherit"
             >
@@ -343,6 +428,8 @@ const MainListItems = props => {
               to="/"
               primary="Dashboard"
               icon={<DashboardOutlinedIcon />}
+              selected={location.pathname === "/"}
+              className={!drawerOpen ? classes.navItemCollapsed : undefined}
             />
           </>
         )}
@@ -355,12 +442,7 @@ const MainListItems = props => {
             <Divider />
             <ListSubheader
               hidden={!drawerOpen}
-              style={{
-                position: "relative",
-                fontSize: "17px",
-                textAlign: "left",
-                paddingLeft: 20
-              }}
+              className={classes.sectionHeader}
               inset
               color="inherit"
             >
@@ -372,11 +454,13 @@ const MainListItems = props => {
                 <ListItem
                   button
                   onClick={() => setOpenCampaignSubmenu(prev => !prev)}
+                  className={clsx(classes.navItem, !drawerOpen && classes.navItemCollapsed)}
                 >
-                  <ListItemIcon>
+                  <ListItemIcon className={classes.navItemIcon}>
                     <EventAvailableIcon />
                   </ListItemIcon>
                   <ListItemText
+                    className={classes.navItemText}
                     primary={i18n.t("mainDrawer.listItems.campaigns")}
                   />
                   {openCampaignSubmenu ? (
@@ -386,13 +470,17 @@ const MainListItems = props => {
                   )}
                 </ListItem>
                 <Collapse
-                  style={{ paddingLeft: 15 }}
+                  style={{ paddingLeft: 10 }}
                   in={openCampaignSubmenu}
                   timeout="auto"
                   unmountOnExit
                 >
-                  <List component="div" disablePadding>
-                    <ListItem onClick={() => history.push("/campaigns")} button>
+                  <List component="div" disablePadding className={classes.nestedList}>
+                    <ListItem
+                      onClick={() => history.push("/campaigns")}
+                      button
+                      className={classes.nestedItem}
+                    >
                       <ListItemIcon>
                         <ListIcon />
                       </ListItemIcon>
@@ -401,6 +489,7 @@ const MainListItems = props => {
                     <ListItem
                       onClick={() => history.push("/contact-lists")}
                       button
+                      className={classes.nestedItem}
                     >
                       <ListItemIcon>
                         <PeopleIcon />
@@ -410,6 +499,7 @@ const MainListItems = props => {
                     <ListItem
                       onClick={() => history.push("/campaigns-config")}
                       button
+                      className={classes.nestedItem}
                     >
                       <ListItemIcon>
                         <SettingsOutlinedIcon />
@@ -425,6 +515,8 @@ const MainListItems = props => {
                 to="/announcements"
                 primary={i18n.t("mainDrawer.listItems.annoucements")}
                 icon={<AnnouncementIcon />}
+                selected={location.pathname.startsWith("/announcements")}
+                className={!drawerOpen ? classes.navItemCollapsed : undefined}
               />
             )}
             <ListItemLink
@@ -435,45 +527,50 @@ const MainListItems = props => {
                   <SyncAltIcon />
                 </Badge>
               }
+              selected={location.pathname.startsWith("/connections")}
+              className={!drawerOpen ? classes.navItemCollapsed : undefined}
             />
             <ListItemLink
               to="/queues"
               primary={i18n.t("mainDrawer.listItems.queues")}
               icon={<AccountTreeOutlinedIcon />}
+              selected={location.pathname.startsWith("/queues")}
+              className={!drawerOpen ? classes.navItemCollapsed : undefined}
             />
             <ListItemLink
               to="/users"
               primary={i18n.t("mainDrawer.listItems.users")}
               icon={<PeopleAltOutlinedIcon />}
+              selected={location.pathname.startsWith("/users")}
+              className={!drawerOpen ? classes.navItemCollapsed : undefined}
             />
             <ListItemLink
               to="/messages-api"
               primary={i18n.t("mainDrawer.listItems.messagesAPI")}
               icon={<CodeRoundedIcon />}
+              selected={location.pathname.startsWith("/messages-api")}
+              className={!drawerOpen ? classes.navItemCollapsed : undefined}
             />
             <ListItemLink
               to="/financeiro"
               primary={i18n.t("mainDrawer.listItems.financeiro")}
               icon={<LocalAtmIcon />}
+              selected={location.pathname.startsWith("/financeiro")}
+              className={!drawerOpen ? classes.navItemCollapsed : undefined}
             />
 
             <ListItemLink
               to="/settings"
               primary={i18n.t("mainDrawer.listItems.settings")}
               icon={<SettingsOutlinedIcon />}
+              selected={location.pathname.startsWith("/settings")}
+              className={!drawerOpen ? classes.navItemCollapsed : undefined}
             />
 
             {drawerOpen && (
               <>
                 <Divider />
-                <Typography
-                  style={{
-                    fontSize: "12px",
-                    padding: "10px",
-                    textAlign: "right",
-                    fontWeight: "bold"
-                  }}
-                >
+                <Typography className={classes.versionText}>
                   {`${gitinfo.tagName || gitinfo.branchName + " " + gitinfo.commitHash}`}
                   &nbsp;/&nbsp;
                   {`${gitinfo.buildTimestamp}`}

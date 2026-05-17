@@ -24,16 +24,27 @@ import Tooltip from "@material-ui/core/Tooltip";
 import { green } from "@material-ui/core/colors";
 import { PhoneCallContext } from "../../context/PhoneCall/PhoneCallContext";
 import { wavoipAvailable, wavoipCall } from "../../helpers/wavoipCallManager";
-import { toBeChecked } from "@testing-library/jest-dom/matchers";
 
 const useStyles = makeStyles(theme => ({
   actionButtons: {
-    marginRight: 6,
+    marginRight: 8,
     flex: "none",
     alignSelf: "center",
     marginLeft: "auto",
+    display: "flex",
+    alignItems: "center",
+    borderRadius: 999,
+    padding: theme.spacing(0.25, 0.5),
+    backgroundColor:
+      theme.mode === "light" ? "rgba(255,122,0,0.08)" : "rgba(255,154,47,0.14)",
+    border: `1px solid ${
+      theme.mode === "light" ? "rgba(255,122,0,0.2)" : "rgba(255,154,47,0.24)"
+    }`,
     "& > *": {
       margin: theme.spacing(0.5)
+    },
+    "& .MuiIconButton-root": {
+      borderRadius: 10
     }
   }
 }));

@@ -17,18 +17,57 @@ import { TicketsContext } from "../../context/Tickets/TicketsContext";
 import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles(theme => ({
-  header: {},
+  header: {
+    position: "sticky",
+    top: 0,
+    zIndex: 2,
+    borderBottom: `1px solid ${theme.palette.backgroundContrast.border}`,
+    backgroundColor: theme.palette.background.paper
+  },
+  nav: {
+    height: 56,
+    backgroundColor: "transparent",
+    "& .MuiBottomNavigationAction-root": {
+      minWidth: 0,
+      maxWidth: "none",
+      borderRadius: 10,
+      margin: theme.spacing(0.75),
+      color: theme.palette.messageIcons,
+      transition: "background-color 160ms ease"
+    },
+    "& .MuiBottomNavigationAction-label": {
+      fontSize: "0.72rem",
+      fontWeight: 600
+    },
+    "& .MuiBottomNavigationAction-root.Mui-selected": {
+      color: theme.palette.primary.main,
+      backgroundColor:
+        theme.mode === "light" ? "rgba(255,122,0,0.14)" : "rgba(255,154,47,0.22)",
+      border: `1px solid ${
+        theme.mode === "light"
+          ? "rgba(255,122,0,0.24)"
+          : "rgba(255,154,47,0.35)"
+      }`
+    }
+  },
   content: {
-    overflow: "auto"
+    overflow: "auto",
+    backgroundColor: theme.palette.background.default
   },
   placeholderContainer: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    height: "100%"
+    gap: theme.spacing(2),
+    height: "100%",
+    padding: theme.spacing(2.5),
+    textAlign: "center"
   },
-  placeholderItem: {}
+  placeholderItem: {
+    color: theme.palette.messageIcons,
+    fontWeight: 600
+  }
 }));
 
 const TicketAdvanced = props => {
@@ -94,7 +133,7 @@ const TicketAdvanced = props => {
             setOption(newValue);
           }}
           showLabels
-          className={classes.root}
+          className={classes.nav}
         >
           <BottomNavigationAction label="Ticket" icon={<ChatIcon />} />
           <BottomNavigationAction

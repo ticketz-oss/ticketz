@@ -79,10 +79,8 @@ const useStyles = makeStyles(theme => ({
   },
 
   stickedMessages: {
-    backgroundImage:
-      theme.mode === "light"
-        ? `url(${whatsBackground})`
-        : `url(${whatsBackgroundDark})`,
+    backgroundImage: "none",
+    backgroundColor: theme.palette.background.default,
     flexDirection: "column",
     flexGrow: 1,
     padding: "5px 20px 20px 20px",
@@ -111,8 +109,9 @@ const useStyles = makeStyles(theme => ({
   messagesList: {
     backgroundImage:
       theme.mode === "light"
-        ? `url(${whatsBackground})`
-        : `url(${whatsBackgroundDark})`,
+        ? "radial-gradient(circle at 20% 30%, rgba(255,255,255,0.5) 1px, transparent 1px), radial-gradient(circle at 80% 70%, rgba(0,0,0,0.02) 1px, transparent 1px), linear-gradient(180deg, #F1ECE2 0%, #EAE5DC 100%)"
+        : "none",
+    backgroundColor: theme.mode === "light" ? "#EFEAE2" : theme.palette.chatBackground.main,
     display: "flex",
     flexDirection: "column",
     flexGrow: 1,
@@ -132,7 +131,7 @@ const useStyles = makeStyles(theme => ({
 
   messageLeft: {
     marginRight: 20,
-    marginTop: 2,
+    marginTop: 3,
     minWidth: 100,
     maxWidth: "min(600px, 100%)",
     height: "auto",
@@ -146,19 +145,20 @@ const useStyles = makeStyles(theme => ({
     },
 
     whiteSpace: "pre-wrap",
-    backgroundColor: theme.mode === "light" ? "#ffffff" : "#024481",
-    color: theme.mode === "light" ? "#303030" : "#ffffff",
+    backgroundColor: theme.mode === "light" ? "#ffffff" : theme.palette.chatBubbleReceived.main,
+    color: theme.mode === "light" ? "#0A0A0A" : "#ffffff",
     alignSelf: "flex-start",
     borderTopLeftRadius: 0,
-    borderTopRightRadius: 8,
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
-    paddingLeft: 5,
-    paddingRight: 5,
-    paddingTop: 5,
+    borderTopRightRadius: 14,
+    borderBottomLeftRadius: 6,
+    borderBottomRightRadius: 14,
+    paddingLeft: 6,
+    paddingRight: 6,
+    paddingTop: 6,
     paddingBottom: 0,
+    border: `1px solid ${theme.mode === "light" ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.08)"}`,
     boxShadow:
-      theme.mode === "light" ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000",
+      theme.mode === "light" ? "0 1px 2px rgba(0,0,0,0.08)" : "0 1px 2px rgba(0,0,0,0.45)",
     transition: "background-color 0.5s ease-in-out"
   },
 
@@ -195,7 +195,7 @@ const useStyles = makeStyles(theme => ({
 
   messageRight: {
     marginLeft: 20,
-    marginTop: 2,
+    marginTop: 3,
     minWidth: 100,
     maxWidth: "min(600px, 100%)",
     height: "auto",
@@ -208,19 +208,24 @@ const useStyles = makeStyles(theme => ({
       right: 0
     },
     whiteSpace: "pre-wrap",
-    backgroundColor: theme.mode === "light" ? "#dcf8c6" : "#005c4b",
-    color: theme.mode === "light" ? "#303030" : "#ffffff",
+    background:
+      theme.mode === "light"
+        ? "linear-gradient(135deg, #FF7A00, #FF8F1A)"
+        : `linear-gradient(135deg, ${theme.palette.chatBubbleFromMe.main}, #FFB25F)`,
+    color: "#ffffff",
     alignSelf: "flex-end",
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 0,
-    paddingLeft: 5,
-    paddingRight: 5,
-    paddingTop: 5,
+    borderTopLeftRadius: 14,
+    borderTopRightRadius: 14,
+    borderBottomLeftRadius: 14,
+    borderBottomRightRadius: 6,
+    paddingLeft: 6,
+    paddingRight: 6,
+    paddingTop: 6,
     paddingBottom: 0,
     boxShadow:
-      theme.mode === "light" ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000",
+      theme.mode === "light"
+        ? "0 2px 6px -1px rgba(255,122,0,0.35), 0 1px 2px rgba(0,0,0,0.08)"
+        : "0 2px 6px -1px rgba(0,0,0,0.55)",
     transition: "background-color 0.5s ease-in-out"
   },
 
@@ -279,7 +284,7 @@ const useStyles = makeStyles(theme => ({
 
   textContentItem: {
     overflowWrap: "break-word",
-    padding: "3px 80px 6px 6px"
+    padding: "4px 84px 7px 7px"
   },
 
   messageLocation: {
@@ -300,12 +305,12 @@ const useStyles = makeStyles(theme => ({
     fontStyle: "italic",
     color: "rgba(0, 0, 0, 0.36)",
     overflowWrap: "break-word",
-    padding: "3px 80px 6px 6px"
+    padding: "4px 84px 7px 7px"
   },
 
   textContentItemEdited: {
     overflowWrap: "break-word",
-    padding: "3px 120px 6px 6px"
+    padding: "4px 120px 7px 7px"
   },
   messageMediaDeleted: {
     filter: "grayscale(1)",
@@ -376,19 +381,21 @@ const useStyles = makeStyles(theme => ({
     position: "absolute",
     bottom: 0,
     right: 5,
-    color: theme.mode === "light" ? "#999" : "#d0d0d0"
+    color: theme.mode === "light" ? "rgba(255,255,255,0.88)" : "rgba(255,255,255,0.86)",
+    fontWeight: 500
   },
 
   timestampStickerLeft: {
-    backgroundColor: theme.mode === "light" ? "#ffffff" : "#024481",
+    backgroundColor: theme.mode === "light" ? "#ffffff" : theme.palette.chatBubbleReceived.main,
     borderRadius: 8,
     padding: 5,
     boxShadow:
-      theme.mode === "light" ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000"
+      theme.mode === "light" ? "0 1px 2px rgba(0,0,0,0.1)" : "0 1px 2px rgba(0,0,0,0.45)",
+    color: theme.mode === "light" ? "#8B8B95" : "#d0d0d0"
   },
 
   timestampStickerRight: {
-    backgroundColor: theme.mode === "light" ? "#dcf8c6" : "#128c7e",
+    backgroundColor: theme.mode === "light" ? "#FF8F1A" : theme.palette.chatBubbleFromMe.main,
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
     borderBottomLeftRadius: 8,
@@ -398,25 +405,29 @@ const useStyles = makeStyles(theme => ({
     paddingTop: 5,
     paddingBottom: 0,
     boxShadow:
-      theme.mode === "light" ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000"
+      theme.mode === "light" ? "0 1px 2px rgba(0,0,0,0.15)" : "0 1px 2px rgba(0,0,0,0.45)",
+    color: "rgba(255,255,255,0.9)"
   },
 
   dailyTimestamp: {
     alignItems: "center",
     textAlign: "center",
     alignSelf: "center",
-    width: "110px",
-    backgroundColor: theme.palette.backgroundContrast.paper,
+    width: "124px",
+    backgroundColor: theme.mode === "light" ? "rgba(255,255,255,0.94)" : theme.palette.backgroundContrast.paper,
     margin: "10px",
-    borderRadius: "10px",
-    boxShadow: `0 1px 1px ${theme.palette.backgroundContrast.border}`
+    borderRadius: "999px",
+    border: `1px solid ${theme.palette.backgroundContrast.border}`,
+    boxShadow: `0 1px 2px ${theme.palette.backgroundContrast.border}`
   },
 
   dailyTimestampText: {
-    color: theme.palette.textCommon.main,
-    padding: 8,
+    color: theme.palette.messageIcons,
+    padding: "5px 10px",
     alignSelf: "center",
-    marginLeft: "0px"
+    marginLeft: "0px",
+    fontSize: "0.72rem",
+    fontWeight: 600
   },
 
   ackIcons: {
@@ -432,7 +443,7 @@ const useStyles = makeStyles(theme => ({
   },
 
   ackDoneReadIcon: {
-    color: blue[500],
+    color: "#93C5FD",
     fontSize: 18,
     verticalAlign: "middle",
     marginLeft: 4
@@ -604,7 +615,9 @@ const useStyles = makeStyles(theme => ({
     paddingRight: 5,
     paddingBottom: 3,
     borderRadius: 15,
-    backgroundColor: "gray",
+    backgroundColor:
+      theme.mode === "light" ? "rgba(255,255,255,0.95)" : "rgba(37,37,41,0.96)",
+    border: `1px solid ${theme.palette.backgroundContrast.border}`,
     cursor: "default"
   },
   mediaDescription: {

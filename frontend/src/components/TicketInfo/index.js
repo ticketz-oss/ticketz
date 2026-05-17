@@ -1,12 +1,44 @@
 import React, { useState, useEffect } from "react";
 
 import { Avatar, CardHeader } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
 
 import { i18n } from "../../translate/i18n";
 import { getInitials } from "../../helpers/getInitials";
 import { generateColor } from "../../helpers/colorGenerator";
 
+const useStyles = makeStyles(theme => ({
+  cardHeader: {
+    cursor: "pointer",
+    paddingTop: 8,
+    paddingBottom: 8,
+    "& .MuiCardHeader-content": {
+      overflow: "hidden"
+    }
+  },
+  title: {
+    fontWeight: 600,
+    letterSpacing: "-0.01em",
+    color: theme.palette.textCommon,
+    fontSize: "0.92rem"
+  },
+  subheader: {
+    color: theme.palette.messageIcons,
+    fontSize: "0.76rem",
+    fontWeight: 500
+  },
+  avatar: {
+    backgroundColor: props => generateColor(props?.contact?.number),
+    color: "white",
+    fontWeight: "bold",
+    width: 38,
+    height: 38,
+    fontSize: "0.88rem"
+  }
+}));
+
 const TicketInfo = ({ contact, ticket, onClick }) => {
+  const classes = useStyles({ contact });
   const { user } = ticket;
   const [userName, setUserName] = useState("");
   const [contactName, setContactName] = useState("");
@@ -35,22 +67,19 @@ const TicketInfo = ({ contact, ticket, onClick }) => {
   return (
     <CardHeader
       onClick={onClick}
-      style={{ cursor: "pointer" }}
+      className={classes.cardHeader}
       titleTypographyProps={{ noWrap: true }}
       subheaderTypographyProps={{ noWrap: true }}
       avatar={
         <Avatar
-          style={{
-            backgroundColor: generateColor(contact?.number),
-            color: "white",
-            fontWeight: "bold"
-          }}
+          className={classes.avatar}
           src={contact.profilePicUrl}
           alt="contact_image"
         >
           {getInitials(contact?.name)}
         </Avatar>
       }
+      classes={{ title: classes.title, subheader: classes.subheader }}
       title={`${contactName} #${ticket.id}`}
       subheader={ticket.user && `${userName}`}
     />

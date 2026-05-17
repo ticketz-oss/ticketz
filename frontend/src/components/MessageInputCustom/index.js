@@ -64,38 +64,50 @@ const useStyles = makeStyles(theme => ({
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    borderTop: "1px solid rgba(0, 0, 0, 0.12)"
+    borderTop: `1px solid ${theme.palette.backgroundContrast.border}`,
+    backgroundColor: theme.palette.background.paper
   },
 
   newMessageBox: {
     width: "100%",
     display: "flex",
-    padding: "7px",
-    alignItems: "center"
+    padding: "8px 10px",
+    alignItems: "center",
+    gap: 2
   },
 
   messageInputWrapper: {
     padding: 6,
     marginRight: 7,
-    //background: "#fff",
-    border: "1px solid #ccc",
+    background: theme.palette.background.paper,
+    border: `1px solid ${theme.palette.backgroundContrast.border}`,
     display: "flex",
-    borderRadius: 20,
+    borderRadius: 18,
+    boxShadow:
+      theme.mode === "light"
+        ? "0 1px 2px rgba(0,0,0,0.06)"
+        : "0 1px 2px rgba(0,0,0,0.45)",
     flex: 1
   },
 
   messageInput: {
     paddingLeft: 10,
     flex: 1,
-    border: "none"
+    border: "none",
+    fontSize: "0.92rem"
   },
 
   cameraIcon: {
-    color: "grey"
+    color: theme.palette.messageIcons
   },
 
   sendMessageIcons: {
-    color: "grey"
+    color: theme.palette.messageIcons
+  },
+
+  signatureIcon: {
+    color: props => (props.signMessage ? theme.palette.primary.main : theme.palette.messageIcons),
+    borderRadius: 10
   },
 
   uploadInput: {
@@ -108,15 +120,15 @@ const useStyles = makeStyles(theme => ({
     position: "relative",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#eee",
-    borderTop: "1px solid rgba(0, 0, 0, 0.12)"
+    backgroundColor: theme.palette.background.default,
+    borderTop: `1px solid ${theme.palette.backgroundContrast.border}`
   },
 
   emojiBox: {
     position: "absolute",
     bottom: 63,
     width: 40,
-    borderTop: "1px solid #e8e8e8"
+    borderTop: `1px solid ${theme.palette.backgroundContrast.border}`
   },
 
   circleLoading: {
@@ -161,7 +173,11 @@ const useStyles = makeStyles(theme => ({
     flex: 1,
     marginRight: 5,
     overflowY: "hidden",
-    backgroundColor: "rgba(0, 0, 0, 0.05)",
+    backgroundColor:
+      theme.mode === "light" ? "rgba(255,122,0,0.1)" : "rgba(255,154,47,0.14)",
+    border: `1px solid ${
+      theme.mode === "light" ? "rgba(255,122,0,0.2)" : "rgba(255,154,47,0.25)"
+    }`,
     borderRadius: "7.5px",
     display: "flex",
     position: "relative"
@@ -189,7 +205,7 @@ const useStyles = makeStyles(theme => ({
 
   messageContactName: {
     display: "flex",
-    color: "#6bcbef",
+    color: theme.palette.primary.main,
     fontWeight: 500
   },
 
@@ -202,9 +218,10 @@ const useStyles = makeStyles(theme => ({
   formatMenu: {
     backgroundColor: theme.palette.background.paper,
     color: theme.palette.text.primary,
-    borderRadius: 30,
+    border: `1px solid ${theme.palette.backgroundContrast.border}`,
+    borderRadius: 14,
     boxShadow: theme.shadows[2],
-    padding: "4px 8px",
+    padding: "4px 6px",
     display: "flex",
     alignItems: "center"
   }

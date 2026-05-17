@@ -44,25 +44,36 @@ const useStyles = makeStyles(theme => ({
   drawerPaper: {
     width: drawerWidth,
     display: "flex",
-    borderTop: "1px solid rgba(0, 0, 0, 0.12)",
-    borderRight: "1px solid rgba(0, 0, 0, 0.12)",
-    borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
-    borderTopRightRadius: 4,
-    borderBottomRightRadius: 4
+    borderTop: `1px solid ${theme.palette.backgroundContrast.border}`,
+    borderRight: `1px solid ${theme.palette.backgroundContrast.border}`,
+    borderBottom: `1px solid ${theme.palette.backgroundContrast.border}`,
+    borderTopRightRadius: 12,
+    borderBottomRightRadius: 12,
+    backgroundColor: theme.palette.background.default,
+    boxShadow:
+      theme.mode === "light"
+        ? "0 20px 36px -22px rgba(0,0,0,0.45)"
+        : "0 28px 44px -24px rgba(0,0,0,0.78)"
   },
   header: {
     display: "flex",
-    borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
+    borderBottom: `1px solid ${theme.palette.backgroundContrast.border}`,
+    backgroundColor: theme.palette.background.paper,
     alignItems: "center",
-    padding: theme.spacing(0, 1),
-    minHeight: "73px",
+    padding: theme.spacing(0, 1.2),
+    minHeight: "64px",
     justifyContent: "flex-start"
+  },
+  headerTitle: {
+    fontWeight: 600,
+    letterSpacing: "-0.01em"
   },
   content: {
     display: "flex",
 
     flexDirection: "column",
-    padding: "8px 0px 8px 8px",
+    padding: "10px",
+    gap: theme.spacing(1),
     height: "100%",
     overflowY: "scroll",
     ...theme.scrollbarStyles
@@ -76,7 +87,10 @@ const useStyles = makeStyles(theme => ({
 
   contactHeader: {
     display: "flex",
-    padding: 8,
+    padding: 10,
+    borderRadius: 12,
+    border: `1px solid ${theme.palette.backgroundContrast.border}`,
+    backgroundColor: theme.palette.background.paper,
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
@@ -86,14 +100,27 @@ const useStyles = makeStyles(theme => ({
   },
 
   contactDetails: {
-    marginTop: 8,
-    padding: 8,
+    marginTop: 2,
+    padding: 10,
+    borderRadius: 12,
+    borderColor: theme.palette.backgroundContrast.border,
+    backgroundColor: theme.palette.background.paper,
     display: "flex",
     flexDirection: "column"
   },
   contactExtraInfo: {
-    marginTop: 4,
-    padding: 6
+    marginTop: 2,
+    padding: 10,
+    borderRadius: 12,
+    border: `1px solid ${theme.palette.backgroundContrast.border}`,
+    backgroundColor: theme.palette.background.paper
+  },
+  editButton: {
+    alignSelf: "stretch",
+    borderRadius: 10,
+    fontSize: 12,
+    fontWeight: 600,
+    textTransform: "none"
   }
 }));
 
@@ -140,7 +167,7 @@ const ContactDrawer = ({
           <IconButton onClick={handleDrawerClose}>
             <CloseIcon />
           </IconButton>
-          <Typography style={{ justifySelf: "center" }}>
+          <Typography className={classes.headerTitle} style={{ justifySelf: "center" }}>
             {i18n.t("contactDrawer.header")}
           </Typography>
         </div>
@@ -204,8 +231,8 @@ const ContactDrawer = ({
             <Button
               variant="outlined"
               color="primary"
+              className={classes.editButton}
               onClick={() => setModalOpen(!openForm)}
-              style={{ fontSize: 12, marginTop: 8 }}
             >
               {i18n.t("contactDrawer.buttons.edit")}
             </Button>

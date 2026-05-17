@@ -8,7 +8,12 @@ const useStyles = makeStyles(theme => ({
   ticketHeader: {
     display: "flex",
     flex: "none",
-    borderBottom: "1px solid rgba(0, 0, 0, 0.12)"
+    alignItems: "center",
+    borderBottom: `1px solid ${theme.palette.backgroundContrast.border}`,
+    backgroundColor:
+      theme.mode === "light" ? "rgba(255,255,255,0.92)" : theme.palette.background.paper,
+    backdropFilter: "blur(6px)",
+    boxShadow: "none"
   }
 }));
 
