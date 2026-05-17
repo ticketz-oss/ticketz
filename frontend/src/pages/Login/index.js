@@ -1,11 +1,10 @@
-import React, { useContext, useEffect, useState } from "react";
-import { Link as RouterLink } from "react-router-dom";
+import React, { useContext, useEffect, useMemo, useState } from "react";
+import { Link as RouterLink, useHistory, useLocation } from "react-router-dom";
 
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import TextField from "@material-ui/core/TextField";
 import Link from "@material-ui/core/Link";
-import Grid from "@material-ui/core/Grid";
 import MenuItem from "@material-ui/core/MenuItem";
 import Popover from "@material-ui/core/Popover";
 import Fade from "@material-ui/core/Fade";
@@ -17,6 +16,7 @@ import Brightness4Icon from "@material-ui/icons/Brightness4";
 import Brightness7Icon from "@material-ui/icons/Brightness7";
 import LanguageIcon from "@material-ui/icons/Translate";
 import Typography from "@material-ui/core/Typography";
+import { toast } from "react-toastify";
 
 import { i18n } from "../../translate/i18n";
 import { messages } from "../../translate/languages";
@@ -26,6 +26,8 @@ import useSettings from "../../hooks/useSettings";
 import { getBackendURL } from "../../services/config";
 import ColorModeContext from "../../layout/themeContext";
 import { loadJSON } from "../../helpers/loadJSON";
+import toastError from "../../errors/toastError";
+import { openApi } from "../../services/api";
 
 const gitinfo = loadJSON("/gitinfo.json");
 
@@ -254,6 +256,34 @@ const useStyles = makeStyles(theme => ({
     width: "100%",
     marginTop: theme.spacing(1)
   },
+  formTitle: {
+    width: "100%",
+    marginTop: theme.spacing(1),
+    fontWeight: 600,
+    letterSpacing: "-0.02em",
+    textAlign: "left"
+  },
+  formSubtitle: {
+    width: "100%",
+    marginTop: theme.spacing(1),
+    color: theme.palette.messageIcons,
+    textAlign: "left"
+  },
+  helperLinks: {
+    marginTop: theme.spacing(1.5),
+    display: "flex",
+    flexWrap: "wrap",
+    gap: theme.spacing(1.5)
+  },
+  feedbackBox: {
+    width: "100%",
+    marginTop: theme.spacing(1.5),
+    padding: theme.spacing(1.25, 1.5),
+    borderRadius: 14,
+    backgroundColor: theme.palette.background.default,
+    border: `1px solid ${theme.palette.backgroundContrast.border}`,
+    color: theme.palette.messageIcons
+  },
   submit: {
     margin: theme.spacing(2, 0, 1)
   },
@@ -346,6 +376,8 @@ const useStyles = makeStyles(theme => ({
 const Login = () => {
   const classes = useStyles();
   const theme = useTheme();
+  const history = useHistory();
+  const location = useLocation();
   const { getPublicSetting } = useSettings();
   const { colorMode } = useContext(ColorModeContext);
 
@@ -360,12 +392,81 @@ const Login = () => {
   };
 
   const [user, setUser] = useState({ email: "", password: "" });
+  const [resetRequestEmail, setResetRequestEmail] = useState("");
+  const [resetForm, setResetForm] = useState({
+    token: "",
+    password: "",
+    confirmPassword: ""
+  });
   const [allowSignup, setAllowSignup] = useState(false);
   const [loginLinks, setLoginLinks] = useState([]);
   const [sidePanelImage, setSidePanelImage] = useState("");
   const [backgroundContent, setBackgroundContent] = useState("");
+  const [requestInFlight, setRequestInFlight] = useState(false);
+  const [resetInFlight, setResetInFlight] = useState(false);
+  const [requestFeedbackVisible, setRequestFeedbackVisible] = useState(false);
+  const [forceTokenForm, setForceTokenForm] = useState(false);
 
   const { handleLogin } = useContext(AuthContext);
+
+  const resetTokenFromUrl =
+    new URLSearchParams(location.search).get("token") || "";
+  const isPasswordResetRoute = location.pathname === "/password-reset";
+  const showResetPasswordForm =
+    isPasswordResetRoute && (Boolean(resetTokenFromUrl) || forceTokenForm);
+
+  const resetLabels = useMemo(() => {
+    const isPortuguese = currentLanguage.toLowerCase().startsWith("pt");
+
+    return isPortuguese
+      ? {
+          requestTitle: "Recuperar senha",
+          requestDescription:
+            "Informe o e-mail do usuario para receber um token de redefinicao.",
+          requestSubmit: "Enviar token por e-mail",
+          requestSuccess:
+            "Se o e-mail existir, enviamos um token de redefinicao para ele.",
+          forgotPassword: "Esqueceu sua senha?",
+          haveToken: "Ja tenho um token",
+          resetTitle: "Definir nova senha",
+          resetDescription:
+            "Informe o token recebido por e-mail e cadastre a nova senha.",
+          tokenLabel: "Token",
+          newPassword: "Nova senha",
+          confirmPassword: "Confirmar nova senha",
+          resetSubmit: "Redefinir senha",
+          resetSuccess: "Senha redefinida com sucesso. Entre com a nova senha.",
+          backToLogin: "Voltar para login",
+          requestAccess: "Solicitar token por e-mail",
+          mismatch: "As senhas nao coincidem.",
+          invalidToken: "O token informado e invalido ou expirou.",
+          requestUnavailable:
+            "A recuperacao de senha nao esta configurada no servidor."
+        }
+      : {
+          requestTitle: "Recover password",
+          requestDescription: "Enter the user email to receive a reset token.",
+          requestSubmit: "Send token by email",
+          requestSuccess: "If the email exists, we sent a reset token to it.",
+          forgotPassword: "Forgot your password?",
+          haveToken: "I already have a token",
+          resetTitle: "Set a new password",
+          resetDescription:
+            "Enter the token received by email and choose the new password.",
+          tokenLabel: "Token",
+          newPassword: "New password",
+          confirmPassword: "Confirm new password",
+          resetSubmit: "Reset password",
+          resetSuccess:
+            "Password reset successfully. Sign in with your new password.",
+          backToLogin: "Back to login",
+          requestAccess: "Request token by email",
+          mismatch: "Passwords do not match.",
+          invalidToken: "The provided token is invalid or expired.",
+          requestUnavailable:
+            "Password recovery is not configured on the server."
+        };
+  }, [currentLanguage]);
 
   const handleChangeInput = event => {
     setUser(prevUser => ({
@@ -377,6 +478,72 @@ const Login = () => {
   const handlSubmit = event => {
     event.preventDefault();
     handleLogin(user);
+  };
+
+  const handleResetRequestSubmit = async event => {
+    event.preventDefault();
+    setRequestInFlight(true);
+
+    try {
+      await openApi.post("/auth/request-password-reset", {
+        email: resetRequestEmail.trim()
+      });
+      setRequestFeedbackVisible(true);
+      toast.success(resetLabels.requestSuccess);
+    } catch (err) {
+      if (
+        [
+          "ERR_SMTP_NOT_CONFIGURED",
+          "ERR_SMTP_FROM_NOT_CONFIGURED",
+          "ERR_FRONTEND_URL_NOT_CONFIGURED"
+        ].includes(err?.response?.data?.error)
+      ) {
+        toast.error(resetLabels.requestUnavailable);
+      } else {
+        toastError(err);
+      }
+    } finally {
+      setRequestInFlight(false);
+    }
+  };
+
+  const handleResetFormChange = event => {
+    const { name, value } = event.target;
+    setResetForm(prevState => ({
+      ...prevState,
+      [name]: name === "token" ? value.trim() : value
+    }));
+  };
+
+  const handlePasswordResetSubmit = async event => {
+    event.preventDefault();
+
+    if (resetForm.password !== resetForm.confirmPassword) {
+      toast.error(resetLabels.mismatch);
+      return;
+    }
+
+    setResetInFlight(true);
+
+    try {
+      await openApi.post("/auth/reset-password", {
+        token: resetForm.token.trim(),
+        password: resetForm.password
+      });
+      toast.success(resetLabels.resetSuccess);
+      history.push("/login");
+      setForceTokenForm(false);
+      setRequestFeedbackVisible(false);
+      setResetForm({ token: "", password: "", confirmPassword: "" });
+    } catch (err) {
+      if (err?.response?.data?.error === "ERR_INVALID_PASSWORD_RESET_TOKEN") {
+        toast.error(resetLabels.invalidToken);
+      } else {
+        toastError(err);
+      }
+    } finally {
+      setResetInFlight(false);
+    }
   };
 
   useEffect(() => {
@@ -404,6 +571,22 @@ const Login = () => {
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (resetTokenFromUrl) {
+      setForceTokenForm(true);
+      setResetForm(prevState => ({
+        ...prevState,
+        token: resetTokenFromUrl
+      }));
+      return;
+    }
+
+    if (!isPasswordResetRoute) {
+      setForceTokenForm(false);
+      setRequestFeedbackVisible(false);
+    }
+  }, [isPasswordResetRoute, resetTokenFromUrl]);
 
   const backgroundAssetUrl = getPublicAssetUrl(backgroundContent);
   const sidePanelImageUrl = getPublicAssetUrl(sidePanelImage);
@@ -513,49 +696,71 @@ const Login = () => {
                       alt={i18n.t("login.title")}
                     />
                   </div>
-                  <form
-                    className={classes.form}
-                    noValidate
-                    onSubmit={handlSubmit}
-                  >
-                    <TextField
-                      variant="outlined"
-                      margin="normal"
-                      required
-                      fullWidth
-                      id="email"
-                      label={i18n.t("login.form.email")}
-                      name="email"
-                      value={user.email}
-                      onChange={handleChangeInput}
-                      autoComplete="email"
-                      autoFocus
-                    />
-                    <TextField
-                      variant="outlined"
-                      margin="normal"
-                      required
-                      fullWidth
-                      name="password"
-                      label={i18n.t("login.form.password")}
-                      type="password"
-                      id="password"
-                      value={user.password}
-                      onChange={handleChangeInput}
-                      autoComplete="current-password"
-                    />
-                    <Button
-                      type="submit"
-                      fullWidth
-                      variant="contained"
-                      color="primary"
-                      className={classes.submit}
+                  <Typography variant="h5" className={classes.formTitle}>
+                    {isPasswordResetRoute
+                      ? showResetPasswordForm
+                        ? resetLabels.resetTitle
+                        : resetLabels.requestTitle
+                      : i18n.t("login.title")}
+                  </Typography>
+                  <Typography variant="body2" className={classes.formSubtitle}>
+                    {isPasswordResetRoute
+                      ? showResetPasswordForm
+                        ? resetLabels.resetDescription
+                        : resetLabels.requestDescription
+                      : i18n.t("login.buttons.submit")}
+                  </Typography>
+                  {!isPasswordResetRoute && (
+                    <form
+                      className={classes.form}
+                      noValidate
+                      onSubmit={handlSubmit}
                     >
-                      {i18n.t("login.buttons.submit")}
-                    </Button>
-                    {allowSignup && (
-                      <Grid container>
-                        <Grid item>
+                      <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="email"
+                        label={i18n.t("login.form.email")}
+                        name="email"
+                        value={user.email}
+                        onChange={handleChangeInput}
+                        autoComplete="email"
+                        autoFocus
+                      />
+                      <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        fullWidth
+                        name="password"
+                        label={i18n.t("login.form.password")}
+                        type="password"
+                        id="password"
+                        value={user.password}
+                        onChange={handleChangeInput}
+                        autoComplete="current-password"
+                      />
+                      <Button
+                        type="submit"
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        className={classes.submit}
+                      >
+                        {i18n.t("login.buttons.submit")}
+                      </Button>
+                      <div className={classes.helperLinks}>
+                        <Link
+                          href="#"
+                          variant="body2"
+                          component={RouterLink}
+                          to="/password-reset"
+                        >
+                          {resetLabels.forgotPassword}
+                        </Link>
+                        {allowSignup && (
                           <Link
                             href="#"
                             variant="body2"
@@ -564,10 +769,145 @@ const Login = () => {
                           >
                             {i18n.t("login.buttons.register")}
                           </Link>
-                        </Grid>
-                      </Grid>
-                    )}
-                  </form>
+                        )}
+                      </div>
+                    </form>
+                  )}
+                  {isPasswordResetRoute && !showResetPasswordForm && (
+                    <form
+                      className={classes.form}
+                      noValidate
+                      onSubmit={handleResetRequestSubmit}
+                    >
+                      <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="reset-email"
+                        label={i18n.t("login.form.email")}
+                        name="email"
+                        value={resetRequestEmail}
+                        onChange={event =>
+                          setResetRequestEmail(event.target.value.trim())
+                        }
+                        autoComplete="email"
+                        autoFocus
+                      />
+                      <Button
+                        type="submit"
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        className={classes.submit}
+                        disabled={requestInFlight}
+                      >
+                        {resetLabels.requestSubmit}
+                      </Button>
+                      {requestFeedbackVisible && (
+                        <div className={classes.feedbackBox}>
+                          <Typography variant="body2">
+                            {resetLabels.requestSuccess}
+                          </Typography>
+                        </div>
+                      )}
+                      <div className={classes.helperLinks}>
+                        <Link
+                          href="#"
+                          variant="body2"
+                          component={RouterLink}
+                          to="/login"
+                        >
+                          {resetLabels.backToLogin}
+                        </Link>
+                        <Link
+                          href="#"
+                          variant="body2"
+                          onClick={event => {
+                            event.preventDefault();
+                            setForceTokenForm(true);
+                          }}
+                        >
+                          {resetLabels.haveToken}
+                        </Link>
+                      </div>
+                    </form>
+                  )}
+                  {showResetPasswordForm && (
+                    <form
+                      className={classes.form}
+                      noValidate
+                      onSubmit={handlePasswordResetSubmit}
+                    >
+                      <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="reset-token"
+                        label={resetLabels.tokenLabel}
+                        name="token"
+                        value={resetForm.token}
+                        onChange={handleResetFormChange}
+                        autoFocus={!resetTokenFromUrl}
+                      />
+                      <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        fullWidth
+                        name="password"
+                        label={resetLabels.newPassword}
+                        type="password"
+                        id="reset-password"
+                        value={resetForm.password}
+                        onChange={handleResetFormChange}
+                        autoComplete="new-password"
+                      />
+                      <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        fullWidth
+                        name="confirmPassword"
+                        label={resetLabels.confirmPassword}
+                        type="password"
+                        id="reset-confirm-password"
+                        value={resetForm.confirmPassword}
+                        onChange={handleResetFormChange}
+                        autoComplete="new-password"
+                      />
+                      <Button
+                        type="submit"
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        className={classes.submit}
+                        disabled={resetInFlight}
+                      >
+                        {resetLabels.resetSubmit}
+                      </Button>
+                      <div className={classes.helperLinks}>
+                        <Link
+                          href="#"
+                          variant="body2"
+                          component={RouterLink}
+                          to="/password-reset"
+                          onClick={() => setForceTokenForm(false)}
+                        >
+                          {resetLabels.requestAccess}
+                        </Link>
+                        <Link
+                          href="#"
+                          variant="body2"
+                          component={RouterLink}
+                          to="/login"
+                        >
+                          {resetLabels.backToLogin}
+                        </Link>
+                      </div>
+                    </form>
+                  )}
                 </div>
               </div>
             </div>
