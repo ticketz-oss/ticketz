@@ -71,6 +71,7 @@ const ContactDetailsModal = ({ open, onClose, contactId, onEdit }) => {
   const classes = useStyles();
   const [contact, setContact] = useState(null);
   const [loading, setLoading] = useState(false);
+  const hasContact = Boolean(contact);
 
   useEffect(() => {
     let isMounted = true;
@@ -222,7 +223,12 @@ const ContactDetailsModal = ({ open, onClose, contactId, onEdit }) => {
         <Button onClick={onClose} color="secondary" variant="outlined">
           {i18n.t("contacts.details.close")}
         </Button>
-        <Button onClick={handleEdit} color="primary" variant="contained">
+        <Button
+          onClick={handleEdit}
+          color="primary"
+          variant="contained"
+          disabled={!hasContact}
+        >
           {i18n.t("contacts.details.edit")}
         </Button>
       </DialogActions>

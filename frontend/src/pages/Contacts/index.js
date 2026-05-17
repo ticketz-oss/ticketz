@@ -11,7 +11,6 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import Button from "@material-ui/core/Button";
-import Avatar from "@material-ui/core/Avatar";
 import WhatsAppIcon from "@material-ui/icons/WhatsApp";
 import SearchIcon from "@material-ui/icons/Search";
 import TextField from "@material-ui/core/TextField";
@@ -26,6 +25,7 @@ import api from "../../services/api";
 import TableRowSkeleton from "../../components/TableRowSkeleton";
 import ContactModal from "../../components/ContactModal";
 import ContactDetailsModal from "../../components/ContactDetailsModal";
+import ClickableContactAvatar from "../../components/ClickableContactAvatar";
 import ConfirmationModal from "../../components/ConfirmationModal/";
 
 import { i18n } from "../../translate/i18n";
@@ -37,8 +37,6 @@ import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { Can } from "../../components/Can";
 import { SocketContext } from "../../context/Socket/SocketContext";
-import { generateColor } from "../../helpers/colorGenerator";
-import { getInitials } from "../../helpers/getInitials";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCloudArrowUp } from "@fortawesome/free-solid-svg-icons";
@@ -462,26 +460,19 @@ const Contacts = () => {
               {contacts.map(contact => (
                 <TableRow key={contact.id}>
                   <TableCell style={{ paddingRight: 0 }}>
-                    {
-                      <Avatar
-                        style={{
-                          backgroundColor: generateColor(contact?.number),
-                          fontWeight: "bold",
-                          color: "white"
-                        }}
-                        src={contact.profilePicUrl}
-                      >
-                        {getInitials(contact?.name)}
-                      </Avatar>
-                    }
+                    <ClickableContactAvatar contact={contact} />
                   </TableCell>
                   <TableCell className={classes.contactName}>
                     {contact.name}
                     <div className={classes.tagsdiv}>
-                      {contact.tags.map(tag => (
-                        <Tooltip title={tag.name} placement="top" arrow>
+                      {(contact.tags || []).map(tag => (
+                        <Tooltip
+                          key={tag.id}
+                          title={tag.name}
+                          placement="top"
+                          arrow
+                        >
                           <div
-                            key={tag.id}
                             className={classes.tag}
                             style={{
                               backgroundColor: tag.color
@@ -497,18 +488,20 @@ const Contacts = () => {
                   <TableCell align="center">{contact.email}</TableCell>
                   <TableCell align="center">
                     {!contact.isGroup && (
-                      <IconButton
-                        size="small"
-                        onClick={() =>
-                          window.mentionClick({
-                            contactId: contact.id,
-                            name: contact?.name,
-                            number: contact?.number
-                          })
-                        }
-                      >
-                        <WhatsAppIcon />
-                      </IconButton>
+                      <Tooltip title={i18n.t("contacts.toolTips.message")}>
+                        <IconButton
+                          size="small"
+                          onClick={() =>
+                            window.mentionClick({
+                              contactId: contact.id,
+                              name: contact?.name,
+                              number: contact?.number
+                            })
+                          }
+                        >
+                          <WhatsAppIcon />
+                        </IconButton>
+                      </Tooltip>
                     )}
                     <Tooltip title={i18n.t("contacts.toolTips.view")}>
                       <IconButton
@@ -518,25 +511,29 @@ const Contacts = () => {
                         <VisibilityOutlinedIcon />
                       </IconButton>
                     </Tooltip>
-                    <IconButton
-                      size="small"
-                      onClick={() => hadleEditContact(contact.id)}
-                    >
-                      <EditIcon />
-                    </IconButton>
+                    <Tooltip title={i18n.t("contacts.toolTips.edit")}>
+                      <IconButton
+                        size="small"
+                        onClick={() => hadleEditContact(contact.id)}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                    </Tooltip>
                     <Can
                       role={user.profile}
                       perform="contacts-page:deleteContact"
                       yes={() => (
-                        <IconButton
-                          size="small"
-                          onClick={() => {
-                            setDeleteConfirmOpen(true);
-                            setDeletingContact(contact);
-                          }}
-                        >
-                          <DeleteOutlineIcon />
-                        </IconButton>
+                        <Tooltip title={i18n.t("contacts.toolTips.delete")}>
+                          <IconButton
+                            size="small"
+                            onClick={() => {
+                              setDeleteConfirmOpen(true);
+                              setDeletingContact(contact);
+                            }}
+                          >
+                            <DeleteOutlineIcon />
+                          </IconButton>
+                        </Tooltip>
                       )}
                     />
                   </TableCell>

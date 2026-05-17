@@ -227,6 +227,9 @@ const messages = {
           add: "Adicionar Contato"
         },
         toolTips: {
+          message: "Abrir conversa",
+          edit: "Editar contato",
+          delete: "Excluir contato",
           view: "Visualizar contato"
         },
         table: {
