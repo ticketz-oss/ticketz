@@ -191,7 +191,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
                     <ClickableContactAvatar
                       contact={contact}
                       avatarProps={{
-                        style: classes.profileAvatar
+                        className: classes.profileAvatar
                       }}
                     />
                     <div className={classes.profileSummaryInfo}>

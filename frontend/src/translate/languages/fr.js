@@ -163,11 +163,27 @@ const messages = {
           import: "Importer des Contacts",
           add: "Ajouter un Contact"
         },
+        toolTips: {
+          message: "Ouvrir la conversation",
+          edit: "Modifier le contact",
+          delete: "Supprimer le contact",
+          view: "Voir le contact"
+        },
         table: {
           name: "Nom",
           whatsapp: "WhatsApp",
           email: "Email",
           actions: "Actions"
+        },
+        details: {
+          title: "Détails du contact",
+          tags: "Étiquettes",
+          chatbot: "Chatbot",
+          emptyEmail: "Aucun email renseigné",
+          emptyTags: "Aucune étiquette liée",
+          emptyExtraInfo: "Aucune information supplémentaire disponible.",
+          close: "Fermer",
+          edit: "Modifier le contact"
         }
       },
       contactModal: {
@@ -181,6 +197,7 @@ const messages = {
           name: "Nom",
           number: "Numéro WhatsApp",
           email: "Email",
+          profile: "Résumé du contact",
           extraName: "Nom du champ",
           extraValue: "Valeur",
           disableBot: "Désactiver le chatbot"

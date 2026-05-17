@@ -241,6 +241,7 @@ const messages = {
         details: {
           title: "Dados do contato",
           tags: "Tags",
+          chatbot: "Chatbot",
           emptyEmail: "Email não informado",
           emptyTags: "Nenhuma tag vinculada",
           emptyExtraInfo: "Nenhuma informação adicional cadastrada.",

@@ -168,11 +168,27 @@ const messages = {
           import: "Impor Kontak",
           add: "Tambah Kontak"
         },
+        toolTips: {
+          message: "Buka percakapan",
+          edit: "Edit kontak",
+          delete: "Hapus kontak",
+          view: "Lihat kontak"
+        },
         table: {
           name: "Nama",
           whatsapp: "WhatsApp",
           email: "Email",
           actions: "Aksi"
+        },
+        details: {
+          title: "Detail kontak",
+          tags: "Tag",
+          chatbot: "Chatbot",
+          emptyEmail: "Email belum diisi",
+          emptyTags: "Belum ada tag terhubung",
+          emptyExtraInfo: "Belum ada informasi tambahan.",
+          close: "Tutup",
+          edit: "Edit kontak"
         }
       },
       contactModal: {
@@ -186,6 +202,7 @@ const messages = {
           name: "Nama",
           number: "Nomor WhatsApp",
           email: "Email",
+          profile: "Ringkasan kontak",
           extraName: "Nama Bidang",
           extraValue: "Nilai",
           disableBot: "Nonaktifkan chatbot"
