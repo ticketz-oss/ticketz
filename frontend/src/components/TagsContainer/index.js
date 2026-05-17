@@ -7,6 +7,7 @@ import api from "../../services/api";
 
 const useStyles = makeStyles(theme => ({
   root: {
+    width: "100%",
     "& .MuiOutlinedInput-root": {
       borderRadius: 10,
       backgroundColor: theme.palette.background.paper
@@ -19,12 +20,14 @@ const useStyles = makeStyles(theme => ({
     color: "white",
     border: "none",
     fontWeight: 600,
+    height: 24,
     textShadow:
       "-1px 0 rgba(0,0,0,0.16), 0 1px rgba(0,0,0,0.16), 1px 0 rgba(0,0,0,0.16), 0 -1px rgba(0,0,0,0.16)"
   },
   paper: {
     width: 400,
-    marginLeft: 12,
+    maxWidth: "calc(100vw - 24px)",
+    marginLeft: 8,
     borderRadius: 10,
     border: `1px solid ${theme.palette.backgroundContrast.border}`
   }

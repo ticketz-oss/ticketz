@@ -72,11 +72,29 @@ const useStyles = makeStyles(theme => ({
     display: "flex",
 
     flexDirection: "column",
-    padding: "10px",
+    padding: "12px",
     gap: theme.spacing(1),
     height: "100%",
     overflowY: "scroll",
     ...theme.scrollbarStyles
+  },
+  contactCardHeader: {
+    cursor: "pointer",
+    width: "100%",
+    padding: 0
+  },
+  contactCardAvatar: {
+    width: 60,
+    height: 60,
+    color: "white",
+    fontWeight: "bold"
+  },
+  contactName: {
+    fontWeight: 600,
+    letterSpacing: "-0.01em"
+  },
+  contactLink: {
+    fontSize: 12
   },
 
   contactAvatar: {
@@ -103,7 +121,7 @@ const useStyles = makeStyles(theme => ({
     marginTop: 2,
     padding: 10,
     borderRadius: 12,
-    borderColor: theme.palette.backgroundContrast.border,
+    border: `1px solid ${theme.palette.backgroundContrast.border}`,
     backgroundColor: theme.palette.background.paper,
     display: "flex",
     flexDirection: "column"
@@ -121,6 +139,9 @@ const useStyles = makeStyles(theme => ({
     fontSize: 12,
     fontWeight: 600,
     textTransform: "none"
+  },
+  notesTitle: {
+    marginBottom: 10
   }
 }));
 
@@ -167,7 +188,7 @@ const ContactDrawer = ({
           <IconButton onClick={handleDrawerClose}>
             <CloseIcon />
           </IconButton>
-          <Typography className={classes.headerTitle} style={{ justifySelf: "center" }}>
+          <Typography className={classes.headerTitle}>
             {i18n.t("contactDrawer.header")}
           </Typography>
         </div>
@@ -178,37 +199,32 @@ const ContactDrawer = ({
             <div className={classes.contactHeader}>
               <CardHeader
                 onClick={() => {}}
-                style={{ cursor: "pointer", width: "100%", padding: 0 }}
+                className={classes.contactCardHeader}
                 titleTypographyProps={{ noWrap: true }}
                 subheaderTypographyProps={{ noWrap: true }}
                 avatar={
                   <Avatar
                     src={contact.profilePicUrl}
                     alt="contact_image"
-                    style={{
-                      width: 60,
-                      height: 60,
-                      backgroundColor: generateColor(contact?.number),
-                      color: "white",
-                      fontWeight: "bold"
-                    }}
+                    className={classes.contactCardAvatar}
+                    style={{ backgroundColor: generateColor(contact?.number) }}
                   >
                     {getInitials(contact?.name)}
                   </Avatar>
                 }
                 title={
                   <>
-                    <Typography>{contact.name}</Typography>
+                    <Typography className={classes.contactName}>{contact.name}</Typography>
                   </>
                 }
                 subheader={
                   <>
-                    <Typography style={{ fontSize: 12 }}>
+                    <Typography className={classes.contactLink}>
                       <Link href={`tel:${contact.number}`}>
                         {contact.number}
                       </Link>
                     </Typography>
-                    <Typography style={{ fontSize: 12 }}>
+                    <Typography className={classes.contactLink}>
                       <Link href={`mailto:${contact.email}`}>
                         {contact.email}
                       </Link>
@@ -237,7 +253,7 @@ const ContactDrawer = ({
               {i18n.t("contactDrawer.buttons.edit")}
             </Button>
             <Paper square variant="outlined" className={classes.contactDetails}>
-              <Typography variant="subtitle1" style={{ marginBottom: 10 }}>
+              <Typography variant="subtitle1" className={classes.notesTitle}>
                 {i18n.t("ticketOptionsMenu.appointmentsModal.title")}
               </Typography>
               <TicketNotes ticket={ticket} />

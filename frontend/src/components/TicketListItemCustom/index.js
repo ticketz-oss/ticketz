@@ -45,7 +45,7 @@ const useStyles = makeStyles(theme => ({
   },
   ticket: {
     position: "relative",
-    minHeight: 96,
+    minHeight: 92,
     paddingHorizontal: 10,
     paddingVertical: 0,
     paddingTop: 0,
@@ -100,7 +100,7 @@ const useStyles = makeStyles(theme => ({
     display: "grid",
     justifyContent: "space-between",
     width: "100%",
-    gap: 2
+    gap: 3
   },
 
   contactName: {
@@ -112,7 +112,7 @@ const useStyles = makeStyles(theme => ({
     justifySelf: "flex-end",
     textAlign: "right",
     position: "relative",
-    top: -23,
+    top: -24,
     fontSize: 11,
     color: theme.palette.messageIcons,
     fontWeight: 500
@@ -143,7 +143,7 @@ const useStyles = makeStyles(theme => ({
     alignSelf: "center",
     marginRight: 0,
     marginLeft: "auto",
-    top: -10,
+    top: -8,
     right: 10
   },
 
@@ -162,7 +162,7 @@ const useStyles = makeStyles(theme => ({
 
   ticketQueueColor: {
     flex: "none",
-    width: "3px",
+    width: "4px",
     height: "100%",
     position: "absolute",
     top: "0%",
@@ -177,7 +177,7 @@ const useStyles = makeStyles(theme => ({
 
   ticketInfo1: {
     position: "relative",
-    top: 40,
+    top: 36,
     right: 0
   },
   listItemText: {
@@ -197,7 +197,9 @@ const useStyles = makeStyles(theme => ({
     color: "white",
     top: -6,
     marginRight: 3,
-    fontWeight: 700
+    fontWeight: 700,
+    fontSize: 10,
+    lineHeight: 1
   },
   closedStatusPill: {
     height: 22,
@@ -217,7 +219,11 @@ const useStyles = makeStyles(theme => ({
     position: "absolute",
     top: -8,
     color: "#fff",
-    cursor: "pointer"
+    cursor: "pointer",
+    boxShadow:
+      theme.mode === "light"
+        ? "0 6px 12px -8px rgba(0,0,0,0.6)"
+        : "0 8px 14px -9px rgba(0,0,0,0.8)"
   },
   closeActionPrimary: {
     backgroundColor: red[700],
@@ -253,11 +259,11 @@ const useStyles = makeStyles(theme => ({
   },
   Radiusdot: {
     "& .MuiBadge-badge": {
-      borderRadius: 2,
+      borderRadius: 999,
       position: "inherit",
-      height: 16,
+      height: 18,
       margin: 2,
-      padding: 3,
+      padding: "2px 7px",
       fontSize: 10
     },
     "& .MuiBadge-anchorOriginTopRightRectangle": {
