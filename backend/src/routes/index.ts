@@ -32,6 +32,7 @@ import versionRoutes from "./versionRoutes";
 import ticketzOSSRoutes from "./ticketzOSSRoutes";
 import i18nRoutes from "./i18nRoutes";
 import wavoipRoutes from "./wavoipRoutes";
+import connectionAlertRoutes from "./connectionAlertRoutes";
 
 const routes = Router();
 
@@ -68,5 +69,6 @@ routes.use(versionRoutes);
 routes.use(ticketzOSSRoutes);
 routes.use(i18nRoutes);
 routes.use(wavoipRoutes);
+routes.use(connectionAlertRoutes);
 
 export default routes;

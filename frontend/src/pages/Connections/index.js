@@ -6,6 +6,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { green } from "@material-ui/core/colors";
 import {
   Button,
+  Divider,
   TableBody,
   TableRow,
   TableCell,
@@ -39,6 +40,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 import MainContainer from "../../components/MainContainer";
+import ConnectionAlertsOverview from "../../components/ConnectionAlertsOverview";
 import MainHeader from "../../components/MainHeader";
 import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper";
 import Title from "../../components/Title";
@@ -80,6 +82,9 @@ const useStyles = makeStyles(theme => ({
   },
   buttonProgress: {
     color: green[500]
+  },
+  alertSection: {
+    marginBottom: theme.spacing(2)
   }
 }));
 
@@ -109,6 +114,7 @@ const CustomToolTip = ({ title, content, children }) => {
 
 const Connections = () => {
   const classes = useStyles();
+  const currentCompanyId = localStorage.getItem("companyId");
 
   const { whatsApps, loading } = useContext(WhatsAppsContext);
   const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false);
@@ -390,6 +396,17 @@ const Connections = () => {
         </MainHeaderButtonsWrapper>
       </MainHeader>
       <Paper className={classes.mainPaper} variant="outlined">
+        <div className={classes.alertSection}>
+          <ConnectionAlertsOverview
+            title="Painel de alertas de conexao"
+            subtitle="Eventos definitivos de desconexao e exclusao registrados para esta empresa."
+            companyId={currentCompanyId ? Number(currentCompanyId) : undefined}
+            maxItems={5}
+          />
+        </div>
+
+        <Divider style={{ marginBottom: 16 }} />
+
         <Table size="small">
           <TableHead>
             <TableRow>

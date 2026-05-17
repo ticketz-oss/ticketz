@@ -38,6 +38,7 @@ import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import GetTicketWbot from "../helpers/GetTicketWbot";
 import { getJidOf } from "../services/WbotServices/getJidOf";
 import WhatsappLidMap from "../models/WhatsappLidMap";
+import CreateConnectionAlertService from "../services/ConnectionAlertServices/CreateConnectionAlertService";
 
 // const loggerBaileys = MAIN_LOGGER.child({});
 // loggerBaileys.level = process.env.BAILEYS_LOG_LEVEL || "error";
@@ -340,6 +341,11 @@ export const initWASocket = async (
                   session: "",
                   qrcode: ""
                 });
+                await CreateConnectionAlertService({
+                  whatsapp,
+                  eventType: "disconnected",
+                  reason: "forbidden_403"
+                });
                 await DeleteBaileysService(whatsapp.id);
                 io.to(`company-${whatsapp.companyId}-admin`).emit(
                   `company-${whatsapp.companyId}-whatsappSession`,
@@ -380,6 +386,11 @@ export const initWASocket = async (
                   status: "DISCONNECTED",
                   session: "",
                   qrcode: ""
+                });
+                await CreateConnectionAlertService({
+                  whatsapp,
+                  eventType: "disconnected",
+                  reason: "logged_out"
                 });
                 await DeleteBaileysService(whatsapp.id);
                 io.to(`company-${whatsapp.companyId}-admin`).emit(
