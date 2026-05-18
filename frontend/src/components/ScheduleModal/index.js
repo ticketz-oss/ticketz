@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 
 import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
@@ -24,6 +24,9 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import moment from "moment";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { isArray, capitalize } from "lodash";
+import VariablePicker from "../VariablePicker";
+import insertTextAtCursor from "../../helpers/insertTextAtCursor";
+import { scheduleVariableCatalog } from "../../helpers/variableCatalog";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -52,6 +55,18 @@ const useStyles = makeStyles(theme => ({
   formControl: {
     margin: theme.spacing(1),
     minWidth: 120
+  },
+  variableToolbar: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
+    gap: theme.spacing(1),
+    marginTop: theme.spacing(1)
+  },
+  variableHint: {
+    color: theme.palette.text.secondary,
+    fontSize: theme.typography.caption.fontSize
   }
 }));
 
@@ -90,6 +105,7 @@ const ScheduleModal = ({
   const [schedule, setSchedule] = useState(initialState);
   const [currentContact, setCurrentContact] = useState(initialContact);
   const [contacts, setContacts] = useState([initialContact]);
+  const bodyInputRef = useRef(null);
 
   useEffect(() => {
     if (contactId && contacts.length) {
@@ -167,6 +183,30 @@ const ScheduleModal = ({
     handleClose();
   };
 
+  const handleInsertVariable = (token, bodyValue, setFieldValue) => {
+    const {
+      nextValue,
+      nextSelectionStart,
+      nextSelectionEnd
+    } = insertTextAtCursor(bodyValue, token, bodyInputRef.current);
+
+    setFieldValue("body", nextValue);
+
+    requestAnimationFrame(() => {
+      const input = bodyInputRef.current;
+
+      if (!input) {
+        return;
+      }
+
+      input.focus();
+
+      if (typeof input.setSelectionRange === "function") {
+        input.setSelectionRange(nextSelectionStart, nextSelectionEnd);
+      }
+    });
+  };
+
   return (
     <div className={classes.root}>
       <Dialog
@@ -192,7 +232,14 @@ const ScheduleModal = ({
             }, 400);
           }}
         >
-          {({ touched, errors, isSubmitting, values }) => (
+          {({
+            touched,
+            errors,
+            handleBlur,
+            isSubmitting,
+            setFieldValue,
+            values
+          }) => (
             <Form>
               <DialogContent dividers>
                 <div className={classes.multFieldLine}>
@@ -214,7 +261,7 @@ const ScheduleModal = ({
                         <TextField
                           {...params}
                           variant="outlined"
-                          placeholder="Contato"
+                          placeholder={i18n.t("scheduleModal.form.contact")}
                         />
                       )}
                     />
@@ -222,18 +269,37 @@ const ScheduleModal = ({
                 </div>
                 <br />
                 <div className={classes.multFieldLine}>
-                  <Field
-                    as={TextField}
+                  <TextField
                     rows={9}
                     multiline={true}
                     label={i18n.t("scheduleModal.form.body")}
                     name="body"
+                    value={values.body}
+                    onChange={event => setFieldValue("body", event.target.value)}
+                    onBlur={handleBlur}
                     error={touched.body && Boolean(errors.body)}
                     helperText={touched.body && errors.body}
                     variant="outlined"
                     margin="dense"
                     fullWidth
+                    inputRef={bodyInputRef}
                   />
+                </div>
+                <div className={classes.variableToolbar}>
+                  <VariablePicker
+                    items={scheduleVariableCatalog}
+                    onSelectVariable={token =>
+                      handleInsertVariable(token, values.body, setFieldValue)
+                    }
+                    buttonAriaLabel={i18n.t("settings.mustacheVariables.title")}
+                    menuTitle={i18n.t("settings.mustacheVariables.title")}
+                  />
+                  <span className={classes.variableHint}>
+                    {i18n.t("settings.mustacheVariables.title")}{" "}
+                    {scheduleVariableCatalog
+                      .map(variable => variable.token)
+                      .join(" ")}
+                  </span>
                 </div>
                 <br />
                 <div className={classes.multFieldLine}>
