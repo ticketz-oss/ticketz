@@ -148,11 +148,15 @@ const CampaignModal = ({
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [campaignEditable, setCampaignEditable] = useState(true);
   const [campaignSettingsVariables, setCampaignSettingsVariables] = useState([]);
+  const [contactExtraFieldNames, setContactExtraFieldNames] = useState([]);
   const attachmentFile = useRef(null);
   const messageInputRefs = useRef({});
   const campaignVariableCatalog = useMemo(() => {
-    return buildCampaignVariableCatalog(campaignSettingsVariables);
-  }, [campaignSettingsVariables]);
+    return buildCampaignVariableCatalog(
+      campaignSettingsVariables,
+      contactExtraFieldNames
+    );
+  }, [campaignSettingsVariables, contactExtraFieldNames]);
 
   useEffect(() => {
     return () => {
@@ -178,7 +182,16 @@ const CampaignModal = ({
 
       api
         .get("/campaign-settings")
-        .then(({ data }) => setCampaignSettingsVariables(getCampaignSettingVariables(data)));
+        .then(({ data }) =>
+          setCampaignSettingsVariables(getCampaignSettingVariables(data))
+        );
+
+      api
+        .get("/contacts/extra-fields")
+        .then(({ data }) =>
+          setContactExtraFieldNames(Array.isArray(data) ? data : [])
+        )
+        .catch(() => setContactExtraFieldNames([]));
 
       if (!campaignId) return;
 

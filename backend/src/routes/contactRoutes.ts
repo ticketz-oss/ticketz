@@ -43,6 +43,13 @@ contactRoutes.get(
 );
 
 contactRoutes.get(
+  "/contacts/extra-fields",
+  apiTokenAuth,
+  isAuth,
+  ContactController.listExtraFieldNames
+);
+
+contactRoutes.get(
   "/contacts/:contactId",
   apiTokenAuth,
   isAuth,

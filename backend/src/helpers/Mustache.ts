@@ -24,15 +24,14 @@ export const genGreeting = (
     _t("Good evening", lngSource)
   ];
   const h = new Date().getHours();
-  // eslint-disable-next-line no-bitwise
   return greetings[(h / 6) >> 0];
 };
 
 export function mustacheValues(
-  ticket: Ticket,
-  contact: Contact | ContactListItem,
-  currentUser: User
-): Record<string, any> {
+  ticket?: Ticket,
+  contact?: Contact | ContactListItem,
+  currentUser?: User
+): Record<string, unknown> {
   contact = contact || ticket?.contact;
 
   const name = contact?.name || contact?.number || "{{name}}";
@@ -53,15 +52,18 @@ export function mustacheValues(
     "{{protocol}}";
   const time = now.toLocaleTimeString("en-GB", { hour12: false });
 
-  let extraInfo: any;
+  let extraInfo: Record<string, string> = {};
 
   if (contact instanceof ContactListItem) {
-    extraInfo = {}; // contact.extraInfo;
+    extraInfo = {};
   } else if (contact && contact.extraInfo) {
-    extraInfo = contact.extraInfo.reduce((acc, field) => {
-      acc[field.name] = field.value;
-      return acc;
-    }, {});
+    extraInfo = contact.extraInfo.reduce<Record<string, string>>(
+      (acc, field) => {
+        acc[field.name] = field.value;
+        return acc;
+      },
+      {}
+    );
   }
 
   const view = {

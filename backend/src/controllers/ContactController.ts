@@ -10,6 +10,7 @@ import ShowContactService from "../services/ContactServices/ShowContactService";
 import UpdateContactService from "../services/ContactServices/UpdateContactService";
 import DeleteContactService from "../services/ContactServices/DeleteContactService";
 import GetContactService from "../services/ContactServices/GetContactService";
+import ListExtraFieldNamesService from "../services/ContactServices/ListExtraFieldNamesService";
 
 import CheckContactNumber, {
   CheckNumberAndCreateContact,
@@ -40,16 +41,22 @@ type IndexGetContactQuery = {
   number: string;
 };
 
-interface ExtraInfo extends ContactCustomField {
+type CreateContactPayload = Parameters<typeof CreateContactService>[0];
+
+type ExtraInfoPayload = {
+  id?: number;
   name: string;
   value: string;
-}
+};
+
 interface ContactData {
   name: string;
   number: string;
   email?: string;
   isGroup?: boolean;
-  extraInfo?: ExtraInfo[];
+  extraInfo?: ExtraInfoPayload[];
+  disableBot?: boolean;
+  language?: string;
 }
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
@@ -95,8 +102,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   try {
     await schema.validate(newContact);
-  } catch (err: any) {
-    throw new AppError(err.message);
+  } catch (err: unknown) {
+    throw new AppError(err instanceof Error ? err.message : String(err));
   }
 
   let contact: Contact;
@@ -110,7 +117,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     contact = await CreateContactService({
       ...newContact,
       companyId
-    });
+    } as CreateContactPayload);
   }
 
   const io = getIO();
@@ -134,6 +141,17 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
   return res.status(200).json(contact);
 };
 
+export const listExtraFieldNames = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { companyId } = req.user;
+
+  const extraFieldNames = await ListExtraFieldNamesService(companyId);
+
+  return res.status(200).json(extraFieldNames);
+};
+
 export const update = async (
   req: Request,
   res: Response
@@ -148,8 +166,8 @@ export const update = async (
 
   try {
     await schema.validate(contactData);
-  } catch (err: any) {
-    throw new AppError(err.message);
+  } catch (err: unknown) {
+    throw new AppError(err instanceof Error ? err.message : String(err));
   }
 
   let checked: IOnWhatsapp;
@@ -280,64 +298,69 @@ export const importCsv = async (
   try {
     const firstLine = fs.readFileSync(file.path, "utf8").split("\n")[0];
     delimiter = firstLine.includes(";") ? ";" : ",";
-  } catch (error) {
+  } catch {
     throw new AppError("ERR_INVALID_CSV", 400);
   }
 
-  const parser = csvParser({ delimiter, columns: true }, async (err, data) => {
-    if (err) {
-      throw new AppError("ERR_INVALID_CSV", 400);
-    }
-
-    data.forEach(async (record: any) => {
-      let extraInfo: any[];
-      try {
-        extraInfo = JSON.parse(record.ExtraInfo);
-      } catch (error) {
-        extraInfo = [];
+  const parser = csvParser(
+    { delimiter, columns: true },
+    async (err, data: Record<string, string>[]) => {
+      if (err) {
+        throw new AppError("ERR_INVALID_CSV", 400);
       }
 
-      const contact = {
-        companyId,
-        name: record.name || record.Name,
-        number: record.number || record.Number,
-        email: record.email || record.Email,
-        extraInfo
-      };
+      data.forEach(async record => {
+        let extraInfo: ExtraInfoPayload[];
+        try {
+          extraInfo = JSON.parse(record.ExtraInfo || "[]");
+        } catch {
+          extraInfo = [];
+        }
 
-      Object.keys(record).forEach((key: string) => {
-        if (
-          key !== "name" &&
-          key !== "number" &&
-          key !== "email" &&
-          key !== "Name" &&
-          key !== "Number" &&
-          key !== "Email" &&
-          key !== "ExtraInfo" &&
-          record[key]
-        ) {
-          contact.extraInfo.push({
-            name: key,
-            value: record[key]
-          });
+        const contact = {
+          companyId,
+          name: record.name || record.Name,
+          number: record.number || record.Number,
+          email: record.email || record.Email,
+          extraInfo
+        };
+
+        Object.keys(record).forEach((key: string) => {
+          if (
+            key !== "name" &&
+            key !== "number" &&
+            key !== "email" &&
+            key !== "Name" &&
+            key !== "Number" &&
+            key !== "Email" &&
+            key !== "ExtraInfo" &&
+            record[key]
+          ) {
+            contact.extraInfo.push({
+              name: key,
+              value: record[key]
+            });
+          }
+        });
+
+        try {
+          const newContact = await CreateContactService(
+            contact as CreateContactPayload
+          );
+          const io = getIO();
+          io.to(`company-${companyId}-mainchannel`).emit(
+            `company-${companyId}-contact`,
+            {
+              action: "update",
+              contact: newContact
+            }
+          );
+        } catch (error) {
+          logger.error({ contact }, `Error creating contact: ${error.message}`);
         }
       });
-
-      try {
-        const newContact = await CreateContactService(contact);
-        const io = getIO();
-        io.to(`company-${companyId}-mainchannel`).emit(
-          `company-${companyId}-contact`,
-          {
-            action: "update",
-            contact: newContact
-          }
-        );
-      } catch (error) {
-        logger.error({ contact }, `Error creating contact: ${error.message}`);
-      }
-    });
-  });
+    }
+  );
 
   const readable = fs.createReadStream(file.path);
 
@@ -371,8 +394,8 @@ export const exportCsv = async (
     ]
   });
 
-  const records = contacts.map((contact: any) => {
-    const extraInfo = contact.extraInfo.map((info: any) => ({
+  const records = contacts.map(contact => {
+    const extraInfo = contact.extraInfo.map(info => ({
       name: info.name,
       value: info.value
     }));

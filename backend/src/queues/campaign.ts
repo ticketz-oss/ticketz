@@ -7,6 +7,7 @@ import { AnyMessageContent } from "libzapitu-rf";
 import Campaign from "../models/Campaign";
 import ContactList from "../models/ContactList";
 import ContactListItem from "../models/ContactListItem";
+import Contact from "../models/Contact";
 import CampaignSetting from "../models/CampaignSetting";
 import CampaignShipping from "../models/CampaignShipping";
 import Whatsapp from "../models/Whatsapp";
@@ -20,6 +21,7 @@ import { parseToMilliseconds } from "../helpers/parseToMilliseconds";
 import GetWhatsappWbot from "../helpers/GetWhatsappWbot";
 import OutOfTicketMessage from "../models/OutOfTicketMessages";
 import { Session } from "../libs/wbot";
+import { mustacheValues } from "../helpers/Mustache";
 
 const connection = process.env.REDIS_URI || "";
 export const campaignQueue = new Queue("CampaignQueue", connection);
@@ -33,6 +35,19 @@ interface DispatchCampaignData {
   campaignId: number;
   campaignShippingId: number;
   contactListItemId: number;
+}
+
+interface CampaignVariable {
+  key: string;
+  value: string;
+}
+
+interface PreparedCampaignShipping {
+  number: string;
+  contactId: number;
+  campaignId: number;
+  message?: string;
+  confirmationMessage?: string;
 }
 
 async function handleVerifyCampaigns() {
@@ -113,7 +128,7 @@ async function getSettings(campaign) {
   let messageInterval = 20;
   let longerIntervalAfter = 20;
   let greaterInterval = 60;
-  let variables: any[] = [];
+  let variables: CampaignVariable[] = [];
 
   settings.forEach(setting => {
     if (setting.key === "messageInterval") {
@@ -138,8 +153,8 @@ async function getSettings(campaign) {
   };
 }
 
-function getCampaignValidMessages(campaign) {
-  const messages = [];
+function getCampaignValidMessages(campaign): string[] {
+  const messages: string[] = [];
 
   if (!isEmpty(campaign.message1) && !isNil(campaign.message1)) {
     messages.push(campaign.message1);
@@ -164,8 +179,8 @@ function getCampaignValidMessages(campaign) {
   return messages;
 }
 
-function getCampaignValidConfirmationMessages(campaign) {
-  const messages = [];
+function getCampaignValidConfirmationMessages(campaign): string[] {
+  const messages: string[] = [];
 
   if (
     !isEmpty(campaign.confirmationMessage1) &&
@@ -205,29 +220,157 @@ function getCampaignValidConfirmationMessages(campaign) {
   return messages;
 }
 
-function getProcessedMessage(msg: string, variables: any[], contact: any) {
-  let finalMessage = msg;
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
-  if (finalMessage.includes("{nome}")) {
-    finalMessage = finalMessage.replace(/{nome}/g, contact.name);
+function extractCampaignTokens(body: string): string[] {
+  const matches = body.match(/{[^{}]+}/g);
+
+  if (!matches) {
+    return [];
   }
 
-  if (finalMessage.includes("{email}")) {
-    finalMessage = finalMessage.replace(/{email}/g, contact.email);
+  return [...new Set(matches.map(token => token.slice(1, -1)))];
+}
+
+function buildCampaignNativeValues(
+  contact: Contact | ContactListItem
+): Record<string, string> {
+  const resolvedValues = mustacheValues(undefined, contact);
+  const name = contact?.name || contact?.number || "{nome}";
+  const firstname = contact?.name
+    ? contact.name.trim().split(" ")[0]
+    : contact?.number || "{primeiro_nome}";
+  const email = contact?.email || "{email}";
+  const number = contact?.number || "{numero}";
+  const date = new Date().toLocaleDateString("en-GB");
+  const greeting =
+    typeof resolvedValues.greeting === "string"
+      ? resolvedValues.greeting
+      : "{saudacao}";
+  const time =
+    typeof resolvedValues.time === "string" ? resolvedValues.time : "{hora}";
+
+  return {
+    nome: name,
+    name,
+    primeiro_nome: firstname,
+    firstname,
+    email,
+    numero: number,
+    number,
+    telefone: number,
+    phone: number,
+    saudacao: greeting,
+    greeting,
+    hora: time,
+    time,
+    data: date,
+    date
+  };
+}
+
+function buildCampaignCustomVariableEntries(variables: CampaignVariable[]) {
+  return variables
+    .filter(variable => variable?.key)
+    .map(variable => [variable.key, variable.value ?? ""] as [string, string]);
+}
+
+function buildCampaignExtraInfoEntries(contact: Contact | null) {
+  if (!contact?.extraInfo?.length) {
+    return [] as [string, string][];
   }
 
-  if (finalMessage.includes("{numero}")) {
-    finalMessage = finalMessage.replace(/{numero}/g, contact.number);
-  }
+  const uniqueEntries = new Map<string, string>();
 
-  variables.forEach(variable => {
-    if (finalMessage.includes(`{${variable.key}}`)) {
-      const regex = new RegExp(`{${variable.key}}`, "g");
-      finalMessage = finalMessage.replace(regex, variable.value);
+  contact.extraInfo.forEach(field => {
+    const key = field?.name?.trim();
+
+    if (!key || uniqueEntries.has(key)) {
+      return;
     }
+
+    uniqueEntries.set(key, field.value ?? "");
+  });
+
+  return Array.from(uniqueEntries.entries());
+}
+
+async function findCampaignContact(
+  companyId: number,
+  contact: ContactListItem
+): Promise<Contact | null> {
+  if (!contact?.number) {
+    return null;
+  }
+
+  return Contact.findOne({
+    where: {
+      companyId,
+      number: contact.number
+    },
+    include: ["extraInfo"]
+  });
+}
+
+function replaceCampaignTokens(
+  body: string,
+  replacementEntries: [string, string][]
+) {
+  let finalMessage = body;
+
+  replacementEntries.forEach(([key, value]) => {
+    if (!key) {
+      return;
+    }
+
+    const regex = new RegExp(`\\{${escapeRegExp(key)}\\}`, "g");
+    finalMessage = finalMessage.replace(regex, value ?? "");
   });
 
   return finalMessage;
+}
+
+async function getProcessedMessage(
+  msg: string,
+  variables: CampaignVariable[],
+  contact: ContactListItem,
+  companyId: number
+) {
+  let nativeValues = buildCampaignNativeValues(contact);
+  const customVariableEntries = buildCampaignCustomVariableEntries(variables);
+  const requestedTokens = extractCampaignTokens(msg);
+  const knownTokenNames = new Set([
+    ...Object.keys(nativeValues),
+    ...customVariableEntries.map(([key]) => key)
+  ]);
+
+  let extraInfoEntries: [string, string][] = [];
+
+  const shouldLoadContactRecord = requestedTokens.some(
+    token =>
+      token === "saudacao" ||
+      token === "greeting" ||
+      !knownTokenNames.has(token)
+  );
+
+  if (shouldLoadContactRecord) {
+    const contactRecord = await findCampaignContact(companyId, contact);
+
+    if (contactRecord) {
+      nativeValues = buildCampaignNativeValues(contactRecord);
+      extraInfoEntries = buildCampaignExtraInfoEntries(contactRecord).filter(
+        ([key]) => !(key in nativeValues) && !knownTokenNames.has(key)
+      );
+    }
+  }
+
+  return replaceCampaignTokens(msg, [
+    ...Object.entries(nativeValues),
+    ...customVariableEntries,
+    ...extraInfoEntries
+  ]);
 }
 
 async function verifyAndFinalizeCampaign(campaign: Campaign) {
@@ -243,23 +386,25 @@ async function verifyAndFinalizeCampaign(campaign: Campaign) {
 
 async function prepareContact(
   campaign: Campaign,
-  variables: any[],
+  variables: CampaignVariable[],
   contact: ContactListItem,
   delay: number,
-  messages: string | any[],
-  confirmationMessages: string | any[]
+  messages: string[],
+  confirmationMessages: string[]
 ) {
-  const campaignShipping: any = {};
-  campaignShipping.number = contact.number;
-  campaignShipping.contactId = contact.id;
-  campaignShipping.campaignId = campaign.id;
+  const campaignShipping: PreparedCampaignShipping = {
+    number: contact.number,
+    contactId: contact.id,
+    campaignId: campaign.id
+  };
 
   if (messages.length) {
     const radomIndex = randomValue(0, messages.length);
-    const message = getProcessedMessage(
+    const message = await getProcessedMessage(
       messages[radomIndex],
       variables,
-      contact
+      contact,
+      campaign.companyId
     );
     campaignShipping.message = `${message}`;
   }
@@ -267,10 +412,11 @@ async function prepareContact(
   if (campaign.confirmation) {
     if (confirmationMessages.length) {
       const radomIndex = randomValue(0, confirmationMessages.length);
-      const message = getProcessedMessage(
+      const message = await getProcessedMessage(
         confirmationMessages[radomIndex],
         variables,
-        contact
+        contact,
+        campaign.companyId
       );
       campaignShipping.confirmationMessage = `${message}`;
     }
