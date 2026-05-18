@@ -4,6 +4,7 @@ import Avatar from "@material-ui/core/Avatar";
 
 import { generateColor } from "../../helpers/colorGenerator";
 import { getInitials } from "../../helpers/getInitials";
+import { i18n } from "../../translate/i18n";
 import MediaGalleryLightbox from "../MediaGalleryLightbox";
 
 const hasPreviewablePhoto = profilePicUrl => {
@@ -36,6 +37,9 @@ const ClickableContactAvatar = ({ contact, avatarProps = {} }) => {
   const { style: avatarStyle, ...restAvatarProps } = avatarProps;
   const previewable = hasPreviewablePhoto(contact?.profilePicUrl);
   const slides = useMemo(() => buildSlides(contact), [contact]);
+  const contactLabel =
+    contact?.name || contact?.number || i18n.t("contactModal.form.profile");
+  const avatarLabel = `${i18n.t("contactModal.form.profile")}: ${contactLabel}`;
 
   const avatar = (
     <Avatar
@@ -47,7 +51,7 @@ const ClickableContactAvatar = ({ contact, avatarProps = {} }) => {
         ...avatarStyle
       }}
       src={contact?.profilePicUrl}
-      alt="contact_image"
+      alt={avatarLabel}
     >
       {getInitials(contact?.name)}
     </Avatar>
@@ -74,6 +78,8 @@ const ClickableContactAvatar = ({ contact, avatarProps = {} }) => {
       <span
         role="button"
         tabIndex={0}
+        aria-label={avatarLabel}
+        aria-haspopup="dialog"
         onClick={handleOpen}
         onKeyDown={handleKeyDown}
         style={{
