@@ -179,6 +179,7 @@ const messages = {
           title: "Dettagli del contatto",
           tags: "Tag",
           chatbot: "Chatbot",
+          unavailable: "Impossibile caricare i dati di questo contatto.",
           emptyEmail: "Email non disponibile",
           emptyTags: "Nessun tag collegato",
           emptyExtraInfo: "Nessuna informazione aggiuntiva disponibile.",

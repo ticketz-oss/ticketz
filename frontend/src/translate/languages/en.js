@@ -242,6 +242,7 @@ const messages = {
           title: "Contact details",
           tags: "Tags",
           chatbot: "Chatbot",
+          unavailable: "Could not load this contact's details.",
           emptyEmail: "No email provided",
           emptyTags: "No tags linked",
           emptyExtraInfo: "No additional information available.",

@@ -147,6 +147,12 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: theme.palette.action.hover,
     border: `1px dashed ${theme.palette.divider}`
   },
+  statusCard: {
+    padding: theme.spacing(2),
+    borderRadius: theme.shape.borderRadius * 1.5,
+    display: "grid",
+    gap: theme.spacing(1)
+  },
   loadingState: {
     minHeight: 220,
     display: "flex",
@@ -225,6 +231,13 @@ const ContactDetailsModal = ({ open, onClose, contactId, onEdit }) => {
           <div className={classes.loadingState}>
             <CircularProgress size={28} />
           </div>
+        ) : !hasContact ? (
+          <Paper variant="outlined" className={classes.statusCard}>
+            <Typography variant="subtitle2">{i18n.t("common.error")}</Typography>
+            <Typography variant="body2" className={classes.muted}>
+              {i18n.t("contacts.details.unavailable")}
+            </Typography>
+          </Paper>
         ) : (
           <>
             <Paper variant="outlined" className={classes.heroCard}>

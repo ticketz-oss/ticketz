@@ -184,6 +184,7 @@ const messages = {
           title: "Detail kontak",
           tags: "Tag",
           chatbot: "Chatbot",
+          unavailable: "Detail kontak ini tidak dapat dimuat.",
           emptyEmail: "Email belum diisi",
           emptyTags: "Belum ada tag terhubung",
           emptyExtraInfo: "Belum ada informasi tambahan.",
