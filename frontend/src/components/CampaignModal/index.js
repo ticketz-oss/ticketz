@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import React, { useState, useEffect, useMemo, useRef, useContext } from "react";
 
 import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
@@ -35,6 +35,27 @@ import {
 } from "@material-ui/core";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import ConfirmationModal from "../ConfirmationModal";
+import VariablePicker from "../VariablePicker";
+import insertTextAtCursor from "../../helpers/insertTextAtCursor";
+import { buildCampaignVariableCatalog } from "../../helpers/variableCatalog";
+
+const getCampaignSettingVariables = settings => {
+  const variablesSetting = Array.isArray(settings)
+    ? settings.find(setting => setting.key === "variables")
+    : null;
+
+  if (!variablesSetting?.value) {
+    return [];
+  }
+
+  try {
+    const parsedValue = JSON.parse(variablesSetting.value);
+
+    return Array.isArray(parsedValue) ? parsedValue : [];
+  } catch (error) {
+    return [];
+  }
+};
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -64,6 +85,18 @@ const useStyles = makeStyles(theme => ({
     left: "50%",
     marginTop: -12,
     marginLeft: -12
+  },
+  variableToolbar: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
+    gap: theme.spacing(1),
+    marginTop: theme.spacing(1)
+  },
+  variableHint: {
+    color: theme.palette.text.secondary,
+    fontSize: theme.typography.caption.fontSize
   }
 }));
 
@@ -114,7 +147,12 @@ const CampaignModal = ({
   const [attachment, setAttachment] = useState(null);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [campaignEditable, setCampaignEditable] = useState(true);
+  const [campaignSettingsVariables, setCampaignSettingsVariables] = useState([]);
   const attachmentFile = useRef(null);
+  const messageInputRefs = useRef({});
+  const campaignVariableCatalog = useMemo(() => {
+    return buildCampaignVariableCatalog(campaignSettingsVariables);
+  }, [campaignSettingsVariables]);
 
   useEffect(() => {
     return () => {
@@ -137,6 +175,10 @@ const CampaignModal = ({
       api
         .get(`/whatsapp`, { params: { companyId, session: 0 } })
         .then(({ data }) => setWhatsapps(data));
+
+      api
+        .get("/campaign-settings")
+        .then(({ data }) => setCampaignSettingsVariables(getCampaignSettingVariables(data)));
 
       if (!campaignId) return;
 
@@ -235,40 +277,119 @@ const CampaignModal = ({
     }
   };
 
-  const renderMessageField = identifier => {
+  const handleInsertVariable = (identifier, token, fieldValue, setFieldValue) => {
+    const { nextValue, nextSelectionStart, nextSelectionEnd } =
+      insertTextAtCursor(fieldValue, token, messageInputRefs.current[identifier]);
+
+    setFieldValue(identifier, nextValue);
+
+    requestAnimationFrame(() => {
+      const input = messageInputRefs.current[identifier];
+
+      if (!input) {
+        return;
+      }
+
+      input.focus();
+
+      if (typeof input.setSelectionRange === "function") {
+        input.setSelectionRange(nextSelectionStart, nextSelectionEnd);
+      }
+    });
+  };
+
+  const renderVariableToolbar = (identifier, values, setFieldValue) => {
     return (
-      <Field
-        as={TextField}
-        id={identifier}
-        name={identifier}
-        spellCheck={true}
-        fullWidth
-        rows={5}
-        label={i18n.t(`campaigns.dialog.form.${identifier}`)}
-        placeholder={i18n.t("campaigns.dialog.form.messagePlaceholder")}
-        multiline={true}
-        variant="outlined"
-        helperText="Utilize variáveis como {nome}, {numero}, {email} ou defina variáveis personalziadas."
-        disabled={!campaignEditable && campaign.status !== "CANCELADA"}
-      />
+      <div className={classes.variableToolbar}>
+        <VariablePicker
+          items={campaignVariableCatalog}
+          onSelectVariable={token =>
+            handleInsertVariable(
+              identifier,
+              token,
+              values[identifier],
+              setFieldValue
+            )
+          }
+          buttonLabel="{ }"
+          buttonAriaLabel={i18n.t("settings.mustacheVariables.title")}
+          menuTitle={i18n.t("settings.mustacheVariables.title")}
+        />
+        <span className={classes.variableHint}>
+          {i18n.t("settings.mustacheVariables.title")}{" "}
+          {campaignVariableCatalog.map(variable => variable.token).join(" ")}
+        </span>
+      </div>
     );
   };
 
-  const renderConfirmationMessageField = identifier => {
+  const renderMessageField = ({
+    identifier,
+    touched,
+    errors,
+    handleBlur,
+    setFieldValue,
+    values
+  }) => {
     return (
-      <Field
-        as={TextField}
-        id={identifier}
-        name={identifier}
-        spellCheck={true}
-        fullWidth
-        rows={5}
-        label={i18n.t(`campaigns.dialog.form.${identifier}`)}
-        placeholder={i18n.t("campaigns.dialog.form.messagePlaceholder")}
-        multiline={true}
-        variant="outlined"
-        disabled={!campaignEditable && campaign.status !== "CANCELADA"}
-      />
+      <>
+        <TextField
+          id={identifier}
+          name={identifier}
+          spellCheck={true}
+          fullWidth
+          rows={5}
+          label={i18n.t(`campaigns.dialog.form.${identifier}`)}
+          placeholder={i18n.t("campaigns.dialog.form.messagePlaceholder")}
+          multiline={true}
+          variant="outlined"
+          value={values[identifier] || ""}
+          onChange={event => setFieldValue(identifier, event.target.value)}
+          onBlur={handleBlur}
+          error={touched[identifier] && Boolean(errors[identifier])}
+          helperText={touched[identifier] && errors[identifier]}
+          disabled={!campaignEditable && campaign.status !== "CANCELADA"}
+          inputRef={input => {
+            messageInputRefs.current[identifier] = input;
+          }}
+        />
+        {renderVariableToolbar(identifier, values, setFieldValue)}
+      </>
+    );
+  };
+
+  const renderConfirmationMessageField = ({
+    identifier,
+    touched,
+    errors,
+    handleBlur,
+    setFieldValue,
+    values
+  }) => {
+    return (
+      <>
+        <TextField
+          id={identifier}
+          name={identifier}
+          spellCheck={true}
+          fullWidth
+          rows={5}
+          label={i18n.t(`campaigns.dialog.form.${identifier}`)}
+          placeholder={i18n.t("campaigns.dialog.form.messagePlaceholder")}
+          multiline={true}
+          variant="outlined"
+          value={values[identifier] || ""}
+          onChange={event => setFieldValue(identifier, event.target.value)}
+          onBlur={handleBlur}
+          error={touched[identifier] && Boolean(errors[identifier])}
+          helperText={touched[identifier] && errors[identifier]}
+          disabled={!campaignEditable && campaign.status !== "CANCELADA"}
+          inputRef={input => {
+            messageInputRefs.current[identifier] = input;
+          }}
+        />
+        {renderVariableToolbar(identifier, values, setFieldValue)}
+      </>
     );
   };
 
@@ -340,7 +461,14 @@ const CampaignModal = ({
             }, 400);
           }}
         >
-          {({ values, errors, touched, isSubmitting }) => (
+          {({
+            values,
+            errors,
+            touched,
+            handleBlur,
+            isSubmitting,
+            setFieldValue
+          }) => (
             <Form>
               <DialogContent dividers>
                 <Grid spacing={2} container>
@@ -493,18 +621,41 @@ const CampaignModal = ({
                           {values.confirmation ? (
                             <Grid spacing={2} container>
                               <Grid xs={12} md={8} item>
-                                <>{renderMessageField("message1")}</>
+                                <>
+                                  {renderMessageField({
+                                    identifier: "message1",
+                                    touched,
+                                    errors,
+                                    handleBlur,
+                                    setFieldValue,
+                                    values
+                                  })}
+                                </>
                               </Grid>
                               <Grid xs={12} md={4} item>
                                 <>
-                                  {renderConfirmationMessageField(
-                                    "confirmationMessage1"
-                                  )}
+                                  {renderConfirmationMessageField({
+                                    identifier: "confirmationMessage1",
+                                    touched,
+                                    errors,
+                                    handleBlur,
+                                    setFieldValue,
+                                    values
+                                  })}
                                 </>
                               </Grid>
                             </Grid>
                           ) : (
-                            <>{renderMessageField("message1")}</>
+                            <>
+                              {renderMessageField({
+                                identifier: "message1",
+                                touched,
+                                errors,
+                                handleBlur,
+                                setFieldValue,
+                                values
+                              })}
+                            </>
                           )}
                         </>
                       )}
@@ -513,18 +664,41 @@ const CampaignModal = ({
                           {values.confirmation ? (
                             <Grid spacing={2} container>
                               <Grid xs={12} md={8} item>
-                                <>{renderMessageField("message2")}</>
+                                <>
+                                  {renderMessageField({
+                                    identifier: "message2",
+                                    touched,
+                                    errors,
+                                    handleBlur,
+                                    setFieldValue,
+                                    values
+                                  })}
+                                </>
                               </Grid>
                               <Grid xs={12} md={4} item>
                                 <>
-                                  {renderConfirmationMessageField(
-                                    "confirmationMessage2"
-                                  )}
+                                  {renderConfirmationMessageField({
+                                    identifier: "confirmationMessage2",
+                                    touched,
+                                    errors,
+                                    handleBlur,
+                                    setFieldValue,
+                                    values
+                                  })}
                                 </>
                               </Grid>
                             </Grid>
                           ) : (
-                            <>{renderMessageField("message2")}</>
+                            <>
+                              {renderMessageField({
+                                identifier: "message2",
+                                touched,
+                                errors,
+                                handleBlur,
+                                setFieldValue,
+                                values
+                              })}
+                            </>
                           )}
                         </>
                       )}
@@ -533,18 +707,41 @@ const CampaignModal = ({
                           {values.confirmation ? (
                             <Grid spacing={2} container>
                               <Grid xs={12} md={8} item>
-                                <>{renderMessageField("message3")}</>
+                                <>
+                                  {renderMessageField({
+                                    identifier: "message3",
+                                    touched,
+                                    errors,
+                                    handleBlur,
+                                    setFieldValue,
+                                    values
+                                  })}
+                                </>
                               </Grid>
                               <Grid xs={12} md={4} item>
                                 <>
-                                  {renderConfirmationMessageField(
-                                    "confirmationMessage3"
-                                  )}
+                                  {renderConfirmationMessageField({
+                                    identifier: "confirmationMessage3",
+                                    touched,
+                                    errors,
+                                    handleBlur,
+                                    setFieldValue,
+                                    values
+                                  })}
                                 </>
                               </Grid>
                             </Grid>
                           ) : (
-                            <>{renderMessageField("message3")}</>
+                            <>
+                              {renderMessageField({
+                                identifier: "message3",
+                                touched,
+                                errors,
+                                handleBlur,
+                                setFieldValue,
+                                values
+                              })}
+                            </>
                           )}
                         </>
                       )}
@@ -553,18 +750,41 @@ const CampaignModal = ({
                           {values.confirmation ? (
                             <Grid spacing={2} container>
                               <Grid xs={12} md={8} item>
-                                <>{renderMessageField("message4")}</>
+                                <>
+                                  {renderMessageField({
+                                    identifier: "message4",
+                                    touched,
+                                    errors,
+                                    handleBlur,
+                                    setFieldValue,
+                                    values
+                                  })}
+                                </>
                               </Grid>
                               <Grid xs={12} md={4} item>
                                 <>
-                                  {renderConfirmationMessageField(
-                                    "confirmationMessage4"
-                                  )}
+                                  {renderConfirmationMessageField({
+                                    identifier: "confirmationMessage4",
+                                    touched,
+                                    errors,
+                                    handleBlur,
+                                    setFieldValue,
+                                    values
+                                  })}
                                 </>
                               </Grid>
                             </Grid>
                           ) : (
-                            <>{renderMessageField("message4")}</>
+                            <>
+                              {renderMessageField({
+                                identifier: "message4",
+                                touched,
+                                errors,
+                                handleBlur,
+                                setFieldValue,
+                                values
+                              })}
+                            </>
                           )}
                         </>
                       )}
@@ -573,18 +793,41 @@ const CampaignModal = ({
                           {values.confirmation ? (
                             <Grid spacing={2} container>
                               <Grid xs={12} md={8} item>
-                                <>{renderMessageField("message5")}</>
+                                <>
+                                  {renderMessageField({
+                                    identifier: "message5",
+                                    touched,
+                                    errors,
+                                    handleBlur,
+                                    setFieldValue,
+                                    values
+                                  })}
+                                </>
                               </Grid>
                               <Grid xs={12} md={4} item>
                                 <>
-                                  {renderConfirmationMessageField(
-                                    "confirmationMessage5"
-                                  )}
+                                  {renderConfirmationMessageField({
+                                    identifier: "confirmationMessage5",
+                                    touched,
+                                    errors,
+                                    handleBlur,
+                                    setFieldValue,
+                                    values
+                                  })}
                                 </>
                               </Grid>
                             </Grid>
                           ) : (
-                            <>{renderMessageField("message5")}</>
+                            <>
+                              {renderMessageField({
+                                identifier: "message5",
+                                touched,
+                                errors,
+                                handleBlur,
+                                setFieldValue,
+                                values
+                              })}
+                            </>
                           )}
                         </>
                       )}
