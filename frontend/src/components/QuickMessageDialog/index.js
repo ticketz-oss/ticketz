@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import {
   Button,
   TextField,
@@ -14,6 +14,9 @@ import { i18n } from "../../translate/i18n";
 import { makeStyles } from "@material-ui/core/styles";
 import ButtonWithSpinner from "../ButtonWithSpinner";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import VariablePicker from "../VariablePicker";
+import insertTextAtCursor from "../../helpers/insertTextAtCursor";
+import { quickMessageVariableCatalog } from "../../helpers/variableCatalog";
 
 import { isNil, isObject, has, get } from "lodash";
 
@@ -40,6 +43,18 @@ const useStyles = makeStyles(theme => ({
   },
   inline: {
     width: "100%"
+  },
+  variableToolbar: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
+    gap: theme.spacing(1),
+    margin: theme.spacing(0, 1, 1)
+  },
+  variableHint: {
+    color: theme.palette.text.secondary,
+    fontSize: theme.typography.caption.fontSize
   }
 }));
 
@@ -57,6 +72,7 @@ function QuickMessageDialog(props) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [message, setMessage] = useState(initialMessage);
   const [loading, setLoading] = useState(false);
+  const messageInputRef = useRef(null);
 
   const { user } = useContext(AuthContext);
 
@@ -109,6 +125,30 @@ function QuickMessageDialog(props) {
     handleClose();
   };
 
+  const handleInsertVariable = (token, bodyValue, setFieldValue) => {
+    const {
+      nextValue,
+      nextSelectionStart,
+      nextSelectionEnd
+    } = insertTextAtCursor(bodyValue, token, messageInputRef.current);
+
+    setFieldValue("message", nextValue);
+
+    requestAnimationFrame(() => {
+      const input = messageInputRef.current;
+
+      if (!input) {
+        return;
+      }
+
+      input.focus();
+
+      if (typeof input.setSelectionRange === "function") {
+        input.setSelectionRange(nextSelectionStart, nextSelectionEnd);
+      }
+    });
+  };
+
   return (
     <Dialog
       title="Mensagem Rápida"
@@ -127,7 +167,7 @@ function QuickMessageDialog(props) {
           }, 400);
         }}
       >
-        {({ touched, errors }) => (
+        {({ touched, errors, handleBlur, setFieldValue, values }) => (
           <Form>
             <DialogContent className={classes.root} dividers>
               <Grid direction="column" container>
@@ -142,17 +182,40 @@ function QuickMessageDialog(props) {
                   />
                 </Grid>
                 <Grid item>
-                  <Field
-                    as={TextField}
+                  <TextField
                     name="message"
                     rows={6}
                     label={i18n.t("quickMessages.dialog.message")}
                     multiline={true}
                     spellCheck={true}
+                    value={values.message}
+                    onChange={event =>
+                      setFieldValue("message", event.target.value)
+                    }
+                    onBlur={handleBlur}
                     error={touched.message && Boolean(errors.message)}
                     helperText={touched.message && errors.message}
                     variant="outlined"
+                    inputRef={messageInputRef}
                   />
+                </Grid>
+                <Grid item>
+                  <div className={classes.variableToolbar}>
+                    <VariablePicker
+                      items={quickMessageVariableCatalog}
+                      onSelectVariable={token =>
+                        handleInsertVariable(token, values.message, setFieldValue)
+                      }
+                      buttonAriaLabel={i18n.t("settings.mustacheVariables.title")}
+                      menuTitle={i18n.t("settings.mustacheVariables.title")}
+                    />
+                    <span className={classes.variableHint}>
+                      {i18n.t("settings.mustacheVariables.title")}{" "}
+                      {quickMessageVariableCatalog
+                        .map(variable => variable.token)
+                        .join(" ")}
+                    </span>
+                  </div>
                 </Grid>
               </Grid>
             </DialogContent>
