@@ -325,6 +325,7 @@ const TicketsManagerTabs = () => {
                 className={classes.badge}
                 badgeContent={openCount}
                 color="primary"
+                max={999}
               >
                 {i18n.t("ticketsList.assignedHeader")}
               </Badge>
@@ -337,6 +338,7 @@ const TicketsManagerTabs = () => {
                 className={classes.badge}
                 badgeContent={pendingCount}
                 color="secondary"
+                max={999}
               >
                 {i18n.t("ticketsList.pendingHeader")}
               </Badge>
