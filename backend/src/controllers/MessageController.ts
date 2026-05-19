@@ -30,7 +30,7 @@ import ShowContactService from "../services/ContactServices/ShowContactService";
 import { verifyContact } from "../services/WbotServices/verifyContact";
 
 type IndexQuery = {
-  pageNumber: string;
+  nextId?: string;
   markAsRead: string;
 };
 
@@ -43,7 +43,7 @@ type ForwardData = {
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const { ticketId } = req.params;
-  const { pageNumber, markAsRead } = req.query as IndexQuery;
+  const { nextId, markAsRead } = req.query as IndexQuery;
   const { companyId, profile } = req.user;
   const queues: number[] = [];
 
@@ -56,8 +56,14 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     });
   }
 
-  const { count, messages, ticket, hasMore } = await ListMessagesService({
-    pageNumber,
+  const {
+    count,
+    messages,
+    ticket,
+    hasMore,
+    nextId: responseNextId
+  } = await ListMessagesService({
+    nextId,
     ticketId,
     companyId,
     queues
@@ -67,7 +73,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     SetTicketMessagesAsRead(ticket);
   }
 
-  return res.json({ count, messages, ticket, hasMore });
+  return res.json({ count, messages, ticket, hasMore, nextId: responseNextId });
 };
 
 export const historyByMessageId = async (

@@ -9,19 +9,20 @@ import { GetCompanySetting } from "../../helpers/CheckSettings";
 interface Request {
   ticketId: string;
   companyId: number;
-  pageNumber?: string;
+  nextId?: string;
   queues?: number[];
 }
 
 interface Response {
   messages: Message[];
   ticket: Ticket;
-  count: number;
+  count: number | null;
   hasMore: boolean;
+  nextId: string | null;
 }
 
 const ListMessagesService = async ({
-  pageNumber = "1",
+  nextId,
   ticketId,
   companyId,
   queues = []
@@ -33,7 +34,6 @@ const ListMessagesService = async ({
   }
 
   const limit = 100;
-  const offset = limit * (+pageNumber - 1);
 
   const options: FindOptions = {
     where: {
@@ -61,9 +61,28 @@ const ListMessagesService = async ({
     };
   }
 
-  const { count, rows: messages } = await Message.findAndCountAll({
+  if (nextId) {
+    const cursorMessage = await Message.findOne({
+      where: {
+        id: nextId,
+        ticketId,
+        companyId
+      },
+      attributes: ["id", "createdAt"]
+    });
+
+    if (!cursorMessage) {
+      throw new AppError("ERR_MESSAGE_NOT_FOUND", 404);
+    }
+
+    options.where["createdAt"] = {
+      [Op.lt]: cursorMessage.createdAt
+    };
+  }
+
+  const messages = await Message.findAll({
     ...options,
-    limit,
+    limit: limit + 1,
     include: [
       "contact",
       {
@@ -89,17 +108,19 @@ const ListMessagesService = async ({
         as: "queue"
       }
     ],
-    offset,
     order: [["createdAt", "DESC"]]
   });
 
-  const hasMore = count > offset + messages.length;
+  const hasMore = messages.length > limit;
+  const visibleMessages = hasMore ? messages.slice(0, limit) : messages;
+  const oldestMessage = visibleMessages[visibleMessages.length - 1];
 
   return {
-    messages: messages.reverse(),
+    messages: visibleMessages.reverse(),
     ticket,
-    count,
-    hasMore
+    count: null,
+    hasMore,
+    nextId: hasMore && oldestMessage ? oldestMessage.id : null
   };
 };
 

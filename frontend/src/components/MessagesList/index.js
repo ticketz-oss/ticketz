@@ -688,7 +688,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
   const classes = useStyles();
 
   const [messagesList, dispatch] = useReducer(reducer, []);
-  const [pageNumber, setPageNumber] = useState(1);
+  const [nextId, setNextId] = useState(null);
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef();
@@ -708,23 +708,28 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
   const socketManager = useContext(SocketContext);
 
   function loadData(incrementPage = false) {
+    if (incrementPage && !nextId) {
+      return;
+    }
+
     setLoading(true);
-    const thisPageNumber = incrementPage ? pageNumber + 1 : 1;
+    const thisNextId = incrementPage ? nextId : undefined;
     const delayDebounceFn = setTimeout(() => {
       const fetchMessages = async () => {
         if (ticketId === undefined) return;
         try {
           const { data } = await api.get("/messages/" + ticketId, {
-            params: { pageNumber: thisPageNumber, markAsRead }
+            params: { nextId: thisNextId, markAsRead }
           });
 
           if (currentTicketId.current === ticketId) {
             dispatch({ type: "LOAD_MESSAGES", payload: data.messages });
             setHasMore(data.hasMore);
+            setNextId(data.nextId || null);
             setLoading(false);
           }
 
-          if (thisPageNumber === 1 && data.messages.length > 1) {
+          if (!incrementPage && data.messages.length > 1) {
             scrollToBottom();
           }
         } catch (err) {
@@ -733,7 +738,6 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
         }
       };
       fetchMessages();
-      setPageNumber(thisPageNumber);
     }, 500);
     return () => {
       clearTimeout(delayDebounceFn);
