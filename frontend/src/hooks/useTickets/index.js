@@ -22,8 +22,6 @@ const useTickets = ({
   all
 }) => {
   const [loading, setLoading] = useState(true);
-  const [nextCursorUpdatedAt, setNextCursorUpdatedAt] = useState(null);
-  const [nextCursorTicketId, setNextCursorTicketId] = useState(null);
   const [tickets, setTickets] = useState([]);
 
   useEffect(() => {
@@ -52,8 +50,6 @@ const useTickets = ({
             }
           });
           setTickets(data.tickets);
-          setNextCursorUpdatedAt(data.nextUpdatedAt || null);
-          setNextCursorTicketId(data.nextTicketId || null);
           setLoading(false);
         } catch (err) {
           setLoading(false);
@@ -76,12 +72,15 @@ const useTickets = ({
     updatedAt,
     showAll,
     queueIds,
-    withUnreadMessages
+    withUnreadMessages,
+    isSearch,
+    notClosed,
+    all
   ]);
 
   return {
     tickets,
-    loading,
+    loading
   };
 };
 
