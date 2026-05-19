@@ -25,6 +25,13 @@ messageRoutes.get(
   MessageController.index
 );
 
+messageRoutes.get(
+  "/messages/:messageId/history",
+  isAuth,
+  isCompliant,
+  MessageController.historyByMessageId
+);
+
 messageRoutes.post(
   "/messages/:ticketId",
   isAuth,

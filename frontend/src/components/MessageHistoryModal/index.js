@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -10,21 +10,65 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  makeStyles
+  makeStyles,
+  CircularProgress
 } from "@material-ui/core";
 
 import { parseISO, format } from "date-fns";
 
 import { i18n } from "../../translate/i18n";
+import api from "../../services/api";
+import toastError from "../../errors/toastError";
 
 const useStyles = makeStyles(theme => ({
   timestamp: {
     minWidth: 250
+  },
+  loadingContainer: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 120
   }
 }));
 
-const MessageHistoryModal = ({ open, onClose, oldMessages }) => {
+const MessageHistoryModal = ({ open, onClose, messageId }) => {
   const classes = useStyles();
+  const [oldMessages, setOldMessages] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!open || !messageId) {
+      return undefined;
+    }
+
+    let isMounted = true;
+
+    const loadHistory = async () => {
+      try {
+        setLoading(true);
+        const { data } = await api.get(`/messages/${messageId}/history`);
+        if (isMounted) {
+          setOldMessages(data.oldMessages || []);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setOldMessages([]);
+          toastError(err);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadHistory();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [open, messageId]);
 
   return (
     <Dialog
@@ -36,11 +80,15 @@ const MessageHistoryModal = ({ open, onClose, oldMessages }) => {
         {i18n.t("messageHistoryModal.title")}
       </DialogTitle>
       <DialogContent>
-        <TableContainer>
-          <Table aria-label="message-history-table">
-            <TableBody>
-              {oldMessages &&
-                oldMessages.map(oldMessage => (
+        {loading ? (
+          <div className={classes.loadingContainer}>
+            <CircularProgress size={28} />
+          </div>
+        ) : (
+          <TableContainer>
+            <Table aria-label="message-history-table">
+              <TableBody>
+                {oldMessages.map(oldMessage => (
                   <TableRow key={oldMessage.id}>
                     <TableCell component="th" scope="row">
                       {oldMessage.body}
@@ -50,9 +98,10 @@ const MessageHistoryModal = ({ open, onClose, oldMessages }) => {
                     </TableCell>
                   </TableRow>
                 ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
       </DialogContent>
       <DialogActions>
         <Button autoFocus onClick={() => onClose(false)}>

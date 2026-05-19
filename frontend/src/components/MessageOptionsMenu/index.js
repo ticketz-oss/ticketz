@@ -6,7 +6,7 @@ import MenuItem from "@material-ui/core/MenuItem";
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import ConfirmationModal from "../ConfirmationModal";
-import { Dialog, DialogContent, DialogTitle, Menu } from "@material-ui/core";
+import { Dialog, Menu } from "@material-ui/core";
 import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessageContext";
 import { EditMessageContext } from "../../context/EditingMessage/EditingMessageContext";
 import toastError from "../../errors/toastError";
@@ -109,7 +109,7 @@ const MessageOptionsMenu = ({
       <MessageHistoryModal
         open={messageHistoryOpen}
         onClose={setMessageHistoryOpen}
-        oldMessages={message.oldMessages}
+        messageId={message.id}
       />
       <MessageForwardModal
         modalOpen={forwardModalOpen}
@@ -164,11 +164,12 @@ const MessageOptionsMenu = ({
               </MenuItem>
             )
           ]}
-          {!isSticker && message.oldMessages?.length > 0 && (
-            <MenuItem key="history" onClick={handleOpenMessageHistoryModal}>
-              {i18n.t("messageOptionsMenu.history")}
-            </MenuItem>
-          )}
+          {!isSticker &&
+            (message.isEdited || message.oldMessages?.length > 0) && (
+              <MenuItem key="history" onClick={handleOpenMessageHistoryModal}>
+                {i18n.t("messageOptionsMenu.history")}
+              </MenuItem>
+            )}
           <MenuItem onClick={handleReplyMessage}>
             {i18n.t("messageOptionsMenu.reply")}
           </MenuItem>

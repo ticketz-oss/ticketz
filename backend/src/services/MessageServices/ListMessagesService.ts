@@ -1,7 +1,6 @@
 import { FindOptions, Op } from "sequelize";
 import AppError from "../../errors/AppError";
 import Message from "../../models/Message";
-import OldMessage from "../../models/OldMessage";
 import Ticket from "../../models/Ticket";
 import ShowTicketService from "../TicketServices/ShowTicketService";
 import Queue from "../../models/Queue";
@@ -54,7 +53,6 @@ const ListMessagesService = async ({
     (await GetCompanySetting(companyId, "messageVisibility", "message")) ===
       "message"
   ) {
-    // eslint-disable-next-line dot-notation
     options.where["queueId"] = {
       [Op.or]: {
         [Op.in]: queues,
@@ -74,14 +72,6 @@ const ListMessagesService = async ({
         include: ["contact"],
         where: {
           companyId: ticket.companyId
-        },
-        required: false
-      },
-      {
-        model: OldMessage,
-        as: "oldMessages",
-        where: {
-          ticketId: ticket.id
         },
         required: false
       },
