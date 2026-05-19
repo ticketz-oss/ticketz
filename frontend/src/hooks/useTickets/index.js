@@ -22,7 +22,6 @@ const useTickets = ({
   all
 }) => {
   const [loading, setLoading] = useState(true);
-  const [hasMore, setHasMore] = useState(false);
   const [nextCursorUpdatedAt, setNextCursorUpdatedAt] = useState(null);
   const [nextCursorTicketId, setNextCursorTicketId] = useState(null);
   const [tickets, setTickets] = useState([]);
@@ -53,7 +52,6 @@ const useTickets = ({
             }
           });
           setTickets(data.tickets);
-          setHasMore(data.hasMore);
           setNextCursorUpdatedAt(data.nextUpdatedAt || null);
           setNextCursorTicketId(data.nextTicketId || null);
           setLoading(false);
@@ -84,9 +82,6 @@ const useTickets = ({
   return {
     tickets,
     loading,
-    hasMore,
-    nextUpdatedAt: nextCursorUpdatedAt,
-    nextTicketId: nextCursorTicketId
   };
 };
 

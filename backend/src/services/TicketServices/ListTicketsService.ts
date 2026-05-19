@@ -27,7 +27,6 @@ interface Request {
   isSearch?: boolean;
   searchParam?: string;
   nextUpdatedAt?: string;
-  nextTicketId?: string;
   status?: string;
   groups?: string;
   date?: string;
@@ -47,16 +46,12 @@ interface Request {
 interface Response {
   tickets: Ticket[];
   count: number | null;
-  hasMore: boolean;
-  nextUpdatedAt: string | null;
-  nextTicketId: number | null;
 }
 
 const ListTicketsService = async ({
   isSearch = false,
   searchParam = "",
   nextUpdatedAt,
-  nextTicketId,
   queueIds,
   contactId,
   tags,
@@ -316,21 +311,9 @@ const ListTicketsService = async ({
       throw new AppError("ERR_INVALID_NEXT_UPDATED_AT", 400);
     }
 
-    const parsedNextTicketId = Number(nextTicketId);
-
     andedOrs.push({
-      updatedAt: {
-        [Op.lte]: parsedNextUpdatedAt
-      }
+      updatedAt: { [Op.lt]: parsedNextUpdatedAt }
     });
-
-    if (!Number.isNaN(parsedNextTicketId) && parsedNextTicketId > 0) {
-      andedOrs.push({
-        id: {
-          [Op.ne]: parsedNextTicketId
-        }
-      });
-    }
   }
 
   if (notClosed) {
@@ -348,7 +331,7 @@ const ListTicketsService = async ({
   const tickets = await Ticket.findAll({
     where: whereCondition,
     include: includeCondition,
-    limit: limit ? limit + 1 : undefined,
+    limit,
     order: [
       ["updatedAt", "DESC"],
       ["id", "DESC"]
@@ -356,17 +339,9 @@ const ListTicketsService = async ({
     subQuery: false
   });
 
-  const hasMore = limit ? tickets.length > limit : false;
-  const visibleTickets = limit && hasMore ? tickets.slice(0, limit) : tickets;
-  const lastTicket = visibleTickets[visibleTickets.length - 1];
-
   return {
-    tickets: visibleTickets,
-    count: null,
-    hasMore,
-    nextUpdatedAt:
-      hasMore && lastTicket ? lastTicket.updatedAt.toISOString() : null,
-    nextTicketId: hasMore && lastTicket ? lastTicket.id : null
+    tickets,
+    count: null
   };
 };
 

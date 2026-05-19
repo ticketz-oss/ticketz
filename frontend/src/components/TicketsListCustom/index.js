@@ -394,28 +394,21 @@ const TicketsListCustom = props => {
 
   const loadMore = () => {
     const lastTicket = ticketsList[ticketsList.length - 1];
-    const cursorUpdatedAt = nextUpdatedAt || lastTicket?.updatedAt || null;
-    const cursorTicketId = nextTicketId || lastTicket?.id || null;
-
-    if (!cursorUpdatedAt || !cursorTicketId) {
-      return;
-    }
-
+    if (!lastTicket) return;
     if (
-      paginationCursor.nextUpdatedAt === cursorUpdatedAt &&
-      paginationCursor.nextTicketId === cursorTicketId
+      paginationCursor.nextUpdatedAt === lastTicket.updatedAt &&
+      paginationCursor.nextTicketId === lastTicket.id
     ) {
       return;
     }
-
     setPaginationCursor({
-      nextUpdatedAt: cursorUpdatedAt,
-      nextTicketId: cursorTicketId
+      nextUpdatedAt: lastTicket.updatedAt,
+      nextTicketId: lastTicket.id
     });
   };
 
   const handleScroll = e => {
-    if (!hasMore || loading) return;
+    if (loading) return;
 
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
 
