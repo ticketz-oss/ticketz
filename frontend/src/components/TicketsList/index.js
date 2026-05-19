@@ -267,13 +267,24 @@ const TicketsList = ({
   }, [status, showAll, user, selectedQueueIds, socketManager]);
 
   const loadMore = () => {
-    if (!nextUpdatedAt) {
+    const lastTicket = ticketsList[ticketsList.length - 1];
+    const cursorUpdatedAt = nextUpdatedAt || lastTicket?.updatedAt || null;
+    const cursorTicketId = nextTicketId || lastTicket?.id || null;
+
+    if (!cursorUpdatedAt || !cursorTicketId) {
+      return;
+    }
+
+    if (
+      paginationCursor.nextUpdatedAt === cursorUpdatedAt &&
+      paginationCursor.nextTicketId === cursorTicketId
+    ) {
       return;
     }
 
     setPaginationCursor({
-      nextUpdatedAt,
-      nextTicketId
+      nextUpdatedAt: cursorUpdatedAt,
+      nextTicketId: cursorTicketId
     });
   };
 
