@@ -14,7 +14,9 @@ import ListTicketsServiceKanban from "../services/TicketServices/ListTicketsServ
 type IndexQuery = {
   isSearch?: string;
   searchParam: string;
-  pageNumber: string;
+  pageNumber?: string;
+  nextUpdatedAt?: string;
+  nextTicketId?: string;
   status: string;
   groups: string;
   date: string;
@@ -40,7 +42,8 @@ const updateMutex = new Mutex();
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const {
-    pageNumber,
+    nextUpdatedAt,
+    nextTicketId,
     status,
     groups,
     date,
@@ -76,13 +79,20 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     usersIds = JSON.parse(userIdsStringified);
   }
 
-  const { tickets, count, hasMore } = await ListTicketsService({
+  const {
+    tickets,
+    count,
+    hasMore,
+    nextUpdatedAt: responseNextUpdatedAt,
+    nextTicketId: responseNextTicketId
+  } = await ListTicketsService({
     isSearch: isSearch === "true",
     searchParam,
     contactId: Number(contactId) || undefined,
     tags: tagsIds,
     users: usersIds,
-    pageNumber,
+    nextUpdatedAt,
+    nextTicketId,
     status,
     groups,
     date,
@@ -96,7 +106,13 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     companyId
   });
 
-  return res.status(200).json({ tickets, count, hasMore });
+  return res.status(200).json({
+    tickets,
+    count,
+    hasMore,
+    nextUpdatedAt: responseNextUpdatedAt,
+    nextTicketId: responseNextTicketId
+  });
 };
 
 export const kanban = async (

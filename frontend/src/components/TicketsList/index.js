@@ -161,7 +161,10 @@ const TicketsList = ({
   selectedQueueIds
 }) => {
   const classes = useStyles();
-  const [pageNumber, setPageNumber] = useState(1);
+  const [paginationCursor, setPaginationCursor] = useState({
+    nextUpdatedAt: null,
+    nextTicketId: null
+  });
   const [ticketsList, dispatch] = useReducer(reducer, []);
   const { user } = useContext(AuthContext);
 
@@ -169,17 +172,20 @@ const TicketsList = ({
 
   useEffect(() => {
     dispatch({ type: "RESET" });
-    setPageNumber(1);
+    setPaginationCursor({ nextUpdatedAt: null, nextTicketId: null });
   }, [status, searchParam, dispatch, showAll, selectedQueueIds]);
 
-  const { tickets, hasMore, loading } = useTickets({
-    pageNumber,
-    searchParam,
-    tags: JSON.stringify(tags),
-    status,
-    showAll,
-    queueIds: JSON.stringify(selectedQueueIds)
-  });
+  const { tickets, hasMore, loading, nextUpdatedAt, nextTicketId } = useTickets(
+    {
+      nextUpdatedAt: paginationCursor.nextUpdatedAt,
+      nextTicketId: paginationCursor.nextTicketId,
+      searchParam,
+      tags: JSON.stringify(tags),
+      status,
+      showAll,
+      queueIds: JSON.stringify(selectedQueueIds)
+    }
+  );
 
   useEffect(() => {
     if (!status && !searchParam) return;
@@ -261,7 +267,14 @@ const TicketsList = ({
   }, [status, showAll, user, selectedQueueIds, socketManager]);
 
   const loadMore = () => {
-    setPageNumber(prevState => prevState + 1);
+    if (!nextUpdatedAt) {
+      return;
+    }
+
+    setPaginationCursor({
+      nextUpdatedAt,
+      nextTicketId
+    });
   };
 
   const handleScroll = e => {

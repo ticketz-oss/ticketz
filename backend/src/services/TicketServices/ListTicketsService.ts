@@ -10,6 +10,7 @@ import {
 import { startOfDay, endOfDay, parseISO } from "date-fns";
 
 import { intersection } from "lodash";
+import AppError from "../../errors/AppError";
 import Ticket from "../../models/Ticket";
 import Contact from "../../models/Contact";
 import Message from "../../models/Message";
@@ -25,7 +26,8 @@ import ContactTag from "../../models/ContactTag";
 interface Request {
   isSearch?: boolean;
   searchParam?: string;
-  pageNumber?: string;
+  nextUpdatedAt?: string;
+  nextTicketId?: string;
   status?: string;
   groups?: string;
   date?: string;
@@ -44,14 +46,17 @@ interface Request {
 
 interface Response {
   tickets: Ticket[];
-  count: number;
+  count: number | null;
   hasMore: boolean;
+  nextUpdatedAt: string | null;
+  nextTicketId: number | null;
 }
 
 const ListTicketsService = async ({
   isSearch = false,
   searchParam = "",
-  pageNumber = "1",
+  nextUpdatedAt,
+  nextTicketId,
   queueIds,
   contactId,
   tags,
@@ -198,7 +203,7 @@ const ListTicketsService = async ({
             `%${sanitizedSearchParam}%`
           )
         }
-      ] as any[]
+      ]
     });
   }
 
@@ -231,8 +236,8 @@ const ListTicketsService = async ({
   }
 
   if (Array.isArray(tags) && tags.length > 0) {
-    const ticketsTagFilter: any[] | null = [];
-    const contactsTagFilter: any[] | null = [];
+    const ticketsTagFilter: number[][] = [];
+    const contactsTagFilter: number[][] = [];
     // eslint-disable-next-line no-restricted-syntax
     for await (const tag of tags) {
       const ticketTags = await TicketTag.findAll({
@@ -281,7 +286,7 @@ const ListTicketsService = async ({
   }
 
   if (Array.isArray(users) && users.length > 0) {
-    const ticketsUserFilter: any[] | null = [];
+    const ticketsUserFilter: number[][] = [];
     // eslint-disable-next-line no-restricted-syntax
     for await (const u of users) {
       const ticketUsers = await Ticket.findAll({
@@ -303,7 +308,30 @@ const ListTicketsService = async ({
   }
 
   const limit = all ? undefined : 40;
-  const offset = all ? undefined : limit * (+pageNumber - 1);
+
+  if (!all && nextUpdatedAt) {
+    const parsedNextUpdatedAt = new Date(nextUpdatedAt);
+
+    if (Number.isNaN(parsedNextUpdatedAt.getTime())) {
+      throw new AppError("ERR_INVALID_NEXT_UPDATED_AT", 400);
+    }
+
+    const parsedNextTicketId = Number(nextTicketId);
+
+    andedOrs.push({
+      updatedAt: {
+        [Op.lte]: parsedNextUpdatedAt
+      }
+    });
+
+    if (!Number.isNaN(parsedNextTicketId) && parsedNextTicketId > 0) {
+      andedOrs.push({
+        id: {
+          [Op.ne]: parsedNextTicketId
+        }
+      });
+    }
+  }
 
   if (notClosed) {
     whereCondition = {
@@ -317,23 +345,28 @@ const ListTicketsService = async ({
     companyId
   };
 
-  const { count, rows: tickets } = await Ticket.findAndCountAll({
+  const tickets = await Ticket.findAll({
     where: whereCondition,
     include: includeCondition,
-    distinct: true,
-    col: "id",
-    limit,
-    offset,
-    order: [["updatedAt", "DESC"]],
+    limit: limit ? limit + 1 : undefined,
+    order: [
+      ["updatedAt", "DESC"],
+      ["id", "DESC"]
+    ],
     subQuery: false
   });
 
-  const hasMore = count > offset + tickets.length;
+  const hasMore = limit ? tickets.length > limit : false;
+  const visibleTickets = limit && hasMore ? tickets.slice(0, limit) : tickets;
+  const lastTicket = visibleTickets[visibleTickets.length - 1];
 
   return {
-    tickets,
-    count,
-    hasMore
+    tickets: visibleTickets,
+    count: null,
+    hasMore,
+    nextUpdatedAt:
+      hasMore && lastTicket ? lastTicket.updatedAt.toISOString() : null,
+    nextTicketId: hasMore && lastTicket ? lastTicket.id : null
   };
 };
 

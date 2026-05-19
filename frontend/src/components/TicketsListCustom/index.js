@@ -180,7 +180,10 @@ const TicketsListCustom = props => {
     showTabGroups
   } = props;
   const classes = useStyles();
-  const [pageNumber, setPageNumber] = useState(1);
+  const [paginationCursor, setPaginationCursor] = useState({
+    nextUpdatedAt: null,
+    nextTicketId: null
+  });
   const [update, setUpdate] = useState(0);
   const [ticketsList, dispatch] = useReducer(reducer, []);
   const [ticketsListUpdated, setTicketsListUpdated] = useState([]);
@@ -191,7 +194,7 @@ const TicketsListCustom = props => {
 
   useEffect(() => {
     dispatch({ type: "RESET" });
-    setPageNumber(1);
+    setPaginationCursor({ nextUpdatedAt: null, nextTicketId: null });
   }, [
     status,
     searchParam,
@@ -203,18 +206,21 @@ const TicketsListCustom = props => {
     selectedQueueIds
   ]);
 
-  const { tickets, hasMore, loading } = useTickets({
-    pageNumber,
-    isSearch,
-    searchParam,
-    status,
-    groups,
-    showAll,
-    contactId,
-    tags: JSON.stringify(tags),
-    users: JSON.stringify(users),
-    queueIds: JSON.stringify(selectedQueueIds)
-  });
+  const { tickets, hasMore, loading, nextUpdatedAt, nextTicketId } = useTickets(
+    {
+      nextUpdatedAt: paginationCursor.nextUpdatedAt,
+      nextTicketId: paginationCursor.nextTicketId,
+      isSearch,
+      searchParam,
+      status,
+      groups,
+      showAll,
+      contactId,
+      tags: JSON.stringify(tags),
+      users: JSON.stringify(users),
+      queueIds: JSON.stringify(selectedQueueIds)
+    }
+  );
 
   useEffect(() => {
     const queueIds = queues.map(q => q.id);
@@ -387,7 +393,14 @@ const TicketsListCustom = props => {
   }, [ticketsList]);
 
   const loadMore = () => {
-    setPageNumber(prevState => prevState + 1);
+    if (!nextUpdatedAt) {
+      return;
+    }
+
+    setPaginationCursor({
+      nextUpdatedAt,
+      nextTicketId
+    });
   };
 
   const handleScroll = e => {
