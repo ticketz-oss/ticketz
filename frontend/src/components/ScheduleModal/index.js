@@ -192,7 +192,7 @@ const ScheduleModal = ({
             }, 400);
           }}
         >
-          {({ touched, errors, isSubmitting, values }) => (
+          {({ touched, errors, isSubmitting, values, setFieldValue }) => (
             <Form>
               <DialogContent dividers>
                 <div className={classes.multFieldLine}>
@@ -203,7 +203,7 @@ const ScheduleModal = ({
                       options={contacts}
                       onChange={(e, contact) => {
                         const contactId = contact ? contact.id : "";
-                        setSchedule({ ...schedule, contactId });
+                        setFieldValue("contactId", contactId);
                         setCurrentContact(contact ? contact : initialContact);
                       }}
                       getOptionLabel={option => option.name}
@@ -260,10 +260,7 @@ const ScheduleModal = ({
                         size="small"
                         checked={values.saveMessage}
                         onChange={() =>
-                          setSchedule({
-                            ...values,
-                            saveMessage: !values.saveMessage
-                          })
+                          setFieldValue("saveMessage", !values.saveMessage)
                         }
                         name="saveMessage"
                         color="primary"
