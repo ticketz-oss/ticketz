@@ -304,16 +304,23 @@ const getSenderMessage = (
 
 const getContactMessage = async (msg: WAMessage, wbot: Session) => {
   const isGroup = msg.key.remoteJid.includes("g.us");
-  const rawNumber = msg.key.remoteJid.replace(/\D/g, "");
+  const mainJid = isGroup
+    ? msg.key.remoteJid
+    : msg.key?.sender_pn || msg.key?.peer_recipient_pn || msg.key.remoteJid;
+  const numberJid = msg.key?.sender_pn || msg.key?.peer_recipient_pn;
+  const rawNumber = mainJid.replace(/\D/g, "");
   return isGroup
     ? {
         id: getSenderMessage(msg, wbot),
         name: msg.pushName
       }
     : {
-        id: msg.key.remoteJid,
-        lid: msg?.key?.sender_lid,
-        jid: msg?.key?.sender_pn,
+        id: mainJid,
+        lid:
+          msg.key?.sender_lid ||
+          msg.key?.peer_recipient_lid ||
+          (msg.key?.peer_recipient_pn ? msg.key.remoteJid : undefined),
+        jid: numberJid,
         name: msg.key.fromMe ? rawNumber : msg.pushName || msg.verifiedBizName
       };
 };
