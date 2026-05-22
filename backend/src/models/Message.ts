@@ -18,6 +18,12 @@ import Queue from "./Queue";
 import OldMessage from "./OldMessage";
 import { URLCharEncoder } from "./URLCharEncoder";
 
+export type MessageErrorPayload = {
+  code: string;
+  message: string;
+  rawPayload?: unknown;
+};
+
 @Table
 class Message extends Model {
   @PrimaryKey
@@ -50,6 +56,9 @@ class Message extends Model {
 
   @Column(DataType.TEXT)
   body: string;
+
+  @Column(DataType.JSONB)
+  error: MessageErrorPayload;
 
   @Column(DataType.STRING)
   get mediaUrl(): string | null {

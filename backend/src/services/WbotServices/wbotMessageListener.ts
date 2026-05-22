@@ -15,7 +15,8 @@ import {
   WAMessageUpdate,
   WAMessageStubType,
   WAGenericMediaMessage,
-  WALocationMessage
+  WALocationMessage,
+  WAMessageStatus
 } from "libzapitu-rf";
 import { Mutex } from "async-mutex";
 import { Op } from "sequelize";
@@ -25,7 +26,7 @@ import { Throttle } from "stream-throttle";
 import { Sequelize } from "sequelize-typescript";
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
-import Message from "../../models/Message";
+import Message, { MessageErrorPayload } from "../../models/Message";
 import OldMessage from "../../models/OldMessage";
 
 import { getIO } from "../../libs/socket";
@@ -2073,8 +2074,12 @@ const handleMessage = async (
   }
 };
 
-const handleMsgAck = async (id: string, whatsappId: number, ack: number) => {
-  if (!ack) return;
+const handleMsgAck = async (
+  id: string,
+  whatsappId: number,
+  update: { status?: number; messageStubParameters?: string[] }
+) => {
+  if (!update) return;
 
   const io = getIO();
 
@@ -2098,9 +2103,28 @@ const handleMsgAck = async (id: string, whatsappId: number, ack: number) => {
       ]
     });
 
-    if (!messageToUpdate || ack <= messageToUpdate.ack) return;
+    if (
+      !messageToUpdate ||
+      (update.status > 0 && update.status <= messageToUpdate.ack)
+    ) {
+      return;
+    }
 
-    await messageToUpdate.update({ ack });
+    let error: MessageErrorPayload;
+
+    if (update.status === WAMessageStatus.ERROR) {
+      logger.error({ id, whatsappId, update }, "Message failed to send.");
+
+      error = {
+        code: `ZAPITU-${update.status}`,
+        message: update.messageStubParameters?.[1]
+          ? update.messageStubParameters[1]
+          : "Message failed to send",
+        rawPayload: update
+      };
+    }
+
+    await messageToUpdate.update({ ack: error ? -1 : update.status, error });
     io.to(messageToUpdate.ticketId.toString()).emit(
       `company-${messageToUpdate.companyId}-appMessage`,
       {
@@ -2211,7 +2235,7 @@ const wbotMessageListener = async (
       if (messageReceipt.length === 0) return;
       messageReceipt.forEach(async (receipt: any) => {
         await ackMutex.runExclusive(async () => {
-          handleMsgAck(receipt.key.id, wbot.id, 2);
+          handleMsgAck(receipt.key.id, wbot.id, { status: 2 });
         });
       });
     });
@@ -2223,7 +2247,7 @@ const wbotMessageListener = async (
         (wbot as WASocket)!.readMessages([message.key]);
 
         await ackMutex.runExclusive(async () => {
-          handleMsgAck(message.key.id, wbot.id, message.update.status);
+          handleMsgAck(message.key.id, wbot.id, message.update);
         });
       });
     });

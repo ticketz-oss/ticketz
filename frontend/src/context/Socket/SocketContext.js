@@ -43,6 +43,7 @@ import { createContext } from "react";
 import openSocket from "socket.io-client";
 import { getBackendSocketURL } from "../../services/config";
 import { decodeToken, isExpired } from "react-jwt";
+import { toast } from "react-toastify";
 import api from "../../services/api";
 
 class ManagedSocket {
@@ -200,6 +201,13 @@ const socketManager = {
 
       this.currentSocket.on("connect", (...params) => {
         console.debug("socket connected", params);
+      });
+
+      this.currentSocket.on("error", payload => {
+        const message = payload?.message;
+        if (typeof message === "string" && message.trim()) {
+          toast.error(message);
+        }
       });
 
       this.currentSocket.onAny((event, ...args) => {
