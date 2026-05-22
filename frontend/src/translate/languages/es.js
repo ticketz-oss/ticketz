@@ -225,11 +225,28 @@ const messages = {
           import: "Importar Contactos",
           add: "Agregar Contacto"
         },
+        toolTips: {
+          message: "Abrir conversación",
+          edit: "Editar contacto",
+          delete: "Eliminar contacto",
+          view: "Ver contacto"
+        },
         table: {
           name: "Nombre",
           whatsapp: "WhatsApp",
           email: "Correo electrónico",
           actions: "Acciones"
+        },
+        details: {
+          title: "Datos del contacto",
+          tags: "Etiquetas",
+          chatbot: "Chatbot",
+          unavailable: "No se pudieron cargar los datos de este contacto.",
+          emptyEmail: "Correo no informado",
+          emptyTags: "No hay etiquetas vinculadas",
+          emptyExtraInfo: "No hay información adicional registrada.",
+          close: "Cerrar",
+          edit: "Editar contacto"
         }
       },
       contactModal: {
@@ -243,6 +260,7 @@ const messages = {
           name: "Nombre",
           number: "Número de WhatsApp",
           email: "Correo electrónico",
+          profile: "Resumen del contacto",
           extraName: "Nombre del campo",
           extraValue: "Valor",
           disableBot: "Desativar bot de conversa"

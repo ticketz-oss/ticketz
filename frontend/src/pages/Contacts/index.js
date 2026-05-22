@@ -11,7 +11,6 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import Button from "@material-ui/core/Button";
-import Avatar from "@material-ui/core/Avatar";
 import WhatsAppIcon from "@material-ui/icons/WhatsApp";
 import SearchIcon from "@material-ui/icons/Search";
 import TextField from "@material-ui/core/TextField";
@@ -20,10 +19,13 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 import IconButton from "@material-ui/core/IconButton";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
 import EditIcon from "@material-ui/icons/Edit";
+import VisibilityOutlinedIcon from "@material-ui/icons/VisibilityOutlined";
 
 import api from "../../services/api";
 import TableRowSkeleton from "../../components/TableRowSkeleton";
 import ContactModal from "../../components/ContactModal";
+import ContactDetailsModal from "../../components/ContactDetailsModal";
+import ClickableContactAvatar from "../../components/ClickableContactAvatar";
 import ConfirmationModal from "../../components/ConfirmationModal/";
 
 import { i18n } from "../../translate/i18n";
@@ -35,8 +37,6 @@ import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { Can } from "../../components/Can";
 import { SocketContext } from "../../context/Socket/SocketContext";
-import { generateColor } from "../../helpers/colorGenerator";
-import { getInitials } from "../../helpers/getInitials";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCloudArrowUp } from "@fortawesome/free-solid-svg-icons";
@@ -136,6 +136,8 @@ const Contacts = () => {
   const [contacts, dispatch] = useReducer(reducer, []);
   const [selectedContactId, setSelectedContactId] = useState(null);
   const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [viewContactId, setViewContactId] = useState(null);
+  const [contactDetailsOpen, setContactDetailsOpen] = useState(false);
   const [deletingContact, setDeletingContact] = useState(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [importConfirmOpen, setImportConfirmOpen] = useState(false);
@@ -148,11 +150,13 @@ const Contacts = () => {
   useEffect(() => {
     api.get("/whatsapp").then(({ data }) => {
       setConnections(data);
-      data.map(connection => {
-        if (connection.channel === "whatsapp" && connection.isDefault) {
-          setImportConnectionId(connection.id);
-        }
+      const defaultConnection = data.find(connection => {
+        return connection.channel === "whatsapp" && connection.isDefault;
       });
+
+      if (defaultConnection) {
+        setImportConnectionId(defaultConnection.id);
+      }
     });
   }, []);
 
@@ -216,9 +220,24 @@ const Contacts = () => {
     setContactModalOpen(false);
   };
 
+  const handleOpenContactDetails = contactId => {
+    setViewContactId(contactId);
+    setContactDetailsOpen(true);
+  };
+
+  const handleCloseContactDetails = () => {
+    setViewContactId(null);
+    setContactDetailsOpen(false);
+  };
+
   const hadleEditContact = contactId => {
     setSelectedContactId(contactId);
     setContactModalOpen(true);
+  };
+
+  const handleEditFromDetails = contactId => {
+    handleCloseContactDetails();
+    hadleEditContact(contactId);
   };
 
   const handleDeleteContact = async contactId => {
@@ -306,6 +325,12 @@ const Contacts = () => {
         aria-labelledby="form-dialog-title"
         contactId={selectedContactId}
       ></ContactModal>
+      <ContactDetailsModal
+        open={contactDetailsOpen}
+        onClose={handleCloseContactDetails}
+        contactId={viewContactId}
+        onEdit={handleEditFromDetails}
+      />
       <ConfirmationModal
         title={`${i18n.t("contacts.confirmationModal.deleteTitle")} ${deletingContact?.name}?`}
         open={deleteConfirmOpen}
@@ -435,26 +460,19 @@ const Contacts = () => {
               {contacts.map(contact => (
                 <TableRow key={contact.id}>
                   <TableCell style={{ paddingRight: 0 }}>
-                    {
-                      <Avatar
-                        style={{
-                          backgroundColor: generateColor(contact?.number),
-                          fontWeight: "bold",
-                          color: "white"
-                        }}
-                        src={contact.profilePicUrl}
-                      >
-                        {getInitials(contact?.name)}
-                      </Avatar>
-                    }
+                    <ClickableContactAvatar contact={contact} />
                   </TableCell>
                   <TableCell className={classes.contactName}>
                     {contact.name}
                     <div className={classes.tagsdiv}>
-                      {contact.tags.map(tag => (
-                        <Tooltip title={tag.name} placement="top" arrow>
+                      {(contact.tags || []).map(tag => (
+                        <Tooltip
+                          key={tag.id}
+                          title={tag.name}
+                          placement="top"
+                          arrow
+                        >
                           <div
-                            key={tag.id}
                             className={classes.tag}
                             style={{
                               backgroundColor: tag.color
@@ -470,38 +488,52 @@ const Contacts = () => {
                   <TableCell align="center">{contact.email}</TableCell>
                   <TableCell align="center">
                     {!contact.isGroup && (
+                      <Tooltip title={i18n.t("contacts.toolTips.message")}>
+                        <IconButton
+                          size="small"
+                          onClick={() =>
+                            window.mentionClick({
+                              contactId: contact.id,
+                              name: contact?.name,
+                              number: contact?.number
+                            })
+                          }
+                        >
+                          <WhatsAppIcon />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                    <Tooltip title={i18n.t("contacts.toolTips.view")}>
                       <IconButton
                         size="small"
-                        onClick={() =>
-                          window.mentionClick({
-                            contactId: contact.id,
-                            name: contact?.name,
-                            number: contact?.number
-                          })
-                        }
+                        onClick={() => handleOpenContactDetails(contact.id)}
                       >
-                        <WhatsAppIcon />
+                        <VisibilityOutlinedIcon />
                       </IconButton>
-                    )}
-                    <IconButton
-                      size="small"
-                      onClick={() => hadleEditContact(contact.id)}
-                    >
-                      <EditIcon />
-                    </IconButton>
+                    </Tooltip>
+                    <Tooltip title={i18n.t("contacts.toolTips.edit")}>
+                      <IconButton
+                        size="small"
+                        onClick={() => hadleEditContact(contact.id)}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                    </Tooltip>
                     <Can
                       role={user.profile}
                       perform="contacts-page:deleteContact"
                       yes={() => (
-                        <IconButton
-                          size="small"
-                          onClick={() => {
-                            setDeleteConfirmOpen(true);
-                            setDeletingContact(contact);
-                          }}
-                        >
-                          <DeleteOutlineIcon />
-                        </IconButton>
+                        <Tooltip title={i18n.t("contacts.toolTips.delete")}>
+                          <IconButton
+                            size="small"
+                            onClick={() => {
+                              setDeleteConfirmOpen(true);
+                              setDeletingContact(contact);
+                            }}
+                          >
+                            <DeleteOutlineIcon />
+                          </IconButton>
+                        </Tooltip>
                       )}
                     />
                   </TableCell>

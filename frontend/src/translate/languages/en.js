@@ -226,11 +226,28 @@ const messages = {
           import: "Import Contacts",
           add: "Add Contact"
         },
+        toolTips: {
+          message: "Open conversation",
+          edit: "Edit contact",
+          delete: "Delete contact",
+          view: "View contact"
+        },
         table: {
           name: "Name",
           whatsapp: "WhatsApp",
           email: "Email",
           actions: "Actions"
+        },
+        details: {
+          title: "Contact details",
+          tags: "Tags",
+          chatbot: "Chatbot",
+          unavailable: "Could not load this contact's details.",
+          emptyEmail: "No email provided",
+          emptyTags: "No tags linked",
+          emptyExtraInfo: "No additional information available.",
+          close: "Close",
+          edit: "Edit contact"
         }
       },
       contactModal: {
@@ -244,6 +261,7 @@ const messages = {
           name: "Name",
           number: "WhatsApp Number",
           email: "Email",
+          profile: "Contact summary",
           extraName: "Field Name",
           extraValue: "Value",
           disableBot: "Disable chatbot"
