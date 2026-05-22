@@ -14,6 +14,7 @@ import UpdateWhatsAppService from "../services/WhatsappService/UpdateWhatsAppSer
 import AppError from "../errors/AppError";
 import Ticket from "../models/Ticket";
 import { sendWhatsappUpdate } from "../services/WhatsappService/SocketSendWhatsappUpdate";
+import CreateConnectionAlertService from "../services/ConnectionAlertServices/CreateConnectionAlertService";
 
 interface WhatsappData {
   name: string;
@@ -185,6 +186,12 @@ export const remove = async (
     await cacheLayer.delFromPattern(`sessions:${whatsappId}:*`);
     removeWbot(+whatsappId);
   }
+
+  await CreateConnectionAlertService({
+    whatsapp,
+    eventType: "deleted",
+    reason: "manual_delete"
+  });
 
   await DeleteWhatsAppService(whatsappId);
 

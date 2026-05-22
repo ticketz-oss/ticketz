@@ -22,6 +22,7 @@ import AccountCircle from "@material-ui/icons/AccountCircle";
 import CachedIcon from "@material-ui/icons/Cached";
 
 import MainListItems from "./MainListItems";
+import ConnectionAlertsPopover from "../components/ConnectionAlertsPopover";
 import NotificationsPopOver from "../components/NotificationsPopOver";
 import { Backendlogs } from "../components/Backendlogs";
 import { PhoneCall } from "../components/PhoneCall";
@@ -602,6 +603,10 @@ const LoggedInLayout = ({ children, themeToggle }) => {
           <PhoneCall />
 
           <NotificationsVolume setVolume={setVolume} volume={volume} />
+
+          {user.id && (user.profile === "admin" || user.super) && (
+            <ConnectionAlertsPopover />
+          )}
 
           {user.id && <NotificationsPopOver volume={volume} />}
 

@@ -35,6 +35,7 @@ import { TicketCountersChart } from "./TicketCountersChart";
 import { getTimezoneOffset } from "../../helpers/getTimezoneOffset.js";
 
 import TicketzRegistry from "../../components/TicketzRegistry";
+import ConnectionAlertsOverview from "../../components/ConnectionAlertsOverview";
 import { copyToClipboard } from "../../helpers/copyToClipboard.js";
 import api from "../../services/api.js";
 import { SocketContext } from "../../context/Socket/SocketContext.js";
@@ -802,6 +803,18 @@ const Dashboard = () => {
             value={openedTotal}
             graph={<SmallPie chartData={openedChartData} />}
           />
+
+          <Grid item xs={12}>
+            <ConnectionAlertsOverview
+              title="Monitoramento de conexoes"
+              subtitle={
+                currentUser?.super
+                  ? "Ultimos eventos definitivos de todas as empresas monitoradas."
+                  : "Ultimos eventos definitivos das conexoes desta empresa."
+              }
+              maxItems={8}
+            />
+          </Grid>
 
           {/* FILTROS */}
           {renderFilters()}

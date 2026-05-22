@@ -52,6 +52,7 @@
     "multer": "^2.1.1",
     "mustache": "^4.2.0",
     "node-cache": "^5.1.2",
+    "nodemailer": "^6.10.1",
     "openai": "^4.95.1",
     "pg": "^8.11.5",
     "pino": "^9.6.0",
