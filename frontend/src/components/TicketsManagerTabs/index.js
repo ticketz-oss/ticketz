@@ -42,8 +42,9 @@ const useStyles = makeStyles(theme => ({
   },
 
   tabsHeader: {
-    flex: "none"
-    // backgroundColor: "#eee",
+    flex: "none",
+    backgroundColor: theme.palette.background.paper,
+    borderBottom: `1px solid ${theme.palette.backgroundContrast.border}`
   },
 
   settingsIcon: {
@@ -54,27 +55,44 @@ const useStyles = makeStyles(theme => ({
 
   tabWithGroups: {
     minWidth: 90,
-    width: 90
+    width: 90,
+    fontSize: "0.72rem",
+    fontWeight: 600,
+    minHeight: 58
   },
 
   tab: {
     minWidth: 120,
-    width: 120
+    width: 120,
+    fontSize: "0.72rem",
+    fontWeight: 600,
+    minHeight: 58
+  },
+
+  tabsRoot: {
+    minHeight: 58,
+    "& .MuiTabs-indicator": {
+      height: 3,
+      borderRadius: 3
+    }
   },
 
   ticketOptionsBox: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    // background: "#fafafa",
-    padding: theme.spacing(1)
+    backgroundColor: theme.palette.background.default,
+    borderBottom: `1px solid ${theme.palette.backgroundContrast.border}`,
+    padding: theme.spacing(1),
+    gap: theme.spacing(1)
   },
 
   serachInputWrapper: {
     flex: 1,
-    // background: "#fff",
+    background: theme.palette.background.paper,
     display: "flex",
-    borderRadius: 40,
+    border: `1px solid ${theme.palette.backgroundContrast.border}`,
+    borderRadius: 10,
     padding: 4,
     marginRight: theme.spacing(1)
   },
@@ -89,7 +107,8 @@ const useStyles = makeStyles(theme => ({
   searchInput: {
     flex: 1,
     border: "none",
-    borderRadius: 30
+    borderRadius: 30,
+    fontSize: "0.88rem"
   },
 
   badge: {
@@ -105,6 +124,23 @@ const useStyles = makeStyles(theme => ({
   icon24: {
     width: 24,
     height: 24
+  },
+
+  newTicketButton: {
+    borderRadius: 10,
+    fontWeight: 600,
+    whiteSpace: "nowrap"
+  },
+
+  queueSelectBox: {
+    marginLeft: 6,
+    minWidth: 120
+  },
+
+  searchFilters: {
+    paddingRight: 10,
+    paddingLeft: 10,
+    paddingTop: 8
   }
 }));
 
@@ -214,6 +250,7 @@ const TicketsManagerTabs = () => {
           variant="fullWidth"
           indicatorColor="primary"
           textColor="primary"
+          className={classes.tabsRoot}
           aria-label="icon label tabs example"
         >
           <Tab
@@ -275,6 +312,7 @@ const TicketsManagerTabs = () => {
             <Button
               variant="outlined"
               color="primary"
+              className={classes.newTicketButton}
               onClick={() => setNewTicketModalOpen(true)}
             >
               {i18n.t("ticketsManager.buttons.newTicket")}
@@ -305,6 +343,7 @@ const TicketsManagerTabs = () => {
           </>
         )}
         <TicketsQueueSelect
+          className={classes.queueSelectBox}
           style={{ marginLeft: 6 }}
           selectedQueueIds={selectedQueueIds}
           userQueues={user?.queues}
@@ -318,6 +357,7 @@ const TicketsManagerTabs = () => {
           indicatorColor="primary"
           textColor="primary"
           variant="fullWidth"
+          className={classes.tabsRoot}
         >
           <Tab
             label={
@@ -383,7 +423,7 @@ const TicketsManagerTabs = () => {
         />
       </TabPanel>
       <TabPanel value={tab} name="search" className={classes.ticketsWrapper}>
-        <Box style={{ paddingRight: 10, paddingLeft: 10 }}>
+        <Box className={classes.searchFilters}>
           <ContactSelect
             onSelected={contactId => {
               setSelectedContact(contactId);

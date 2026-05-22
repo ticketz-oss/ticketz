@@ -8,19 +8,27 @@ import TicketsManager from "../../components/TicketsManagerTabs/";
 import Ticket from "../../components/Ticket/";
 
 import { i18n } from "../../translate/i18n";
-import WhatsappBackground from "../../assets/wa-background.png";
 
 const useStyles = makeStyles(theme => ({
   chatContainer: {
     flex: 1,
     height: `calc(100% - 48px)`,
-    overflowY: "hidden"
+    overflowY: "hidden",
+    padding: theme.spacing(1),
+    backgroundColor: "transparent"
   },
 
   chatPapper: {
-    // backgroundColor: "red",
     display: "flex",
-    height: "100%"
+    height: "100%",
+    borderRadius: 14,
+    overflow: "hidden",
+    border: `1px solid ${theme.palette.backgroundContrast.border}`,
+    backgroundColor: theme.palette.background.paper,
+    boxShadow:
+      theme.mode === "light"
+        ? "0 12px 30px -24px rgba(0,0,0,0.45)"
+        : "0 20px 34px -26px rgba(0,0,0,0.8)"
   },
 
   contactsWrapper: {
@@ -28,7 +36,10 @@ const useStyles = makeStyles(theme => ({
     height: "100%",
     flexDirection: "column",
     overflowY: "hidden",
-    maxWidth: 534
+    maxWidth: 534,
+    borderRight: `1px solid ${theme.palette.backgroundContrast.border}`,
+    backgroundColor:
+      theme.mode === "light" ? theme.palette.background.paper : theme.palette.inputBackground
   },
   messagesWrapper: {
     overflow: "hidden",
@@ -36,14 +47,19 @@ const useStyles = makeStyles(theme => ({
     height: "100%",
     flexDirection: "column",
     flexGrow: 1,
-    maxWidth: "unset"
+    maxWidth: "unset",
+    backgroundColor: theme.palette.background.default
   },
   welcomeMsg: {
     display: "flex",
-    justifyContent: "space-evenly",
+    justifyContent: "center",
     alignItems: "center",
     height: "100%",
-    textAlign: "center"
+    textAlign: "center",
+    fontWeight: 600,
+    color: theme.palette.messageIcons,
+    backgroundColor: "transparent",
+    border: "none"
   }
 }));
 

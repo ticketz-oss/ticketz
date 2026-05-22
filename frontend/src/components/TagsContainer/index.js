@@ -1,11 +1,40 @@
-import { Chip, Paper, TextField } from "@material-ui/core";
+import { Chip, Paper, TextField, makeStyles } from "@material-ui/core";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import React, { useEffect, useRef, useState } from "react";
 import { isArray, isString } from "lodash";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 
+const useStyles = makeStyles(theme => ({
+  root: {
+    width: "100%",
+    "& .MuiOutlinedInput-root": {
+      borderRadius: 10,
+      backgroundColor: theme.palette.background.paper
+    },
+    "& .MuiInputBase-input": {
+      fontSize: "0.82rem"
+    }
+  },
+  chip: {
+    color: "white",
+    border: "none",
+    fontWeight: 600,
+    height: 24,
+    textShadow:
+      "-1px 0 rgba(0,0,0,0.16), 0 1px rgba(0,0,0,0.16), 1px 0 rgba(0,0,0,0.16), 0 -1px rgba(0,0,0,0.16)"
+  },
+  paper: {
+    width: 400,
+    maxWidth: "calc(100vw - 24px)",
+    marginLeft: 8,
+    borderRadius: 10,
+    border: `1px solid ${theme.palette.backgroundContrast.border}`
+  }
+}));
+
 export function TagsContainer({ ticket, contact }) {
+  const classes = useStyles();
   const [tags, setTags] = useState([]);
   const [selecteds, setSelecteds] = useState([]);
   const isMounted = useRef(true);
@@ -100,6 +129,7 @@ export function TagsContainer({ ticket, contact }) {
 
   return (
     <Autocomplete
+      className={classes.root}
       multiple
       size="small"
       options={tags}
@@ -111,12 +141,8 @@ export function TagsContainer({ ticket, contact }) {
         value.map((option, index) => (
           <Chip
             variant="outlined"
-            style={{
-              color: "white",
-              backgroundColor: option.color || "#eee",
-              textShadow:
-                "-1px 0 #808080, 0 1px #808080, 1px 0 #808080, 0 -1px #808080"
-            }}
+            className={classes.chip}
+            style={{ backgroundColor: option.color || "#9ca3af" }}
             label={option.name}
             {...getTagProps({ index })}
             size="small"
@@ -127,7 +153,7 @@ export function TagsContainer({ ticket, contact }) {
         <TextField {...params} variant="outlined" placeholder="Tags" />
       )}
       PaperComponent={({ children }) => (
-        <Paper style={{ width: 400, marginLeft: 12 }}>{children}</Paper>
+        <Paper className={classes.paper}>{children}</Paper>
       )}
     />
   );

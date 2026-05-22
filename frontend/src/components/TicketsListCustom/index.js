@@ -20,7 +20,8 @@ const useStyles = makeStyles(theme => ({
     flexDirection: "column",
     overflow: "hidden",
     borderTopRightRadius: 0,
-    borderBottomRightRadius: 0
+    borderBottomRightRadius: 0,
+    backgroundColor: theme.palette.background.default
   },
 
   ticketsList: {
@@ -28,7 +29,8 @@ const useStyles = makeStyles(theme => ({
     maxHeight: "100%",
     overflowY: "scroll",
     ...theme.scrollbarStyles,
-    borderTop: "2px solid rgba(0, 0, 0, 0.12)"
+    borderTop: `1px solid ${theme.palette.backgroundContrast.border}`,
+    backgroundColor: theme.palette.background.paper
   },
 
   ticketsListHeader: {
@@ -50,7 +52,7 @@ const useStyles = makeStyles(theme => ({
 
   noTicketsText: {
     textAlign: "center",
-    color: "rgb(104, 121, 146)",
+    color: theme.palette.messageIcons,
     fontSize: "14px",
     lineHeight: "1.4"
   },
@@ -59,13 +61,19 @@ const useStyles = makeStyles(theme => ({
     textAlign: "center",
     fontSize: "16px",
     fontWeight: "600",
-    margin: "0px"
+    margin: "0px",
+    color: theme.palette.textCommon
   },
 
   noTicketsDiv: {
     display: "flex",
-    height: "100px",
+    minHeight: "120px",
     margin: 40,
+    padding: theme.spacing(2),
+    border: `1px dashed ${theme.palette.backgroundContrast.border}`,
+    borderRadius: 12,
+    backgroundColor:
+      theme.mode === "light" ? "rgba(255,255,255,0.72)" : "rgba(255,255,255,0.02)",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center"

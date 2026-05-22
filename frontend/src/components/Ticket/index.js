@@ -28,7 +28,8 @@ const useStyles = makeStyles(theme => ({
     display: "flex",
     height: "100%",
     position: "relative",
-    overflow: "hidden"
+    overflow: "hidden",
+    backgroundColor: theme.palette.background.default
   },
 
   mainWrapper: {
@@ -40,6 +41,8 @@ const useStyles = makeStyles(theme => ({
     borderTopLeftRadius: 0,
     borderBottomLeftRadius: 0,
     borderLeft: "0",
+    borderRadius: 0,
+    backgroundColor: theme.palette.background.paper,
     transition: theme.transitions.create("margin", {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen
@@ -54,6 +57,12 @@ const useStyles = makeStyles(theme => ({
       duration: theme.transitions.duration.enteringScreen
     }),
     marginRight: 0
+  },
+  tagsWrapper: {
+    borderBottom: `1px solid ${theme.palette.backgroundContrast.border}`,
+    backgroundColor:
+      theme.mode === "light" ? "rgba(255,255,255,0.85)" : theme.palette.background.paper,
+    boxShadow: "none"
   },
   drawerShade: {
     display: "none",
@@ -223,7 +232,7 @@ const Ticket = () => {
           {renderTicketInfo()}
           <TicketActionButtons ticket={ticket} showTabGroups={showTabGroups} />
         </TicketHeader>
-        <Paper>
+        <Paper className={classes.tagsWrapper}>
           <TagsContainer
             ticket={["ticket", "both"].includes(tagsMode) && ticket}
             contact={tagsMode === "contact" && contact}
