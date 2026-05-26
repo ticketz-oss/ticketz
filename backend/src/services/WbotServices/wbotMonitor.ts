@@ -3,7 +3,6 @@ import * as Sentry from "@sentry/node";
 
 import { Mutex } from "async-mutex";
 import Contact from "../../models/Contact";
-import Setting from "../../models/Setting";
 import Ticket from "../../models/Ticket";
 import Whatsapp from "../../models/Whatsapp";
 import { logger } from "../../utils/logger";
@@ -12,6 +11,7 @@ import CreateMessageService from "../MessageServices/CreateMessageService";
 import { _t } from "../TranslationServices/i18nService";
 import { Session } from "../../libs/wbot";
 import { cacheLayer } from "../../libs/cache";
+import { GetCompanySetting } from "../../helpers/CheckSettings";
 
 const contactMutex = new Mutex();
 
@@ -25,11 +25,13 @@ const wbotMonitor = async (
       const content = node.content[0] as BinaryNode;
 
       if (content.tag === "terminate") {
-        const sendMsgCall = await Setting.findOne({
-          where: { key: "call", companyId }
-        });
+        const sendMsgCall = await GetCompanySetting(
+          companyId,
+          "call",
+          "disabled"
+        );
 
-        if (sendMsgCall.value === "disabled") {
+        if (sendMsgCall === "disabled") {
           const number = node.attrs.from.replace(/\D/g, "");
 
           const contact = await Contact.findOne({
