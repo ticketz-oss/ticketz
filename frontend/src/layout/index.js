@@ -68,6 +68,10 @@ const useStyles = makeStyles(theme => ({
     display: "flex",
     height: "var(--vh)",
     backgroundColor: theme.palette.fancyBackground,
+    backgroundImage:
+      theme.mode === "light"
+        ? "radial-gradient(900px at 10% 10%, rgba(255,122,0,0.08), transparent 60%), radial-gradient(1000px at 90% 90%, rgba(255,122,0,0.04), transparent 60%)"
+        : "none",
     "& .MuiButton-outlinedPrimary": {
       color: theme.palette.primary,
       border:
@@ -100,10 +104,14 @@ const useStyles = makeStyles(theme => ({
     borderRadius: 20,
     overflow: "hidden",
     cursor: "pointer",
-    backgroundColor:
+    border: `1px solid ${
+      theme.mode === "light" ? "rgba(255,255,255,0.28)" : "rgba(255,255,255,0.2)"
+    }`,
+    background:
       theme.mode === "dark"
-        ? "rgba(0, 0, 0, 0.2)"
-        : "rgba(255, 255, 255, 0.15)",
+        ? "rgba(18,18,22,0.5)"
+        : "rgba(255, 255, 255, 0.20)",
+    backdropFilter: "blur(8px)",
     [theme.breakpoints.down("xs")]: {
       borderRadius: 20
     }
@@ -163,7 +171,11 @@ const useStyles = makeStyles(theme => ({
     background:
       localStorage.getItem("impersonated") === "true"
         ? theme.palette.secondary.main
-        : theme.palette.primary.main
+        : `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+    boxShadow:
+      theme.mode === "light"
+        ? "0 4px 20px -10px rgba(0,0,0,0.35)"
+        : "0 6px 24px -12px rgba(0,0,0,0.55)"
   },
   toolbarIcon: {
     display: "flex",
@@ -173,6 +185,10 @@ const useStyles = makeStyles(theme => ({
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
+    boxShadow: "none",
+    borderBottom: `1px solid ${
+      theme.mode === "light" ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.06)"
+    }`,
     transition: theme.transitions.create(["width", "margin"], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen
@@ -194,7 +210,15 @@ const useStyles = makeStyles(theme => ({
     }
   },
   menuButton: {
-    marginRight: 36
+    marginRight: 18,
+    borderRadius: 10,
+    color: theme.palette.primary.contrastText,
+    backgroundColor:
+      theme.mode === "light" ? "rgba(255,255,255,0.16)" : "rgba(0,0,0,0.22)",
+    "&:hover": {
+      backgroundColor:
+        theme.mode === "light" ? "rgba(255,255,255,0.24)" : "rgba(0,0,0,0.35)"
+    }
   },
   menuButtonHidden: {
     display: "none"
@@ -202,7 +226,9 @@ const useStyles = makeStyles(theme => ({
   title: {
     flexGrow: 1,
     fontSize: 14,
-    color: "white"
+    color: "white",
+    fontWeight: 600,
+    letterSpacing: "-0.01em"
   },
   userMenuInfoContainer: {
     padding: theme.spacing(1.5, 2),
@@ -216,6 +242,10 @@ const useStyles = makeStyles(theme => ({
     position: "relative",
     whiteSpace: "nowrap",
     width: drawerWidth,
+    borderRight: `1px solid ${
+      theme.mode === "light" ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.12)"
+    }`,
+    backgroundColor: theme.palette.background.paper,
     transition: theme.transitions.create("width", {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen
@@ -226,6 +256,7 @@ const useStyles = makeStyles(theme => ({
   drawerPaperClose: {
     overflowX: "hidden",
     overflowY: "clip",
+    backgroundColor: theme.palette.background.paper,
     transition: theme.transitions.create("width", {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen
@@ -240,7 +271,8 @@ const useStyles = makeStyles(theme => ({
   },
   content: {
     flex: 1,
-    overflow: "auto"
+    overflow: "auto",
+    backgroundColor: "transparent"
   },
   container: {
     paddingTop: theme.spacing(4),
@@ -307,6 +339,8 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   const greaterThenSm = useMediaQuery(theme.breakpoints.up("sm"));
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { colorMode } = useContext(ColorModeContext);
+  const currentThemeVariant = colorMode.themeVariant || "attenditop";
+  const availableThemeVariants = colorMode.availableThemeVariants || [];
 
   const [currentLanguage, setCurrentLanguage] = useState(i18n.language);
 
@@ -508,12 +542,21 @@ const LoggedInLayout = ({ children, themeToggle }) => {
     colorMode.toggleColorMode();
   };
 
+  const handleChooseThemeVariant = variant => {
+    colorMode.setThemeVariant(variant);
+  };
+
   const handleChooseLanguage = language => {
     localStorage.setItem("language", language);
     window.location.reload(false);
   };
 
   const userCompanyId = Number(user?.companyId ?? user?.company?.id ?? 0);
+  const currentUserCompanyId = Number(
+    currentUser?.companyId ?? currentUser?.company?.id ?? userCompanyId
+  );
+  const canSelectThemeVariant =
+    Boolean(currentUser?.super) && currentUserCompanyId === 1;
   const shouldShowCompanyDueDate =
     user?.profile === "admin" && userCompanyId !== 1;
   const companyDueDateText = user?.company?.dueDate
@@ -696,6 +739,27 @@ const LoggedInLayout = ({ children, themeToggle }) => {
                   </MenuItem>
                 ))}
               </NestedMenuItem>
+              {canSelectThemeVariant && (
+                <NestedMenuItem label="Tema visual" parentMenuOpen={menuOpen}>
+                  {availableThemeVariants.map(variant => (
+                    <MenuItem
+                      key={variant.value}
+                      onClick={() => handleChooseThemeVariant(variant.value)}
+                    >
+                      <div
+                        style={{
+                          fontWeight:
+                            currentThemeVariant === variant.value
+                              ? "bold"
+                              : "normal"
+                        }}
+                      >
+                        {variant.label}
+                      </div>
+                    </MenuItem>
+                  ))}
+                </NestedMenuItem>
+              )}
               <MenuItem onClick={handleOpenAboutModal}>
                 {i18n.t("about.aboutthe")}{" "}
                 {currentUser?.super ? "ticketz" : theme.appName}
