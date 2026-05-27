@@ -1,17 +1,19 @@
 import { Mutex } from "async-mutex";
 import { Op } from "sequelize";
 import { Session } from "../../libs/wbot";
+import normalizePhone from "../../helpers/NormalizePhone";
 import Contact from "../../models/Contact";
 import CreateOrUpdateContactService, {
   updateContact
 } from "../ContactServices/CreateOrUpdateContactService";
+import MergeContactsService from "../ContactServices/MergeContactsService";
 import WhatsappLidMap from "../../models/WhatsappLidMap";
-import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
 import UpdateTicketService from "../TicketServices/UpdateTicketService";
 import GetProfilePicUrl from "./GetProfilePicUrl";
 
 const lidUpdateMutex = new Mutex();
+const contactIncludes = ["tags", "extraInfo", "whatsappLidMap"];
 
 interface IMe {
   name: string;
@@ -20,60 +22,111 @@ interface IMe {
   jid?: string;
 }
 
-async function checkAndDedup(contact: Contact, lid: string): Promise<void> {
-  const lidContact = await Contact.findOne({
-    where: {
-      companyId: contact.companyId,
-      number: {
-        [Op.or]: [lid, lid.substring(0, lid.indexOf("@"))]
-      }
-    }
-  });
+const getUniqueNumbers = (
+  numbers: Array<string | null | undefined>
+): string[] => [
+  ...new Set(numbers.filter((value): value is string => !!value))
+];
 
-  if (!lidContact) {
-    return;
+const getPreferredContact = (
+  contacts: Contact[],
+  preferredNumbers: string[]
+): Contact | null => {
+  for (let index = 0; index < preferredNumbers.length; index += 1) {
+    const preferredNumber = preferredNumbers[index];
+    const preferredContact = contacts.find(
+      contact => contact.number === preferredNumber
+    );
+
+    if (preferredContact) {
+      return preferredContact;
+    }
   }
 
-  await Message.update(
-    { contactId: contact.id },
-    {
-      where: {
-        contactId: lidContact.id,
-        companyId: contact.companyId
-      }
-    }
-  );
+  if (contacts.length === 0) {
+    return null;
+  }
 
+  return [...contacts].sort((a, b) => {
+    const aTime = new Date(a.createdAt).getTime();
+    const bTime = new Date(b.createdAt).getTime();
+
+    if (aTime !== bTime) {
+      return aTime - bTime;
+    }
+
+    return a.id - b.id;
+  })[0];
+};
+
+const getPhoneCandidates = (number: string): string[] => {
+  const normalized = normalizePhone(number);
+
+  return getUniqueNumbers([number, normalized.phone, normalized.wphone]);
+};
+
+const closeOpenTicketsForContact = async (contact: Contact): Promise<void> => {
   const notClosedTickets = await Ticket.findAll({
     where: {
-      contactId: lidContact.id,
+      contactId: contact.id,
       status: {
         [Op.not]: "closed"
       }
     }
   });
 
-  // eslint-disable-next-line no-restricted-syntax
-  for (const ticket of notClosedTickets) {
+  for (let index = 0; index < notClosedTickets.length; index += 1) {
+    const ticket = notClosedTickets[index];
+
     await UpdateTicketService({
       ticketData: { status: "closed", justClose: true },
       ticketId: ticket.id,
       companyId: ticket.companyId
     });
   }
+};
 
-  await Ticket.update(
-    { contactId: contact.id },
-    {
-      where: {
-        contactId: lidContact.id,
-        companyId: contact.companyId
+const mergeContacts = async (
+  contacts: Contact[],
+  companyId: number,
+  preferredWinner?: Contact,
+  closeLoserTickets = false
+): Promise<Contact | null> => {
+  if (contacts.length === 0) {
+    return null;
+  }
+
+  const winner = await MergeContactsService(contacts, {
+    companyId,
+    preferredWinner,
+    prepareLoser: closeLoserTickets
+      ? async (_winner, loser) => closeOpenTicketsForContact(loser)
+      : undefined
+  });
+
+  await winner.reload({ include: contactIncludes });
+
+  return winner;
+};
+
+const getContactsByNumbers = async (
+  companyId: number,
+  numbers: string[]
+): Promise<Contact[]> => {
+  if (numbers.length === 0) {
+    return [];
+  }
+
+  return Contact.findAll({
+    where: {
+      companyId,
+      number: {
+        [Op.in]: numbers
       }
-    }
-  );
-
-  await lidContact.destroy();
-}
+    },
+    include: contactIncludes
+  });
+};
 
 async function getLid(msgContact: IMe, wbot: Session): Promise<string> {
   const lid: string =
@@ -120,8 +173,13 @@ export async function verifyContact(
   const isLid = !jidNumber && msgContact.id.includes("@lid");
   const isGroup = msgContact.id.includes("@g.us");
 
-  const number =
+  const rawNumber =
     jidNumber || (isLid ? msgContact.id : msgContact.id.split("@")[0]);
+  const normalizedPhone = !isLid && !isGroup ? normalizePhone(rawNumber) : null;
+  const number = normalizedPhone?.phone || rawNumber;
+  const phoneCandidates = normalizedPhone
+    ? getPhoneCandidates(rawNumber)
+    : [number];
 
   const contactData = {
     name: msgContact?.name || number || msgContact.id.replace(/\D/g, ""),
@@ -137,22 +195,29 @@ export async function verifyContact(
   }
 
   return lidUpdateMutex.runExclusive(async () => {
-    const foundContact = await Contact.findOne({
-      where: {
-        companyId,
-        number
-      },
-      include: ["tags", "extraInfo", "whatsappLidMap"]
-    });
+    const phoneContacts = isLid
+      ? []
+      : await getContactsByNumbers(companyId, phoneCandidates);
+    const preferredPhoneContact = getPreferredContact(phoneContacts, [
+      contactData.number,
+      rawNumber,
+      ...(normalizedPhone ? [normalizedPhone.wphone] : [])
+    ]);
+    const foundContact = await mergeContacts(
+      phoneContacts,
+      companyId,
+      preferredPhoneContact,
+      false
+    );
 
     if (isLid) {
-      if (foundContact) {
-        return updateContact(foundContact, {
-          profilePicUrl: contactData.profilePicUrl,
-          profileHiresPictureUrl: contactData.profileHiresPictureUrl
-        });
-      }
-
+      const partialLid = number.includes("@")
+        ? number.substring(0, number.indexOf("@"))
+        : null;
+      const lidContacts = await getContactsByNumbers(
+        companyId,
+        getUniqueNumbers([number, partialLid])
+      );
       const foundMappedContact = await WhatsappLidMap.findOne({
         where: {
           companyId,
@@ -162,56 +227,85 @@ export async function verifyContact(
           {
             model: Contact,
             as: "contact",
-            include: ["tags", "extraInfo"]
+            include: ["tags", "extraInfo", "whatsappLidMap"]
           }
         ]
       });
+      const preferredLidContact =
+        getPreferredContact(lidContacts, [number, partialLid]) ||
+        foundMappedContact?.contact ||
+        null;
+      const mergedLidContact = await mergeContacts(
+        [
+          ...lidContacts,
+          ...(foundMappedContact?.contact ? [foundMappedContact.contact] : [])
+        ],
+        companyId,
+        preferredLidContact,
+        false
+      );
 
-      if (foundMappedContact) {
-        return updateContact(foundMappedContact.contact, {
-          profilePicUrl: contactData.profilePicUrl,
-          profileHiresPictureUrl: contactData.profileHiresPictureUrl
-        });
-      }
-
-      const partialLidContact = await Contact.findOne({
-        where: {
-          companyId,
-          number: number.substring(0, number.indexOf("@"))
-        },
-        include: ["tags", "extraInfo"]
-      });
-
-      if (partialLidContact) {
-        return updateContact(partialLidContact, {
-          number: contactData.number,
+      if (mergedLidContact) {
+        return updateContact(mergedLidContact, {
           profilePicUrl: contactData.profilePicUrl,
           profileHiresPictureUrl: contactData.profileHiresPictureUrl
         });
       }
     } else if (wbot && foundContact) {
       const lid = await getLid(msgContact, wbot);
-      let recreateLidMap = false;
-      if (
-        foundContact.whatsappLidMap &&
-        lid !== foundContact.whatsappLidMap.lid
-      ) {
-        await WhatsappLidMap.destroy({
-          where: { id: foundContact.whatsappLidMap.id }
-        });
-        recreateLidMap = true;
-      }
-      if (recreateLidMap || !foundContact.whatsappLidMap) {
-        if (lid) {
-          await checkAndDedup(foundContact, lid);
-          await WhatsappLidMap.create({
-            companyId,
+      const lidCandidates = lid
+        ? getUniqueNumbers([
             lid,
-            contactId: foundContact.id
-          });
-        }
+            lid.includes("@") ? lid.substring(0, lid.indexOf("@")) : null
+          ])
+        : [];
+      const lidContacts = await getContactsByNumbers(companyId, lidCandidates);
+      const mappedContacts = lid
+        ? await WhatsappLidMap.findAll({
+            where: {
+              companyId,
+              lid
+            },
+            include: [
+              {
+                model: Contact,
+                as: "contact",
+                include: contactIncludes
+              }
+            ]
+          })
+        : [];
+      const mergedContact = await mergeContacts(
+        [
+          foundContact,
+          ...lidContacts,
+          ...mappedContacts.map(lidMap => lidMap.contact)
+        ],
+        companyId,
+        foundContact,
+        true
+      );
+      let currentContact = mergedContact || foundContact;
+      let currentLidMap = currentContact.whatsappLidMap;
+
+      if (currentLidMap && lid !== currentLidMap.lid) {
+        await WhatsappLidMap.destroy({
+          where: { id: currentLidMap.id }
+        });
+        currentLidMap = null;
       }
-      return updateContact(foundContact, {
+
+      if (!currentLidMap && lid) {
+        await WhatsappLidMap.create({
+          companyId,
+          lid,
+          contactId: currentContact.id
+        });
+        await currentContact.reload({ include: contactIncludes });
+      }
+
+      return updateContact(currentContact, {
+        number: contactData.number,
         profilePicUrl: contactData.profilePicUrl,
         profileHiresPictureUrl: contactData.profileHiresPictureUrl
       });
@@ -219,22 +313,43 @@ export async function verifyContact(
       const lid = wbot && (await getLid(msgContact, wbot));
 
       if (lid) {
-        const lidContact = await Contact.findOne({
-          where: {
-            companyId,
-            number: {
-              [Op.or]: [lid, lid.substring(0, lid.indexOf("@"))]
-            }
-          },
-          include: ["tags", "extraInfo"]
-        });
+        const lidCandidates = getUniqueNumbers([
+          lid,
+          lid.includes("@") ? lid.substring(0, lid.indexOf("@")) : null
+        ]);
+        const lidContacts = await getContactsByNumbers(
+          companyId,
+          lidCandidates
+        );
+        const preferredLidContact = getPreferredContact(lidContacts, [
+          contactData.number,
+          rawNumber,
+          ...lidCandidates
+        ]);
+        const lidContact = await mergeContacts(
+          lidContacts,
+          companyId,
+          preferredLidContact,
+          true
+        );
 
         if (lidContact) {
-          await WhatsappLidMap.create({
-            companyId,
-            lid,
-            contactId: lidContact.id
+          const existingLidMap = await WhatsappLidMap.findOne({
+            where: {
+              companyId,
+              contactId: lidContact.id,
+              lid
+            }
           });
+
+          if (!existingLidMap) {
+            await WhatsappLidMap.create({
+              companyId,
+              lid,
+              contactId: lidContact.id
+            });
+          }
+
           return updateContact(lidContact, {
             number: contactData.number,
             profilePicUrl: contactData.profilePicUrl,
