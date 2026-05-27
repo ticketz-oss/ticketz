@@ -4,6 +4,7 @@ import { getWbot, Session } from "../../libs/wbot";
 import Contact from "../../models/Contact";
 import Whatsapp from "../../models/Whatsapp";
 import { logger } from "../../utils/logger";
+import { getJidOf } from "./getJidOf";
 import { verifyContact } from "./verifyContact";
 
 export interface IOnWhatsapp {
@@ -13,7 +14,8 @@ export interface IOnWhatsapp {
 }
 
 const checker = async (number: string, wbot: Session) => {
-  const jid = number.includes("@") ? number : `${number}@s.whatsapp.net`;
+  const address = number.includes("@") ? number : number.replace(/\D/g, "");
+  const jid = getJidOf(address);
   const [validNumber] = await wbot.onWhatsApp(jid);
 
   if (!validNumber) {
