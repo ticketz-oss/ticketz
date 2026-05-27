@@ -10,6 +10,7 @@ import Message from "../models/Message";
 import CheckSettings from "./CheckSettings";
 import saveMediaToFile from "./saveMediaFile";
 import OutOfTicketMessage from "../models/OutOfTicketMessages";
+import { getJidOf } from "../services/WbotServices/getJidOf";
 
 export type MessageData = {
   number: string;
@@ -32,7 +33,10 @@ export const SendMessage = async (
   try {
     const wbot = await GetWhatsappWbot(whatsapp);
     const number = messageData.number.toString();
-    const chatId = number.includes("@") ? number : `${number}@s.whatsapp.net`;
+    const sanitizedAddress = number.includes("@")
+      ? number
+      : number.replace(/\D/g, "");
+    const chatId = getJidOf(sanitizedAddress);
 
     let message: proto.WebMessageInfo;
 

@@ -20,6 +20,7 @@ import { parseToMilliseconds } from "../helpers/parseToMilliseconds";
 import GetWhatsappWbot from "../helpers/GetWhatsappWbot";
 import OutOfTicketMessage from "../models/OutOfTicketMessages";
 import { Session } from "../libs/wbot";
+import { getJidOf } from "../services/WbotServices/getJidOf";
 
 const connection = process.env.REDIS_URI || "";
 export const campaignQueue = new Queue("CampaignQueue", connection);
@@ -403,7 +404,8 @@ async function handleDispatchCampaign(job) {
       }
     );
 
-    const chatId = `${campaignShipping.number}@s.whatsapp.net`;
+    const sanitizedNumber = String(campaignShipping.number).replace(/\D/g, "");
+    const chatId = getJidOf(sanitizedNumber);
 
     if (campaign.confirmation && campaignShipping.confirmation === null) {
       await sendCampaignMessage(campaign.whatsappId, wbot, chatId, {
