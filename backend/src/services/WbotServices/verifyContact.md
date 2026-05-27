@@ -13,7 +13,6 @@ It is responsible for:
 - normalizing phone numbers before lookup
 - merging duplicated contact records when multiple candidates represent the same person
 - linking a phone contact to a `WhatsappLidMap` when a LID is known
-- closing open tickets of loser contacts only in the flows where the merge is correcting phone/LID duplication
 - creating the contact when no reusable record exists
 
 ## Inputs
@@ -205,11 +204,11 @@ It merges:
 
 The preferred winner is always `foundContact`.
 
-In this branch, `closeLoserTickets = true`, so before each loser is merged:
+Ticket handling after merge is enforced by `MergeContactsService` as a system rule:
 
-- every non-closed ticket of the loser contact is closed via `UpdateTicketService`
-
-This means the surviving contact keeps the relationship after merge, but duplicate open/pending tickets from loser contacts are force-closed first.
+- for each connection (`whatsappId`), only one `open` or `pending` ticket can remain
+- the kept ticket is the most recent by message activity (`MAX(Message.createdAt)`) with fallback to `Ticket.updatedAt`
+- duplicates for the same connection are closed with `justClose`
 
 ### Step 4: repair or create the LID map
 
@@ -247,8 +246,6 @@ If a LID exists, it looks for contacts whose `number` matches:
 ### Step 3: merge LID duplicates
 
 If multiple such contacts exist, they are merged.
-
-In this branch, `closeLoserTickets = true`, so loser open tickets are closed before merge.
 
 ### Step 4: create missing LID map
 
@@ -292,10 +289,7 @@ That helper currently:
 - merges tags without duplicating contact-tag relations
 - moves `WhatsappLidMap` rows to the winner when needed
 - destroys loser contacts at the end
-
-`verifyContact` adds one extra behavior on top of that helper for some flows:
-
-- optionally close all non-closed tickets from loser contacts before merge
+- enforces the ticket rule after merge: one open/pending ticket per connection, keeping the most recent by activity/update timestamp
 
 ## Exact case matrix
 
@@ -322,7 +316,6 @@ That helper currently:
 
 - resolve current LID
 - merge phone contact, LID-number contact, and mapped contact into the phone contact
-- close loser open tickets before merge
 - ensure winner LID map is correct
 - update canonical phone number and pictures
 
@@ -331,7 +324,6 @@ That helper currently:
 - resolve current LID
 - find LID-number contacts
 - merge them if duplicated
-- close loser open tickets before merge
 - create LID map if missing
 - convert winner to canonical phone number
 - return reused contact
@@ -369,8 +361,9 @@ That helper currently:
 
 - `@lid` input does not normalize into a phone number.
 - Phone input does normalize and may merge multiple stored variants of the same number.
-- Phone-driven LID reconciliation closes loser open tickets before merge.
-- Pure `@lid` reconciliation does not close loser tickets before merge.
+- Ticket deduplication is global and mandatory after any merge:
+  - one open/pending ticket per connection (`whatsappId`)
+  - keep most recent by activity/update
 - The mutex only protects the non-group flow.
 - Profile picture updates are best-effort and never block contact resolution.
 - If WhatsApp says the phone contact does not exist during LID resolution, the function throws `ERR_WAPP_CONTACT_NOT_FOUND`.
@@ -381,11 +374,13 @@ When the input is phone-based, the function prefers storing the canonical normal
 
 This is why existing LID-based contacts can be converted into phone-based contacts when a phone identity is later resolved for the same person.
 
-## Why some merges close tickets and others do not
+## Ticket consistency rule
 
-The current rule is practical rather than universal:
+Ticket consistency is now centralized in `MergeContactsService`.
 
-- phone/LID consolidation that turns one person back into a single phone contact closes loser open tickets first
-- pure LID-side consolidation only merges records and keeps ticket state untouched
+After every contact merge, the service enforces:
 
-That difference reflects how the current wbot flow uses phone contacts as the canonical operational identity.
+- at most one `open`/`pending` ticket per `whatsappId` for the merged contact
+- winner ticket per connection chosen by most recent activity timestamp
+
+This keeps the rule consistent across all callers, including `verifyContact` and future consumers such as `WabaVerifyContact`.

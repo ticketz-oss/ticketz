@@ -1,4 +1,4 @@
-import { Transaction } from "sequelize";
+import { Transaction, Op, col, fn } from "sequelize";
 import sequelize from "../../database";
 import CampaignShipping from "../../models/CampaignShipping";
 import Contact from "../../models/Contact";
@@ -9,8 +9,15 @@ import Schedule from "../../models/Schedule";
 import Ticket from "../../models/Ticket";
 import TicketNote from "../../models/TicketNote";
 import WhatsappLidMap from "../../models/WhatsappLidMap";
+import UpdateTicketService from "../TicketServices/UpdateTicketService";
 
 type MergeContactsCallback = (
+  winner: Contact,
+  loser: Contact,
+  transaction: Transaction
+) => Promise<void>;
+
+type PrepareLoserCallback = (
   winner: Contact,
   loser: Contact,
   transaction: Transaction
@@ -20,9 +27,90 @@ interface MergeContactsOptions {
   companyId: number;
   preferredWinner?: Contact;
   resolveWinner?: (contacts: Contact[]) => Promise<Contact> | Contact;
-  prepareLoser?: (winner: Contact, loser: Contact) => Promise<void>;
+  prepareLoser?: PrepareLoserCallback;
   mergeRelatedData?: MergeContactsCallback;
 }
+
+const closeDuplicatedOpenTicketsPerConnection = async (
+  contactId: number,
+  companyId: number
+): Promise<void> => {
+  const openTickets = await Ticket.findAll({
+    where: {
+      contactId,
+      status: {
+        [Op.or]: ["open", "pending"]
+      }
+    }
+  });
+
+  if (openTickets.length <= 1) {
+    return;
+  }
+
+  const ticketIds = openTickets.map(ticket => ticket.id);
+  const messageActivityRows = (await Message.findAll({
+    attributes: ["ticketId", [fn("MAX", col("createdAt")), "latestActivityAt"]],
+    where: {
+      ticketId: {
+        [Op.in]: ticketIds
+      }
+    },
+    group: ["ticketId"],
+    raw: true
+  })) as unknown as Array<{
+    ticketId: number;
+    latestActivityAt: string | null;
+  }>;
+
+  const activityByTicketId = new Map<number, number>();
+
+  for (let index = 0; index < messageActivityRows.length; index += 1) {
+    const row = messageActivityRows[index];
+    const latestMessageTime = row.latestActivityAt
+      ? new Date(row.latestActivityAt).getTime()
+      : 0;
+    activityByTicketId.set(row.ticketId, latestMessageTime);
+  }
+
+  const orderedTickets = [...openTickets].sort((a, b) => {
+    if (a.whatsappId !== b.whatsappId) {
+      return a.whatsappId - b.whatsappId;
+    }
+
+    const aActivity = Math.max(
+      activityByTicketId.get(a.id) || 0,
+      new Date(a.updatedAt).getTime()
+    );
+    const bActivity = Math.max(
+      activityByTicketId.get(b.id) || 0,
+      new Date(b.updatedAt).getTime()
+    );
+
+    if (aActivity !== bActivity) {
+      return bActivity - aActivity;
+    }
+
+    return b.id - a.id;
+  });
+
+  const keepOpenByConnection = new Set<number>();
+
+  for (let index = 0; index < orderedTickets.length; index += 1) {
+    const ticket = orderedTickets[index];
+
+    if (!keepOpenByConnection.has(ticket.whatsappId)) {
+      keepOpenByConnection.add(ticket.whatsappId);
+      continue;
+    }
+
+    await UpdateTicketService({
+      ticketData: { status: "closed", justClose: true },
+      ticketId: ticket.id,
+      companyId
+    });
+  }
+};
 
 const getOldestContact = (contacts: Contact[]): Contact => {
   const sorted = [...contacts].sort((a, b) => {
@@ -122,9 +210,10 @@ const mergeContactsInTransaction = async (
   {
     companyId,
     preferredWinner,
+    prepareLoser,
     resolveWinner,
     mergeRelatedData
-  }: Omit<MergeContactsOptions, "prepareLoser">,
+  }: MergeContactsOptions,
   transaction: Transaction
 ): Promise<Contact> => {
   if (contacts.length === 1) {
@@ -142,6 +231,10 @@ const mergeContactsInTransaction = async (
 
   for (let index = 0; index < losers.length; index += 1) {
     const loser = losers[index];
+
+    if (prepareLoser) {
+      await prepareLoser(winner, loser, transaction);
+    }
 
     await Message.update(
       { contactId: winner.id },
@@ -238,15 +331,7 @@ const MergeContactsService = async (
       ? await options.resolveWinner(uniqueContacts)
       : getOldestContact(uniqueContacts);
 
-  const losers = uniqueContacts.filter(contact => contact.id !== winner.id);
-
-  if (options.prepareLoser) {
-    for (let index = 0; index < losers.length; index += 1) {
-      await options.prepareLoser(winner, losers[index]);
-    }
-  }
-
-  return sequelize.transaction(transaction =>
+  const mergedWinner = await sequelize.transaction(transaction =>
     mergeContactsInTransaction(
       uniqueContacts,
       {
@@ -256,6 +341,13 @@ const MergeContactsService = async (
       transaction
     )
   );
+
+  await closeDuplicatedOpenTicketsPerConnection(
+    mergedWinner.id,
+    options.companyId
+  );
+
+  return mergedWinner;
 };
 
 export default MergeContactsService;

@@ -8,8 +8,6 @@ import CreateOrUpdateContactService, {
 } from "../ContactServices/CreateOrUpdateContactService";
 import MergeContactsService from "../ContactServices/MergeContactsService";
 import WhatsappLidMap from "../../models/WhatsappLidMap";
-import Ticket from "../../models/Ticket";
-import UpdateTicketService from "../TicketServices/UpdateTicketService";
 import GetProfilePicUrl from "./GetProfilePicUrl";
 
 const lidUpdateMutex = new Mutex();
@@ -65,32 +63,10 @@ const getPhoneCandidates = (number: string): string[] => {
   return getUniqueNumbers([number, normalized.phone, normalized.wphone]);
 };
 
-const closeOpenTicketsForContact = async (contact: Contact): Promise<void> => {
-  const notClosedTickets = await Ticket.findAll({
-    where: {
-      contactId: contact.id,
-      status: {
-        [Op.not]: "closed"
-      }
-    }
-  });
-
-  for (let index = 0; index < notClosedTickets.length; index += 1) {
-    const ticket = notClosedTickets[index];
-
-    await UpdateTicketService({
-      ticketData: { status: "closed", justClose: true },
-      ticketId: ticket.id,
-      companyId: ticket.companyId
-    });
-  }
-};
-
 const mergeContacts = async (
   contacts: Contact[],
   companyId: number,
-  preferredWinner?: Contact,
-  closeLoserTickets = false
+  preferredWinner?: Contact
 ): Promise<Contact | null> => {
   if (contacts.length === 0) {
     return null;
@@ -98,10 +74,7 @@ const mergeContacts = async (
 
   const winner = await MergeContactsService(contacts, {
     companyId,
-    preferredWinner,
-    prepareLoser: closeLoserTickets
-      ? async (_winner, loser) => closeOpenTicketsForContact(loser)
-      : undefined
+    preferredWinner
   });
 
   await winner.reload({ include: contactIncludes });
@@ -206,8 +179,7 @@ export async function verifyContact(
     const foundContact = await mergeContacts(
       phoneContacts,
       companyId,
-      preferredPhoneContact,
-      false
+      preferredPhoneContact
     );
 
     if (isLid) {
@@ -241,8 +213,7 @@ export async function verifyContact(
           ...(foundMappedContact?.contact ? [foundMappedContact.contact] : [])
         ],
         companyId,
-        preferredLidContact,
-        false
+        preferredLidContact
       );
 
       if (mergedLidContact) {
@@ -282,8 +253,7 @@ export async function verifyContact(
           ...mappedContacts.map(lidMap => lidMap.contact)
         ],
         companyId,
-        foundContact,
-        true
+        foundContact
       );
       let currentContact = mergedContact || foundContact;
       let currentLidMap = currentContact.whatsappLidMap;
@@ -329,8 +299,7 @@ export async function verifyContact(
         const lidContact = await mergeContacts(
           lidContacts,
           companyId,
-          preferredLidContact,
-          true
+          preferredLidContact
         );
 
         if (lidContact) {
