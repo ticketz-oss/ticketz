@@ -122,24 +122,23 @@ export async function verifyContact(
   wbot: Session,
   companyId: number
 ): Promise<Contact> {
-  let profilePicUrl: string;
+  let profilePicUrl: string | undefined;
   let profileHiresPictureUrl: string | undefined;
-  const noPicture = `${process.env.FRONTEND_URL}/nopicture.png`;
 
   try {
     profilePicUrl =
       (wbot && (await GetProfilePicUrl(msgContact.id, "preview", wbot))) ||
-      noPicture;
+      undefined;
   } catch {
-    profilePicUrl = noPicture;
+    profilePicUrl = undefined;
   }
 
   try {
     profileHiresPictureUrl =
       (wbot && (await GetProfilePicUrl(msgContact.id, "image", wbot))) ||
-      noPicture;
+      undefined;
   } catch {
-    profileHiresPictureUrl = null;
+    profileHiresPictureUrl = undefined;
   }
 
   const jidNumber = msgContact.jid && msgContact.jid?.split("@")[0];
