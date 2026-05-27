@@ -1,5 +1,6 @@
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
+import normalizePhone from "../../helpers/NormalizePhone";
 
 export function getJidOf(reference: string | Contact | Ticket) {
   let address = reference;
@@ -16,9 +17,33 @@ export function getJidOf(reference: string | Contact | Ticket) {
     throw new Error("Invalid reference type");
   }
 
+  if (isGroup) {
+    if (address.includes("@")) {
+      return address;
+    }
+
+    return `${address}@g.us`;
+  }
+
   if (address.includes("@")) {
+    const standardJidSuffix = "@s.whatsapp.net";
+
+    if (address.endsWith(standardJidSuffix)) {
+      const number = address.slice(0, -standardJidSuffix.length);
+
+      if (!/^\d+$/.test(number)) {
+        throw new Error("Invalid contact number");
+      }
+
+      return `${normalizePhone(number).wphone}${standardJidSuffix}`;
+    }
+
     return address;
   }
 
-  return `${address}@${isGroup ? "g.us" : "s.whatsapp.net"}`;
+  if (!/^\d+$/.test(address)) {
+    throw new Error("Invalid contact number");
+  }
+
+  return `${normalizePhone(address).wphone}@s.whatsapp.net`;
 }
