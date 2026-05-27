@@ -15,6 +15,7 @@ import Divider from "@material-ui/core/Divider";
 import Badge from "@material-ui/core/Badge";
 
 import { i18n } from "../../translate/i18n";
+import { formatWhatsappContactName } from "../../helpers/formatWhatsappDisplay";
 
 import api from "../../services/api";
 import ButtonWithSpinner from "../ButtonWithSpinner";
@@ -177,7 +178,7 @@ const TicketListItem = ({ ticket, groupActionButtons }) => {
                 variant="body2"
                 color="textPrimary"
               >
-                {ticket.contact.name}
+                {formatWhatsappContactName(ticket.contact, ticket)}
               </Typography>
               {ticket.status === "closed" && (
                 <Badge

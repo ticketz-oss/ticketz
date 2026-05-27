@@ -21,7 +21,6 @@ import alertSound from "../../assets/sound.mp3";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { SocketContext } from "../../context/Socket/SocketContext";
 import Favicon from "react-favicon";
-import { getBackendURL } from "../../services/config";
 import useSettings from "../../hooks/useSettings";
 
 const defaultLogoFavicon = "/vector/favicon.svg";
@@ -31,15 +30,6 @@ const useStyles = makeStyles(theme => ({
     overflowY: "auto",
     maxHeight: 350,
     ...theme.scrollbarStyles
-  },
-  popoverPaper: {
-    width: "100%",
-    maxWidth: 350,
-    marginLeft: theme.spacing(2),
-    marginRight: theme.spacing(1),
-    [theme.breakpoints.down("sm")]: {
-      maxWidth: 270
-    }
   },
   noShadow: {
     boxShadow: "none !important"
@@ -111,7 +101,7 @@ const NotificationsPopOver = props => {
         );
       }
     );
-  }, []);
+  }, [getSetting]);
 
   useEffect(() => {
     soundAlertRef.current = play;
@@ -183,6 +173,20 @@ const NotificationsPopOver = props => {
       }
     };
 
+    const onCompanyContactNotificationsPopover = data => {
+      if (data.action !== "update") {
+        return;
+      }
+
+      setNotifications(prevState =>
+        prevState.map(ticket =>
+          ticket.contactId === data.contact?.id
+            ? { ...ticket, contact: { ...ticket.contact, ...data.contact } }
+            : ticket
+        )
+      );
+    };
+
     socketManager.onConnect(onConnectNotificationsPopover);
     socket.on(
       `company-${companyId}-ticket`,
@@ -192,11 +196,15 @@ const NotificationsPopOver = props => {
       `company-${companyId}-appMessage`,
       onCompanyAppMessageNotificationsPopover
     );
+    socket.on(
+      `company-${companyId}-contact`,
+      onCompanyContactNotificationsPopover
+    );
 
     return () => {
       socket.disconnect();
     };
-  }, [user, profile, queues, soundGroupNotifications, socketManager]);
+  }, [user, profile, queues, queueIds, soundGroupNotifications, socketManager]);
 
   const handleNotifications = data => {
     const { message, contact, ticket } = data;

@@ -17,6 +17,7 @@ import Badge from "@material-ui/core/Badge";
 import Box from "@material-ui/core/Box";
 
 import { i18n } from "../../translate/i18n";
+import { formatWhatsappContactName } from "../../helpers/formatWhatsappDisplay";
 
 import api from "../../services/api";
 import ButtonWithSpinner from "../ButtonWithSpinner";
@@ -158,6 +159,7 @@ const useStyles = makeStyles(theme => ({
 
 const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
   const classes = useStyles();
+
   const history = useHistory();
   const [ticketUser, setTicketUser] = useState(null);
   const [whatsAppName, setWhatsAppName] = useState(null);
@@ -529,7 +531,7 @@ const TicketListItemCustom = ({ ticket, setTabOpen, groupActionButtons }) => {
                     />
                   </Tooltip>
                 )}{" "}
-                {ticket.contact.name}
+                {formatWhatsappContactName(ticket.contact, ticket)}
               </Typography>
             </span>
           }

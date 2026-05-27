@@ -12,6 +12,10 @@ import Button from "@material-ui/core/Button";
 import Paper from "@material-ui/core/Paper";
 
 import { i18n } from "../../translate/i18n";
+import {
+  formatWhatsappContactName,
+  formatWhatsappContactNumber
+} from "../../helpers/formatWhatsappDisplay";
 
 import ContactDrawerSkeleton from "../ContactDrawerSkeleton";
 import WhatsMarked from "react-whatsmarked";
@@ -106,6 +110,7 @@ const ContactDrawer = ({
 }) => {
   const classes = useStyles();
   const { getSetting } = useSettings();
+  const formattedContactName = formatWhatsappContactName(contact, ticket);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [openForm, setOpenForm] = useState(false);
@@ -166,19 +171,19 @@ const ContactDrawer = ({
                       fontWeight: "bold"
                     }}
                   >
-                    {getInitials(contact?.name)}
+                    {getInitials(formattedContactName)}
                   </Avatar>
                 }
                 title={
                   <>
-                    <Typography>{contact.name}</Typography>
+                    <Typography>{formattedContactName}</Typography>
                   </>
                 }
                 subheader={
                   <>
                     <Typography style={{ fontSize: 12 }}>
                       <Link href={`tel:${contact.number}`}>
-                        {contact.number}
+                        {formatWhatsappContactNumber(contact)}
                       </Link>
                     </Typography>
                     <Typography style={{ fontSize: 12 }}>

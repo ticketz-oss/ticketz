@@ -133,7 +133,7 @@ const reducer = (state, action) => {
     const contact = action.payload;
     state.forEach(ticket => {
       if (ticket.contactId === contact.id) {
-        ticket.contact = contact;
+        ticket.contact = { ...ticket.contact, ...contact };
       }
     });
     return [...state];
