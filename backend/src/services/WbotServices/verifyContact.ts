@@ -55,7 +55,6 @@ async function checkAndDedup(contact: Contact, lid: string): Promise<void> {
 
   // eslint-disable-next-line no-restricted-syntax
   for (const ticket of notClosedTickets) {
-    // eslint-disable-next-line no-await-in-loop
     await UpdateTicketService({
       ticketData: { status: "closed", justClose: true },
       ticketId: ticket.id,
@@ -98,30 +97,37 @@ export async function verifyContact(
   companyId: number
 ): Promise<Contact> {
   let profilePicUrl: string;
+  let profileHiresPictureUrl: string | undefined;
   const noPicture = `${process.env.FRONTEND_URL}/nopicture.png`;
 
   try {
     profilePicUrl =
-      (await GetProfilePicUrl(msgContact.id, "preview", wbot)) || noPicture;
-  } catch (error) {
+      (wbot && (await GetProfilePicUrl(msgContact.id, "preview", wbot))) ||
+      noPicture;
+  } catch {
     profilePicUrl = noPicture;
   }
 
-  const jidNumber =
-    msgContact.jid && msgContact.jid?.substring(0, msgContact.jid.indexOf("@"));
+  try {
+    profileHiresPictureUrl =
+      (wbot && (await GetProfilePicUrl(msgContact.id, "image", wbot))) ||
+      noPicture;
+  } catch {
+    profileHiresPictureUrl = null;
+  }
+
+  const jidNumber = msgContact.jid && msgContact.jid?.split("@")[0];
   const isLid = !jidNumber && msgContact.id.includes("@lid");
   const isGroup = msgContact.id.includes("@g.us");
 
   const number =
-    jidNumber ||
-    (isLid
-      ? msgContact.id
-      : msgContact.id.substring(0, msgContact.id.indexOf("@")));
+    jidNumber || (isLid ? msgContact.id : msgContact.id.split("@")[0]);
 
   const contactData = {
     name: msgContact?.name || number || msgContact.id.replace(/\D/g, ""),
     number,
     profilePicUrl,
+    profileHiresPictureUrl,
     isGroup: msgContact.id.includes("g.us"),
     companyId
   };
@@ -142,7 +148,8 @@ export async function verifyContact(
     if (isLid) {
       if (foundContact) {
         return updateContact(foundContact, {
-          profilePicUrl: contactData.profilePicUrl
+          profilePicUrl: contactData.profilePicUrl,
+          profileHiresPictureUrl: contactData.profileHiresPictureUrl
         });
       }
 
@@ -162,7 +169,8 @@ export async function verifyContact(
 
       if (foundMappedContact) {
         return updateContact(foundMappedContact.contact, {
-          profilePicUrl: contactData.profilePicUrl
+          profilePicUrl: contactData.profilePicUrl,
+          profileHiresPictureUrl: contactData.profileHiresPictureUrl
         });
       }
 
@@ -177,10 +185,11 @@ export async function verifyContact(
       if (partialLidContact) {
         return updateContact(partialLidContact, {
           number: contactData.number,
-          profilePicUrl: contactData.profilePicUrl
+          profilePicUrl: contactData.profilePicUrl,
+          profileHiresPictureUrl: contactData.profileHiresPictureUrl
         });
       }
-    } else if (foundContact) {
+    } else if (wbot && foundContact) {
       const lid = await getLid(msgContact, wbot);
       let recreateLidMap = false;
       if (
@@ -203,10 +212,11 @@ export async function verifyContact(
         }
       }
       return updateContact(foundContact, {
-        profilePicUrl: contactData.profilePicUrl
+        profilePicUrl: contactData.profilePicUrl,
+        profileHiresPictureUrl: contactData.profileHiresPictureUrl
       });
     } else {
-      const lid = await getLid(msgContact, wbot);
+      const lid = wbot && (await getLid(msgContact, wbot));
 
       if (lid) {
         const lidContact = await Contact.findOne({
@@ -227,7 +237,8 @@ export async function verifyContact(
           });
           return updateContact(lidContact, {
             number: contactData.number,
-            profilePicUrl: contactData.profilePicUrl
+            profilePicUrl: contactData.profilePicUrl,
+            profileHiresPictureUrl: contactData.profileHiresPictureUrl
           });
         }
       }

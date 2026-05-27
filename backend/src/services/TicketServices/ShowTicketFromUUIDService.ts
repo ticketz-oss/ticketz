@@ -21,6 +21,7 @@ const ShowTicketUUIDService = async (uuid: string): Promise<Ticket> => {
           "number",
           "email",
           "profilePicUrl",
+          "profileHiresPictureUrl",
           "presence",
           "disableBot"
         ],

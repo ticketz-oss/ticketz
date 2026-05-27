@@ -26,6 +26,7 @@ const ShowTicketService = async (
           "number",
           "email",
           "profilePicUrl",
+          "profileHiresPictureUrl",
           "presence",
           "disableBot",
           "language"

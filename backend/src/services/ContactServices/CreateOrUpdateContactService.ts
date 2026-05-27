@@ -13,6 +13,7 @@ interface ContactData {
   isGroup?: boolean;
   email?: string;
   profilePicUrl?: string;
+  profileHiresPictureUrl?: string;
   companyId?: number;
   extraInfo?: ExtraInfo[];
   channel?: string;
@@ -41,6 +42,7 @@ const CreateOrUpdateContactService = async ({
   name,
   number,
   profilePicUrl,
+  profileHiresPictureUrl,
   isGroup,
   email = "",
   companyId,
@@ -57,6 +59,7 @@ const CreateOrUpdateContactService = async ({
       name,
       number,
       profilePicUrl,
+      profileHiresPictureUrl,
       email,
       isGroup,
       extraInfo,
@@ -88,7 +91,7 @@ const CreateOrUpdateContactService = async ({
       });
 
       if (contact) {
-        updateContact(contact, { profilePicUrl });
+        updateContact(contact, { profilePicUrl, profileHiresPictureUrl });
       }
     } else {
       console.error("Error creating contact:", createError);
