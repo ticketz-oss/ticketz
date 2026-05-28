@@ -1,4 +1,4 @@
-import { parsePhoneNumber } from "libphonenumber-js";
+import { parsePhoneNumberWithError } from "libphonenumber-js";
 
 import { i18n } from "../translate/i18n";
 
@@ -15,7 +15,11 @@ function countryCodeToFlag(countryCode) {
 }
 
 function getCurrentLanguage() {
-  return (i18n.language || "en").toLowerCase();
+  return i18n.language || "en";
+}
+
+function shouldUseBrazilianDisplayFormat(language) {
+  return language === "pt" || language === "pt_BR";
 }
 
 function normalizeWhatsappDigits(rawValue) {
@@ -83,9 +87,9 @@ export function formatWhatsappDigits(rawValue) {
 
   try {
     const normalizedDigits = normalizeWhatsappDigits(rawValue).phone;
-    const phoneNumber = parsePhoneNumber("+" + normalizedDigits);
+    const phoneNumber = parsePhoneNumberWithError("+" + normalizedDigits);
     const countryCode = phoneNumber.country;
-    const isPortuguese = getCurrentLanguage().startsWith("pt");
+    const isPortuguese = shouldUseBrazilianDisplayFormat(getCurrentLanguage());
     const shouldOmitFlag = countryCode === "BR" && isPortuguese;
     const formattedNumber = shouldOmitFlag
       ? phoneNumber.formatNational()
