@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useMemo } from "react";
 import {
   makeStyles,
   Paper,
@@ -12,8 +12,10 @@ import {
   TableBody,
   TableCell,
   TableRow,
+  TableSortLabel,
   IconButton,
-  Select
+  Select,
+  Tooltip
 } from "@material-ui/core";
 import { Formik, Form, Field } from "formik";
 import ButtonWithSpinner from "../ButtonWithSpinner";
@@ -47,10 +49,13 @@ const useStyles = makeStyles(theme => ({
   fullWidth: {
     width: "100%"
   },
-  tableContainer: {
+  tableWrapper: {
     width: "100%",
-    overflowX: "scroll",
+    overflowX: "auto",
     ...theme.scrollbarStyles
+  },
+  table: {
+    minWidth: 900
   },
   textfield: {
     width: "100%"
@@ -70,6 +75,26 @@ const useStyles = makeStyles(theme => ({
     textAlign: "right",
     padding: theme.spacing(1)
   },
+  filterBar: {
+    display: "flex",
+    alignItems: "center",
+    gap: theme.spacing(2),
+    padding: theme.spacing(1, 0),
+    flexWrap: "wrap"
+  },
+  filterSelect: {
+    minWidth: 200
+  },
+  filterCount: {
+    fontSize: "0.8rem",
+    color: theme.palette.text.secondary,
+    marginLeft: "auto"
+  },
+  sortLabel: {
+    "& .MuiTableSortLabel-icon": {
+      opacity: 0.4
+    }
+  },
   inactive: {
     color: "gray"
   },
@@ -78,8 +103,61 @@ const useStyles = makeStyles(theme => ({
   },
   almostDue: {
     color: theme.mode === "light" ? "blue" : "#38f"
+  },
+  cellCompact: {
+    paddingTop: 4,
+    paddingBottom: 4,
+    fontSize: "0.8rem"
   }
 }));
+
+// ─── helpers ────────────────────────────────────────────────────────────────
+
+function getDiffDays(record) {
+  if (!moment(record.dueDate).isValid()) return null;
+  return moment(record.dueDate).diff(moment(), "days");
+}
+
+function getStatusCategory(record, gracePeriod) {
+  const diff = getDiffDays(record);
+  if (diff === null) return "active";
+  if (diff < -gracePeriod) return "inactive";   // vencido
+  if (diff < 0) return "grace";                 // período de carência
+  if (diff < 7) return "almostDue";             // a vencer
+  return "active";
+}
+
+const FILTER_OPTIONS = [
+  { value: "all",      label: "Todos" },
+  { value: "active",   label: "Clientes Ativos" },
+  { value: "almostDue",label: "A Vencer (≤ 7 dias)" },
+  { value: "inactive", label: "Clientes Vencidos" },
+];
+
+const SORTABLE_COLUMNS = [
+  { id: "name",    label: "Nome" },
+  { id: "phone",   label: "Telefone" },
+  { id: "plan",    label: "Plano" },
+  { id: "status",  label: "Status" },
+  { id: "dueDate", label: "Vencimento" },
+];
+
+function compareRows(a, b, orderBy) {
+  let valA, valB;
+  switch (orderBy) {
+    case "name":    valA = (a.name || "").toLowerCase();  valB = (b.name || "").toLowerCase();  break;
+    case "phone":   valA = (a.phone || "").toLowerCase(); valB = (b.phone || "").toLowerCase(); break;
+    case "plan":    valA = a.planId ? (a.plan?.name || "").toLowerCase() : ""; valB = b.planId ? (b.plan?.name || "").toLowerCase() : ""; break;
+    case "status":  valA = a.status ? 1 : 0; valB = b.status ? 1 : 0; break;
+    case "dueDate": valA = a.dueDate || ""; valB = b.dueDate || ""; break;
+    default:        valA = ""; valB = "";
+  }
+  if (valA < valB) return -1;
+  if (valA > valB) return 1;
+  return 0;
+}
+
+// ─── CompanyForm ─────────────────────────────────────────────────────────────
 
 export function CompanyForm(props) {
   const { onSubmit, onDelete, onImpersonate, onCancel, initialValue, loading } =
@@ -430,12 +508,19 @@ export function CompanyForm(props) {
   );
 }
 
+// ─── CompaniesManagerGrid ────────────────────────────────────────────────────
+
 export function CompaniesManagerGrid(props) {
   const { records, onSelect } = props;
   const classes = useStyles();
   const { dateToClient } = useDate();
   const { getSetting } = useSettings();
   const [gracePeriod, setGracePeriod] = useState(5);
+
+  // Filter + sort state
+  const [filter, setFilter]       = useState("all");
+  const [orderBy, setOrderBy]     = useState("name");
+  const [orderDir, setOrderDir]   = useState("asc");
 
   useEffect(() => {
     getSetting("gracePeriod").then(value => {
@@ -445,20 +530,21 @@ export function CompaniesManagerGrid(props) {
     });
   }, [getSetting]);
 
-  const renderStatus = row => {
-    return row.status === false ? "Não" : "Sim";
+  const handleSort = column => {
+    if (orderBy === column) {
+      setOrderDir(prev => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setOrderBy(column);
+      setOrderDir("asc");
+    }
   };
 
-  const renderPlan = row => {
-    return row.planId !== null ? row.plan.name : "-";
-  };
+  const renderStatus = row => (row.status === false ? "Não" : "Sim");
+
+  const renderPlan = row => (row.planId !== null ? row.plan?.name || "-" : "-");
 
   const renderCampaignsStatus = row => {
-    if (
-      has(row, "settings") &&
-      isArray(row.settings) &&
-      row.settings.length > 0
-    ) {
+    if (has(row, "settings") && isArray(row.settings) && row.settings.length > 0) {
       const setting = row.settings.find(s => s.key === "campaignsEnabled");
       if (setting) {
         return setting.value === "true" ? "Habilitadas" : "Desabilitadas";
@@ -468,86 +554,158 @@ export function CompaniesManagerGrid(props) {
   };
 
   const rowClass = record => {
-    if (moment(record.dueDate).isValid()) {
-      const now = moment();
-      const dueDate = moment(record.dueDate);
-      const diff = dueDate.diff(now, "days");
-      if (diff < -gracePeriod) {
-        return classes.inactive;
-      }
-      if (diff < 0) {
-        return classes.gracePeriod;
-      }
-      if (diff < 7) {
-        return classes.almostDue;
-      }
+    const cat = getStatusCategory(record, gracePeriod);
+    if (cat === "inactive") return classes.inactive;
+    if (cat === "grace")    return classes.gracePeriod;
+    if (cat === "almostDue") return classes.almostDue;
+    return undefined;
+  };
+
+  // Filtered + sorted list
+  const visibleRecords = useMemo(() => {
+    let filtered = records;
+
+    if (filter !== "all") {
+      filtered = records.filter(r => {
+        const cat = getStatusCategory(r, gracePeriod);
+        if (filter === "inactive") return cat === "inactive" || cat === "grace";
+        if (filter === "almostDue") return cat === "almostDue";
+        if (filter === "active") return cat === "active";
+        return true;
+      });
     }
-    return classes.active;
+
+    const sorted = [...filtered].sort((a, b) => {
+      const cmp = compareRows(a, b, orderBy);
+      return orderDir === "asc" ? cmp : -cmp;
+    });
+
+    return sorted;
+  }, [records, filter, orderBy, orderDir, gracePeriod]);
+
+  // Count badges
+  const counts = useMemo(() => {
+    const c = { active: 0, almostDue: 0, inactive: 0, grace: 0 };
+    records.forEach(r => {
+      const cat = getStatusCategory(r, gracePeriod);
+      c[cat] = (c[cat] || 0) + 1;
+    });
+    return c;
+  }, [records, gracePeriod]);
+
+  const filterLabels = {
+    all:       `Todos (${records.length})`,
+    active:    `Clientes Ativos (${counts.active})`,
+    almostDue: `A Vencer — ≤ 7 dias (${counts.almostDue})`,
+    inactive:  `Vencidos (${counts.inactive + counts.grace})`,
   };
 
   return (
-    <Paper className={classes.tableContainer}>
-      <Table
-        className={classes.fullWidth}
-        size="small"
-        aria-label="a dense table"
-      >
-        <TableHead>
-          <TableRow>
-            <TableCell align="center" style={{ width: "1%" }}>
-              #
-            </TableCell>
-            <TableCell align="left">Nome</TableCell>
-            <TableCell align="left">E-mail</TableCell>
-            <TableCell align="left">Telefone</TableCell>
-            <TableCell align="left">Plano</TableCell>
-            <TableCell align="left">Campanhas</TableCell>
-            <TableCell align="left">Status</TableCell>
-            <TableCell align="left">Criada Em</TableCell>
-            <TableCell align="left">Vencimento</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {records.map((row, key) => (
-            <TableRow className={rowClass(row)} key={key}>
-              <TableCell align="center" style={{ width: "1%" }}>
-                <IconButton onClick={() => onSelect(row)} aria-label="delete">
-                  <EditIcon />
-                </IconButton>
-              </TableCell>
-              <TableCell align="left" style={{ color: "unset" }}>
-                {row.name || "-"}
-              </TableCell>
-              <TableCell align="left" style={{ color: "unset" }}>
-                {row.email || "-"}
-              </TableCell>
-              <TableCell align="left" style={{ color: "unset" }}>
-                {row.phone || "-"}
-              </TableCell>
-              <TableCell align="left" style={{ color: "unset" }}>
-                {renderPlan(row)}
-              </TableCell>
-              <TableCell align="left" style={{ color: "unset" }}>
-                {renderCampaignsStatus(row)}
-              </TableCell>
-              <TableCell align="left" style={{ color: "unset" }}>
-                {renderStatus(row)}
-              </TableCell>
-              <TableCell align="left" style={{ color: "unset" }}>
-                {dateToClient(row.createdAt)}
-              </TableCell>
-              <TableCell align="left" style={{ color: "unset" }}>
-                {dateToClient(row.dueDate)}
-                <br />
-                <span>{row.recurrence}</span>
-              </TableCell>
+    <Paper variant="outlined">
+      {/* ── Barra de filtro ── */}
+      <div className={classes.filterBar} style={{ padding: "8px 16px" }}>
+        <FormControl variant="outlined" size="small" className={classes.filterSelect}>
+          <InputLabel>Filtrar por situação</InputLabel>
+          <Select
+            value={filter}
+            onChange={e => setFilter(e.target.value)}
+            label="Filtrar por situação"
+          >
+            {FILTER_OPTIONS.map(opt => (
+              <MenuItem key={opt.value} value={opt.value}>
+                {filterLabels[opt.value]}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <span className={classes.filterCount}>
+          {visibleRecords.length} registro{visibleRecords.length !== 1 ? "s" : ""}
+          {filter !== "all" ? ` de ${records.length}` : ""}
+        </span>
+      </div>
+
+      {/* ── Tabela ── */}
+      <div className={classes.tableWrapper}>
+        <Table className={classes.table} size="small" aria-label="companies table">
+          <TableHead>
+            <TableRow>
+              <TableCell style={{ width: 40 }} />
+
+              {SORTABLE_COLUMNS.map(col => (
+                <TableCell key={col.id} sortDirection={orderBy === col.id ? orderDir : false}>
+                  <Tooltip title={`Ordenar por ${col.label}`} enterDelay={300}>
+                    <TableSortLabel
+                      className={classes.sortLabel}
+                      active={orderBy === col.id}
+                      direction={orderBy === col.id ? orderDir : "asc"}
+                      onClick={() => handleSort(col.id)}
+                    >
+                      {col.label}
+                    </TableSortLabel>
+                  </Tooltip>
+                </TableCell>
+              ))}
+
+              <TableCell>E-mail</TableCell>
+              <TableCell>Campanhas</TableCell>
+              <TableCell>Criada Em</TableCell>
+              <TableCell>Recorrência</TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHead>
+          <TableBody>
+            {visibleRecords.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={9} align="center" style={{ padding: 24, color: "gray" }}>
+                  Nenhum registro encontrado para este filtro.
+                </TableCell>
+              </TableRow>
+            ) : (
+              visibleRecords.map((row, key) => (
+                <TableRow className={rowClass(row)} key={key}>
+                  <TableCell className={classes.cellCompact} style={{ width: 40 }}>
+                    <IconButton size="small" onClick={() => onSelect(row)} aria-label="editar">
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                  </TableCell>
+                  <TableCell className={classes.cellCompact} style={{ color: "unset" }}>
+                    {row.name || "-"}
+                  </TableCell>
+                  <TableCell className={classes.cellCompact} style={{ color: "unset" }}>
+                    {row.phone || "-"}
+                  </TableCell>
+                  <TableCell className={classes.cellCompact} style={{ color: "unset" }}>
+                    {renderPlan(row)}
+                  </TableCell>
+                  <TableCell className={classes.cellCompact} style={{ color: "unset" }}>
+                    {renderStatus(row)}
+                  </TableCell>
+                  <TableCell className={classes.cellCompact} style={{ color: "unset" }}>
+                    {dateToClient(row.dueDate)}
+                  </TableCell>
+                  <TableCell className={classes.cellCompact} style={{ color: "unset" }}>
+                    {row.email || "-"}
+                  </TableCell>
+                  <TableCell className={classes.cellCompact} style={{ color: "unset" }}>
+                    {renderCampaignsStatus(row)}
+                  </TableCell>
+                  <TableCell className={classes.cellCompact} style={{ color: "unset" }}>
+                    {dateToClient(row.createdAt)}
+                  </TableCell>
+                  <TableCell className={classes.cellCompact} style={{ color: "unset" }}>
+                    {row.recurrence || "-"}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </Paper>
   );
 }
+
+// ─── CompaniesManager (default) ──────────────────────────────────────────────
 
 export default function CompaniesManager() {
   const classes = useStyles();
