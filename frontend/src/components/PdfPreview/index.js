@@ -9,18 +9,19 @@ import {
   Tooltip,
   Typography
 } from "@material-ui/core";
-import {
-  Close,
-  GetApp,
-  NavigateBefore,
-  NavigateNext
-} from "@material-ui/icons";
+import { Close, GetApp } from "@material-ui/icons";
 import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
 
 GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
-const useStyles = makeStyles(theme => ({
+const MAX_UNRANGED_BYTES = 10 * 1024 * 1024; // 10 MB
+
+// True when the browser ships a built-in PDF viewer (Chrome 94+, FF 99+, Edge 94+).
+const BROWSER_HAS_PDF_VIEWER =
+  typeof navigator !== "undefined" && navigator.pdfViewerEnabled === true;
+
+const useStyles = makeStyles(() => ({
   // ── Thumbnail ──────────────────────────────────────────────────────────
   thumbnail: {
     position: "relative",
@@ -79,7 +80,7 @@ const useStyles = makeStyles(theme => ({
     gap: 4
   },
   dialogContent: {
-    padding: 0,
+    padding: "8px 0",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
@@ -87,19 +88,31 @@ const useStyles = makeStyles(theme => ({
     minHeight: "60vh",
     overflowY: "auto"
   },
+  dialogContentIframe: {
+    padding: 0,
+    height: "80vh",
+    overflow: "hidden"
+  },
+  pdfIframe: {
+    width: "100%",
+    height: "100%",
+    border: "none",
+    display: "block"
+  },
   pageCanvas: {
     display: "block",
     maxWidth: "100%",
     boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
-    margin: "16px auto",
+    margin: "8px auto",
     backgroundColor: "#fff"
   },
-  pageNav: {
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-    padding: "8px 0",
-    color: "#fff"
+  pagePlaceholder: {
+    // A4 aspect ratio placeholder keeps scrollbar accurate before a page renders.
+    width: "calc(100% - 32px)",
+    paddingTop: "141.4%",
+    margin: "8px auto",
+    backgroundColor: "#fff",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.4)"
   },
   spinnerWrap: {
     display: "flex",
@@ -111,40 +124,124 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-// ── Shared PDF loader ─────────────────────────────────────────────────────────
-async function renderPageToCanvas(pdf, pageNum, canvas) {
-  const page = await pdf.getPage(pageNum);
-  const containerWidth = canvas.parentElement?.clientWidth || 700;
-  const viewport = page.getViewport({ scale: 1 });
-  const scale = Math.min(containerWidth / viewport.width, 2);
-  const scaledViewport = page.getViewport({ scale });
-  canvas.width = scaledViewport.width;
-  canvas.height = scaledViewport.height;
-  await page.render({
-    canvasContext: canvas.getContext("2d"),
-    viewport: scaledViewport
-  }).promise;
+// ── HEAD check ────────────────────────────────────────────────────────────────
+// Conservative: presumes range requests are NOT supported unless the server
+// explicitly confirms otherwise. Without range support we only allow loading
+// when the file size is known and ≤ MAX_UNRANGED_BYTES, to avoid locking up
+// the frontend with a huge unbounded download.
+async function checkPdfUrl(url) {
+  try {
+    const res = await fetch(url, { method: "HEAD" });
+    const acceptRanges = res.headers.get("Accept-Ranges");
+    const contentLength = res.headers.get("Content-Length");
+    const fileSize = contentLength ? parseInt(contentLength, 10) : null;
+
+    // Range support explicitly confirmed → always allow.
+    if (acceptRanges && acceptRanges !== "none") {
+      return { canLoad: true, supportsRange: true, fileSize };
+    }
+
+    // Range not supported or unknown → only allow when size is confirmed ≤ limit.
+    if (fileSize !== null && fileSize <= MAX_UNRANGED_BYTES) {
+      return { canLoad: true, supportsRange: false, fileSize };
+    }
+
+    return { canLoad: false, supportsRange: false, fileSize };
+  } catch {
+    // Request failed → cannot confirm range support; block to avoid lockup.
+    return { canLoad: false, supportsRange: false, fileSize: null };
+  }
 }
 
-function cacheBustUrl(url) {
-  if (!url) return url;
-  const sep = url.includes("?") ? "&" : "?";
-  return `${url}${sep}t=${Date.now()}`;
+// ── Lazy per-page renderer ────────────────────────────────────────────────────
+// Renders a page only when it scrolls within 400 px of the viewport.
+// A placeholder with an A4 aspect ratio keeps the scrollbar accurate.
+function LazyPdfPage({ pdf, pageNum, classes }) {
+  const wrapperRef = useRef(null);
+  const canvasRef = useRef(null);
+  const renderTriggered = useRef(false);
+  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el || !pdf) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (!entries[0].isIntersecting || renderTriggered.current) return;
+        renderTriggered.current = true;
+        observer.disconnect();
+
+        let cancelled = false;
+        (async () => {
+          try {
+            const page = await pdf.getPage(pageNum);
+            if (cancelled) return;
+            const containerWidth = el.parentElement?.clientWidth || 700;
+            const viewport = page.getViewport({ scale: 1 });
+            const scale = Math.min(containerWidth / viewport.width, 2);
+            const scaledViewport = page.getViewport({ scale });
+            const canvas = canvasRef.current;
+            if (!canvas || cancelled) return;
+            canvas.width = scaledViewport.width;
+            canvas.height = scaledViewport.height;
+            await page.render({
+              canvasContext: canvas.getContext("2d"),
+              viewport: scaledViewport
+            }).promise;
+            if (!cancelled) setDone(true);
+          } catch {
+            // silent – placeholder stays
+          }
+        })();
+
+        return () => {
+          cancelled = true;
+        };
+      },
+      { rootMargin: "400px" } // start loading before the page enters view
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [pdf, pageNum]);
+
+  return (
+    <div ref={wrapperRef}>
+      {!done && <div className={classes.pagePlaceholder} />}
+      <canvas
+        ref={canvasRef}
+        className={classes.pageCanvas}
+        style={{ display: done ? "block" : "none" }}
+      />
+    </div>
+  );
 }
 
 // ── Thumbnail sub-component ───────────────────────────────────────────────────
-const Thumbnail = ({ url, onOpen }) => {
+function Thumbnail({ url, onOpen }) {
   const classes = useStyles();
   const canvasRef = useRef(null);
-  const [status, setStatus] = useState("loading");
+  const [status, setStatus] = useState("loading"); // loading | done | error
 
   useEffect(() => {
-    if (!url) return;
+    if (!url) {
+      setStatus("error");
+      return;
+    }
+
     let cancelled = false;
+    setStatus("loading");
 
     (async () => {
       try {
-        const pdf = await getDocument({ url }).promise;
+        const pdf = await getDocument({
+          url,
+          // Only fetch what's needed for page 1 – don't pre-load the whole file.
+          disableAutoFetch: true,
+          disableStream: true,
+          rangeChunkSize: 65536 // 64 KB chunks
+        }).promise;
         if (cancelled) {
           pdf.destroy();
           return;
@@ -155,19 +252,20 @@ const Thumbnail = ({ url, onOpen }) => {
           return;
         }
 
-        const containerWidth = canvas.parentElement?.clientWidth || 300;
         const page = await pdf.getPage(1);
         if (cancelled) {
           pdf.destroy();
           return;
         }
 
+        const containerWidth = canvas.parentElement?.clientWidth || 300;
         const viewport = page.getViewport({ scale: 1 });
         const scale = containerWidth / viewport.width;
         const scaledViewport = page.getViewport({ scale });
 
+        // Draw only the top half of the first page
         canvas.width = scaledViewport.width;
-        canvas.height = Math.floor(scaledViewport.height / 2); // top half only
+        canvas.height = Math.floor(scaledViewport.height / 2);
         await page.render({
           canvasContext: canvas.getContext("2d"),
           viewport: scaledViewport
@@ -191,7 +289,7 @@ const Thumbnail = ({ url, onOpen }) => {
   return (
     <div className={classes.thumbnail} onClick={onOpen}>
       {status === "loading" && (
-        <div className={classes.thumbnailMessage}>Loading preview…</div>
+        <div className={classes.thumbnailMessage}>Loading preview...</div>
       )}
       {status === "error" && (
         <div className={classes.thumbnailMessage}>PDF preview unavailable</div>
@@ -209,41 +307,47 @@ const Thumbnail = ({ url, onOpen }) => {
       )}
     </div>
   );
-};
+}
 
 // ── Full-viewer dialog ────────────────────────────────────────────────────────
-const PdfViewerDialog = ({ url, fileName, open, onClose }) => {
+function PdfViewerDialog({ url, fileName, open, onClose }) {
   const classes = useStyles();
-  const canvasRef = useRef(null);
+  const contentRef = useRef(null);
   const pdfRef = useRef(null);
   const [numPages, setNumPages] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageStatus, setPageStatus] = useState("loading");
+  const [viewerStatus, setViewerStatus] = useState("loading"); // loading | done | error
 
-  // Load PDF when dialog opens
+  // When the browser has a native PDF viewer we skip PDF.js entirely.
   useEffect(() => {
-    if (!open || !url) return;
-    let cancelled = false;
+    if (!open || BROWSER_HAS_PDF_VIEWER) return;
 
-    // Reset state so the page-render effect always fires on re-open,
-    // even when numPages/currentPage happen to be the same values as before.
+    if (!url) {
+      setViewerStatus("error");
+      return;
+    }
+
+    let cancelled = false;
+    setViewerStatus("loading");
     setNumPages(0);
-    setCurrentPage(1);
-    setPageStatus("loading");
 
     (async () => {
       try {
-        const pdf = await getDocument({ url }).promise;
+        const pdf = await getDocument({
+          url,
+          disableAutoFetch: true, // don't bulk-download; fetch chunks on demand
+          rangeChunkSize: 65536 // 64 KB per range request
+        }).promise;
         if (cancelled) {
           pdf.destroy();
           return;
         }
         pdfRef.current = pdf;
         setNumPages(pdf.numPages);
+        setViewerStatus("done");
       } catch (e) {
         if (!cancelled) {
           console.error("PdfViewer load error:", e);
-          setPageStatus("error");
+          setViewerStatus("error");
         }
       }
     })();
@@ -257,34 +361,10 @@ const PdfViewerDialog = ({ url, fileName, open, onClose }) => {
     };
   }, [open, url]);
 
-  // Render the current page whenever it changes or PDF is loaded
-  useEffect(() => {
-    if (!pdfRef.current || !numPages) return;
-    let cancelled = false;
-    setPageStatus("loading");
-
-    (async () => {
-      try {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        await renderPageToCanvas(pdfRef.current, currentPage, canvas);
-        if (!cancelled) setPageStatus("done");
-      } catch (e) {
-        if (!cancelled) {
-          console.error("PdfViewer render error:", e);
-          setPageStatus("error");
-        }
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [currentPage, numPages]);
-
   const handleDownload = useCallback(() => {
     const a = document.createElement("a");
-    a.href = cacheBustUrl(url);
+    const sep = url.includes("?") ? "&" : "?";
+    a.href = `${url}${sep}t=${Date.now()}`;
     a.download = fileName || "document.pdf";
     a.rel = "noopener noreferrer";
     document.body.appendChild(a);
@@ -303,35 +383,6 @@ const PdfViewerDialog = ({ url, fileName, open, onClose }) => {
           {fileName || "PDF Document"}
         </Typography>
         <div className={classes.dialogTitleButtons}>
-          {numPages > 1 && (
-            <div className={classes.pageNav}>
-              <Tooltip title="Previous page">
-                <span>
-                  <IconButton
-                    size="small"
-                    disabled={currentPage <= 1}
-                    onClick={() => setCurrentPage(p => p - 1)}
-                  >
-                    <NavigateBefore />
-                  </IconButton>
-                </span>
-              </Tooltip>
-              <Typography variant="body2">
-                {currentPage} / {numPages}
-              </Typography>
-              <Tooltip title="Next page">
-                <span>
-                  <IconButton
-                    size="small"
-                    disabled={currentPage >= numPages}
-                    onClick={() => setCurrentPage(p => p + 1)}
-                  >
-                    <NavigateNext />
-                  </IconButton>
-                </span>
-              </Tooltip>
-            </div>
-          )}
           <Tooltip title="Download">
             <IconButton size="small" onClick={handleDownload}>
               <GetApp />
@@ -344,30 +395,73 @@ const PdfViewerDialog = ({ url, fileName, open, onClose }) => {
           </Tooltip>
         </div>
       </DialogTitle>
-      <DialogContent className={classes.dialogContent}>
-        {pageStatus === "loading" && (
-          <div className={classes.spinnerWrap}>
-            <CircularProgress color="inherit" />
-          </div>
+
+      <DialogContent
+        className={
+          BROWSER_HAS_PDF_VIEWER
+            ? classes.dialogContentIframe
+            : classes.dialogContent
+        }
+        ref={contentRef}
+      >
+        {BROWSER_HAS_PDF_VIEWER ? (
+          <iframe
+            className={classes.pdfIframe}
+            src={`${url}${url.includes("?") ? "&" : "?"}inline=1`}
+            title={fileName || "PDF Document"}
+          />
+        ) : (
+          <>
+            {viewerStatus === "loading" && (
+              <div className={classes.spinnerWrap}>
+                <CircularProgress color="inherit" />
+              </div>
+            )}
+            {viewerStatus === "error" && (
+              <div className={classes.spinnerWrap}>
+                <Typography color="inherit">Failed to load PDF.</Typography>
+              </div>
+            )}
+            {viewerStatus === "done" &&
+              Array.from({ length: numPages }, (_, i) => i + 1).map(pageNum => (
+                <LazyPdfPage
+                  key={pageNum}
+                  pdf={pdfRef.current}
+                  pageNum={pageNum}
+                  classes={classes}
+                />
+              ))}
+          </>
         )}
-        {pageStatus === "error" && (
-          <div className={classes.spinnerWrap}>
-            <Typography color="inherit">Failed to render page.</Typography>
-          </div>
-        )}
-        <canvas
-          ref={canvasRef}
-          className={classes.pageCanvas}
-          style={{ display: pageStatus === "done" ? "block" : "none" }}
-        />
       </DialogContent>
     </Dialog>
   );
-};
+}
 
 // ── Public component ──────────────────────────────────────────────────────────
-const PdfPreview = ({ url, fileName }) => {
+function PdfPreview({ url, fileName }) {
   const [open, setOpen] = useState(false);
+  // null = pending, true = can load, false = blocked
+  const [canLoad, setCanLoad] = useState(null);
+
+  useEffect(() => {
+    if (!url) return;
+    let cancelled = false;
+    setCanLoad(null);
+
+    checkPdfUrl(url).then(result => {
+      if (!cancelled) setCanLoad(result.canLoad);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [url]);
+
+  // canLoad===null means HEAD check is still in-flight; canLoad===false means
+  // range is unsupported and file exceeds 10 MB → fall back to the normal
+  // document download button already rendered in the messages list.
+  if (!canLoad) return null;
 
   return (
     <>
@@ -380,6 +474,6 @@ const PdfPreview = ({ url, fileName }) => {
       />
     </>
   );
-};
+}
 
 export default PdfPreview;
