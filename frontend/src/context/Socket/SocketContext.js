@@ -129,6 +129,61 @@ const socketManager = {
   currentUserId: -1,
   currentSocket: null,
   socketReady: false,
+  tokenRefreshPromise: null,
+
+  refreshAuthToken: async function () {
+    if (this.tokenRefreshPromise) {
+      return this.tokenRefreshPromise;
+    }
+
+    this.tokenRefreshPromise = api
+      .post("/auth/refresh_token")
+      .then(({ data }) => {
+        const refreshedToken = data?.token;
+        if (!refreshedToken) {
+          return null;
+        }
+
+        localStorage.setItem("token", JSON.stringify(refreshedToken));
+        api.defaults.headers.Authorization = `Bearer ${refreshedToken}`;
+
+        return refreshedToken;
+      })
+      .catch(error => {
+        console.debug("Unable to refresh token for socket", error);
+        return null;
+      })
+      .finally(() => {
+        this.tokenRefreshPromise = null;
+      });
+
+    return this.tokenRefreshPromise;
+  },
+
+  applySocketToken: function (token, markReconnect = false) {
+    if (!this.currentSocket || !token) {
+      return;
+    }
+
+    this.currentSocket.io.opts.query.token = token;
+    if (markReconnect) {
+      this.currentSocket.io.opts.query.r = 1;
+    }
+  },
+
+  syncCurrentSocketToken: function (token) {
+    this.applySocketToken(token, false);
+  },
+
+  reconnectWithFreshToken: async function () {
+    const refreshedToken = await this.refreshAuthToken();
+    if (!refreshedToken || !this.currentSocket) {
+      return;
+    }
+
+    this.applySocketToken(refreshedToken, true);
+    this.currentSocket.connect();
+  },
 
   GetSocket: function (_discardCompanyId = null) {
     const token = JSON.parse(localStorage.getItem("token"));
@@ -148,17 +203,6 @@ const socketManager = {
         this.currentUserId = null;
       }
 
-      if (isExpired(token)) {
-        console.debug("Expired token, refreshing token");
-
-        api.get("/auth/me").then(response => {
-          console.debug("Token refreshed", response);
-          window.location.reload();
-        });
-
-        return new DummySocket();
-      }
-
       this.currentCompanyId = companyId;
       this.currentUserId = userId;
 
@@ -169,12 +213,15 @@ const socketManager = {
         query: { token }
       });
 
-      this.currentSocket.io.on("reconnect_attempt", () => {
+      this.currentSocket.io.on("reconnect_attempt", async () => {
         this.currentSocket.io.opts.query.r = 1;
         const newToken = JSON.parse(localStorage.getItem("token"));
         if (isExpired(newToken)) {
-          console.debug("Refreshing");
-          window.location.reload();
+          console.debug("Refreshing before reconnect attempt");
+          const refreshedToken = await this.refreshAuthToken();
+          if (refreshedToken) {
+            this.currentSocket.io.opts.query.token = refreshedToken;
+          }
         } else {
           console.debug("Using new token");
           this.currentSocket.io.opts.query.token = newToken;
@@ -188,8 +235,8 @@ const socketManager = {
           const newToken = JSON.parse(localStorage.getItem("token"));
 
           if (isExpired(newToken)) {
-            console.debug("Expired token - refreshing");
-            window.location.reload();
+            console.debug("Expired token - refreshing and reconnecting");
+            this.reconnectWithFreshToken();
             return;
           }
           console.debug("Reconnecting using refreshed token");
@@ -197,6 +244,22 @@ const socketManager = {
           this.currentSocket.io.opts.query.r = 1;
           this.currentSocket.connect();
         }
+      });
+
+      this.currentSocket.on("connect_error", async error => {
+        const message = error?.message?.toLowerCase?.() || "";
+        const isAuthError =
+          message.includes("jwt") ||
+          message.includes("token") ||
+          message.includes("unauthorized") ||
+          message.includes("authentication");
+
+        if (!isAuthError) {
+          return;
+        }
+
+        console.debug("Socket auth error, trying token refresh", message);
+        await this.reconnectWithFreshToken();
       });
 
       this.currentSocket.on("connect", (...params) => {
