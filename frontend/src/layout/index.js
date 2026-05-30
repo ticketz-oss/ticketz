@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 import { useHistory } from "react-router-dom";
 import clsx from "clsx";
 import {
@@ -12,6 +12,8 @@ import {
   MenuItem,
   IconButton,
   Menu,
+  Badge,
+  Tooltip,
   useTheme,
   useMediaQuery
 } from "@material-ui/core";
@@ -19,6 +21,7 @@ import {
 import MenuIcon from "@material-ui/icons/Menu";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import AccountCircle from "@material-ui/icons/AccountCircle";
+import SettingsEthernetIcon from "@material-ui/icons/SettingsEthernet";
 import CachedIcon from "@material-ui/icons/Cached";
 
 import MainListItems from "./MainListItems";
@@ -51,6 +54,7 @@ import NestedMenuItem from "material-ui-nested-menu-item";
 import GoogleAnalytics from "../components/GoogleAnalytics";
 import OnlyForSuperUser from "../components/OnlyForSuperUser";
 import NewTicketModal from "../components/NewTicketModal/index.js";
+import { toast } from "react-toastify";
 
 const drawerWidth = 240;
 const DRAWER_STORAGE_KEY = "drawerOpen";
@@ -205,6 +209,25 @@ const useStyles = makeStyles(theme => ({
     fontSize: 14,
     color: "white"
   },
+  wsConnectionAlertButton: {
+    marginRight: theme.spacing(1.5),
+    color: theme.palette.primary.contrastText,
+    padding: theme.spacing(0.5)
+  },
+  wsConnectionAlertIcon: {
+    fontSize: 20
+  },
+  wsConnectionBadge: {
+    "& .MuiBadge-badge": {
+      minWidth: 10,
+      width: 10,
+      height: 10,
+      borderRadius: "50%",
+      backgroundColor: "#ff4d4f",
+      border: "none",
+      boxShadow: "none"
+    }
+  },
   userMenuInfoContainer: {
     padding: theme.spacing(1.5, 2),
     maxWidth: 320
@@ -321,6 +344,8 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   const { dateToClient } = useDate();
 
   const socketManager = useContext(SocketContext);
+  const [wsConnectionIssue, setWsConnectionIssue] = useState(false);
+  const hadWsConnectionIssueRef = useRef(false);
 
   const [newTicketContact, setNewTicketContact] = useState(null);
 
@@ -416,6 +441,14 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   }, [drawerOpen, greaterThenSm]);
 
   useEffect(() => {
+    if (!socketManager?.subscribeWsConnectionIssue) {
+      return undefined;
+    }
+
+    return socketManager.subscribeWsConnectionIssue(setWsConnectionIssue);
+  }, [socketManager]);
+
+  useEffect(() => {
     const companyId = localStorage.getItem("companyId");
     const userId = localStorage.getItem("userId");
 
@@ -509,6 +542,30 @@ const LoggedInLayout = ({ children, themeToggle }) => {
     colorMode.toggleColorMode();
   };
 
+  const showWsConnectionIssueToast = () => {
+    toast.error(i18n.t("common.websocketConnectionIssue"));
+  };
+
+  const showWsConnectionRestoredToast = () => {
+    toast.success(i18n.t("common.websocketConnectionRestored"));
+  };
+
+  const handleWsConnectionHintClick = () => {
+    showWsConnectionIssueToast();
+  };
+
+  useEffect(() => {
+    if (wsConnectionIssue && !hadWsConnectionIssueRef.current) {
+      showWsConnectionIssueToast();
+    }
+
+    if (!wsConnectionIssue && hadWsConnectionIssueRef.current) {
+      showWsConnectionRestoredToast();
+    }
+
+    hadWsConnectionIssueRef.current = wsConnectionIssue;
+  }, [wsConnectionIssue]);
+
   const handleChooseLanguage = language => {
     localStorage.setItem("language", language);
     window.location.reload(false);
@@ -597,6 +654,28 @@ const LoggedInLayout = ({ children, themeToggle }) => {
             noWrap
             className={classes.title}
           />
+
+          {wsConnectionIssue && (
+            <Tooltip title={i18n.t("common.websocketConnectionIssue")} arrow>
+              <IconButton
+                aria-label={i18n.t("common.websocketConnectionIssue")}
+                className={classes.wsConnectionAlertButton}
+                onClick={handleWsConnectionHintClick}
+              >
+                <Badge
+                  variant="dot"
+                  overlap="circular"
+                  color="secondary"
+                  anchorOrigin={{ vertical: "top", horizontal: "right" }}
+                  className={classes.wsConnectionBadge}
+                >
+                  <SettingsEthernetIcon
+                    className={classes.wsConnectionAlertIcon}
+                  />
+                </Badge>
+              </IconButton>
+            </Tooltip>
+          )}
 
           {canAccessBackendlogs && <Backendlogs />}
 

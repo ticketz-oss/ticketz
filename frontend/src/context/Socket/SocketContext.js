@@ -109,6 +109,7 @@ class ManagedSocket {
 
   logout() {
     this.disconnect();
+    this.socketManager.resetWsConnectionIssue();
     this.socketManager.currentSocket = null;
     this.socketManager.currentCompanyId = -1;
     this.socketManager.currentUserId = -1;
@@ -130,6 +131,69 @@ const socketManager = {
   currentSocket: null,
   socketReady: false,
   tokenRefreshPromise: null,
+  wsConnectionIssueActive: false,
+  wsConnectionIssueListeners: [],
+  wsConnectionStableTimer: null,
+  wsConnectionStabilityDelayMs: 5000,
+
+  notifyWsConnectionIssue: function () {
+    this.wsConnectionIssueListeners.forEach(listener => {
+      listener(this.wsConnectionIssueActive);
+    });
+  },
+
+  setWsConnectionIssue: function (active) {
+    if (this.wsConnectionIssueActive === active) {
+      return;
+    }
+
+    this.wsConnectionIssueActive = active;
+    this.notifyWsConnectionIssue();
+  },
+
+  markWsConnectionFailure: function () {
+    if (this.wsConnectionStableTimer) {
+      clearTimeout(this.wsConnectionStableTimer);
+      this.wsConnectionStableTimer = null;
+    }
+    this.setWsConnectionIssue(true);
+  },
+
+  markWsConnectionStable: function () {
+    if (!this.wsConnectionIssueActive) {
+      return;
+    }
+
+    if (this.wsConnectionStableTimer) {
+      clearTimeout(this.wsConnectionStableTimer);
+    }
+
+    this.wsConnectionStableTimer = setTimeout(() => {
+      if (this.currentSocket?.connected) {
+        this.setWsConnectionIssue(false);
+      }
+      this.wsConnectionStableTimer = null;
+    }, this.wsConnectionStabilityDelayMs);
+  },
+
+  resetWsConnectionIssue: function () {
+    if (this.wsConnectionStableTimer) {
+      clearTimeout(this.wsConnectionStableTimer);
+      this.wsConnectionStableTimer = null;
+    }
+    this.setWsConnectionIssue(false);
+  },
+
+  subscribeWsConnectionIssue: function (listener) {
+    this.wsConnectionIssueListeners.push(listener);
+    listener(this.wsConnectionIssueActive);
+
+    return () => {
+      this.wsConnectionIssueListeners = this.wsConnectionIssueListeners.filter(
+        l => l !== listener
+      );
+    };
+  },
 
   refreshAuthToken: async function () {
     if (this.tokenRefreshPromise) {
@@ -230,6 +294,10 @@ const socketManager = {
 
       this.currentSocket.on("disconnect", reason => {
         console.debug(`socket disconnected because: ${reason}`);
+        if (reason !== "io client disconnect") {
+          this.markWsConnectionFailure();
+        }
+
         if (reason.startsWith("io server disconnect")) {
           console.debug("tryng to reconnect", this.currentSocket);
           const newToken = JSON.parse(localStorage.getItem("token"));
@@ -247,6 +315,8 @@ const socketManager = {
       });
 
       this.currentSocket.on("connect_error", async error => {
+        this.markWsConnectionFailure();
+
         const message = error?.message?.toLowerCase?.() || "";
         const isAuthError =
           message.includes("jwt") ||
@@ -264,6 +334,7 @@ const socketManager = {
 
       this.currentSocket.on("connect", (...params) => {
         console.debug("socket connected", params);
+        this.markWsConnectionStable();
       });
 
       this.currentSocket.on("error", payload => {

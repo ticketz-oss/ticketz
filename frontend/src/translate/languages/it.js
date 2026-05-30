@@ -23,7 +23,10 @@ const messages = {
         contact: "Contatto",
         serverTime: "Ora del server:",
         clientTime: "Ora del client:",
-        differenceMinutes: "Differenza: {{count}} minuto(i)"
+        differenceMinutes: "Differenza: {{count}} minuto(i)",
+        websocketConnectionIssue:
+          "Connessione in tempo reale instabile. Riconnessione in corso...",
+        websocketConnectionRestored: "Connessione in tempo reale ristabilita."
       },
       signup: {
         title: "Registrati",
