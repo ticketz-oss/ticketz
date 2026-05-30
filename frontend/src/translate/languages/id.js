@@ -75,6 +75,17 @@ const messages = {
           perDay: {
             title: "Interaksi Hari Ini: "
           }
+        },
+        blog: {
+          title: "Blog Ticketz",
+          loading: "Memuat postingan...",
+          error: "Postingan blog tidak dapat dimuat.",
+          empty: "Tidak ada postingan blog.",
+          showAll: "Tampilkan semua postingan",
+          showLess: "Tampilkan lebih sedikit",
+          openPost: "Baca postingan",
+          previous: "Postingan sebelumnya",
+          next: "Postingan berikutnya"
         }
       },
       connections: {

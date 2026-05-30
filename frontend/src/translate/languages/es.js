@@ -132,6 +132,17 @@ const messages = {
         ticketCountersLabels: {
           created: "Creado",
           closed: "Cerrado"
+        },
+        blog: {
+          title: "El blog de Ticketz",
+          loading: "Cargando publicaciones...",
+          error: "No se pudieron cargar las publicaciones del blog.",
+          empty: "No se encontraron publicaciones.",
+          showAll: "Mostrar todas las publicaciones",
+          showLess: "Mostrar menos",
+          openPost: "Leer publicacion",
+          previous: "Publicacion anterior",
+          next: "Siguiente publicacion"
         }
       },
       connections: {

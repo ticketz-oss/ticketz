@@ -75,6 +75,17 @@ const messages = {
           perDay: {
             title: "Heutige Interaktionen: "
           }
+        },
+        blog: {
+          title: "Ticketz-Blog",
+          loading: "Lade Blogbeitraege...",
+          error: "Blogbeitraege konnten nicht geladen werden.",
+          empty: "Keine Blogbeitraege gefunden.",
+          showAll: "Alle Beitraege anzeigen",
+          showLess: "Weniger anzeigen",
+          openPost: "Beitrag lesen",
+          previous: "Vorheriger Beitrag",
+          next: "Naechster Beitrag"
         }
       },
       connections: {

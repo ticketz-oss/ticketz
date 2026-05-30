@@ -76,6 +76,17 @@ const messages = {
           perDay: {
             title: "Interazioni di oggi: "
           }
+        },
+        blog: {
+          title: "Il blog di Ticketz",
+          loading: "Caricamento articoli...",
+          error: "Impossibile caricare gli articoli del blog.",
+          empty: "Nessun articolo trovato.",
+          showAll: "Mostra tutti gli articoli",
+          showLess: "Mostra meno",
+          openPost: "Leggi articolo",
+          previous: "Articolo precedente",
+          next: "Articolo successivo"
         }
       },
       connections: {

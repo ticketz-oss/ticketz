@@ -108,6 +108,17 @@ const messages = {
           perDay: {
             title: "Atendimentos hoje: "
           }
+        },
+        blog: {
+          title: "Blog do Ticketz",
+          loading: "A carregar artigos...",
+          error: "Nao foi possivel carregar os artigos do blog.",
+          empty: "Nenhum artigo encontrado.",
+          showAll: "Mostrar todos os artigos",
+          showLess: "Mostrar menos",
+          openPost: "Ler artigo",
+          previous: "Artigo anterior",
+          next: "Proximo artigo"
         }
       },
       connections: {

@@ -21,6 +21,7 @@ import { grey, blue } from "@material-ui/core/colors";
 import { toast } from "react-toastify";
 
 import TableAttendantsStatus from "../../components/Dashboard/TableAttendantsStatus";
+import BlogFeedCarousel from "../../components/Dashboard/BlogFeedCarousel";
 
 import { isEmpty } from "lodash";
 import moment from "moment";
@@ -538,7 +539,7 @@ const Dashboard = () => {
                       </Paper>
                     )}
                   </Grid>
-                  <Grid item xs={12} md={8}>
+                  <Grid item xs={12} md={4}>
                     <Paper
                       className={clsx(classes.ticketzProPaper, {
                         [classes.clickpointer]: !proInstructionsOpen
@@ -658,6 +659,10 @@ const Dashboard = () => {
                         )}
                       </Grid>
                     </Paper>
+                  </Grid>
+
+                  <Grid item xs={12} md={4}>
+                    <BlogFeedCarousel />
                   </Grid>
                 </>
               )}

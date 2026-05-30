@@ -133,6 +133,17 @@ const messages = {
         ticketCountersLabels: {
           created: "Created",
           closed: "Closed"
+        },
+        blog: {
+          title: "Ticketz Blog",
+          loading: "Loading posts...",
+          error: "Could not load blog posts right now.",
+          empty: "No blog posts found.",
+          showAll: "Show all posts",
+          showLess: "Show less",
+          openPost: "Read post",
+          previous: "Previous post",
+          next: "Next post"
         }
       },
       connections: {
