@@ -1,5 +1,6 @@
 import React, { useEffect, useReducer, useState, useContext } from "react";
 import { makeStyles } from "@material-ui/core/styles";
+import { useTheme } from "@material-ui/core/styles";
 import toastError from "../../errors/toastError";
 import Popover from "@material-ui/core/Popover";
 import AnnouncementIcon from "@material-ui/icons/Announcement";
@@ -131,6 +132,7 @@ const reducer = (state, action) => {
 
 export default function AnnouncementsPopover() {
   const classes = useStyles();
+  const theme = useTheme();
 
   const [loading, setLoading] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -255,7 +257,9 @@ export default function AnnouncementsPopover() {
           variant="dot"
           invisible={invisible || announcements.length < 1}
         >
-          <AnnouncementIcon style={{ color: "white" }} />
+          <AnnouncementIcon
+            style={{ color: theme.palette.primary.contrastText }}
+          />
         </Badge>
       </IconButton>
       <Popover

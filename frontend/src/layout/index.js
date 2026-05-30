@@ -194,7 +194,8 @@ const useStyles = makeStyles(theme => ({
     }
   },
   menuButton: {
-    marginRight: 36
+    marginRight: 36,
+    color: theme.palette.primary.contrastText
   },
   menuButtonHidden: {
     display: "none"

@@ -299,7 +299,7 @@ const NotificationsPopOver = props => {
         aria-label="Mostrar Notificações"
         variant="contained"
       >
-        <ChatIcon style={{ color: "white" }} />
+        <ChatIcon style={{ color: theme.palette.primary.contrastText }} />
         {notifications.length > 0 ? (
           <Badge
             variant="dot"

@@ -43,7 +43,7 @@ const useStyles = makeStyles(theme => ({
     boxShadow: "none !important"
   },
   icons: {
-    color: "#fff"
+    color: theme.palette.primary.contrastText
   },
   customBadge: {
     backgroundColor: "#f44336",

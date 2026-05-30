@@ -6,6 +6,7 @@ import React, {
   useState
 } from "react";
 import { makeStyles } from "@material-ui/core/styles";
+import { useTheme } from "@material-ui/core/styles";
 import toastError from "../../errors/toastError";
 import Popover from "@material-ui/core/Popover";
 import ForumIcon from "@material-ui/icons/Forum";
@@ -97,6 +98,7 @@ const reducer = (state, action) => {
 
 export default function ChatPopover() {
   const classes = useStyles();
+  const theme = useTheme();
 
   const { user } = useContext(AuthContext);
 
@@ -229,7 +231,7 @@ export default function ChatPopover() {
         onClick={handleClick}
       >
         <Badge color="secondary" variant="dot" invisible={invisible}>
-          <ForumIcon style={{ color: "white" }} />
+          <ForumIcon style={{ color: theme.palette.primary.contrastText }} />
         </Badge>
       </IconButton>
       <Popover
