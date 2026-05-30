@@ -22,6 +22,8 @@ import QueueModel from "./models/Queue";
 import UpdateTicketService from "./services/TicketServices/UpdateTicketService";
 import { handleMessage } from "./services/WbotServices/wbotMessageListener";
 import Invoices from "./models/Invoices";
+import { efiCheckBoletoStatus } from "./services/PaymentGatewayServices/EfiServices";
+import { asaasCheckStatus } from "./services/PaymentGatewayServices/AsaasServices";
 import formatBody, { mustacheFormat } from "./helpers/Mustache";
 import Setting from "./models/Setting";
 import { parseToMilliseconds } from "./helpers/parseToMilliseconds";
@@ -608,6 +610,37 @@ const createInvoices = new CronJob("0 * * * * *", async () => {
 });
 
 createInvoices.start();
+
+const checkOpenBoletos = async () => {
+  try {
+    const invoices = await Invoices.findAll({
+      where: {
+        status: "open",
+        paymentMethod: "boleto",
+        txId: { [Op.not]: null }
+      },
+      include: { model: Company, as: "company" }
+    });
+    for (const invoice of invoices) {
+      try {
+        if (invoice.payGw === "efi") {
+          await efiCheckBoletoStatus(invoice);
+        } else if (invoice.payGw === "asaas") {
+          await asaasCheckStatus(invoice);
+        }
+      } catch (e) {
+        logger.error({ invoiceId: invoice.id, error: e?.message }, "checkOpenBoletos: error checking invoice");
+      }
+    }
+  } catch (e) {
+    logger.error({ error: e?.message }, "checkOpenBoletos: error loading invoices");
+  }
+};
+
+const checkBoletos6am = new CronJob("0 6 * * *", checkOpenBoletos);
+const checkBoletos15h = new CronJob("0 15 * * *", checkOpenBoletos);
+checkBoletos6am.start();
+checkBoletos15h.start();
 
 export async function startQueueProcess() {
   logger.info("Starting queue processing");

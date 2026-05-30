@@ -42,6 +42,26 @@ class Invoices extends Model<Invoices> {
   @Column
   payGwData: string;
 
+  // "pix" | "boleto"
+  @Column
+  paymentMethod: string;
+
+  @Column
+  boletoUrl: string;
+
+  @Column
+  boletoBarcode: string;
+
+  // NFS-e
+  @Column
+  nfseId: string;
+
+  @Column
+  nfseUrl: string;
+
+  @Column
+  nfseStatus: string;
+
   @CreatedAt
   createdAt: Date;
 

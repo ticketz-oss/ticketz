@@ -4,18 +4,18 @@
 
    VERSÃO EM PORTUGUÊS MAIS ABAIXO
 
-   
+
    BASIC LICENSE INFORMATION:
 
    Author: Claudemir Todo Bom
    Email: claudemir@todobom.com
-   
+
    Licensed under the AGPLv3 as stated on LICENSE.md file
-   
-   Any work that uses code from this file is obligated to 
+
+   Any work that uses code from this file is obligated to
    give access to its source code to all of its users (not only
    the system's owner running it)
-   
+
    EXCLUSIVE LICENSE to use on closed source derived work can be
    purchased from the author and put at the root of the source
    code tree as proof-of-purchase.
@@ -28,15 +28,15 @@
    Email: claudemir@todobom.com
 
    Licenciado sob a licença AGPLv3 conforme arquivo LICENSE.md
-    
+
    Qualquer sistema que inclua este código deve ter o seu código
    fonte fornecido a todos os usuários do sistema (não apenas ao
    proprietário da infraestrutura que o executa)
-   
+
    LICENÇA EXCLUSIVA para uso em produto derivado em código fechado
    pode ser adquirida com o autor e colocada na raiz do projeto
-   como prova de compra. 
-   
+   como prova de compra.
+
  */
 
 import React, { useEffect, useState } from "react";
@@ -51,6 +51,7 @@ import { toast } from "react-toastify";
 import { makeStyles } from "@material-ui/core/styles";
 import EfiSettings from "../PaymentGateways/Efi/EfiSettings";
 import PixTicketzSettings from "../PaymentGateways/PixTicketz/PixTicketzSettings";
+import AsaasSettings from "../PaymentGateways/Asaas/AsaasSettings";
 
 const useStyles = makeStyles(_ => ({
   fieldContainer: {
@@ -101,15 +102,18 @@ export default function PaymentGateway(props) {
             >
               <MenuItem value={""}>None</MenuItem>
               <MenuItem value={"pixTicketz"}>Pix Ticketz 💎</MenuItem>
-              <MenuItem value={"efi"}>Efí</MenuItem>
+              <MenuItem value={"efi"}>Efí / Gerencianet (PIX + Boleto)</MenuItem>
+              <MenuItem value={"asaas"}>Asaas (PIX + Boleto + NFS-e)</MenuItem>
             </Select>
           </FormControl>
         </Grid>
       </Grid>
+
       {paymentGateway === "efi" && <EfiSettings settings={settings} />}
       {paymentGateway === "pixTicketz" && (
         <PixTicketzSettings settings={settings} />
       )}
+      {paymentGateway === "asaas" && <AsaasSettings settings={settings} />}
     </>
   );
 }

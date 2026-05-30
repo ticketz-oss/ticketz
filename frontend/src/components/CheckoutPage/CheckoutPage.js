@@ -1,11 +1,19 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Stepper,
   Step,
   StepLabel,
   Button,
   Typography,
-  CircularProgress
+  CircularProgress,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  TextField,
+  FormControl,
+  FormLabel,
+  Grid,
+  Divider
 } from "@material-ui/core";
 import { Formik, Form } from "formik";
 
@@ -33,7 +41,17 @@ export default function CheckoutPage(props) {
   const [activeStep, setActiveStep] = useState(1);
   const [datePayment, setDatePayment] = useState(null);
   const [invoiceId] = useState(props.Invoice.id);
+  const [paymentMethod, setPaymentMethod] = useState("pix");
   const onClose = props.onClose;
+
+  // Carrega CPF/CNPJ dos dados fiscais cadastrados
+  useEffect(() => {
+    api.get("/companies/fiscal/me").then(({ data }) => {
+      if (data.document) {
+        // usado internamente — backend usa company.document diretamente
+      }
+    }).catch(() => {});
+  }, []);
   const currentValidationSchema = validationSchema[activeStep];
   const isLastStep = activeStep === steps.length - 1;
   const { user } = useContext(AuthContext);
@@ -60,7 +78,35 @@ export default function CheckoutPage(props) {
           />
         );
       case 2:
-        return <ReviewOrder />;
+        return (
+          <>
+            <ReviewOrder />
+            <Divider style={{ margin: "24px 0 16px" }} />
+            <FormControl component="fieldset">
+              <FormLabel component="legend">
+                <Typography variant="subtitle1">Forma de Pagamento</Typography>
+              </FormLabel>
+              <RadioGroup
+                row
+                value={paymentMethod}
+                onChange={e => setPaymentMethod(e.target.value)}
+              >
+                <FormControlLabel value="pix" control={<Radio />} label="PIX" />
+                <FormControlLabel
+                  value="boleto"
+                  control={<Radio />}
+                  label="Boleto Bancário"
+                />
+              </RadioGroup>
+            </FormControl>
+
+            {paymentMethod === "boleto" && (
+              <Typography variant="body2" color="textSecondary" style={{ marginTop: 8 }}>
+                O CPF/CNPJ será utilizado dos dados fiscais cadastrados em Financeiro → Configurações.
+              </Typography>
+            )}
+          </>
+        );
       default:
         return <div>Not Found</div>;
     }
@@ -70,34 +116,29 @@ export default function CheckoutPage(props) {
     try {
       const plan = JSON.parse(values.plan);
       const newValues = {
-        firstName: values.firstName,
-        lastName: values.lastName,
-        address2: values.address2,
-        city: values.city,
-        state: values.state,
-        zipcode: values.zipcode,
-        country: values.country,
-        useAddressForPaymentDetails: values.useAddressForPaymentDetails,
-        nameOnCard: values.nameOnCard,
-        cardNumber: values.cardNumber,
-        cvv: values.cvv,
         plan: values.plan,
         price: plan.price,
         users: plan.users,
         connections: plan.connections,
-        invoiceId: invoiceId
+        invoiceId,
+        paymentMethod,
+        customerEmail: user?.email || undefined
       };
 
       const { data } = await api.post("/subscription", newValues);
       setDatePayment(data);
       actions.setSubmitting(true);
       setActiveStep(activeStep + 1);
-      toast.success(
-        "Assinatura realizada com sucesso!, aguardando a realização do pagamento"
-      );
+
+      if (paymentMethod === "boleto") {
+        toast.success("Boleto gerado! Efetue o pagamento até o vencimento.");
+      } else {
+        toast.success(
+          "Assinatura realizada com sucesso! Aguardando a realização do pagamento."
+        );
+      }
     } catch (err) {
       actions.setSubmitting(false);
-
       toastError(err);
     }
   }

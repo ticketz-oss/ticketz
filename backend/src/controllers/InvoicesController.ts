@@ -1,8 +1,12 @@
 import * as Yup from "yup";
 import { Request, Response } from "express";
+import moment from "moment";
 // import { getIO } from "../libs/socket";
 import AppError from "../errors/AppError";
 import Invoices from "../models/Invoices";
+import Company from "../models/Company";
+import { asaasEmitNfse, asaasFetchNfseUrl, asaasCheckStatus } from "../services/PaymentGatewayServices/AsaasServices";
+import { efiCheckBoletoStatus } from "../services/PaymentGatewayServices/EfiServices";
 
 import CreatePlanService from "../services/PlanService/CreatePlanService";
 import UpdatePlanService from "../services/PlanService/UpdatePlanService";
@@ -57,6 +61,71 @@ export const list = async (req: Request, res: Response): Promise<Response> => {
   const invoice: Invoices[] = await FindAllInvoiceService(companyId);
 
   return res.status(200).json(invoice);
+};
+
+export const emitNfse = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { id } = req.params;
+
+  const invoice = await Invoices.findByPk(id, {
+    include: { model: Company, as: "company" }
+  });
+
+  if (!invoice) {
+    throw new AppError("ERR_ASAAS_INVOICE_NOT_FOUND", 404);
+  }
+
+  if (invoice.status !== "paid") {
+    throw new AppError("ERR_ASAAS_NFSE_NOT_PAID", 400);
+  }
+
+  // Restrição: NFS-e disponível apenas para faturas a partir de Maio/2026
+  const NFSE_CUTOFF = moment("2026-05-01", "YYYY-MM-DD");
+  const invoiceDue = moment(invoice.dueDate);
+  if (invoiceDue.isBefore(NFSE_CUTOFF, "month")) {
+    throw new AppError("ERR_ASAAS_NFSE_CUTOFF", 400);
+  }
+
+  const inv = invoice as any;
+
+  // Se já emitiu (nfseId existe), verifica o status atual no Asaas
+  if (inv.nfseId) {
+    const { url, status } = await asaasFetchNfseUrl(inv.nfseId);
+
+    // Nota em erro ou cancelada → limpa e reemite
+    if (["ERROR", "CANCELLED"].includes(status)) {
+      await invoice.update({ nfseId: null, nfseUrl: null, nfseStatus: null } as any);
+      await asaasEmitNfse(invoice, invoice.company);
+      await invoice.reload();
+      return res.status(200).json({ ...invoice.toJSON(), _msg: "nfse_emitted" });
+    }
+
+    // Nota autorizada → atualiza URL se mudou
+    if (status === "AUTHORIZED" || url) {
+      if (url && url !== inv.nfseUrl) {
+        await invoice.update({ nfseUrl: url, nfseStatus: status } as any);
+        await invoice.reload();
+        return res.status(200).json({ ...invoice.toJSON(), _msg: "url_found" });
+      }
+      // URL ainda indisponível mesmo autorizado — retorna o que tem
+      await invoice.reload();
+      const current = invoice as any;
+      return res.status(200).json({
+        ...invoice.toJSON(),
+        _msg: current.nfseUrl ? "url_found" : "nfse_pending"
+      });
+    }
+
+    // SCHEDULED ou status desconhecido — ainda processando
+    await invoice.reload();
+    return res.status(200).json({ ...invoice.toJSON(), _msg: "nfse_pending" });
+  }
+
+  await asaasEmitNfse(invoice, invoice.company);
+  await invoice.reload();
+  return res.status(200).json({ ...invoice.toJSON(), _msg: "nfse_emitted" });
 };
 
 export const update = async (
@@ -168,3 +237,38 @@ export const remove = async (
 
   return res.status(200).json(plan);
 }; */
+
+export const checkPayment = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { id } = req.params;
+
+  const invoice = await Invoices.findByPk(id, {
+    include: { model: Company, as: "company" }
+  });
+
+  if (!invoice) {
+    throw new AppError("ERR_ASAAS_INVOICE_NOT_FOUND", 404);
+  }
+
+  if (invoice.status === "paid") {
+    return res.status(200).json({ ...invoice.toJSON(), _paid: true });
+  }
+
+  if (!invoice.txId) {
+    throw new AppError("ERR_ASAAS_CHECK_UNAVAILABLE", 400);
+  }
+
+  let paid = false;
+  if (invoice.payGw === "asaas") {
+    paid = await asaasCheckStatus(invoice);
+  } else if (invoice.payGw === "efi" && invoice.paymentMethod === "boleto") {
+    paid = await efiCheckBoletoStatus(invoice);
+  } else {
+    throw new AppError("ERR_ASAAS_CHECK_UNAVAILABLE", 400);
+  }
+
+  await invoice.reload();
+  return res.status(200).json({ ...invoice.toJSON(), _paid: paid });
+};

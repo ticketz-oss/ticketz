@@ -2,6 +2,7 @@ import React, { useState, useEffect, useReducer } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
 import Button from "@material-ui/core/Button";
+import { toast } from "react-toastify";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -15,6 +16,7 @@ import api from "../../services/api";
 import TableRowSkeleton from "../../components/TableRowSkeleton";
 import { safeValueFormat } from "../../helpers/safeValueFormat";
 import toastError from "../../errors/toastError";
+import { i18n } from "../../translate/i18n";
 
 import moment from "moment";
 
@@ -93,6 +95,43 @@ const Invoices = () => {
     setSelectedContactId(null);
     setContactModalOpen(false);
   };
+
+  const handleCheckPayment = async invoice => {
+    try {
+      const { data } = await api.post(`/invoices/${invoice.id}/check-payment`);
+      dispatch({ type: "UPDATE_USERS", payload: data });
+      if (data._paid) {
+        toast.success(i18n.t("invoices.toasts.paymentConfirmed"));
+      } else {
+        toast.info(i18n.t("invoices.toasts.paymentNotFound"));
+      }
+    } catch (err) {
+      toastError(err);
+    }
+  };
+
+  const handleEmitNfse = async invoice => {
+    try {
+      const { data } = await api.post(`/invoices/${invoice.id}/nfse`);
+      dispatch({ type: "UPDATE_USERS", payload: data });
+
+      if (data._msg === "url_found" || data._msg === "nfse_emitted") {
+        if (data.nfseUrl) {
+          toast.success(i18n.t("invoices.toasts.nfseAvailable"));
+          window.open(data.nfseUrl, "_blank");
+        } else {
+          toast.success(i18n.t("invoices.toasts.nfseEmitted"));
+        }
+      } else if (data._msg === "nfse_pending") {
+        toast.info(i18n.t("invoices.toasts.nfsePending"));
+      } else {
+        toast.success(i18n.t("invoices.toasts.nfseProcessed"));
+      }
+    } catch (err) {
+      toastError(err);
+    }
+  };
+
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
@@ -129,6 +168,7 @@ const Invoices = () => {
       loadMore();
     }
   };
+
   const rowStyle = record => {
     const hoje = moment(moment()).format("DD/MM/yyyy");
     const vencimento = moment(record.dueDate).format("DD/MM/yyyy");
@@ -150,14 +190,19 @@ const Invoices = () => {
     var dias = moment.duration(diff).asDays();
     const status = record.status;
     if (status === "paid") {
-      return "Pago";
+      return i18n.t("invoices.status.paid");
     }
     if (dias < 0) {
-      return "Vencido";
+      return i18n.t("invoices.status.overdue");
     } else {
-      return "Em Aberto";
+      return i18n.t("invoices.status.open");
     }
   };
+
+  const canCheckPayment = invoice =>
+    invoice.txId &&
+    (invoice.payGw === "asaas" ||
+      (invoice.payGw === "efi" && invoice.paymentMethod === "boleto"));
 
   return (
     <MainContainer>
@@ -169,8 +214,9 @@ const Invoices = () => {
         contactId={selectedContactId}
       ></SubscriptionModal>
       <MainHeader>
-        <Title>Faturas</Title>
+        <Title>{i18n.t("invoices.title")}</Title>
       </MainHeader>
+
       <Paper
         className={classes.mainPaper}
         variant="outlined"
@@ -180,11 +226,11 @@ const Invoices = () => {
           <TableHead>
             <TableRow>
               <TableCell align="center">Id</TableCell>
-              <TableCell align="center">Detalhes</TableCell>
-              <TableCell align="center">Valor</TableCell>
-              <TableCell align="center">Data Venc.</TableCell>
-              <TableCell align="center">Status</TableCell>
-              <TableCell align="center">Ação</TableCell>
+              <TableCell align="center">{i18n.t("invoices.columns.details")}</TableCell>
+              <TableCell align="center">{i18n.t("invoices.columns.value")}</TableCell>
+              <TableCell align="center">{i18n.t("invoices.columns.dueDate")}</TableCell>
+              <TableCell align="center">{i18n.t("invoices.columns.status")}</TableCell>
+              <TableCell align="center">{i18n.t("invoices.columns.action")}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -205,25 +251,73 @@ const Invoices = () => {
                     {rowStatus(invoices)}
                   </TableCell>
                   <TableCell align="center">
-                    {rowStatus(invoices) !== "Pago" ? (
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        color="secondary"
-                        onClick={() => handleOpenContactModal(invoices)}
-                      >
-                        PAGAR
-                      </Button>
-                    ) : (
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        /* color="secondary"
-                        disabled */
-                      >
-                        PAGO
-                      </Button>
-                    )}
+                    <div style={{ display: "flex", gap: 4, justifyContent: "center", flexWrap: "wrap" }}>
+                      {invoices.status !== "paid" ? (
+                        <>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            color="secondary"
+                            onClick={() => handleOpenContactModal(invoices)}
+                          >
+                            {i18n.t("invoices.buttons.pay")}
+                          </Button>
+                          {invoices.paymentMethod === "boleto" && invoices.boletoUrl && (
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              onClick={() => window.open(invoices.boletoUrl, "_blank")}
+                            >
+                              {i18n.t("invoices.buttons.viewBoleto")}
+                            </Button>
+                          )}
+                          {canCheckPayment(invoices) && (
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              color="primary"
+                              onClick={() => handleCheckPayment(invoices)}
+                            >
+                              {i18n.t("invoices.buttons.checkPayment")}
+                            </Button>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <Button size="small" variant="outlined">
+                            {i18n.t("invoices.buttons.paid")}
+                          </Button>
+                          {invoices.paymentMethod === "boleto" && invoices.boletoUrl && (
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              onClick={() => window.open(invoices.boletoUrl, "_blank")}
+                            >
+                              {i18n.t("invoices.buttons.viewBoleto")}
+                            </Button>
+                          )}
+                          {invoices.nfseUrl ? (
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              color="primary"
+                              onClick={() => window.open(invoices.nfseUrl, "_blank")}
+                            >
+                              {i18n.t("invoices.buttons.viewNfse")}
+                            </Button>
+                          ) : (
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              color="primary"
+                              onClick={() => handleEmitNfse(invoices)}
+                            >
+                              {i18n.t("invoices.buttons.emitNfse")}
+                            </Button>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

@@ -136,6 +136,39 @@ export const update = async (
   return res.status(200).json(company);
 };
 
+const FISCAL_FIELDS = [
+  "name", "document", "postalCode", "address", "addressNumber", "province",
+  "city", "state", "municipalRegistration", "stateRegistration", "fiscalEmail"
+] as const;
+
+export const getFiscal = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const company = await Company.findByPk(req.user.companyId, {
+    attributes: ["id", "name", "email", ...FISCAL_FIELDS]
+  });
+  return res.json(company);
+};
+
+export const updateFiscal = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const company = await Company.findByPk(req.user.companyId);
+  if (!company) throw new AppError("Company not found", 404);
+
+  const updates: Record<string, string> = {};
+  for (const field of FISCAL_FIELDS) {
+    if (req.body[field] !== undefined) {
+      updates[field] = req.body[field];
+    }
+  }
+
+  await company.update(updates);
+  return res.json(company);
+};
+
 export const updateSchedules = async (
   req: Request,
   res: Response

@@ -140,6 +140,7 @@ const MainListItems = props => {
   const { user, handleLogout } = useContext(AuthContext);
   const [connectionWarning, setConnectionWarning] = useState(false);
   const [openCampaignSubmenu, setOpenCampaignSubmenu] = useState(false);
+  const [openFinanceiroSubmenu, setOpenFinanceiroSubmenu] = useState(false);
   const [openKanbanSubmenu, setOpenKanbanSubmenu] = useState(false);
 
   const [showCampaigns, setShowCampaigns] = useState(false);
@@ -451,11 +452,48 @@ const MainListItems = props => {
               primary={i18n.t("mainDrawer.listItems.messagesAPI")}
               icon={<CodeRoundedIcon />}
             />
-            <ListItemLink
-              to="/financeiro"
-              primary={i18n.t("mainDrawer.listItems.financeiro")}
-              icon={<LocalAtmIcon />}
-            />
+            <>
+              <ListItem
+                button
+                onClick={() => setOpenFinanceiroSubmenu(prev => !prev)}
+              >
+                <ListItemIcon>
+                  <LocalAtmIcon />
+                </ListItemIcon>
+                <ListItemText
+                  primary={i18n.t("mainDrawer.listItems.financeiro")}
+                />
+                {openFinanceiroSubmenu ? (
+                  <ExpandLessIcon />
+                ) : (
+                  <ExpandMoreIcon />
+                )}
+              </ListItem>
+              <Collapse
+                style={{ paddingLeft: 15 }}
+                in={openFinanceiroSubmenu}
+                timeout="auto"
+                unmountOnExit
+              >
+                <List component="div" disablePadding>
+                  <ListItem onClick={() => history.push("/financeiro")} button>
+                    <ListItemIcon>
+                      <ListIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Faturas" />
+                  </ListItem>
+                  <ListItem
+                    onClick={() => history.push("/financeiro-config")}
+                    button
+                  >
+                    <ListItemIcon>
+                      <SettingsOutlinedIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Configurações" />
+                  </ListItem>
+                </List>
+              </Collapse>
+            </>
 
             <ListItemLink
               to="/settings"

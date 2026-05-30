@@ -23,4 +23,6 @@ companyRoutes.delete(
   CompanyController.remove
 );
 companyRoutes.post("/companies/cadastro", CompanyController.signup);
+companyRoutes.get("/companies/fiscal/me", isAuth, CompanyController.getFiscal);
+companyRoutes.put("/companies/fiscal/me", isAuth, CompanyController.updateFiscal);
 export default companyRoutes;

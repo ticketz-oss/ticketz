@@ -244,6 +244,52 @@ export default function EfiSettings(props) {
             />
           </FormControl>
         </Grid>
+
+        {/* Credenciais exclusivas para Boleto (produção, sem certificado mTLS) */}
+        <Grid xs={12} item>
+          <p style={{ margin: "16px 0 4px", fontWeight: 600 }}>
+            Boleto — Client ID e Secret de Produção
+          </p>
+          <p style={{ margin: 0, fontSize: 12, color: "#666" }}>
+            No painel Efí: API → Aplicações → habilite os escopos de Boleto e
+            copie as credenciais de <strong>produção</strong> (sem prefixo
+            "Client_Id_").
+          </p>
+        </Grid>
+        <Grid xs={12} sm={3} md={12} item>
+          <FormControl className={classes.fieldContainer}>
+            <TextField
+              id="efiBoletoClientIdField"
+              label="Boleto — Client ID (Produção)"
+              variant="standard"
+              name="efiBoletoClientId"
+              value={efiSettings.efiBoletoClientId || ""}
+              onChange={e => {
+                setSetting("efiBoletoClientId", e.target.value);
+              }}
+              onBlur={async _ => {
+                await handleSaveSetting("efiBoletoClientId");
+              }}
+            />
+          </FormControl>
+        </Grid>
+        <Grid xs={12} sm={3} md={12} item>
+          <FormControl className={classes.fieldContainer}>
+            <TextField
+              id="efiBoletoClientSecretField"
+              label="Boleto — Client Secret (Produção)"
+              variant="standard"
+              name="efiBoletoClientSecret"
+              value={efiSettings.efiBoletoClientSecret || ""}
+              onChange={e => {
+                setSetting("efiBoletoClientSecret", e.target.value);
+              }}
+              onBlur={async _ => {
+                await handleSaveSetting("efiBoletoClientSecret");
+              }}
+            />
+          </FormControl>
+        </Grid>
       </Grid>
     </>
   );
