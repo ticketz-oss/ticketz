@@ -46,10 +46,18 @@ const useStyles = makeStyles(theme => ({
   carouselCard: {
     width: "100%",
     display: "flex",
-    alignItems: "stretch",
-    gap: theme.spacing(1),
+    flexDirection: "column",
+    justifyContent: "space-between",
+    gap: theme.spacing(0.75),
+    height: "100%",
     overflow: "hidden",
     cursor: "pointer"
+  },
+  cardHeader: {
+    display: "flex",
+    alignItems: "flex-start",
+    gap: theme.spacing(1),
+    minHeight: 0
   },
   thumbnail: {
     width: 100,
@@ -60,24 +68,37 @@ const useStyles = makeStyles(theme => ({
     backgroundSize: "cover",
     backgroundPosition: "center"
   },
-  carouselText: {
+  headerText: {
     minWidth: 0,
     flexGrow: 1,
     display: "flex",
     flexDirection: "column",
-    justifyContent: "center",
-    gap: theme.spacing(0.5)
+    gap: 2
   },
   title: {
-    display: "-webkit-box",
-    WebkitLineClamp: 1,
-    WebkitBoxOrient: "vertical",
+    whiteSpace: "normal",
+    overflow: "visible",
+    wordBreak: "break-word"
+  },
+  previewWrap: {
+    minHeight: 0,
+    flexGrow: 1,
+    display: "flex",
     overflow: "hidden"
   },
   summary: {
+    flexGrow: 1,
     color: theme.palette.text.secondary,
     display: "-webkit-box",
-    WebkitLineClamp: 3,
+    WebkitLineClamp: 4,
+    WebkitBoxOrient: "vertical",
+    overflow: "hidden"
+  },
+  publishedDate: {
+    color: theme.palette.text.secondary,
+    fontSize: "0.75rem",
+    display: "-webkit-box",
+    WebkitLineClamp: 1,
     WebkitBoxOrient: "vertical",
     overflow: "hidden"
   },
@@ -207,6 +228,24 @@ function sortByDateDesc(entries) {
   });
 }
 
+function formatPublishedDate(dateValue) {
+  if (!dateValue) {
+    return "";
+  }
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  return new Intl.DateTimeFormat(i18n.language || "en", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+  }).format(date);
+}
+
 function PostImage({ src, className }) {
   const imageUrl = src || DEFAULT_TICKETZ_LOGO;
   const isFallback = !src;
@@ -225,6 +264,7 @@ function PostImage({ src, className }) {
 
 function CarouselPost({ entry }) {
   const classes = useStyles();
+  const publishedDate = formatPublishedDate(entry?.publishedAt);
 
   if (!entry) {
     return null;
@@ -236,15 +276,24 @@ function CarouselPost({ entry }) {
 
   return (
     <div className={classes.carouselCard} onClick={openEntry}>
-      <PostImage className={classes.thumbnail} src={entry.image} />
-      <div className={classes.carouselText}>
-        <Typography
-          component="h3"
-          variant="subtitle1"
-          className={classes.title}
-        >
-          {entry.title}
-        </Typography>
+      <div className={classes.cardHeader}>
+        <PostImage className={classes.thumbnail} src={entry.image} />
+        <div className={classes.headerText}>
+          <Typography
+            component="h3"
+            variant="subtitle1"
+            className={classes.title}
+          >
+            {entry.title}
+          </Typography>
+          {publishedDate ? (
+            <Typography className={classes.publishedDate}>
+              {publishedDate}
+            </Typography>
+          ) : null}
+        </div>
+      </div>
+      <div className={classes.previewWrap}>
         <Typography variant="body2" className={classes.summary}>
           {entry.summary}
         </Typography>
