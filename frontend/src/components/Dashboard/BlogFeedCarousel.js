@@ -1,12 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import {
-  Box,
-  CircularProgress,
-  IconButton,
-  Link,
-  Paper,
-  Typography
-} from "@material-ui/core";
+import { Box, IconButton, Link, Paper, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
@@ -14,8 +7,18 @@ import NavigateBeforeIcon from "@material-ui/icons/NavigateBefore";
 import NavigateNextIcon from "@material-ui/icons/NavigateNext";
 import { i18n } from "../../translate/i18n";
 
-const FEED_URL = "https://pro.ticke.tz/pt/blog.json";
 const DEFAULT_TICKETZ_LOGO = "/vector/favicon.svg";
+const SUPPORTED_BLOG_LANGUAGES = ["en", "pt", "es"];
+
+function resolveBlogLanguage(language) {
+  const code = (language || "").slice(0, 2).toLowerCase();
+  return SUPPORTED_BLOG_LANGUAGES.includes(code) ? code : "en";
+}
+
+function getFeedUrl(language) {
+  const locale = resolveBlogLanguage(language);
+  return `https://pro.ticke.tz/${locale}/blog.json`;
+}
 
 const useStyles = makeStyles(theme => ({
   wrapper: {
@@ -166,14 +169,16 @@ const useStyles = makeStyles(theme => ({
     WebkitLineClamp: 1,
     WebkitBoxOrient: "vertical",
     overflow: "hidden"
-  },
-  stateContainer: {
-    height: "100%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center"
   }
 }));
+
+function truncateText(text, maxLength = 220) {
+  if (!text || text.length <= maxLength) {
+    return text || "";
+  }
+
+  return `${text.slice(0, maxLength).trim()}...`;
+}
 
 function stripHtml(html) {
   if (!html) {
@@ -184,14 +189,6 @@ function stripHtml(html) {
     .replace(/<[^>]*>/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-}
-
-function truncateText(text, maxLength = 220) {
-  if (!text || text.length <= maxLength) {
-    return text || "";
-  }
-
-  return `${text.slice(0, maxLength).trim()}...`;
 }
 
 function resolveUrl(base, value) {
@@ -304,6 +301,7 @@ function CarouselPost({ entry }) {
 
 export default function BlogFeedCarousel() {
   const classes = useStyles();
+  const blogLanguage = resolveBlogLanguage(i18n.language);
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -326,9 +324,10 @@ export default function BlogFeedCarousel() {
       setError(false);
 
       try {
-        const response = await fetch(FEED_URL);
+        const feedUrl = getFeedUrl(blogLanguage);
+        const response = await fetch(feedUrl);
         const data = await response.json();
-        const feedBase = data.home_page_url || data.feed_url || FEED_URL;
+        const feedBase = data.home_page_url || data.feed_url || feedUrl;
         const items = Array.isArray(data.items) ? data.items : [];
         const mapped = items
           .map(item => mapPost(item, feedBase))
@@ -355,7 +354,7 @@ export default function BlogFeedCarousel() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [blogLanguage]);
 
   const recentEntries = useMemo(() => entries.slice(0, 3), [entries]);
   const activeEntry = recentEntries[activeIndex] || null;
@@ -434,6 +433,10 @@ export default function BlogFeedCarousel() {
     }
   }, [activeIndex, recentEntries.length]);
 
+  if (loading || error) {
+    return null;
+  }
+
   return (
     <Paper
       className={classes.wrapper}
@@ -462,19 +465,6 @@ export default function BlogFeedCarousel() {
           {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
         </IconButton>
       </div>
-
-      {loading ? (
-        <div className={classes.stateContainer}>
-          <CircularProgress size={24} />
-          <Typography style={{ marginLeft: 8 }}>
-            {i18n.t("dashboard.blog.loading")}
-          </Typography>
-        </div>
-      ) : null}
-
-      {!loading && error ? (
-        <Typography color="error">{i18n.t("dashboard.blog.error")}</Typography>
-      ) : null}
 
       {!loading && !error && !recentEntries.length ? (
         <Typography>{i18n.t("dashboard.blog.empty")}</Typography>
