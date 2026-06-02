@@ -236,11 +236,23 @@ function formatPublishedDate(dateValue) {
     return "";
   }
 
-  return new Intl.DateTimeFormat(i18n.language || "en", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric"
-  }).format(date);
+  const preferredLocale = (i18n.resolvedLanguage || i18n.language || "en")
+    .replace("_", "-")
+    .trim();
+
+  try {
+    return new Intl.DateTimeFormat(preferredLocale, {
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
+    }).format(date);
+  } catch (_error) {
+    return new Intl.DateTimeFormat("en", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
+    }).format(date);
+  }
 }
 
 function PostImage({ src, className }) {
@@ -301,7 +313,9 @@ function CarouselPost({ entry }) {
 
 export default function BlogFeedCarousel() {
   const classes = useStyles();
-  const blogLanguage = resolveBlogLanguage(i18n.language);
+  const blogLanguage = resolveBlogLanguage(
+    i18n.resolvedLanguage || i18n.language
+  );
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
