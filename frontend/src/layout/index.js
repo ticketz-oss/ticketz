@@ -345,7 +345,8 @@ const LoggedInLayout = ({ children, themeToggle }) => {
 
   const socketManager = useContext(SocketContext);
   const [wsConnectionIssue, setWsConnectionIssue] = useState(false);
-  const hadWsConnectionIssueRef = useRef(false);
+  const [wsReconnectAttemptCount, setWsReconnectAttemptCount] = useState(0);
+  const wsIssueToastWasShownRef = useRef(false);
 
   const [newTicketContact, setNewTicketContact] = useState(null);
 
@@ -446,6 +447,16 @@ const LoggedInLayout = ({ children, themeToggle }) => {
     }
 
     return socketManager.subscribeWsConnectionIssue(setWsConnectionIssue);
+  }, [socketManager]);
+
+  useEffect(() => {
+    if (!socketManager?.subscribeWsReconnectAttempt) {
+      return undefined;
+    }
+
+    return socketManager.subscribeWsReconnectAttempt(
+      setWsReconnectAttemptCount
+    );
   }, [socketManager]);
 
   useEffect(() => {
@@ -555,16 +566,20 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   };
 
   useEffect(() => {
-    if (wsConnectionIssue && !hadWsConnectionIssueRef.current) {
+    if (
+      wsConnectionIssue &&
+      wsReconnectAttemptCount >= 2 &&
+      !wsIssueToastWasShownRef.current
+    ) {
       showWsConnectionIssueToast();
+      wsIssueToastWasShownRef.current = true;
     }
 
-    if (!wsConnectionIssue && hadWsConnectionIssueRef.current) {
+    if (!wsConnectionIssue && wsIssueToastWasShownRef.current) {
       showWsConnectionRestoredToast();
+      wsIssueToastWasShownRef.current = false;
     }
-
-    hadWsConnectionIssueRef.current = wsConnectionIssue;
-  }, [wsConnectionIssue]);
+  }, [wsConnectionIssue, wsReconnectAttemptCount]);
 
   const handleChooseLanguage = language => {
     localStorage.setItem("language", language);

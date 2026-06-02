@@ -133,12 +133,20 @@ const socketManager = {
   tokenRefreshPromise: null,
   wsConnectionIssueActive: false,
   wsConnectionIssueListeners: [],
+  wsReconnectAttemptCount: 0,
+  wsReconnectAttemptListeners: [],
   wsConnectionStableTimer: null,
   wsConnectionStabilityDelayMs: 5000,
 
   notifyWsConnectionIssue: function () {
     this.wsConnectionIssueListeners.forEach(listener => {
       listener(this.wsConnectionIssueActive);
+    });
+  },
+
+  notifyWsReconnectAttempt: function () {
+    this.wsReconnectAttemptListeners.forEach(listener => {
+      listener(this.wsReconnectAttemptCount);
     });
   },
 
@@ -149,6 +157,23 @@ const socketManager = {
 
     this.wsConnectionIssueActive = active;
     this.notifyWsConnectionIssue();
+  },
+
+  setWsReconnectAttemptCount: function (count) {
+    if (this.wsReconnectAttemptCount === count) {
+      return;
+    }
+
+    this.wsReconnectAttemptCount = count;
+    this.notifyWsReconnectAttempt();
+  },
+
+  incrementWsReconnectAttemptCount: function () {
+    this.setWsReconnectAttemptCount(this.wsReconnectAttemptCount + 1);
+  },
+
+  resetWsReconnectAttemptCount: function () {
+    this.setWsReconnectAttemptCount(0);
   },
 
   markWsConnectionFailure: function () {
@@ -171,6 +196,7 @@ const socketManager = {
     this.wsConnectionStableTimer = setTimeout(() => {
       if (this.currentSocket?.connected) {
         this.setWsConnectionIssue(false);
+        this.resetWsReconnectAttemptCount();
       }
       this.wsConnectionStableTimer = null;
     }, this.wsConnectionStabilityDelayMs);
@@ -182,6 +208,7 @@ const socketManager = {
       this.wsConnectionStableTimer = null;
     }
     this.setWsConnectionIssue(false);
+    this.resetWsReconnectAttemptCount();
   },
 
   subscribeWsConnectionIssue: function (listener) {
@@ -192,6 +219,16 @@ const socketManager = {
       this.wsConnectionIssueListeners = this.wsConnectionIssueListeners.filter(
         l => l !== listener
       );
+    };
+  },
+
+  subscribeWsReconnectAttempt: function (listener) {
+    this.wsReconnectAttemptListeners.push(listener);
+    listener(this.wsReconnectAttemptCount);
+
+    return () => {
+      this.wsReconnectAttemptListeners =
+        this.wsReconnectAttemptListeners.filter(l => l !== listener);
     };
   },
 
@@ -277,7 +314,10 @@ const socketManager = {
         query: { token }
       });
 
+      this.resetWsReconnectAttemptCount();
+
       this.currentSocket.io.on("reconnect_attempt", async () => {
+        this.incrementWsReconnectAttemptCount();
         this.currentSocket.io.opts.query.r = 1;
         const newToken = JSON.parse(localStorage.getItem("token"));
         if (isExpired(newToken)) {
