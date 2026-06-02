@@ -182,9 +182,7 @@ const ContactDrawer = ({
                 subheader={
                   <>
                     <Typography style={{ fontSize: 12 }}>
-                      <Link href={`tel:${contact.number}`}>
-                        {formatWhatsappContactNumber(contact)}
-                      </Link>
+                      {formatWhatsappContactNumber(contact)}
                     </Typography>
                     <Typography style={{ fontSize: 12 }}>
                       <Link href={`mailto:${contact.email}`}>
