@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Box, IconButton, Link, Paper, Typography } from "@material-ui/core";
+import { Box, IconButton, Paper, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
@@ -25,22 +25,22 @@ const useStyles = makeStyles(theme => ({
     padding: theme.spacing(2),
     display: "flex",
     flexDirection: "column",
-    gap: theme.spacing(1)
+    gap: 0
   },
   header: {
     display: "flex",
     alignItems: "center",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
+    marginBottom: theme.spacing(1)
   },
   body: {
-    height: 230,
+    minHeight: 0,
     overflow: "hidden"
   },
   carouselContainer: {
     display: "flex",
-    alignItems: "center",
-    gap: theme.spacing(0.5),
-    height: "100%"
+    alignItems: "flex-start",
+    gap: theme.spacing(0.5)
   },
   navButton: {
     alignSelf: "center",
@@ -50,9 +50,8 @@ const useStyles = makeStyles(theme => ({
     width: "100%",
     display: "flex",
     flexDirection: "column",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     gap: theme.spacing(0.75),
-    height: "100%",
     overflow: "hidden",
     cursor: "pointer"
   },
@@ -76,24 +75,27 @@ const useStyles = makeStyles(theme => ({
     flexGrow: 1,
     display: "flex",
     flexDirection: "column",
-    gap: 2
+    gap: 2,
+    overflow: "hidden"
   },
   title: {
-    whiteSpace: "normal",
-    overflow: "visible",
+    display: "-webkit-box",
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: "vertical",
+    overflow: "hidden",
     wordBreak: "break-word"
   },
   previewWrap: {
     minHeight: 0,
-    flexGrow: 1,
     display: "flex",
     overflow: "hidden"
   },
   summary: {
-    flexGrow: 1,
     color: theme.palette.text.secondary,
+    lineHeight: 1.35,
+    minHeight: "calc(1.35em * 3)",
     display: "-webkit-box",
-    WebkitLineClamp: 4,
+    WebkitLineClamp: 3,
     WebkitBoxOrient: "vertical",
     overflow: "hidden"
   },
@@ -108,7 +110,7 @@ const useStyles = makeStyles(theme => ({
   footer: {
     display: "flex",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     gap: theme.spacing(1)
   },
   progressContainer: {
@@ -173,11 +175,13 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function truncateText(text, maxLength = 220) {
-  if (!text || text.length <= maxLength) {
-    return text || "";
+  const normalizedText = (text || "").replace(/\s+/g, " ").trim();
+
+  if (!normalizedText || normalizedText.length <= maxLength) {
+    return normalizedText;
   }
 
-  return `${text.slice(0, maxLength).trim()}...`;
+  return `${normalizedText.slice(0, maxLength).trim()}...`;
 }
 
 function stripHtml(html) {
@@ -209,7 +213,7 @@ function mapPost(item, feedBase) {
 
   return {
     id: item.id || item.url,
-    title: item.title || "",
+    title: (item.title || "").replace(/\s+/g, " ").trim(),
     summary: truncateText(summarySource),
     image: resolveUrl(feedBase, item.image),
     url: resolveUrl(feedBase, item.url || item.id),
@@ -487,30 +491,14 @@ export default function BlogFeedCarousel() {
       <div className={classes.body}>
         {!loading && !error && recentEntries.length && !expanded ? (
           <div className={classes.carouselContainer}>
-            <IconButton
-              className={classes.navButton}
-              onClick={handlePrev}
-              aria-label={i18n.t("dashboard.blog.previous")}
-            >
-              <NavigateBeforeIcon />
-            </IconButton>
-
             <Box flexGrow={1}>
               <CarouselPost entry={activeEntry} />
             </Box>
-
-            <IconButton
-              className={classes.navButton}
-              onClick={handleNext}
-              aria-label={i18n.t("dashboard.blog.next")}
-            >
-              <NavigateNextIcon />
-            </IconButton>
           </div>
         ) : null}
 
         {expanded && entries.length ? (
-          <div className={classes.list}>
+          <div className={classes.list} style={{ height: 230 }}>
             {entries.map(entry => (
               <div
                 className={classes.listItem}
@@ -540,6 +528,14 @@ export default function BlogFeedCarousel() {
 
       {!loading && !error && recentEntries.length && !expanded ? (
         <div className={classes.footer}>
+          <IconButton
+            className={classes.navButton}
+            onClick={handlePrev}
+            aria-label={i18n.t("dashboard.blog.previous")}
+          >
+            <NavigateBeforeIcon />
+          </IconButton>
+
           <div className={classes.progressContainer}>
             <div className={classes.progressTrack}>
               <div
@@ -550,14 +546,14 @@ export default function BlogFeedCarousel() {
               />
             </div>
           </div>
-          <Link
-            href={activeEntry.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            color="primary"
+
+          <IconButton
+            className={classes.navButton}
+            onClick={handleNext}
+            aria-label={i18n.t("dashboard.blog.next")}
           >
-            {i18n.t("dashboard.blog.openPost")}
-          </Link>
+            <NavigateNextIcon />
+          </IconButton>
         </div>
       ) : null}
     </Paper>

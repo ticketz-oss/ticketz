@@ -1087,6 +1087,32 @@ const messages = {
           phoneNumber: "Numero di WhatsApp",
           submit: "Registrati"
         },
+        proAd: {
+          imageAlt: "Screenshot di Ticketz PRO",
+          title: "Ticketz PRO",
+          features: {
+            officialChannels:
+              "WhatsApp ufficiale - Instagram - Messenger e altri",
+            exclusiveFeatures: "Funzionalità esclusive",
+            advancedSupport: "Supporto avanzato",
+            easyMigration: "Migrazione semplificata"
+          },
+          subscribePrice: "Abbonati per {{monthlyPrice}}/mese",
+          subscribeSubtitle: "direttamente nel sistema",
+          ctaUpgrade: "Clicca per le istruzioni di upgrade",
+          ctaVisitSite: "Clicca per visitare il sito",
+          instructions: {
+            title: "Istruzioni di upgrade",
+            stepIntro:
+              "Se hai installato le immagini fornite dal progetto su un server o VPS usando le istruzioni semplificate, devi solo accedere al server ed eseguire il comando seguente:",
+            stepInstall:
+              'Tra pochi istanti Ticketz PRO sarà installato con tutti i tuoi dati; poi vai nel menu utente, clicca su "Abbonamento Ticketz PRO" e completa l\'abbonamento.',
+            helpPrefix:
+              "Se la tua installazione è diversa o pensi di aver bisogno di aiuto per installare Ticketz PRO, ",
+            helpLink: "contattaci",
+            helpSuffix: " e ti aiuteremo!"
+          }
+        },
         support: {
           title: "Supporta il progetto Ticketz Open Source",
           mercadopagotitle: "Carta di Credito",
