@@ -1,9 +1,48 @@
+import { useContext, useEffect } from "react";
 import api, { openApi } from "../../services/api";
 import { Mutex } from "async-mutex";
+import { SocketContext } from "../../context/Socket/SocketContext";
+import {
+  clearAllCachedSettings,
+  clearCachedSettingsKey,
+  setCachedSettingValue
+} from "../../helpers/settingsCache";
 
 const cachedSettingsMutex = new Mutex();
+const safeSettingsKeys = new Set([
+  "groupsTab",
+  "CheckMsgIsGroup",
+  "soundGroupNotifications",
+  "tagsMode"
+]);
 
 const useSettings = () => {
+  const getSettingFromApi = async (key, defaultValue = "") => {
+    if (!api.defaults.headers.Authorization) {
+      return defaultValue;
+    }
+    const { data } = await api.request({
+      url: `/settings/${key}`,
+      method: "GET"
+    });
+
+    if (!data) {
+      return defaultValue;
+    }
+
+    setCachedSettingValue(key, data);
+
+    return data;
+  };
+
+  const get = async key => {
+    const { data } = await api.request({
+      url: `/settings/${key}`,
+      method: "GET"
+    });
+    return data;
+  };
+
   const getAll = async params => {
     const { data } = await api.request({
       url: "/settings",
@@ -17,8 +56,13 @@ const useSettings = () => {
     const { data: responseData } = await api.request({
       url: `/settings/${data.key}`,
       method: "PUT",
-      data
+      data: {
+        value: data.value
+      }
     });
+
+    setCachedSettingValue(data.key, data.value);
+
     return responseData;
   };
 
@@ -31,22 +75,11 @@ const useSettings = () => {
   };
 
   const getSetting = async (key, defaultValue = "") => {
-    if (!api.defaults.headers.Authorization) {
-      return defaultValue;
-    }
-    const { data } = await api.request({
-      url: `/settings/${key}`,
-      method: "GET"
-    });
-
-    if (!data) {
-      return defaultValue;
+    if (safeSettingsKeys.has(key)) {
+      return getCachedSetting(key, defaultValue);
     }
 
-    sessionStorage.setItem(key, JSON.stringify(data));
-    sessionStorage.setItem(`${key}_timestamp`, Date.now());
-
-    return data;
+    return getSettingFromApi(key, defaultValue);
   };
 
   const getCachedSetting = async (key, defaultValue = "") => {
@@ -56,17 +89,55 @@ const useSettings = () => {
       if (cached) {
         // check if timestamp is older than 10 minutes
         if (timestamp && Date.now() - timestamp > 10 * 60 * 1000) {
-          sessionStorage.removeItem(key);
-          sessionStorage.removeItem(`${key}_timestamp`);
+          clearCachedSettingsKey(key);
         } else {
           return JSON.parse(cached);
         }
       }
-      return getSetting(key, defaultValue);
+      return getSettingFromApi(key, defaultValue);
     });
   };
 
+  const socketManager = useContext(SocketContext);
+
+  useEffect(() => {
+    if (!socketManager) {
+      return () => {};
+    }
+
+    const socket = socketManager.GetSocket();
+
+    const onSettingsUseSettings = data => {
+      if (typeof data?.key !== "string" || !data.key) {
+        return;
+      }
+
+      setCachedSettingValue(data.key, data.value);
+    };
+
+    socket.on("settings", onSettingsUseSettings);
+
+    let unsubscribeWsConnectionIssue = null;
+    if (typeof socketManager.subscribeWsConnectionIssue === "function") {
+      unsubscribeWsConnectionIssue = socketManager.subscribeWsConnectionIssue(
+        active => {
+          if (active) {
+            clearAllCachedSettings();
+          }
+        }
+      );
+    }
+
+    return () => {
+      if (typeof unsubscribeWsConnectionIssue === "function") {
+        unsubscribeWsConnectionIssue();
+      }
+      socket.disconnect();
+    };
+  }, [socketManager]);
+
   return {
+    get,
     getAll,
     getPublicSetting,
     getSetting,

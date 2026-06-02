@@ -1,6 +1,8 @@
 import AppError from "../../errors/AppError";
+import { getIO } from "../../libs/socket";
 import Setting from "../../models/Setting";
 import { updateDefaultLanguage } from "../TranslationServices/i18nService";
+import { safeSettingsKeys } from "./GetSettingService";
 
 interface Request {
   key: string;
@@ -37,6 +39,14 @@ const UpdateSettingService = async ({
 
   if (setting.key === "defaultLanguage" && companyId === 1) {
     updateDefaultLanguage(value);
+  }
+
+  if (setting.key in safeSettingsKeys) {
+    const io = getIO();
+    io.to(`company-${companyId}-mainchannel`).emit("settings", {
+      key: setting.key,
+      value: setting.value
+    });
   }
 
   return setting;

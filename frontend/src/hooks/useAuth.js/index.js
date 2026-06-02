@@ -8,6 +8,7 @@ import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import { SocketContext } from "../../context/Socket/SocketContext";
+import { clearAllCachedSettings } from "../../helpers/settingsCache";
 import moment from "moment";
 import { decodeToken } from "react-jwt";
 
@@ -50,6 +51,7 @@ const useAuth = () => {
         return api(originalRequest);
       }
       if (error?.response?.status === 401) {
+        clearAllCachedSettings();
         localStorage.removeItem("token");
         localStorage.removeItem("companyId");
         api.defaults.headers.Authorization = undefined;
@@ -122,6 +124,8 @@ const useAuth = () => {
     var diff = moment(dueDate).diff(moment(moment()).format());
 
     var dias = moment.duration(diff).asDays();
+
+    clearAllCachedSettings();
 
     localStorage.setItem("token", JSON.stringify(token));
     localStorage.setItem("companyId", companyId);
@@ -209,6 +213,7 @@ const useAuth = () => {
       socket.logout();
 
       await api.delete("/auth/logout");
+      clearAllCachedSettings();
       setIsAuth(false);
       setUser({});
       localStorage.removeItem("token");

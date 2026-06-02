@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 
-import { getIO } from "../libs/socket";
 import AppError from "../errors/AppError";
 
 import UpdateSettingService from "../services/SettingServices/UpdateSettingService";
@@ -44,12 +43,6 @@ export const update = async (
     key,
     value,
     companyId
-  });
-
-  const io = getIO();
-  io.emit(`company-${companyId}-settings`, {
-    action: "update",
-    setting
   });
 
   return res.status(200).json(setting);
