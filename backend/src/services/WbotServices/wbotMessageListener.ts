@@ -16,7 +16,8 @@ import {
   WAMessageStubType,
   WAGenericMediaMessage,
   WALocationMessage,
-  WAMessageStatus
+  WAMessageStatus,
+  WAMessageKey
 } from "libzapitu-rf";
 import { Mutex } from "async-mutex";
 import { Op } from "sequelize";
@@ -72,6 +73,7 @@ import GetTicketWbot from "../../helpers/GetTicketWbot";
 import saveMediaToFile from "../../helpers/saveMediaFile";
 import { _t } from "../TranslationServices/i18nService";
 import WhatsappLidMap from "../../models/WhatsappLidMap";
+import normalizePhone from "../../helpers/NormalizePhone";
 
 export interface ImessageUpsert {
   messages: proto.IWebMessageInfo[];
@@ -2143,17 +2145,77 @@ const verifyRecentCampaign = async (
   companyId: number
 ) => {
   if (!message.key.fromMe) {
-    const number = message.key.remoteJid.replace(/\D/g, "");
+    const key = message.key as WAMessageKey;
+    const remoteJid = key.remoteJid || "";
+
+    if (remoteJid.endsWith("@g.us") || remoteJid === "status@broadcast") {
+      return false;
+    }
+
+    const candidates = new Set<string>();
+    const jids = [remoteJid, key.sender_pn].filter(Boolean) as string[];
+    const addPhoneCandidates = (digits: string) => {
+      if (!digits) {
+        return;
+      }
+
+      const normalized = normalizePhone(digits);
+      candidates.add(normalized.phone);
+
+      if (normalized.wphone !== normalized.phone) {
+        candidates.add(normalized.wphone);
+      }
+    };
+
+    jids.forEach(jid => {
+      const value = jid.trim();
+
+      if (!value) {
+        return;
+      }
+
+      if (value.endsWith("@lid")) {
+        candidates.add(value);
+        return;
+      }
+
+      if (value.endsWith("@s.whatsapp.net")) {
+        const numberWithCountry = value.replace(/@s\.whatsapp\.net$/, "");
+        const digits = numberWithCountry.replace(/\D/g, "");
+
+        addPhoneCandidates(digits);
+        return;
+      }
+
+      const digits = value.replace(/\D/g, "");
+
+      addPhoneCandidates(digits);
+    });
+
+    if (!candidates.size) {
+      return false;
+    }
+
     const campaigns = await Campaign.findAll({
       where: { companyId, status: "EM_ANDAMENTO", confirmation: true }
     });
-    if (campaigns) {
+    if (campaigns.length) {
       const ids = campaigns.map(c => c.id);
       const campaignShipping = await CampaignShipping.findOne({
-        where: { campaignId: { [Op.in]: ids }, number, confirmation: null }
+        where: {
+          campaignId: { [Op.in]: ids },
+          number: { [Op.in]: [...candidates] },
+          confirmationRequestedAt: {
+            [Op.ne]: null
+          }
+        },
+        order: [
+          ["createdAt", "DESC"],
+          ["id", "DESC"]
+        ]
       });
 
-      if (campaignShipping) {
+      if (campaignShipping && !campaignShipping.confirmation) {
         await campaignShipping.update({
           confirmedAt: moment(),
           confirmation: true

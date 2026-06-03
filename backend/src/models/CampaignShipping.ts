@@ -4,6 +4,8 @@ import {
   CreatedAt,
   UpdatedAt,
   Model,
+  BeforeCreate,
+  BeforeUpdate,
   PrimaryKey,
   AutoIncrement,
   ForeignKey,
@@ -11,6 +13,7 @@ import {
 } from "sequelize-typescript";
 import Campaign from "./Campaign";
 import ContactListItem from "./ContactListItem";
+import normalizePhone from "../helpers/NormalizePhone";
 
 @Table({ tableName: "CampaignShipping" })
 class CampaignShipping extends Model<CampaignShipping> {
@@ -62,6 +65,20 @@ class CampaignShipping extends Model<CampaignShipping> {
 
   @BelongsTo(() => Campaign)
   campaign: Campaign;
+
+  @BeforeUpdate
+  @BeforeCreate
+  static normalizeNumber(instance: CampaignShipping): void {
+    if (!instance.number) {
+      return;
+    }
+
+    if (instance.number.endsWith("@lid")) {
+      return;
+    }
+
+    instance.number = normalizePhone(instance.number).phone;
+  }
 }
 
 export default CampaignShipping;

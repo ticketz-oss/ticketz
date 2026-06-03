@@ -17,6 +17,7 @@ import sequelize from "../database";
 import { logger } from "../utils/logger";
 import { randomValue } from "../helpers/randomValue";
 import { parseToMilliseconds } from "../helpers/parseToMilliseconds";
+import normalizePhone from "../helpers/NormalizePhone";
 import GetWhatsappWbot from "../helpers/GetWhatsappWbot";
 import OutOfTicketMessage from "../models/OutOfTicketMessages";
 import { Session } from "../libs/wbot";
@@ -251,7 +252,9 @@ async function prepareContact(
   confirmationMessages: string | any[]
 ) {
   const campaignShipping: any = {};
-  campaignShipping.number = contact.number;
+  campaignShipping.number = contact.number.endsWith("@lid")
+    ? contact.number
+    : normalizePhone(contact.number).phone;
   campaignShipping.contactId = contact.id;
   campaignShipping.campaignId = campaign.id;
 
@@ -404,8 +407,10 @@ async function handleDispatchCampaign(job) {
       }
     );
 
-    const sanitizedNumber = String(campaignShipping.number).replace(/\D/g, "");
-    const chatId = getJidOf(sanitizedNumber);
+    const shippingNumber = String(campaignShipping.number);
+    const chatId = shippingNumber.endsWith("@lid")
+      ? shippingNumber
+      : getJidOf(shippingNumber.replace(/\D/g, ""));
 
     if (campaign.confirmation && campaignShipping.confirmation === null) {
       await sendCampaignMessage(campaign.whatsappId, wbot, chatId, {
