@@ -63,6 +63,9 @@ class ManagedSocket {
           this.rawSocket.off("ready", refreshJoinsOnReady);
         };
         for (const j of this.callbacks) {
+          if (j.managedOnly) {
+            continue;
+          }
           this.rawSocket.off(j.event, j.callback);
           this.rawSocket.on(j.event, j.callback);
         }
@@ -76,7 +79,19 @@ class ManagedSocket {
     if (event === "ready" || event === "connect") {
       return this.socketManager.onReady(callback);
     }
-    this.callbacks.push({ event, callback });
+    if (event === "wsRefreshRequired") {
+      const unsubscribe =
+        this.socketManager.subscribeWsRefreshRequired(callback);
+      this.callbacks.push({
+        event,
+        callback,
+        unsubscribe,
+        managedOnly: true
+      });
+      return unsubscribe;
+    }
+
+    this.callbacks.push({ event, callback, managedOnly: false });
     return this.rawSocket.on(event, callback);
   }
 
@@ -84,7 +99,18 @@ class ManagedSocket {
     const i = this.callbacks.findIndex(
       c => c.event === event && c.callback === callback
     );
-    this.callbacks.splice(i, 1);
+    if (i !== -1) {
+      const cb = this.callbacks[i];
+      if (typeof cb.unsubscribe === "function") {
+        cb.unsubscribe();
+      }
+      this.callbacks.splice(i, 1);
+    }
+
+    if (event === "wsRefreshRequired") {
+      return;
+    }
+
     return this.rawSocket.off(event, callback);
   }
 
@@ -102,6 +128,10 @@ class ManagedSocket {
     }
     this.joins = [];
     for (const c of this.callbacks) {
+      if (typeof c.unsubscribe === "function") {
+        c.unsubscribe();
+        continue;
+      }
       this.rawSocket.off(c.event, c.callback);
     }
     this.callbacks = [];
@@ -135,6 +165,9 @@ const socketManager = {
   wsConnectionIssueListeners: [],
   wsReconnectAttemptCount: 0,
   wsReconnectAttemptListeners: [],
+  wsRefreshRequiredActive: false,
+  wsRefreshRequiredListeners: [],
+  wsRefreshRequiredReconnectThreshold: 2,
   wsConnectionStableTimer: null,
   wsConnectionStabilityDelayMs: 5000,
 
@@ -150,6 +183,34 @@ const socketManager = {
     });
   },
 
+  notifyWsRefreshRequired: function () {
+    this.wsRefreshRequiredListeners.forEach(listener => {
+      listener(this.wsRefreshRequiredActive);
+    });
+  },
+
+  setWsRefreshRequired: function (active) {
+    if (this.wsRefreshRequiredActive === active) {
+      return;
+    }
+
+    this.wsRefreshRequiredActive = active;
+    this.notifyWsRefreshRequired();
+  },
+
+  triggerWsRefreshRequired: function () {
+    this.setWsRefreshRequired(true);
+    this.setWsRefreshRequired(false);
+  },
+
+  syncWsRefreshRequired: function () {
+    if (this.wsConnectionIssueActive) {
+      return;
+    }
+
+    this.setWsRefreshRequired(false);
+  },
+
   setWsConnectionIssue: function (active) {
     if (this.wsConnectionIssueActive === active) {
       return;
@@ -157,6 +218,7 @@ const socketManager = {
 
     this.wsConnectionIssueActive = active;
     this.notifyWsConnectionIssue();
+    this.syncWsRefreshRequired();
   },
 
   setWsReconnectAttemptCount: function (count) {
@@ -166,6 +228,7 @@ const socketManager = {
 
     this.wsReconnectAttemptCount = count;
     this.notifyWsReconnectAttempt();
+    this.syncWsRefreshRequired();
   },
 
   incrementWsReconnectAttemptCount: function () {
@@ -188,6 +251,10 @@ const socketManager = {
     if (!this.wsConnectionIssueActive) {
       return;
     }
+
+    // Any successful reconnection after an issue should prompt components
+    // to refresh their own data.
+    this.triggerWsRefreshRequired();
 
     if (this.wsConnectionStableTimer) {
       clearTimeout(this.wsConnectionStableTimer);
@@ -229,6 +296,17 @@ const socketManager = {
     return () => {
       this.wsReconnectAttemptListeners =
         this.wsReconnectAttemptListeners.filter(l => l !== listener);
+    };
+  },
+
+  subscribeWsRefreshRequired: function (listener) {
+    this.wsRefreshRequiredListeners.push(listener);
+    listener(this.wsRefreshRequiredActive);
+
+    return () => {
+      this.wsRefreshRequiredListeners = this.wsRefreshRequiredListeners.filter(
+        l => l !== listener
+      );
     };
   },
 
