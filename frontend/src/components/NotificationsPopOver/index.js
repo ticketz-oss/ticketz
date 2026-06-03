@@ -54,7 +54,7 @@ const NotificationsPopOver = props => {
 
   const [, setDesktopNotifications] = useState([]);
 
-  const { tickets } = useTickets({
+  const { tickets, refetch: refetchTickets } = useTickets({
     notClosed: "true",
     withUnreadMessages: "true"
   });
@@ -200,11 +200,24 @@ const NotificationsPopOver = props => {
       `company-${companyId}-contact`,
       onCompanyContactNotificationsPopover
     );
+    socket.on("wsRefreshRequired", refreshRequired => {
+      if (refreshRequired) {
+        refetchTickets();
+      }
+    });
 
     return () => {
       socket.disconnect();
     };
-  }, [user, profile, queues, queueIds, soundGroupNotifications, socketManager]);
+  }, [
+    user,
+    profile,
+    queues,
+    queueIds,
+    soundGroupNotifications,
+    socketManager,
+    refetchTickets
+  ]);
 
   const handleNotifications = data => {
     const { message, contact, ticket } = data;

@@ -761,6 +761,13 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
     };
   }
 
+  function refreshMessagesList() {
+    dispatch({ type: "RESET" });
+    setNextId(null);
+    setHasMore(false);
+    loadData();
+  }
+
   useEffect(async () => {
     dispatch({ type: "RESET" });
     setContactPresence("available");
@@ -815,6 +822,15 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
     };
 
     socket.on(`company-${companyId}-appMessage`, onAppMessage);
+    socket.on("wsRefreshRequired", refreshRequired => {
+      if (!refreshRequired || !currentTicketId.current) {
+        return;
+      }
+
+      loadPageMutex.runExclusive(async () => {
+        refreshMessagesList();
+      });
+    });
 
     socket.on(`company-${companyId}-presence`, data => {
       const { scrollTop, clientHeight, scrollHeight } = scrollRef.current;

@@ -206,21 +206,26 @@ const TicketsListCustom = props => {
     selectedQueueIds
   ]);
 
-  const { tickets, hasMore, loading, nextUpdatedAt, nextTicketId } = useTickets(
-    {
-      nextUpdatedAt: paginationCursor.nextUpdatedAt,
-      nextTicketId: paginationCursor.nextTicketId,
-      isSearch,
-      searchParam,
-      status,
-      groups,
-      showAll,
-      contactId,
-      tags: JSON.stringify(tags),
-      users: JSON.stringify(users),
-      queueIds: JSON.stringify(selectedQueueIds)
-    }
-  );
+  const {
+    tickets,
+    hasMore,
+    loading,
+    nextUpdatedAt,
+    nextTicketId,
+    refetch: refetchTickets
+  } = useTickets({
+    nextUpdatedAt: paginationCursor.nextUpdatedAt,
+    nextTicketId: paginationCursor.nextTicketId,
+    isSearch,
+    searchParam,
+    status,
+    groups,
+    showAll,
+    contactId,
+    tags: JSON.stringify(tags),
+    users: JSON.stringify(users),
+    queueIds: JSON.stringify(selectedQueueIds)
+  });
 
   useEffect(() => {
     const queueIds = queues.map(q => q.id);
@@ -352,6 +357,11 @@ const TicketsListCustom = props => {
     socket.on(`company-${companyId}-ticket`, onCompanyTicket);
     socket.on(`company-${companyId}-appMessage`, onCompanyAppMessage);
     socket.on(`company-${companyId}-contact`, onCompanyContact);
+    socket.on("wsRefreshRequired", refreshRequired => {
+      if (refreshRequired) {
+        refetchTickets();
+      }
+    });
 
     socket.on(`company-${companyId}-presence`, data => {
       dispatch({
@@ -382,7 +392,8 @@ const TicketsListCustom = props => {
     users,
     profile,
     queues,
-    socketManager
+    socketManager,
+    refetchTickets
   ]);
 
   useEffect(() => {
