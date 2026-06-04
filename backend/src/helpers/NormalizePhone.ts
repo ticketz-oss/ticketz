@@ -32,7 +32,9 @@ export default function normalizePhone(
   }
 
   const dddFirstDigit = phone[2];
-  const shouldKeepNinthDigitInWphone = ["1", "2"].includes(dddFirstDigit);
+  const digitAfterNinth = Number(phone[5]);
+  const shouldKeepNinthDigitInWphone =
+    ["1", "2"].includes(dddFirstDigit) || digitAfterNinth < 6;
 
   return {
     phone,

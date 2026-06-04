@@ -28,6 +28,15 @@ describe("normalizePhone", () => {
     });
   });
 
+  it("keeps Brazilian 13-digit mobile phone and wphone when digit after ninth is below 6", () => {
+    const result = normalizePhone("5531945678901");
+
+    expect(result).toEqual({
+      phone: "5531945678901",
+      wphone: "5531945678901"
+    });
+  });
+
   it("converts Brazilian 12-digit mobile into 13-digit phone and keeps wphone for DDD starting with 1 or 2", () => {
     const result = normalizePhone("551187654321");
 
