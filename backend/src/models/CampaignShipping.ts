@@ -13,7 +13,7 @@ import {
 } from "sequelize-typescript";
 import Campaign from "./Campaign";
 import ContactListItem from "./ContactListItem";
-import normalizePhone from "../helpers/NormalizePhone";
+import normalizePhone from "./NormalizePhone";
 
 @Table({ tableName: "CampaignShipping" })
 class CampaignShipping extends Model<CampaignShipping> {
