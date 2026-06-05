@@ -359,6 +359,8 @@ const TicketsListCustom = props => {
     socket.on(`company-${companyId}-contact`, onCompanyContact);
     socket.on("wsRefreshRequired", refreshRequired => {
       if (refreshRequired) {
+        dispatch({ type: "RESET" });
+        setPaginationCursor({ nextUpdatedAt: null, nextTicketId: null });
         refetchTickets();
       }
     });
