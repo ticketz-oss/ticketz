@@ -243,6 +243,7 @@ const mergeContactsInTransaction = async (
           contactId: loser.id,
           companyId
         },
+        silent: true,
         transaction
       }
     );
@@ -254,6 +255,7 @@ const mergeContactsInTransaction = async (
           contactId: loser.id,
           companyId
         },
+        silent: true,
         transaction
       }
     );
@@ -262,6 +264,7 @@ const mergeContactsInTransaction = async (
       { contactId: winner.id },
       {
         where: { contactId: loser.id },
+        silent: true,
         transaction
       }
     );
@@ -270,6 +273,7 @@ const mergeContactsInTransaction = async (
       { contactId: winner.id },
       {
         where: { contactId: loser.id },
+        silent: true,
         transaction
       }
     );
@@ -278,6 +282,7 @@ const mergeContactsInTransaction = async (
       { contactId: winner.id },
       {
         where: { contactId: loser.id },
+        silent: true,
         transaction
       }
     );
@@ -286,6 +291,7 @@ const mergeContactsInTransaction = async (
       { contactId: winner.id },
       {
         where: { contactId: loser.id },
+        silent: true,
         transaction
       }
     );
