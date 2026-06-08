@@ -31,6 +31,7 @@ interface Request {
   groups?: string;
   date?: string;
   updatedAt?: string;
+  minUpdatedAt?: string;
   showAll?: string;
   userId: string;
   withUnreadMessages?: string;
@@ -60,6 +61,7 @@ const ListTicketsService = async ({
   groups,
   date,
   updatedAt,
+  minUpdatedAt,
   showAll,
   userId,
   withUnreadMessages,
@@ -313,6 +315,18 @@ const ListTicketsService = async ({
 
     andedOrs.push({
       updatedAt: { [Op.lt]: parsedNextUpdatedAt }
+    });
+  }
+
+  if (minUpdatedAt) {
+    const parsedMinUpdatedAt = new Date(minUpdatedAt);
+
+    if (Number.isNaN(parsedMinUpdatedAt.getTime())) {
+      throw new AppError("ERR_INVALID_MIN_UPDATED_AT", 400);
+    }
+
+    andedOrs.push({
+      updatedAt: { [Op.gte]: parsedMinUpdatedAt }
     });
   }
 

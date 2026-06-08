@@ -21,6 +21,7 @@ type IndexQuery = {
   groups: string;
   date: string;
   updatedAt?: string;
+  minUpdatedAt?: string;
   showAll: string;
   withUnreadMessages: string;
   notClosed: string;
@@ -48,6 +49,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     groups,
     date,
     updatedAt,
+    minUpdatedAt,
     isSearch,
     searchParam,
     showAll,
@@ -90,6 +92,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     groups,
     date,
     updatedAt,
+    minUpdatedAt,
     showAll,
     userId,
     queueIds,

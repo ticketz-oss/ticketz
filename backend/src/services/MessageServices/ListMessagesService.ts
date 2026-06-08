@@ -11,6 +11,7 @@ interface Request {
   companyId: number;
   nextId?: string;
   queues?: number[];
+  minUpdatedAt?: string;
 }
 
 interface Response {
@@ -25,7 +26,8 @@ const ListMessagesService = async ({
   nextId,
   ticketId,
   companyId,
-  queues = []
+  queues = [],
+  minUpdatedAt
 }: Request): Promise<Response> => {
   const ticket = await ShowTicketService(ticketId, companyId);
 
@@ -61,7 +63,17 @@ const ListMessagesService = async ({
     };
   }
 
-  if (nextId) {
+  if (minUpdatedAt) {
+    const parsedMinUpdatedAt = new Date(minUpdatedAt);
+
+    if (Number.isNaN(parsedMinUpdatedAt.getTime())) {
+      throw new AppError("ERR_INVALID_MIN_UPDATED_AT", 400);
+    }
+
+    options.where["updatedAt"] = {
+      [Op.gte]: parsedMinUpdatedAt
+    };
+  } else if (nextId) {
     const cursorMessage = await Message.findOne({
       where: {
         id: nextId,

@@ -32,6 +32,7 @@ import { verifyContact } from "../services/WbotServices/verifyContact";
 type IndexQuery = {
   nextId?: string;
   markAsRead: string;
+  minUpdatedAt?: string;
 };
 
 type ForwardData = {
@@ -43,7 +44,7 @@ type ForwardData = {
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const { ticketId } = req.params;
-  const { nextId, markAsRead } = req.query as IndexQuery;
+  const { nextId, markAsRead, minUpdatedAt } = req.query as IndexQuery;
   const { companyId, profile } = req.user;
   const queues: number[] = [];
 
@@ -66,7 +67,8 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     nextId,
     ticketId,
     companyId,
-    queues
+    queues,
+    minUpdatedAt
   });
 
   if (ticket.channel === "whatsapp" && markAsRead === "true") {
