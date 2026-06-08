@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useReducer, useContext } from "react";
+import React, {
+  useState,
+  useEffect,
+  useReducer,
+  useContext,
+  useRef
+} from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
 import List from "@material-ui/core/List";
@@ -11,6 +17,7 @@ import useTickets from "../../hooks/useTickets";
 import { i18n } from "../../translate/i18n";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { SocketContext } from "../../context/Socket/SocketContext";
+import toastError from "../../errors/toastError";
 
 const useStyles = makeStyles(theme => ({
   ticketsListWrapper: {
@@ -107,10 +114,15 @@ const reducer = (state, action) => {
 
     const ticketIndex = state.findIndex(t => t.id === ticket.id);
     if (ticketIndex !== -1) {
-      state[ticketIndex] = ticket;
-    } else {
-      state.unshift(ticket);
+      state.splice(ticketIndex, 1);
     }
+
+    const idx = state.findIndex(
+      t =>
+        new Date(t.updatedAt) < new Date(ticket.updatedAt) ||
+        (t.updatedAt === ticket.updatedAt && t.id < ticket.id)
+    );
+    state.splice(idx < 0 ? state.length : idx, 0, ticket);
 
     return [...state];
   }
@@ -186,6 +198,10 @@ const TicketsListCustom = props => {
   });
   const [update, setUpdate] = useState(0);
   const [ticketsList, dispatch] = useReducer(reducer, []);
+  const ticketsListRef = useRef(ticketsList);
+  useEffect(() => {
+    ticketsListRef.current = ticketsList;
+  }, [ticketsList]);
   const [ticketsListUpdated, setTicketsListUpdated] = useState([]);
   const { user } = useContext(AuthContext);
   const { profile, queues } = user;
@@ -212,7 +228,8 @@ const TicketsListCustom = props => {
     loading,
     nextUpdatedAt,
     nextTicketId,
-    refetch: refetchTickets
+    refetch: refetchTickets,
+    fetchSince
   } = useTickets({
     nextUpdatedAt: paginationCursor.nextUpdatedAt,
     nextTicketId: paginationCursor.nextTicketId,
@@ -359,9 +376,27 @@ const TicketsListCustom = props => {
     socket.on(`company-${companyId}-contact`, onCompanyContact);
     socket.on("wsRefreshRequired", refreshRequired => {
       if (refreshRequired) {
-        dispatch({ type: "RESET" });
-        setPaginationCursor({ nextUpdatedAt: null, nextTicketId: null });
-        refetchTickets();
+        const currentList = ticketsListRef.current;
+        if (currentList.length > 0) {
+          const maxUpdatedAt = currentList.reduce(
+            (max, ticket) => (ticket.updatedAt > max ? ticket.updatedAt : max),
+            currentList[0].updatedAt
+          );
+
+          fetchSince(maxUpdatedAt)
+            .then(newTickets => {
+              newTickets.forEach(ticket => {
+                dispatch({ type: "UPDATE_TICKET", payload: ticket });
+              });
+            })
+            .catch(err => {
+              toastError(err);
+            });
+        } else {
+          dispatch({ type: "RESET" });
+          setPaginationCursor({ nextUpdatedAt: null, nextTicketId: null });
+          refetchTickets();
+        }
       }
     });
 

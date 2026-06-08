@@ -696,6 +696,24 @@ const reducer = (state, action) => {
     return [...state];
   }
 
+  if (action.type === "MERGE_MESSAGES") {
+    const messages = action.payload;
+
+    messages.forEach(message => {
+      const messageIndex = state.findIndex(m => m.id === message.id);
+      if (messageIndex !== -1) {
+        state[messageIndex] = message;
+      } else {
+        const idx = state.findIndex(
+          m => new Date(m.createdAt) > new Date(message.createdAt)
+        );
+        state.splice(idx < 0 ? state.length : idx, 0, message);
+      }
+    });
+
+    return [...state];
+  }
+
   if (action.type === "RESET") {
     return [];
   }
@@ -705,6 +723,10 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
   const classes = useStyles();
 
   const [messagesList, dispatch] = useReducer(reducer, []);
+  const messagesListRef = useRef(messagesList);
+  useEffect(() => {
+    messagesListRef.current = messagesList;
+  }, [messagesList]);
   const [nextId, setNextId] = useState(null);
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -828,7 +850,60 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
       }
 
       loadPageMutex.runExclusive(async () => {
-        refreshMessagesList();
+        const currentList = messagesListRef.current;
+        if (currentList.length > 0) {
+          const maxUpdatedAt = currentList.reduce(
+            (max, msg) => (msg.updatedAt > max ? msg.updatedAt : max),
+            currentList[0].updatedAt
+          );
+
+          try {
+            const { data } = await api.get(
+              "/messages/" + currentTicketId.current,
+              {
+                params: { minUpdatedAt: maxUpdatedAt }
+              }
+            );
+            const currentIds = new Set(currentList.map(m => m.id));
+            const newMessages = data.messages.filter(
+              m => !currentIds.has(m.id)
+            );
+            let isAtBottom = false;
+            let newestMessage = null;
+
+            if (newMessages.length > 0) {
+              const { scrollTop, clientHeight, scrollHeight } =
+                scrollRef.current;
+              isAtBottom =
+                scrollTop + clientHeight >= scrollHeight - clientHeight / 4;
+              newestMessage = newMessages.reduce((latest, msg) =>
+                new Date(msg.createdAt) > new Date(latest.createdAt)
+                  ? msg
+                  : latest
+              );
+              newestMessage.bottomStick =
+                (!isAtBottom && !newestMessage.fromMe) || undefined;
+            }
+
+            dispatch({ type: "MERGE_MESSAGES", payload: data.messages });
+
+            if (newMessages.length > 0) {
+              if (
+                (isAtBottom || newestMessage.fromMe) &&
+                newestMessage.mediaType !== "reactionMessage"
+              ) {
+                scrollToBottom();
+              }
+              if (newestMessage.bottomStick) {
+                scrollStickedToBottom();
+              }
+            }
+          } catch (err) {
+            toastError(err);
+          }
+        } else {
+          refreshMessagesList();
+        }
       });
     });
 

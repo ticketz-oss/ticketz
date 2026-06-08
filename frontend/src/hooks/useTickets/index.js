@@ -84,10 +84,52 @@ const useTickets = ({
     setRefreshTrigger(prevState => prevState + 1);
   }, []);
 
+  const fetchSince = useCallback(
+    async minUpdatedAt => {
+      const { data } = await api.get("/tickets", {
+        params: {
+          isSearch,
+          searchParam,
+          contactId,
+          tags,
+          users,
+          status,
+          groups,
+          date,
+          updatedAt,
+          showAll,
+          queueIds,
+          withUnreadMessages,
+          notClosed,
+          all,
+          minUpdatedAt
+        }
+      });
+      return data.tickets;
+    },
+    [
+      isSearch,
+      searchParam,
+      contactId,
+      tags,
+      users,
+      status,
+      groups,
+      date,
+      updatedAt,
+      showAll,
+      queueIds,
+      withUnreadMessages,
+      notClosed,
+      all
+    ]
+  );
+
   return {
     tickets,
     loading,
-    refetch
+    refetch,
+    fetchSince
   };
 };
 
