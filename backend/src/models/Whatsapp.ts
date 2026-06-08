@@ -129,6 +129,18 @@ class Whatsapp extends Model<Whatsapp> {
 
   @Column(DataType.TEXT)
   channel: string;
+
+  @AllowNull
+  @Column
+  phoneNumberId: string;
+
+  @AllowNull
+  @Column
+  wabaId: string;
+
+  @AllowNull
+  @Column
+  webhookVerifyToken: string;
 }
 
 export default Whatsapp;

@@ -54,6 +54,7 @@ import { WhatsAppsContext } from "../../context/WhatsApp/WhatsAppsContext";
 import toastError from "../../errors/toastError";
 import wavoipIcon from "../../assets/wavoip.webp";
 import WavoipModal from "../../components/WavoipModal";
+import MetaConnectionModal from "../../components/MetaConnectionModal";
 import { wavoipAvailable } from "../../helpers/wavoipCallManager";
 
 const useStyles = makeStyles(theme => ({
@@ -127,6 +128,7 @@ const Connections = () => {
     confirmationModalInitialState
   );
   const [wavoipModalOpen, setWavoipModalOpen] = useState(false);
+  const [metaModalOpen, setMetaModalOpen] = useState(false);
 
   const handleStartWhatsAppSession = async whatsAppId => {
     try {
@@ -233,6 +235,20 @@ const Connections = () => {
     setWavoipModalOpen(false);
     setSelectedWhatsApp(null);
   }, [setWavoipModalOpen, setSelectedWhatsApp]);
+
+  const handleSaveMetaConnection = async (data) => {
+    try {
+      await api.post("/whatsapp/", {
+        ...data,
+        channel: "meta",
+        queueIds: []
+      });
+      toast.success("Conexão Meta API criada!");
+      setMetaModalOpen(false);
+    } catch (err) {
+      toastError(err);
+    }
+  };
 
   const refreshWhatsApp = async whatsApp => {
     try {
@@ -377,9 +393,21 @@ const Connections = () => {
         onClose={handleCloseWavoipModal}
         whatsappId={selectedWhatsApp?.id}
       />
+      <MetaConnectionModal
+        open={metaModalOpen}
+        onClose={() => setMetaModalOpen(false)}
+        onSave={handleSaveMetaConnection}
+      />
       <MainHeader>
         <Title>{i18n.t("connections.title")}</Title>
         <MainHeaderButtonsWrapper>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => setMetaModalOpen(true)}
+          >
+            + Meta API
+          </Button>
           <Button
             variant="contained"
             color="primary"

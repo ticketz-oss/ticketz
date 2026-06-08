@@ -13,6 +13,7 @@ import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import DeleteWhatsAppMessage from "../services/WbotServices/DeleteWhatsAppMessage";
 import SendWhatsAppMedia from "../services/WbotServices/SendWhatsAppMedia";
 import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
+import { SendMetaTextMessage, SendMetaMediaMessage } from "../services/MetaServices/SendMetaMessage";
 import CheckContactNumber from "../services/WbotServices/CheckNumber";
 import EditWhatsAppMessage from "../services/WbotServices/EditWhatsAppMessage";
 
@@ -157,9 +158,18 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
           fs.unlinkSync(media.path);
         })
       );
+    } else if (channel === "meta") {
+      await Promise.all(
+        medias.map(async (media: Express.Multer.File) => {
+          await SendMetaMediaMessage({ media, ticket, caption: body });
+          fs.unlinkSync(media.path);
+        })
+      );
     }
   } else if (channel === "whatsapp") {
     await SendWhatsAppMessage({ body, ticket, userId, quotedMsg });
+  } else if (channel === "meta") {
+    await SendMetaTextMessage({ body, ticket, userId, quotedMsg });
   }
 
   return res.send();

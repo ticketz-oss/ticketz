@@ -1,17 +1,25 @@
 import { QueryInterface } from "sequelize";
 import { hash } from "bcryptjs";
 
+// ================================================================
+//  SEED: Usuário admin padrão - Solution Zap
+//  Email e senha definidos via variável de ambiente no .env
+// ================================================================
+
 module.exports = {
   up: (queryInterface: QueryInterface) => {
     return queryInterface.sequelize.transaction(async t => {
-      const passwordHash = await hash("123456", 8);
+      const adminPassword = process.env.ADMIN_PASSWORD || "SolutionZap@2025";
+      const adminEmail = process.env.EMAIL_ADDRESS || "admin@solutionzap.com.br";
+      const passwordHash = await hash(adminPassword, 8);
+
       return Promise.all([
         queryInterface.bulkInsert(
           "Users",
           [
             {
-              name: "Admin",
-              email: process.env.EMAIL_ADDRESS || "admin@ticketz.host",
+              name: "Admin Solution Zap",
+              email: adminEmail,
               profile: "admin",
               passwordHash,
               companyId: 1,
