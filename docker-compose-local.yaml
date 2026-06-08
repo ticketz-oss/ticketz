@@ -1,5 +1,5 @@
 networks:
-  ticketz:
+  solutionzap:
 
 volumes:
   postgres_data:
@@ -25,7 +25,7 @@ services:
     ports:
       - ${BACKEND_PORT:-8080}:3000
     networks:
-      - ticketz
+      - solutionzap
 
   frontend:
     ports:
@@ -41,22 +41,22 @@ services:
     depends_on:
       - backend
     networks:
-      - ticketz
+      - solutionzap
 
   postgres:
     image: postgres:16-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_USER=${POSTGRES_USER:-ticketz}
-      - POSTGRES_DB=${POSTGRES_DB:-ticketz}
+      - POSTGRES_USER=${POSTGRES_USER:-solutionzap}
+      - POSTGRES_DB=${POSTGRES_DB:-solutionzap}
       - POSTGRES_HOST_AUTH_METHOD=trust
       - TZ=${TZ:-America/Sao_Paulo}
     expose:
       - 5432
     restart: always
     networks:
-      - ticketz
+      - solutionzap
 
   redis:
     image: redis:alpine
@@ -67,20 +67,4 @@ services:
     volumes:
       - redis_data:/data
     networks:
-      - ticketz
-
-  sidekick:
-    image: ghcr.io/ticketz-oss/ticketz-sidekick:latest
-    profiles: ["do-not-start"]
-    env_file:
-      - .env-backend-local
-    restart: unless-stopped
-    volumes:
-      - backend_public:/backend-public
-      - backend_private:/backend-private
-      - ./backups:/backups
-      - ./retrieve:/retrieve
-    depends_on:
-      - postgres
-    networks:
-      - ticketz
+      - solutionzap

@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Programas/laragon_8/www/**)",
+      "PowerShell(New-Item -ItemType Directory -Force \"c:\\\\Programas\\\\laragon_8\\\\www\\\\solutionzap\\\\backend\\\\src\\\\services\\\\MetaServices\")",
+      "PowerShell(New-Item -ItemType Directory -Force \"c:\\\\Programas\\\\laragon_8\\\\www\\\\solutionzap\\\\backend\\\\src\\\\services\\\\IntegrationServices\")"
+    ],
+    "additionalDirectories": [
+      "c:\\Programas\\laragon_8\\www\\Whatsapp\\solutionzap\\backend\\src\\services\\WhatsappService",
+      "c:\\Programas\\laragon_8\\www\\Whatsapp\\solutionzap\\backend\\src\\services\\MetaServices"
+    ]
+  }
+}

@@ -27,6 +27,11 @@ interface WhatsappData {
   status?: string;
   isDefault?: boolean;
   token?: string;
+  channel?: string;
+  tokenMeta?: string;
+  phoneNumberId?: string;
+  wabaId?: string;
+  webhookVerifyToken?: string;
 }
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
@@ -52,7 +57,12 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     ratingMessage,
     transferMessage,
     queueIds,
-    token
+    token,
+    channel,
+    tokenMeta,
+    phoneNumberId,
+    wabaId,
+    webhookVerifyToken
   }: WhatsappData = req.body;
   const { companyId } = req.user;
 
@@ -67,7 +77,11 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     transferMessage,
     queueIds,
     companyId,
-    token
+    token,
+    channel: channel || "whatsapp",
+    tokenMeta,
+    phoneNumberId,
+    wabaId
   });
 
   sendWhatsappUpdate(whatsapp);
@@ -76,7 +90,14 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     sendWhatsappUpdate(oldDefaultWhatsapp);
   }
 
-  StartWhatsAppSession(whatsapp, companyId);
+  // Only start Baileys session for WhatsApp connections, not Meta
+  if (!channel || channel === "whatsapp") {
+    StartWhatsAppSession(whatsapp, companyId);
+  } else if (channel === "meta") {
+    // Meta connections are immediately "CONNECTED" after token is set
+    await whatsapp.update({ status: "CONNECTED" });
+    sendWhatsappUpdate(whatsapp);
+  }
 
   return res.status(200).json(whatsapp);
 };
