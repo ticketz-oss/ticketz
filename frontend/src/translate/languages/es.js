@@ -58,10 +58,7 @@ const messages = {
         },
         serverTime: "Hora del servidor:",
         clientTime: "Hora del cliente:",
-        differenceMinutes: "Diferencia: {{count}} minuto(s)",
-        websocketConnectionIssue:
-          "Conexion en tiempo real inestable. Intentando reconectar...",
-        websocketConnectionRestored: "Conexion en tiempo real restablecida."
+        differenceMinutes: "Diferencia: {{count}} minuto(s)"
       },
       signup: {
         title: "Registrarse",

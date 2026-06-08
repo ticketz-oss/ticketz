@@ -23,10 +23,7 @@ const messages = {
         contact: "Contact",
         serverTime: "Heure du serveur :",
         clientTime: "Heure du client :",
-        differenceMinutes: "Différence : {{count}} minute(s)",
-        websocketConnectionIssue:
-          "Connexion temps reel instable. Reconnexion en cours...",
-        websocketConnectionRestored: "Connexion temps reel retablie."
+        differenceMinutes: "Différence : {{count}} minute(s)"
       },
       signup: {
         title: "S'inscrire",

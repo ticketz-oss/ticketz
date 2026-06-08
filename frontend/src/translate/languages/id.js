@@ -22,10 +22,7 @@ const messages = {
         contact: "Kontak",
         serverTime: "Waktu server:",
         clientTime: "Waktu klien:",
-        differenceMinutes: "Selisih: {{count}} menit",
-        websocketConnectionIssue:
-          "Koneksi real-time tidak stabil. Mencoba menyambung ulang...",
-        websocketConnectionRestored: "Koneksi real-time tersambung kembali."
+        differenceMinutes: "Selisih: {{count}} menit"
       },
       signup: {
         title: "Daftar",

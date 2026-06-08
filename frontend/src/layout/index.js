@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useRef } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import clsx from "clsx";
 import {
@@ -54,7 +54,6 @@ import NestedMenuItem from "material-ui-nested-menu-item";
 import GoogleAnalytics from "../components/GoogleAnalytics";
 import OnlyForSuperUser from "../components/OnlyForSuperUser";
 import NewTicketModal from "../components/NewTicketModal/index.js";
-import { toast } from "react-toastify";
 
 const drawerWidth = 240;
 const DRAWER_STORAGE_KEY = "drawerOpen";
@@ -345,8 +344,6 @@ const LoggedInLayout = ({ children, themeToggle }) => {
 
   const socketManager = useContext(SocketContext);
   const [wsConnectionIssue, setWsConnectionIssue] = useState(false);
-  const [wsReconnectAttemptCount, setWsReconnectAttemptCount] = useState(0);
-  const wsIssueToastWasShownRef = useRef(false);
 
   const [newTicketContact, setNewTicketContact] = useState(null);
 
@@ -450,16 +447,6 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   }, [socketManager]);
 
   useEffect(() => {
-    if (!socketManager?.subscribeWsReconnectAttempt) {
-      return undefined;
-    }
-
-    return socketManager.subscribeWsReconnectAttempt(
-      setWsReconnectAttemptCount
-    );
-  }, [socketManager]);
-
-  useEffect(() => {
     const companyId = localStorage.getItem("companyId");
     const userId = localStorage.getItem("userId");
 
@@ -553,34 +540,6 @@ const LoggedInLayout = ({ children, themeToggle }) => {
     colorMode.toggleColorMode();
   };
 
-  const showWsConnectionIssueToast = () => {
-    toast.error(i18n.t("common.websocketConnectionIssue"));
-  };
-
-  const showWsConnectionRestoredToast = () => {
-    toast.success(i18n.t("common.websocketConnectionRestored"));
-  };
-
-  const handleWsConnectionHintClick = () => {
-    showWsConnectionIssueToast();
-  };
-
-  useEffect(() => {
-    if (
-      wsConnectionIssue &&
-      wsReconnectAttemptCount >= 2 &&
-      !wsIssueToastWasShownRef.current
-    ) {
-      showWsConnectionIssueToast();
-      wsIssueToastWasShownRef.current = true;
-    }
-
-    if (!wsConnectionIssue && wsIssueToastWasShownRef.current) {
-      showWsConnectionRestoredToast();
-      wsIssueToastWasShownRef.current = false;
-    }
-  }, [wsConnectionIssue, wsReconnectAttemptCount]);
-
   const handleChooseLanguage = language => {
     localStorage.setItem("language", language);
     window.location.reload(false);
@@ -671,11 +630,10 @@ const LoggedInLayout = ({ children, themeToggle }) => {
           />
 
           {wsConnectionIssue && (
-            <Tooltip title={i18n.t("common.websocketConnectionIssue")} arrow>
-              <IconButton
-                aria-label={i18n.t("common.websocketConnectionIssue")}
+            <Tooltip title={i18n.t("common.connection")} arrow>
+              <span
+                aria-label={i18n.t("common.connection")}
                 className={classes.wsConnectionAlertButton}
-                onClick={handleWsConnectionHintClick}
               >
                 <Badge
                   variant="dot"
@@ -688,7 +646,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
                     className={classes.wsConnectionAlertIcon}
                   />
                 </Badge>
-              </IconButton>
+              </span>
             </Tooltip>
           )}
 
