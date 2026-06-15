@@ -97,6 +97,7 @@ export default function Options(props) {
   const [userRating, setUserRating] = useState("disabled");
   const [scheduleType, setScheduleType] = useState("disabled");
   const [outOfHoursAction, setOutOfHoursAction] = useState("pending");
+  const [outOfHoursNotifyNumber, setOutOfHoursNotifyNumber] = useState("");
   const [callType, setCallType] = useState("enabled");
   const [quickMessages, setQuickMessages] = useState("");
   const [defaultLanguage, setDefaultLanguage] = useState("");
@@ -168,6 +169,11 @@ export default function Options(props) {
 
       const outOfHoursAction = settings.find(s => s.key === "outOfHoursAction");
       setOutOfHoursAction(outOfHoursAction?.value || "pending");
+
+      const outOfHoursNotifyNumber = settings.find(
+        s => s.key === "outOfHoursNotifyNumber"
+      );
+      setOutOfHoursNotifyNumber(outOfHoursNotifyNumber?.value || "");
 
       const callType = settings.find(s => s.key === "call");
       if (callType) {
@@ -854,6 +860,24 @@ export default function Options(props) {
                 {i18n.t("settings.outOfHoursAction.options.closed")}
               </MenuItem>
             </Select>
+          </FormControl>
+        </Grid>
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <TextField
+              id="out-of-hours-notify-number-field"
+              label={i18n.t("settings.outOfHoursNotifyNumber.title")}
+              placeholder={i18n.t("settings.outOfHoursNotifyNumber.placeholder")}
+              variant="standard"
+              value={outOfHoursNotifyNumber}
+              onChange={e => {
+                setOutOfHoursNotifyNumber(e.target.value);
+              }}
+              onBlur={() => {
+                handleSetting("outOfHoursNotifyNumber", outOfHoursNotifyNumber);
+              }}
+            />
           </FormControl>
         </Grid>
 

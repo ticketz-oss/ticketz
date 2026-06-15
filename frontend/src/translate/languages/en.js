@@ -896,6 +896,10 @@ const messages = {
             closed: "Close ticket"
           }
         },
+        outOfHoursNotifyNumber: {
+          title: "Out of hours notify number",
+          placeholder: "E.g.: 5511999999999"
+        },
         IgnoreGroupMessages: {
           title: "Ignore Group Messages",
           options: {
