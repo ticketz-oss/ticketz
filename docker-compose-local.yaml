@@ -1,5 +1,6 @@
 networks:
-  ticketz:
+  default:
+    name: ${TICKETZ_NETWORK:-ticketz_default}
 
 volumes:
   postgres_data:
@@ -24,8 +25,6 @@ services:
       - redis
     ports:
       - ${BACKEND_PORT:-8080}:3000
-    networks:
-      - ticketz
 
   frontend:
     ports:
@@ -40,8 +39,6 @@ services:
     restart: always
     depends_on:
       - backend
-    networks:
-      - ticketz
 
   postgres:
     image: postgres:16-alpine
@@ -55,8 +52,6 @@ services:
     expose:
       - 5432
     restart: always
-    networks:
-      - ticketz
 
   redis:
     image: redis:alpine
@@ -66,8 +61,6 @@ services:
     restart: always
     volumes:
       - redis_data:/data
-    networks:
-      - ticketz
 
   sidekick:
     image: ghcr.io/ticketz-oss/ticketz-sidekick:latest
@@ -82,5 +75,3 @@ services:
       - ./retrieve:/retrieve
     depends_on:
       - postgres
-    networks:
-      - ticketz

@@ -1,3 +1,5 @@
 .docker
 *~
 /.project
+monitor/alertmanager.local.yml
+.env-monitor-local

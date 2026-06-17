@@ -1,0 +1,36 @@
+global: {}
+
+route:
+  receiver: "telegram"
+  group_by: ["alertname", "component", "companyId", "queue"]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 3h
+  routes:
+    - receiver: "telegram-critical"
+      matchers:
+        - severity="critical"
+      repeat_interval: 1h
+
+receivers:
+  - name: "telegram"
+    telegram_configs:
+      - bot_token: "${TELEGRAM_BOT_TOKEN}"
+        chat_id: ${TELEGRAM_CHAT_ID}
+        parse_mode: "HTML"
+        send_resolved: true
+        message: '{{ range .Alerts }}<b>Status:</b> {{ .Status }}{{ "\n" }}<b>Alerta:</b> {{ .Labels.alertname }}{{ "\n" }}<b>Resumo:</b> {{ .Annotations.summary }}{{ "\n" }}<b>Descrição:</b> {{ .Annotations.description }}{{ "\n\n" }}{{ end }}'
+  - name: "telegram-critical"
+    telegram_configs:
+      - bot_token: "${TELEGRAM_BOT_TOKEN}"
+        chat_id: ${TELEGRAM_CHAT_ID}
+        parse_mode: "HTML"
+        send_resolved: true
+        message: '{{ range .Alerts }}<b>Status:</b> {{ .Status }}{{ "\n" }}<b>Alerta:</b> {{ .Labels.alertname }}{{ "\n" }}<b>Resumo:</b> {{ .Annotations.summary }}{{ "\n" }}<b>Descrição:</b> {{ .Annotations.description }}{{ "\n\n" }}{{ end }}'
+
+inhibit_rules:
+  - source_matchers:
+      - severity="critical"
+    target_matchers:
+      - severity="warning"
+    equal: ["alertname", "component"]
