@@ -69,7 +69,8 @@
     "ts-morph": "^26.0.0",
     "uuid": "^8.3.2",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz",
-    "yup": "^0.32.11"
+    "yup": "^0.32.11",
+    "prom-client": "^15.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",

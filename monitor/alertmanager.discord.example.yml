@@ -1,0 +1,30 @@
+global: {}
+
+route:
+  receiver: "discord"
+  group_by: ["alertname", "component", "companyId", "queue"]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 3h
+  routes:
+    - receiver: "discord-critical"
+      matchers:
+        - severity="critical"
+      repeat_interval: 1h
+
+receivers:
+  - name: "discord"
+    webhook_configs:
+      - url: "https://discord.com/api/webhooks/REPLACE_WITH_WEBHOOK"
+        send_resolved: true
+  - name: "discord-critical"
+    webhook_configs:
+      - url: "https://discord.com/api/webhooks/REPLACE_WITH_WEBHOOK"
+        send_resolved: true
+
+inhibit_rules:
+  - source_matchers:
+      - severity="critical"
+    target_matchers:
+      - severity="warning"
+    equal: ["alertname", "component"]

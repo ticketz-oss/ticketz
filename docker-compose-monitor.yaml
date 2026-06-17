@@ -1,0 +1,116 @@
+services:
+  prometheus:
+    image: prom/prometheus:v2.55.0
+    restart: unless-stopped
+    depends_on:
+      - redis-exporter
+      - postgres-exporter
+      - node-exporter
+      - cadvisor
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=15d"
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitor/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitor/prometheus.rules.yml:/etc/prometheus/prometheus.rules.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - monitor_net
+      - ticketz_network
+
+  alertmanager:
+    image: prom/alertmanager:v0.26.0
+    restart: unless-stopped
+    command:
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+      - "--storage.path=/alertmanager"
+      - "--config.expand-env"
+    env_file:
+      - path: .env-monitor-local
+        required: false
+    ports:
+      - "9093:9093"
+    volumes:
+      - ${ALERTMANAGER_CONFIG:-./monitor/alertmanager.yml}:/etc/alertmanager/alertmanager.yml:ro
+    networks:
+      - monitor_net
+
+  grafana:
+    image: grafana/grafana:10.4.0
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      - GF_SERVER_ROOT_URL=http://localhost:3001
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitor/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./monitor/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitor/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    networks:
+      - monitor_net
+      - ticketz_network
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.55.1
+    restart: unless-stopped
+    privileged: true
+    ports:
+      - "8082:8080" # avoid host port conflict with backend dev on 8080 and pgAdmin on 8081
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - monitor_net
+
+  node-exporter:
+    image: prom/node-exporter:v1.9.0
+    restart: unless-stopped
+    command:
+      - "--path.rootfs=/host"
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/host:ro
+    networks:
+      - monitor_net
+
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.44.0
+    restart: unless-stopped
+    environment:
+      - REDIS_ADDR=redis:6379
+    networks:
+      - ticketz_network
+
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.11.0
+    restart: unless-stopped
+    environment:
+      - DATA_SOURCE_NAME=postgresql://ticketz@postgres:5432/ticketz?sslmode=disable
+    networks:
+      - ticketz_network
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  monitor_net:
+    driver: bridge
+  ticketz_network:
+    name: ${TICKETZ_NETWORK:-ticketz_default}
+    external: true

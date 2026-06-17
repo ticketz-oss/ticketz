@@ -12,6 +12,11 @@ import uploadConfig from "./config/upload";
 import AppError from "./errors/AppError";
 import routes from "./routes";
 import { logger } from "./utils/logger";
+import {
+  metricsHandler,
+  metricsMiddleware,
+  startMetricRefresh
+} from "./metrics";
 import { messageQueue, sendScheduledMessages } from "./queues";
 import { corsOrigin } from "./helpers/corsOrigin";
 
@@ -43,6 +48,8 @@ app.use(
 );
 app.use(cookieParser());
 app.use(express.json());
+app.use(metricsMiddleware);
+app.get("/metrics", metricsHandler);
 app.use(Sentry.Handlers.requestHandler());
 app.get("/public/*", (req, res) => {
   const filePath = path.join(uploadConfig.directory, req.params[0]);
@@ -96,6 +103,8 @@ app.use((req, _res, next) => {
 });
 
 app.use(routes);
+
+startMetricRefresh();
 
 app.use(Sentry.Handlers.errorHandler());
 app.use(async (err: Error, req: Request, res: Response, _: NextFunction) => {

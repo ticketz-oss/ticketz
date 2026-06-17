@@ -125,6 +125,50 @@ Execution can be stopped with the command:
 docker compose -f docker-compose-local.yaml down
 ```
 
+## Monitoring Stack
+
+A separate monitoring stack is available for host, service, Redis/Postgres and backend metrics. It uses Prometheus, Grafana, node-exporter, cAdvisor, Redis exporter, Postgres exporter and Alertmanager.
+
+Run it from the repository root with:
+
+```bash
+docker compose -f docker-compose-monitor.yaml -p monitor up -d
+```
+
+This uses a dedicated compose project and avoids duplicate stack names.
+
+Use Docker Compose v2 (`docker compose`, with a space). The legacy Python v1 command
+(`docker-compose`, with a dash) can fail while recreating containers with
+`KeyError: 'ContainerConfig'`. If that happens, remove the old monitor containers and
+start the stack again with Compose v2:
+
+```bash
+docker compose -f docker-compose-monitor.yaml -p monitor down --remove-orphans
+docker compose -f docker-compose-monitor.yaml -p monitor up -d
+```
+
+If the Ticketz application is running in a separate Docker project, make sure the monitor stack can access the same Docker network. The default external network name is `ticketz_default`; set `TICKETZ_NETWORK` if your project uses a different network.
+
+Then open:
+
+- Grafana: http://localhost:3001
+- Prometheus: http://localhost:9090
+- Alertmanager: http://localhost:9093
+- cAdvisor: http://localhost:8082
+
+Grafana default admin login is `admin/admin`.
+
+The Grafana stack is provisioned with these dashboards:
+
+- `Ticketz Monitor`
+- `Ticketz Services`
+- `Ticketz Application`
+- `Ticketz Alerts`
+
+The backend now exposes `/metrics` for Prometheus and includes internal Ticketz metrics for queues, WebSocket sessions, request latency, company counts, WhatsApp session status, tickets by status/queue, ticket age, messages, and queue backlog age.
+
+For Telegram alert delivery, keep secrets in `.env-monitor-local` and run Alertmanager with `ALERTMANAGER_CONFIG=./monitor/alertmanager.local.yml`.
+
 ## Running and Serving on the Internet
 
 Having a server accessible via the internet, it is necessary to adjust two DNS names of your choice, one for the backend and another for the frontend, and also an email address for certificate registration, for example:

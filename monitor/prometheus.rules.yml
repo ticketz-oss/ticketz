@@ -1,0 +1,222 @@
+groups:
+  - name: ticketz-alert-rules
+    rules:
+      - alert: HighHostCpuUsage
+        expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+        for: 5m
+        labels:
+          severity: warning
+          component: host
+        annotations:
+          summary: "Uso de CPU do host está alto"
+          description: "O host {{ $labels.instance }} está com uso de CPU acima de 85% há mais de 5 minutos."
+
+      - alert: HighHostMemoryUsage
+        expr: 100 * (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) > 85
+        for: 5m
+        labels:
+          severity: warning
+          component: host
+        annotations:
+          summary: "Uso de memória do host está alto"
+          description: "O host {{ $labels.instance }} está com uso de memória acima de 85% há mais de 5 minutos."
+
+      - alert: HighHostDiskUsage
+        expr: 100 * (node_filesystem_size_bytes{mountpoint="/"} - node_filesystem_avail_bytes{mountpoint="/"}) / node_filesystem_size_bytes{mountpoint="/"} > 90
+        for: 5m
+        labels:
+          severity: warning
+          component: host
+        annotations:
+          summary: "Uso de disco do host está alto"
+          description: "O filesystem raiz do host {{ $labels.instance }} está acima de 90% de uso há mais de 5 minutos."
+
+      - alert: ContainerHighMemoryUsage
+        expr: sum(container_memory_usage_bytes{container_label_com_docker_compose_service!~""}) by (container_label_com_docker_compose_service) > 500000000
+        for: 5m
+        labels:
+          severity: warning
+          component: docker
+        annotations:
+          summary: "Uso de memória do container está alto"
+          description: "O container {{ $labels.container_label_com_docker_compose_service }} está usando mais de 500MB de memória há mais de 5 minutos."
+
+      - alert: TicketzServiceHighCpuUsage
+        expr: sum(rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_service=~"backend|postgres|redis"}[1m])) by (container_label_com_docker_compose_service) > 0.75
+        for: 5m
+        labels:
+          severity: warning
+          component: ticketz-service
+        annotations:
+          summary: "Uso de CPU do serviço Ticketz está alto"
+          description: "O serviço {{ $labels.container_label_com_docker_compose_service }} está com uso de CPU acima de 75% há mais de 5 minutos."
+
+      - alert: TicketzServiceHighMemoryUsage
+        expr: sum(container_memory_usage_bytes{container_label_com_docker_compose_service=~"backend|postgres|redis"}) by (container_label_com_docker_compose_service) > 600000000
+        for: 5m
+        labels:
+          severity: warning
+          component: ticketz-service
+        annotations:
+          summary: "Uso de memória do serviço Ticketz está alto"
+          description: "O serviço {{ $labels.container_label_com_docker_compose_service }} está usando mais de 600MB de memória há mais de 5 minutos."
+
+      - alert: BackendDown
+        expr: up{job="backend"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: backend
+        annotations:
+          summary: "Backend do Ticketz está indisponível"
+          description: "O serviço backend não responde há mais de 2 minutos."
+
+      - alert: PostgresDown
+        expr: up{job="postgres-exporter"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: postgres
+        annotations:
+          summary: "Postgres exporter está indisponível"
+          description: "O Postgres exporter não pode ser coletado ou o banco Postgres está indisponível."
+
+      - alert: RedisDown
+        expr: up{job="redis-exporter"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: redis
+        annotations:
+          summary: "Redis exporter está indisponível"
+          description: "O Redis exporter não pode ser coletado ou o servidor Redis está indisponível."
+
+      - alert: TicketzQueueBacklog
+        expr: ticketz_queue_waiting > 50
+        for: 10m
+        labels:
+          severity: warning
+          component: queues
+        annotations:
+          summary: "Fila do Ticketz está acumulando jobs"
+          description: "Uma fila Bull do Ticketz está com mais de 50 jobs aguardando há mais de 10 minutos."
+
+      - alert: TicketzQueueBacklogByQueue
+        expr: ticketz_queue_waiting > 30
+        for: 10m
+        labels:
+          severity: warning
+          component: queues
+        annotations:
+          summary: "Fila específica do Ticketz está acumulando jobs"
+          description: "A fila '{{ $labels.queue }}' está com mais de 30 jobs aguardando há mais de 10 minutos."
+
+      - alert: TicketzQueueFailureRate
+        expr: ticketz_queue_failed > 0
+        for: 5m
+        labels:
+          severity: warning
+          component: queues
+        annotations:
+          summary: "Existem falhas em filas do Ticketz"
+          description: "Existe um ou mais jobs com falha nas filas do Ticketz."
+
+      - alert: TicketzQueueFailuresByQueue
+        expr: ticketz_queue_failed > 0
+        for: 5m
+        labels:
+          severity: warning
+          component: queues
+        annotations:
+          summary: "Fila do Ticketz possui jobs com falha"
+          description: "A fila '{{ $labels.queue }}' possui jobs com falha."
+
+      - alert: TicketzBackendErrorRate
+        expr: sum(rate(ticketz_http_requests_total{status=~"5.."}[5m])) / sum(rate(ticketz_http_requests_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          component: backend
+        annotations:
+          summary: "Taxa de erro do backend está alta"
+          description: "Mais de 5% das requisições do backend retornaram erro 5xx nos últimos 5 minutos."
+
+      - alert: TicketzBackendLatencyHigh
+        expr: histogram_quantile(0.95, sum(rate(ticketz_request_duration_seconds_bucket[5m])) by (le)) > 2
+        for: 5m
+        labels:
+          severity: warning
+          component: backend
+        annotations:
+          summary: "Latência p95 do backend está alta"
+          description: "O percentil 95 da latência das requisições do backend passou de 2 segundos."
+
+      - alert: TicketzWhatsappDisconnected
+        expr: sum(ticketz_whatsapp_sessions_total{status!~"CONNECTED|connected|open|OPEN"}) by (companyId, status) > 0
+        for: 5m
+        labels:
+          severity: warning
+          component: whatsapp
+        annotations:
+          summary: "Sessões WhatsApp não estão conectadas"
+          description: "A empresa {{ $labels.companyId }} possui sessões WhatsApp com status {{ $labels.status }} há mais de 5 minutos."
+
+      - alert: TicketzStaleTickets
+        expr: sum(ticketz_tickets_stale_total) by (companyId, status) > 0
+        for: 15m
+        labels:
+          severity: warning
+          component: tickets
+        annotations:
+          summary: "Tickets estão parados"
+          description: "A empresa {{ $labels.companyId }} possui tickets {{ $labels.status }} sem atualização há mais de 30 minutos."
+
+      - alert: TicketzTicketsWithoutQueue
+        expr: sum(ticketz_tickets_without_queue_total) by (companyId, status) > 0
+        for: 15m
+        labels:
+          severity: warning
+          component: tickets
+        annotations:
+          summary: "Tickets estão sem fila"
+          description: "A empresa {{ $labels.companyId }} possui tickets {{ $labels.status }} sem fila há mais de 15 minutos."
+
+      - alert: TicketzOldOpenTicket
+        expr: max(ticketz_oldest_ticket_age_seconds{status=~"open|pending"}) by (companyId, status) > 3600
+        for: 15m
+        labels:
+          severity: warning
+          component: tickets
+        annotations:
+          summary: "Ticket aberto ou pendente antigo"
+          description: "A empresa {{ $labels.companyId }} possui um ticket {{ $labels.status }} com mais de 1 hora."
+
+      - alert: TicketzOldQueueJob
+        expr: ticketz_queue_oldest_waiting_seconds > 300
+        for: 5m
+        labels:
+          severity: warning
+          component: queues
+        annotations:
+          summary: "Job antigo aguardando na fila"
+          description: "A fila {{ $labels.queue }} possui um job aguardando há mais de 5 minutos."
+
+      - alert: TicketzMessageErrors
+        expr: sum(ticketz_message_errors_total) by (companyId, direction) > 0
+        for: 10m
+        labels:
+          severity: warning
+          component: messages
+        annotations:
+          summary: "Existem mensagens com erro"
+          description: "A empresa {{ $labels.companyId }} possui erros em mensagens {{ $labels.direction }}."
+
+      - alert: TicketzWhatsappConnectedWithoutInboundMessages
+        expr: (max(ticketz_last_message_age_seconds{direction="inbound"}) by (companyId) > 1800) and on (companyId) (sum(ticketz_whatsapp_sessions_total{status=~"CONNECTED|connected|open|OPEN"}) by (companyId) > 0)
+        for: 10m
+        labels:
+          severity: warning
+          component: whatsapp
+        annotations:
+          summary: "WhatsApp conectado sem mensagens recebidas"
+          description: "A empresa {{ $labels.companyId }} possui WhatsApp conectado, mas não recebe mensagens há mais de 30 minutos."
