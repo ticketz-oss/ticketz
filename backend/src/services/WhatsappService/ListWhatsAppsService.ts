@@ -13,6 +13,7 @@ const ListWhatsAppsService = async ({
     attributes: [
       "id",
       "name",
+      "number",
       "channel",
       "status",
       "qrcode",

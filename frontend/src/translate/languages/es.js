@@ -190,6 +190,7 @@ const messages = {
         },
         table: {
           name: "Nombre",
+          number: "Número",
           status: "Estado",
           lastUpdate: "Última actualización",
           default: "Predeterminado",

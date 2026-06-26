@@ -439,10 +439,13 @@ export const initWASocket = async (
               wsocket.myLid = jidNormalizedUser(wsocket.user?.lid);
               wsocket.myJid = jidNormalizedUser(wsocket.user.id);
 
+              const connectedNumber = wsocket.user.id.split(":")[0].split("@")[0];
+
               await whatsapp.update({
                 status: "CONNECTED",
                 qrcode: "",
-                retries: 0
+                retries: 0,
+                number: connectedNumber
               });
 
               logger.debug(

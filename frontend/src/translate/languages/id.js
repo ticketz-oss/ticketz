@@ -133,6 +133,7 @@ const messages = {
         },
         table: {
           name: "Nama",
+          number: "Nomor",
           status: "Status",
           lastUpdate: "Pembaruan Terakhir",
           default: "Default",

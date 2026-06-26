@@ -128,6 +128,7 @@ const messages = {
         },
         table: {
           name: "Nome",
+          number: "Numero",
           status: "Stato",
           lastUpdate: "Ultimo aggiornamento",
           default: "Predefinito",
