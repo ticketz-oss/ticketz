@@ -394,7 +394,7 @@ const Connections = () => {
           <TableHead>
             <TableRow>
               <TableCell align="center">
-                ID
+                {i18n.t("connections.table.id")}
               </TableCell>
               <TableCell align="center">
                 {i18n.t("connections.table.name")}

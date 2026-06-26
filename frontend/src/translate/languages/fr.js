@@ -127,6 +127,7 @@ const messages = {
           }
         },
         table: {
+          id: "ID",
           name: "Nom",
           number: "Numéro",
           status: "Statut",

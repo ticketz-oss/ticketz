@@ -190,6 +190,7 @@ const messages = {
           retry: "Try Again"
         },
         table: {
+          id: "ID",
           name: "Name",
           number: "Number",
           status: "Status",

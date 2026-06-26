@@ -189,6 +189,7 @@ const messages = {
           retry: "Intentar nuevamente"
         },
         table: {
+          id: "ID",
           name: "Nombre",
           number: "Número",
           status: "Estado",
