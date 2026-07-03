@@ -27,10 +27,15 @@ function sanitizeFileName(name: string): string {
 function runCommand(
   command: string,
   args: string[],
-  cwd: string
+  cwd: string,
+  env?: NodeJS.ProcessEnv
 ): Promise<void> {
   return new Promise((resolve, reject) => {
-    const child = spawn(command, args, { cwd, stdio: "pipe" });
+    const child = spawn(command, args, {
+      cwd,
+      stdio: "pipe",
+      env: env ?? process.env
+    });
     const stdoutChunks: Buffer[] = [];
     const stderrChunks: Buffer[] = [];
 
@@ -153,7 +158,10 @@ async function build(companyId: number, frontendUrl?: string): Promise<void> {
       }
     }
 
-    await runCommand("npm", ["install"], workDir);
+    await runCommand("npm", ["install"], workDir, {
+      ...process.env,
+      NODE_ENV: "development"
+    });
     await runCommand("npm", ["run", "package"], workDir);
 
     const packagedName = `${sanitizeFileName(title)}.zip`;
