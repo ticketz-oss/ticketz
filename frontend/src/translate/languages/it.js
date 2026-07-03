@@ -129,7 +129,8 @@ const messages = {
             title: "Passkey authentication required",
             content:
               "Click the passkey button and use the browser extension to capture the authenticated WhatsApp Web session."
-          }
+          },
+          resetPasskey: "Reimposta sessione passkey"
         },
         table: {
           name: "Nome",
@@ -161,16 +162,18 @@ const messages = {
       },
       qrCode: {
         message: "Scansiona il QR Code per avviare la sessione",
-        localDevHint:
-          "Estensione rilevata: autenticati tramite WhatsApp Web invece di scansionare il QR code.",
-        triggerCapture: "Autenticati tramite WhatsApp Web"
+        extensionHint: "Autenticati tramite WhatsApp Web",
+        startCapture: "Cattura sessione WhatsApp Web",
+        installExtension: "Installa estensione di cattura"
       },
       passkeyModal: {
-        title: "Passkey Authentication",
+        title: "Estensione di cattura WhatsApp Web",
         instructions:
           "Use the browser extension to capture the authenticated WhatsApp Web session and send it to the server.",
         connectorNotFound:
           "Extension not detected. Install the passkey capture extension and reload the page.",
+        connectorReady:
+          "Estensione rilevata. Clicca qui sotto per autenticarti tramite WhatsApp Web.",
         startCapture: "Start Capture",
         waitingForCapture: "Waiting for WhatsApp Web session capture…",
         existingSession: "WhatsApp Web already has a session for {{number}}.",
@@ -181,6 +184,7 @@ const messages = {
         missingToken: "Capture token is missing. Please reload the page.",
         downloadExtension: "Scarica l'estensione di cattura",
         installInstructions: "Come installare",
+        hideInstructions: "Nascondi istruzioni",
         instructionsIntro:
           "Segui i passaggi seguenti per installare l'estensione:",
         installStep1: "Scarica il file ZIP dell'estensione.",
@@ -190,7 +194,9 @@ const messages = {
           "Attiva la Modalità sviluppatore con l'interruttore in alto a destra.",
         installStep5: 'Clicca su "Carica estensione non pacchettizzata".',
         installStep6: "Seleziona la cartella dist estratta.",
-        installStep7: "L'estensione è installata e pronta all'uso."
+        installStep7: "L'estensione è installata e pronta all'uso.",
+        installStep8:
+          "Aggiorna questa pagina con F5 e prova a connetterti di nuovo."
       },
       extensionDownloadModal: {
         title: "Estensione pronta",

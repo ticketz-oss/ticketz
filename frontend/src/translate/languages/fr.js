@@ -129,7 +129,8 @@ const messages = {
             title: "Passkey authentication required",
             content:
               "Click the passkey button and use the browser extension to capture the authenticated WhatsApp Web session."
-          }
+          },
+          resetPasskey: "Réinitialiser la session passkey"
         },
         table: {
           name: "Nom",
@@ -161,16 +162,18 @@ const messages = {
       },
       qrCode: {
         message: "Scannez le QR Code pour démarrer la session",
-        localDevHint:
-          "Extension détectée : authentifiez-vous via WhatsApp Web au lieu de scanner le QR code.",
-        triggerCapture: "Authentifier via WhatsApp Web"
+        extensionHint: "S'authentifier via WhatsApp Web",
+        startCapture: "Capturer la session WhatsApp Web",
+        installExtension: "Installer l'extension de capture"
       },
       passkeyModal: {
-        title: "Passkey Authentication",
+        title: "Extension de capture WhatsApp Web",
         instructions:
           "Use the browser extension to capture the authenticated WhatsApp Web session and send it to the server.",
         connectorNotFound:
           "Extension not detected. Install the passkey capture extension and reload the page.",
+        connectorReady:
+          "Extension détectée. Cliquez ci-dessous pour vous authentifier via WhatsApp Web.",
         startCapture: "Start Capture",
         waitingForCapture: "Waiting for WhatsApp Web session capture…",
         existingSession: "WhatsApp Web already has a session for {{number}}.",
@@ -181,6 +184,7 @@ const messages = {
         missingToken: "Capture token is missing. Please reload the page.",
         downloadExtension: "Télécharger l'extension de capture",
         installInstructions: "Comment installer",
+        hideInstructions: "Masquer les instructions",
         instructionsIntro:
           "Suivez les étapes ci-dessous pour installer l'extension :",
         installStep1: "Téléchargez le fichier ZIP de l'extension.",
@@ -191,7 +195,9 @@ const messages = {
           "Activez le Mode développeur avec le bouton en haut à droite.",
         installStep5: 'Cliquez sur "Charger l\'extension non empaquetée".',
         installStep6: "Sélectionnez le dossier dist extrait.",
-        installStep7: "L'extension est installée et prête à l'emploi."
+        installStep7: "L'extension est installée et prête à l'emploi.",
+        installStep8:
+          "Actualisez cette page avec F5 et essayez de vous connecter à nouveau."
       },
       extensionDownloadModal: {
         title: "Extension prête",

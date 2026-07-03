@@ -598,23 +598,9 @@ export const initWASocket = async (
             retries: 0
           });
 
-          whatsapp.setDataValue("pairToken" as keyof Whatsapp, token as never);
-
-          const extensionDownloadUrl = await GetPublicSettingService({
-            key: "extensionDownloadUrl"
+          await whatsapp.update({
+            qrcode: token
           });
-          if (extensionDownloadUrl) {
-            whatsapp.setDataValue(
-              "extensionDownloadUrl" as keyof Whatsapp,
-              extensionDownloadUrl as never
-            );
-          }
-
-          const sessionIndex = sessions.findIndex(s => s.id === whatsapp.id);
-          if (sessionIndex === -1) {
-            wsocket.id = whatsapp.id;
-            sessions.push(wsocket);
-          }
 
           io.to(`company-${whatsapp.companyId}-admin`).emit(
             `company-${whatsapp.companyId}-whatsappSession`,
@@ -623,6 +609,11 @@ export const initWASocket = async (
               session: whatsapp
             }
           );
+
+          // Keep the socket alive so the extension can complete passkey pairing
+          // in the browser and post the captured session back. Do not reject or
+          // close here; the capture endpoint will restart the session after the
+          // dump is received.
         });
 
         wsocket.ev.on(

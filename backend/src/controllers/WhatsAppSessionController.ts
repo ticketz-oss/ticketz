@@ -126,6 +126,41 @@ const requestCaptureToken = async (
   return res.status(200).json({ token });
 };
 
+const reset = async (req: Request, res: Response): Promise<Response> => {
+  const { whatsappId } = req.params;
+  const { companyId } = req.user;
+
+  const whatsapp = await ShowWhatsAppService(whatsappId);
+
+  if (whatsapp && whatsapp.companyId !== companyId) {
+    throw new AppError("ERR_FORBIDDEN", 403);
+  }
+
+  if (!whatsapp) {
+    throw new AppError("ERR_NO_WAPP_FOUND", 404);
+  }
+
+  await removeWbot(whatsapp.id, false);
+  await BaileysKeys.destroy({ where: { whatsappId: whatsapp.id } });
+  await whatsapp.update({
+    status: "DISCONNECTED",
+    qrcode: "",
+    session: "",
+    retries: 0
+  });
+
+  const io = getIO();
+  io.to(`company-${whatsapp.companyId}-admin`).emit(
+    `company-${whatsapp.companyId}-whatsappSession`,
+    {
+      action: "update",
+      session: whatsapp
+    }
+  );
+
+  return res.status(200).json({ message: "Session reset." });
+};
+
 const capture = async (req: Request, res: Response): Promise<Response> => {
   const { token } = req.params;
   const whatsappId = resolvePasskeyToken(token);
@@ -237,5 +272,6 @@ export default {
   refresh,
   capture,
   requestCaptureToken,
-  buildCaptureExtension
+  buildCaptureExtension,
+  reset
 };

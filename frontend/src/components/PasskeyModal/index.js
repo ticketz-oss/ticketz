@@ -8,7 +8,8 @@ import {
   CircularProgress,
   makeStyles
 } from "@material-ui/core";
-import { Fingerprint } from "@material-ui/icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUserLock } from "@fortawesome/free-solid-svg-icons";
 import { i18n } from "../../translate/i18n";
 import { SocketContext } from "../../context/Socket/SocketContext";
 import api from "../../services/api";
@@ -33,10 +34,27 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: theme.palette.background.default,
     borderRadius: theme.shape.borderRadius
   },
-  instructionsActions: {
+  installCard: {
+    marginTop: theme.spacing(2),
+    padding: theme.spacing(2),
+    backgroundColor: theme.palette.background.default,
+    borderRadius: theme.shape.borderRadius,
+    textAlign: "left"
+  },
+  installActions: {
     display: "flex",
-    justifyContent: "flex-end",
-    paddingBottom: theme.spacing(2)
+    justifyContent: "center",
+    alignItems: "center",
+    gap: theme.spacing(1),
+    flexWrap: "wrap",
+    marginTop: theme.spacing(2)
+  },
+  instructionsBox: {
+    marginTop: theme.spacing(2),
+    padding: theme.spacing(2),
+    backgroundColor: theme.palette.background.paper,
+    borderRadius: theme.shape.borderRadius,
+    textAlign: "left"
   }
 }));
 
@@ -54,7 +72,6 @@ const PasskeyModal = ({
   const [whatsApp, setWhatsApp] = useState(null);
   const [connectorReady, setConnectorReady] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState("");
-  const [instructionsOpen, setInstructionsOpen] = useState(false);
   const { getPublicSetting } = useSettings();
 
   useEffect(() => {
@@ -71,8 +88,8 @@ const PasskeyModal = ({
   }, [getPublicSetting]);
 
   useEffect(() => {
-    if (whatsApp?.extensionDownloadUrl) {
-      setDownloadUrl(whatsApp.extensionDownloadUrl);
+    if (whatsApp?.qrcode) {
+      setDownloadUrl(whatsApp.extensionDownloadUrl || "");
     }
   }, [whatsApp]);
 
@@ -155,7 +172,7 @@ const PasskeyModal = ({
   }, [whatsAppId, onClose, socketManager]);
 
   const handleStartCapture = () => {
-    const token = captureToken || whatsApp?.pairToken;
+    const token = captureToken || whatsApp?.qrcode;
 
     if (!token) {
       setStatus("error");
@@ -194,23 +211,15 @@ const PasskeyModal = ({
     onClose();
   };
 
-  const installSteps = Array.from({ length: 7 }, (_, index) =>
+  const installSteps = Array.from({ length: 8 }, (_, index) =>
     i18n.t(`passkeyModal.installStep${index + 1}`)
   );
-
-  const handleOpenInstructions = () => {
-    setInstructionsOpen(true);
-  };
-
-  const handleCloseInstructions = () => {
-    setInstructionsOpen(false);
-  };
 
   return (
     <Dialog open={open} onClose={handleCancel} maxWidth="sm" fullWidth>
       <DialogTitle>{i18n.t("passkeyModal.title")}</DialogTitle>
       <DialogContent className={classes.root}>
-        <Fingerprint className={classes.icon} />
+        <FontAwesomeIcon icon={faUserLock} className={classes.icon} />
         <Typography variant="body1" gutterBottom>
           {i18n.t("passkeyModal.instructions")}
         </Typography>
@@ -220,36 +229,47 @@ const PasskeyModal = ({
               {i18n.t("passkeyModal.connectorNotFound")}
             </Typography>
             {downloadUrl && (
-              <>
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  href={`${getBackendURL()}/public/${downloadUrl}`}
-                  target="_blank"
-                  rel="noopener"
-                >
-                  {i18n.t("passkeyModal.downloadExtension")}
-                </Button>
-                <Button
-                  variant="text"
-                  color="primary"
-                  onClick={handleOpenInstructions}
-                  style={{ marginTop: 8 }}
-                >
-                  {i18n.t("passkeyModal.installInstructions")}
-                </Button>
-              </>
+              <div className={classes.installCard}>
+                <div className={classes.installActions}>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    href={`${getBackendURL()}/public/${downloadUrl}`}
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    {i18n.t("passkeyModal.downloadExtension")}
+                  </Button>
+                </div>
+                <div className={classes.instructionsBox}>
+                  <Typography variant="body2" gutterBottom>
+                    {i18n.t("passkeyModal.instructionsIntro")}
+                  </Typography>
+                  <ol>
+                    {installSteps.map((step, index) => (
+                      <li key={`install-step-${index}`}>
+                        <Typography variant="body2">{step}</Typography>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              </div>
             )}
           </>
         )}
         {connectorReady && status === "idle" && (
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleStartCapture}
-          >
-            {i18n.t("passkeyModal.startCapture")}
-          </Button>
+          <>
+            <Typography color="textSecondary" variant="body2" gutterBottom>
+              {i18n.t("passkeyModal.connectorReady")}
+            </Typography>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleStartCapture}
+            >
+              {i18n.t("passkeyModal.startCapture")}
+            </Button>
+          </>
         )}
         {status === "waiting" && (
           <div className={classes.statusBox}>
@@ -290,35 +310,6 @@ const PasskeyModal = ({
           </div>
         )}
       </DialogContent>
-      <Dialog
-        open={instructionsOpen}
-        onClose={handleCloseInstructions}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>{i18n.t("passkeyModal.installInstructions")}</DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" gutterBottom>
-            {i18n.t("passkeyModal.instructionsIntro")}
-          </Typography>
-          <ol>
-            {installSteps.map((step, index) => (
-              <li key={`install-step-${index}`}>
-                <Typography variant="body2">{step}</Typography>
-              </li>
-            ))}
-          </ol>
-        </DialogContent>
-        <DialogContent className={classes.instructionsActions}>
-          <Button
-            variant="outlined"
-            color="primary"
-            onClick={handleCloseInstructions}
-          >
-            {i18n.t("common.close")}
-          </Button>
-        </DialogContent>
-      </Dialog>
     </Dialog>
   );
 };

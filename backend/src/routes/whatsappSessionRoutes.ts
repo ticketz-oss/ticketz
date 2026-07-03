@@ -45,4 +45,11 @@ whatsappSessionRoutes.post(
   WhatsAppSessionController.requestCaptureToken
 );
 
+whatsappSessionRoutes.post(
+  "/whatsappsession/:whatsappId/reset",
+  isAuth,
+  isAdmin,
+  WhatsAppSessionController.reset
+);
+
 export default whatsappSessionRoutes;

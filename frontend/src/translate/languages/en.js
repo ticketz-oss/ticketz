@@ -192,7 +192,8 @@ const messages = {
           disconnect: "Disconnect",
           scan: "Scan QR Code",
           newQr: "Request new QR Code",
-          retry: "Try Again"
+          retry: "Try Again",
+          resetPasskey: "Reset passkey session"
         },
         table: {
           name: "Name",
@@ -224,16 +225,18 @@ const messages = {
       },
       qrCode: {
         message: "Scan the QR Code to start the session",
-        localDevHint:
-          "Extension detected: authenticate through WhatsApp Web instead of scanning the QR code.",
-        triggerCapture: "Authenticate through Whatsapp Web"
+        extensionHint: "Authenticate through WhatsApp Web",
+        startCapture: "Capture WhatsApp Web session",
+        installExtension: "Install Capture Extension"
       },
       passkeyModal: {
-        title: "Passkey Authentication",
+        title: "Capture WhatsApp Web Extension",
         instructions:
           "Use the browser extension to capture the authenticated WhatsApp Web session and send it to the server.",
         connectorNotFound:
           "Extension not detected. Install the passkey capture extension and reload the page.",
+        connectorReady:
+          "Extension detected. Click below to authenticate through WhatsApp Web.",
         startCapture: "Start Capture",
         waitingForCapture: "Waiting for WhatsApp Web session capture…",
         existingSession: "WhatsApp Web already has a session for {{number}}.",
@@ -244,6 +247,7 @@ const messages = {
         missingToken: "Capture token is missing. Please reload the page.",
         downloadExtension: "Download capture extension",
         installInstructions: "How to install",
+        hideInstructions: "Hide instructions",
         instructionsIntro: "Follow the steps below to install the extension:",
         installStep1: "Download the extension ZIP file.",
         installStep2: "Extract the ZIP file to a folder on your computer.",
@@ -252,7 +256,8 @@ const messages = {
           "Enable Developer mode using the toggle in the top-right corner.",
         installStep5: 'Click "Load unpacked".',
         installStep6: "Select the extracted dist folder.",
-        installStep7: "The extension is now installed and ready to use."
+        installStep7: "The extension is now installed and ready to use.",
+        installStep8: "Refresh this page with F5 and try to connect again."
       },
       extensionDownloadModal: {
         title: "Extension ready",

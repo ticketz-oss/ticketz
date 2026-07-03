@@ -29,13 +29,14 @@ import {
   Lock,
   Refresh,
   Replay,
-  Fingerprint
+  SettingsBackupRestore
 } from "@material-ui/icons";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPhoneSlash,
   faQrcode,
+  faUserLock,
   faWandMagicSparkles
 } from "@fortawesome/free-solid-svg-icons";
 
@@ -174,6 +175,14 @@ const Connections = () => {
     setPasskeyModalOpen(true);
   };
 
+  const handleResetPasskeySession = async whatsAppId => {
+    try {
+      await api.post(`/whatsappsession/${whatsAppId}/reset`);
+    } catch (err) {
+      toastError(err);
+    }
+  };
+
   const handleClosePasskeyModal = useCallback(() => {
     setSelectedWhatsApp(null);
     setPasskeyInitialToken("");
@@ -188,6 +197,12 @@ const Connections = () => {
     },
     [setQrModalOpen, setPasskeyInitialToken, setPasskeyModalOpen]
   );
+
+  const handleOpenInstallInstructionsFromQr = useCallback(() => {
+    setQrModalOpen(false);
+    setPasskeyInitialToken("");
+    setPasskeyModalOpen(true);
+  }, [setQrModalOpen, setPasskeyInitialToken, setPasskeyModalOpen]);
 
   const handleEditWhatsApp = whatsApp => {
     setSelectedWhatsApp(whatsApp);
@@ -281,14 +296,24 @@ const Connections = () => {
           </Tooltip>
         )}
         {whatsApp.status === "passkey_required" && (
-          <Tooltip title={i18n.t("connections.toolTips.passkey.title")}>
-            <IconButton
-              size="small"
-              onClick={() => handleOpenPasskeyModal(whatsApp)}
-            >
-              <Fingerprint />
-            </IconButton>
-          </Tooltip>
+          <>
+            <Tooltip title={i18n.t("connections.toolTips.passkey.title")}>
+              <IconButton
+                size="small"
+                onClick={() => handleOpenPasskeyModal(whatsApp)}
+              >
+                <FontAwesomeIcon icon={faUserLock} />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title={i18n.t("connections.toolTips.resetPasskey")}>
+              <IconButton
+                size="small"
+                onClick={() => handleResetPasskeySession(whatsApp.id)}
+              >
+                <SettingsBackupRestore />
+              </IconButton>
+            </Tooltip>
+          </>
         )}
         {whatsApp.status === "DISCONNECTED" && (
           <>
@@ -363,7 +388,7 @@ const Connections = () => {
             title={i18n.t("connections.toolTips.passkey.title")}
             content={i18n.t("connections.toolTips.passkey.content")}
           >
-            <Fingerprint color="primary" />
+            <FontAwesomeIcon icon={faUserLock} color="primary" />
           </CustomToolTip>
         )}
         {whatsApp.status === "CONNECTED" && (
@@ -401,7 +426,7 @@ const Connections = () => {
       <QrcodeModal
         open={qrModalOpen}
         onClose={handleCloseQrModal}
-        onTriggerCapture={handleTriggerCaptureFromQr}
+        onOpenPasskeyModal={handleOpenInstallInstructionsFromQr}
         connectorReady={connectorReady}
         whatsAppId={
           !whatsAppModalOpen && !privacyModalOpen && selectedWhatsApp?.id

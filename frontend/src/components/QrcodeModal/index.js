@@ -10,6 +10,7 @@ import {
   Button,
   makeStyles
 } from "@material-ui/core";
+import { ExtensionOutlined } from "@material-ui/icons";
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import { SocketContext } from "../../context/Socket/SocketContext";
@@ -26,6 +27,9 @@ const useStyles = makeStyles(theme => ({
     textAlign: "center",
     padding: theme.spacing(2),
     gap: theme.spacing(2)
+  },
+  extensionAction: {
+    marginTop: theme.spacing(1)
   }
 }));
 
@@ -33,12 +37,11 @@ const QrcodeModal = ({
   open,
   onClose,
   whatsAppId,
-  onTriggerCapture,
+  onOpenPasskeyModal,
   connectorReady = false
 }) => {
   const classes = useStyles();
   const [qrCode, setQrCode] = useState("");
-  const [requestingToken, setRequestingToken] = useState(false);
 
   const socketManager = useContext(SocketContext);
 
@@ -78,22 +81,6 @@ const QrcodeModal = ({
     };
   }, [whatsAppId, onClose, socketManager]);
 
-  const handleTriggerCapture = async () => {
-    if (!whatsAppId || !onTriggerCapture) return;
-
-    setRequestingToken(true);
-    try {
-      const { data } = await api.post(
-        `/whatsappsession/${whatsAppId}/capture-token`
-      );
-      onTriggerCapture(data.token);
-    } catch (err) {
-      toastError(err);
-    } finally {
-      setRequestingToken(false);
-    }
-  };
-
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg" scroll="paper">
       <DialogContent>
@@ -108,20 +95,19 @@ const QrcodeModal = ({
               Waiting for QR Code
             </Typography>
           )}
-          {connectorReady && onTriggerCapture && (
-            <>
-              <Typography color="textSecondary" variant="body2">
-                {i18n.t("qrCode.localDevHint")}
-              </Typography>
-              <Button
-                variant="outlined"
-                color="primary"
-                disabled={requestingToken}
-                onClick={handleTriggerCapture}
-              >
-                {i18n.t("qrCode.triggerCapture")}
-              </Button>
-            </>
+          {onOpenPasskeyModal && (
+            <Button
+              className={classes.extensionAction}
+              variant={connectorReady ? "contained" : "outlined"}
+              color="primary"
+              size="small"
+              startIcon={<ExtensionOutlined />}
+              onClick={onOpenPasskeyModal}
+            >
+              {connectorReady
+                ? i18n.t("qrCode.startCapture")
+                : i18n.t("qrCode.installExtension")}
+            </Button>
           )}
         </Paper>
       </DialogContent>

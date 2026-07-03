@@ -129,7 +129,8 @@ const messages = {
             title: "Passkey authentication required",
             content:
               "Click the passkey button and use the browser extension to capture the authenticated WhatsApp Web session."
-          }
+          },
+          resetPasskey: "Passkey-Sitzung zurücksetzen"
         },
         table: {
           name: "Name",
@@ -161,16 +162,18 @@ const messages = {
       },
       qrCode: {
         message: "Scannen Sie den QR-Code, um die Sitzung zu starten",
-        localDevHint:
-          "Erweiterung erkannt: Authentifizieren Sie sich über WhatsApp Web, anstatt den QR-Code zu scannen.",
-        triggerCapture: "Über WhatsApp Web authentifizieren"
+        extensionHint: "Über WhatsApp Web authentifizieren",
+        startCapture: "WhatsApp Web-Sitzung erfassen",
+        installExtension: "Capture-Erweiterung installieren"
       },
       passkeyModal: {
-        title: "Passkey Authentication",
+        title: "WhatsApp Web Capture-Erweiterung",
         instructions:
           "Use the browser extension to capture the authenticated WhatsApp Web session and send it to the server.",
         connectorNotFound:
           "Extension not detected. Install the passkey capture extension and reload the page.",
+        connectorReady:
+          "Erweiterung erkannt. Klicken Sie unten, um sich über WhatsApp Web zu authentifizieren.",
         startCapture: "Start Capture",
         waitingForCapture: "Waiting for WhatsApp Web session capture…",
         existingSession: "WhatsApp Web already has a session for {{number}}.",
@@ -181,6 +184,7 @@ const messages = {
         missingToken: "Capture token is missing. Please reload the page.",
         downloadExtension: "Capture-Erweiterung herunterladen",
         installInstructions: "Installation",
+        hideInstructions: "Anleitung ausblenden",
         instructionsIntro:
           "Folgen Sie den unten stehenden Schritten, um die Erweiterung zu " +
           "installieren:",
@@ -193,7 +197,10 @@ const messages = {
           "Aktivieren Sie den Entwicklermodus über den Schalter oben rechts.",
         installStep5: 'Klicken Sie auf "Entpackte Erweiterung laden".',
         installStep6: "Wählen Sie den entpackten dist-Ordner aus.",
-        installStep7: "Die Erweiterung ist jetzt installiert und einsatzbereit."
+        installStep7:
+          "Die Erweiterung ist jetzt installiert und einsatzbereit.",
+        installStep8:
+          "Aktualisieren Sie diese Seite mit F5 und versuchen Sie erneut zu verbinden."
       },
       extensionDownloadModal: {
         title: "Erweiterung bereit",

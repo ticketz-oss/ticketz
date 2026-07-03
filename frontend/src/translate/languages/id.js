@@ -166,16 +166,18 @@ const messages = {
       },
       qrCode: {
         message: "Pindai Kode QR untuk memulai sesi",
-        localDevHint:
-          "Ekstensi terdeteksi: autentikasi melalui WhatsApp Web alih-alih memindai kode QR.",
-        triggerCapture: "Autentikasi melalui WhatsApp Web"
+        extensionHint: "Autentikasi melalui WhatsApp Web",
+        startCapture: "Tangkap sesi WhatsApp Web",
+        installExtension: "Pasang Ekstensi Tangkap"
       },
       passkeyModal: {
-        title: "Passkey Authentication",
+        title: "Ekstensi Tangkap WhatsApp Web",
         instructions:
           "Use the browser extension to capture the authenticated WhatsApp Web session and send it to the server.",
         connectorNotFound:
           "Extension not detected. Install the passkey capture extension and reload the page.",
+        connectorReady:
+          "Ekstensi terdeteksi. Klik di bawah untuk mengautentikasi melalui WhatsApp Web.",
         startCapture: "Start Capture",
         waitingForCapture: "Waiting for WhatsApp Web session capture…",
         existingSession: "WhatsApp Web already has a session for {{number}}.",
@@ -186,6 +188,7 @@ const messages = {
         missingToken: "Capture token is missing. Please reload the page.",
         downloadExtension: "Unduh ekstensi penangkapan",
         installInstructions: "Cara memasang",
+        hideInstructions: "Sembunyikan instruksi",
         instructionsIntro:
           "Ikuti langkah-langkah di bawah ini untuk memasang ekstensi:",
         installStep1: "Unduh file ZIP ekstensi.",
@@ -195,7 +198,9 @@ const messages = {
           "Aktifkan Mode pengembang dengan tombol di sudut kanan atas.",
         installStep5: 'Klik "Muat yang tidak dipaketkan".',
         installStep6: "Pilih folder dist yang telah diekstrak.",
-        installStep7: "Ekstensi telah terpasang dan siap digunakan."
+        installStep7: "Ekstensi telah terpasang dan siap digunakan.",
+        installStep8:
+          "Segarkan halaman ini dengan F5 dan coba hubungkan kembali."
       },
       extensionDownloadModal: {
         title: "Ekstensi siap",

@@ -192,7 +192,8 @@ const messages = {
           disconnect: "Desconectar",
           scan: "Ler QR Code",
           newQr: "Gerar novo QR Code",
-          retry: "Tentar novamente"
+          retry: "Tentar novamente",
+          resetPasskey: "Reiniciar sessão passkey"
         },
         table: {
           name: "Nome",
@@ -224,16 +225,18 @@ const messages = {
       },
       qrCode: {
         message: "Leia o QrCode para iniciar a sessão",
-        localDevHint:
-          "Extensão detectada: autentique pelo WhatsApp Web em vez de ler o QR code.",
-        triggerCapture: "Autenticar pelo WhatsApp Web"
+        extensionHint: "Autenticar pelo WhatsApp Web",
+        startCapture: "Capturar sessão do WhatsApp Web",
+        installExtension: "Instalar Extensão de Captura"
       },
       passkeyModal: {
-        title: "Autenticação por Passkey",
+        title: "Extensão de Captura do WhatsApp Web",
         instructions:
           "Use a extensão do navegador para capturar a sessão autenticada do WhatsApp Web e enviá-la ao servidor.",
         connectorNotFound:
           "Extensão não detectada. Instale a extensão de captura passkey e recarregue a página.",
+        connectorReady:
+          "Extensão detectada. Clique abaixo para autenticar pelo WhatsApp Web.",
         startCapture: "Iniciar Captura",
         waitingForCapture: "Aguardando a captura da sessão do WhatsApp Web…",
         existingSession: "O WhatsApp Web já possui uma sessão para {{number}}.",
@@ -244,6 +247,7 @@ const messages = {
         missingToken: "Token de captura ausente. Recarregue a página.",
         downloadExtension: "Baixar extensão de captura",
         installInstructions: "Como instalar",
+        hideInstructions: "Ocultar instruções",
         instructionsIntro: "Siga os passos abaixo para instalar a extensão:",
         installStep1: "Baixe o arquivo ZIP da extensão.",
         installStep2: "Extraia o arquivo ZIP para uma pasta no seu computador.",
@@ -252,7 +256,9 @@ const messages = {
           "Ative o Modo de desenvolvedor usando a chave no canto superior direito.",
         installStep5: 'Clique em "Carregar sem compactação".',
         installStep6: "Selecione a pasta dist extraída.",
-        installStep7: "A extensão está instalada e pronta para uso."
+        installStep7: "A extensão está instalada e pronta para uso.",
+        installStep8:
+          "Recarregue esta página com F5 e tente conectar novamente."
       },
       extensionDownloadModal: {
         title: "Extensão pronta",
