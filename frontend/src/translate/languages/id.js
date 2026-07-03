@@ -125,6 +125,11 @@ const messages = {
             content:
               "Pastikan ponsel Anda terhubung ke internet dan WhatsApp terbuka, atau klik 'Putuskan' untuk mendapatkan Kode QR baru."
           },
+          passkey: {
+            title: "Passkey authentication required",
+            content:
+              "Click the passkey button and use the browser extension to capture the authenticated WhatsApp Web session."
+          },
           refresh: "Muat ulang",
           disconnect: "Putuskan",
           scan: "Pindai",
@@ -160,7 +165,25 @@ const messages = {
         success: "WhatsApp berhasil disimpan."
       },
       qrCode: {
-        message: "Pindai Kode QR untuk memulai sesi"
+        message: "Pindai Kode QR untuk memulai sesi",
+        localDevHint:
+          "Ekstensi terdeteksi: autentikasi melalui WhatsApp Web alih-alih memindai kode QR.",
+        triggerCapture: "Autentikasi melalui WhatsApp Web"
+      },
+      passkeyModal: {
+        title: "Passkey Authentication",
+        instructions:
+          "Use the browser extension to capture the authenticated WhatsApp Web session and send it to the server.",
+        connectorNotFound:
+          "Extension not detected. Install the passkey capture extension and reload the page.",
+        startCapture: "Start Capture",
+        waitingForCapture: "Waiting for WhatsApp Web session capture…",
+        existingSession: "WhatsApp Web already has a session for {{number}}.",
+        captureExisting: "Capture this session",
+        clearAndContinue: "Clear local session and continue",
+        importSent: "Session captured and sent successfully.",
+        importError: "Capture failed: {{reason}}.",
+        missingToken: "Capture token is missing. Please reload the page."
       },
       contacts: {
         title: "Kontak",

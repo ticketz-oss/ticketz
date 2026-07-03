@@ -1,9 +1,18 @@
 import { Request, Response } from "express";
-import { getWbot } from "../libs/wbot";
+import {
+  getWbot,
+  removeWbot,
+  resolvePasskeyToken,
+  createCaptureToken
+} from "../libs/wbot";
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
 import UpdateWhatsAppService from "../services/WhatsappService/UpdateWhatsAppService";
+import ImportWhatsAppSessionService from "../services/WbotServices/ImportWhatsAppSessionService";
 import AppError from "../errors/AppError";
+import { getIO } from "../libs/socket";
+import { logger } from "../utils/logger";
+import BaileysKeys from "../models/BaileysKeys";
 
 const store = async (req: Request, res: Response): Promise<Response> => {
   const { whatsappId } = req.params;
@@ -94,4 +103,107 @@ const refresh = async (req: Request, res: Response): Promise<Response> => {
   return res.status(400).json({ message: "Session not supported." });
 };
 
-export default { store, remove, update, refresh };
+const requestCaptureToken = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { whatsappId } = req.params;
+  const { companyId } = req.user;
+
+  const whatsapp = await ShowWhatsAppService(whatsappId);
+
+  if (whatsapp && whatsapp.companyId !== companyId) {
+    throw new AppError("ERR_FORBIDDEN", 403);
+  }
+
+  if (!whatsapp) {
+    throw new AppError("ERR_NO_WAPP_FOUND", 404);
+  }
+
+  const token = createCaptureToken(whatsapp.id);
+
+  return res.status(200).json({ token });
+};
+
+const capture = async (req: Request, res: Response): Promise<Response> => {
+  const { token } = req.params;
+  const whatsappId = resolvePasskeyToken(token);
+
+  if (!whatsappId) {
+    return res
+      .status(404)
+      .json({ message: "Invalid or expired capture token." });
+  }
+
+  const whatsapp = await ShowWhatsAppService(whatsappId.toString());
+  if (!whatsapp) {
+    return res.status(404).json({ message: "Session not found." });
+  }
+
+  const dump = req.body;
+  if (!dump || typeof dump !== "object") {
+    return res.status(400).json({ message: "Invalid dump payload." });
+  }
+
+  try {
+    await whatsapp.update({
+      status: "IMPORTING",
+      qrcode: ""
+    });
+
+    const io = getIO();
+    io.to(`company-${whatsapp.companyId}-admin`).emit(
+      `company-${whatsapp.companyId}-whatsappSession`,
+      {
+        action: "update",
+        session: whatsapp
+      }
+    );
+
+    await removeWbot(whatsapp.id, false);
+    await ImportWhatsAppSessionService(whatsapp, dump);
+
+    await whatsapp.update({ status: "PENDING" });
+    io.to(`company-${whatsapp.companyId}-admin`).emit(
+      `company-${whatsapp.companyId}-whatsappSession`,
+      {
+        action: "update",
+        session: whatsapp
+      }
+    );
+
+    // Give the browser extension time to wipe the source WhatsApp Web
+    // session before this backend tries to connect with the same credentials.
+    setTimeout(async () => {
+      try {
+        await StartWhatsAppSession(whatsapp, whatsapp.companyId);
+      } catch (startErr) {
+        logger.error(
+          { err: startErr, whatsappId: whatsapp.id },
+          "Failed to start imported session"
+        );
+      }
+    }, 5000);
+
+    return res.status(200).json({
+      message: "Session dump received and imported."
+    });
+  } catch (err) {
+    logger.error({ err, whatsappId: whatsapp.id }, "Failed to import dump");
+    await whatsapp.update({ status: "DISCONNECTED", qrcode: "", session: "" });
+    await BaileysKeys.destroy({ where: { whatsappId: whatsapp.id } });
+    const io = getIO();
+    io.to(`company-${whatsapp.companyId}-admin`).emit(
+      `company-${whatsapp.companyId}-whatsappSession`,
+      {
+        action: "update",
+        session: whatsapp
+      }
+    );
+    return res
+      .status(500)
+      .json({ message: err.message || "Failed to process dump." });
+  }
+};
+
+export default { store, remove, update, refresh, capture, requestCaptureToken };

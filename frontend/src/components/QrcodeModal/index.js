@@ -7,6 +7,7 @@ import {
   DialogContent,
   Paper,
   Typography,
+  Button,
   makeStyles
 } from "@material-ui/core";
 import { i18n } from "../../translate/i18n";
@@ -17,12 +18,27 @@ const useStyles = makeStyles(theme => ({
   qrcodeFrame: {
     padding: "10px",
     backgroundColor: "#fff"
+  },
+  content: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    textAlign: "center",
+    padding: theme.spacing(2),
+    gap: theme.spacing(2)
   }
 }));
 
-const QrcodeModal = ({ open, onClose, whatsAppId }) => {
+const QrcodeModal = ({
+  open,
+  onClose,
+  whatsAppId,
+  onTriggerCapture,
+  connectorReady = false
+}) => {
   const classes = useStyles();
   const [qrCode, setQrCode] = useState("");
+  const [requestingToken, setRequestingToken] = useState(false);
 
   const socketManager = useContext(SocketContext);
 
@@ -62,17 +78,50 @@ const QrcodeModal = ({ open, onClose, whatsAppId }) => {
     };
   }, [whatsAppId, onClose, socketManager]);
 
+  const handleTriggerCapture = async () => {
+    if (!whatsAppId || !onTriggerCapture) return;
+
+    setRequestingToken(true);
+    try {
+      const { data } = await api.post(
+        `/whatsappsession/${whatsAppId}/capture-token`
+      );
+      onTriggerCapture(data.token);
+    } catch (err) {
+      toastError(err);
+    } finally {
+      setRequestingToken(false);
+    }
+  };
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg" scroll="paper">
       <DialogContent>
-        <Paper elevation={0}>
+        <Paper elevation={0} className={classes.content}>
           <Typography color="primary" gutterBottom>
             {i18n.t("qrCode.message")}
           </Typography>
           {qrCode ? (
             <QRCode className={classes.qrcodeFrame} value={qrCode} size={256} />
           ) : (
-            <span>Waiting for QR Code</span>
+            <Typography component="span" variant="body1">
+              Waiting for QR Code
+            </Typography>
+          )}
+          {connectorReady && onTriggerCapture && (
+            <>
+              <Typography color="textSecondary" variant="body2">
+                {i18n.t("qrCode.localDevHint")}
+              </Typography>
+              <Button
+                variant="outlined"
+                color="primary"
+                disabled={requestingToken}
+                onClick={handleTriggerCapture}
+              >
+                {i18n.t("qrCode.triggerCapture")}
+              </Button>
+            </>
           )}
         </Paper>
       </DialogContent>

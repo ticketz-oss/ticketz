@@ -40,9 +40,33 @@ import GetTicketWbot from "../helpers/GetTicketWbot";
 import { getJidOf } from "../services/WbotServices/getJidOf";
 import WhatsappLidMap from "../models/WhatsappLidMap";
 import { reach } from "yup";
+import crypto from "crypto";
 
 // const loggerBaileys = MAIN_LOGGER.child({});
 // loggerBaileys.level = process.env.BAILEYS_LOG_LEVEL || "error";
+
+const passkeyTokens = new Map<number, string>();
+
+export function setPasskeyToken(whatsappId: number, token: string): void {
+  passkeyTokens.set(whatsappId, token);
+}
+
+export function getPasskeyToken(whatsappId: number): string | undefined {
+  return passkeyTokens.get(whatsappId);
+}
+
+export function resolvePasskeyToken(token: string): number | undefined {
+  for (const [id, t] of passkeyTokens.entries()) {
+    if (t === token) return id;
+  }
+  return undefined;
+}
+
+export function createCaptureToken(whatsappId: number): string {
+  const token = crypto.randomBytes(24).toString("hex");
+  passkeyTokens.set(whatsappId, token);
+  return token;
+}
 
 export type Session = WASocket & {
   id?: number;
@@ -563,6 +587,33 @@ export const initWASocket = async (
           }
         );
         wsocket.ev.on("creds.update", saveState);
+
+        wsocket.ev.on("pair.passkey.request", async () => {
+          logger.info(`Session ${name} requires passkey authentication`);
+          const token = createCaptureToken(whatsapp.id);
+
+          await whatsapp.update({
+            status: "passkey_required",
+            qrcode: "",
+            retries: 0
+          });
+
+          whatsapp.setDataValue("pairToken" as keyof Whatsapp, token as never);
+
+          const sessionIndex = sessions.findIndex(s => s.id === whatsapp.id);
+          if (sessionIndex === -1) {
+            wsocket.id = whatsapp.id;
+            sessions.push(wsocket);
+          }
+
+          io.to(`company-${whatsapp.companyId}-admin`).emit(
+            `company-${whatsapp.companyId}-whatsappSession`,
+            {
+              action: "update",
+              session: whatsapp
+            }
+          );
+        });
 
         wsocket.ev.on(
           "presence.update",

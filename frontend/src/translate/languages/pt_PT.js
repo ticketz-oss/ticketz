@@ -156,6 +156,11 @@ const messages = {
             title: "A conexão com o telemóvel foi perdida",
             content:
               "Certifique-se de que o seu telemóvel está conectado à internet e o WhatsApp está aberto, ou clique no botão 'Desconectar' para obter um novo QR Code"
+          },
+          passkey: {
+            title: "Autenticação por passkey necessária",
+            content:
+              "Clique no botão de passkey e utilize a extensão do navegador para capturar a sessão autenticada do WhatsApp Web."
           }
         },
         table: {
@@ -187,7 +192,25 @@ const messages = {
         success: "WhatsApp salvo com sucesso."
       },
       qrCode: {
-        message: "Leia o QrCode para iniciar a sessão"
+        message: "Leia o QrCode para iniciar a sessão",
+        localDevHint:
+          "Extensão detetada: autentique-se pelo WhatsApp Web em vez de ler o QR code.",
+        triggerCapture: "Autenticar pelo WhatsApp Web"
+      },
+      passkeyModal: {
+        title: "Autenticação por Passkey",
+        instructions:
+          "Utilize a extensão do navegador para capturar a sessão autenticada do WhatsApp Web e enviá-la ao servidor.",
+        connectorNotFound:
+          "Extensão não detetada. Instale a extensão de captura passkey e recarregue a página.",
+        startCapture: "Iniciar Captura",
+        waitingForCapture: "A aguardar a captura da sessão do WhatsApp Web…",
+        existingSession: "O WhatsApp Web já tem uma sessão para {{number}}.",
+        captureExisting: "Capturar esta sessão",
+        clearAndContinue: "Limpar sessão local e continuar",
+        importSent: "Sessão capturada e enviada com sucesso.",
+        importError: "Falha na captura: {{reason}}.",
+        missingToken: "Token de captura em falta. Recarregue a página."
       },
       contacts: {
         title: "Contactos",

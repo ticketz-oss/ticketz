@@ -33,4 +33,16 @@ whatsappSessionRoutes.get(
   WhatsAppSessionController.refresh
 );
 
+whatsappSessionRoutes.post(
+  "/whatsappsession/capture/:token",
+  WhatsAppSessionController.capture
+);
+
+whatsappSessionRoutes.post(
+  "/whatsappsession/:whatsappId/capture-token",
+  isAuth,
+  isAdmin,
+  WhatsAppSessionController.requestCaptureToken
+);
+
 export default whatsappSessionRoutes;

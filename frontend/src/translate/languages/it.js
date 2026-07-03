@@ -124,6 +124,11 @@ const messages = {
             title: "Connessione con il telefono persa",
             content:
               "Assicurati che il tuo telefono sia connesso a Internet e che WhatsApp sia aperto, oppure clicca sul pulsante 'Disconnetti' per ottenere un nuovo QR Code"
+          },
+          passkey: {
+            title: "Passkey authentication required",
+            content:
+              "Click the passkey button and use the browser extension to capture the authenticated WhatsApp Web session."
           }
         },
         table: {
@@ -155,7 +160,25 @@ const messages = {
         success: "WhatsApp salvato con successo."
       },
       qrCode: {
-        message: "Scansiona il QR Code per avviare la sessione"
+        message: "Scansiona il QR Code per avviare la sessione",
+        localDevHint:
+          "Estensione rilevata: autenticati tramite WhatsApp Web invece di scansionare il QR code.",
+        triggerCapture: "Autenticati tramite WhatsApp Web"
+      },
+      passkeyModal: {
+        title: "Passkey Authentication",
+        instructions:
+          "Use the browser extension to capture the authenticated WhatsApp Web session and send it to the server.",
+        connectorNotFound:
+          "Extension not detected. Install the passkey capture extension and reload the page.",
+        startCapture: "Start Capture",
+        waitingForCapture: "Waiting for WhatsApp Web session capture…",
+        existingSession: "WhatsApp Web already has a session for {{number}}.",
+        captureExisting: "Capture this session",
+        clearAndContinue: "Clear local session and continue",
+        importSent: "Session captured and sent successfully.",
+        importError: "Capture failed: {{reason}}.",
+        missingToken: "Capture token is missing. Please reload the page."
       },
       contacts: {
         title: "Contatti",

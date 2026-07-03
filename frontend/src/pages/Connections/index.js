@@ -28,7 +28,8 @@ import {
   DeleteOutline,
   Lock,
   Refresh,
-  Replay
+  Replay,
+  Fingerprint
 } from "@material-ui/icons";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -48,6 +49,7 @@ import api from "../../services/api";
 import WhatsAppModal from "../../components/WhatsAppModal";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import QrcodeModal from "../../components/QrcodeModal";
+import PasskeyModal from "../../components/PasskeyModal";
 import PrivacyModal from "../../components/PrivacyModal";
 import { i18n } from "../../translate/i18n";
 import { WhatsAppsContext } from "../../context/WhatsApp/WhatsAppsContext";
@@ -127,6 +129,9 @@ const Connections = () => {
     confirmationModalInitialState
   );
   const [wavoipModalOpen, setWavoipModalOpen] = useState(false);
+  const [passkeyModalOpen, setPasskeyModalOpen] = useState(false);
+  const [passkeyInitialToken, setPasskeyInitialToken] = useState("");
+  const [connectorReady, setConnectorReady] = useState(false);
 
   const handleStartWhatsAppSession = async whatsAppId => {
     try {
@@ -163,6 +168,26 @@ const Connections = () => {
     setSelectedWhatsApp(null);
     setQrModalOpen(false);
   }, [setQrModalOpen, setSelectedWhatsApp]);
+
+  const handleOpenPasskeyModal = whatsApp => {
+    setSelectedWhatsApp(whatsApp);
+    setPasskeyModalOpen(true);
+  };
+
+  const handleClosePasskeyModal = useCallback(() => {
+    setSelectedWhatsApp(null);
+    setPasskeyInitialToken("");
+    setPasskeyModalOpen(false);
+  }, [setPasskeyModalOpen, setSelectedWhatsApp, setPasskeyInitialToken]);
+
+  const handleTriggerCaptureFromQr = useCallback(
+    token => {
+      setQrModalOpen(false);
+      setPasskeyInitialToken(token);
+      setPasskeyModalOpen(true);
+    },
+    [setQrModalOpen, setPasskeyInitialToken, setPasskeyModalOpen]
+  );
 
   const handleEditWhatsApp = whatsApp => {
     setSelectedWhatsApp(whatsApp);
@@ -255,6 +280,16 @@ const Connections = () => {
             </IconButton>
           </Tooltip>
         )}
+        {whatsApp.status === "passkey_required" && (
+          <Tooltip title={i18n.t("connections.toolTips.passkey.title")}>
+            <IconButton
+              size="small"
+              onClick={() => handleOpenPasskeyModal(whatsApp)}
+            >
+              <Fingerprint />
+            </IconButton>
+          </Tooltip>
+        )}
         {whatsApp.status === "DISCONNECTED" && (
           <>
             <Tooltip title={i18n.t("connections.toolTips.retry")}>
@@ -323,6 +358,14 @@ const Connections = () => {
             <CropFree />
           </CustomToolTip>
         )}
+        {whatsApp.status === "passkey_required" && (
+          <CustomToolTip
+            title={i18n.t("connections.toolTips.passkey.title")}
+            content={i18n.t("connections.toolTips.passkey.content")}
+          >
+            <Fingerprint color="primary" />
+          </CustomToolTip>
+        )}
         {whatsApp.status === "CONNECTED" && (
           <CustomToolTip title={i18n.t("connections.toolTips.connected.title")}>
             <SignalCellular4Bar style={{ color: green[500] }} />
@@ -358,6 +401,17 @@ const Connections = () => {
       <QrcodeModal
         open={qrModalOpen}
         onClose={handleCloseQrModal}
+        onTriggerCapture={handleTriggerCaptureFromQr}
+        connectorReady={connectorReady}
+        whatsAppId={
+          !whatsAppModalOpen && !privacyModalOpen && selectedWhatsApp?.id
+        }
+      />
+      <PasskeyModal
+        open={passkeyModalOpen}
+        onClose={handleClosePasskeyModal}
+        captureToken={passkeyInitialToken}
+        onConnectorReady={() => setConnectorReady(true)}
         whatsAppId={
           !whatsAppModalOpen && !privacyModalOpen && selectedWhatsApp?.id
         }
