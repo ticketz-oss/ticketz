@@ -47,7 +47,7 @@ import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import { makeStyles } from "@material-ui/core/styles";
 import OnlyForSuperUser from "../OnlyForSuperUser";
-import useAuth from "../../hooks/useAuth.js";
+import { AuthContext } from "../../context/Auth/AuthContext";
 import useSettings from "../../hooks/useSettings";
 
 import { IconButton, InputAdornment, Typography } from "@material-ui/core";
@@ -230,8 +230,7 @@ export default function Whitelabel(props) {
   const [settingsLoaded, setSettingsLoaded] = useState({});
   const [loginLinks, setLoginLinks] = useState([createEmptyLink()]);
 
-  const { getCurrentUserInfo } = useAuth();
-  const [currentUser, setCurrentUser] = useState({});
+  const { user: currentUser } = useContext(AuthContext);
 
   const { colorMode } = useContext(ColorModeContext);
   const [primaryColorLightModalOpen, setPrimaryColorLightModalOpen] =
@@ -247,12 +246,6 @@ export default function Whitelabel(props) {
   const [appName, setAppName] = useState("");
 
   const { update } = useSettings();
-
-  useEffect(() => {
-    getCurrentUserInfo().then(user => {
-      setCurrentUser(user);
-    });
-  }, [getCurrentUserInfo]);
 
   useEffect(() => {
     if (!Array.isArray(settings) || settings.length === 0) {
