@@ -15,7 +15,6 @@ import api from "../../services/api";
 import { getBackendURL } from "../../services/config";
 import useSettings from "../../hooks/useSettings";
 import toastError from "../../errors/toastError";
-import getInstallInstructions from "./installInstructions";
 
 const SOURCE = "wasession-capture";
 
@@ -195,7 +194,9 @@ const PasskeyModal = ({
     onClose();
   };
 
-  const installSteps = getInstallInstructions(i18n.language);
+  const installSteps = Array.from({ length: 7 }, (_, index) =>
+    i18n.t(`passkeyModal.installStep${index + 1}`)
+  );
 
   const handleOpenInstructions = () => {
     setInstructionsOpen(true);

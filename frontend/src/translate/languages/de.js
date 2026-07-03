@@ -182,8 +182,18 @@ const messages = {
         downloadExtension: "Capture-Erweiterung herunterladen",
         installInstructions: "Installation",
         instructionsIntro:
-          // eslint-disable-next-line prettier/prettier
-          "Folgen Sie den unten stehenden Schritten, um die Erweiterung zu installieren:"
+          "Folgen Sie den unten stehenden Schritten, um die Erweiterung zu " +
+          "installieren:",
+        installStep1: "Laden Sie die ZIP-Datei der Erweiterung herunter.",
+        installStep2:
+          "Entpacken Sie die ZIP-Datei in einen Ordner auf Ihrem Computer.",
+        installStep3:
+          "Öffnen Sie Google Chrome und rufen Sie chrome://extensions/ auf.",
+        installStep4:
+          "Aktivieren Sie den Entwicklermodus über den Schalter oben rechts.",
+        installStep5: 'Klicken Sie auf "Entpackte Erweiterung laden".',
+        installStep6: "Wählen Sie den entpackten dist-Ordner aus.",
+        installStep7: "Die Erweiterung ist jetzt installiert und einsatzbereit."
       },
       extensionDownloadModal: {
         title: "Erweiterung bereit",

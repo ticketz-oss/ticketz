@@ -182,7 +182,16 @@ const messages = {
         downloadExtension: "Télécharger l'extension de capture",
         installInstructions: "Comment installer",
         instructionsIntro:
-          "Suivez les étapes ci-dessous pour installer l'extension :"
+          "Suivez les étapes ci-dessous pour installer l'extension :",
+        installStep1: "Téléchargez le fichier ZIP de l'extension.",
+        installStep2:
+          "Extrayez le fichier ZIP dans un dossier de votre ordinateur.",
+        installStep3: "Ouvrez Google Chrome et allez à chrome://extensions/.",
+        installStep4:
+          "Activez le Mode développeur avec le bouton en haut à droite.",
+        installStep5: 'Cliquez sur "Charger l\'extension non empaquetée".',
+        installStep6: "Sélectionnez le dossier dist extrait.",
+        installStep7: "L'extension est installée et prête à l'emploi."
       },
       extensionDownloadModal: {
         title: "Extension prête",

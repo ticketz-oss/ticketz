@@ -244,7 +244,15 @@ const messages = {
         missingToken: "Capture token is missing. Please reload the page.",
         downloadExtension: "Download capture extension",
         installInstructions: "How to install",
-        instructionsIntro: "Follow the steps below to install the extension:"
+        instructionsIntro: "Follow the steps below to install the extension:",
+        installStep1: "Download the extension ZIP file.",
+        installStep2: "Extract the ZIP file to a folder on your computer.",
+        installStep3: "Open Google Chrome and go to chrome://extensions/.",
+        installStep4:
+          "Enable Developer mode using the toggle in the top-right corner.",
+        installStep5: 'Click "Load unpacked".',
+        installStep6: "Select the extracted dist folder.",
+        installStep7: "The extension is now installed and ready to use."
       },
       extensionDownloadModal: {
         title: "Extension ready",

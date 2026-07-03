@@ -182,7 +182,15 @@ const messages = {
         downloadExtension: "Scarica l'estensione di cattura",
         installInstructions: "Come installare",
         instructionsIntro:
-          "Segui i passaggi seguenti per installare l'estensione:"
+          "Segui i passaggi seguenti per installare l'estensione:",
+        installStep1: "Scarica il file ZIP dell'estensione.",
+        installStep2: "Estrai il file ZIP in una cartella del tuo computer.",
+        installStep3: "Apri Google Chrome e vai a chrome://extensions/.",
+        installStep4:
+          "Attiva la Modalità sviluppatore con l'interruttore in alto a destra.",
+        installStep5: 'Clicca su "Carica estensione non pacchettizzata".',
+        installStep6: "Seleziona la cartella dist estratta.",
+        installStep7: "L'estensione è installata e pronta all'uso."
       },
       extensionDownloadModal: {
         title: "Estensione pronta",

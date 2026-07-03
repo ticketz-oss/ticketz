@@ -244,7 +244,15 @@ const messages = {
         missingToken: "Token de captura ausente. Recarregue a página.",
         downloadExtension: "Baixar extensão de captura",
         installInstructions: "Como instalar",
-        instructionsIntro: "Siga os passos abaixo para instalar a extensão:"
+        instructionsIntro: "Siga os passos abaixo para instalar a extensão:",
+        installStep1: "Baixe o arquivo ZIP da extensão.",
+        installStep2: "Extraia o arquivo ZIP para uma pasta no seu computador.",
+        installStep3: "Abra o Google Chrome e acesse chrome://extensions/.",
+        installStep4:
+          "Ative o Modo de desenvolvedor usando a chave no canto superior direito.",
+        installStep5: 'Clique em "Carregar sem compactação".',
+        installStep6: "Selecione a pasta dist extraída.",
+        installStep7: "A extensão está instalada e pronta para uso."
       },
       extensionDownloadModal: {
         title: "Extensão pronta",

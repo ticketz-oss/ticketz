@@ -187,7 +187,15 @@ const messages = {
         downloadExtension: "Unduh ekstensi penangkapan",
         installInstructions: "Cara memasang",
         instructionsIntro:
-          "Ikuti langkah-langkah di bawah ini untuk memasang ekstensi:"
+          "Ikuti langkah-langkah di bawah ini untuk memasang ekstensi:",
+        installStep1: "Unduh file ZIP ekstensi.",
+        installStep2: "Ekstrak file ZIP ke folder di komputer Anda.",
+        installStep3: "Buka Google Chrome dan akses chrome://extensions/.",
+        installStep4:
+          "Aktifkan Mode pengembang dengan tombol di sudut kanan atas.",
+        installStep5: 'Klik "Muat yang tidak dipaketkan".',
+        installStep6: "Pilih folder dist yang telah diekstrak.",
+        installStep7: "Ekstensi telah terpasang dan siap digunakan."
       },
       extensionDownloadModal: {
         title: "Ekstensi siap",

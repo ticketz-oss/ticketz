@@ -244,8 +244,16 @@ const messages = {
         downloadExtension: "Descargar extensión de captura",
         installInstructions: "Cómo instalar",
         instructionsIntro:
-          // eslint-disable-next-line prettier/prettier
-          "Siga los pasos a continuación para instalar la extensión:"
+          "Siga los pasos a continuación para instalar la extensión:",
+        installStep1: "Descargue el archivo ZIP de la extensión.",
+        installStep2:
+          "Extraiga el archivo ZIP en una carpeta de su computadora.",
+        installStep3: "Abra Google Chrome y vaya a chrome://extensions/.",
+        installStep4:
+          "Active el Modo de desarrollador con el interruptor de la esquina superior derecha.",
+        installStep5: 'Haga clic en "Cargar descomprimida".',
+        installStep6: "Seleccione la carpeta dist extraída.",
+        installStep7: "La extensión está instalada y lista para usar."
       },
       extensionDownloadModal: {
         title: "Extensión lista",
