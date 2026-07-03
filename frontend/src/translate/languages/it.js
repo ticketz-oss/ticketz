@@ -178,7 +178,18 @@ const messages = {
         clearAndContinue: "Clear local session and continue",
         importSent: "Session captured and sent successfully.",
         importError: "Capture failed: {{reason}}.",
-        missingToken: "Capture token is missing. Please reload the page."
+        missingToken: "Capture token is missing. Please reload the page.",
+        downloadExtension: "Scarica l'estensione di cattura"
+      },
+      extensionDownloadModal: {
+        title: "Estensione pronta",
+        errorTitle: "Creazione estensione fallita",
+        ready:
+          "L'estensione WA Session Capture è stata creata ed è pronta per il download.",
+        instructions:
+          "Decomprimi il file e carica la cartella dist come estensione non pacchettizzata in Chrome, oppure distribuiscila ai tuoi utenti.",
+        download: "Scarica estensione",
+        unknownError: "Errore di creazione sconosciuto."
       },
       contacts: {
         title: "Contatti",
@@ -796,7 +807,16 @@ const messages = {
         backgroundContent: "Contenuto di sfondo del login",
         backgroundContentHint:
           "Supporta immagini, file SVG e video MP4 per lo sfondo della schermata di login.",
-        noFileSelected: "Nessun file selezionato."
+        noFileSelected: "Nessun file selezionato.",
+        buildExtension: "Crea estensione WA Session Capture",
+        buildingExtension: "Creazione estensione in corso…",
+        downloadExtension: "Scarica estensione",
+        extensionHint:
+          "Crea un'estensione Chrome whitelabel utilizzando il nome app, la favicon e l'URL del frontend attuali.",
+        extensionBuildStarted:
+          "Creazione dell'estensione avviata. Riceverai una notifica quando sarà pronta.",
+        extensionBuildFailed:
+          "Impossibile avviare la creazione dell'estensione."
       },
       settings: {
         group: {

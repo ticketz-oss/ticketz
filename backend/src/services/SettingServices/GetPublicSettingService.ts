@@ -15,7 +15,8 @@ const publicSettingsKeys = [
   "loginPageLinks",
   "loginSidePanelImage",
   "loginBackgroundContent",
-  "vapidPublicKey"
+  "vapidPublicKey",
+  "extensionDownloadUrl"
 ];
 
 const GetPublicSettingService = async ({

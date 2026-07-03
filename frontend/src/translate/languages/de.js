@@ -178,7 +178,18 @@ const messages = {
         clearAndContinue: "Clear local session and continue",
         importSent: "Session captured and sent successfully.",
         importError: "Capture failed: {{reason}}.",
-        missingToken: "Capture token is missing. Please reload the page."
+        missingToken: "Capture token is missing. Please reload the page.",
+        downloadExtension: "Capture-Erweiterung herunterladen"
+      },
+      extensionDownloadModal: {
+        title: "Erweiterung bereit",
+        errorTitle: "Erweiterungs-Build fehlgeschlagen",
+        ready:
+          "Die WA Session Capture-Erweiterung wurde erstellt und kann heruntergeladen werden.",
+        instructions:
+          "Entpacken Sie die Datei und laden Sie den dist-Ordner als entpackte Erweiterung in Chrome, oder verteilen Sie sie an Ihre Benutzer.",
+        download: "Erweiterung herunterladen",
+        unknownError: "Unbekannter Build-Fehler."
       },
       contacts: {
         title: "Kontakte",
@@ -799,7 +810,16 @@ const messages = {
         backgroundContent: "Login-Hintergrundinhalt",
         backgroundContentHint:
           "Unterstützt Bilder, SVG-Dateien und MP4-Videos für den Hintergrund des Login-Bildschirms.",
-        noFileSelected: "Noch keine Datei ausgewählt."
+        noFileSelected: "Noch keine Datei ausgewählt.",
+        buildExtension: "WA Session Capture-Erweiterung erstellen",
+        buildingExtension: "Erweiterung wird erstellt…",
+        downloadExtension: "Erweiterung herunterladen",
+        extensionHint:
+          "Erstellt eine whitelabel Chrome-Erweiterung mit dem aktuellen App-Namen, Favicon und Frontend-URL.",
+        extensionBuildStarted:
+          "Erweiterungs-Build gestartet. Sie werden benachrichtigt, sobald er fertig ist.",
+        extensionBuildFailed:
+          "Der Erweiterungs-Build konnte nicht gestartet werden."
       },
       settings: {
         group: {

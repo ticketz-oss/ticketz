@@ -13,6 +13,7 @@ import { i18n } from "../../translate/i18n";
 import { SocketContext } from "../../context/Socket/SocketContext";
 import api from "../../services/api";
 import { getBackendURL } from "../../services/config";
+import useSettings from "../../hooks/useSettings";
 import toastError from "../../errors/toastError";
 
 const SOURCE = "wasession-capture";
@@ -47,6 +48,27 @@ const PasskeyModal = ({
   const [message, setMessage] = useState("");
   const [whatsApp, setWhatsApp] = useState(null);
   const [connectorReady, setConnectorReady] = useState(false);
+  const [downloadUrl, setDownloadUrl] = useState("");
+  const { getPublicSetting } = useSettings();
+
+  useEffect(() => {
+    const loadDownloadUrl = async () => {
+      try {
+        const url = await getPublicSetting("extensionDownloadUrl");
+        setDownloadUrl(url || "");
+      } catch (_) {
+        setDownloadUrl("");
+      }
+    };
+
+    loadDownloadUrl();
+  }, [getPublicSetting]);
+
+  useEffect(() => {
+    if (whatsApp?.extensionDownloadUrl) {
+      setDownloadUrl(whatsApp.extensionDownloadUrl);
+    }
+  }, [whatsApp]);
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -175,9 +197,22 @@ const PasskeyModal = ({
           {i18n.t("passkeyModal.instructions")}
         </Typography>
         {!connectorReady && (
-          <Typography color="textSecondary" variant="body2">
-            {i18n.t("passkeyModal.connectorNotFound")}
-          </Typography>
+          <>
+            <Typography color="textSecondary" variant="body2" gutterBottom>
+              {i18n.t("passkeyModal.connectorNotFound")}
+            </Typography>
+            {downloadUrl && (
+              <Button
+                variant="outlined"
+                color="primary"
+                href={`${getBackendURL()}/public/${downloadUrl}`}
+                target="_blank"
+                rel="noopener"
+              >
+                {i18n.t("passkeyModal.downloadExtension")}
+              </Button>
+            )}
+          </>
         )}
         {connectorReady && status === "idle" && (
           <Button

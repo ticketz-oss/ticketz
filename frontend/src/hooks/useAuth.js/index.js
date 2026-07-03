@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useCallback } from "react";
 import { useHistory } from "react-router-dom";
 import { has, isArray } from "lodash";
 
@@ -12,6 +12,8 @@ import { clearAllCachedSettings } from "../../helpers/settingsCache";
 import moment from "moment";
 import { decodeToken } from "react-jwt";
 
+let apiInterceptorsRegistered = false;
+
 const useAuth = () => {
   const history = useHistory();
   const [isAuth, setIsAuth] = useState(false);
@@ -20,46 +22,53 @@ const useAuth = () => {
 
   const socketManager = useContext(SocketContext);
 
-  api.interceptors.request.use(
-    config => {
-      const token = localStorage.getItem("token");
-      if (token) {
-        config.headers["Authorization"] = `Bearer ${JSON.parse(token)}`;
-        setIsAuth(true);
-      }
-      return config;
-    },
-    error => {
-      Promise.reject(error);
+  useEffect(() => {
+    if (apiInterceptorsRegistered) {
+      return;
     }
-  );
+    apiInterceptorsRegistered = true;
 
-  api.interceptors.response.use(
-    response => {
-      return response;
-    },
-    async error => {
-      const originalRequest = error.config;
-      if (error?.response?.status === 403 && !originalRequest._retry) {
-        originalRequest._retry = true;
-
-        const { data } = await api.post("/auth/refresh_token");
-        if (data) {
-          localStorage.setItem("token", JSON.stringify(data.token));
-          api.defaults.headers.Authorization = `Bearer ${data.token}`;
+    api.interceptors.request.use(
+      config => {
+        const token = localStorage.getItem("token");
+        if (token) {
+          config.headers["Authorization"] = `Bearer ${JSON.parse(token)}`;
+          setIsAuth(true);
         }
-        return api(originalRequest);
+        return config;
+      },
+      error => {
+        Promise.reject(error);
       }
-      if (error?.response?.status === 401) {
-        clearAllCachedSettings();
-        localStorage.removeItem("token");
-        localStorage.removeItem("companyId");
-        api.defaults.headers.Authorization = undefined;
-        setIsAuth(false);
+    );
+
+    api.interceptors.response.use(
+      response => {
+        return response;
+      },
+      async error => {
+        const originalRequest = error.config;
+        if (error?.response?.status === 403 && !originalRequest._retry) {
+          originalRequest._retry = true;
+
+          const { data } = await api.post("/auth/refresh_token");
+          if (data) {
+            localStorage.setItem("token", JSON.stringify(data.token));
+            api.defaults.headers.Authorization = `Bearer ${data.token}`;
+          }
+          return api(originalRequest);
+        }
+        if (error?.response?.status === 401) {
+          clearAllCachedSettings();
+          localStorage.removeItem("token");
+          localStorage.removeItem("companyId");
+          api.defaults.headers.Authorization = undefined;
+          setIsAuth(false);
+        }
+        return Promise.reject(error);
       }
-      return Promise.reject(error);
-    }
-  );
+    );
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -231,14 +240,14 @@ const useAuth = () => {
     }
   };
 
-  const getCurrentUserInfo = async () => {
+  const getCurrentUserInfo = useCallback(async () => {
     try {
       const { data } = await api.get("/auth/me");
       return data;
     } catch (_) {
       return null;
     }
-  };
+  }, []);
 
   return {
     isAuth,

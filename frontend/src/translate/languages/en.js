@@ -241,7 +241,18 @@ const messages = {
         clearAndContinue: "Clear local session and continue",
         importSent: "Session captured and sent successfully.",
         importError: "Capture failed: {{reason}}.",
-        missingToken: "Capture token is missing. Please reload the page."
+        missingToken: "Capture token is missing. Please reload the page.",
+        downloadExtension: "Download capture extension"
+      },
+      extensionDownloadModal: {
+        title: "Extension ready",
+        errorTitle: "Extension build failed",
+        ready:
+          "The WA Session Capture extension has been built and is ready to download.",
+        instructions:
+          "Unzip the file and load the dist folder as an unpacked extension in Chrome, or distribute it to your users.",
+        download: "Download extension",
+        unknownError: "Unknown build error."
       },
       contacts: {
         title: "Contacts",
@@ -870,7 +881,15 @@ const messages = {
         backgroundContent: "Login background content",
         backgroundContentHint:
           "Supports images, SVG files, and MP4 videos for the login screen background.",
-        noFileSelected: "No file selected yet."
+        noFileSelected: "No file selected yet.",
+        buildExtension: "Build WA Session Capture extension",
+        buildingExtension: "Building extension…",
+        downloadExtension: "Download extension",
+        extensionHint:
+          "Builds a whitelabeled Chrome extension using the current app name, favicon and frontend URL.",
+        extensionBuildStarted:
+          "Extension build started. You will be notified when it is ready.",
+        extensionBuildFailed: "Could not start the extension build."
       },
       settings: {
         group: {

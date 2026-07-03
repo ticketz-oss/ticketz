@@ -183,7 +183,17 @@ const messages = {
         clearAndContinue: "Clear local session and continue",
         importSent: "Session captured and sent successfully.",
         importError: "Capture failed: {{reason}}.",
-        missingToken: "Capture token is missing. Please reload the page."
+        missingToken: "Capture token is missing. Please reload the page.",
+        downloadExtension: "Unduh ekstensi penangkapan"
+      },
+      extensionDownloadModal: {
+        title: "Ekstensi siap",
+        errorTitle: "Gagal membangun ekstensi",
+        ready: "Ekstensi WA Session Capture telah dibangun dan siap diunduh.",
+        instructions:
+          "Ekstrak file dan muat folder dist sebagai ekstensi yang tidak dipaketkan di Chrome, atau bagikan kepada pengguna Anda.",
+        download: "Unduh ekstensi",
+        unknownError: "Kesalahan build tidak diketahui."
       },
       contacts: {
         title: "Kontak",
@@ -815,7 +825,15 @@ const messages = {
         backgroundContent: "Konten latar login",
         backgroundContentHint:
           "Mendukung gambar, file SVG, dan video MP4 untuk latar layar login.",
-        noFileSelected: "Belum ada file yang dipilih."
+        noFileSelected: "Belum ada file yang dipilih.",
+        buildExtension: "Bangun ekstensi WA Session Capture",
+        buildingExtension: "Membangun ekstensi…",
+        downloadExtension: "Unduh ekstensi",
+        extensionHint:
+          "Membangun ekstensi Chrome whitelabel menggunakan nama aplikasi, favicon, dan URL frontend saat ini.",
+        extensionBuildStarted:
+          "Pembangunan ekstensi dimulai. Anda akan diberitahu saat sudah siap.",
+        extensionBuildFailed: "Tidak dapat memulai pembangunan ekstensi."
       },
       settings: {
         group: {

@@ -600,6 +600,16 @@ export const initWASocket = async (
 
           whatsapp.setDataValue("pairToken" as keyof Whatsapp, token as never);
 
+          const extensionDownloadUrl = await GetPublicSettingService({
+            key: "extensionDownloadUrl"
+          });
+          if (extensionDownloadUrl) {
+            whatsapp.setDataValue(
+              "extensionDownloadUrl" as keyof Whatsapp,
+              extensionDownloadUrl as never
+            );
+          }
+
           const sessionIndex = sessions.findIndex(s => s.id === whatsapp.id);
           if (sessionIndex === -1) {
             wsocket.id = whatsapp.id;

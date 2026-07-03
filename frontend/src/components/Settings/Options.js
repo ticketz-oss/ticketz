@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
 
 import Grid from "@material-ui/core/Grid";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -12,7 +12,7 @@ import { grey, blue } from "@material-ui/core/colors";
 import OnlyForSuperUser from "../OnlyForSuperUser";
 import useAuth from "../../hooks/useAuth.js";
 import { Delete } from "@material-ui/icons";
-import { IconButton, TextField } from "@material-ui/core";
+import { IconButton, TextField, Button, Typography } from "@material-ui/core";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCopy, faGears } from "@fortawesome/free-solid-svg-icons";
@@ -22,6 +22,10 @@ import { copyToClipboard } from "../../helpers/copyToClipboard";
 import useQueues from "../../hooks/useQueues";
 import { i18n } from "../../translate/i18n.js";
 import { SelectLanguage } from "../SelectLanguage";
+import { SocketContext } from "../../context/Socket/SocketContext";
+import api from "../../services/api";
+import { getBackendURL } from "../../services/config";
+import ExtensionDownloadModal from "../ExtensionDownloadModal";
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -143,6 +147,14 @@ export default function Options(props) {
 
   const { update } = useSettings();
 
+  const [extensionUrl, setExtensionUrl] = useState("");
+  const [buildingExtension, setBuildingExtension] = useState(false);
+  const [extensionModalOpen, setExtensionModalOpen] = useState(false);
+  const [extensionModalUrl, setExtensionModalUrl] = useState("");
+  const [extensionModalError, setExtensionModalError] = useState("");
+
+  const socketManager = useContext(SocketContext);
+
   const isMounted = useRef(true);
 
   useEffect(() => {
@@ -150,6 +162,34 @@ export default function Options(props) {
       isMounted.current = false;
     };
   }, []);
+
+  useEffect(() => {
+    const companyId = localStorage.getItem("companyId");
+    if (!companyId) return;
+
+    const socket = socketManager.GetSocket(companyId);
+
+    const onExtensionBuild = data => {
+      setBuildingExtension(false);
+      if (data?.status === "success" && data?.url) {
+        setExtensionUrl(data.url);
+        setExtensionModalUrl(data.url);
+        setExtensionModalError("");
+      } else {
+        setExtensionModalUrl("");
+        setExtensionModalError(
+          data?.message || i18n.t("extensionDownloadModal.unknownError")
+        );
+      }
+      setExtensionModalOpen(true);
+    };
+
+    socket.on(`company-${companyId}-extensionBuild`, onExtensionBuild);
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [socketManager]);
 
   useEffect(() => {
     getCurrentUserInfo().then(u => {
@@ -281,6 +321,11 @@ export default function Options(props) {
 
       const transferMessage = settings.find(s => s.key === "transferMessage");
       setTransferMessage(transferMessage?.value || "");
+
+      const extensionDownloadUrl = settings.find(
+        s => s.key === "extensionDownloadUrl"
+      );
+      setExtensionUrl(extensionDownloadUrl?.value || "");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
@@ -389,6 +434,23 @@ export default function Options(props) {
     });
     i18nToast.success("settings.success");
   }
+
+  const handleBuildExtension = async () => {
+    setBuildingExtension(true);
+    try {
+      await api.post("/build-capture-extension");
+      i18nToast.success("whitelabel.extensionBuildStarted");
+    } catch (error) {
+      setBuildingExtension(false);
+      i18nToast.error("whitelabel.extensionBuildFailed");
+    }
+  };
+
+  const handleCloseExtensionModal = () => {
+    setExtensionModalOpen(false);
+    setExtensionModalUrl("");
+    setExtensionModalError("");
+  };
 
   async function generateApiToken() {
     const newToken = generateSecureToken(33);
@@ -1214,10 +1276,52 @@ export default function Options(props) {
                   />
                 </FormControl>
               </Grid>
+
+              <Grid xs={12} item>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 16,
+                    flexWrap: "wrap"
+                  }}
+                >
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    disabled={buildingExtension}
+                    onClick={handleBuildExtension}
+                  >
+                    {buildingExtension
+                      ? i18n.t("whitelabel.buildingExtension")
+                      : i18n.t("whitelabel.buildExtension")}
+                  </Button>
+                  {extensionUrl && (
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      href={`${getBackendURL()}/public/${extensionUrl}`}
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      {i18n.t("whitelabel.downloadExtension")}
+                    </Button>
+                  )}
+                </div>
+                <Typography className={classes.helperText}>
+                  {i18n.t("whitelabel.extensionHint")}
+                </Typography>
+              </Grid>
             </>
           )}
         />
       </Grid>
+      <ExtensionDownloadModal
+        open={extensionModalOpen}
+        onClose={handleCloseExtensionModal}
+        url={extensionModalUrl}
+        error={extensionModalError}
+      />
     </>
   );
 }

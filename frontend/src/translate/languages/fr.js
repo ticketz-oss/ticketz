@@ -178,7 +178,18 @@ const messages = {
         clearAndContinue: "Clear local session and continue",
         importSent: "Session captured and sent successfully.",
         importError: "Capture failed: {{reason}}.",
-        missingToken: "Capture token is missing. Please reload the page."
+        missingToken: "Capture token is missing. Please reload the page.",
+        downloadExtension: "Télécharger l'extension de capture"
+      },
+      extensionDownloadModal: {
+        title: "Extension prête",
+        errorTitle: "Échec de la construction de l'extension",
+        ready:
+          "L'extension WA Session Capture a été construite et est prête à être téléchargée.",
+        instructions:
+          "Décompressez le fichier et chargez le dossier dist comme extension non empaquetée dans Chrome, ou distribuez-la à vos utilisateurs.",
+        download: "Télécharger l'extension",
+        unknownError: "Erreur de construction inconnue."
       },
       contacts: {
         title: "Contacts",
@@ -798,7 +809,16 @@ const messages = {
         backgroundContent: "Contenu d'arrière-plan de connexion",
         backgroundContentHint:
           "Accepte les images, fichiers SVG et vidéos MP4 pour l'arrière-plan de l'écran de connexion.",
-        noFileSelected: "Aucun fichier sélectionné pour le moment."
+        noFileSelected: "Aucun fichier sélectionné pour le moment.",
+        buildExtension: "Construire l'extension WA Session Capture",
+        buildingExtension: "Construction de l'extension…",
+        downloadExtension: "Télécharger l'extension",
+        extensionHint:
+          "Construit une extension Chrome en marque blanche avec le nom de l'app, le favicon et l'URL du frontend actuels.",
+        extensionBuildStarted:
+          "Construction de l'extension démarrée. Vous serez notifié lorsqu'elle sera prête.",
+        extensionBuildFailed:
+          "Impossible de démarrer la construction de l'extension."
       },
       settings: {
         group: {

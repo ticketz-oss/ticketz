@@ -9,6 +9,7 @@ import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
 import UpdateWhatsAppService from "../services/WhatsappService/UpdateWhatsAppService";
 import ImportWhatsAppSessionService from "../services/WbotServices/ImportWhatsAppSessionService";
+import { startBuildCaptureExtension } from "../services/WbotServices/BuildCaptureExtensionService";
 import AppError from "../errors/AppError";
 import { getIO } from "../libs/socket";
 import { logger } from "../utils/logger";
@@ -206,4 +207,35 @@ const capture = async (req: Request, res: Response): Promise<Response> => {
   }
 };
 
-export default { store, remove, update, refresh, capture, requestCaptureToken };
+/**
+ * Triggers a background build of the WA Session Capture browser extension.
+ *
+ * The extension is built from the public zapitu/zapitu-wasession-capture
+ * repository, whitelabeled with the configured app name, favicon and frontend
+ * URL. The resulting zip is published under /public/capture-extension.zip and
+ * the public setting extensionDownloadUrl is updated.
+ *
+ * Build progress is reported asynchronously via websocket on the
+ * company-${companyId}-extensionBuild channel.
+ */
+const buildCaptureExtension = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { companyId } = req.user;
+  const frontendUrl = process.env.FRONTEND_URL || req.headers.origin;
+
+  startBuildCaptureExtension(companyId, frontendUrl);
+
+  return res.status(202).json({ message: "Extension build started." });
+};
+
+export default {
+  store,
+  remove,
+  update,
+  refresh,
+  capture,
+  requestCaptureToken,
+  buildCaptureExtension
+};
