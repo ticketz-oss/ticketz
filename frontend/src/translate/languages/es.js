@@ -241,7 +241,11 @@ const messages = {
         importSent: "Sesión capturada y enviada con éxito.",
         importError: "Error en la captura: {{reason}}.",
         missingToken: "Falta el token de captura. Recarga la página.",
-        downloadExtension: "Descargar extensión de captura"
+        downloadExtension: "Descargar extensión de captura",
+        installInstructions: "Cómo instalar",
+        instructionsIntro:
+          // eslint-disable-next-line prettier/prettier
+          "Siga los pasos a continuación para instalar la extensión:"
       },
       extensionDownloadModal: {
         title: "Extensión lista",

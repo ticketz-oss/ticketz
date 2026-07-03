@@ -242,7 +242,9 @@ const messages = {
         importSent: "Sessão capturada e enviada com sucesso.",
         importError: "Falha na captura: {{reason}}.",
         missingToken: "Token de captura ausente. Recarregue a página.",
-        downloadExtension: "Baixar extensão de captura"
+        downloadExtension: "Baixar extensão de captura",
+        installInstructions: "Como instalar",
+        instructionsIntro: "Siga os passos abaixo para instalar a extensão:"
       },
       extensionDownloadModal: {
         title: "Extensão pronta",

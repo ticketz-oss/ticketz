@@ -184,7 +184,10 @@ const messages = {
         importSent: "Session captured and sent successfully.",
         importError: "Capture failed: {{reason}}.",
         missingToken: "Capture token is missing. Please reload the page.",
-        downloadExtension: "Unduh ekstensi penangkapan"
+        downloadExtension: "Unduh ekstensi penangkapan",
+        installInstructions: "Cara memasang",
+        instructionsIntro:
+          "Ikuti langkah-langkah di bawah ini untuk memasang ekstensi:"
       },
       extensionDownloadModal: {
         title: "Ekstensi siap",

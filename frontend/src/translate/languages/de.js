@@ -179,7 +179,11 @@ const messages = {
         importSent: "Session captured and sent successfully.",
         importError: "Capture failed: {{reason}}.",
         missingToken: "Capture token is missing. Please reload the page.",
-        downloadExtension: "Capture-Erweiterung herunterladen"
+        downloadExtension: "Capture-Erweiterung herunterladen",
+        installInstructions: "Installation",
+        instructionsIntro:
+          // eslint-disable-next-line prettier/prettier
+          "Folgen Sie den unten stehenden Schritten, um die Erweiterung zu installieren:"
       },
       extensionDownloadModal: {
         title: "Erweiterung bereit",

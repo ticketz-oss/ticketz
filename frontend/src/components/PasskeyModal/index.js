@@ -15,6 +15,7 @@ import api from "../../services/api";
 import { getBackendURL } from "../../services/config";
 import useSettings from "../../hooks/useSettings";
 import toastError from "../../errors/toastError";
+import getInstallInstructions from "./installInstructions";
 
 const SOURCE = "wasession-capture";
 
@@ -32,6 +33,11 @@ const useStyles = makeStyles(theme => ({
     padding: theme.spacing(2),
     backgroundColor: theme.palette.background.default,
     borderRadius: theme.shape.borderRadius
+  },
+  instructionsActions: {
+    display: "flex",
+    justifyContent: "flex-end",
+    paddingBottom: theme.spacing(2)
   }
 }));
 
@@ -49,6 +55,7 @@ const PasskeyModal = ({
   const [whatsApp, setWhatsApp] = useState(null);
   const [connectorReady, setConnectorReady] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState("");
+  const [instructionsOpen, setInstructionsOpen] = useState(false);
   const { getPublicSetting } = useSettings();
 
   useEffect(() => {
@@ -188,6 +195,16 @@ const PasskeyModal = ({
     onClose();
   };
 
+  const installSteps = getInstallInstructions(i18n.language);
+
+  const handleOpenInstructions = () => {
+    setInstructionsOpen(true);
+  };
+
+  const handleCloseInstructions = () => {
+    setInstructionsOpen(false);
+  };
+
   return (
     <Dialog open={open} onClose={handleCancel} maxWidth="sm" fullWidth>
       <DialogTitle>{i18n.t("passkeyModal.title")}</DialogTitle>
@@ -202,15 +219,25 @@ const PasskeyModal = ({
               {i18n.t("passkeyModal.connectorNotFound")}
             </Typography>
             {downloadUrl && (
-              <Button
-                variant="outlined"
-                color="primary"
-                href={`${getBackendURL()}/public/${downloadUrl}`}
-                target="_blank"
-                rel="noopener"
-              >
-                {i18n.t("passkeyModal.downloadExtension")}
-              </Button>
+              <>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  href={`${getBackendURL()}/public/${downloadUrl}`}
+                  target="_blank"
+                  rel="noopener"
+                >
+                  {i18n.t("passkeyModal.downloadExtension")}
+                </Button>
+                <Button
+                  variant="text"
+                  color="primary"
+                  onClick={handleOpenInstructions}
+                  style={{ marginTop: 8 }}
+                >
+                  {i18n.t("passkeyModal.installInstructions")}
+                </Button>
+              </>
             )}
           </>
         )}
@@ -262,6 +289,35 @@ const PasskeyModal = ({
           </div>
         )}
       </DialogContent>
+      <Dialog
+        open={instructionsOpen}
+        onClose={handleCloseInstructions}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>{i18n.t("passkeyModal.installInstructions")}</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" gutterBottom>
+            {i18n.t("passkeyModal.instructionsIntro")}
+          </Typography>
+          <ol>
+            {installSteps.map((step, index) => (
+              <li key={`install-step-${index}`}>
+                <Typography variant="body2">{step}</Typography>
+              </li>
+            ))}
+          </ol>
+        </DialogContent>
+        <DialogContent className={classes.instructionsActions}>
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={handleCloseInstructions}
+          >
+            {i18n.t("common.close")}
+          </Button>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 };
