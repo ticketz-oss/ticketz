@@ -123,6 +123,29 @@ const requestCaptureToken = async (
 
   const token = createCaptureToken(whatsapp.id);
 
+  try {
+    const wbot = getWbot(whatsapp.id);
+    wbot.ev.removeAllListeners("connection.update");
+    wbot.end(null);
+  } catch {
+    // no active socket to terminate
+  }
+
+  await whatsapp.update({
+    status: "passkey_required",
+    qrcode: token,
+    retries: 0
+  });
+
+  const io = getIO();
+  io.to(`company-${whatsapp.companyId}-admin`).emit(
+    `company-${whatsapp.companyId}-whatsappSession`,
+    {
+      action: "update",
+      session: whatsapp
+    }
+  );
+
   return res.status(200).json({ token });
 };
 

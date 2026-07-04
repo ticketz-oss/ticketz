@@ -40,6 +40,7 @@ const QrcodeModal = ({
   onOpenPasskeyModal,
   connectorReady = false
 }) => {
+  const [requestingCapture, setRequestingCapture] = useState(false);
   const classes = useStyles();
   const [qrCode, setQrCode] = useState("");
 
@@ -67,6 +68,10 @@ const QrcodeModal = ({
     const onCompanyWhatsappSession = data => {
       if (data.action === "update" && data.session.id === whatsAppId) {
         setQrCode(data.session.qrcode);
+
+        if (data.session.status === "passkey_required" && onOpenPasskeyModal) {
+          onOpenPasskeyModal();
+        }
       }
 
       if (data.action === "update" && data.session.qrcode === "") {
@@ -95,18 +100,41 @@ const QrcodeModal = ({
               Waiting for QR Code
             </Typography>
           )}
-          {onOpenPasskeyModal && (
+          {connectorReady && (
             <Button
               className={classes.extensionAction}
-              variant={connectorReady ? "contained" : "outlined"}
+              variant="contained"
+              color="primary"
+              size="small"
+              disabled={requestingCapture}
+              startIcon={<ExtensionOutlined />}
+              onClick={async () => {
+                if (!whatsAppId) return;
+                setRequestingCapture(true);
+                try {
+                  await api.post(
+                    `/whatsappsession/${whatsAppId}/capture-token`
+                  );
+                } catch (err) {
+                  toastError(err);
+                } finally {
+                  setRequestingCapture(false);
+                }
+              }}
+            >
+              {i18n.t("qrCode.startCapture")}
+            </Button>
+          )}
+          {!connectorReady && onOpenPasskeyModal && (
+            <Button
+              className={classes.extensionAction}
+              variant="outlined"
               color="primary"
               size="small"
               startIcon={<ExtensionOutlined />}
               onClick={onOpenPasskeyModal}
             >
-              {connectorReady
-                ? i18n.t("qrCode.startCapture")
-                : i18n.t("qrCode.installExtension")}
+              {i18n.t("qrCode.installExtension")}
             </Button>
           )}
         </Paper>

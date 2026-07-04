@@ -171,8 +171,22 @@ const PasskeyModal = ({
     };
   }, [whatsAppId, onClose, socketManager]);
 
-  const handleStartCapture = () => {
-    const token = captureToken || whatsApp?.qrcode;
+  const handleStartCapture = async () => {
+    let token = captureToken || whatsApp?.qrcode;
+
+    if (!token && whatsAppId) {
+      try {
+        const { data } = await api.post(
+          `/whatsappsession/${whatsAppId}/capture-token`
+        );
+        token = data.token;
+      } catch (err) {
+        toastError(err);
+        setStatus("error");
+        setMessage(i18n.t("passkeyModal.missingToken"));
+        return;
+      }
+    }
 
     if (!token) {
       setStatus("error");

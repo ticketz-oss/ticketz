@@ -594,12 +594,8 @@ export const initWASocket = async (
 
           await whatsapp.update({
             status: "passkey_required",
-            qrcode: "",
+            qrcode: token,
             retries: 0
-          });
-
-          await whatsapp.update({
-            qrcode: token
           });
 
           io.to(`company-${whatsapp.companyId}-admin`).emit(
@@ -610,10 +606,11 @@ export const initWASocket = async (
             }
           );
 
-          // Keep the socket alive so the extension can complete passkey pairing
-          // in the browser and post the captured session back. Do not reject or
-          // close here; the capture endpoint will restart the session after the
-          // dump is received.
+          // Close the socket so the ongoing QR-code loop does not overwrite the
+          // capture token that is now stored in the qrcode field. The capture
+          // endpoint will restart the session once the extension posts the dump.
+          wsocket.ev.removeAllListeners("connection.update");
+          wsocket.end(null);
         });
 
         wsocket.ev.on(
