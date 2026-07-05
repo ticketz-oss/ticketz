@@ -25,6 +25,7 @@
     "@flystorage/file-storage": "^1.1.0",
     "@flystorage/local-fs": "^1.1.0",
     "@hapi/boom": "^9.1.4",
+    "@resvg/resvg-js": "^2.6.2",
     "@sentry/node": "^6.19.7",
     "@socket.io/admin-ui": "^0.5.1",
     "@types/lodash": "^4.17.1",
