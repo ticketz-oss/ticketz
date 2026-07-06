@@ -193,20 +193,11 @@ const messages = {
         installStep4:
           "Attiva la Modalità sviluppatore con l'interruttore in alto a destra.",
         installStep5: 'Clicca su "Carica estensione non pacchettizzata".',
-        installStep6: "Seleziona la cartella dist estratta.",
+        installStep6:
+          "Seleziona la cartella estratta che contiene i file dell'estensione.",
         installStep7: "L'estensione è installata e pronta all'uso.",
         installStep8:
           "Aggiorna questa pagina con F5 e prova a connetterti di nuovo."
-      },
-      extensionDownloadModal: {
-        title: "Estensione pronta",
-        errorTitle: "Creazione estensione fallita",
-        ready:
-          "L'estensione WA Session Capture è stata creata ed è pronta per il download.",
-        instructions:
-          "Decomprimi il file e carica la cartella dist come estensione non pacchettizzata in Chrome, oppure distribuiscila ai tuoi utenti.",
-        download: "Scarica estensione",
-        unknownError: "Errore di creazione sconosciuto."
       },
       contacts: {
         title: "Contatti",
@@ -829,11 +820,13 @@ const messages = {
         buildingExtension: "Creazione estensione in corso…",
         downloadExtension: "Scarica estensione",
         extensionHint:
-          "Crea un'estensione Chrome whitelabel utilizzando il nome app, la favicon e l'URL del frontend attuali.",
+          "Crea un'estensione Chrome whitelabel. Il ZIP scaricato contiene già i file dell'estensione: estrailo e carica la cartella estratta come estensione non pacchettizzata.",
         extensionBuildStarted:
           "Creazione dell'estensione avviata. Riceverai una notifica quando sarà pronta.",
         extensionBuildFailed:
-          "Impossibile avviare la creazione dell'estensione."
+          "Impossibile avviare la creazione dell'estensione.",
+        extensionBuilt: "Estensione creata con successo.",
+        extensionBuildUnknownError: "Errore di creazione sconosciuto."
       },
       settings: {
         group: {

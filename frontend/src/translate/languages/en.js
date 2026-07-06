@@ -255,19 +255,10 @@ const messages = {
         installStep4:
           "Enable Developer mode using the toggle in the top-right corner.",
         installStep5: 'Click "Load unpacked".',
-        installStep6: "Select the extracted dist folder.",
+        installStep6:
+          "Select the extracted folder containing the extension files.",
         installStep7: "The extension is now installed and ready to use.",
         installStep8: "Refresh this page with F5 and try to connect again."
-      },
-      extensionDownloadModal: {
-        title: "Extension ready",
-        errorTitle: "Extension build failed",
-        ready:
-          "The WA Session Capture extension has been built and is ready to download.",
-        instructions:
-          "Unzip the file and load the dist folder as an unpacked extension in Chrome, or distribute it to your users.",
-        download: "Download extension",
-        unknownError: "Unknown build error."
       },
       contacts: {
         title: "Contacts",
@@ -901,10 +892,12 @@ const messages = {
         buildingExtension: "Building extension…",
         downloadExtension: "Download extension",
         extensionHint:
-          "Builds a whitelabeled Chrome extension using the current app name, favicon and frontend URL.",
+          "Builds a whitelabeled Chrome extension. The downloaded ZIP already contains the extension files: extract it and load the extracted folder as an unpacked extension.",
         extensionBuildStarted:
           "Extension build started. You will be notified when it is ready.",
-        extensionBuildFailed: "Could not start the extension build."
+        extensionBuildFailed: "Could not start the extension build.",
+        extensionBuilt: "Extension built successfully.",
+        extensionBuildUnknownError: "Unknown build error."
       },
       settings: {
         group: {

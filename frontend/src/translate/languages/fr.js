@@ -194,20 +194,11 @@ const messages = {
         installStep4:
           "Activez le Mode développeur avec le bouton en haut à droite.",
         installStep5: 'Cliquez sur "Charger l\'extension non empaquetée".',
-        installStep6: "Sélectionnez le dossier dist extrait.",
+        installStep6:
+          "Sélectionnez le dossier extrait contenant les fichiers de l'extension.",
         installStep7: "L'extension est installée et prête à l'emploi.",
         installStep8:
           "Actualisez cette page avec F5 et essayez de vous connecter à nouveau."
-      },
-      extensionDownloadModal: {
-        title: "Extension prête",
-        errorTitle: "Échec de la construction de l'extension",
-        ready:
-          "L'extension WA Session Capture a été construite et est prête à être téléchargée.",
-        instructions:
-          "Décompressez le fichier et chargez le dossier dist comme extension non empaquetée dans Chrome, ou distribuez-la à vos utilisateurs.",
-        download: "Télécharger l'extension",
-        unknownError: "Erreur de construction inconnue."
       },
       contacts: {
         title: "Contacts",
@@ -832,11 +823,13 @@ const messages = {
         buildingExtension: "Construction de l'extension…",
         downloadExtension: "Télécharger l'extension",
         extensionHint:
-          "Construit une extension Chrome en marque blanche avec le nom de l'app, le favicon et l'URL du frontend actuels.",
+          "Construit une extension Chrome en marque blanche. Le ZIP téléchargé contient déjà les fichiers de l'extension : décompressez-le et chargez le dossier extrait comme extension non empaquetée.",
         extensionBuildStarted:
           "Construction de l'extension démarrée. Vous serez notifié lorsqu'elle sera prête.",
         extensionBuildFailed:
-          "Impossible de démarrer la construction de l'extension."
+          "Impossible de démarrer la construction de l'extension.",
+        extensionBuilt: "Extension construite avec succès.",
+        extensionBuildUnknownError: "Erreur de construction inconnue."
       },
       settings: {
         group: {

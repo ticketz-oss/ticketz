@@ -197,19 +197,10 @@ const messages = {
         installStep4:
           "Aktifkan Mode pengembang dengan tombol di sudut kanan atas.",
         installStep5: 'Klik "Muat yang tidak dipaketkan".',
-        installStep6: "Pilih folder dist yang telah diekstrak.",
+        installStep6: "Pilih folder hasil ekstraksi yang berisi file ekstensi.",
         installStep7: "Ekstensi telah terpasang dan siap digunakan.",
         installStep8:
           "Segarkan halaman ini dengan F5 dan coba hubungkan kembali."
-      },
-      extensionDownloadModal: {
-        title: "Ekstensi siap",
-        errorTitle: "Gagal membangun ekstensi",
-        ready: "Ekstensi WA Session Capture telah dibangun dan siap diunduh.",
-        instructions:
-          "Ekstrak file dan muat folder dist sebagai ekstensi yang tidak dipaketkan di Chrome, atau bagikan kepada pengguna Anda.",
-        download: "Unduh ekstensi",
-        unknownError: "Kesalahan build tidak diketahui."
       },
       contacts: {
         title: "Kontak",
@@ -846,10 +837,12 @@ const messages = {
         buildingExtension: "Membangun ekstensi…",
         downloadExtension: "Unduh ekstensi",
         extensionHint:
-          "Membangun ekstensi Chrome whitelabel menggunakan nama aplikasi, favicon, dan URL frontend saat ini.",
+          "Membangun ekstensi Chrome whitelabel. File ZIP yang diunduh sudah berisi file ekstensi: ekstrak dan muat folder hasil ekstraksi sebagai ekstensi yang tidak dipaketkan.",
         extensionBuildStarted:
           "Pembangunan ekstensi dimulai. Anda akan diberitahu saat sudah siap.",
-        extensionBuildFailed: "Tidak dapat memulai pembangunan ekstensi."
+        extensionBuildFailed: "Tidak dapat memulai pembangunan ekstensi.",
+        extensionBuilt: "Ekstensi berhasil dibangun.",
+        extensionBuildUnknownError: "Kesalahan build tidak diketahui."
       },
       settings: {
         group: {

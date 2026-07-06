@@ -256,20 +256,11 @@ const messages = {
         installStep4:
           "Active el Modo de desarrollador con el interruptor de la esquina superior derecha.",
         installStep5: 'Haga clic en "Cargar descomprimida".',
-        installStep6: "Seleccione la carpeta dist extraída.",
+        installStep6:
+          "Seleccione la carpeta extraída que contiene los archivos de la extensión.",
         installStep7: "La extensión está instalada y lista para usar.",
         installStep8:
           "Actualice esta página con F5 e intente conectarse de nuevo."
-      },
-      extensionDownloadModal: {
-        title: "Extensión lista",
-        errorTitle: "Error al construir la extensión",
-        ready:
-          "La extensión WA Session Capture se ha construido y está lista para descargar.",
-        instructions:
-          "Descomprima el archivo y cargue la carpeta dist como extensión desempaquetada en Chrome, o distribúyala a sus usuarios.",
-        download: "Descargar extensión",
-        unknownError: "Error desconocido de construcción."
       },
       contacts: {
         title: "Contactos",
@@ -903,11 +894,13 @@ const messages = {
         buildingExtension: "Construyendo extensión…",
         downloadExtension: "Descargar extensión",
         extensionHint:
-          "Construye una extensión Chrome personalizada con el nombre de la app, favicon y URL del frontend actuales.",
+          "Construye una extensión Chrome personalizada. El ZIP descargado ya contiene los archivos de la extensión: extraiga y cargue la carpeta extraída como extensión desempaquetada.",
         extensionBuildStarted:
           "Construcción de la extensión iniciada. Se le notificará cuando esté lista.",
         extensionBuildFailed:
-          "No se pudo iniciar la construcción de la extensión."
+          "No se pudo iniciar la construcción de la extensión.",
+        extensionBuilt: "Extensión construida con éxito.",
+        extensionBuildUnknownError: "Error de construcción desconocido."
       },
       settings: {
         group: {

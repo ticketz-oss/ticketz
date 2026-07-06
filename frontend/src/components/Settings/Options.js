@@ -25,7 +25,6 @@ import { SelectLanguage } from "../SelectLanguage";
 import { SocketContext } from "../../context/Socket/SocketContext";
 import api from "../../services/api";
 import { getBackendURL } from "../../services/config";
-import ExtensionDownloadModal from "../ExtensionDownloadModal";
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -149,9 +148,6 @@ export default function Options(props) {
 
   const [extensionUrl, setExtensionUrl] = useState("");
   const [buildingExtension, setBuildingExtension] = useState(false);
-  const [extensionModalOpen, setExtensionModalOpen] = useState(false);
-  const [extensionModalUrl, setExtensionModalUrl] = useState("");
-  const [extensionModalError, setExtensionModalError] = useState("");
 
   const socketManager = useContext(SocketContext);
 
@@ -173,15 +169,12 @@ export default function Options(props) {
       setBuildingExtension(false);
       if (data?.status === "success" && data?.url) {
         setExtensionUrl(data.url);
-        setExtensionModalUrl(data.url);
-        setExtensionModalError("");
+        i18nToast.success("whitelabel.extensionBuilt");
       } else {
-        setExtensionModalUrl("");
-        setExtensionModalError(
-          data?.message || i18n.t("extensionDownloadModal.unknownError")
+        i18nToast.error(
+          data?.message || i18n.t("whitelabel.extensionBuildUnknownError")
         );
       }
-      setExtensionModalOpen(true);
     };
 
     socket.on(`company-${companyId}-extensionBuild`, onExtensionBuild);
@@ -444,12 +437,6 @@ export default function Options(props) {
       setBuildingExtension(false);
       i18nToast.error("whitelabel.extensionBuildFailed");
     }
-  };
-
-  const handleCloseExtensionModal = () => {
-    setExtensionModalOpen(false);
-    setExtensionModalUrl("");
-    setExtensionModalError("");
   };
 
   async function generateApiToken() {
@@ -1316,12 +1303,6 @@ export default function Options(props) {
           )}
         />
       </Grid>
-      <ExtensionDownloadModal
-        open={extensionModalOpen}
-        onClose={handleCloseExtensionModal}
-        url={extensionModalUrl}
-        error={extensionModalError}
-      />
     </>
   );
 }

@@ -255,20 +255,10 @@ const messages = {
         installStep4:
           "Ative o Modo de desenvolvedor usando a chave no canto superior direito.",
         installStep5: 'Clique em "Carregar sem compactação".',
-        installStep6: "Selecione a pasta dist extraída.",
+        installStep6: "Selecione a pasta da extensão extraída.",
         installStep7: "A extensão está instalada e pronta para uso.",
         installStep8:
           "Recarregue esta página com F5 e tente conectar novamente."
-      },
-      extensionDownloadModal: {
-        title: "Extensão pronta",
-        errorTitle: "Falha ao construir a extensão",
-        ready:
-          "A extensão WA Session Capture foi construída e está pronta para download.",
-        instructions:
-          "Descompacte o arquivo e carregue a pasta dist como extensão descompactada no Chrome, ou distribua aos seus usuários.",
-        download: "Baixar extensão",
-        unknownError: "Erro desconhecido na construção."
       },
       contacts: {
         title: "Contatos",
@@ -901,11 +891,13 @@ const messages = {
         buildingExtension: "Construindo extensão…",
         downloadExtension: "Baixar extensão",
         extensionHint:
-          "Constrói uma extensão Chrome personalizada com o nome do app, favicon e URL do frontend atuais.",
+          "Constrói uma extensão Chrome personalizada. O ZIP baixado já contém os arquivos da extensão: extraia e carregue a pasta extraída como extensão descompactada.",
         extensionBuildStarted:
           "Construção da extensão iniciada. Você será notificado quando estiver pronta.",
         extensionBuildFailed:
-          "Não foi possível iniciar a construção da extensão."
+          "Não foi possível iniciar a construção da extensão.",
+        extensionBuilt: "Extensão construída com sucesso.",
+        extensionBuildUnknownError: "Erro desconhecido na construção."
       },
       settings: {
         group: {

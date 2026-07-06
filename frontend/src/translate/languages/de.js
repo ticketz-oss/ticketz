@@ -196,21 +196,12 @@ const messages = {
         installStep4:
           "Aktivieren Sie den Entwicklermodus über den Schalter oben rechts.",
         installStep5: 'Klicken Sie auf "Entpackte Erweiterung laden".',
-        installStep6: "Wählen Sie den entpackten dist-Ordner aus.",
+        installStep6:
+          "Wählen Sie den entpackten Ordner mit den Erweiterungsdateien aus.",
         installStep7:
           "Die Erweiterung ist jetzt installiert und einsatzbereit.",
         installStep8:
           "Aktualisieren Sie diese Seite mit F5 und versuchen Sie erneut zu verbinden."
-      },
-      extensionDownloadModal: {
-        title: "Erweiterung bereit",
-        errorTitle: "Erweiterungs-Build fehlgeschlagen",
-        ready:
-          "Die WA Session Capture-Erweiterung wurde erstellt und kann heruntergeladen werden.",
-        instructions:
-          "Entpacken Sie die Datei und laden Sie den dist-Ordner als entpackte Erweiterung in Chrome, oder verteilen Sie sie an Ihre Benutzer.",
-        download: "Erweiterung herunterladen",
-        unknownError: "Unbekannter Build-Fehler."
       },
       contacts: {
         title: "Kontakte",
@@ -836,11 +827,13 @@ const messages = {
         buildingExtension: "Erweiterung wird erstellt…",
         downloadExtension: "Erweiterung herunterladen",
         extensionHint:
-          "Erstellt eine whitelabel Chrome-Erweiterung mit dem aktuellen App-Namen, Favicon und Frontend-URL.",
+          "Erstellt eine whitelabel Chrome-Erweiterung. Die heruntergeladene ZIP enthält bereits die Erweiterungsdateien: Entpacken Sie sie und laden Sie den entpackten Ordner als entpackte Erweiterung.",
         extensionBuildStarted:
           "Erweiterungs-Build gestartet. Sie werden benachrichtigt, sobald er fertig ist.",
         extensionBuildFailed:
-          "Der Erweiterungs-Build konnte nicht gestartet werden."
+          "Der Erweiterungs-Build konnte nicht gestartet werden.",
+        extensionBuilt: "Erweiterung erfolgreich erstellt.",
+        extensionBuildUnknownError: "Unbekannter Build-Fehler."
       },
       settings: {
         group: {
