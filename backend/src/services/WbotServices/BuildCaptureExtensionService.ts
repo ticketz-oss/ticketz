@@ -5,7 +5,7 @@ import http from "http";
 import https from "https";
 import { spawn } from "child_process";
 
-import sharp from "sharp";
+import { Jimp } from "jimp";
 import { Resvg } from "@resvg/resvg-js";
 
 import AppError from "../../errors/AppError";
@@ -47,15 +47,15 @@ async function convertIconToPng(
     } catch (resvgErr) {
       logger.warn(
         { resvgErr },
-        "Failed to convert SVG icon with resvg, trying sharp"
+        "Failed to convert SVG icon with resvg, trying jimp"
       );
     }
   }
 
-  await sharp(sourcePath)
-    .resize(128, 128, { fit: "cover" })
-    .png()
-    .toFile(outputPath);
+  const image = await Jimp.read(sourcePath);
+  image.cover({ w: 128, h: 128 });
+  const pngBuffer = await image.getBuffer("image/png");
+  fs.writeFileSync(outputPath, new Uint8Array(pngBuffer));
 }
 
 function runCommand(
