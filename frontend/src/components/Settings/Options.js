@@ -1287,7 +1287,7 @@ export default function Options(props) {
                     <Button
                       variant="outlined"
                       color="primary"
-                      href={`${getBackendURL()}/public/${extensionUrl}`}
+                      href={`${getBackendURL()}/public/${extensionUrl}?_=${Date.now()}`}
                       target="_blank"
                       rel="noopener"
                     >

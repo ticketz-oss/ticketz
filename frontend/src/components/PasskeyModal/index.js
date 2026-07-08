@@ -248,7 +248,7 @@ const PasskeyModal = ({
                   <Button
                     variant="outlined"
                     color="primary"
-                    href={`${getBackendURL()}/public/${downloadUrl}`}
+                    href={`${getBackendURL()}/public/${downloadUrl}?_=${Date.now()}`}
                     target="_blank"
                     rel="noopener"
                   >
