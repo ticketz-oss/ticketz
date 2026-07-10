@@ -181,7 +181,7 @@ const useStyles = makeStyles(theme => ({
     }
   },
   loginBox: {
-    width: "fit-content",
+    width: 780,
     maxWidth: "100%",
     display: "flex",
     alignItems: "center",
@@ -493,7 +493,9 @@ const Login = () => {
         >
           <div
             className={classes.loginBox}
-            style={!showSidePanelImage ? { maxWidth: 420 } : undefined}
+            style={
+              !showSidePanelImage ? { width: "100%", maxWidth: 420 } : undefined
+            }
           >
             {showSidePanelImage && (
               <div className={classes.mediaPane}>
