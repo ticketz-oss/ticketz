@@ -17,6 +17,7 @@ interface Request {
   extraInfo?: ExtraInfo[];
   disableBot?: boolean;
   language?: string;
+  returnFound?: boolean;
 }
 
 const CreateContactService = async ({
@@ -26,7 +27,8 @@ const CreateContactService = async ({
   companyId,
   extraInfo = [],
   disableBot = false,
-  language
+  language,
+  returnFound = false
 }: Request): Promise<Contact> => {
   const where: WhereOptions = { number, companyId };
 
@@ -43,10 +45,27 @@ const CreateContactService = async ({
   }
 
   const numberExists = await Contact.findOne({
-    where
+    where,
+    include: returnFound
+      ? [
+          {
+            association: "tags",
+            include: [
+              {
+                association: "funnelStep",
+                include: ["funnel"]
+              }
+            ]
+          },
+          "extraInfo"
+        ]
+      : undefined
   });
 
   if (numberExists) {
+    if (returnFound) {
+      return numberExists;
+    }
     throw new AppError("ERR_DUPLICATED_CONTACT");
   }
 

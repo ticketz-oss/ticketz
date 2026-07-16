@@ -9,7 +9,7 @@ import CreateContactService from "../services/ContactServices/CreateContactServi
 import ShowContactService from "../services/ContactServices/ShowContactService";
 import UpdateContactService from "../services/ContactServices/UpdateContactService";
 import DeleteContactService from "../services/ContactServices/DeleteContactService";
-import GetContactService from "../services/ContactServices/GetContactService";
+import FindOrCreateContactService from "../services/ContactServices/FindOrCreateContactService";
 
 import CheckContactNumber, {
   CheckNumberAndCreateContact,
@@ -72,7 +72,7 @@ export const findOrInsertContact = async (
   const { name, number } = req.body as IndexGetContactQuery;
   const { companyId } = req.user;
 
-  const contact = await GetContactService({
+  const contact = await FindOrCreateContactService({
     name,
     number,
     companyId

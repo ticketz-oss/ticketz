@@ -1,4 +1,3 @@
-import AppError from "../../errors/AppError";
 import Contact from "../../models/Contact";
 import ContactCustomField from "../../models/ContactCustomField";
 import CreateContactService from "./CreateContactService";
@@ -17,27 +16,17 @@ interface Request {
   extraInfo?: ExtraInfo[];
 }
 
-const GetContactService = async ({
+const FindOrCreateContactService = async ({
   name,
   number,
   companyId
 }: Request): Promise<Contact> => {
-  const numberExists = await Contact.findOne({
-    where: { number, companyId }
+  return CreateContactService({
+    name,
+    number,
+    companyId,
+    returnFound: true
   });
-
-  if (!numberExists) {
-    const contact = await CreateContactService({
-      name,
-      number,
-      companyId
-    });
-
-    if (contact == null) throw new AppError("CONTACT_NOT_FIND");
-    else return contact;
-  }
-
-  return numberExists;
 };
 
-export default GetContactService;
+export default FindOrCreateContactService;
