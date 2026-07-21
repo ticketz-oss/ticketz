@@ -103,11 +103,16 @@ const wbotMonitor = async (
     wbot.ev.on("contacts.update", async (contacts: Partial<BContact[]>) => {
       logger.debug({ contacts }, "contacts.update");
       contactMutex.runExclusive(async () => {
-        contacts.map(async (c: BContact) => {
-          if (["changed", "removed"].includes(c.imgUrl)) {
-            cacheLayer.del(`profilePicUrl:${c.id}`);
-          }
-        });
+        await Promise.all(
+          contacts.map(async (c: BContact) => {
+            if (["changed", "removed"].includes(c.imgUrl)) {
+              await Promise.all([
+                cacheLayer.del(`picurl_preview:${c.id}`),
+                cacheLayer.del(`picurl_image:${c.id}`)
+              ]);
+            }
+          })
+        );
       });
     });
   } catch (err) {
