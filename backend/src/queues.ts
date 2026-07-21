@@ -26,6 +26,7 @@ import formatBody, { mustacheFormat } from "./helpers/Mustache";
 import Setting from "./models/Setting";
 import { parseToMilliseconds } from "./helpers/parseToMilliseconds";
 import { startCampaignQueues } from "./queues/campaign";
+import { clearRepeatableJobsFromQueues } from "./queues/repeatableJobs";
 import OutOfTicketMessage from "./models/OutOfTicketMessages";
 import { getJidOf } from "./services/WbotServices/getJidOf";
 import { _t } from "./services/TranslationServices/i18nService";
@@ -611,6 +612,13 @@ createInvoices.start();
 
 export async function startQueueProcess() {
   logger.info("Starting queue processing");
+
+  await clearRepeatableJobsFromQueues([
+    { name: "UserMonitor", queue: userMonitor },
+    { name: "MessageQueue", queue: messageQueue },
+    { name: "ScheduleMonitor", queue: scheduleMonitor },
+    { name: "SendSacheduledMessages", queue: sendScheduledMessages }
+  ]);
 
   startCampaignQueues().then(() => {
     logger.info("Campaign processing functions started");
