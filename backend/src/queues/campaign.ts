@@ -67,7 +67,8 @@ async function handleVerifyCampaigns() {
           delay
         },
         {
-          removeOnComplete: true
+          removeOnComplete: true,
+          removeOnFail: 100
         }
       );
     } catch (err) {
@@ -306,7 +307,9 @@ async function prepareContact(
         contactListItemId: contact.id
       },
       {
-        delay
+        delay,
+        removeOnComplete: true,
+        removeOnFail: 100
       }
     );
 
@@ -461,7 +464,8 @@ export async function startCampaignQueues() {
     {},
     {
       repeat: { cron: "*/20 * * * * *" },
-      removeOnComplete: true
+      removeOnComplete: true,
+      removeOnFail: 100
     }
   );
 }

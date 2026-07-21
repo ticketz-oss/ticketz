@@ -361,7 +361,7 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
                 saveOnTicket
               }
             },
-            { removeOnComplete: true, attempts: 3 }
+            { removeOnComplete: true, removeOnFail: 100, attempts: 3 }
           );
         })
       );
@@ -378,7 +378,7 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
           }
         },
 
-        { removeOnComplete: false, attempts: 3 }
+        { removeOnComplete: true, removeOnFail: 100, attempts: 3 }
       );
     }
 

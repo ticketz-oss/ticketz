@@ -91,7 +91,7 @@ async function handleVerifySchedules() {
         sendScheduledMessages.add(
           "SendMessage",
           { schedule },
-          { delay: 40000 }
+          { delay: 40000, removeOnComplete: true, removeOnFail: 100 }
         );
         logger.info(`Delivery scheduled for: ${schedule.contact.name}`);
       });
@@ -630,7 +630,8 @@ export async function startQueueProcess() {
     {},
     {
       repeat: { cron: "*/5 * * * * *" },
-      removeOnComplete: true
+      removeOnComplete: true,
+      removeOnFail: 100
     }
   );
 
@@ -639,7 +640,8 @@ export async function startQueueProcess() {
     {},
     {
       repeat: { cron: "* * * * *" },
-      removeOnComplete: true
+      removeOnComplete: true,
+      removeOnFail: 100
     }
   );
 }
