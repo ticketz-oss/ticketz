@@ -331,7 +331,7 @@ async function handleNoQueueTimeout(
       "handleNoQueueTimeout -> UpdateTicketService"
     );
     const userId = status === "pending" ? null : ticket.userId;
-    // eslint-disable-next-line no-await-in-loop
+
     await UpdateTicketService({
       ticketId: ticket.id,
       ticketData: { status, userId, queueId },
@@ -425,7 +425,7 @@ async function handleChatbotTicketTimeout(
       { ...ticketData },
       "handleChatbotTicketTimeout -> UpdateTicketService"
     );
-    // eslint-disable-next-line no-await-in-loop
+
     await UpdateTicketService({
       ticketId: ticket.id,
       ticketData,
@@ -468,7 +468,6 @@ async function handleOpenTicketTimeout(
 
   // eslint-disable-next-line no-restricted-syntax
   for (const ticket of tickets) {
-    // eslint-disable-next-line no-await-in-loop
     await UpdateTicketService({
       ticketId: ticket.id,
       ticketData: {
@@ -489,15 +488,13 @@ async function handleTicketTimeouts() {
   for (const company of companies) {
     logger.trace({ companyId: company?.id }, "handleTicketTimeouts -> company");
     const noQueueTimeout = Number(
-      // eslint-disable-next-line no-await-in-loop
       await GetCompanySetting(company.id, "noQueueTimeout", "0")
     );
     if (noQueueTimeout) {
       const noQueueTimeoutAction = Number(
-        // eslint-disable-next-line no-await-in-loop
         await GetCompanySetting(company.id, "noQueueTimeoutAction", "0")
       );
-      // eslint-disable-next-line no-await-in-loop
+
       await handleNoQueueTimeout(
         company,
         noQueueTimeout,
@@ -505,17 +502,15 @@ async function handleTicketTimeouts() {
       );
     }
     const openTicketTimeout = Number(
-      // eslint-disable-next-line no-await-in-loop
       await GetCompanySetting(company.id, "openTicketTimeout", "0")
     );
     if (openTicketTimeout) {
-      // eslint-disable-next-line no-await-in-loop
       const openTicketTimeoutAction = await GetCompanySetting(
         company.id,
         "openTicketTimeoutAction",
         "pending"
       );
-      // eslint-disable-next-line no-await-in-loop
+
       await handleOpenTicketTimeout(
         company,
         openTicketTimeout,
@@ -523,16 +518,14 @@ async function handleTicketTimeouts() {
       );
     }
     const chatbotTicketTimeout = Number(
-      // eslint-disable-next-line no-await-in-loop
       await GetCompanySetting(company.id, "chatbotTicketTimeout", "0")
     );
     if (chatbotTicketTimeout) {
       const chatbotTicketTimeoutAction =
         Number(
-          // eslint-disable-next-line no-await-in-loop
           await GetCompanySetting(company.id, "chatbotTicketTimeoutAction", "0")
         ) || 0;
-      // eslint-disable-next-line no-await-in-loop
+
       await handleChatbotTicketTimeout(
         company,
         chatbotTicketTimeout,
