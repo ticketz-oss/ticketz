@@ -608,9 +608,7 @@ export async function startQueueProcess() {
 
   await clearRepeatableJobsFromQueues([
     { name: "UserMonitor", queue: userMonitor },
-    { name: "MessageQueue", queue: messageQueue },
-    { name: "ScheduleMonitor", queue: scheduleMonitor },
-    { name: "SendSacheduledMessages", queue: sendScheduledMessages }
+    { name: "ScheduleMonitor", queue: scheduleMonitor }
   ]);
 
   startCampaignQueues().then(() => {
