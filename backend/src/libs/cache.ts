@@ -8,7 +8,15 @@ import { logger } from "../utils/logger";
 
 type RedisSetOption = "EX" | "PX" | "EXAT" | "PXAT" | "NX" | "XX" | "KEEPTTL";
 
-const redis = new Redis(REDIS_URI_CONNECTION);
+let redis: Redis | null = null;
+
+function getRedisClient(): Redis {
+  if (!redis) {
+    redis = new Redis(REDIS_URI_CONNECTION);
+  }
+
+  return redis;
+}
 const REDIS_MANDATORY_CLEAR_KEY = "mandatory-clear-counter";
 const preserveKeys = ["TICKETZ_JWT_SECRET", "TICKETZ_JWT_REFRESH_SECRET"];
 
@@ -56,59 +64,63 @@ export function set(
   option?: RedisSetOption,
   optionValue?: number
 ) {
+  const redisClient = getRedisClient();
   if (option === undefined) {
-    return redis.set(key, value);
+    return redisClient.set(key, value);
   }
 
   if (option === "NX") {
-    return redis.set(key, value, "NX");
+    return redisClient.set(key, value, "NX");
   }
 
   if (option === "XX") {
-    return redis.set(key, value, "XX");
+    return redisClient.set(key, value, "XX");
   }
 
   if (option === "KEEPTTL") {
-    return redis.set(key, value, "KEEPTTL");
+    return redisClient.set(key, value, "KEEPTTL");
   }
 
   if (option === "EX") {
     if (optionValue === undefined) {
       throw new Error("Redis option EX requires optionValue");
     }
-    return redis.set(key, value, "EX", optionValue);
+    return redisClient.set(key, value, "EX", optionValue);
   }
 
   if (option === "PX") {
     if (optionValue === undefined) {
       throw new Error("Redis option PX requires optionValue");
     }
-    return redis.set(key, value, "PX", optionValue);
+    return redisClient.set(key, value, "PX", optionValue);
   }
 
   if (option === "EXAT") {
     if (optionValue === undefined) {
       throw new Error("Redis option EXAT requires optionValue");
     }
-    return redis.set(key, value, "EXAT", optionValue);
+    return redisClient.set(key, value, "EXAT", optionValue);
   }
 
   if (optionValue === undefined) {
     throw new Error("Redis option PXAT requires optionValue");
   }
-  return redis.set(key, value, "PXAT", optionValue);
+  return redisClient.set(key, value, "PXAT", optionValue);
 }
 
 export function get(key: string) {
-  return redis.get(key);
+  const redisClient = getRedisClient();
+  return redisClient.get(key);
 }
 
 export function getKeys(pattern: string) {
-  return redis.keys(pattern);
+  const redisClient = getRedisClient();
+  return redisClient.keys(pattern);
 }
 
 export function del(key: string) {
-  return redis.del(key);
+  const redisClient = getRedisClient();
+  return redisClient.del(key);
 }
 
 export async function delFromPattern(pattern: string) {
@@ -131,7 +143,8 @@ export async function runMandatoryClearIfNeeded() {
     })
   );
 
-  await redis.flushall();
+  const redisClient = getRedisClient();
+  await redisClient.flushall();
 
   await Promise.all(
     preservedEntries
@@ -146,6 +159,20 @@ export async function runMandatoryClearIfNeeded() {
   );
 }
 
+export async function disconnectCache(): Promise<void> {
+  if (!redis) {
+    return;
+  }
+
+  try {
+    await redis.quit();
+  } catch {
+    redis.disconnect();
+  } finally {
+    redis = null;
+  }
+}
+
 export const cacheLayer = {
   set,
   setFromParams,
@@ -155,5 +182,6 @@ export const cacheLayer = {
   del,
   delFromParams,
   delFromPattern,
-  runMandatoryClearIfNeeded
+  runMandatoryClearIfNeeded,
+  disconnectCache
 };
