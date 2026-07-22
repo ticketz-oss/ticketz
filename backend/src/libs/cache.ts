@@ -1,35 +1,45 @@
 import Redis from "ioredis";
 import { REDIS_URI_CONNECTION } from "../config/redis";
-import util from "util";
 import * as crypto from "crypto";
+
+type RedisSetOption = "EX" | "PX" | "EXAT" | "PXAT" | "NX" | "XX" | "KEEPTTL";
 
 const redis = new Redis(REDIS_URI_CONNECTION);
 
-function encryptParams(params: any) {
+function encryptParams(params: unknown) {
   const str = JSON.stringify(params);
   return crypto.createHash("sha256").update(str).digest("base64");
 }
 
 export function setFromParams(
   key: string,
-  params: any,
+  params: unknown,
   value: string,
-  option?: string,
-  optionValue?: string | number
+  option?: RedisSetOption,
+  optionValue?: number
 ) {
   const finalKey = `${key}:${encryptParams(params)}`;
-  if (option !== undefined && optionValue !== undefined) {
+  if (option === undefined) {
+    return set(finalKey, value);
+  }
+
+  if (option === "NX" || option === "XX" || option === "KEEPTTL") {
+    return set(finalKey, value, option);
+  }
+
+  if (optionValue !== undefined) {
     return set(finalKey, value, option, optionValue);
   }
-  return set(finalKey, value);
+
+  throw new Error(`Redis option ${option} requires optionValue`);
 }
 
-export function getFromParams(key: string, params: any) {
+export function getFromParams(key: string, params: unknown) {
   const finalKey = `${key}:${encryptParams(params)}`;
   return get(finalKey);
 }
 
-export function delFromParams(key: string, params: any) {
+export function delFromParams(key: string, params: unknown) {
   const finalKey = `${key}:${encryptParams(params)}`;
   return del(finalKey);
 }
@@ -37,37 +47,67 @@ export function delFromParams(key: string, params: any) {
 export function set(
   key: string,
   value: string,
-  option?: string,
-  optionValue?: string | number
+  option?: RedisSetOption,
+  optionValue?: number
 ) {
-  const setPromisefy = util.promisify(redis.set).bind(redis);
-  if (option !== undefined && optionValue !== undefined) {
-    return setPromisefy(key, value, option, optionValue);
+  if (option === undefined) {
+    return redis.set(key, value);
   }
 
-  return setPromisefy(key, value);
+  if (option === "NX") {
+    return redis.set(key, value, "NX");
+  }
+
+  if (option === "XX") {
+    return redis.set(key, value, "XX");
+  }
+
+  if (option === "KEEPTTL") {
+    return redis.set(key, value, "KEEPTTL");
+  }
+
+  if (option === "EX") {
+    if (optionValue === undefined) {
+      throw new Error("Redis option EX requires optionValue");
+    }
+    return redis.set(key, value, "EX", optionValue);
+  }
+
+  if (option === "PX") {
+    if (optionValue === undefined) {
+      throw new Error("Redis option PX requires optionValue");
+    }
+    return redis.set(key, value, "PX", optionValue);
+  }
+
+  if (option === "EXAT") {
+    if (optionValue === undefined) {
+      throw new Error("Redis option EXAT requires optionValue");
+    }
+    return redis.set(key, value, "EXAT", optionValue);
+  }
+
+  if (optionValue === undefined) {
+    throw new Error("Redis option PXAT requires optionValue");
+  }
+  return redis.set(key, value, "PXAT", optionValue);
 }
 
 export function get(key: string) {
-  const getPromisefy = util.promisify(redis.get).bind(redis);
-  return getPromisefy(key);
+  return redis.get(key);
 }
 
 export function getKeys(pattern: string) {
-  const getKeysPromisefy = util.promisify(redis.keys).bind(redis);
-  return getKeysPromisefy(pattern);
+  return redis.keys(pattern);
 }
 
 export function del(key: string) {
-  const delPromisefy = util.promisify(redis.del).bind(redis);
-  return delPromisefy(key);
+  return redis.del(key);
 }
 
 export async function delFromPattern(pattern: string) {
   const all = await getKeys(pattern);
-  for (let item of all) {
-    del(item);
-  }
+  await Promise.all(all.map(item => del(item)));
 }
 
 export const cacheLayer = {
