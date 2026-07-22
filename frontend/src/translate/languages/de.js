@@ -133,7 +133,9 @@ const messages = {
           resetPasskey: "Passkey-Sitzung zurücksetzen"
         },
         table: {
+          id: "ID",
           name: "Name",
+          number: "Nummer",
           status: "Status",
           lastUpdate: "Letztes Update",
           default: "Standard",
