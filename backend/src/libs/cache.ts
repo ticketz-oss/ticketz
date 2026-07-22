@@ -1,10 +1,16 @@
 import Redis from "ioredis";
-import { REDIS_URI_CONNECTION } from "../config/redis";
+import {
+  REDIS_MANDATORY_CLEAR_COUNTER,
+  REDIS_URI_CONNECTION
+} from "../config/redis";
 import * as crypto from "crypto";
+import { logger } from "../utils/logger";
 
 type RedisSetOption = "EX" | "PX" | "EXAT" | "PXAT" | "NX" | "XX" | "KEEPTTL";
 
 const redis = new Redis(REDIS_URI_CONNECTION);
+const REDIS_MANDATORY_CLEAR_KEY = "mandatory-clear-counter";
+const preserveKeys = ["TICKETZ_JWT_SECRET", "TICKETZ_JWT_REFRESH_SECRET"];
 
 function encryptParams(params: unknown) {
   const str = JSON.stringify(params);
@@ -110,6 +116,36 @@ export async function delFromPattern(pattern: string) {
   await Promise.all(all.map(item => del(item)));
 }
 
+export async function runMandatoryClearIfNeeded() {
+  const currentCounterRaw = await get(REDIS_MANDATORY_CLEAR_KEY);
+  const currentCounter = Number(currentCounterRaw || "0");
+
+  if (currentCounter >= REDIS_MANDATORY_CLEAR_COUNTER) {
+    return;
+  }
+
+  const preservedEntries = await Promise.all(
+    preserveKeys.map(async key => {
+      const value = await get(key);
+      return [key, value] as const;
+    })
+  );
+
+  await redis.flushall();
+
+  await Promise.all(
+    preservedEntries
+      .filter(([, value]) => Boolean(value))
+      .map(([key, value]) => set(key, value as string))
+  );
+
+  await set(REDIS_MANDATORY_CLEAR_KEY, String(REDIS_MANDATORY_CLEAR_COUNTER));
+
+  logger.warn(
+    `Redis mandatory clear executed (counter ${currentCounter} -> ${REDIS_MANDATORY_CLEAR_COUNTER})`
+  );
+}
+
 export const cacheLayer = {
   set,
   setFromParams,
@@ -118,5 +154,6 @@ export const cacheLayer = {
   getKeys,
   del,
   delFromParams,
-  delFromPattern
+  delFromPattern,
+  runMandatoryClearIfNeeded
 };

@@ -10,6 +10,7 @@ import {
   payGatewayInitialize
 } from "./services/PaymentGatewayServices/PaymentGatewayServices";
 import { i18nReady } from "./services/TranslationServices/i18nService";
+import { cacheLayer } from "./libs/cache";
 
 // Environment Variable Validation
 if (!process.env.PORT) {
@@ -20,6 +21,8 @@ if (!process.env.PORT) {
 // Function to start server and initialize services
 async function startServer() {
   try {
+    await cacheLayer.runMandatoryClearIfNeeded();
+
     const companies = await Company.findAll();
     const sessionPromises = companies.map(async company => {
       try {
