@@ -900,6 +900,12 @@ const messages = {
         extensionBuildUnknownError: "Unknown build error."
       },
       settings: {
+        restartBackend: {
+          button: "Restart Backend",
+          restarting: "Restarting…",
+          success: "Backend restart initiated.",
+          error: "Failed to restart backend."
+        },
         group: {
           general: "General",
           timeouts: "Timeouts",
@@ -1000,6 +1006,13 @@ const messages = {
           options: {
             enabled: "enabled",
             disabled: "disabled"
+          }
+        },
+        MultiThreadedWbot: {
+          title: "Multithreaded WhatsApp Worker",
+          options: {
+            enabled: "Enabled",
+            disabled: "Disabled"
           }
         },
         FileUploadLimit: {

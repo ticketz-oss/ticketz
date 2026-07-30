@@ -845,6 +845,12 @@ const messages = {
         extensionBuildUnknownError: "Kesalahan build tidak diketahui."
       },
       settings: {
+        restartBackend: {
+          button: "Mulai Ulang Backend",
+          restarting: "Memulai ulang…",
+          success: "Mulai ulang backend dimulai.",
+          error: "Gagal memulai ulang backend."
+        },
         group: {
           general: "Umum",
           timeouts: "Waktu habis",
@@ -932,6 +938,13 @@ const messages = {
         },
         AllowRegistration: {
           title: "Izinkan pendaftaran",
+          options: {
+            enabled: "Diaktifkan",
+            disabled: "Dinonaktifkan"
+          }
+        },
+        MultiThreadedWbot: {
+          title: "Worker WhatsApp Multithread",
           options: {
             enabled: "Diaktifkan",
             disabled: "Dinonaktifkan"

@@ -277,6 +277,10 @@
       }
 
       window.renderError = message => {
+        // During restart transition, suppress error rendering — the
+        // backend is expected to be down.
+        if (window.__ticketzRestartTransition) return;
+
         const splashScreen = document.getElementById("splash-screen");
         splashScreen.innerHTML = `
             <div style="color: var(--primary); text-align: center;">
@@ -302,6 +306,10 @@
       };
 
       const configureSplash = async config => {
+        // During restart transition, skip backend fetches — the
+        // backend is expected to be down.
+        if (window.__ticketzRestartTransition) return;
+
         const protocol = config.BACKEND_PROTOCOL || "https";
         const hostname = config.BACKEND_HOST || window.location.hostname;
         const port = config.BACKEND_PORT ? `:${config.BACKEND_PORT}` : "";
@@ -388,6 +396,45 @@
       window.finishProgress = () => {
         progress = 100;
       };
+
+      // Restart transitional page: show countdown and redirect after 30s
+      (function handleRestartTransition() {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("restart") !== "1") return;
+
+        // Signal to other parts of the page that the backend is restarting
+        // so they suppress error rendering and skip backend fetches.
+        window.__ticketzRestartTransition = true;
+
+        // Stop the normal splash progress
+        clearInterval(interval);
+
+        const splashScreen = document.getElementById("splash-screen");
+        const countdownSeconds = 30;
+
+        splashScreen.innerHTML = `
+          <div style="color: var(--primary); text-align: center; width: 100%;">
+            <svg class="alertsign" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+            </svg>
+            <div class="progress-bar">
+              <div class="progress regress" id="restart-progress-bar" style="animation-duration: ${countdownSeconds}s;"></div>
+            </div>
+          </div>
+        `;
+
+        const redirect = () => {
+          // Remove the restart param and navigate to /settings
+          const url = new URL(window.location.href);
+          url.searchParams.delete("restart");
+          url.pathname = "/settings";
+          window.location.href = url.toString();
+        };
+
+        // Redirect after the regress animation completes
+        setTimeout(redirect, countdownSeconds * 1000);
+      })();
     </script>
     <script src="/notificame-gateway.js"></script>
   </body>

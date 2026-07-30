@@ -903,6 +903,12 @@ const messages = {
         extensionBuildUnknownError: "Error de construcción desconocido."
       },
       settings: {
+        restartBackend: {
+          button: "Reiniciar Backend",
+          restarting: "Reiniciando…",
+          success: "Reinicio del backend iniciado.",
+          error: "Error al reiniciar el backend."
+        },
         group: {
           general: "General",
           timeouts: "Tiempos de espera",
@@ -1001,6 +1007,13 @@ const messages = {
         },
         AllowRegistration: {
           title: "Permitir el registro",
+          options: {
+            enabled: "Activado",
+            disabled: "Desactivado"
+          }
+        },
+        MultiThreadedWbot: {
+          title: "Worker Multihilo de WhatsApp",
           options: {
             enabled: "Activado",
             disabled: "Desactivado"

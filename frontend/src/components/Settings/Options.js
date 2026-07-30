@@ -114,6 +114,7 @@ export default function Options(props) {
   const [openAiKey, setOpenAiKey] = useState("");
   const [aiProvider, setAiProvider] = useState("openai");
   const [audioTranscriptions, setAudioTranscriptions] = useState("disabled");
+  const [useMultiThreadedWbot, setUseMultiThreadedWbot] = useState("disabled");
   const [uploadLimit, setUploadLimit] = useState("15");
   const [downloadLimit, setDownloadLimit] = useState("15");
 
@@ -253,6 +254,11 @@ export default function Options(props) {
         s => s.key === "audioTranscriptions"
       );
       setAudioTranscriptions(audioTranscriptions?.value || "disabled");
+
+      const useMultiThreadedWbot = settings.find(
+        s => s.key === "useMultiThreadedWbot"
+      );
+      setUseMultiThreadedWbot(useMultiThreadedWbot?.value || "disabled");
 
       const uploadLimit = settings.find(s => s.key === "uploadLimit");
       setUploadLimit(uploadLimit?.value || "");
@@ -428,6 +434,8 @@ export default function Options(props) {
     i18nToast.success("settings.success");
   }
 
+  const [restartingBackend, setRestartingBackend] = useState(false);
+
   const handleBuildExtension = async () => {
     setBuildingExtension(true);
     try {
@@ -436,6 +444,19 @@ export default function Options(props) {
     } catch (error) {
       setBuildingExtension(false);
       i18nToast.error("whitelabel.extensionBuildFailed");
+    }
+  };
+
+  const handleRestartBackend = async () => {
+    setRestartingBackend(true);
+    try {
+      await api.post("/restart");
+      // Redirect to the transitional page; it will count down 30s then
+      // redirect back to /settings.
+      window.location.href = "/?restart=1";
+    } catch (error) {
+      setRestartingBackend(false);
+      i18nToast.error("settings.restartBackend.error");
     }
   };
 
@@ -1210,6 +1231,32 @@ export default function Options(props) {
 
               <Grid xs={12} sm={6} md={4} item>
                 <FormControl className={classes.selectContainer}>
+                  <InputLabel id="multithread-label">
+                    {i18n.t("settings.MultiThreadedWbot.title")}
+                  </InputLabel>
+                  <Select
+                    labelId="multithread-select"
+                    value={useMultiThreadedWbot}
+                    onChange={async e => {
+                      handleSetting(
+                        "useMultiThreadedWbot",
+                        e.target.value,
+                        setUseMultiThreadedWbot
+                      );
+                    }}
+                  >
+                    <MenuItem value={"disabled"}>
+                      {i18n.t("settings.MultiThreadedWbot.options.disabled")}
+                    </MenuItem>
+                    <MenuItem value={"enabled"}>
+                      {i18n.t("settings.MultiThreadedWbot.options.enabled")}
+                    </MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid xs={12} sm={6} md={4} item>
+                <FormControl className={classes.selectContainer}>
                   <TextField
                     id="upload-limit-field"
                     label={i18n.t("settings.FileUploadLimit.title")}
@@ -1298,6 +1345,19 @@ export default function Options(props) {
                 <Typography className={classes.helperText}>
                   {i18n.t("whitelabel.extensionHint")}
                 </Typography>
+              </Grid>
+
+              <Grid xs={12} item>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  disabled={restartingBackend}
+                  onClick={handleRestartBackend}
+                >
+                  {restartingBackend
+                    ? i18n.t("settings.restartBackend.restarting")
+                    : i18n.t("settings.restartBackend.button")}
+                </Button>
               </Grid>
             </>
           )}

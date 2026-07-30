@@ -829,6 +829,12 @@ const messages = {
         extensionBuildUnknownError: "Errore di creazione sconosciuto."
       },
       settings: {
+        restartBackend: {
+          button: "Riavvia Backend",
+          restarting: "Riavvio…",
+          success: "Riavvio del backend avviato.",
+          error: "Errore durante il riavvio del backend."
+        },
         group: {
           general: "Generale",
           timeouts: "Tempi di attesa",
@@ -922,6 +928,13 @@ const messages = {
         },
         AllowRegistration: {
           title: "Permetti registrazione",
+          options: {
+            enabled: "Attivato",
+            disabled: "Disattivato"
+          }
+        },
+        MultiThreadedWbot: {
+          title: "Worker Multithread WhatsApp",
           options: {
             enabled: "Attivato",
             disabled: "Disattivato"

@@ -836,6 +836,12 @@ const messages = {
         extensionBuildUnknownError: "Unbekannter Build-Fehler."
       },
       settings: {
+        restartBackend: {
+          button: "Backend neu starten",
+          restarting: "Neustart…",
+          success: "Backend-Neustart eingeleitet.",
+          error: "Fehler beim Neustart des Backends."
+        },
         group: {
           general: "Allgemein",
           timeouts: "Zeitüberschreitungen",
@@ -929,6 +935,13 @@ const messages = {
         },
         AllowRegistration: {
           title: "Registrierung erlauben",
+          options: {
+            enabled: "Aktiviert",
+            disabled: "Deaktiviert"
+          }
+        },
+        MultiThreadedWbot: {
+          title: "Multithreaded WhatsApp Worker",
           options: {
             enabled: "Aktiviert",
             disabled: "Deaktiviert"
