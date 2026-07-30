@@ -93,6 +93,21 @@ export const storeLogo = async (
   return res.status(406);
 };
 
+export const restart = async (
+  _req: Request,
+  res: Response
+): Promise<Response> => {
+  res.status(200).json({ message: "Server restarting..." });
+
+  // Delay shutdown so the response can be sent before the process exits.
+  // The Docker container will restart the process automatically.
+  setTimeout(() => {
+    process.exit(0);
+  }, 500);
+
+  return res;
+};
+
 export const storePrivateFile = async (
   req: Request,
   res: Response

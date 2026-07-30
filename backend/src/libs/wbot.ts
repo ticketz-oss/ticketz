@@ -1,5 +1,5 @@
 import * as Sentry from "@sentry/node";
-import makeWASocket, {
+import makeWASocketSingleProcess, {
   WASocket,
   DisconnectReason,
   isJidBroadcast,
@@ -10,6 +10,7 @@ import makeWASocket, {
   jidNormalizedUser,
   BinaryNode
 } from "libzapitu-rf";
+import makeWASocketMultiThreaded from "libzapitu-rf/worker";
 
 import { Boom } from "@hapi/boom";
 // import MAIN_LOGGER from "@whiskeysockets/baileys/lib/Utils/logger";
@@ -41,6 +42,7 @@ import { getJidOf } from "../services/WbotServices/getJidOf";
 import WhatsappLidMap from "../models/WhatsappLidMap";
 import { reach } from "yup";
 import crypto from "crypto";
+import { GetCompanySetting } from "../helpers/CheckSettings";
 
 // const loggerBaileys = MAIN_LOGGER.child({});
 // loggerBaileys.level = process.env.BAILEYS_LOG_LEVEL || "error";
@@ -329,6 +331,16 @@ export const initWASocket = async (
         const clientName = `${appName} ${appVersion}${
           hostName ? ` - ${hostName}` : ""
         }`;
+
+        let makeWASocket: typeof makeWASocketSingleProcess;
+        if (
+          (await GetCompanySetting(1, "useMultiThreadedWbot", "disabled")) ===
+          "enabled"
+        ) {
+          makeWASocket = makeWASocketMultiThreaded;
+        } else {
+          makeWASocket = makeWASocketSingleProcess;
+        }
 
         wsocket = makeWASocket({
           logger: loggerBaileys,

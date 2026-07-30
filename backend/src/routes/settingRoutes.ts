@@ -56,4 +56,6 @@ settingRoutes.post(
   SettingController.storePublicFile
 );
 
+settingRoutes.post("/restart", isAuth, isSuper, SettingController.restart);
+
 export default settingRoutes;
