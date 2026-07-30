@@ -465,7 +465,7 @@ export const initWASocket = async (
               });
 
               wsocket.fetchNewChatMessageCap().then(cap => {
-                logger.debug({ cap }, "Fetched new chat message cap");
+                logger.info({ cap }, "Fetched new chat message cap");
               });
 
               await whatsapp.reload({
@@ -511,9 +511,11 @@ export const initWASocket = async (
                   sessions.push(wsocket);
                 }
 
-                const anotherSameJid = sessions.find(
-                  s => s.id !== whatsapp.id && s.myJid === wsocket.myJid
-                );
+                const anotherSameJid =
+                  !!wsocket.myJid &&
+                  sessions.find(
+                    s => s.id !== whatsapp.id && s.myJid === wsocket.myJid
+                  );
 
                 if (anotherSameJid) {
                   logger.warn(
