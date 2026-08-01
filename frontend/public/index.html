@@ -330,16 +330,25 @@
           .then(response => response.json())
           .then(data => {
             const root = document.documentElement;
+            const color = data || (theme === "dark" ? "#39ACE7" : "#00f");
 
+            root.style.setProperty("--primary", color);
+            // Persist the resolved primary color so the restart
+            // transition can render it while the backend is down.
+            localStorage.setItem("ticketzPrimaryColor", color);
+          });
+
+        // Persist the login background image so the restart transition
+        // can render it while the backend is down.
+        fetch(settingsBaseUrl + "/loginBackgroundContent")
+          .then(response => response.json())
+          .then(data => {
             if (data) {
-              root.style.setProperty("--primary", data);
-              return;
+              localStorage.setItem(
+                "ticketzBackgroundImage",
+                backendUrl + "/public/" + data
+              );
             }
-
-            root.style.setProperty(
-              "--primary",
-              theme === "dark" ? "#39ACE7" : "#00f"
-            );
           });
 
         Promise.all([
@@ -409,8 +418,29 @@
         // Stop the normal splash progress
         clearInterval(interval);
 
+        // Apply the persisted primary color and background image so the
+        // restart transition matches the configured branding while the
+        // backend is down.
+        const root = document.documentElement;
+        const storedPrimaryColor = localStorage.getItem("ticketzPrimaryColor");
+        if (storedPrimaryColor) {
+          root.style.setProperty("--primary", storedPrimaryColor);
+        }
+        const storedBackgroundImage = localStorage.getItem(
+          "ticketzBackgroundImage"
+        );
+        if (storedBackgroundImage) {
+          const splashBackground = document.getElementById(
+            "splash-background"
+          );
+          splashBackground.style.backgroundImage = `url("${storedBackgroundImage}")`;
+          splashBackground.style.backgroundSize = "cover";
+          splashBackground.style.backgroundPosition = "center";
+          splashBackground.style.animation = "none";
+        }
+
         const splashScreen = document.getElementById("splash-screen");
-        const countdownSeconds = 30;
+        const countdownSeconds = 60;
 
         splashScreen.innerHTML = `
           <div style="color: var(--primary); text-align: center; width: 100%;">
