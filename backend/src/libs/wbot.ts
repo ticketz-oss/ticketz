@@ -126,6 +126,24 @@ export const removeWbot = async (
   }
 };
 
+/**
+ * Closes every active WhatsApp session without logging out, so credentials
+ * are preserved and sessions can be resumed after a restart. Used during
+ * graceful shutdown.
+ */
+export const closeAllSessions = async (): Promise<void> => {
+  const ids = sessions.map(s => s.id).filter((id): id is number => !!id);
+
+  if (ids.length === 0) {
+    logger.info("No active WhatsApp sessions to close.");
+    return;
+  }
+
+  logger.info(`Closing ${ids.length} WhatsApp session(s)...`);
+  await Promise.allSettled(ids.map(id => removeWbot(id, false)));
+  logger.info("All WhatsApp sessions closed.");
+};
+
 function getGreaterVersion(a, b) {
   for (let i = 0; i < Math.max(a.length, b.length); i += 1) {
     const numA = a[i] || 0;

@@ -6,6 +6,7 @@ import UpdateSettingService from "../services/SettingServices/UpdateSettingServi
 import ListSettingsService from "../services/SettingServices/ListSettingsService";
 import GetPublicSettingService from "../services/SettingServices/GetPublicSettingService";
 import { GetSettingService } from "../services/SettingServices/GetSettingService";
+import { triggerGracefulShutdown } from "../utils/shutdown";
 
 type LogoRequest = {
   mode: string;
@@ -102,7 +103,7 @@ export const restart = async (
   // Delay shutdown so the response can be sent before the process exits.
   // The Docker container will restart the process automatically.
   setTimeout(() => {
-    process.exit(0);
+    triggerGracefulShutdown();
   }, 500);
 
   return res;

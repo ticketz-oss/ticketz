@@ -371,3 +371,18 @@ export const getIO = (): SocketIO => {
   }
   return io;
 };
+
+/**
+ * Closes the Socket.IO server and all its client connections. Used during
+ * graceful shutdown so open WebSocket connections don't keep the HTTP server
+ * from closing.
+ */
+export const closeIO = async (): Promise<void> => {
+  if (!io) {
+    return;
+  }
+
+  await new Promise<void>(resolve => {
+    io.close(() => resolve());
+  });
+};

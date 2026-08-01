@@ -647,3 +647,20 @@ export async function startQueueProcess() {
     }
   );
 }
+
+/**
+ * Gracefully closes all Bull queues so in-flight jobs can finish before the
+ * process exits. Used during graceful shutdown.
+ */
+export async function closeAllQueues(): Promise<void> {
+  const queues = [
+    userMonitor,
+    messageQueue,
+    scheduleMonitor,
+    sendScheduledMessages
+  ];
+
+  logger.info(`Closing ${queues.length} queue(s)...`);
+  await Promise.allSettled(queues.map(queue => queue.close()));
+  logger.info("All queues closed.");
+}
