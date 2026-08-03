@@ -17,7 +17,7 @@ import { logger } from "../utils/logger";
  * worst value (max) is below 1s, and at `warn` when it is >= 1s.
  *
  * Example log line:
- *   "poolMonitor: 5 queries waited more than 50ms for a connection. 51/75/120ms (min/avg/max)"
+ *   "poolMonitor: 5 queries waited for a connection. 51/75/120ms (min/avg/max), threshold 50ms"
  */
 export class SlowEventCounter {
   private readonly label: string;
@@ -74,7 +74,7 @@ export class SlowEventCounter {
         max,
         thresholdMs: this.thresholdMs
       },
-      `poolMonitor: ${this.count} ${this.label} more than ${this.thresholdMs}ms. ${min}/${avg}/${max}ms (min/avg/max)`
+      `poolMonitor: ${this.count} ${this.label}. ${min}/${avg}/${max}ms (min/avg/max), threshold ${this.thresholdMs}ms`
     );
 
     this.count = 0;

@@ -31,7 +31,7 @@ import OutOfTicketMessage from "./models/OutOfTicketMessages";
 import { getJidOf } from "./services/WbotServices/getJidOf";
 import { _t } from "./services/TranslationServices/i18nService";
 import { makeRandomId } from "./helpers/MakeRandomId";
-import { flushSlowWaitCounter } from "./database/poolMonitor";
+import { flushPoolMonitor } from "./database/poolMonitor";
 
 const connection = process.env.REDIS_URI || "";
 const limiterMax = process.env.REDIS_OPT_LIMITER_MAX || 1;
@@ -551,8 +551,8 @@ async function handleEveryMinute(job: Job) {
   const executionId = makeRandomId(10);
   logger.trace(`handleEveryMinute: entering - executionId: ${executionId}`);
   try {
-    // Emit the pool monitor's slow-query summary for the last minute.
-    flushSlowWaitCounter();
+    // Emit the pool monitor's per-minute summaries.
+    flushPoolMonitor();
 
     await handleRatingsTimeout();
     await handleTicketTimeouts();
