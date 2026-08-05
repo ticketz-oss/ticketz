@@ -1009,6 +1009,64 @@ const messages = {
         },
         i18nSettings: {
           title: "Terjemahan"
+        },
+        docker: {
+          title: "Kontainer Docker",
+          description:
+            "Kelola kontainer server: periksa pembaruan gambar, pull+mulai ulang atau mulai ulang.",
+          selfBadge: "backend ini",
+          notChecked: "Belum diperiksa",
+          updateAvailable: "Pembaruan tersedia",
+          upToDate: "Terbaru",
+          unavailable: "Tidak tersedia",
+          unavailableMessage:
+            "Layanan Docker tidak tersedia di server ini. Periksa apakah soket Docker terpasang di kontainer backend.",
+          columns: {
+            name: "Nama",
+            image: "Gambar",
+            state: "Status",
+            created: "Dibuat",
+            update: "Pembaruan",
+            actions: "Aksi"
+          },
+          actions: {
+            refreshList: "Muat ulang daftar",
+            checkUpdates: "Periksa pembaruan",
+            checkUpdate: "Periksa pembaruan",
+            updateBackendFrontend: "Perbarui backend & frontend",
+            updatingBackendFrontend: "Memperbarui backend & frontend...",
+            update: "Pull + mulai ulang",
+            restart: "Mulai ulang"
+          },
+          toasts: {
+            updateAvailable: "Pembaruan tersedia untuk {{name}}",
+            selfUpdate:
+              "Backend sedang diperbarui dan akan dimulai ulang. Tunggu beberapa saat dan muat ulang halaman.",
+            selfRestart:
+              "Backend sedang dimulai ulang. Tunggu beberapa saat dan muat ulang halaman.",
+            restarted: "{{name}} dimulai ulang",
+            noUpdates: "Tidak ada pembaruan yang tersedia."
+          },
+          confirm: {
+            updateTitle: "Perbarui {{name}}",
+            updateAllTitle: "Perbarui backend & frontend",
+            updateAllBody:
+              "Kontainer backend dan frontend akan diperbarui (pull + buat ulang). Kontainer backend akan dimulai ulang dan aplikasi akan tidak tersedia selama beberapa saat. Lanjutkan?",
+            restartTitle: "Mulai ulang {{name}}",
+            updateBody:
+              'Gambar "{{image}}" akan di-pull dan kontainer akan dibuat ulang dengan versi baru. Lanjutkan?',
+            restartBody: 'Kontainer "{{name}}" akan dimulai ulang. Lanjutkan?',
+            selfWarning:
+              "Ini adalah kontainer backend: aplikasi akan tidak tersedia selama beberapa saat."
+          },
+          dashboardBanner: {
+            title: "Pembaruan kontainer tersedia",
+            description: "Pembaruan gambar backend dan/atau frontend tersedia.",
+            updateAll: "Perbarui backend & frontend",
+            updating: "Memperbarui...",
+            confirmBody:
+              "Kontainer backend dan frontend akan diperbarui (pull + buat ulang). Kontainer backend akan dimulai ulang dan aplikasi akan tidak tersedia selama sekitar 1 menit. Lanjutkan?"
+          }
         }
       },
       messagesList: {

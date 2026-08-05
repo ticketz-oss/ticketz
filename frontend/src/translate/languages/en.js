@@ -1097,6 +1097,65 @@ const messages = {
             contact: "Contact",
             both: "Ticket and Contact"
           }
+        },
+        docker: {
+          title: "Docker Containers",
+          description:
+            "Manage the server containers: check for image updates, pull+restart or restart.",
+          selfBadge: "this backend",
+          notChecked: "Not checked",
+          updateAvailable: "Update available",
+          upToDate: "Up to date",
+          unavailable: "Unavailable",
+          unavailableMessage:
+            "Docker service unavailable on this server. Check if the Docker socket is mounted in the backend container.",
+          columns: {
+            name: "Name",
+            image: "Image",
+            state: "State",
+            created: "Created",
+            update: "Update",
+            actions: "Actions"
+          },
+          actions: {
+            refreshList: "Refresh list",
+            checkUpdates: "Check for updates",
+            checkUpdate: "Check for update",
+            updateBackendFrontend: "Update backend & frontend",
+            updatingBackendFrontend: "Updating backend & frontend...",
+            update: "Pull + restart",
+            restart: "Restart"
+          },
+          toasts: {
+            updateAvailable: "Update available for {{name}}",
+            selfUpdate:
+              "The backend is being updated and will restart. Wait a few moments and reload the page.",
+            selfRestart:
+              "The backend is restarting. Wait a few moments and reload the page.",
+            restarted: "{{name}} restarted",
+            noUpdates: "No updates available."
+          },
+          confirm: {
+            updateTitle: "Update {{name}}",
+            updateAllTitle: "Update backend & frontend",
+            updateAllBody:
+              "Backend and frontend containers will be updated (pull + recreate). The backend container will restart and the application will be unavailable for a few moments. Do you want to continue?",
+            restartTitle: "Restart {{name}}",
+            updateBody:
+              'The image "{{image}}" will be pulled and the container will be recreated with the new version. Do you want to continue?',
+            restartBody:
+              'The container "{{name}}" will be restarted. Do you want to continue?',
+            selfWarning:
+              "This is the backend container: the application will be unavailable for a few moments."
+          },
+          dashboardBanner: {
+            title: "Container updates available",
+            description: "Backend and/or frontend image updates are available.",
+            updateAll: "Update backend & frontend",
+            updating: "Updating...",
+            confirmBody:
+              "Backend and frontend containers will be updated (pull + recreate). The backend container will restart and the application will be unavailable for about 1 minute. Do you want to continue?"
+          }
         }
       },
       messagesList: {

@@ -13,6 +13,7 @@ import {
 import { i18nReady } from "./services/TranslationServices/i18nService";
 import { cacheLayer } from "./libs/cache";
 import { registerShutdownTrigger } from "./utils/shutdown";
+import CleanupReplacedContainerService from "./services/DockerServices/CleanupReplacedContainerService";
 
 // Hard-exit safety timer for graceful shutdown. Set in preShutdown and cleared
 // in finally so the process can never hang during a restart.
@@ -64,6 +65,9 @@ i18nReady.then(() => {
   // Create and start the server
   const server = app.listen(process.env.PORT, async () => {
     logger.info(`Server is listening on port: ${process.env.PORT}`);
+
+    // Remove the old container after a self-update via the interface
+    CleanupReplacedContainerService();
 
     await startServer();
   });

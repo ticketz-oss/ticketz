@@ -990,6 +990,67 @@ const messages = {
         },
         PaymentGateways: {
           title: "Zahlungsgateways"
+        },
+        docker: {
+          title: "Docker-Container",
+          description:
+            "Verwalten Sie die Server-Container: Bild-Updates prüfen, Pull+Neustart oder Neustart.",
+          selfBadge: "dieses Backend",
+          notChecked: "Nicht geprüft",
+          updateAvailable: "Update verfügbar",
+          upToDate: "Aktuell",
+          unavailable: "Nicht verfügbar",
+          unavailableMessage:
+            "Docker-Dienst auf diesem Server nicht verfügbar. Prüfen Sie, ob der Docker-Socket im Backend-Container gemountet ist.",
+          columns: {
+            name: "Name",
+            image: "Image",
+            state: "Status",
+            created: "Erstellt",
+            update: "Update",
+            actions: "Aktionen"
+          },
+          actions: {
+            refreshList: "Liste aktualisieren",
+            checkUpdates: "Updates prüfen",
+            checkUpdate: "Update prüfen",
+            updateBackendFrontend: "Backend & Frontend aktualisieren",
+            updatingBackendFrontend:
+              "Backend & Frontend werden aktualisiert...",
+            update: "Pull + Neustart",
+            restart: "Neustart"
+          },
+          toasts: {
+            updateAvailable: "Update für {{name}} verfügbar",
+            selfUpdate:
+              "Das Backend wird aktualisiert und neu gestartet. Warten Sie einen Moment und laden Sie die Seite neu.",
+            selfRestart:
+              "Das Backend wird neu gestartet. Warten Sie einen Moment und laden Sie die Seite neu.",
+            restarted: "{{name}} neu gestartet",
+            noUpdates: "Keine Updates verfügbar."
+          },
+          confirm: {
+            updateTitle: "{{name}} aktualisieren",
+            updateAllTitle: "Backend & Frontend aktualisieren",
+            updateAllBody:
+              "Die Backend- und Frontend-Container werden aktualisiert (Pull + Neuerstellung). Der Backend-Container wird neu gestartet und die Anwendung ist für einige Momente nicht verfügbar. Möchten Sie fortfahren?",
+            restartTitle: "{{name}} neu starten",
+            updateBody:
+              'Das Image "{{image}}" wird gepullt und der Container mit der neuen Version neu erstellt. Möchten Sie fortfahren?',
+            restartBody:
+              'Der Container "{{name}}" wird neu gestartet. Möchten Sie fortfahren?',
+            selfWarning:
+              "Dies ist der Backend-Container: Die Anwendung ist für einige Momente nicht verfügbar."
+          },
+          dashboardBanner: {
+            title: "Container-Updates verfügbar",
+            description:
+              "Backend- und/oder Frontend-Image-Updates sind verfügbar.",
+            updateAll: "Backend & Frontend aktualisieren",
+            updating: "Aktualisieren...",
+            confirmBody:
+              "Die Backend- und Frontend-Container werden aktualisiert (Pull + Neuerstellung). Der Backend-Container wird neu gestartet und die Anwendung ist für etwa 1 Minute nicht verfügbar. Möchten Sie fortfahren?"
+          }
         }
       },
       messagesList: {

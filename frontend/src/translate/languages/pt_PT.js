@@ -1039,6 +1039,66 @@ const messages = {
         },
         PaymentGateways: {
           title: "Gateways de pagamento"
+        },
+        docker: {
+          title: "Contentores Docker",
+          description:
+            "Gira os contentores do servidor: verifique atualizações de imagem, faça pull+reinicie ou reinicie.",
+          selfBadge: "este backend",
+          notChecked: "Não verificado",
+          updateAvailable: "Atualização disponível",
+          upToDate: "Atualizado",
+          unavailable: "Indisponível",
+          unavailableMessage:
+            "Serviço Docker indisponível neste servidor. Verifique se o socket do Docker está montado no contentor do backend.",
+          columns: {
+            name: "Nome",
+            image: "Imagem",
+            state: "Estado",
+            created: "Criado em",
+            update: "Atualização",
+            actions: "Ações"
+          },
+          actions: {
+            refreshList: "Atualizar lista",
+            checkUpdates: "Verificar atualizações",
+            checkUpdate: "Verificar atualização",
+            updateBackendFrontend: "Atualizar backend e frontend",
+            updatingBackendFrontend: "A atualizar backend e frontend...",
+            update: "Pull + reiniciar",
+            restart: "Reiniciar"
+          },
+          toasts: {
+            updateAvailable: "Atualização disponível para {{name}}",
+            selfUpdate:
+              "O backend está a ser atualizado e será reiniciado. Aguarde alguns instantes e recarregue a página.",
+            selfRestart:
+              "O backend está a reiniciar. Aguarde alguns instantes e recarregue a página.",
+            restarted: "{{name}} reiniciado",
+            noUpdates: "Nenhuma atualização disponível."
+          },
+          confirm: {
+            updateTitle: "Atualizar {{name}}",
+            updateAllTitle: "Atualizar backend e frontend",
+            updateAllBody:
+              "Os contentores do backend e frontend serão atualizados (pull + recriação). O contentor do backend será reiniciado e a aplicação ficará indisponível por alguns instantes. Deseja continuar?",
+            restartTitle: "Reiniciar {{name}}",
+            updateBody:
+              'Será feito o pull da imagem "{{image}}" e o contentor será recriado com a nova versão. Deseja continuar?',
+            restartBody:
+              'O contentor "{{name}}" será reiniciado. Deseja continuar?',
+            selfWarning:
+              "Este é o contentor do backend: a aplicação ficará indisponível por alguns instantes."
+          },
+          dashboardBanner: {
+            title: "Atualizações de contentores disponíveis",
+            description:
+              "Atualizações de imagem do backend e/ou frontend estão disponíveis.",
+            updateAll: "Atualizar backend e frontend",
+            updating: "A atualizar...",
+            confirmBody:
+              "Os contentores do backend e frontend serão atualizados (pull + recriação). O contentor do backend será reiniciado e a aplicação ficará indisponível por cerca de 1 minuto. Deseja continuar?"
+          }
         }
       },
       messagesList: {

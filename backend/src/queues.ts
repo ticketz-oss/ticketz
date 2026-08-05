@@ -32,6 +32,8 @@ import { getJidOf } from "./services/WbotServices/getJidOf";
 import { _t } from "./services/TranslationServices/i18nService";
 import { makeRandomId } from "./helpers/MakeRandomId";
 import { flushPoolMonitor } from "./database/poolMonitor";
+import CheckAllContainersUpdateService from "./services/DockerServices/CheckAllContainersUpdateService";
+import { cacheLayer } from "./libs/cache";
 
 const connection = process.env.REDIS_URI || "";
 const limiterMax = process.env.REDIS_OPT_LIMITER_MAX || 1;
@@ -606,6 +608,30 @@ const createInvoices = new CronJob("0 * * * * *", async () => {
 });
 
 createInvoices.start();
+
+const DOCKER_UPDATES_CACHE_KEY = "docker:updates:daily-check";
+const DOCKER_UPDATES_CACHE_TTL_SECONDS = 60 * 60 * 24; // 24 hours
+
+async function runDailyDockerUpdatesCheck() {
+  try {
+    const result = await CheckAllContainersUpdateService();
+    await cacheLayer.set(
+      DOCKER_UPDATES_CACHE_KEY,
+      JSON.stringify(result),
+      "EX",
+      DOCKER_UPDATES_CACHE_TTL_SECONDS
+    );
+    logger.info({ result }, "Daily Docker update check completed");
+  } catch (e) {
+    logger.error({ message: e?.message }, "Daily Docker update check failed");
+  }
+}
+
+const dailyDockerUpdatesCheckJob = new CronJob(
+  "0 6 * * *",
+  runDailyDockerUpdatesCheck
+);
+dailyDockerUpdatesCheckJob.start();
 
 export async function startQueueProcess() {
   logger.info("Starting queue processing");

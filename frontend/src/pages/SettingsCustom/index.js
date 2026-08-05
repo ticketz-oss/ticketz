@@ -10,6 +10,7 @@ import SchedulesForm from "../../components/SchedulesForm";
 import CompaniesManager from "../../components/CompaniesManager";
 import PlansManager from "../../components/PlansManager";
 import HelpsManager from "../../components/HelpsManager";
+import ContainersManager from "../../components/ContainersManager";
 import Options from "../../components/Settings/Options";
 import Whitelabel from "../../components/Settings/Whitelabel";
 import PaymentGateway from "../../components/Settings/PaymentGateway";
@@ -207,6 +208,9 @@ const SettingsCustom = () => {
           {isSuper() ? (
             <Tab label={i18n.t("settings.i18nSettings.title")} value={"i18n"} />
           ) : null}
+          {isSuper() ? (
+            <Tab label={i18n.t("settings.docker.title")} value={"containers"} />
+          ) : null}
         </Tabs>
         <Paper className={classes.paper} elevation={0}>
           <TabPanel
@@ -284,6 +288,13 @@ const SettingsCustom = () => {
                   name={"i18n"}
                 >
                   <I18nSettings />
+                </TabPanel>
+                <TabPanel
+                  className={classes.container}
+                  value={tab}
+                  name={"containers"}
+                >
+                  <ContainersManager />
                 </TabPanel>
                 <TabPanel
                   className={classes.container}

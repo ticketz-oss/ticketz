@@ -986,6 +986,66 @@ const messages = {
         },
         PaymentGateways: {
           title: "Passerelles de paiement"
+        },
+        docker: {
+          title: "Conteneurs Docker",
+          description:
+            "Gérez les conteneurs du serveur : vérifiez les mises à jour d'image, faites pull+redémarrer ou redémarrez.",
+          selfBadge: "ce backend",
+          notChecked: "Non vérifié",
+          updateAvailable: "Mise à jour disponible",
+          upToDate: "À jour",
+          unavailable: "Indisponible",
+          unavailableMessage:
+            "Service Docker indisponible sur ce serveur. Vérifiez si le socket Docker est monté dans le conteneur du backend.",
+          columns: {
+            name: "Nom",
+            image: "Image",
+            state: "État",
+            created: "Créé le",
+            update: "Mise à jour",
+            actions: "Actions"
+          },
+          actions: {
+            refreshList: "Actualiser la liste",
+            checkUpdates: "Vérifier les mises à jour",
+            checkUpdate: "Vérifier la mise à jour",
+            updateBackendFrontend: "Mettre à jour backend & frontend",
+            updatingBackendFrontend: "Mise à jour backend & frontend...",
+            update: "Pull + redémarrer",
+            restart: "Redémarrer"
+          },
+          toasts: {
+            updateAvailable: "Mise à jour disponible pour {{name}}",
+            selfUpdate:
+              "Le backend est en cours de mise à jour et va redémarrer. Attendez quelques instants et rechargez la page.",
+            selfRestart:
+              "Le backend redémarre. Attendez quelques instants et rechargez la page.",
+            restarted: "{{name}} redémarré",
+            noUpdates: "Aucune mise à jour disponible."
+          },
+          confirm: {
+            updateTitle: "Mettre à jour {{name}}",
+            updateAllTitle: "Mettre à jour backend & frontend",
+            updateAllBody:
+              "Les conteneurs backend et frontend seront mis à jour (pull + recréation). Le conteneur du backend redémarrera et l'application sera indisponible pendant quelques instants. Voulez-vous continuer ?",
+            restartTitle: "Redémarrer {{name}}",
+            updateBody:
+              'L\'image "{{image}}" sera téléchargée et le conteneur sera recréé avec la nouvelle version. Voulez-vous continuer ?',
+            restartBody:
+              'Le conteneur "{{name}}" sera redémarré. Voulez-vous continuer ?',
+            selfWarning:
+              "C'est le conteneur du backend : l'application sera indisponible pendant quelques instants."
+          },
+          dashboardBanner: {
+            title: "Mises à jour des conteneurs disponibles",
+            description:
+              "Des mises à jour d'image backend et/ou frontend sont disponibles.",
+            updateAll: "Mettre à jour backend & frontend",
+            updating: "Mise à jour...",
+            confirmBody:
+              "Les conteneurs backend et frontend seront mis à jour (pull + recréation). Le conteneur du backend redémarrera et l'application sera indisponible pendant environ 1 minute. Voulez-vous continuer ?"
+          }
         }
       },
       messagesList: {

@@ -985,6 +985,66 @@ const messages = {
         },
         i18nSettings: {
           title: "Traduzioni"
+        },
+        docker: {
+          title: "Contenitori Docker",
+          description:
+            "Gestisci i contenitori del server: verifica gli aggiornamenti delle immagini, pull+riavvia o riavvia.",
+          selfBadge: "questo backend",
+          notChecked: "Non verificato",
+          updateAvailable: "Aggiornamento disponibile",
+          upToDate: "Aggiornato",
+          unavailable: "Non disponibile",
+          unavailableMessage:
+            "Servizio Docker non disponibile su questo server. Verifica che il socket Docker sia montato nel contenitore del backend.",
+          columns: {
+            name: "Nome",
+            image: "Immagine",
+            state: "Stato",
+            created: "Creato il",
+            update: "Aggiornamento",
+            actions: "Azioni"
+          },
+          actions: {
+            refreshList: "Aggiorna elenco",
+            checkUpdates: "Verifica aggiornamenti",
+            checkUpdate: "Verifica aggiornamento",
+            updateBackendFrontend: "Aggiorna backend e frontend",
+            updatingBackendFrontend: "Aggiornamento backend e frontend...",
+            update: "Pull + riavvia",
+            restart: "Riavvia"
+          },
+          toasts: {
+            updateAvailable: "Aggiornamento disponibile per {{name}}",
+            selfUpdate:
+              "Il backend sta venendo aggiornato e verrà riavviato. Attendi qualche istante e ricarica la pagina.",
+            selfRestart:
+              "Il backend sta riavviando. Attendi qualche istante e ricarica la pagina.",
+            restarted: "{{name}} riavviato",
+            noUpdates: "Nessun aggiornamento disponibile."
+          },
+          confirm: {
+            updateTitle: "Aggiorna {{name}}",
+            updateAllTitle: "Aggiorna backend e frontend",
+            updateAllBody:
+              "I contenitori backend e frontend verranno aggiornati (pull + ricreazione). Il contenitore del backend verrà riavviato e l'applicazione sarà non disponibile per qualche istante. Vuoi continuare?",
+            restartTitle: "Riavvia {{name}}",
+            updateBody:
+              'L\'immagine "{{image}}" verrà scaricata e il contenitore verrà ricreato con la nuova versione. Vuoi continuare?',
+            restartBody:
+              'Il contenitore "{{name}}" verrà riavviato. Vuoi continuare?',
+            selfWarning:
+              "Questo è il contenitore del backend: l'applicazione sarà non disponibile per qualche istante."
+          },
+          dashboardBanner: {
+            title: "Aggiornamenti contenitori disponibili",
+            description:
+              "Sono disponibili aggiornamenti di immagine backend e/o frontend.",
+            updateAll: "Aggiorna backend e frontend",
+            updating: "Aggiornamento...",
+            confirmBody:
+              "I contenitori backend e frontend verranno aggiornati (pull + ricreazione). Il contenitore del backend verrà riavviato e l'applicazione sarà non disponibile per circa 1 minuto. Vuoi continuare?"
+          }
         }
       },
       messagesList: {

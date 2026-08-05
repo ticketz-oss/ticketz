@@ -1102,6 +1102,66 @@ const messages = {
             contact: "Contacto",
             both: "Ticket y contacto"
           }
+        },
+        docker: {
+          title: "Contenedores Docker",
+          description:
+            "Gestione los contenedores del servidor: verifique actualizaciones de imagen, pull+reinicie o reinicie.",
+          selfBadge: "este backend",
+          notChecked: "No verificado",
+          updateAvailable: "Actualización disponible",
+          upToDate: "Actualizado",
+          unavailable: "No disponible",
+          unavailableMessage:
+            "Servicio Docker no disponible en este servidor. Verifique si el socket de Docker está montado en el contenedor del backend.",
+          columns: {
+            name: "Nombre",
+            image: "Imagen",
+            state: "Estado",
+            created: "Creado el",
+            update: "Actualización",
+            actions: "Acciones"
+          },
+          actions: {
+            refreshList: "Actualizar lista",
+            checkUpdates: "Verificar actualizaciones",
+            checkUpdate: "Verificar actualización",
+            updateBackendFrontend: "Actualizar backend y frontend",
+            updatingBackendFrontend: "Actualizando backend y frontend...",
+            update: "Pull + reiniciar",
+            restart: "Reiniciar"
+          },
+          toasts: {
+            updateAvailable: "Actualización disponible para {{name}}",
+            selfUpdate:
+              "El backend se está actualizando y se reiniciará. Espere unos instantes y recargue la página.",
+            selfRestart:
+              "El backend se está reiniciando. Espere unos instantes y recargue la página.",
+            restarted: "{{name}} reiniciado",
+            noUpdates: "No hay actualizaciones disponibles."
+          },
+          confirm: {
+            updateTitle: "Actualizar {{name}}",
+            updateAllTitle: "Actualizar backend y frontend",
+            updateAllBody:
+              "Los contenedores de backend y frontend se actualizarán (pull + recreación). El contenedor del backend se reiniciará y la aplicación estará no disponible por unos instantes. ¿Desea continuar?",
+            restartTitle: "Reiniciar {{name}}",
+            updateBody:
+              'Se hará el pull de la imagen "{{image}}" y el contenedor se recreará con la nueva versión. ¿Desea continuar?',
+            restartBody:
+              'El contenedor "{{name}}" se reiniciará. ¿Desea continuar?',
+            selfWarning:
+              "Este es el contenedor del backend: la aplicación estará no disponible por unos instantes."
+          },
+          dashboardBanner: {
+            title: "Actualizaciones de contenedores disponibles",
+            description:
+              "Hay actualizaciones de imagen de backend y/o frontend disponibles.",
+            updateAll: "Actualizar backend y frontend",
+            updating: "Actualizando...",
+            confirmBody:
+              "Los contenedores de backend y frontend se actualizarán (pull + recreación). El contenedor del backend se reiniciará y la aplicación estará no disponible durante aproximadamente 1 minuto. ¿Desea continuar?"
+          }
         }
       },
       messagesList: {

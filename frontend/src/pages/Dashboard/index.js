@@ -35,6 +35,7 @@ import { TicketCountersChart } from "./TicketCountersChart";
 import { getTimezoneOffset } from "../../helpers/getTimezoneOffset.js";
 
 import TicketzRegistry from "../../components/TicketzRegistry";
+import ContainerUpdatesBanner from "../../components/Dashboard/ContainerUpdatesBanner";
 import { copyToClipboard } from "../../helpers/copyToClipboard.js";
 import api from "../../services/api.js";
 import { SocketContext } from "../../context/Socket/SocketContext.js";
@@ -553,6 +554,7 @@ const Dashboard = () => {
           yes={() => (
             <>
               <Grid container spacing={3} justifyContent="flex-start">
+                <ContainerUpdatesBanner />
                 {!localStorage.getItem("hideAds") && (
                   <>
                     <Grid item xs={12}>
