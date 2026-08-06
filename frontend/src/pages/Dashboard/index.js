@@ -38,6 +38,7 @@ import TicketzRegistry from "../../components/TicketzRegistry";
 import ContainerUpdatesBanner from "../../components/Dashboard/ContainerUpdatesBanner";
 import { copyToClipboard } from "../../helpers/copyToClipboard.js";
 import api from "../../services/api.js";
+import config from "../../services/config.js";
 import { SocketContext } from "../../context/Socket/SocketContext.js";
 import { formatTimeInterval } from "../../helpers/formatTimeInterval.js";
 import TicketzProAd from "../../components/Dashboard/TicketzProAd";
@@ -554,7 +555,7 @@ const Dashboard = () => {
           yes={() => (
             <>
               <Grid container spacing={3} justifyContent="flex-start">
-                <ContainerUpdatesBanner />
+                {config.TZAUTOINSTALLER === "1" && <ContainerUpdatesBanner />}
                 {!localStorage.getItem("hideAds") && (
                   <>
                     <Grid item xs={12}>

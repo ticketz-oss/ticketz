@@ -22,6 +22,7 @@ import { toast } from "react-toastify";
 import useCompanies from "../../hooks/useCompanies";
 import useAuth from "../../hooks/useAuth.js";
 import useSettings from "../../hooks/useSettings";
+import config from "../../services/config.js";
 
 import OnlyForSuperUser from "../../components/OnlyForSuperUser";
 import OpenHoursEditor from "../../components/OpenHoursEditor";
@@ -208,7 +209,7 @@ const SettingsCustom = () => {
           {isSuper() ? (
             <Tab label={i18n.t("settings.i18nSettings.title")} value={"i18n"} />
           ) : null}
-          {isSuper() ? (
+          {isSuper() && config.TZAUTOINSTALLER === "1" ? (
             <Tab label={i18n.t("settings.docker.title")} value={"containers"} />
           ) : null}
         </Tabs>
@@ -289,13 +290,15 @@ const SettingsCustom = () => {
                 >
                   <I18nSettings />
                 </TabPanel>
-                <TabPanel
-                  className={classes.container}
-                  value={tab}
-                  name={"containers"}
-                >
-                  <ContainersManager />
-                </TabPanel>
+                {config.TZAUTOINSTALLER === "1" && (
+                  <TabPanel
+                    className={classes.container}
+                    value={tab}
+                    name={"containers"}
+                  >
+                    <ContainersManager />
+                  </TabPanel>
+                )}
                 <TabPanel
                   className={classes.container}
                   value={tab}
