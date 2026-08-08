@@ -137,7 +137,9 @@ const messages = {
           retry: "Coba Lagi"
         },
         table: {
+          id: "ID",
           name: "Nama",
+          number: "Nomor",
           status: "Status",
           lastUpdate: "Pembaruan Terakhir",
           default: "Default",
