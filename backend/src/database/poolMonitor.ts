@@ -130,6 +130,14 @@ export const initPoolMonitor = (sequelize: Sequelize): void => {
     return;
   }
 
+  // Unique keys used to store original methods on the objects we wrap.
+  // Keeping the originals as properties (instead of local variables) avoids
+  // control-flow-flattening bugs in javascript-obfuscator that can turn
+  // .bind() + reassignment patterns into infinite recursion.
+  const ORIGINAL_QUERY_KEY = "__poolMonitor_originalQuery";
+  const ORIGINAL_ACQUIRE_KEY = "__poolMonitor_originalAcquire";
+  const ORIGINAL_RELEASE_KEY = "__poolMonitor_originalRelease";
+
   // Wrap the underlying pg.Client.query to capture the SQL and execution
   // duration for every query run on this connection. This lets us distinguish
   // between slow Postgres queries and application-level delays that hold a
@@ -137,13 +145,22 @@ export const initPoolMonitor = (sequelize: Sequelize): void => {
   const instrumentClient = (client: PoolClient): void => {
     interface PgClientLike {
       query: (...args: unknown[]) => unknown;
+      [key: string]: unknown;
     }
 
     const pgClient = client as unknown as PgClientLike;
     if (typeof pgClient.query !== "function") return;
 
-    const originalQuery = pgClient.query.bind(pgClient);
-    pgClient.query = (...queryArgs: unknown[]) => {
+    if (pgClient[ORIGINAL_QUERY_KEY]) {
+      return; // already instrumented
+    }
+
+    pgClient[ORIGINAL_QUERY_KEY] = pgClient.query;
+
+    pgClient.query = function queryWrapper(
+      this: PgClientLike,
+      ...queryArgs: unknown[]
+    ) {
       const startedAt = Date.now();
       client.__lastQueryStartedAt = startedAt;
       client.__lastQuery =
@@ -159,7 +176,8 @@ export const initPoolMonitor = (sequelize: Sequelize): void => {
       };
 
       try {
-        const result = originalQuery(...queryArgs);
+        const original = pgClient[ORIGINAL_QUERY_KEY] as PgClientLike["query"];
+        const result = original.apply(this, queryArgs);
         if (
           result &&
           typeof result === "object" &&
@@ -180,65 +198,90 @@ export const initPoolMonitor = (sequelize: Sequelize): void => {
 
   // Wrap acquire() to measure how long each query waits for a connection and
   // instrument the client for per-query tracking.
-  const originalAcquire = pool.acquire.bind(pool);
-  pool.acquire = async (...args: unknown[]) => {
-    const requestedAt = Date.now();
-    const client = await originalAcquire(...args);
-    const waitMs = Date.now() - requestedAt;
-    client.__acquireRequestedAt = requestedAt;
-    client.__queryCount = 0;
-    instrumentClient(client);
-
-    snapshotState.maxUsing = Math.max(snapshotState.maxUsing, pool.using || 0);
-    snapshotState.maxWaiting = Math.max(
-      snapshotState.maxWaiting,
-      pool.waiting || 0
-    );
-    snapshotState.maxSize = Math.max(snapshotState.maxSize, pool.size || 0);
-
-    slowWaitCounter.record(waitMs);
-
-    return client;
+  const typedPool = pool as Pool & {
+    [ORIGINAL_ACQUIRE_KEY]?: Pool["acquire"];
   };
+
+  if (!typedPool[ORIGINAL_ACQUIRE_KEY]) {
+    typedPool[ORIGINAL_ACQUIRE_KEY] = pool.acquire;
+
+    typedPool.acquire = async function acquireWrapper(
+      this: Pool,
+      ...args: unknown[]
+    ) {
+      const requestedAt = Date.now();
+      const original = (this as typeof typedPool)[ORIGINAL_ACQUIRE_KEY]!;
+      const client = await original.apply(this, args);
+      const waitMs = Date.now() - requestedAt;
+      client.__acquireRequestedAt = requestedAt;
+      client.__queryCount = 0;
+      instrumentClient(client);
+
+      snapshotState.maxUsing = Math.max(
+        snapshotState.maxUsing,
+        pool.using || 0
+      );
+      snapshotState.maxWaiting = Math.max(
+        snapshotState.maxWaiting,
+        pool.waiting || 0
+      );
+      snapshotState.maxSize = Math.max(snapshotState.maxSize, pool.size || 0);
+
+      slowWaitCounter.record(waitMs);
+
+      return client;
+    };
+  }
 
   // Wrap release() to measure how long a connection was held (checked out).
-  const originalRelease = pool.release.bind(pool);
-  pool.release = (client: PoolClient) => {
-    const now = Date.now();
-    const heldMs = now - (client?.__acquireRequestedAt || now);
-    const lastExecuteMs = client?.__lastQueryFinishedAt
-      ? client.__lastQueryFinishedAt - (client.__lastQueryStartedAt || 0)
-      : undefined;
-    const idleAfterQueryMs = client?.__lastQueryFinishedAt
-      ? now - client.__lastQueryFinishedAt
-      : undefined;
-
-    snapshotState.totalQueries += client?.__queryCount || 0;
-
-    if (heldMs > heldWarningThresholdMs) {
-      snapshotState.slowReleases += 1;
-      logger.warn(
-        {
-          heldMs,
-          executeMs: lastExecuteMs,
-          idleAfterQueryMs,
-          pid: client?.processID,
-          queryCount: client?.__queryCount,
-          lastQuery: client?.__lastQuery,
-          querySummary: summarizeQuery(client?.__lastQuery),
-          pool: {
-            size: pool.size,
-            available: pool.available,
-            using: pool.using,
-            waiting: pool.waiting
-          }
-        },
-        `poolMonitor: connection held for ${heldMs}ms`
-      );
-    }
-
-    return originalRelease(client);
+  const releaseTypedPool = pool as Pool & {
+    [ORIGINAL_RELEASE_KEY]?: Pool["release"];
   };
+
+  if (!releaseTypedPool[ORIGINAL_RELEASE_KEY]) {
+    releaseTypedPool[ORIGINAL_RELEASE_KEY] = pool.release;
+
+    releaseTypedPool.release = function releaseWrapper(
+      this: Pool,
+      client: PoolClient
+    ) {
+      const now = Date.now();
+      const heldMs = now - (client?.__acquireRequestedAt || now);
+      const lastExecuteMs = client?.__lastQueryFinishedAt
+        ? client.__lastQueryFinishedAt - (client.__lastQueryStartedAt || 0)
+        : undefined;
+      const idleAfterQueryMs = client?.__lastQueryFinishedAt
+        ? now - client.__lastQueryFinishedAt
+        : undefined;
+
+      snapshotState.totalQueries += client?.__queryCount || 0;
+
+      if (heldMs > heldWarningThresholdMs) {
+        snapshotState.slowReleases += 1;
+        logger.warn(
+          {
+            heldMs,
+            executeMs: lastExecuteMs,
+            idleAfterQueryMs,
+            pid: client?.processID,
+            queryCount: client?.__queryCount,
+            lastQuery: client?.__lastQuery,
+            querySummary: summarizeQuery(client?.__lastQuery),
+            pool: {
+              size: pool.size,
+              available: pool.available,
+              using: pool.using,
+              waiting: pool.waiting
+            }
+          },
+          `poolMonitor: connection held for ${heldMs}ms`
+        );
+      }
+
+      const original = (this as typeof releaseTypedPool)[ORIGINAL_RELEASE_KEY]!;
+      return original.call(this, client);
+    };
+  }
 
   logger.debug("poolMonitor: enabled");
 };
