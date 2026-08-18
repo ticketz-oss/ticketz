@@ -1651,10 +1651,12 @@ const handleMessage = async (
     if (isGroup) {
       groupContact = await wbotMutex.runExclusive(async () => {
         // The cache is shared across all WhatsApp sessions/companies in this
-        // process, so the key MUST be scoped by company. Otherwise a group
-        // contact resolved for one company could be reused to create tickets
-        // for another company that participates in the same group.
-        const cacheKey = `${companyId}:${msg.key.remoteJid}`;
+        // process, so the key MUST be scoped by connection (whatsappId).
+        // Otherwise a group contact resolved for one connection could be reused
+        // to create tickets for another connection/company that participates in
+        // the same group. Scoping by whatsappId also keeps connections of the
+        // same company independent when they share group membership.
+        const cacheKey = `${wbot.id}:${msg.key.remoteJid}`;
         let result = groupContactCache.get(cacheKey);
         if (!result || result.companyId !== companyId) {
           const groupMetadata = await wbot.groupMetadata(msg.key.remoteJid);
