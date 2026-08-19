@@ -6,6 +6,11 @@ import isSuper from "../middleware/isAdmin";
 const authRoutes = Router();
 
 authRoutes.post("/login", SessionController.store);
+authRoutes.post(
+  "/request-password-reset",
+  SessionController.requestPasswordReset
+);
+authRoutes.post("/reset-password", SessionController.resetPassword);
 authRoutes.get(
   "/impersonate/:companyId",
   isAuth,
