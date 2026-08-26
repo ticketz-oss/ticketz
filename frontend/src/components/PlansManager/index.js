@@ -32,6 +32,67 @@ import { safeValueFormat } from "../../helpers/safeValueFormat";
 import { i18n } from "../../translate/i18n";
 import cc from "currency-codes";
 
+// Maps the i18n language code (e.g. "pt", "pt_PT", "en") to a locale accepted
+// by Intl.NumberFormat (e.g. "pt-BR", "pt-PT", "en").
+const getLocale = () =>
+  (i18n.resolvedLanguage || i18n.language || "en").replace("_", "-").trim();
+
+// Detects the thousands and decimal separators used by the selected locale,
+// so formatted values can be parsed back into plain numbers correctly.
+const getSeparators = () => {
+  try {
+    const sample = new Intl.NumberFormat(getLocale()).format(1234.5);
+    const separators = sample.replace(/[0-9]/g, "");
+    // The decimal separator is the last non-digit character; the thousands
+    // separator (if any) is the one immediately before it.
+    const decimal = separators[separators.length - 1] || ".";
+    const thousands = separators.length > 1 ? separators[0] : "";
+    return { decimal, thousands };
+  } catch (e) {
+    return { decimal: ".", thousands: "," };
+  }
+};
+
+// Converts a possibly formatted value (e.g. "1.234,56" or "1,234.56") into a
+// plain number, stripping the locale-specific thousands separator and
+// normalizing the decimal separator, so the backend always receives an
+// unformatted numeric value.
+const parseValueToNumber = value => {
+  if (typeof value === "number") {
+    return value;
+  }
+  if (typeof value !== "string" || value.trim() === "") {
+    return 0;
+  }
+  const { decimal, thousands } = getSeparators();
+  let normalized = value.trim();
+  if (thousands) {
+    normalized = normalized.split(thousands).join("");
+  }
+  if (decimal !== ".") {
+    normalized = normalized.split(decimal).join(".");
+  }
+  const parsed = Number(normalized);
+  return Number.isNaN(parsed) ? 0 : parsed;
+};
+
+// Formats a numeric value for display only, adapting the thousands/decimal
+// separators to the selected language. The value sent to the backend remains
+// unformatted (see parseValueToNumber).
+const formatValueForDisplay = value => {
+  if (typeof value !== "number" || Number.isNaN(value)) {
+    return "";
+  }
+  try {
+    return new Intl.NumberFormat(getLocale(), {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(value);
+  } catch (e) {
+    return value.toString();
+  }
+};
+
 const useStyles = makeStyles(theme => ({
   root: {
     width: "100%"
@@ -371,7 +432,7 @@ export default function PlansManager() {
       name: data.name,
       queues: data.queues,
       users: data.users,
-      value: data.value.replace(",", "."),
+      value: parseValueToNumber(data.value),
       currency: data.currency,
       isPublic: data.isPublic
     };
@@ -430,8 +491,7 @@ export default function PlansManager() {
       users: data.users || 0,
       connections: data.connections || 0,
       queues: data.queues || 0,
-      value:
-        data.value.toLocaleString("pt-br", { minimumFractionDigits: 2 }) || 0,
+      value: formatValueForDisplay(data.value),
       currency: data.currency || "",
       isPublic: data.isPublic
     });
