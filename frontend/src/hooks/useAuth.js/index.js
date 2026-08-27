@@ -61,6 +61,7 @@ const useAuth = () => {
         if (error?.response?.status === 401) {
           clearAllCachedSettings();
           localStorage.removeItem("token");
+          localStorage.removeItem("userId");
           localStorage.removeItem("companyId");
           api.defaults.headers.Authorization = undefined;
           setIsAuth(false);
