@@ -1170,6 +1170,42 @@ const sendMenu = async (
   botText();
 };
 
+const notifyOutOfHoursContact = async (
+  wbot: Session,
+  ticket: Ticket,
+  contact: Contact,
+  bodyMessage?: string
+) => {
+  const notifyNumber = await GetCompanySetting(
+    ticket.companyId,
+    "outOfHoursNotifyNumber",
+    ""
+  );
+
+  const sanitizedNumber = notifyNumber?.replace(/\D/g, "");
+
+  if (!sanitizedNumber) {
+    return;
+  }
+
+  try {
+    const contactName = contact.name || contact.number;
+
+    let text = `*Mensagem recebida fora do horário de expediente*\n\nDe: ${contactName} (${contact.number})`;
+
+    if (bodyMessage?.trim()) {
+      text += `\n\nMensagem: ${bodyMessage.trim()}`;
+    }
+
+    await wbot.sendMessage(getJidOf(sanitizedNumber), { text });
+  } catch (error) {
+    logger.error(
+      { error },
+      "Error sending out-of-hours notification message"
+    );
+  }
+};
+
 export const startQueue = async (
   wbot: Session,
   ticket: Ticket,
@@ -1248,6 +1284,7 @@ export const startQueue = async (
         text: formatBody(outOfHoursMessage, ticket)
       });
       await verifyMessage(sentMessage, ticket, contact);
+      await notifyOutOfHoursContact(wbot, ticket, contact, ticket.lastMessage);
       const outOfHoursAction = await GetCompanySetting(
         companyId,
         "outOfHoursAction",
@@ -1963,6 +2000,12 @@ const handleMessage = async (
                 text: formatBody(outOfHoursMessage, ticket)
               });
               await verifyMessage(sentMessage, ticket, ticket.contact);
+              await notifyOutOfHoursContact(
+                wbot,
+                ticket,
+                ticket.contact,
+                bodyMessage
+              );
             }
             if (ticket.status !== "open") {
               await UpdateTicketService({
@@ -1999,6 +2042,12 @@ const handleMessage = async (
                 text: formatBody(outOfHoursMessage, ticket)
               });
               await verifyMessage(sentMessage, ticket, ticket.contact);
+              await notifyOutOfHoursContact(
+                wbot,
+                ticket,
+                ticket.contact,
+                bodyMessage
+              );
             }
             if (ticket.status !== "open") {
               await UpdateTicketService({
