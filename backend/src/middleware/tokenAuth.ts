@@ -9,7 +9,13 @@ const tokenAuth = async (
   next: NextFunction
 ): Promise<void> => {
   try {
+    if (!req.headers.authorization) {
+      throw new AppError("ERR_UNAUTHORIZED", 401);
+    }
     const token = req.headers.authorization.replace("Bearer ", "");
+    if (!token) {
+      throw new AppError("ERR_UNAUTHORIZED", 401);
+    }
     const whatsapp = await Whatsapp.findOne({ where: { token } });
     if (whatsapp) {
       req.params = {
@@ -17,10 +23,13 @@ const tokenAuth = async (
       };
       req.companyId = whatsapp.companyId;
     } else {
-      throw new Error();
+      throw new AppError("ERR_UNAUTHORIZED", 401);
     }
   } catch (err) {
-    throw new AppError("Acesso não permitido", 401);
+    if (err instanceof AppError) {
+      throw err;
+    }
+    throw new AppError("ERR_INTERNAL_SERVER_ERROR", 500);
   }
 
   return next();
