@@ -67,14 +67,16 @@ const QrcodeModal = ({
 
     const onCompanyWhatsappSession = data => {
       if (data.action === "update" && data.session.id === whatsAppId) {
-        setQrCode(data.session.qrcode);
+        if (data.session.status === "qrcode") {
+          setQrCode(data.session.qrcode);
+        }
 
         if (data.session.status === "passkey_required" && onOpenPasskeyModal) {
           onOpenPasskeyModal();
         }
       }
 
-      if (data.action === "update" && data.session.qrcode === "") {
+      if (data.action === "update" && data.session.status !== "qrcode") {
         onClose();
       }
     };
@@ -84,7 +86,7 @@ const QrcodeModal = ({
     return () => {
       socket.disconnect();
     };
-  }, [whatsAppId, onClose, socketManager]);
+  }, [whatsAppId, onClose, socketManager, onOpenPasskeyModal]);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg" scroll="paper">
