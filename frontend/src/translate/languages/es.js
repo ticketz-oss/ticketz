@@ -1289,6 +1289,8 @@ const messages = {
           "El backend se está iniciando y aún no está listo. Reintentando automáticamente."
       },
       backendErrors: {
+        ERR_INTERNAL:
+          "Error interno del servidor. Por favor, contacte con soporte.",
         ERR_FORBIDDEN: "No tienes permisos para acceder a este recurso.",
         ERR_CHECK_NUMBER: "No se pudo verificar el número de WhatsApp.",
         ERR_NO_OTHER_WHATSAPP:

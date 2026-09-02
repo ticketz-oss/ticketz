@@ -393,6 +393,6 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
         "MessageController.send: Failed to put message on queue"
       );
     }
-    throw new AppError("ERR_INTERNAL_ERROR", 500);
+    throw new AppError("ERR_INTERNAL", 500);
   }
 };

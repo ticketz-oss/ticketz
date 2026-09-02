@@ -1167,6 +1167,8 @@ const messages = {
           "Le backend démarre et n'est pas encore prêt. Nouvelle tentative automatique."
       },
       backendErrors: {
+        ERR_INTERNAL:
+          "Erreur interne du serveur. Veuillez contacter le support.",
         ERR_NO_OTHER_WHATSAPP:
           "Il doit y avoir au moins un WhatsApp par défaut.",
         ERR_NO_DEF_WAPP_FOUND:

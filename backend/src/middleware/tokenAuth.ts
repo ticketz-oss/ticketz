@@ -29,7 +29,7 @@ const tokenAuth = async (
     if (err instanceof AppError) {
       throw err;
     }
-    throw new AppError("ERR_INTERNAL_SERVER_ERROR", 500);
+    throw new AppError("ERR_INTERNAL", 500);
   }
 
   return next();

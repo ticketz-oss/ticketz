@@ -1222,6 +1222,8 @@ const messages = {
           "O backend está a iniciar e ainda não está pronto. A tentar novamente automaticamente."
       },
       backendErrors: {
+        ERR_INTERNAL:
+          "Erro interno do servidor. Por favor, contacte o suporte.",
         ERR_UNAUTHORIZED: "Não autorizado. Por favor, faça o login novamente.",
         ERR_FORBIDDEN:
           "Acesso negado. Você não tem permissão para acessar este recurso.",

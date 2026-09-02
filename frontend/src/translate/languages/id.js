@@ -1186,6 +1186,7 @@ const messages = {
           "Backend sedang memulai dan belum siap. Mencoba lagi secara otomatis."
       },
       backendErrors: {
+        ERR_INTERNAL: "Kesalahan internal server. Silakan hubungi dukungan.",
         ERR_FORBIDDEN: "Akses ditolak. Periksa izin Anda.",
         ERR_CHECK_NUMBER: "Nomor ini tidak terdaftar di WhatsApp.",
         ERR_NO_OTHER_WHATSAPP: "Harus ada setidaknya satu WhatsApp default.",

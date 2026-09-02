@@ -1279,6 +1279,7 @@ const messages = {
           "Backend is starting up and not ready yet. Retrying automatically."
       },
       backendErrors: {
+        ERR_INTERNAL: "Internal server error. Please contact support.",
         ERR_UNAUTHORIZED: "You are not authorized to perform this action.",
         ERR_FORBIDDEN: "You do not have permission to access this resource.",
         ERR_CHECK_NUMBER: "Check the number and try again.",
