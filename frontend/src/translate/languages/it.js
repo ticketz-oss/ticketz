@@ -1056,7 +1056,8 @@ const messages = {
             reopen: "Riapri",
             accept: "Accetta"
           }
-        }
+        },
+        openPaymentLink: "Apri link di pagamento"
       },
       messagesInput: {
         placeholderOpen: "Digita un messaggio",

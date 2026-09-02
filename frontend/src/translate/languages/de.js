@@ -1062,7 +1062,8 @@ const messages = {
             reopen: "Wieder öffnen",
             accept: "Akzeptieren"
           }
-        }
+        },
+        openPaymentLink: "Zahlungslink öffnen"
       },
       messagesInput: {
         placeholderOpen: "Nachricht eingeben",

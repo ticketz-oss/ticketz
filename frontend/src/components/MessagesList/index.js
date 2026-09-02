@@ -1509,6 +1509,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
       message?.buttonsMessage?.buttons ||
       message?.listMessage?.sections ||
       message?.templateMessage?.hydratedTemplate?.hydratedButtons ||
+      message?.interactiveMessage?.nativeFlowMessage?.buttons ||
       message?.templateMessage?.interactiveMessageTemplate?.nativeFlowMessage
         ?.buttons;
 
@@ -1526,6 +1527,12 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
         return renderReplyButton(item.buttonText.displayText);
       } else if (item.buttonParamsJson) {
         const params = JSON.parse(item.buttonParamsJson);
+        if (params?.payment_setting?.payment_link?.uri) {
+          return renderUrlButton({
+            displayText: i18n.t("messagesList.openPaymentLink"),
+            url: params.payment_setting.payment_link.uri
+          });
+        }
         if (params?.url && params.display_text) {
           return renderUrlButton({
             displayText: params.display_text,

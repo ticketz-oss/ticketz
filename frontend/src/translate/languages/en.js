@@ -1169,7 +1169,8 @@ const messages = {
             call: "Call",
             endCall: "End Call"
           }
-        }
+        },
+        openPaymentLink: "Open payment link"
       },
       messagesInput: {
         placeholderOpen: "Type a message",

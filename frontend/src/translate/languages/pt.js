@@ -1170,7 +1170,8 @@ const messages = {
             call: "Chamar",
             endCall: "Encerrar Chamada"
           }
-        }
+        },
+        openPaymentLink: "Abrir link de pagamento"
       },
       messagesInput: {
         placeholderOpen: "Digite uma mensagem",

@@ -1175,7 +1175,8 @@ const messages = {
             call: "Llamar",
             endCall: "Cortar"
           }
-        }
+        },
+        openPaymentLink: "Abrir enlace de pago"
       },
       messagesInput: {
         placeholderOpen: "Ingrese un mensaje",

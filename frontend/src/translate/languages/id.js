@@ -1078,7 +1078,8 @@ const messages = {
             reopen: "Buka Kembali",
             accept: "Terima"
           }
-        }
+        },
+        openPaymentLink: "Buka tautan pembayaran"
       },
       messagesInput: {
         placeholderOpen: "Ketik pesan",

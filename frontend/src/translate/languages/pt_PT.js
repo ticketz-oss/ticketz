@@ -1111,7 +1111,8 @@ const messages = {
             accept: "Aceitar",
             call: "Chamar"
           }
-        }
+        },
+        openPaymentLink: "Abrir link de pagamento"
       },
       messagesInput: {
         placeholderOpen: "Digite uma mensagem",

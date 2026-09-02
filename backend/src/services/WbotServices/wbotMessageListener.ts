@@ -230,7 +230,8 @@ export const getBodyMessage = async (msg: proto.IMessage): Promise<string> => {
       audioMessage: "🔊",
       listResponseMessage:
         msg?.listResponseMessage?.singleSelectReply?.selectedRowId,
-      reactionMessage: msg?.reactionMessage?.text || "reaction"
+      reactionMessage: msg?.reactionMessage?.text || "reaction",
+      interactiveMessage: msg?.interactiveMessage?.body?.text || ""
     };
 
     const objKey = Object.keys(types).find(key => key === type);
@@ -1086,6 +1087,7 @@ const isValidMsg = (msg: proto.IWebMessageInfo): boolean => {
       msgType === "listResponseMessage" ||
       msgType === "listMessage" ||
       msgType === "templateMessage" ||
+      msgType === "interactiveMessage" ||
       msgType === "viewOnceMessage" ||
       msgType === "viewOnceMessageV2";
 
