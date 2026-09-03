@@ -30,7 +30,6 @@ import { head, isArray, has } from "lodash";
 import { useDate } from "../../hooks/useDate";
 import useSettings from "../../hooks/useSettings";
 import { SelectLanguage } from "../SelectLanguage";
-
 import { i18n } from "../../translate/i18n";
 
 import moment from "moment";
