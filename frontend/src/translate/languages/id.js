@@ -20,6 +20,7 @@ const messages = {
         connection: "Koneksi",
         queue: "Antrian",
         contact: "Kontak",
+        status: "Status",
         serverTime: "Waktu server:",
         clientTime: "Waktu klien:",
         differenceMinutes: "Selisih: {{count}} menit"
@@ -59,6 +60,41 @@ const messages = {
           token: "Token",
           submit: "Daftar",
           success: "Perusahaan berhasil dibuat!"
+        }
+      },
+      companiesManager: {
+        form: {
+          campaigns: "Kampanye",
+          recurrence: "Berulang",
+          monthly: "Bulanan",
+          bimonthly: "Dua bulanan",
+          quarterly: "Tiga bulanan",
+          semiannual: "Enam bulanan",
+          annual: "Tahunan"
+        },
+        buttons: {
+          clear: "Bersihkan",
+          accessAs: "Akses sebagai",
+          incrementDueDate: "+ Jatuh Tempo",
+          user: "Pengguna"
+        },
+        table: {
+          campaigns: "Kampanye",
+          createdAt: "Dibuat pada"
+        },
+        toasts: {
+          loadError: "Tidak dapat memuat daftar rekaman",
+          operationSuccess: "Operasi berhasil dilakukan",
+          operationError: "Tidak dapat melakukan operasi",
+          operationErrorDuplicate:
+            "Tidak dapat melakukan operasi. Periksa apakah sudah ada perusahaan dengan nama yang sama atau apakah kolom telah diisi dengan benar"
+        },
+        confirmationModal: {
+          deleteTitle: "Hapus Rekaman",
+          deleteMessage: "Apakah Anda yakin ingin menghapus rekaman ini?",
+          impersonateTitle: "Akses sebagai",
+          impersonateMessage:
+            "Apakah Anda ingin mengakses sistem sebagai perusahaan ini?"
         }
       },
       auth: {

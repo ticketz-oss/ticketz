@@ -20,6 +20,7 @@ const messages = {
         connection: "Verbindung",
         queue: "Warteschlange",
         contact: "Kontakt",
+        status: "Status",
         serverTime: "Serverzeit:",
         clientTime: "Clientzeit:",
         differenceMinutes: "Unterschied: {{count}} Minute(n)"
@@ -59,6 +60,41 @@ const messages = {
           token: "Token",
           submit: "Registrieren",
           success: "Unternehmen erfolgreich erstellt!"
+        }
+      },
+      companiesManager: {
+        form: {
+          campaigns: "Kampagnen",
+          recurrence: "Wiederkehrend",
+          monthly: "Monatlich",
+          bimonthly: "Zweimonatlich",
+          quarterly: "Vierteljaehrlich",
+          semiannual: "Halbjaehrlich",
+          annual: "Jaehrlich"
+        },
+        buttons: {
+          clear: "Leeren",
+          accessAs: "Zugreifen als",
+          incrementDueDate: "+ Faelligkeitsdatum",
+          user: "Benutzer"
+        },
+        table: {
+          campaigns: "Kampagnen",
+          createdAt: "Erstellt am"
+        },
+        toasts: {
+          loadError: "Datensatzliste konnte nicht geladen werden",
+          operationSuccess: "Operation erfolgreich durchgefuehrt",
+          operationError: "Operation konnte nicht durchgefuehrt werden",
+          operationErrorDuplicate:
+            "Operation konnte nicht durchgefuehrt werden. Ueberpruefen Sie, ob bereits ein Unternehmen mit demselben Namen existiert oder ob die Felder korrekt ausgefuellt wurden"
+        },
+        confirmationModal: {
+          deleteTitle: "Datensatz loeschen",
+          deleteMessage: "Moechten Sie diesen Datensatz wirklich loeschen?",
+          impersonateTitle: "Zugreifen als",
+          impersonateMessage:
+            "Moechten Sie das System als dieses Unternehmen aufrufen?"
         }
       },
       auth: {

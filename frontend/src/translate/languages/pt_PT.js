@@ -53,6 +53,7 @@ const messages = {
           invalidEmail: "Email inválido",
           invalidPhone: "Número de telefone inválido"
         },
+        status: "Estado",
         serverTime: "Hora do servidor:",
         clientTime: "Hora do cliente:",
         differenceMinutes: "Diferença: {{count}} minuto(s)"
@@ -92,6 +93,40 @@ const messages = {
           token: "Token",
           submit: "Registar",
           success: "Empresa criada com sucesso!"
+        }
+      },
+      companiesManager: {
+        form: {
+          campaigns: "Campanhas",
+          recurrence: "Recorrência",
+          monthly: "Mensal",
+          bimonthly: "Bimestral",
+          quarterly: "Trimestral",
+          semiannual: "Semestral",
+          annual: "Anual"
+        },
+        buttons: {
+          clear: "Limpar",
+          accessAs: "Aceder como",
+          incrementDueDate: "+ Vencimento",
+          user: "Utilizador"
+        },
+        table: {
+          campaigns: "Campanhas",
+          createdAt: "Criada Em"
+        },
+        toasts: {
+          loadError: "Não foi possível carregar a lista de registos",
+          operationSuccess: "Operação realizada com sucesso",
+          operationError: "Não foi possível realizar a operação",
+          operationErrorDuplicate:
+            "Não foi possível realizar a operação. Verifique se já existe uma empresa com o mesmo nome ou se os campos foram preenchidos corretamente"
+        },
+        confirmationModal: {
+          deleteTitle: "Eliminação de Registo",
+          deleteMessage: "Deseja realmente eliminar este registo?",
+          impersonateTitle: "Aceder como",
+          impersonateMessage: "Deseja aceder ao sistema como esta empresa?"
         }
       },
       auth: {

@@ -56,6 +56,7 @@ const messages = {
           invalidEmail: "Email inválido",
           invalidPhone: "Número de telefone inválido"
         },
+        status: "Status",
         serverTime: "Hora do servidor:",
         clientTime: "Hora do cliente:",
         differenceMinutes: "Diferença: {{count}} minuto(s)"
@@ -95,6 +96,40 @@ const messages = {
           token: "Token",
           submit: "Cadastrar",
           success: "Empresa criada com sucesso!"
+        }
+      },
+      companiesManager: {
+        form: {
+          campaigns: "Campanhas",
+          recurrence: "Recorrência",
+          monthly: "Mensal",
+          bimonthly: "Bimestral",
+          quarterly: "Trimestral",
+          semiannual: "Semestral",
+          annual: "Anual"
+        },
+        buttons: {
+          clear: "Limpar",
+          accessAs: "Acessar como",
+          incrementDueDate: "+ Vencimento",
+          user: "Usuário"
+        },
+        table: {
+          campaigns: "Campanhas",
+          createdAt: "Criada Em"
+        },
+        toasts: {
+          loadError: "Não foi possível carregar a lista de registros",
+          operationSuccess: "Operação realizada com sucesso",
+          operationError: "Não foi possível realizar a operação",
+          operationErrorDuplicate:
+            "Não foi possível realizar a operação. Verifique se já existe uma empresa com o mesmo nome ou se os campos foram preenchidos corretamente"
+        },
+        confirmationModal: {
+          deleteTitle: "Exclusão de Registro",
+          deleteMessage: "Deseja realmente excluir esse registro?",
+          impersonateTitle: "Acessar como",
+          impersonateMessage: "Deseja acessar o sistema como esta empresa?"
         }
       },
       auth: {

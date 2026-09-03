@@ -21,6 +21,7 @@ const messages = {
         connection: "Connessione",
         queue: "Coda",
         contact: "Contatto",
+        status: "Stato",
         serverTime: "Ora del server:",
         clientTime: "Ora del client:",
         differenceMinutes: "Differenza: {{count}} minuto(i)"
@@ -60,6 +61,40 @@ const messages = {
           token: "Token",
           submit: "Registrati",
           success: "Azienda creata con successo!"
+        }
+      },
+      companiesManager: {
+        form: {
+          campaigns: "Campagne",
+          recurrence: "Ricorrenza",
+          monthly: "Mensile",
+          bimonthly: "Bimestrale",
+          quarterly: "Trimestrale",
+          semiannual: "Semestrale",
+          annual: "Annuale"
+        },
+        buttons: {
+          clear: "Cancella",
+          accessAs: "Accedi come",
+          incrementDueDate: "+ Scadenza",
+          user: "Utente"
+        },
+        table: {
+          campaigns: "Campagne",
+          createdAt: "Creata il"
+        },
+        toasts: {
+          loadError: "Impossibile caricare l'elenco dei record",
+          operationSuccess: "Operazione completata con successo",
+          operationError: "Impossibile eseguire l'operazione",
+          operationErrorDuplicate:
+            "Impossibile eseguire l'operazione. Verificare se esiste gia un'azienda con lo stesso nome o se i campi sono stati compilati correttamente"
+        },
+        confirmationModal: {
+          deleteTitle: "Eliminazione record",
+          deleteMessage: "Vuoi eliminare davvero questo record?",
+          impersonateTitle: "Accedi come",
+          impersonateMessage: "Vuoi accedere al sistema come questa azienda?"
         }
       },
       auth: {

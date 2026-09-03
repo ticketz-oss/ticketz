@@ -56,6 +56,7 @@ const messages = {
           invalidEmail: "Invalid email",
           invalidPhone: "Invalid phone number"
         },
+        status: "Status",
         serverTime: "Server time:",
         clientTime: "Client time:",
         differenceMinutes: "Difference: {{count}} minute(s)"
@@ -95,6 +96,41 @@ const messages = {
           token: "Token",
           submit: "Register",
           success: "Company created successfully!"
+        }
+      },
+      companiesManager: {
+        form: {
+          campaigns: "Campaigns",
+          recurrence: "Recurrence",
+          monthly: "Monthly",
+          bimonthly: "Bimonthly",
+          quarterly: "Quarterly",
+          semiannual: "Semiannual",
+          annual: "Annual"
+        },
+        buttons: {
+          clear: "Clear",
+          accessAs: "Access as",
+          incrementDueDate: "+ Due Date",
+          user: "User"
+        },
+        table: {
+          campaigns: "Campaigns",
+          createdAt: "Created At"
+        },
+        toasts: {
+          loadError: "Could not load the record list",
+          operationSuccess: "Operation completed successfully",
+          operationError: "Could not perform the operation",
+          operationErrorDuplicate:
+            "Could not perform the operation. Check if a company with the same name already exists or if the fields were filled correctly"
+        },
+        confirmationModal: {
+          deleteTitle: "Delete Record",
+          deleteMessage: "Do you really want to delete this record?",
+          impersonateTitle: "Access as",
+          impersonateMessage:
+            "Do you want to access the system as this company?"
         }
       },
       auth: {

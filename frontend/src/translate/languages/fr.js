@@ -21,6 +21,7 @@ const messages = {
         connection: "Connexion",
         queue: "File d'attente",
         contact: "Contact",
+        status: "Statut",
         serverTime: "Heure du serveur :",
         clientTime: "Heure du client :",
         differenceMinutes: "Différence : {{count}} minute(s)"
@@ -60,6 +61,41 @@ const messages = {
           token: "Jeton",
           submit: "Enregistrer",
           success: "Entreprise créée avec succès !"
+        }
+      },
+      companiesManager: {
+        form: {
+          campaigns: "Campagnes",
+          recurrence: "Récurrence",
+          monthly: "Mensuel",
+          bimonthly: "Bimestriel",
+          quarterly: "Trimestriel",
+          semiannual: "Semestriel",
+          annual: "Annuel"
+        },
+        buttons: {
+          clear: "Effacer",
+          accessAs: "Accéder en tant que",
+          incrementDueDate: "+ Échéance",
+          user: "Utilisateur"
+        },
+        table: {
+          campaigns: "Campagnes",
+          createdAt: "Créée le"
+        },
+        toasts: {
+          loadError: "Impossible de charger la liste des enregistrements",
+          operationSuccess: "Opération réalisée avec succès",
+          operationError: "Impossible de réaliser l'opération",
+          operationErrorDuplicate:
+            "Impossible de réaliser l'opération. Vérifiez si une entreprise avec le même nom existe déjà ou si les champs ont été correctement remplis"
+        },
+        confirmationModal: {
+          deleteTitle: "Suppression d'enregistrement",
+          deleteMessage: "Voulez-vous vraiment supprimer cet enregistrement ?",
+          impersonateTitle: "Accéder en tant que",
+          impersonateMessage:
+            "Voulez-vous accéder au système en tant que cette entreprise ?"
         }
       },
       auth: {
