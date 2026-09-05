@@ -102,7 +102,11 @@ export const context = async (req: Request, res: Response): Promise<Response> =>
     order: [[{ model: Queue, as: "queues" }, "name", "ASC"]]
   });
 
-  if (!user) {
+  if (
+    !user ||
+    user.id !== Number(req.user.id) ||
+    user.companyId !== req.user.companyId
+  ) {
     throw new AppError("ERR_UNAUTHORIZED", 401);
   }
 
