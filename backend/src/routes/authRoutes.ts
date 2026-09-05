@@ -34,5 +34,6 @@ authRoutes.post("/impersonate/back", isAuth, SessionController.backToSuper);
 authRoutes.post("/refresh_token", SessionController.update);
 authRoutes.delete("/logout", isAuth, SessionController.remove);
 authRoutes.get("/me", isAuth, SessionController.me);
+authRoutes.get("/context", isAuth, SessionController.context);
 
 export default authRoutes;

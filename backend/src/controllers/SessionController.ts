@@ -7,6 +7,7 @@ import { SendRefreshToken } from "../helpers/SendRefreshToken";
 import { RefreshTokenService } from "../services/AuthServices/RefreshTokenService";
 import FindUserFromToken from "../services/AuthServices/FindUserFromToken";
 import User from "../models/User";
+import Queue from "../models/Queue";
 import { SerializeUser } from "../helpers/SerializeUser";
 import { createAccessToken, createRefreshToken } from "../helpers/CreateTokens";
 import Company from "../models/Company";
@@ -86,6 +87,35 @@ export const me = async (req: Request, res: Response): Promise<Response> => {
   }
 
   return res.json({ id, profile, email, super: superAdmin });
+};
+
+export const context = async (req: Request, res: Response): Promise<Response> => {
+  const user = await User.findByPk(req.user.id, {
+    attributes: ["id", "companyId", "profile"],
+    include: [
+      {
+        model: Queue,
+        as: "queues",
+        attributes: ["id", "name", "color"]
+      }
+    ],
+    order: [[{ model: Queue, as: "queues" }, "name", "ASC"]]
+  });
+
+  if (!user) {
+    throw new AppError("ERR_UNAUTHORIZED", 401);
+  }
+
+  return res.json({
+    id: user.id,
+    companyId: user.companyId,
+    profile: user.profile,
+    queues: user.queues.map(queue => ({
+      id: queue.id,
+      name: queue.name,
+      color: queue.color
+    }))
+  });
 };
 
 export const remove = async (
