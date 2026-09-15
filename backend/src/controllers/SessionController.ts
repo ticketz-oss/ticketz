@@ -13,6 +13,8 @@ import Company from "../models/Company";
 import Setting from "../models/Setting";
 import Translation from "../models/Translation";
 import { decodeRefreshToken } from "../helpers/DecodeRefreshToken";
+import RequestPasswordResetService from "../services/AuthServices/RequestPasswordResetService";
+import ResetPasswordService from "../services/AuthServices/ResetPasswordService";
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const { email, password } = req.body;
@@ -74,6 +76,28 @@ export const update = async (
   SendRefreshToken(res, refreshToken);
 
   return res.json({ token: newToken, user });
+};
+
+export const requestPasswordReset = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { email } = req.body;
+
+  await RequestPasswordResetService({ email });
+
+  return res.status(204).send();
+};
+
+export const resetPassword = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { token, password } = req.body;
+
+  await ResetPasswordService({ token, password });
+
+  return res.status(204).send();
 };
 
 export const me = async (req: Request, res: Response): Promise<Response> => {
