@@ -311,6 +311,8 @@ const LandingPage = () => {
         <p>{t("footer.description")}</p>
         <nav>
           <a href="/login">{t("story.login")}</a>
+          <a href="/documentacao">{i18n.t("documentation.guides")}</a>
+          <a href="/api">{i18n.t("documentation.reference")}</a>
           <a href="/privacidade/">{t("footer.privacy")}</a>
           <a href="/termos/">{t("footer.terms")}</a>
           <a

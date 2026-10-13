@@ -96,6 +96,7 @@ jobs:
       - run: npm test -- --watchAll=false
         env:
           CI: "true"
+      - run: npm run docs:check
       - run: npm run typecheck
       - run: npm run build
         env:

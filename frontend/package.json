@@ -50,6 +50,7 @@
     "material-ui-nested-menu-item": "^1.0.2",
     "material-ui-popup-state": "^1.7.0",
     "mic-recorder-to-mp3": "^2.2.2",
+    "mobx": "6.16.1",
     "moment": "^2.29.1",
     "papaparse": "^5.5.3",
     "pdfjs-dist": "^3.11.174",
@@ -78,6 +79,7 @@
     "react-toastify": "9.0.0",
     "react-whatsmarked": "^0.9.19",
     "recharts": "^2.0.2",
+    "redoc": "2.5.4",
     "socket.io-client": "^4.7.5",
     "styled-components": "^5.3.5",
     "text-mask-addons": "^3.8.0",
@@ -92,6 +94,8 @@
     "yup": "^1.4.0"
   },
   "scripts": {
+    "docs:generate": "node scripts/generate-api-docs.cjs",
+    "docs:check": "node scripts/generate-api-docs.cjs --check && node scripts/check-api-docs.cjs",
     "start": "craco start",
     "legacy": "craco start",
     "build:avatar": "node scripts/build-kirby-definition.cjs && node scripts/build-kirby-bundle.cjs",
@@ -123,7 +127,13 @@
       "last 1 safari version"
     ]
   },
+  "overrides": {
+    "redoc": {
+      "react-tabs": "4.3.0"
+    }
+  },
   "devDependencies": {
+    "@redocly/openapi-core": "1.34.21",
     "@craco/craco": "^7.1.0",
     "@socket.io/admin-ui": "^0.5.1",
     "@testing-library/jest-dom": "^5.11.4",

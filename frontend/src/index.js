@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import { loadJSON } from "./helpers/loadJSON";
 import { i18n } from "./translate/i18n";
 import getCompanySlug from "./helpers/getCompanySlug";
+import { isDocumentationPath } from "./pages/Documentation/examples";
 
 const BACKEND_RETRY_INTERVAL_SECONDS = 30;
 const BACKEND_PROBE_TIMEOUT_MS = 10000;
@@ -122,7 +123,14 @@ const isPublicCheckout =
   !getCompanySlug() &&
   !new URLSearchParams(window.location.search).has("companyId");
 
-if (!config) {
+if (isDocumentationPath(window.location.pathname)) {
+  document.getElementById("splash-background")?.remove();
+  import("./pages/Documentation").then(({ default: Documentation }) => {
+    ReactDOM.render(<Documentation />, document.getElementById("root"), () =>
+      window.finishProgress()
+    );
+  });
+} else if (!config) {
   window.renderError(i18n.t("frontendErrors.ERR_CONFIG_ERROR"));
 } else if (isPublicLanding) {
   renderPublicLanding();
