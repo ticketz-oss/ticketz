@@ -8,6 +8,7 @@ const messages = {
         delete: "Eliminar",
         cancel: "Cancelar",
         save: "Salvar",
+        new: "Novo",
         confirm: "Confirmar",
         confirmation: "Confirmação",
         areyousure: "Tem certeza?",
@@ -127,6 +128,10 @@ const messages = {
           deleteMessage: "Deseja realmente eliminar este registo?",
           impersonateTitle: "Aceder como",
           impersonateMessage: "Deseja aceder ao sistema como esta empresa?"
+        },
+        modal: {
+          newTitle: "Nova Empresa",
+          editTitle: "Editar Empresa"
         }
       },
       auth: {
@@ -1064,7 +1069,9 @@ const messages = {
           title: "Horários"
         },
         Plans: {
-          title: "Planos"
+          title: "Planos",
+          new: "Novo Plano",
+          edit: "Editar Plano"
         },
         Help: {
           title: "Ajuda"

@@ -7,6 +7,7 @@ const messages = {
         delete: "Hapus",
         cancel: "Batal",
         save: "Simpan",
+        new: "Baru",
         confirm: "Konfirmasi",
         close: "Tutup",
         error: "Kesalahan",
@@ -95,6 +96,10 @@ const messages = {
           impersonateTitle: "Akses sebagai",
           impersonateMessage:
             "Apakah Anda ingin mengakses sistem sebagai perusahaan ini?"
+        },
+        modal: {
+          newTitle: "Perusahaan Baru",
+          editTitle: "Edit Perusahaan"
         }
       },
       auth: {
@@ -1032,7 +1037,9 @@ const messages = {
           title: "Jadwal"
         },
         Plans: {
-          title: "Rencana"
+          title: "Rencana",
+          new: "Rencana Baru",
+          edit: "Edit Rencana"
         },
         Help: {
           title: "Bantuan"

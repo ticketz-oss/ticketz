@@ -7,6 +7,7 @@ const messages = {
         delete: "Löschen",
         cancel: "Abbrechen",
         save: "Speichern",
+        new: "Neu",
         confirm: "Bestätigen",
         close: "Schließen",
         error: "Fehler",
@@ -95,6 +96,10 @@ const messages = {
           impersonateTitle: "Zugreifen als",
           impersonateMessage:
             "Moechten Sie das System als dieses Unternehmen aufrufen?"
+        },
+        modal: {
+          newTitle: "Neues Unternehmen",
+          editTitle: "Unternehmen bearbeiten"
         }
       },
       auth: {
@@ -1016,7 +1021,9 @@ const messages = {
           title: "Zeitpläne"
         },
         Plans: {
-          title: "Pläne"
+          title: "Pläne",
+          new: "Neuer Plan",
+          edit: "Plan bearbeiten"
         },
         Help: {
           title: "Hilfe"

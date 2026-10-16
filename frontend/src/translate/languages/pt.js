@@ -11,6 +11,7 @@ const messages = {
         delete: "Excluir",
         cancel: "Cancelar",
         save: "Salvar",
+        new: "Novo",
         confirm: "Confirmar",
         confirmation: "Confirmação",
         areyousure: "Você tem certeza?",
@@ -130,6 +131,10 @@ const messages = {
           deleteMessage: "Deseja realmente excluir esse registro?",
           impersonateTitle: "Acessar como",
           impersonateMessage: "Deseja acessar o sistema como esta empresa?"
+        },
+        modal: {
+          newTitle: "Nova Empresa",
+          editTitle: "Editar Empresa"
         }
       },
       auth: {
@@ -1106,7 +1111,9 @@ const messages = {
           usersLimit: "Limite de usuários",
           connectionsLimit: "Limite de conexões",
           queuesLimit: "Limite de filas",
-          currencyCode: "Código da Moeda (ISO 4217)"
+          currencyCode: "Código da Moeda (ISO 4217)",
+          new: "Novo Plano",
+          edit: "Editar Plano"
         },
         Help: {
           title: "Ajuda"

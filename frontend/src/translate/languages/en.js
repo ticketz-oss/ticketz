@@ -11,6 +11,7 @@ const messages = {
         delete: "Delete",
         cancel: "Cancel",
         save: "Save",
+        new: "New",
         confirm: "Confirm",
         confirmation: "Confirmation",
         areyousure: "Are you sure?",
@@ -131,6 +132,10 @@ const messages = {
           impersonateTitle: "Access as",
           impersonateMessage:
             "Do you want to access the system as this company?"
+        },
+        modal: {
+          newTitle: "New Company",
+          editTitle: "Edit Company"
         }
       },
       auth: {
@@ -1107,7 +1112,9 @@ const messages = {
           usersLimit: "Users limit",
           connectionsLimit: "Connections limit",
           queuesLimit: "Queues limit",
-          currencyCode: "Currency code (ISO 4217)"
+          currencyCode: "Currency code (ISO 4217)",
+          new: "New Plan",
+          edit: "Edit Plan"
         },
         Help: {
           title: "Help"

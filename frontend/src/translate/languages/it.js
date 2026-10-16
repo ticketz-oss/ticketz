@@ -7,6 +7,7 @@ const messages = {
         delete: "Elimina",
         cancel: "Annulla",
         save: "Salva",
+        new: "Nuovo",
         confirm: "Conferma",
         close: "Chiudi",
         error: "Errore",
@@ -95,6 +96,10 @@ const messages = {
           deleteMessage: "Vuoi eliminare davvero questo record?",
           impersonateTitle: "Accedi come",
           impersonateMessage: "Vuoi accedere al sistema come questa azienda?"
+        },
+        modal: {
+          newTitle: "Nuova Azienda",
+          editTitle: "Modifica Azienda"
         }
       },
       auth: {
@@ -1007,7 +1012,9 @@ const messages = {
           title: "Orari"
         },
         Plans: {
-          title: "Piani"
+          title: "Piani",
+          new: "Nuovo Piano",
+          edit: "Modifica Piano"
         },
         Help: {
           title: "Aiuto"

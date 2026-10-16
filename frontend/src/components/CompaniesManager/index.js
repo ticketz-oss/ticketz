@@ -13,13 +13,17 @@ import {
   TableCell,
   TableRow,
   IconButton,
-  Select
+  Select,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Button
 } from "@material-ui/core";
 import { Formik, Form, Field } from "formik";
 import ButtonWithSpinner from "../ButtonWithSpinner";
 import ConfirmationModal from "../ConfirmationModal";
 
-import { Edit as EditIcon } from "@material-ui/icons";
+import { Edit as EditIcon, Add as AddIcon } from "@material-ui/icons";
 
 import { toast } from "react-toastify";
 import useCompanies from "../../hooks/useCompanies";
@@ -583,6 +587,7 @@ export default function CompaniesManager() {
     useState(false);
   const [loading, setLoading] = useState(false);
   const [records, setRecords] = useState([]);
+  const [modalOpen, setModalOpen] = useState(false);
   const [record, setRecord] = useState({
     name: "",
     email: "",
@@ -668,6 +673,7 @@ export default function CompaniesManager() {
       dueDate: "",
       recurrence: ""
     }));
+    setModalOpen(false);
   };
 
   const handleSelect = data => {
@@ -694,12 +700,58 @@ export default function CompaniesManager() {
       dueDate: data.dueDate || "",
       recurrence: data.recurrence || ""
     }));
+    setModalOpen(true);
+  };
+
+  const handleNew = () => {
+    setRecord({
+      name: "",
+      email: "",
+      phone: "",
+      language: "",
+      planId: "",
+      status: true,
+      campaignsEnabled: false,
+      dueDate: "",
+      recurrence: ""
+    });
+    setModalOpen(true);
   };
 
   return (
     <Paper className={classes.mainPaper} elevation={0}>
       <Grid spacing={2} container>
         <Grid xs={12} item>
+          <Grid justifyContent="flex-end" container>
+            <Grid xs={4} md={2} item>
+              <Button
+                className={classes.fullWidth}
+                onClick={handleNew}
+                variant="contained"
+                color="primary"
+                startIcon={<AddIcon />}
+              >
+                {i18n.t("common.new")}
+              </Button>
+            </Grid>
+          </Grid>
+        </Grid>
+        <Grid xs={12} item>
+          <CompaniesManagerGrid records={records} onSelect={handleSelect} />
+        </Grid>
+      </Grid>
+      <Dialog
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          {record.id !== undefined
+            ? i18n.t("companiesManager.modal.editTitle")
+            : i18n.t("companiesManager.modal.newTitle")}
+        </DialogTitle>
+        <DialogContent>
           <CompanyForm
             initialValue={record}
             onDelete={handleOpenDeleteDialog}
@@ -708,11 +760,8 @@ export default function CompaniesManager() {
             onCancel={handleCancel}
             loading={loading}
           />
-        </Grid>
-        <Grid xs={12} item>
-          <CompaniesManagerGrid records={records} onSelect={handleSelect} />
-        </Grid>
-      </Grid>
+        </DialogContent>
+      </Dialog>
       <ConfirmationModal
         title={i18n.t("companiesManager.confirmationModal.deleteTitle")}
         open={showConfirmDeleteDialog}

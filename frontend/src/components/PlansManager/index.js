@@ -15,8 +15,13 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Button
 } from "@material-ui/core";
+import { Add as AddIcon } from "@material-ui/icons";
 import { Formik, Form, Field } from "formik";
 import ButtonWithSpinner from "../ButtonWithSpinner";
 import ConfirmationModal from "../ConfirmationModal";
@@ -396,13 +401,15 @@ export default function PlansManager() {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [loading, setLoading] = useState(false);
   const [records, setRecords] = useState([]);
+  const [modalOpen, setModalOpen] = useState(false);
   const [record, setRecord] = useState({
     name: "",
     users: 0,
     connections: 0,
     queues: 0,
     value: 0,
-    currency: ""
+    currency: "",
+    isPublic: true
   });
 
   useEffect(() => {
@@ -482,6 +489,7 @@ export default function PlansManager() {
       currency: "",
       isPublic: true
     });
+    setModalOpen(false);
   };
 
   const handleSelect = data => {
@@ -495,12 +503,56 @@ export default function PlansManager() {
       currency: data.currency || "",
       isPublic: data.isPublic
     });
+    setModalOpen(true);
+  };
+
+  const handleNew = () => {
+    setRecord({
+      name: "",
+      users: 0,
+      connections: 0,
+      queues: 0,
+      value: 0,
+      currency: "",
+      isPublic: true
+    });
+    setModalOpen(true);
   };
 
   return (
     <Paper className={classes.mainPaper} elevation={0}>
       <Grid spacing={2} container>
         <Grid xs={12} item>
+          <Grid justifyContent="flex-end" container>
+            <Grid xs={4} md={2} item>
+              <Button
+                className={classes.fullWidth}
+                onClick={handleNew}
+                variant="contained"
+                color="primary"
+                startIcon={<AddIcon />}
+              >
+                {i18n.t("common.new")}
+              </Button>
+            </Grid>
+          </Grid>
+        </Grid>
+        <Grid xs={12} item>
+          <PlansManagerGrid records={records} onSelect={handleSelect} />
+        </Grid>
+      </Grid>
+      <Dialog
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          {record.id !== undefined
+            ? i18n.t("settings.Plans.edit")
+            : i18n.t("settings.Plans.new")}
+        </DialogTitle>
+        <DialogContent>
           <PlanManagerForm
             initialValue={record}
             onDelete={handleOpenDeleteDialog}
@@ -508,11 +560,8 @@ export default function PlansManager() {
             onCancel={handleCancel}
             loading={loading}
           />
-        </Grid>
-        <Grid xs={12} item>
-          <PlansManagerGrid records={records} onSelect={handleSelect} />
-        </Grid>
-      </Grid>
+        </DialogContent>
+      </Dialog>
       <ConfirmationModal
         title="Exclusão de Registro"
         open={showConfirmDialog}
