@@ -555,7 +555,9 @@ const Dashboard = () => {
           yes={() => (
             <>
               <Grid container spacing={3} justifyContent="flex-start">
-                {config.TZAUTOINSTALLER === "1" && <ContainerUpdatesBanner />}
+                {false && config.TZAUTOINSTALLER === "1" && (
+                  <ContainerUpdatesBanner />
+                )}
                 {!localStorage.getItem("hideAds") && (
                   <>
                     <Grid item xs={12}>
