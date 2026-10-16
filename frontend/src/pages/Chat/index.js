@@ -25,8 +25,6 @@ import { has, isObject } from "lodash";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
 import withWidth, { isWidthUp } from "@material-ui/core/withWidth";
-import whatsBackground from "../../assets/wa-background.png";
-import whatsBackgroundDark from "../../assets/wa-background-dark.png";
 
 import { i18n } from "../../translate/i18n";
 import Title from "../../components/Title";
@@ -39,14 +37,7 @@ const useStyles = makeStyles(theme => ({
     padding: theme.spacing(2),
     height: `calc(100% - 48px)`,
     overflowY: "hidden",
-    border: "1px solid rgba(0, 0, 0, 0.12)",
-    backgroundImage:
-      theme.mode === "light"
-        ? `url(${whatsBackground})`
-        : `url(${whatsBackgroundDark})`,
-    backgroundPosition: "center",
-    backgroundSize: "cover",
-    backgroundRepeat: "no-repeat"
+    border: "1px solid rgba(0, 0, 0, 0.12)"
   },
   gridContainer: {
     flex: 1,

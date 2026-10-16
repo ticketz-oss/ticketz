@@ -8,7 +8,6 @@ import TicketsManager from "../../components/TicketsManagerTabs/";
 import Ticket from "../../components/Ticket/";
 
 import { i18n } from "../../translate/i18n";
-import WhatsappBackground from "../../assets/wa-background.png";
 
 const useStyles = makeStyles(theme => ({
   chatContainer: {
