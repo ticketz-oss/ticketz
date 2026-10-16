@@ -955,6 +955,7 @@ const messages = {
         success: "Setting saved successfully.",
         copiedToClipboard: "Copied to clipboard",
         title: "Settings",
+        section: "Section",
         chatbotTicketTimeout: "Chatbot ticket timeout (minutes)",
         chatbotTicketTimeoutAction: "Action after chatbot timeout",
         settings: {

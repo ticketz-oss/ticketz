@@ -2,7 +2,20 @@ import React, { useState, useEffect } from "react";
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
 import Title from "../../components/Title";
-import { makeStyles, Paper, Tabs, Tab, Button, Grid } from "@material-ui/core";
+import {
+  makeStyles,
+  Paper,
+  Tabs,
+  Tab,
+  Button,
+  Grid,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  useMediaQuery
+} from "@material-ui/core";
+import { useTheme } from "@material-ui/core/styles";
 
 import TabPanel from "../../components/TabPanel";
 
@@ -47,8 +60,27 @@ const useStyles = makeStyles(theme => ({
     overflowY: "scroll",
     flex: 1
   },
+  contentWrapper: {
+    display: "flex",
+    width: "100%",
+    [theme.breakpoints.down("sm")]: {
+      flexDirection: "column"
+    }
+  },
+  tabsVertical: {
+    borderRight: `1px solid ${theme.palette.divider}`,
+    minWidth: 200,
+    [theme.breakpoints.down("sm")]: {
+      borderRight: "none",
+      minWidth: "auto"
+    }
+  },
   tab: {
     borderRadius: 4
+  },
+  dropdown: {
+    width: "100%",
+    textAlign: "left"
   },
   paper: {
     ...theme.scrollbarStyles,
@@ -72,6 +104,8 @@ const useStyles = makeStyles(theme => ({
 
 const SettingsCustom = () => {
   const classes = useStyles();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [tab, setTab] = useState("options");
   const [schedules, setSchedules] = useState({});
   const [company, setCompany] = useState({});
@@ -166,172 +200,242 @@ const SettingsCustom = () => {
         <Title>{i18n.t("settings.title")}</Title>
       </MainHeader>
       <Paper className={classes.mainPaper} elevation={1}>
-        <Tabs
-          value={tab}
-          indicatorColor="primary"
-          textColor="primary"
-          scrollButtons="on"
-          variant="scrollable"
-          onChange={handleTabChange}
-          className={classes.tab}
-        >
-          <Tab label={i18n.t("settings.Options.title")} value={"options"} />
-          {schedulesEnabled && (
-            <Tab
-              label={i18n.t("settings.schedules.title")}
-              value={"schedules"}
-            />
-          )}
-          {isSuper() ? (
-            <Tab
-              label={i18n.t("settings.Companies.title")}
-              value={"companies"}
-            />
-          ) : null}
-          {isSuper() ? (
-            <Tab label={i18n.t("settings.Plans.title")} value={"plans"} />
-          ) : null}
-          {isSuper() ? (
-            <Tab label={i18n.t("settings.Help.title")} value={"helps"} />
-          ) : null}
-          {isSuper() ? (
-            <Tab
-              label={i18n.t("settings.Whitelabel.title")}
-              value={"whitelabel"}
-            />
-          ) : null}
-          {isSuper() ? (
-            <Tab
-              label={i18n.t("settings.PaymentGateways.title")}
-              value={"paymentGateway"}
-            />
-          ) : null}
-          {isSuper() ? (
-            <Tab label={i18n.t("settings.i18nSettings.title")} value={"i18n"} />
-          ) : null}
-          {isSuper() && config.TZAUTOINSTALLER === "1" ? (
-            <Tab label={i18n.t("settings.docker.title")} value={"containers"} />
-          ) : null}
-        </Tabs>
-        <Paper className={classes.paper} elevation={0}>
-          <TabPanel
-            className={classes.container}
-            value={tab}
-            name={"schedules"}
-          >
-            {isOpenHoursFormat(schedules) ? (
-              <>
-                <OpenHoursEditor value={schedules} onChange={setSchedules} />
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    marginTop: 16
-                  }}
-                >
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => handleSubmitSchedules(schedules)}
-                    disabled={loading}
-                  >
-                    {loading
-                      ? i18n.t("settings.saving")
-                      : i18n.t("common.save")}
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <>
-                <Grid spacing={4} container>
-                  <Grid item xs={12}>
-                    <div>
-                      <Button
-                        variant="contained"
-                        color="secondary"
-                        onClick={() => setSchedules({})}
-                        disabled={loading}
-                      >
-                        ⚠️ {i18n.t("settings.schedules.updateToNewFormat")}
-                      </Button>
-                    </div>
-                  </Grid>
-                </Grid>
-                <SchedulesForm
-                  loading={loading}
-                  onSubmit={handleSubmitSchedules}
-                  initialValues={schedules}
+        <div className={classes.contentWrapper}>
+          {!isMobile && (
+            <Tabs
+              orientation="vertical"
+              value={tab}
+              indicatorColor="primary"
+              textColor="primary"
+              onChange={handleTabChange}
+              className={classes.tabsVertical}
+            >
+              <Tab label={i18n.t("settings.Options.title")} value={"options"} />
+              {schedulesEnabled && (
+                <Tab
+                  label={i18n.t("settings.schedules.title")}
+                  value={"schedules"}
                 />
-              </>
-            )}
-          </TabPanel>
-          <OnlyForSuperUser
-            user={currentUser}
-            yes={() => (
-              <>
-                <TabPanel
-                  className={classes.container}
-                  value={tab}
-                  name={"whitelabel"}
-                >
-                  <Whitelabel settings={settings} />
-                </TabPanel>
-                <TabPanel
-                  className={classes.container}
-                  value={tab}
-                  name={"paymentGateway"}
-                >
-                  <PaymentGateway settings={settings} />
-                </TabPanel>
-                <TabPanel
-                  className={classes.container}
-                  value={tab}
-                  name={"i18n"}
-                >
-                  <I18nSettings />
-                </TabPanel>
-                {config.TZAUTOINSTALLER === "1" && (
+              )}
+              {isSuper() ? (
+                <Tab
+                  label={i18n.t("settings.Companies.title")}
+                  value={"companies"}
+                />
+              ) : null}
+              {isSuper() ? (
+                <Tab label={i18n.t("settings.Plans.title")} value={"plans"} />
+              ) : null}
+              {isSuper() ? (
+                <Tab label={i18n.t("settings.Help.title")} value={"helps"} />
+              ) : null}
+              {isSuper() ? (
+                <Tab
+                  label={i18n.t("settings.Whitelabel.title")}
+                  value={"whitelabel"}
+                />
+              ) : null}
+              {isSuper() ? (
+                <Tab
+                  label={i18n.t("settings.PaymentGateways.title")}
+                  value={"paymentGateway"}
+                />
+              ) : null}
+              {isSuper() ? (
+                <Tab
+                  label={i18n.t("settings.i18nSettings.title")}
+                  value={"i18n"}
+                />
+              ) : null}
+              {isSuper() && config.TZAUTOINSTALLER === "1" ? (
+                <Tab
+                  label={i18n.t("settings.docker.title")}
+                  value={"containers"}
+                />
+              ) : null}
+            </Tabs>
+          )}
+          {isMobile && (
+            <Grid container style={{ padding: theme.spacing(2) }}>
+              <Grid xs={12} sm={6} item>
+                <FormControl className={classes.dropdown}>
+                  <InputLabel>{i18n.t("settings.section")}</InputLabel>
+                  <Select
+                    value={tab}
+                    onChange={e => handleTabChange(e, e.target.value)}
+                  >
+                    <MenuItem value="options">
+                      {i18n.t("settings.Options.title")}
+                    </MenuItem>
+                    {schedulesEnabled && (
+                      <MenuItem value="schedules">
+                        {i18n.t("settings.schedules.title")}
+                      </MenuItem>
+                    )}
+                    {isSuper() && (
+                      <MenuItem value="companies">
+                        {i18n.t("settings.Companies.title")}
+                      </MenuItem>
+                    )}
+                    {isSuper() && (
+                      <MenuItem value="plans">
+                        {i18n.t("settings.Plans.title")}
+                      </MenuItem>
+                    )}
+                    {isSuper() && (
+                      <MenuItem value="helps">
+                        {i18n.t("settings.Help.title")}
+                      </MenuItem>
+                    )}
+                    {isSuper() && (
+                      <MenuItem value="whitelabel">
+                        {i18n.t("settings.Whitelabel.title")}
+                      </MenuItem>
+                    )}
+                    {isSuper() && (
+                      <MenuItem value="paymentGateway">
+                        {i18n.t("settings.PaymentGateways.title")}
+                      </MenuItem>
+                    )}
+                    {isSuper() && (
+                      <MenuItem value="i18n">
+                        {i18n.t("settings.i18nSettings.title")}
+                      </MenuItem>
+                    )}
+                    {isSuper() && config.TZAUTOINSTALLER === "1" && (
+                      <MenuItem value="containers">
+                        {i18n.t("settings.docker.title")}
+                      </MenuItem>
+                    )}
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+          )}
+          <Paper className={classes.paper} elevation={0}>
+            <TabPanel
+              className={classes.container}
+              value={tab}
+              name={"schedules"}
+            >
+              {isOpenHoursFormat(schedules) ? (
+                <>
+                  <OpenHoursEditor value={schedules} onChange={setSchedules} />
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      marginTop: 16
+                    }}
+                  >
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleSubmitSchedules(schedules)}
+                      disabled={loading}
+                    >
+                      {loading
+                        ? i18n.t("settings.saving")
+                        : i18n.t("common.save")}
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Grid spacing={4} container>
+                    <Grid item xs={12}>
+                      <div>
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          onClick={() => setSchedules({})}
+                          disabled={loading}
+                        >
+                          ⚠️ {i18n.t("settings.schedules.updateToNewFormat")}
+                        </Button>
+                      </div>
+                    </Grid>
+                  </Grid>
+                  <SchedulesForm
+                    loading={loading}
+                    onSubmit={handleSubmitSchedules}
+                    initialValues={schedules}
+                  />
+                </>
+              )}
+            </TabPanel>
+            <OnlyForSuperUser
+              user={currentUser}
+              yes={() => (
+                <>
                   <TabPanel
                     className={classes.container}
                     value={tab}
-                    name={"containers"}
+                    name={"whitelabel"}
                   >
-                    <ContainersManager />
+                    <Whitelabel settings={settings} />
                   </TabPanel>
-                )}
-                <TabPanel
-                  className={classes.container}
-                  value={tab}
-                  name={"companies"}
-                >
-                  <CompaniesManager />
-                </TabPanel>
-                <TabPanel
-                  className={classes.container}
-                  value={tab}
-                  name={"plans"}
-                >
-                  <PlansManager />
-                </TabPanel>
-                <TabPanel
-                  className={classes.container}
-                  value={tab}
-                  name={"helps"}
-                >
-                  <HelpsManager />
-                </TabPanel>
-              </>
-            )}
-          />
-          <TabPanel className={classes.container} value={tab} name={"options"}>
-            <Options
-              settings={settings}
-              scheduleTypeChanged={value =>
-                setSchedulesEnabled(value === "company")
-              }
+                  <TabPanel
+                    className={classes.container}
+                    value={tab}
+                    name={"paymentGateway"}
+                  >
+                    <PaymentGateway settings={settings} />
+                  </TabPanel>
+                  <TabPanel
+                    className={classes.container}
+                    value={tab}
+                    name={"i18n"}
+                  >
+                    <I18nSettings />
+                  </TabPanel>
+                  {config.TZAUTOINSTALLER === "1" && (
+                    <TabPanel
+                      className={classes.container}
+                      value={tab}
+                      name={"containers"}
+                    >
+                      <ContainersManager />
+                    </TabPanel>
+                  )}
+                  <TabPanel
+                    className={classes.container}
+                    value={tab}
+                    name={"companies"}
+                  >
+                    <CompaniesManager />
+                  </TabPanel>
+                  <TabPanel
+                    className={classes.container}
+                    value={tab}
+                    name={"plans"}
+                  >
+                    <PlansManager />
+                  </TabPanel>
+                  <TabPanel
+                    className={classes.container}
+                    value={tab}
+                    name={"helps"}
+                  >
+                    <HelpsManager />
+                  </TabPanel>
+                </>
+              )}
             />
-          </TabPanel>
-        </Paper>
+            <TabPanel
+              className={classes.container}
+              value={tab}
+              name={"options"}
+            >
+              <Options
+                settings={settings}
+                scheduleTypeChanged={value =>
+                  setSchedulesEnabled(value === "company")
+                }
+              />
+            </TabPanel>
+          </Paper>
+        </div>
       </Paper>
     </MainContainer>
   );
