@@ -17,6 +17,10 @@ import Select from "@material-ui/core/Select";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
+import IconButton from "@material-ui/core/IconButton";
+import InputAdornment from "@material-ui/core/InputAdornment";
+import Visibility from "@material-ui/icons/Visibility";
+import VisibilityOff from "@material-ui/icons/VisibilityOff";
 
 import { i18n } from "../../translate/i18n";
 
@@ -78,6 +82,7 @@ const UserModal = ({ open, onClose, userId }) => {
   const { user: loggedInUser } = useContext(AuthContext);
 
   const [user, setUser] = useState(initialState);
+  const [showPassword, setShowPassword] = useState(false);
   const [selectedQueueIds, setSelectedQueueIds] = useState([]);
 
   useEffect(() => {
@@ -101,6 +106,7 @@ const UserModal = ({ open, onClose, userId }) => {
   const handleClose = () => {
     onClose();
     setUser(initialState);
+    setShowPassword(false);
   };
 
   const handleSaveUser = async values => {
@@ -161,7 +167,7 @@ const UserModal = ({ open, onClose, userId }) => {
                   <Field
                     as={TextField}
                     label={i18n.t("userModal.form.password")}
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     name="password"
                     error={touched.password && Boolean(errors.password)}
                     helperText={touched.password && errors.password}
@@ -170,6 +176,24 @@ const UserModal = ({ open, onClose, userId }) => {
                     fullWidth
                     inputProps={{
                       autoComplete: "off"
+                    }}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label={
+                              showPassword
+                                ? i18n.t("common.hidePassword")
+                                : i18n.t("common.showPassword")
+                            }
+                            onClick={() => setShowPassword(!showPassword)}
+                            onMouseDown={event => event.preventDefault()}
+                            edge="end"
+                          >
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      )
                     }}
                   />
                 </div>

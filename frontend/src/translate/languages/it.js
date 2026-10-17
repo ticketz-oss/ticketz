@@ -10,6 +10,8 @@ const messages = {
         new: "Nuovo",
         confirm: "Conferma",
         close: "Chiudi",
+        showPassword: "Mostra password",
+        hidePassword: "Nascondi password",
         error: "Errore",
         success: "Successo",
         actions: "Azioni",

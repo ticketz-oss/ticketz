@@ -12,10 +12,13 @@ import Fade from "@material-ui/core/Fade";
 import Paper from "@material-ui/core/Paper";
 import MenuList from "@material-ui/core/MenuList";
 import IconButton from "@material-ui/core/IconButton";
+import InputAdornment from "@material-ui/core/InputAdornment";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import Brightness4Icon from "@material-ui/icons/Brightness4";
 import Brightness7Icon from "@material-ui/icons/Brightness7";
 import LanguageIcon from "@material-ui/icons/Translate";
+import Visibility from "@material-ui/icons/Visibility";
+import VisibilityOff from "@material-ui/icons/VisibilityOff";
 import Typography from "@material-ui/core/Typography";
 
 import { i18n } from "../../translate/i18n";
@@ -360,6 +363,7 @@ const Login = () => {
   };
 
   const [user, setUser] = useState({ email: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
   const [allowSignup, setAllowSignup] = useState(false);
   const [loginLinks, setLoginLinks] = useState([]);
   const [sidePanelImage, setSidePanelImage] = useState("");
@@ -540,11 +544,33 @@ const Login = () => {
                       fullWidth
                       name="password"
                       label={i18n.t("login.form.password")}
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       id="password"
                       value={user.password}
                       onChange={handleChangeInput}
                       autoComplete="current-password"
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              aria-label={
+                                showPassword
+                                  ? i18n.t("common.hidePassword")
+                                  : i18n.t("common.showPassword")
+                              }
+                              onClick={() => setShowPassword(!showPassword)}
+                              onMouseDown={event => event.preventDefault()}
+                              edge="end"
+                            >
+                              {showPassword ? (
+                                <VisibilityOff />
+                              ) : (
+                                <Visibility />
+                              )}
+                            </IconButton>
+                          </InputAdornment>
+                        )
+                      }}
                     />
                     <Button
                       type="submit"

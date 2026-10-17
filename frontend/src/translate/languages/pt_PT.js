@@ -13,6 +13,8 @@ const messages = {
         confirmation: "Confirmação",
         areyousure: "Tem certeza?",
         close: "Fechar",
+        showPassword: "Mostrar palavra-passe",
+        hidePassword: "Ocultar palavra-passe",
         closed: "Fechado",
         error: "Erro",
         success: "Sucesso",

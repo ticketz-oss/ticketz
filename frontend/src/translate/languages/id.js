@@ -10,6 +10,8 @@ const messages = {
         new: "Baru",
         confirm: "Konfirmasi",
         close: "Tutup",
+        showPassword: "Tampilkan kata sandi",
+        hidePassword: "Sembunyikan kata sandi",
         error: "Kesalahan",
         success: "Sukses",
         actions: "Aksi",

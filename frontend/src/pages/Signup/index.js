@@ -12,9 +12,18 @@ import CssBaseline from "@material-ui/core/CssBaseline";
 import TextField from "@material-ui/core/TextField";
 import Link from "@material-ui/core/Link";
 import Grid from "@material-ui/core/Grid";
-import { InputLabel, FormControl, MenuItem, Select } from "@material-ui/core";
+import {
+  InputLabel,
+  FormControl,
+  MenuItem,
+  Select,
+  IconButton,
+  InputAdornment
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useTheme } from "@material-ui/core";
+import Visibility from "@material-ui/icons/Visibility";
+import VisibilityOff from "@material-ui/icons/VisibilityOff";
 import Container from "@material-ui/core/Container";
 import { i18n } from "../../translate/i18n";
 
@@ -73,6 +82,7 @@ const SignUp = () => {
   const history = useHistory();
   const { getPublicSetting } = useSettings();
   const [allowSignup, setAllowSignup] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   let companyId = null;
 
@@ -206,10 +216,32 @@ const SignUp = () => {
                         error={touched.password && Boolean(errors.password)}
                         helperText={touched.password && errors.password}
                         label={i18n.t("signup.form.password")}
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         id="password"
                         autoComplete="current-password"
                         required
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton
+                                aria-label={
+                                  showPassword
+                                    ? i18n.t("common.hidePassword")
+                                    : i18n.t("common.showPassword")
+                                }
+                                onClick={() => setShowPassword(!showPassword)}
+                                onMouseDown={event => event.preventDefault()}
+                                edge="end"
+                              >
+                                {showPassword ? (
+                                  <VisibilityOff />
+                                ) : (
+                                  <Visibility />
+                                )}
+                              </IconButton>
+                            </InputAdornment>
+                          )
+                        }}
                       />
                     </Grid>
                     <Grid item xs={12}>
