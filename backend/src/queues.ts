@@ -38,6 +38,7 @@ import { cacheLayer } from "./libs/cache";
 const connection = process.env.REDIS_URI || "";
 const limiterMax = process.env.REDIS_OPT_LIMITER_MAX || 1;
 const limiterDuration = process.env.REDIS_OPT_LIMITER_DURATION || 3000;
+const MAX_TIMEOUT_MINUTES = 365 * 24 * 60;
 
 export const userMonitor = new Queue("UserMonitor", connection);
 
@@ -247,11 +248,13 @@ async function handleRatingsTimeout() {
   // eslint-disable-next-line no-restricted-syntax
   for await (const tracking of openTrackingRatings) {
     if (!ratingThresholds[tracking.companyId]) {
-      const timeout =
+      const timeout = Math.min(
         parseInt(
           await GetCompanySetting(tracking.companyId, "ratingsTimeout", "5"),
           10
-        ) || 5;
+        ) || 5,
+        MAX_TIMEOUT_MINUTES
+      );
 
       ratingThresholds[tracking.companyId] = subMinutes(currentTime, timeout);
     }
@@ -490,8 +493,9 @@ async function handleTicketTimeouts() {
   // eslint-disable-next-line no-restricted-syntax
   for (const company of companies) {
     logger.trace({ companyId: company?.id }, "handleTicketTimeouts -> company");
-    const noQueueTimeout = Number(
-      await GetCompanySetting(company.id, "noQueueTimeout", "0")
+    const noQueueTimeout = Math.min(
+      Number(await GetCompanySetting(company.id, "noQueueTimeout", "0")),
+      MAX_TIMEOUT_MINUTES
     );
     if (noQueueTimeout) {
       const noQueueTimeoutAction = Number(
@@ -504,8 +508,9 @@ async function handleTicketTimeouts() {
         noQueueTimeoutAction || 0
       );
     }
-    const openTicketTimeout = Number(
-      await GetCompanySetting(company.id, "openTicketTimeout", "0")
+    const openTicketTimeout = Math.min(
+      Number(await GetCompanySetting(company.id, "openTicketTimeout", "0")),
+      MAX_TIMEOUT_MINUTES
     );
     if (openTicketTimeout) {
       const openTicketTimeoutAction = await GetCompanySetting(
@@ -520,8 +525,9 @@ async function handleTicketTimeouts() {
         openTicketTimeoutAction
       );
     }
-    const chatbotTicketTimeout = Number(
-      await GetCompanySetting(company.id, "chatbotTicketTimeout", "0")
+    const chatbotTicketTimeout = Math.min(
+      Number(await GetCompanySetting(company.id, "chatbotTicketTimeout", "0")),
+      MAX_TIMEOUT_MINUTES
     );
     if (chatbotTicketTimeout) {
       const chatbotTicketTimeoutAction =
