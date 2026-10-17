@@ -46,8 +46,6 @@ import {
 import WhatsMarked from "react-whatsmarked";
 import PdfPreview from "../PdfPreview";
 import MessageOptionsMenu from "../MessageOptionsMenu";
-import whatsBackground from "../../assets/wa-background.png";
-import whatsBackgroundDark from "../../assets/wa-background-dark.png";
 import MediaGalleryLightbox, {
   buildMediaGalleryData
 } from "../MediaGalleryLightbox";
@@ -80,10 +78,7 @@ const useStyles = makeStyles(theme => ({
   },
 
   stickedMessages: {
-    backgroundImage:
-      theme.mode === "light"
-        ? `url(${whatsBackground})`
-        : `url(${whatsBackgroundDark})`,
+    backgroundColor: theme.mode === "light" ? "#dfdfdf" : "#505050",
     flexDirection: "column",
     flexGrow: 1,
     padding: "5px 20px 20px 20px",
@@ -110,10 +105,7 @@ const useStyles = makeStyles(theme => ({
   },
 
   messagesList: {
-    backgroundImage:
-      theme.mode === "light"
-        ? `url(${whatsBackground})`
-        : `url(${whatsBackgroundDark})`,
+    backgroundColor: theme.mode === "light" ? "#dfdfdf" : "#505050",
     display: "flex",
     flexDirection: "column",
     flexGrow: 1,

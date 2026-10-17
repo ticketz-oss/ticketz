@@ -140,9 +140,9 @@ const App = () => {
               paper: mode === "light" ? "#fff" : "#424242"
             },
             backgroundContrast: {
-              default: mode === "light" ? "#ddd" : "#888",
-              paper: mode === "light" ? "#ddd" : "#888",
-              border: mode === "light" ? "#aaa" : "#444"
+              default: mode === "light" ? "#ccc" : "#888",
+              paper: mode === "light" ? "#ccc" : "#888",
+              border: mode === "light" ? "#999" : "#444"
             },
             dark: { main: mode === "light" ? "#333333" : "#666" },
             light: { main: mode === "light" ? "#F3F3F3" : "#333333" },
@@ -155,7 +155,7 @@ const App = () => {
             optionsBackground: mode === "light" ? "#fafafa" : "#333",
             options: mode === "light" ? "#fafafa" : "#666",
             fontecor: mode === "light" ? primaryColorLight : primaryColorDark,
-            fancyBackground: mode === "light" ? "#fafafa" : "#333",
+            fancyBackground: mode === "light" ? "white" : "#333",
             bordabox: mode === "light" ? "#eee" : "#333",
             newmessagebox: mode === "light" ? "#eee" : "#333",
             inputdigita: mode === "light" ? "#fff" : "#666",
@@ -186,6 +186,9 @@ const App = () => {
               return calculatedLogoLight();
             }
             return calculatedLogoDark();
+          },
+          calculatedLogoFavicon: () => {
+            return appLogoFavicon || defaultLogoFavicon;
           }
         },
         locale

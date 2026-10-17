@@ -7,7 +7,7 @@ const useStyles = makeStyles(theme => ({
   mainContainer: {
     flex: 1,
     padding: theme.spacing(2),
-    height: `calc(100% - 48px)`
+    height: "100%"
   },
 
   contentWrapper: {
