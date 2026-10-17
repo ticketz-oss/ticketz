@@ -449,6 +449,89 @@ async function handleChatbotTicketTimeout(
   );
 }
 
+async function handlePendingTicketTimeout(
+  company: Company,
+  timeout: number,
+  action: number
+) {
+  logger.trace(
+    {
+      timeout,
+      action,
+      companyId: company?.id
+    },
+    "handlePendingTicketTimeout: entering"
+  );
+
+  if (action) {
+    const queue = await QueueModel.findOne({
+      where: {
+        companyId: company.id,
+        id: action
+      }
+    });
+
+    if (!queue) {
+      const removed = await Setting.destroy({
+        where: {
+          companyId: company.id,
+          key: {
+            [Op.like]: "pendingTicketTimeout%"
+          }
+        }
+      });
+      logger.info(
+        { companyId: company.id, action, removed },
+        "handlePendingTicketTimeout -> removed incorrect setting"
+      );
+      return;
+    }
+  }
+
+  const where: WhereOptions<Ticket> = {
+    status: "pending",
+    companyId: company.id,
+    updatedAt: {
+      [Op.lt]: subMinutes(new Date(), timeout)
+    }
+  };
+
+  if (action) {
+    where.queueId = {
+      [Op.or]: [{ [Op.ne]: action }, { [Op.is]: null }]
+    };
+  }
+
+  const tickets = await Ticket.findAll({ where });
+
+  logger.debug(
+    { expiredCount: tickets.length },
+    "handlePendingTicketTimeout -> tickets"
+  );
+
+  // eslint-disable-next-line no-restricted-syntax
+  for (const ticket of tickets) {
+    const ticketData = action
+      ? { status: "pending", queueId: action, userId: null }
+      : { status: "closed" };
+
+    await UpdateTicketService({
+      ticketId: ticket.id,
+      ticketData,
+      companyId: company.id
+    });
+  }
+
+  logger.trace(
+    {
+      timeout,
+      action,
+      companyId: company?.id
+    },
+    "handlePendingTicketTimeout: exiting"
+  );
+}
+
 async function handleOpenTicketTimeout(
   company: Company,
   timeout: number,
@@ -539,6 +622,22 @@ async function handleTicketTimeouts() {
         company,
         chatbotTicketTimeout,
         chatbotTicketTimeoutAction
+      );
+    }
+    const pendingTicketTimeout = Math.min(
+      Number(await GetCompanySetting(company.id, "pendingTicketTimeout", "0")),
+      MAX_TIMEOUT_MINUTES
+    );
+    if (pendingTicketTimeout) {
+      const pendingTicketTimeoutAction =
+        Number(
+          await GetCompanySetting(company.id, "pendingTicketTimeoutAction", "0")
+        ) || 0;
+
+      await handlePendingTicketTimeout(
+        company,
+        pendingTicketTimeout,
+        pendingTicketTimeoutAction
       );
     }
   }

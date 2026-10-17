@@ -965,6 +965,8 @@ const messages = {
         section: "Section",
         chatbotTicketTimeout: "Chatbot ticket timeout (minutes)",
         chatbotTicketTimeoutAction: "Action after chatbot timeout",
+        pendingTicketTimeout: "Pending ticket timeout (minutes)",
+        pendingTicketTimeoutAction: "Action after pending ticket timeout",
         settings: {
           userCreation: {
             name: "User creation",

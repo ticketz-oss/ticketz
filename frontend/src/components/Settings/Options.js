@@ -128,6 +128,9 @@ export default function Options(props) {
   const [chatbotTicketTimeout, setChatbotTicketTimeout] = useState("0");
   const [chatbotTicketTimeoutAction, setChatbotTicketTimeoutAction] =
     useState(0);
+  const [pendingTicketTimeout, setPendingTicketTimeout] = useState("0");
+  const [pendingTicketTimeoutAction, setPendingTicketTimeoutAction] =
+    useState("0");
 
   const [queues, setQueues] = useState([]);
   const { findAll: findAllQueues } = useQueues();
@@ -306,6 +309,16 @@ export default function Options(props) {
         s => s.key === "chatbotTicketTimeoutAction"
       );
       setChatbotTicketTimeoutAction(chatbotTicketTimeoutAction?.value || "0");
+
+      const pendingTicketTimeout = settings.find(
+        s => s.key === "pendingTicketTimeout"
+      );
+      setPendingTicketTimeout(pendingTicketTimeout?.value || "0");
+
+      const pendingTicketTimeoutAction = settings.find(
+        s => s.key === "pendingTicketTimeoutAction"
+      );
+      setPendingTicketTimeoutAction(pendingTicketTimeoutAction?.value || "0");
 
       const gracePeriod = settings.find(s => s.key === "gracePeriod");
       setGracePeriod(gracePeriod?.value || 0);
@@ -854,6 +867,54 @@ export default function Options(props) {
                   "chatbotTicketTimeoutAction",
                   e.target.value,
                   setChatbotTicketTimeoutAction
+                );
+              }}
+            >
+              <MenuItem value={"0"}>{i18n.t("common.close")}</MenuItem>
+              {queues.map(queue => (
+                <MenuItem key={queue.id} value={queue.id}>
+                  {i18n.t("common.transferTo")} {queue.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <TextField
+              id="pending-ticket-timeout-field"
+              label={i18n.t("settings.pendingTicketTimeout")}
+              variant="standard"
+              name="pendingTicketTimeout"
+              type="number"
+              value={pendingTicketTimeout}
+              onChange={e => {
+                setPendingTicketTimeout(e.target.value);
+              }}
+              onBlur={async _ => {
+                await handleSetting(
+                  "pendingTicketTimeout",
+                  pendingTicketTimeout
+                );
+              }}
+            />
+          </FormControl>
+        </Grid>
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="pending-ticket-timeout-action-label">
+              {i18n.t("settings.pendingTicketTimeoutAction")}
+            </InputLabel>
+            <Select
+              labelId="pending-ticket-timeout-action-label"
+              value={pendingTicketTimeoutAction}
+              onChange={async e => {
+                handleSetting(
+                  "pendingTicketTimeoutAction",
+                  e.target.value,
+                  setPendingTicketTimeoutAction
                 );
               }}
             >

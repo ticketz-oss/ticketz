@@ -968,6 +968,9 @@ const messages = {
         chatbotTicketTimeout:
           "Tiempo de espera del ticket del chatbot (minutos)",
         chatbotTicketTimeoutAction: "Acción después del tiempo de espera",
+        pendingTicketTimeout: "Tiempo de espera del ticket pendiente (minutos)",
+        pendingTicketTimeoutAction:
+          "Acción después del tiempo de espera del ticket pendiente",
         settings: {
           userCreation: {
             name: "Creación de usuario",
