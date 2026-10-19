@@ -55,6 +55,12 @@ const StoriesStrip = ({ companyId, userId }) => {
     setComposing({ whatsappId: whatsappId || null });
   };
 
+  const openEdit = post => {
+    setViewing(null);
+    setToast(null);
+    setComposing({ whatsappId: post.whatsappId, post });
+  };
+
   const handleSaved = ({ post, action, connection }) => {
     applyPost(post);
     if (action !== "draft") setComposing(null);
@@ -133,6 +139,7 @@ const StoriesStrip = ({ companyId, userId }) => {
           start={viewing}
           onClose={closeViewer}
           onNew={openCompose}
+          onEdit={openEdit}
           onPostChange={applyPost}
           onSeen={handleSeen}
         />
@@ -141,6 +148,7 @@ const StoriesStrip = ({ companyId, userId }) => {
       {composing && (
         <NewStoryModal
           defaultWhatsappId={composing.whatsappId}
+          post={composing.post}
           onClose={() => setComposing(null)}
           onSaved={handleSaved}
         />

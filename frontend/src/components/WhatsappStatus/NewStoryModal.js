@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import api from "../../services/api";
 import Layer from "./Layer";
+import downloadStoryMedia from "./downloadStoryMedia";
 import {
   CalendarIcon,
   CloseIcon,
@@ -64,27 +65,53 @@ const blockReason = (connection, kind) => {
   return null;
 };
 
-const NewStoryModal = ({ defaultWhatsappId, onClose, onSaved }) => {
+const colorIndexOf = hex => {
+  const index = STORY_COLORS.findIndex(
+    color => color.hex.toLowerCase() === String(hex || "").toLowerCase()
+  );
+  return index === -1 ? 0 : index;
+};
+
+// With `post` the modal edits that existing draft: it starts prefilled, saves
+// with PUT and never creates another post.
+const NewStoryModal = ({
+  defaultWhatsappId,
+  post: editing,
+  onClose,
+  onSaved
+}) => {
   const idempotencyKey = useRef(newIdempotencyKey());
   const fileInput = useRef(null);
+  const editingText = editing?.kind === "text";
   const [connections, setConnections] = useState([]);
   const [connectionsLoaded, setConnectionsLoaded] = useState(false);
   const [whatsappId, setWhatsappId] = useState(null);
-  const [kind, setKind] = useState("text");
-  const [text, setText] = useState("");
-  const [colorIndex, setColorIndex] = useState(0);
+  const [kind, setKind] = useState(editing?.kind || "text");
+  const [text, setText] = useState(editingText ? editing.body || "" : "");
+  const [colorIndex, setColorIndex] = useState(() =>
+    editingText ? colorIndexOf(editing.backgroundColor) : 0
+  );
   const [file, setFile] = useState(null);
   const [fileUrl, setFileUrl] = useState(null);
+  const [existingUrl, setExistingUrl] = useState(null);
   const [dragOver, setDragOver] = useState(false);
-  const [caption, setCaption] = useState("");
-  const [audienceMode, setAudienceMode] = useState("connection_contacts");
-  const [contactListId, setContactListId] = useState("");
+  const [caption, setCaption] = useState(
+    editing && !editingText ? editing.body || "" : ""
+  );
+  const [audienceMode, setAudienceMode] = useState(
+    editing?.audienceMode || "connection_contacts"
+  );
+  const [contactListId, setContactListId] = useState(
+    editing?.audienceMode === "contact_list" && editing.contactListId
+      ? String(editing.contactListId)
+      : ""
+  );
   const [contactLists, setContactLists] = useState([]);
   const [audience, setAudience] = useState({ status: "idle" });
   const [when, setWhen] = useState("now");
   const [scheduleValue, setScheduleValue] = useState("");
-  const [savedPost, setSavedPost] = useState(null);
-  const [dirty, setDirty] = useState(true);
+  const [savedPost, setSavedPost] = useState(editing || null);
+  const [dirty, setDirty] = useState(!editing);
   const [mediaDirty, setMediaDirty] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -97,14 +124,45 @@ const NewStoryModal = ({ defaultWhatsappId, onClose, onSaved }) => {
         if (!active) return;
         const list = Array.isArray(data) ? data : [];
         setConnections(list);
-        setWhatsappId(pickDefaultConnection(list, defaultWhatsappId));
+        const picked = pickDefaultConnection(list, defaultWhatsappId);
+        setWhatsappId(picked);
+        // The draft's connection is gone: saving must send the new one.
+        if (editing && picked !== editing.whatsappId) setDirty(true);
       })
       .catch(err => active && setError(errorText(err)))
       .finally(() => active && setConnectionsLoaded(true));
     return () => {
       active = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultWhatsappId]);
+
+  const editingId = editing?.id;
+  const editingMedia = Boolean(editing?.hasMedia) && editing?.kind !== "text";
+
+  // The file already stored with the draft, for the preview.
+  useEffect(() => {
+    if (!editingMedia) return undefined;
+    let active = true;
+    let objectUrl = null;
+    api
+      .get(`/whatsapp-status/posts/${editingId}/media`, {
+        responseType: "blob"
+      })
+      .then(({ data }) => {
+        if (!active || typeof URL.createObjectURL !== "function") return;
+        objectUrl = URL.createObjectURL(data);
+        setExistingUrl(objectUrl);
+      })
+      .catch(() => {
+        // The preview is optional; the draft keeps its file either way.
+      });
+    return () => {
+      active = false;
+      if (objectUrl && typeof URL.revokeObjectURL === "function")
+        URL.revokeObjectURL(objectUrl);
+    };
+  }, [editingId, editingMedia]);
 
   useEffect(() => {
     if (audienceMode !== "contact_list" || contactLists.length)
@@ -179,7 +237,14 @@ const NewStoryModal = ({ defaultWhatsappId, onClose, onSaved }) => {
     capabilityReason === "DISCONNECTED" && scheduling ? null : capabilityReason;
   const minSchedule = useMemo(() => toLocalInput(new Date()), []);
 
-  const hasMedia = Boolean(file) || (savedPost?.hasMedia && !mediaDirty);
+  // Media already stored with the post counts while the kind still matches.
+  const existingMedia =
+    !file &&
+    !mediaDirty &&
+    Boolean(savedPost?.hasMedia) &&
+    savedPost?.kind === kind;
+  const hasMedia = Boolean(file) || existingMedia;
+  const previewUrl = fileUrl || (existingMedia ? existingUrl : null);
   const contentOk = isText
     ? text.trim().length > 0 && text.length <= TEXT_LIMIT
     : hasMedia;
@@ -321,26 +386,7 @@ const NewStoryModal = ({ defaultWhatsappId, onClose, onSaved }) => {
       const wasSaved = savedPost && !dirty;
       const post = await saveDraft();
       if (!wasSaved) onSaved({ post, action: "draft", connection });
-      const { data } = await api.get(
-        `/whatsapp-status/posts/${post.id}/media`,
-        {
-          params: { download: 1 },
-          responseType: "blob"
-        }
-      );
-      if (typeof URL.createObjectURL !== "function") return;
-      const url = URL.createObjectURL(data);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `story-${post.id}.${kind === "video" ? "mp4" : "jpg"}`;
-      document.body.appendChild(link);
-      try {
-        link.click();
-      } catch (_) {
-        // jsdom and some embedded browsers have no navigation.
-      }
-      link.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      await downloadStoryMedia(post);
     });
 
   const audienceLine = () => {
@@ -388,7 +434,13 @@ const NewStoryModal = ({ defaultWhatsappId, onClose, onSaved }) => {
       >
         <header className="ews-dialog-head">
           <div style={{ flex: 1, minWidth: 0 }}>
-            <h2 id="ews-new-story-title">{t("whatsappStatus.modal.title")}</h2>
+            <h2 id="ews-new-story-title">
+              {t(
+                editing
+                  ? "whatsappStatus.modal.editTitle"
+                  : "whatsappStatus.modal.title"
+              )}
+            </h2>
             <p>{t("whatsappStatus.modal.subtitle")}</p>
           </div>
           <button
@@ -541,11 +593,13 @@ const NewStoryModal = ({ defaultWhatsappId, onClose, onSaved }) => {
                   <div className="ews-drop-hint">
                     {file
                       ? file.name
-                      : t(
-                          kind === "video"
-                            ? "whatsappStatus.modal.hintVideo"
-                            : "whatsappStatus.modal.hintImage"
-                        )}
+                      : existingMedia
+                        ? t("whatsappStatus.modal.mediaAttached")
+                        : t(
+                            kind === "video"
+                              ? "whatsappStatus.modal.hintVideo"
+                              : "whatsappStatus.modal.hintImage"
+                          )}
                   </div>
                   <input
                     ref={fileInput}
@@ -696,12 +750,14 @@ const NewStoryModal = ({ defaultWhatsappId, onClose, onSaved }) => {
                 <div className="ews-phone-text">{text}</div>
               ) : (
                 <div className="ews-phone-media">
-                  {fileUrl && kind === "video" && (
+                  {previewUrl && kind === "video" && (
                     // eslint-disable-next-line jsx-a11y/media-has-caption
-                    <video src={fileUrl} muted playsInline controls />
+                    <video src={previewUrl} muted playsInline controls />
                   )}
-                  {fileUrl && kind === "image" && <img src={fileUrl} alt="" />}
-                  {!fileUrl && (
+                  {previewUrl && kind === "image" && (
+                    <img src={previewUrl} alt="" />
+                  )}
+                  {!previewUrl && (
                     <>
                       <ImageIcon size={26} />
                       {t(
@@ -711,7 +767,7 @@ const NewStoryModal = ({ defaultWhatsappId, onClose, onSaved }) => {
                       )}
                     </>
                   )}
-                  {fileUrl && caption && (
+                  {previewUrl && caption && (
                     <div className="ews-phone-caption">{caption}</div>
                   )}
                 </div>

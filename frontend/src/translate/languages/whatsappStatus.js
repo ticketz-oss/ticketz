@@ -108,6 +108,8 @@ const pt = {
     },
     modal: {
       title: "Novo story",
+      editTitle: "Editar rascunho",
+      mediaAttached: "Arquivo já anexado",
       subtitle:
         "Publicado no status do WhatsApp da conexão escolhida. Fica visível para seus contatos por 24 horas.",
       close: "Fechar",
@@ -186,6 +188,8 @@ const pt = {
         "A lista de quem visualizou não está disponível para stories publicados pela plataforma.",
       publishNew: "Publicar novo story",
       delete: "Excluir este story",
+      editDraft: "Editar rascunho",
+      download: "Baixar arquivo",
       imageAlt: "Imagem do story",
       mediaUnavailable: "Mídia indisponível"
     },
@@ -229,6 +233,8 @@ const en = {
     },
     modal: {
       title: "New story",
+      editTitle: "Edit draft",
+      mediaAttached: "File already attached",
       subtitle:
         "Published on the WhatsApp status of the chosen connection. Visible to your contacts for 24 hours.",
       close: "Close",
@@ -307,6 +313,8 @@ const en = {
         "The list of who viewed is not available for stories published by the platform.",
       publishNew: "Publish new story",
       delete: "Delete this story",
+      editDraft: "Edit draft",
+      download: "Download file",
       imageAlt: "Story image",
       mediaUnavailable: "Media unavailable"
     },

@@ -134,16 +134,56 @@ const posts = [
 const socket = { on: jest.fn(), off: jest.fn(), disconnect: jest.fn() };
 const socketManager = { GetSocket: () => socket };
 
-const mockApi = ({ enabled = true } = {}) => {
+const mockApi = ({ enabled = true, extraPosts = [] } = {}) => {
   api.get.mockImplementation(url => {
     if (url === "/whatsapp-status/availability")
       return Promise.resolve({ data: { enabled } });
     if (url === "/whatsapp-status/connections")
       return Promise.resolve({ data: connections });
     if (url === "/whatsapp-status/posts")
-      return Promise.resolve({ data: posts });
+      return Promise.resolve({ data: [...posts, ...extraPosts] });
+    if (url === "/whatsapp-status/audience-preview")
+      return Promise.resolve({ data: { count: 3, sample: ["Ana"] } });
+    if (url === "/contact-lists")
+      return Promise.resolve({
+        data: { records: [{ id: 4, name: "Clientes VIP" }], hasMore: false }
+      });
+    if (/^\/whatsapp-status\/posts\/\d+\/media$/.test(url))
+      return Promise.resolve({
+        data: new Blob(["jpg"], { type: "image/jpeg" })
+      });
     return Promise.reject(new Error(`unexpected ${url}`));
   });
+};
+
+const imageDraft = {
+  ...basePost,
+  id: 31,
+  whatsappId: 3,
+  kind: "image",
+  body: "Cardápio da semana",
+  backgroundColor: null,
+  hasMedia: true,
+  mediaMime: "image/jpeg",
+  state: "draft",
+  publishedAt: null,
+  expiresAt: null,
+  createdAt: hoursFromNow(-30),
+  updatedAt: hoursFromNow(-30)
+};
+
+const textDraft = {
+  ...basePost,
+  id: 32,
+  whatsappId: 2,
+  body: "Rascunho de promoção",
+  backgroundColor: "#15803D",
+  audienceMode: "contact_list",
+  contactListId: 4,
+  state: "draft",
+  publishedAt: null,
+  expiresAt: null,
+  createdAt: hoursFromNow(-3)
 };
 
 const renderStrip = () =>
@@ -310,5 +350,208 @@ describe("Stories strip", () => {
         "A lista de quem visualizou não está disponível para stories publicados pela plataforma."
       )
     ).toBeVisible();
+  });
+
+  describe("drafts", () => {
+    beforeEach(() => {
+      global.URL.createObjectURL = jest.fn(() => "blob:story");
+      global.URL.revokeObjectURL = jest.fn();
+    });
+
+    it("shows a draft in the strip and in the viewer with its actions", async () => {
+      mockApi({ extraPosts: [imageDraft] });
+      renderStrip();
+      fireEvent.click(
+        await screen.findByRole("button", {
+          name: "Ver stories de Sem stories (1)"
+        })
+      );
+      const viewer = screen.getByRole("dialog", { name: "Meu story" });
+      const details = within(viewer).getByRole("complementary", {
+        name: "Detalhes do story"
+      });
+      expect(within(details).getByText("Rascunho")).toBeVisible();
+      expect(
+        await within(viewer).findByAltText("Imagem do story")
+      ).toBeVisible();
+      expect(
+        within(details).getByRole("button", { name: "Editar rascunho" })
+      ).toBeVisible();
+      expect(
+        within(details).getByRole("button", { name: "Baixar arquivo" })
+      ).toBeVisible();
+      expect(
+        within(details).getByRole("button", { name: "Excluir este story" })
+      ).toBeVisible();
+    });
+
+    it("downloads the draft media with download=1", async () => {
+      mockApi({ extraPosts: [imageDraft] });
+      renderStrip();
+      fireEvent.click(
+        await screen.findByRole("button", {
+          name: "Ver stories de Sem stories (1)"
+        })
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Baixar arquivo" }));
+      await waitFor(() =>
+        expect(api.get).toHaveBeenCalledWith(
+          "/whatsapp-status/posts/31/media",
+          { params: { download: 1 }, responseType: "blob" }
+        )
+      );
+      await waitFor(() => expect(URL.createObjectURL).toHaveBeenCalled());
+      await waitFor(() =>
+        expect(
+          screen.getByRole("button", { name: "Baixar arquivo" })
+        ).toBeEnabled()
+      );
+    });
+
+    it("hides the download action for a text draft", async () => {
+      mockApi({ extraPosts: [textDraft] });
+      renderStrip();
+      fireEvent.click(
+        await screen.findByRole("button", {
+          name: "Ver stories de Comercial (2)"
+        })
+      );
+      const details = screen.getByRole("complementary", {
+        name: "Detalhes do story"
+      });
+      expect(within(details).getByText("Rascunho")).toBeVisible();
+      expect(
+        within(details).queryByRole("button", { name: "Baixar arquivo" })
+      ).not.toBeInTheDocument();
+    });
+
+    it("edits a text draft in a prefilled modal and saves it with PUT", async () => {
+      mockApi({ extraPosts: [{ ...textDraft, whatsappId: 3 }] });
+      api.put.mockResolvedValue({
+        data: { ...textDraft, whatsappId: 3, body: "Promoção nova" }
+      });
+      renderStrip();
+      fireEvent.click(
+        await screen.findByRole("button", {
+          name: "Ver stories de Sem stories (1)"
+        })
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Editar rascunho" }));
+      expect(
+        screen.queryByRole("dialog", { name: "Meu story" })
+      ).not.toBeInTheDocument();
+      const modal = await screen.findByRole("dialog", {
+        name: "Editar rascunho"
+      });
+      await waitFor(() =>
+        expect(
+          within(modal).getByRole("combobox", { name: "Conexão" })
+        ).toHaveValue("3")
+      );
+      expect(within(modal).getByRole("tab", { name: "Texto" })).toHaveAttribute(
+        "aria-selected",
+        "true"
+      );
+      const textbox = within(modal).getByRole("textbox", { name: "Texto" });
+      expect(textbox).toHaveValue("Rascunho de promoção");
+      expect(
+        within(modal).getByRole("button", { name: "Verde" })
+      ).toHaveAttribute("aria-pressed", "true");
+      expect(
+        within(modal).getByRole("combobox", { name: "Quem pode ver" })
+      ).toHaveValue("contact_list");
+      await waitFor(() =>
+        expect(
+          within(modal).getByRole("combobox", { name: "Lista de contatos" })
+        ).toHaveValue("4")
+      );
+
+      fireEvent.change(textbox, { target: { value: "Promoção nova" } });
+      fireEvent.click(
+        within(modal).getByRole("button", { name: "Salvar rascunho" })
+      );
+      await waitFor(() => expect(api.put).toHaveBeenCalledTimes(1));
+      const [url, form] = api.put.mock.calls[0];
+      expect(url).toBe("/whatsapp-status/posts/32");
+      expect(form.get("body")).toBe("Promoção nova");
+      expect(form.get("contactListId")).toBe("4");
+      expect(api.post).not.toHaveBeenCalled();
+    });
+
+    it("publishes an edited draft without creating a new post", async () => {
+      mockApi({ extraPosts: [textDraft] });
+      api.put.mockResolvedValue({ data: { ...textDraft, body: "Nova" } });
+      api.post.mockResolvedValue({
+        data: { ...textDraft, body: "Nova", state: "queued" }
+      });
+      renderStrip();
+      fireEvent.click(
+        await screen.findByRole("button", {
+          name: "Ver stories de Comercial (2)"
+        })
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Editar rascunho" }));
+      const modal = await screen.findByRole("dialog", {
+        name: "Editar rascunho"
+      });
+      await within(modal).findByText(/Será visto por 3 contatos/);
+      fireEvent.change(within(modal).getByRole("textbox", { name: "Texto" }), {
+        target: { value: "Nova" }
+      });
+      fireEvent.click(
+        within(modal).getByRole("button", { name: /Publicar story/ })
+      );
+      await waitFor(() =>
+        expect(api.post).toHaveBeenCalledWith(
+          "/whatsapp-status/posts/32/publish",
+          {}
+        )
+      );
+      expect(api.put).toHaveBeenCalledWith(
+        "/whatsapp-status/posts/32",
+        expect.any(FormData)
+      );
+      expect(api.post).toHaveBeenCalledTimes(1);
+    });
+
+    it("shows the existing media of a draft as already attached", async () => {
+      mockApi({ extraPosts: [imageDraft] });
+      api.put.mockResolvedValue({ data: imageDraft });
+      renderStrip();
+      fireEvent.click(
+        await screen.findByRole("button", {
+          name: "Ver stories de Sem stories (1)"
+        })
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Editar rascunho" }));
+      const modal = await screen.findByRole("dialog", {
+        name: "Editar rascunho"
+      });
+      expect(
+        within(modal).getByRole("tab", { name: "Imagem" })
+      ).toHaveAttribute("aria-selected", "true");
+      expect(within(modal).getByText("Arquivo já anexado")).toBeVisible();
+      expect(
+        within(modal).getByPlaceholderText("Escreva uma legenda")
+      ).toHaveValue("Cardápio da semana");
+      await waitFor(() =>
+        expect(
+          within(modal).getByRole("combobox", { name: "Conexão" })
+        ).toHaveValue("3")
+      );
+      fireEvent.change(
+        within(modal).getByPlaceholderText("Escreva uma legenda"),
+        { target: { value: "Cardápio novo" } }
+      );
+      fireEvent.click(
+        within(modal).getByRole("button", { name: "Salvar rascunho" })
+      );
+      await waitFor(() => expect(api.put).toHaveBeenCalledTimes(1));
+      const [url, form] = api.put.mock.calls[0];
+      expect(url).toBe("/whatsapp-status/posts/31");
+      expect(form.get("body")).toBe("Cardápio novo");
+      expect(form.get("media")).toBeNull();
+      expect(api.post).not.toHaveBeenCalled();
+    });
   });
 });

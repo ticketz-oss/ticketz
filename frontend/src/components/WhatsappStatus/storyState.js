@@ -122,9 +122,10 @@ export const markSeen = (userId, ids) => {
   return seen;
 };
 
+// Drafts stay in the strip so they can be edited or downloaded later (a
+// Cloud API connection can only save drafts); the server only lists recent ones.
 const isVisible = (post, now) => {
-  if (!post || post.state === "cancelled" || post.state === "draft")
-    return false;
+  if (!post || post.state === "cancelled") return false;
   const expiresAt = toTime(post.expiresAt);
   return !(expiresAt && expiresAt <= now);
 };

@@ -2,10 +2,12 @@ import React, { useCallback, useEffect, useState } from "react";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import Layer from "./Layer";
+import downloadStoryMedia from "./downloadStoryMedia";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
   CloseIcon,
+  DownloadIcon,
   ImageIcon,
   InfoIcon
 } from "./icons";
@@ -72,6 +74,7 @@ const StoryViewer = ({
   start,
   onClose,
   onNew,
+  onEdit,
   onPostChange,
   onSeen
 }) => {
@@ -162,6 +165,18 @@ const StoryViewer = ({
     }
   };
 
+  const handleDownload = async () => {
+    if (!post || busy) return;
+    setBusy(true);
+    try {
+      await downloadStoryMedia(post);
+    } catch (err) {
+      toastError(err);
+    } finally {
+      setBusy(false);
+    }
+  };
+
   if (!connection || !post) return null;
 
   const name = connection.name;
@@ -171,6 +186,8 @@ const StoryViewer = ({
   const background = isText
     ? post.backgroundColor || STORY_BLUE
     : MEDIA_BACKGROUND;
+  const isDraft = post.state === "draft";
+  const canDownload = isDraft && !isText && Boolean(post.hasMedia);
   const showFailure =
     (post.state === "failed" || post.state === "unsupported") &&
     post.failureCode;
@@ -325,6 +342,27 @@ const StoryViewer = ({
           >
             {t("whatsappStatus.viewer.publishNew")}
           </button>
+          {isDraft && onEdit && (
+            <button
+              type="button"
+              className="ews-btn-ghost"
+              onClick={() => onEdit(post)}
+              disabled={busy}
+            >
+              {t("whatsappStatus.viewer.editDraft")}
+            </button>
+          )}
+          {canDownload && (
+            <button
+              type="button"
+              className="ews-btn-ghost"
+              onClick={handleDownload}
+              disabled={busy}
+            >
+              <DownloadIcon />
+              {t("whatsappStatus.viewer.download")}
+            </button>
+          )}
           {CANCELLABLE.includes(post.state) && (
             <button
               type="button"
