@@ -46,13 +46,11 @@ const AUDIENCE_MODES: StatusAudienceMode[] = [
 ];
 const EDITABLE: StatusPostState[] = ["draft", "failed", "unsupported"];
 const PUBLISHABLE: StatusPostState[] = ["draft", "failed", "unsupported"];
-// A queued post only while the worker has not handed it to the session.
-const CANCELLABLE: StatusPostState[] = [
-  "draft",
-  "queued",
-  "failed",
-  "unsupported"
-];
+// Finished posts can always be cancelled: cancel only changes the row and
+// removes the media. Pending ones only while the worker has not handed them
+// to the session.
+const CANCELLABLE_FINISHED: StatusPostState[] = ["failed", "unsupported"];
+const CANCELLABLE_PENDING: StatusPostState[] = ["draft", "queued"];
 
 // The author shown on the story; every post sent to the browser carries it.
 const createdByInclude = () => ({
@@ -381,9 +379,10 @@ export const cancelPost = async (
   id: number
 ): Promise<WhatsappStatusPost> => {
   const post = await findPost(companyId, id);
-  if (!CANCELLABLE.includes(post.state) || post.attemptStartedAt) {
-    throw invalidState();
-  }
+  const finished = CANCELLABLE_FINISHED.includes(post.state);
+  const pending =
+    CANCELLABLE_PENDING.includes(post.state) && !post.attemptStartedAt;
+  if (!finished && !pending) throw invalidState();
   const previousState = post.state;
   const { mediaPath } = post;
   const changes = {
@@ -398,7 +397,7 @@ export const cancelPost = async (
       id: post.id,
       companyId,
       state: previousState,
-      attemptStartedAt: null
+      ...(pending ? { attemptStartedAt: null } : {})
     }
   });
   if (!count) throw invalidState();

@@ -507,6 +507,49 @@ describe("StatusPostService.cancelPost", () => {
     expect(removeStatusMedia).not.toHaveBeenCalled();
   });
 
+  it("cancels a failed post even when its send had started", async () => {
+    const post = makePost({
+      state: "failed",
+      kind: "image",
+      mediaPath: "whatsapp-status/7/a.jpg",
+      attemptStartedAt: NOW,
+      failureCode: "ERR_STATUS_OUTCOME_UNKNOWN"
+    });
+    (WhatsappStatusPost.findOne as jest.Mock).mockResolvedValue(post);
+    const result = await cancelPost(7, 5);
+    expect(WhatsappStatusPost.update).toHaveBeenCalledWith(
+      expect.objectContaining({ state: "cancelled", mediaPath: null }),
+      { where: { id: 5, companyId: 7, state: "failed" } }
+    );
+    expect(removeStatusMedia).toHaveBeenCalledWith(
+      7,
+      "whatsapp-status/7/a.jpg"
+    );
+    expect(removeStatusJob).not.toHaveBeenCalled();
+    expect(result.state).toBe("cancelled");
+  });
+
+  it("cancels an unsupported post", async () => {
+    (WhatsappStatusPost.findOne as jest.Mock).mockResolvedValue(
+      makePost({ state: "unsupported", failureCode: "ERR_STATUS_OFFICIAL_API" })
+    );
+    await expect(cancelPost(7, 5)).resolves.toMatchObject({
+      state: "cancelled"
+    });
+  });
+
+  it("refuses to cancel a published post", async () => {
+    (WhatsappStatusPost.findOne as jest.Mock).mockResolvedValue(
+      makePost({ state: "published", attemptStartedAt: NOW })
+    );
+    await expect(cancelPost(7, 5)).rejects.toMatchObject({
+      message: "ERR_STATUS_INVALID_STATE",
+      statusCode: 409
+    });
+    expect(WhatsappStatusPost.update).not.toHaveBeenCalled();
+    expect(removeStatusMedia).not.toHaveBeenCalled();
+  });
+
   it("refuses when the worker claimed the post in the meantime", async () => {
     (WhatsappStatusPost.findOne as jest.Mock).mockResolvedValue(
       makePost({ state: "queued" })
