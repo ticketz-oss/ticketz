@@ -54,6 +54,12 @@ jest.mock("../StatusSocket", () => ({
 }));
 
 const NOW = new Date("2026-10-19T12:00:00Z");
+const AUTHOR = { id: 2, name: "Ana" };
+
+const lastEmitted = () => {
+  const { calls } = (emitStatusPost as jest.Mock).mock;
+  return calls[calls.length - 1][2];
+};
 
 const makePost = (fields: Record<string, unknown> = {}) => {
   const post: Record<string, unknown> = {
@@ -82,6 +88,13 @@ const makePost = (fields: Record<string, unknown> = {}) => {
   post.update = jest.fn(async (patch: Record<string, unknown>) =>
     Object.assign(post, patch)
   );
+  // Like Sequelize, the author is only loaded when the reload includes it.
+  post.reload = jest.fn(async (options?: { include?: { as?: string }[] }) => {
+    if (options?.include?.some(include => include.as === "createdBy")) {
+      post.createdBy = AUTHOR;
+    }
+    return post;
+  });
   return post as never as WhatsappStatusPost & {
     update: jest.Mock;
     set: jest.Mock;
@@ -160,6 +173,11 @@ describe("StatusPostService.createPost", () => {
       contactListId: null
     });
     expect(emitStatusPost).toHaveBeenCalledWith(7, "create", post);
+  });
+
+  it("emits the created post with its author (createdBy)", async () => {
+    await createPost(7, 2, textInput);
+    expect(lastEmitted().createdBy).toEqual(AUTHOR);
   });
 
   it("returns the existing post for a repeated idempotency key", async () => {
@@ -517,9 +535,9 @@ describe("StatusPostService.cancelPendingForCompany", () => {
     const b = makePost({ id: 2, state: "queued" });
     (WhatsappStatusPost.findAll as jest.Mock).mockResolvedValue([a, b]);
     await cancelPendingForCompany(7);
-    expect(WhatsappStatusPost.findAll).toHaveBeenCalledWith({
-      where: { companyId: 7, state: "queued" }
-    });
+    expect(WhatsappStatusPost.findAll).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { companyId: 7, state: "queued" } })
+    );
     expect(WhatsappStatusPost.update).toHaveBeenCalledWith(
       { state: "cancelled", failureCode: "ERR_STATUS_FEATURE_DISABLED" },
       {
@@ -531,6 +549,23 @@ describe("StatusPostService.cancelPendingForCompany", () => {
     expect(a.state).toBe("cancelled");
     expect(b.failureCode).toBe("ERR_STATUS_FEATURE_DISABLED");
     expect(emitStatusPost).toHaveBeenCalledTimes(2);
+  });
+
+  it("emits cancelled posts with their author (createdBy)", async () => {
+    (WhatsappStatusPost.findAll as jest.Mock).mockImplementation(
+      async (options: { include?: { as?: string }[] }) => [
+        makePost({
+          id: 1,
+          state: "queued",
+          ...(options.include?.some(include => include.as === "createdBy")
+            ? { createdBy: AUTHOR }
+            : {})
+        })
+      ]
+    );
+    await cancelPendingForCompany(7);
+    expect(lastEmitted().state).toBe("cancelled");
+    expect(lastEmitted().createdBy).toEqual(AUTHOR);
   });
 });
 

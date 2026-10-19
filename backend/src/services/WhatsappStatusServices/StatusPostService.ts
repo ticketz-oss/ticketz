@@ -54,6 +54,13 @@ const CANCELLABLE: StatusPostState[] = [
   "unsupported"
 ];
 
+// The author shown on the story; every post sent to the browser carries it.
+const createdByInclude = () => ({
+  model: User,
+  as: "createdBy",
+  attributes: ["id", "name"]
+});
+
 const notFound = () => new AppError("ERR_STATUS_NOT_FOUND", 404);
 const invalid = (code = "ERR_STATUS_INVALID_INPUT") => new AppError(code, 400);
 const invalidState = () => new AppError("ERR_STATUS_INVALID_STATE", 409);
@@ -64,7 +71,7 @@ const findPost = async (
 ): Promise<WhatsappStatusPost> => {
   const post = await WhatsappStatusPost.findOne({
     where: { id, companyId },
-    include: [{ model: User, as: "createdBy", attributes: ["id", "name"] }]
+    include: [createdByInclude()]
   });
   if (!post) throw notFound();
   return post;
@@ -174,7 +181,7 @@ export const listPosts = async (
   }
   return WhatsappStatusPost.findAll({
     where,
-    include: [{ model: User, as: "createdBy", attributes: ["id", "name"] }],
+    include: [createdByInclude()],
     order: [["createdAt", "ASC"]]
   });
 };
@@ -239,6 +246,7 @@ export const createPost = async (
     if (!winner) throw error;
     return winner;
   }
+  await post.reload({ include: [createdByInclude()] });
   emitStatusPost(companyId, "create", post);
   return post;
 };
@@ -411,7 +419,8 @@ export const cancelPendingForCompany = async (
   companyId: number
 ): Promise<void> => {
   const posts = await WhatsappStatusPost.findAll({
-    where: { companyId, state: "queued" }
+    where: { companyId, state: "queued" },
+    include: [createdByInclude()]
   });
   const changes = {
     state: "cancelled" as StatusPostState,
