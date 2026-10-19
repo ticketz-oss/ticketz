@@ -82,7 +82,9 @@ const pt = {
       ringAria: "Ver stories de {{name}} ({{total}})"
     },
     toast: {
+      submitted: "Story enviado para publicação na conexão {{name}}",
       published: "Story publicado no WhatsApp da conexão {{name}}",
+      failed: "Story não publicado na conexão {{name}}: {{reason}}",
       scheduled: "Story agendado na conexão {{name}}",
       draftSaved: "Rascunho salvo na conexão {{name}}"
     },
@@ -207,7 +209,9 @@ const en = {
       ringAria: "View stories of {{name}} ({{total}})"
     },
     toast: {
+      submitted: "Story sent for publishing on connection {{name}}",
       published: "Story published on the WhatsApp of connection {{name}}",
+      failed: "Story not published on connection {{name}}: {{reason}}",
       scheduled: "Story scheduled on connection {{name}}",
       draftSaved: "Draft saved on connection {{name}}"
     },

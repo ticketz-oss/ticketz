@@ -117,6 +117,9 @@
   font-weight: 500;
   max-width: calc(100vw - 32px);
 }
+.ews-toast--error {
+  background: #b91c1c;
+}
 
 /* Shared overlay pieces */
 .ews-layer {

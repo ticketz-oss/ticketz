@@ -326,31 +326,144 @@ describe("New story modal", () => {
     expect(screen.getByRole("button", { name: /Agendar story/ })).toBeEnabled();
   });
 
-  it("shows the success toast with the connection name after publishing", async () => {
-    mockGets();
-    api.post
-      .mockResolvedValueOnce({ data: draftPost() })
-      .mockResolvedValueOnce({ data: draftPost({ state: "queued" }) });
-    const socket = { on: jest.fn(), off: jest.fn(), disconnect: jest.fn() };
-    render(
-      <SocketContext.Provider value={{ GetSocket: () => socket }}>
-        <StoriesStrip companyId={1} userId={7} />
-      </SocketContext.Provider>
-    );
-    fireEvent.click(await screen.findByRole("button", { name: "Novo story" }));
-    expect(screen.getByRole("dialog", { name: "Novo story" })).toBeVisible();
-    await waitAudience();
-    fireEvent.change(screen.getByRole("textbox", { name: "Texto" }), {
-      target: { value: "Atendimento até as 20h hoje." }
+  describe("publish toasts", () => {
+    const publishFromStrip = async socket => {
+      render(
+        <SocketContext.Provider value={{ GetSocket: () => socket }}>
+          <StoriesStrip companyId={1} userId={7} />
+        </SocketContext.Provider>
+      );
+      fireEvent.click(
+        await screen.findByRole("button", { name: "Novo story" })
+      );
+      expect(screen.getByRole("dialog", { name: "Novo story" })).toBeVisible();
+      await waitAudience();
+      fireEvent.change(screen.getByRole("textbox", { name: "Texto" }), {
+        target: { value: "Atendimento até as 20h hoje." }
+      });
+      fireEvent.click(publishButton());
+      return socket.on.mock.calls.find(
+        ([event]) => event === "company-1-whatsapp-status-post"
+      )[1];
+    };
+
+    const newSocket = () => ({
+      on: jest.fn(),
+      off: jest.fn(),
+      disconnect: jest.fn()
     });
-    fireEvent.click(publishButton());
-    expect(
+
+    afterEach(() => jest.useRealTimers());
+
+    it("says the story was sent for publishing, not published, right after the request", async () => {
+      mockGets();
+      api.post
+        .mockResolvedValueOnce({ data: draftPost() })
+        .mockResolvedValueOnce({ data: draftPost({ state: "queued" }) });
+      await publishFromStrip(newSocket());
+      expect(
+        await screen.findByText(
+          "Story enviado para publicação na conexão Espaço Whats"
+        )
+      ).toBeVisible();
+      expect(
+        screen.queryByText(
+          "Story publicado no WhatsApp da conexão Espaço Whats"
+        )
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("dialog", { name: "Novo story" })
+      ).not.toBeInTheDocument();
+    });
+
+    it("announces the publication once when the socket reports it published", async () => {
+      mockGets();
+      api.post
+        .mockResolvedValueOnce({ data: draftPost() })
+        .mockResolvedValueOnce({ data: draftPost({ state: "queued" }) });
+      const onPost = await publishFromStrip(newSocket());
       await screen.findByText(
-        "Story publicado no WhatsApp da conexão Espaço Whats"
-      )
-    ).toBeVisible();
-    expect(
-      screen.queryByRole("dialog", { name: "Novo story" })
-    ).not.toBeInTheDocument();
+        "Story enviado para publicação na conexão Espaço Whats"
+      );
+
+      jest.useFakeTimers();
+      // Another user's story does not touch the toast.
+      act(() =>
+        onPost({
+          action: "update",
+          post: draftPost({ id: 99, state: "published" })
+        })
+      );
+      expect(
+        screen.getByText(
+          "Story enviado para publicação na conexão Espaço Whats"
+        )
+      ).toBeVisible();
+
+      act(() =>
+        onPost({
+          action: "update",
+          post: draftPost({
+            state: "published",
+            publishedAt: new Date().toISOString(),
+            expiresAt: new Date(Date.now() + 86400000).toISOString()
+          })
+        })
+      );
+      expect(
+        screen.getByText("Story publicado no WhatsApp da conexão Espaço Whats")
+      ).toBeVisible();
+
+      act(() => jest.advanceTimersByTime(5000));
+      expect(
+        screen.queryByText(
+          "Story publicado no WhatsApp da conexão Espaço Whats"
+        )
+      ).not.toBeInTheDocument();
+      act(() =>
+        onPost({
+          action: "update",
+          post: draftPost({
+            state: "published",
+            audienceCount: 4,
+            publishedAt: new Date().toISOString(),
+            expiresAt: new Date(Date.now() + 86400000).toISOString()
+          })
+        })
+      );
+      expect(
+        screen.queryByText(
+          "Story publicado no WhatsApp da conexão Espaço Whats"
+        )
+      ).not.toBeInTheDocument();
+    });
+
+    it("shows the translated failure when the socket reports it failed", async () => {
+      mockGets();
+      api.post
+        .mockResolvedValueOnce({ data: draftPost() })
+        .mockResolvedValueOnce({ data: draftPost({ state: "queued" }) });
+      const onPost = await publishFromStrip(newSocket());
+      await screen.findByText(
+        "Story enviado para publicação na conexão Espaço Whats"
+      );
+      act(() =>
+        onPost({
+          action: "update",
+          post: draftPost({
+            state: "failed",
+            failureCode: "ERR_STATUS_CONNECTION_UNAVAILABLE"
+          })
+        })
+      );
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Story não publicado na conexão Espaço Whats: A conexão estava indisponível no momento da publicação."
+      );
+      expect(
+        screen.queryByText(
+          "Story publicado no WhatsApp da conexão Espaço Whats"
+        )
+      ).not.toBeInTheDocument();
+    });
   });
 });

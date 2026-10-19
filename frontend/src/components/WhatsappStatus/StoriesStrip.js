@@ -1,15 +1,29 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from "react";
 import { createPortal } from "react-dom";
 import useWhatsappStatus from "./useWhatsappStatus";
 import StoryViewer from "./StoryViewer";
 import NewStoryModal from "./NewStoryModal";
-import { CheckIcon, ClockIcon, PlusIcon } from "./icons";
-import { initialsOf, loadSeen, markSeen, ringGradient, t } from "./storyState";
+import { CheckIcon, ClockIcon, InfoIcon, PlusIcon } from "./icons";
+import {
+  failureMessage,
+  initialsOf,
+  loadSeen,
+  markSeen,
+  ringGradient,
+  t
+} from "./storyState";
 import "./whatsappStatus.css";
 
 const TOAST_MS = 4000;
+// Publishing only queues the story; "published" waits for the socket.
 const TOAST_KEYS = {
-  publish: "whatsappStatus.toast.published",
+  publish: "whatsappStatus.toast.submitted",
   schedule: "whatsappStatus.toast.scheduled",
   draft: "whatsappStatus.toast.draftSaved"
 };
@@ -22,6 +36,9 @@ const StoriesStrip = ({ companyId, userId }) => {
   const [viewing, setViewing] = useState(null);
   const [composing, setComposing] = useState(null);
   const [toast, setToast] = useState(null);
+  // Posts sent for publishing from here, by id, with the connection name;
+  // each gets one final toast when the socket reports how it ended.
+  const pending = useRef(new Map());
 
   useEffect(() => setSeen(loadSeen(userId)), [userId]);
 
@@ -30,6 +47,31 @@ const StoriesStrip = ({ companyId, userId }) => {
     const timer = setTimeout(() => setToast(null), TOAST_MS);
     return () => clearTimeout(timer);
   }, [toast]);
+
+  useEffect(() => {
+    if (!pending.current.size) return;
+    Object.values(postsByConnection).forEach(list =>
+      list.forEach(post => {
+        if (!pending.current.has(post.id)) return;
+        const name = pending.current.get(post.id);
+        if (post.state === "published") {
+          pending.current.delete(post.id);
+          setToast({ text: t("whatsappStatus.toast.published", { name }) });
+        } else if (post.state === "failed" || post.state === "unsupported") {
+          pending.current.delete(post.id);
+          setToast({
+            error: true,
+            text: t("whatsappStatus.toast.failed", {
+              name,
+              reason: failureMessage(
+                post.failureCode || "ERR_STATUS_PUBLISH_FAILED"
+              )
+            })
+          });
+        }
+      })
+    );
+  }, [postsByConnection]);
 
   const ringConnections = useMemo(
     () =>
@@ -62,13 +104,11 @@ const StoriesStrip = ({ companyId, userId }) => {
   };
 
   const handleSaved = ({ post, action, connection }) => {
-    applyPost(post);
+    const name = connection?.name || "";
+    if (action === "publish" && post?.id) pending.current.set(post.id, name);
     if (action !== "draft") setComposing(null);
-    setToast(
-      t(TOAST_KEYS[action] || TOAST_KEYS.publish, {
-        name: connection?.name || ""
-      })
-    );
+    setToast({ text: t(TOAST_KEYS[action] || TOAST_KEYS.publish, { name }) });
+    applyPost(post);
   };
 
   if (!enabled) return null;
@@ -156,9 +196,12 @@ const StoriesStrip = ({ companyId, userId }) => {
 
       {toast &&
         createPortal(
-          <div className="ews-toast" role="status">
-            <CheckIcon />
-            {toast}
+          <div
+            className={`ews-toast${toast.error ? " ews-toast--error" : ""}`}
+            role={toast.error ? "alert" : "status"}
+          >
+            {toast.error ? <InfoIcon /> : <CheckIcon />}
+            {toast.text}
           </div>,
           document.body
         )}
