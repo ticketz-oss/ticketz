@@ -1,4 +1,19 @@
 export const TRIAL_DAYS = 7;
+// Same list as backend helpers/normalizeSlug.ts: these addresses collide with
+// infrastructure hostnames and are refused by the signup API.
+const RESERVED_SLUGS = new Set([
+  "www",
+  "api",
+  "app",
+  "admin",
+  "backend",
+  "frontend",
+  "static",
+  "assets",
+  "public"
+]);
+export const isReservedSlug = slug => RESERVED_SLUGS.has(slug);
+
 export const slugFromName = name =>
   name
     .normalize("NFD")

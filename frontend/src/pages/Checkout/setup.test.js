@@ -1,5 +1,6 @@
 import {
   firstBillingPreview,
+  isReservedSlug,
   prorataCents,
   slugFromName,
   tenantLoginUrl,
@@ -58,6 +59,12 @@ describe("self-service setup", () => {
     expect(
       trialEndPreview(new Date("2026-10-28T23:59:00Z")).toISOString()
     ).toBe("2026-11-04T00:00:00.000Z");
+  });
+  it.each(["app", "admin", "public", "www"])("flags %s as reserved", slug => {
+    expect(isReservedSlug(slug)).toBe(true);
+  });
+  it("accepts a normal company address", () => {
+    expect(isReservedSlug("loja-da-ana")).toBe(false);
   });
   it("generates a usable address from a company name", () => {
     expect(slugFromName(" Clínica São João! ")).toBe("clinica-sao-joao");

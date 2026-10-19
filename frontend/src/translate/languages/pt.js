@@ -1414,7 +1414,9 @@ const messages = {
             ERR_COMPANY_SLUG_RESERVED:
               "Esse endereço está reservado. Escolha outro.",
             ERR_COMPANY_SLUG_ALREADY_EXISTS:
-              "Já existe um espaço com esse endereço. Escolha outro endereço."
+              "Já existe um espaço com esse endereço. Escolha outro endereço.",
+            ERR_SIGNUP_DISABLED:
+              "O cadastro pelo site está fechado agora. Fale com a gente para assinar."
           },
           summary: {
             title: "Sua assinatura",
