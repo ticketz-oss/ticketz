@@ -4,7 +4,8 @@ import {
   initialsOf,
   loadSeen,
   markSeen,
-  groupPostsByConnection
+  groupPostsByConnection,
+  upsertPost
 } from "./storyState";
 
 const NOW = new Date("2026-10-19T12:00:00Z").getTime();
@@ -108,5 +109,28 @@ describe("story state helpers", () => {
     );
     expect(grouped[1].map(post => post.id)).toEqual([1, 2]);
     expect(grouped[2]).toBeUndefined();
+  });
+
+  it("keeps the previous author when a socket payload has no createdBy", () => {
+    const author = { id: 7, name: "Guilherme Santos" };
+    const current = [
+      { id: 1, state: "queued", createdBy: author },
+      { id: 2, state: "published", createdBy: { id: 8, name: "Ana" } }
+    ];
+    const merged = upsertPost(current, { id: 1, state: "published" });
+    expect(merged.find(post => post.id === 1)).toEqual({
+      id: 1,
+      state: "published",
+      createdBy: author
+    });
+    const replaced = upsertPost(merged, {
+      id: 2,
+      state: "failed",
+      createdBy: { id: 9, name: "Bia" }
+    });
+    expect(replaced.find(post => post.id === 2).createdBy.name).toBe("Bia");
+    expect(upsertPost([], { id: 3, state: "draft" })).toEqual([
+      { id: 3, state: "draft" }
+    ]);
   });
 });

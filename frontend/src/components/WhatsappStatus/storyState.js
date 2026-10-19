@@ -141,9 +141,16 @@ export const groupPostsByConnection = (posts, now = Date.now()) => {
   return grouped;
 };
 
+// Socket payloads may omit the author; keep the one already on screen.
 export const upsertPost = (posts, post) => {
-  const others = (posts || []).filter(item => item.id !== post.id);
-  return [...others, post];
+  const list = posts || [];
+  const previous = list.find(item => item.id === post.id);
+  const others = list.filter(item => item.id !== post.id);
+  const next =
+    previous && post.createdBy == null && previous.createdBy != null
+      ? { ...post, createdBy: previous.createdBy }
+      : post;
+  return [...others, next];
 };
 
 const pad = value => String(value).padStart(2, "0");
