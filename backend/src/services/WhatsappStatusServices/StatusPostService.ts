@@ -39,6 +39,7 @@ export type UpdateStatusPostInput = Partial<
 const MAX_BODY = 700;
 const MAX_SCHEDULE_MS = 30 * 24 * 60 * 60 * 1000;
 const DAY_MS = 24 * 60 * 60 * 1000;
+const DRAFT_RETENTION_MS = 7 * DAY_MS;
 const KINDS: StatusKind[] = ["text", "image", "video"];
 const AUDIENCE_MODES: StatusAudienceMode[] = [
   "connection_contacts",
@@ -175,6 +176,12 @@ export const listPosts = async (
         // A scheduled post may fail days after creation; count from failing.
         state: { [Op.in]: ["failed", "unsupported"] },
         updatedAt: { [Op.gte]: new Date(now.getTime() - DAY_MS) }
+      },
+      // Drafts (Cloud API ones included) stay reachable until the daily
+      // cleanup cancels them after DRAFT_RETENTION_MS without edits.
+      {
+        state: "draft",
+        updatedAt: { [Op.gte]: new Date(now.getTime() - DRAFT_RETENTION_MS) }
       }
     ];
   }

@@ -635,9 +635,25 @@ describe("StatusPostService reads", () => {
       {
         state: { [Op.in]: ["failed", "unsupported"] },
         updatedAt: { [Op.gte]: new Date(NOW.getTime() - 24 * 3600 * 1000) }
+      },
+      {
+        state: "draft",
+        updatedAt: {
+          [Op.gte]: new Date(NOW.getTime() - 7 * 24 * 3600 * 1000)
+        }
       }
     ]);
     expect(options.order).toEqual([["createdAt", "ASC"]]);
+  });
+
+  it("lists drafts edited in the last 7 days so Cloud API drafts can be reopened", async () => {
+    (WhatsappStatusPost.findAll as jest.Mock).mockResolvedValue([]);
+    await listPosts(7, { active: true });
+    const options = (WhatsappStatusPost.findAll as jest.Mock).mock.calls[0][0];
+    expect(options.where[Op.or]).toContainEqual({
+      state: "draft",
+      updatedAt: { [Op.gte]: new Date(NOW.getTime() - 7 * 24 * 3600 * 1000) }
+    });
   });
 
   it("keeps a scheduled post that failed days after creation visible for 24h after failing", async () => {
