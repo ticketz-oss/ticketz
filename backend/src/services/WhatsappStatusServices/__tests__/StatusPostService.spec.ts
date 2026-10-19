@@ -193,6 +193,17 @@ describe("StatusPostService.createPost", () => {
     expect(emitStatusPost).not.toHaveBeenCalled();
   });
 
+  it("rejects a missing connection with ERR_STATUS_INVALID_INPUT", async () => {
+    await expect(
+      createPost(7, 2, { ...textInput, whatsappId: undefined })
+    ).rejects.toMatchObject({
+      message: "ERR_STATUS_INVALID_INPUT",
+      statusCode: 400
+    });
+    expect(Whatsapp.findOne).not.toHaveBeenCalled();
+    expect(WhatsappStatusPost.create).not.toHaveBeenCalled();
+  });
+
   it("rejects a connection of another company with ERR_STATUS_NOT_FOUND", async () => {
     (Whatsapp.findOne as jest.Mock).mockResolvedValue(null);
     await expect(

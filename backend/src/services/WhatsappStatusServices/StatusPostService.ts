@@ -80,6 +80,8 @@ const findConnection = async (
   companyId: number,
   whatsappId: number
 ): Promise<Whatsapp> => {
+  // A missing id would reach Sequelize as undefined and fail with a 500.
+  if (!Number.isInteger(whatsappId)) throw invalid();
   const connection = await Whatsapp.findOne({
     where: { id: whatsappId, companyId }
   });
