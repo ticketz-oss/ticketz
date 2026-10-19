@@ -48,11 +48,11 @@ describe("checkout summary", () => {
   });
   it("charges the first invoice on the last trial day, only for the days used", () => {
     const html = markup();
-    // 2026-10-08 + 14 days = 22/10; prorated up to the due day 05/11.
+    // 2026-10-08 + 7 days = 15/10; prorated up to the due day 05/11.
     expect(html).toContain("Primeira cobrança, no fim do teste");
-    expect(html).toContain('<time dateTime="2026-10-22">22/10/2026</time>');
-    expect(html).toContain("Proporcional a 14 dias de uso");
-    expect(html).toContain("R$ 455,91");
+    expect(html).toContain('<time dateTime="2026-10-15">15/10/2026</time>');
+    expect(html).toContain("Proporcional a 21 dias de uso");
+    expect(html).toContain("R$ 681,72");
     expect(html).toContain("Mensalidade cheia a partir de");
   });
   it("distinguishes the free trial total from the future monthly price", () => {

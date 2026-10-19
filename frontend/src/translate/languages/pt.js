@@ -1289,7 +1289,7 @@ const messages = {
           bothModes: "API oficial ou QR code",
           choose: "Testar {{name}} grátis",
           trialPromise:
-            "14 dias grátis. Sem cartão de crédito. É só criar a conta e usar.",
+            "7 dias grátis. Sem cartão de crédito. É só criar a conta e usar.",
           customPitch: "Plano sob medida para a sua operação.",
           unavailable:
             "Não conseguimos carregar os planos agora. Atualize a página ou fale com a gente.",
@@ -1359,7 +1359,7 @@ const messages = {
               },
               aiIncluded: "IA ilimitada inclusa",
               action: "Trocar para Enterprise",
-              note: "O teste continua grátis por 14 dias, sem cartão."
+              note: "O teste continua grátis por 7 dias, sem cartão."
             }
           },
           mode: {
@@ -1425,7 +1425,7 @@ const messages = {
             aiNone: "Não contratada",
             total: "Mensalidade após o teste",
             trial:
-              "Hoje: R$ 0,00. São 14 dias grátis, sem cartão. Você só paga se decidir continuar.",
+              "Hoje: R$ 0,00. São 7 dias grátis, sem cartão. Você só paga se decidir continuar.",
             metaCost:
               "Na API oficial, as mensagens são cobradas pela Meta, à parte.",
             change: "Alterar",

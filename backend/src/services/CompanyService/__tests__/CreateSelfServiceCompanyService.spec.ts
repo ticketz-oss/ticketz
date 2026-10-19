@@ -53,7 +53,7 @@ describe("public tenant creation", () => {
     });
     (prepareSignupImages as jest.Mock).mockResolvedValue([]);
   });
-  it("forces self-service and 14 days, ignoring privileged client fields", async () => {
+  it("forces self-service and 7 days, ignoring privileged client fields", async () => {
     await service({
       ...valid,
       trialDays: 999,
@@ -66,7 +66,7 @@ describe("public tenant creation", () => {
       expect.objectContaining({
         name: "Minha Empresa",
         email: "contato@example.com",
-        trialDays: 14,
+        trialDays: 7,
         signupSource: "self_service",
         dueDay: 31,
         whatsappMode: "meta",
@@ -86,6 +86,11 @@ describe("public tenant creation", () => {
       "transaction",
       []
     );
+  });
+  it("defaults dueDay to the day the 7-day trial ends", () => {
+    jest.useFakeTimers().setSystemTime(new Date("2026-10-28T23:59:00Z"));
+    expect(normalizeSignupData({ ...valid, dueDay: undefined }).dueDay).toBe(4);
+    jest.useRealTimers();
   });
   it("rejects invalid days and private or missing plans before creating a tenant", async () => {
     await expect(service({ ...valid, dueDay: "32" })).rejects.toMatchObject({

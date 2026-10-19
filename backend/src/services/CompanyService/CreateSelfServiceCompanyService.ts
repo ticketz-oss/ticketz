@@ -11,7 +11,7 @@ import {
   SignupFiles
 } from "./SignupBrandingService";
 
-export const SELF_SERVICE_TRIAL_DAYS = 14;
+export const SELF_SERVICE_TRIAL_DAYS = 7;
 
 export const normalizeSignupData = (body: Record<string, unknown>) => ({
   name: typeof body.name === "string" ? body.name.trim() : body.name,
@@ -24,7 +24,7 @@ export const normalizeSignupData = (body: Record<string, unknown>) => ({
   planId: Number(body.planId),
   dueDay:
     body.dueDay === undefined
-      ? moment.utc().add(14, "days").date()
+      ? moment.utc().add(SELF_SERVICE_TRIAL_DAYS, "days").date()
       : Number(body.dueDay),
   slug: body.slug,
   timezone: body.timezone || null,

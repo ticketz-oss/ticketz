@@ -7,13 +7,13 @@ import {
 } from "./setup";
 
 describe("self-service setup", () => {
-  it("uses the chosen billing day strictly after all 14 trial days", () => {
+  it("uses the chosen billing day strictly after all 7 trial days", () => {
     expect(
-      firstBillingPreview(22, new Date("2026-10-08T18:00:00Z")).toISOString()
-    ).toBe("2026-11-22T00:00:00.000Z");
+      firstBillingPreview(15, new Date("2026-10-08T18:00:00Z")).toISOString()
+    ).toBe("2026-11-15T00:00:00.000Z");
     expect(
-      firstBillingPreview(23, new Date("2026-10-08T18:00:00Z")).toISOString()
-    ).toBe("2026-10-23T00:00:00.000Z");
+      firstBillingPreview(16, new Date("2026-10-08T18:00:00Z")).toISOString()
+    ).toBe("2026-10-16T00:00:00.000Z");
   });
   it("clamps day 31 in February and handles the year boundary", () => {
     expect(
@@ -27,9 +27,9 @@ describe("self-service setup", () => {
     const now = new Date("2026-11-01T18:00:00Z");
     const start = trialEndPreview(now);
     const end = firstBillingPreview(30, now);
-    expect(start.toISOString()).toBe("2026-11-15T00:00:00.000Z");
+    expect(start.toISOString()).toBe("2026-11-08T00:00:00.000Z");
     expect(end.toISOString()).toBe("2026-11-30T00:00:00.000Z");
-    expect(prorataCents(30000, start, end)).toBe(15000);
+    expect(prorataCents(30000, start, end)).toBe(22000);
   });
   it("matches the backend prorata across months and for a full month", () => {
     expect(
@@ -53,6 +53,11 @@ describe("self-service setup", () => {
         new Date("2026-10-05T00:00:00Z")
       )
     ).toBe(29990);
+  });
+  it("ends the trial 7 days after signup", () => {
+    expect(
+      trialEndPreview(new Date("2026-10-28T23:59:00Z")).toISOString()
+    ).toBe("2026-11-04T00:00:00.000Z");
   });
   it("generates a usable address from a company name", () => {
     expect(slugFromName(" Clínica São João! ")).toBe("clinica-sao-joao");
