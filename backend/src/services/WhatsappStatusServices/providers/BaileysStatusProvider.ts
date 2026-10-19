@@ -13,10 +13,10 @@ import {
   StatusPublishError
 } from "./types";
 
-// libzapitu-rf versions where a real Status was seen on a test phone
-// (Task 1 experiment). Empty until that proof exists, so publishing stays off.
+// libzapitu-rf versions allowed to publish Status. 1.0.0-alpha.16 was enabled
+// by the owner for testing in the dev environment before the phone proof.
 // WHATSAPP_STATUS_VERIFIED_LIBS (comma separated) extends it per deployment.
-export const VERIFIED_LIBZAPITU_VERSIONS: string[] = [];
+export const VERIFIED_LIBZAPITU_VERSIONS: string[] = ["1.0.0-alpha.16"];
 
 // Kinds that did not show up on the phone in the experiment.
 export const UNVERIFIED_KINDS: StatusKind[] = [];

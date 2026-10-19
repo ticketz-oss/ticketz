@@ -40,6 +40,6 @@ Leia o QR com o **celular de teste** (Aparelhos conectados). No fim, desvincule 
 
 ## Decisão
 
-- Se texto aparecer: adicionar `1.0.0-alpha.16` a `VERIFIED_LIBZAPITU_VERSIONS` em `BaileysStatusProvider.ts`. Até lá, para testar localmente, defina `WHATSAPP_STATUS_VERIFIED_LIBS=1.0.0-alpha.16` no `.env-backend-local`.
+- `1.0.0-alpha.16` já está em `VERIFIED_LIBZAPITU_VERSIONS` (`BaileysStatusProvider.ts`), por decisão do Guilherme em 19/10/2026, para testar no ambiente de dev antes desta prova. Se o texto não aparecer no aparelho, remova a versão da lista para desligar a publicação.
 - Tipo que falhar entra em `UNVERIFIED_KINDS`.
 - Só marcar "Confirmado" na interface se algum recibo aparecer de forma consistente.

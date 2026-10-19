@@ -2,7 +2,9 @@ import { getWbot } from "../../../libs/wbot";
 import AppError from "../../../errors/AppError";
 import { resolveStatusMediaPath } from "../StatusMediaService";
 import { getStatusProvider } from "../providers";
-import BaileysStatusProvider from "../providers/BaileysStatusProvider";
+import BaileysStatusProvider, {
+  VERIFIED_LIBZAPITU_VERSIONS
+} from "../providers/BaileysStatusProvider";
 import OfficialStatusProvider from "../providers/OfficialStatusProvider";
 import { StatusPublishError } from "../providers/types";
 
@@ -56,7 +58,16 @@ afterAll(() => {
 });
 
 describe("BaileysStatusProvider", () => {
+  it("verifies the installed version without WHATSAPP_STATUS_VERIFIED_LIBS", () => {
+    delete process.env.WHATSAPP_STATUS_VERIFIED_LIBS;
+    expect(VERIFIED_LIBZAPITU_VERSIONS).toContain(INSTALLED);
+    expect(BaileysStatusProvider.capabilities(connection()).publishStatus).toBe(
+      true
+    );
+  });
+
   it("reports LIB_NOT_VERIFIED when the installed version is not in VERIFIED_LIBZAPITU_VERSIONS", () => {
+    const verified = VERIFIED_LIBZAPITU_VERSIONS.splice(0);
     delete process.env.WHATSAPP_STATUS_VERIFIED_LIBS;
     const caps = BaileysStatusProvider.capabilities(connection());
     expect(caps).toEqual({
@@ -80,6 +91,7 @@ describe("BaileysStatusProvider", () => {
       manualExport: false,
       ownPostsSync: false
     });
+    VERIFIED_LIBZAPITU_VERSIONS.push(...verified);
   });
 
   it("reports DISCONNECTED for a baileys connection that is not CONNECTED", () => {
