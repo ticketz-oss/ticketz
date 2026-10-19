@@ -286,6 +286,12 @@ describe("Stories strip", () => {
     await waitFor(() =>
       expect(api.post).toHaveBeenCalledWith("/whatsapp-status/posts/12/cancel")
     );
+
+    // The cancelled story leaves the list and the viewer shows the next one.
+    expect(await within(details).findByText("Falhou")).toBeVisible();
+    expect(
+      within(viewer).getByRole("button", { name: "Excluir este story" })
+    ).toBeVisible();
   });
 
   it("never shows view counts", async () => {

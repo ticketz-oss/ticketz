@@ -5,6 +5,8 @@ const ptErrors = {
     "Nenhum contato pode ver este story. Escolha outra audiência.",
   ERR_STATUS_AUDIENCE_TOO_LARGE:
     "A audiência passa do limite permitido para um story.",
+  ERR_STATUS_BODY_REQUIRED: "Escreva o texto do story.",
+  ERR_STATUS_BODY_TOO_LONG: "O texto passa de 700 caracteres.",
   ERR_STATUS_CONNECTION_MISMATCH: "A conexão não pertence mais a esta empresa.",
   ERR_STATUS_CONNECTION_UNAVAILABLE:
     "A conexão estava indisponível no momento da publicação.",
@@ -18,6 +20,7 @@ const ptErrors = {
     "Publicação de Status ainda não liberada para esta conexão.",
   ERR_STATUS_MEDIA_INVALID:
     "Arquivo inválido. Use JPG, PNG ou WEBP para imagens e MP4 para vídeos.",
+  ERR_STATUS_MEDIA_REQUIRED: "Selecione uma imagem ou um vídeo.",
   ERR_STATUS_MEDIA_TOO_LARGE: "O arquivo passa do tamanho máximo permitido.",
   ERR_STATUS_NOT_FOUND: "Story não encontrado.",
   ERR_STATUS_NO_CONFIRMATION:
@@ -26,9 +29,10 @@ const ptErrors = {
     "Esta conexão usa a API oficial da Meta, que não publica Status.",
   ERR_STATUS_OUTCOME_UNKNOWN:
     "Não foi possível saber se o story saiu. Ele não foi reenviado para evitar duplicidade.",
+  ERR_STATUS_PUBLISH_FAILED: "Não foi possível publicar o story nesta conexão.",
   ERR_STATUS_SCHEDULE_INVALID:
     "Escolha uma data futura, em até 30 dias, para o agendamento.",
-  ERR_STATUS_UNSUPPORTED: "Indisponível nesta conexão."
+  ERR_STATUS_UNSUPPORTED: "Esta conexão ainda não publica este tipo de story."
 };
 
 const enErrors = {
@@ -36,6 +40,8 @@ const enErrors = {
     "No contact can see this story. Choose another audience.",
   ERR_STATUS_AUDIENCE_TOO_LARGE:
     "The audience is above the limit allowed for a story.",
+  ERR_STATUS_BODY_REQUIRED: "Write the story text.",
+  ERR_STATUS_BODY_TOO_LONG: "The text is longer than 700 characters.",
   ERR_STATUS_CONNECTION_MISMATCH:
     "The connection no longer belongs to this company.",
   ERR_STATUS_CONNECTION_UNAVAILABLE:
@@ -50,6 +56,7 @@ const enErrors = {
     "Status publishing is not enabled for this connection yet.",
   ERR_STATUS_MEDIA_INVALID:
     "Invalid file. Use JPG, PNG or WEBP for images and MP4 for videos.",
+  ERR_STATUS_MEDIA_REQUIRED: "Select an image or a video.",
   ERR_STATUS_MEDIA_TOO_LARGE: "The file is above the maximum allowed size.",
   ERR_STATUS_NOT_FOUND: "Story not found.",
   ERR_STATUS_NO_CONFIRMATION:
@@ -58,9 +65,12 @@ const enErrors = {
     "This connection uses Meta's official API, which does not publish Status.",
   ERR_STATUS_OUTCOME_UNKNOWN:
     "It is unknown whether the story went out. It was not resent to avoid a duplicate.",
+  ERR_STATUS_PUBLISH_FAILED:
+    "The story could not be published on this connection.",
   ERR_STATUS_SCHEDULE_INVALID:
     "Pick a future date, within 30 days, for scheduling.",
-  ERR_STATUS_UNSUPPORTED: "Unavailable on this connection."
+  ERR_STATUS_UNSUPPORTED:
+    "This connection does not publish this kind of story yet."
 };
 
 const pt = {

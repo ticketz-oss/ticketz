@@ -21,7 +21,8 @@ import {
   t
 } from "./storyState";
 
-const CANCELLABLE = ["draft", "queued"];
+// The server cancels anything that has not reached the session yet.
+const CANCELLABLE = ["draft", "queued", "failed", "unsupported"];
 
 const audienceText = post => {
   const label =

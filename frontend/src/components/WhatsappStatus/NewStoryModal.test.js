@@ -296,6 +296,36 @@ describe("New story modal", () => {
     );
   });
 
+  it("lets a disconnected connection schedule but not publish now", async () => {
+    mockGets({
+      connections: [
+        {
+          ...baileys,
+          status: "DISCONNECTED",
+          capabilities: {
+            ...baileys.capabilities,
+            publishStatus: false,
+            reason: "DISCONNECTED"
+          }
+        }
+      ]
+    });
+    renderModal();
+    await waitAudience();
+    expect(screen.getByText("Conexão desconectada.")).toBeVisible();
+    fireEvent.change(screen.getByRole("textbox", { name: "Texto" }), {
+      target: { value: "Olá" }
+    });
+    expect(publishButton()).toBeDisabled();
+    fireEvent.click(screen.getByRole("radio", { name: "Agendar" }));
+    const when = new Date(Date.now() + 86400000);
+    const local = `${when.getFullYear()}-${String(when.getMonth() + 1).padStart(2, "0")}-${String(when.getDate()).padStart(2, "0")}T09:00`;
+    fireEvent.change(screen.getByLabelText("Data e hora do agendamento"), {
+      target: { value: local }
+    });
+    expect(screen.getByRole("button", { name: /Agendar story/ })).toBeEnabled();
+  });
+
   it("shows the success toast with the connection name after publishing", async () => {
     mockGets();
     api.post

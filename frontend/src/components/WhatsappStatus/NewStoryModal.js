@@ -168,11 +168,15 @@ const NewStoryModal = ({ defaultWhatsappId, onClose, onSaved }) => {
   );
 
   const connection = connections.find(item => item.id === whatsappId) || null;
-  const reason = blockReason(connection, kind);
   const capabilities = connection?.capabilities || {};
   const isText = kind === "text";
   const background = isText ? STORY_COLORS[colorIndex].hex : MEDIA_BACKGROUND;
   const scheduling = when === "schedule";
+  const capabilityReason = blockReason(connection, kind);
+  // A disconnected session can still take a scheduled story: the worker
+  // checks the connection again when the time comes.
+  const reason =
+    capabilityReason === "DISCONNECTED" && scheduling ? null : capabilityReason;
   const minSchedule = useMemo(() => toLocalInput(new Date()), []);
 
   const hasMedia = Boolean(file) || (savedPost?.hasMedia && !mediaDirty);
@@ -427,10 +431,12 @@ const NewStoryModal = ({ defaultWhatsappId, onClose, onSaved }) => {
               )}
             </label>
 
-            {reason && (
+            {capabilityReason && (
               <div className="ews-note" role="note">
                 <InfoIcon />
-                <span>{t(`whatsappStatus.modal.reasons.${reason}`)}</span>
+                <span>
+                  {t(`whatsappStatus.modal.reasons.${capabilityReason}`)}
+                </span>
               </div>
             )}
 
