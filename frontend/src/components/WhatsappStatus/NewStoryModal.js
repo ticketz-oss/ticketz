@@ -210,7 +210,12 @@ const NewStoryModal = ({
         });
       })
       .catch(err => {
-        if (active) setAudience({ status: "error", message: errorText(err) });
+        if (active)
+          setAudience({
+            status: "error",
+            message: errorText(err),
+            code: err?.response?.data?.error
+          });
       });
     return () => {
       active = false;
@@ -688,6 +693,20 @@ const NewStoryModal = ({
                 </span>
               )}
               {audienceLine()}
+              {audienceMode === "contact_list" &&
+                contactListId &&
+                ((audience.status === "ok" && audience.count === 0) ||
+                  (audience.status === "error" &&
+                    audience.code === "ERR_STATUS_AUDIENCE_EMPTY")) && (
+                  <a
+                    className="ews-hint"
+                    href={`/contact-lists/${contactListId}/contacts`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {t("whatsappStatus.modal.manageContactList")}
+                  </a>
+                )}
             </div>
 
             <div className="ews-field">

@@ -164,6 +164,9 @@ describe("New story modal", () => {
     expect(api.get).toHaveBeenCalledWith("/whatsapp-status/audience-preview", {
       params: { whatsappId: 1, audienceMode: "contact_list", contactListId: 4 }
     });
+    expect(
+      screen.getByRole("link", { name: "Adicionar contatos a esta lista" })
+    ).toHaveAttribute("href", "/contact-lists/4/contacts");
     expect(publishButton()).toBeDisabled();
   });
 
