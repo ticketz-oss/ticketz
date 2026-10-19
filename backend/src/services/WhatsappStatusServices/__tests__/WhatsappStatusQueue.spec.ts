@@ -516,6 +516,50 @@ describe("whatsappStatus queue", () => {
     expect(cleanupOrphanStatusMedia).toHaveBeenCalled();
   });
 
+  it("fails a publishing post whose job ended failed (stalled) without resending", async () => {
+    const stalled = makePost({
+      id: 4,
+      state: "publishing",
+      attemptStartedAt: NOW
+    });
+    (WhatsappStatusPost.findAll as jest.Mock).mockResolvedValue([stalled]);
+    const failedJob = {
+      isFailed: jest.fn().mockResolvedValue(true),
+      isCompleted: jest.fn().mockResolvedValue(false),
+      remove: jest.fn()
+    };
+    queue.getJob.mockResolvedValue(failedJob);
+    const provider = mockProvider();
+
+    await startWhatsappStatusQueue();
+
+    expect(stalled.state).toBe("failed");
+    expect(stalled.failureCode).toBe("ERR_STATUS_OUTCOME_UNKNOWN");
+    expect(emitStatusPost).toHaveBeenCalledWith(7, "update", stalled);
+    expect(provider.publish).not.toHaveBeenCalled();
+    expect(queue.add.mock.calls.filter(call => call[0] === "Publish")).toEqual(
+      []
+    );
+  });
+
+  it("leaves a publishing post alone while its job is still pending", async () => {
+    const running = makePost({
+      id: 6,
+      state: "publishing",
+      attemptStartedAt: NOW
+    });
+    (WhatsappStatusPost.findAll as jest.Mock).mockResolvedValue([running]);
+    queue.getJob.mockResolvedValue({
+      isFailed: jest.fn().mockResolvedValue(false),
+      isCompleted: jest.fn().mockResolvedValue(false)
+    });
+
+    await startWhatsappStatusQueue();
+
+    expect(running.state).toBe("publishing");
+    expect(running.update).not.toHaveBeenCalled();
+  });
+
   it("emits a recovered post with its author (createdBy)", async () => {
     (WhatsappStatusPost.findAll as jest.Mock).mockImplementation(
       async options => [

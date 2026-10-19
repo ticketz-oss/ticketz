@@ -249,6 +249,14 @@ const handleCleanup = async (): Promise<void> => {
   logger.info({ removed }, "Whatsapp status media cleanup finished");
 };
 
+// A job that ended (for example failed after stalling twice) will never run
+// the handler again, so it counts as missing.
+const hasPendingJob = async (postId: number): Promise<boolean> => {
+  const job = await queue.getJob(jobIdOf(postId));
+  if (!job) return false;
+  return !(await job.isFailed()) && !(await job.isCompleted());
+};
+
 // Jobs may be lost when Redis is flushed or the backend restarts mid-flight.
 const recoverPendingPosts = async (): Promise<void> => {
   const posts = await WhatsappStatusPost.findAll({
@@ -262,7 +270,7 @@ const recoverPendingPosts = async (): Promise<void> => {
     try {
       if (post.state === "queued") {
         await enqueueStatusPost(post);
-      } else if (!(await queue.getJob(jobIdOf(post.id)))) {
+      } else if (!(await hasPendingJob(post.id))) {
         await finish(post, { state: "failed", failureCode: OUTCOME_UNKNOWN });
       }
     } catch (error) {
