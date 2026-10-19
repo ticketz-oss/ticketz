@@ -13,7 +13,10 @@ import { getStatusProvider } from "../providers";
 import { StatusPublishError } from "../providers/types";
 import { resolveAudienceJids } from "../StatusAudienceService";
 import { isStatusEnabled } from "../StatusFeatureService";
-import { cleanupOrphanStatusMedia } from "../StatusMediaService";
+import {
+  cleanupOrphanStatusMedia,
+  removeStatusMedia
+} from "../StatusMediaService";
 import { emitStatusPost } from "../StatusSocket";
 
 jest.mock("bull", () => {
@@ -39,7 +42,8 @@ jest.mock("../StatusAudienceService", () => ({
 }));
 jest.mock("../StatusFeatureService", () => ({ isStatusEnabled: jest.fn() }));
 jest.mock("../StatusMediaService", () => ({
-  cleanupOrphanStatusMedia: jest.fn()
+  cleanupOrphanStatusMedia: jest.fn(),
+  removeStatusMedia: jest.fn()
 }));
 jest.mock("../StatusSocket", () => ({ emitStatusPost: jest.fn() }));
 
@@ -174,10 +178,50 @@ describe("handlePublishStatus", () => {
       remoteMessageId: "3EB0ABC",
       publishedAt: NOW,
       expiresAt: new Date(NOW.getTime() + 24 * 3600 * 1000),
-      failureCode: null
+      failureCode: null,
+      mediaPath: null
     });
     expect(emitStatusPost).toHaveBeenCalledTimes(2);
     expect(emitStatusPost).toHaveBeenLastCalledWith(7, "update", post);
+  });
+
+  it("removes a video only after WhatsApp confirms it and the post is saved", async () => {
+    const mediaPath = "whatsapp-status/7/video.mp4";
+    const post = makePost({ kind: "video", mediaPath });
+    usePost(post);
+    const provider = mockProvider();
+
+    await handlePublishStatus(job());
+
+    expect(provider.publish).toHaveBeenCalledWith(
+      post,
+      expect.objectContaining({ id: 11 }),
+      AUDIENCE
+    );
+    expect(post.state).toBe("published");
+    expect(post.mediaPath).toBeNull();
+    expect(removeStatusMedia).toHaveBeenCalledWith(7, mediaPath);
+    expect(provider.publish.mock.invocationCallOrder[0]).toBeLessThan(
+      post.update.mock.invocationCallOrder[0]
+    );
+    expect(post.update.mock.invocationCallOrder[0]).toBeLessThan(
+      (removeStatusMedia as jest.Mock).mock.invocationCallOrder[0]
+    );
+  });
+
+  it("retains media when WhatsApp does not confirm the send", async () => {
+    const mediaPath = "whatsapp-status/7/video.mp4";
+    const post = makePost({ kind: "video", mediaPath });
+    usePost(post);
+    mockProvider().publish.mockRejectedValue(
+      new StatusPublishError("ERR_STATUS_NO_CONFIRMATION", true)
+    );
+
+    await handlePublishStatus(job());
+
+    expect(post.state).toBe("failed");
+    expect(post.mediaPath).toBe(mediaPath);
+    expect(removeStatusMedia).not.toHaveBeenCalled();
   });
 
   it("emits a published post with its author (createdBy)", async () => {

@@ -15,7 +15,10 @@ import { getStatusProvider } from "../services/WhatsappStatusServices/providers"
 import { StatusPublishError } from "../services/WhatsappStatusServices/providers/types";
 import { resolveAudienceJids } from "../services/WhatsappStatusServices/StatusAudienceService";
 import { isStatusEnabled } from "../services/WhatsappStatusServices/StatusFeatureService";
-import { cleanupOrphanStatusMedia } from "../services/WhatsappStatusServices/StatusMediaService";
+import {
+  cleanupOrphanStatusMedia,
+  removeStatusMedia
+} from "../services/WhatsappStatusServices/StatusMediaService";
 import { emitStatusPost } from "../services/WhatsappStatusServices/StatusSocket";
 import { logger } from "../utils/logger";
 
@@ -61,6 +64,7 @@ const finish = async (
     remoteMessageId?: string;
     publishedAt?: Date;
     expiresAt?: Date;
+    mediaPath?: null;
   }
 ): Promise<void> => {
   await post.update(fields);
@@ -192,13 +196,29 @@ const publishOnce = async (post: WhatsappStatusPost): Promise<void> => {
     }
 
     const publishedAt = new Date();
+    const mediaPath = post.mediaPath;
     await finish(post, {
       state: "published",
       remoteMessageId,
       publishedAt,
       expiresAt: new Date(publishedAt.getTime() + DAY_MS),
-      failureCode: null
+      failureCode: null,
+      mediaPath: null
     });
+    // The provider has returned a WhatsApp message id and the database no
+    // longer references the file. Do not retain a copy of a published story.
+    if (mediaPath) {
+      try {
+        await removeStatusMedia(post.companyId, mediaPath);
+      } catch (error) {
+        // A cleanup problem must not turn a confirmed send into a failed post.
+        // The daily orphan sweep will remove any file left behind.
+        logger.warn(
+          { error: error?.message, postId: post.id },
+          "Could not remove published whatsapp status media"
+        );
+      }
+    }
   });
 };
 

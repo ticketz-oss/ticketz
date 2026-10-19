@@ -8,6 +8,7 @@ import WhatsappStatusPost from "../../../models/WhatsappStatusPost";
 import {
   sniffMime,
   storeStatusMedia,
+  maxVideoBytes,
   resolveStatusMediaPath,
   cleanupOrphanStatusMedia
 } from "../StatusMediaService";
@@ -64,12 +65,18 @@ const expectAppError = async (
 
 describe("StatusMediaService", () => {
   const originalImageMb = process.env.WHATSAPP_STATUS_MAX_IMAGE_MB;
+  const originalVideoMb = process.env.WHATSAPP_STATUS_MAX_VIDEO_MB;
 
   afterEach(() => {
     if (originalImageMb === undefined) {
       delete process.env.WHATSAPP_STATUS_MAX_IMAGE_MB;
     } else {
       process.env.WHATSAPP_STATUS_MAX_IMAGE_MB = originalImageMb;
+    }
+    if (originalVideoMb === undefined) {
+      delete process.env.WHATSAPP_STATUS_MAX_VIDEO_MB;
+    } else {
+      process.env.WHATSAPP_STATUS_MAX_VIDEO_MB = originalVideoMb;
     }
   });
 
@@ -125,6 +132,30 @@ describe("StatusMediaService", () => {
     expect(result.mediaPath).toMatch(/^whatsapp-status\/7\/[0-9a-f-]+\.mp4$/);
     expect(result.mediaMime).toBe("video/mp4");
     expect(fs.existsSync(tmpFile)).toBe(false);
+  });
+
+  it("accepts a 17.6 MB video and rejects one above the 20 MB default", async () => {
+    delete process.env.WHATSAPP_STATUS_MAX_VIDEO_MB;
+    expect(maxVideoBytes()).toBe(20 * 1024 * 1024);
+
+    const accepted = Buffer.alloc(Math.ceil(17.6 * 1024 * 1024));
+    accepted.write("ftypisom", 4, "ascii");
+    const acceptedFile = writeTmp(accepted, ".mp4");
+    const stored = await storeStatusMedia(7, "video", acceptedFile);
+    expect(
+      fs.statSync(path.join(privateFiles.directory, stored.mediaPath)).size
+    ).toBe(accepted.length);
+    expect(fs.existsSync(acceptedFile)).toBe(false);
+
+    const rejected = Buffer.alloc(maxVideoBytes() + 1);
+    rejected.write("ftypisom", 4, "ascii");
+    const rejectedFile = writeTmp(rejected, ".mp4");
+    await expectAppError(
+      storeStatusMedia(7, "video", rejectedFile),
+      "ERR_STATUS_MEDIA_TOO_LARGE",
+      413
+    );
+    expect(fs.existsSync(rejectedFile)).toBe(false);
   });
 
   it("rejects a text file renamed to .jpg with ERR_STATUS_MEDIA_INVALID and deletes the temp file", async () => {

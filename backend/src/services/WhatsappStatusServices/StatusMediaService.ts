@@ -28,7 +28,7 @@ export const maxImageBytes = (): number =>
   envMb("WHATSAPP_STATUS_MAX_IMAGE_MB", 5) * MB;
 
 export const maxVideoBytes = (): number =>
-  envMb("WHATSAPP_STATUS_MAX_VIDEO_MB", 16) * MB;
+  envMb("WHATSAPP_STATUS_MAX_VIDEO_MB", 20) * MB;
 
 // Multer instance for the status API: files land in the OS temp folder and
 // are only moved into private storage by storeStatusMedia after validation.
@@ -213,9 +213,9 @@ const cancelStaleDrafts = async (retentionLimit: Date): Promise<number> => {
 
 // Removes files nobody references (older than 24h, so an upload whose post
 // is still being created is not raced) and the media of posts that no longer
-// need it: published and expired for more than 7 days, cancelled/failed for
-// more than 7 days, or drafts/unsupported posts untouched for 7 days (which
-// are cancelled). Returns how many files were removed.
+// need it: published posts, cancelled/failed posts older than 7 days, or
+// drafts/unsupported posts untouched for 7 days (which are cancelled).
+// Published media left by earlier releases is removed at the next sweep.
 export const cleanupOrphanStatusMedia = async (
   now: Date = new Date()
 ): Promise<number> => {
@@ -266,7 +266,7 @@ export const cleanupOrphanStatusMedia = async (
     where: {
       mediaPath: { [Op.ne]: null },
       [Op.or]: [
-        { state: "published", expiresAt: { [Op.lt]: retentionLimit } },
+        { state: "published" },
         {
           state: { [Op.in]: ["cancelled", "failed"] },
           updatedAt: { [Op.lt]: retentionLimit }

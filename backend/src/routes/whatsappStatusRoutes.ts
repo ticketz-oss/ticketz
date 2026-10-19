@@ -17,7 +17,7 @@ const megabytes = (value: string | undefined, fallback: number): number => {
 const maxUploadBytes = Math.floor(
   Math.max(
     megabytes(process.env.WHATSAPP_STATUS_MAX_IMAGE_MB, 5),
-    megabytes(process.env.WHATSAPP_STATUS_MAX_VIDEO_MB, 16)
+    megabytes(process.env.WHATSAPP_STATUS_MAX_VIDEO_MB, 20)
   ) *
     1024 *
     1024
