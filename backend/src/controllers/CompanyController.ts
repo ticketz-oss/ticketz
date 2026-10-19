@@ -17,7 +17,7 @@ import { SignupFiles } from "../services/CompanyService/SignupBrandingService";
 import { companyTrial } from "../helpers/companyTrial";
 import User from "../models/User";
 
-import CheckSettings from "../helpers/CheckSettings";
+import isSignupAllowed from "../services/CompanyService/SignupGateService";
 import { OpenHoursData } from "../helpers/checkOpenHours";
 import { normalizeCompanyTimezone } from "../services/CompanyService/CompanyTimezoneService";
 import {
@@ -152,8 +152,8 @@ export const signup = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  if ((await CheckSettings("allowSignup")) !== "enabled") {
-    return res.status(401).json("🙎🏻‍♂️ Signup disabled");
+  if (!(await isSignupAllowed())) {
+    throw new AppError("ERR_SIGNUP_DISABLED", 403);
   }
 
   if (process.env.RECAPTCHA_SECRET_KEY) {
