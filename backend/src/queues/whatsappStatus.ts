@@ -183,7 +183,7 @@ const publishOnce = async (post: WhatsappStatusPost): Promise<void> => {
         audience
       ));
     } catch (error) {
-      // The provider raises this only before sendMessage: nothing was sent.
+      // A connection-unavailable error is raised before sendMessage.
       if (
         error instanceof StatusPublishError &&
         !error.permanent &&

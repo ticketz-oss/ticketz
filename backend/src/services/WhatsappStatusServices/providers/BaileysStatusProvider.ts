@@ -6,6 +6,7 @@ import WhatsappStatusPost, {
   StatusKind
 } from "../../../models/WhatsappStatusPost";
 import { resolveStatusMediaPath } from "../StatusMediaService";
+import { logger } from "../../../utils/logger";
 import OfficialStatusProvider from "./OfficialStatusProvider";
 import {
   StatusCapabilities,
@@ -22,6 +23,8 @@ export const VERIFIED_LIBZAPITU_VERSIONS: string[] = [];
 export const UNVERIFIED_KINDS: StatusKind[] = [];
 
 const ALL_KINDS: StatusKind[] = ["text", "image", "video"];
+const STATUS_ACK_EVENT = "CB:ack,class:message";
+const STATUS_ACK_TIMEOUT_MS = 15000;
 
 // Read once: the installed fork only changes with a new deployment.
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -123,16 +126,58 @@ const publish = async (
     if (post.font !== null && post.font !== undefined) options.font = post.font;
   }
 
-  const sent = await wbot.sendMessage(
-    "status@broadcast",
-    content as never,
-    options as never
-  );
-  const remoteMessageId = sent?.key?.id;
-  if (!remoteMessageId) {
-    throw new StatusPublishError("ERR_STATUS_NO_CONFIRMATION", true);
+  // sendMessage resolves after writing the stanza, before the server ACK.
+  // Register first because the ACK can arrive before sendMessage resolves.
+  const observed = new Map<string, string | null>();
+  let expectedId: string | null = null;
+  let acceptAck: ((code: string | null) => void) | null = null;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const onAck = (node: {
+    attrs?: { id?: string; from?: string; error?: string };
+  }): void => {
+    const attrs = node?.attrs;
+    if (attrs?.from !== "status@broadcast" || !attrs.id) return;
+    const code = attrs.error || null;
+    observed.set(attrs.id, code);
+    if (attrs.id === expectedId && acceptAck) acceptAck(code);
+  };
+  const socket = wbot.ws;
+  socket.on(STATUS_ACK_EVENT, onAck);
+  try {
+    const sent = await wbot.sendMessage(
+      "status@broadcast",
+      content as never,
+      options as never
+    );
+    const remoteMessageId = sent?.key?.id;
+    if (!remoteMessageId) {
+      throw new StatusPublishError("ERR_STATUS_NO_CONFIRMATION", true);
+    }
+
+    const ackCode = await new Promise<string | null | undefined>(resolve => {
+      expectedId = remoteMessageId;
+      acceptAck = resolve;
+      if (observed.has(remoteMessageId)) {
+        resolve(observed.get(remoteMessageId));
+      } else {
+        timer = setTimeout(() => resolve(undefined), STATUS_ACK_TIMEOUT_MS);
+      }
+    });
+    if (ackCode === undefined) {
+      throw new StatusPublishError("ERR_STATUS_NO_CONFIRMATION", true);
+    }
+    if (ackCode) {
+      logger.warn(
+        { postId: post.id, ackError: ackCode },
+        "Whatsapp status rejected by server"
+      );
+      throw new StatusPublishError("ERR_STATUS_SERVER_REJECTED", true);
+    }
+    return { remoteMessageId };
+  } finally {
+    if (timer) clearTimeout(timer);
+    socket.off(STATUS_ACK_EVENT, onAck);
   }
-  return { remoteMessageId };
 };
 
 const BaileysStatusProvider: StatusProvider = { capabilities, publish };

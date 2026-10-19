@@ -25,6 +25,8 @@ const ptErrors = {
   ERR_STATUS_NOT_FOUND: "Story não encontrado.",
   ERR_STATUS_NO_CONFIRMATION:
     "A sessão do WhatsApp não confirmou o envio deste story.",
+  ERR_STATUS_SERVER_REJECTED:
+    "O WhatsApp rejeitou este story. Ele não foi publicado.",
   ERR_STATUS_EXPIRED_DRAFT:
     "Rascunho descartado depois de 7 dias sem alterações.",
   ERR_STATUS_OFFICIAL_API:
@@ -63,6 +65,8 @@ const enErrors = {
   ERR_STATUS_NOT_FOUND: "Story not found.",
   ERR_STATUS_NO_CONFIRMATION:
     "The WhatsApp session did not confirm this story was sent.",
+  ERR_STATUS_SERVER_REJECTED:
+    "WhatsApp rejected this story. It was not published.",
   ERR_STATUS_EXPIRED_DRAFT: "Draft discarded after 7 days without changes.",
   ERR_STATUS_OFFICIAL_API:
     "This connection uses Meta's official API, which does not publish Status.",

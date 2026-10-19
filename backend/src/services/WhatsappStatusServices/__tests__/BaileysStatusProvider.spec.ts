@@ -1,3 +1,4 @@
+import { EventEmitter } from "events";
 import { getWbot } from "../../../libs/wbot";
 import AppError from "../../../errors/AppError";
 import { resolveStatusMediaPath } from "../StatusMediaService";
@@ -42,9 +43,24 @@ const post = (overrides = {}) =>
 
 const OWN = "5568999990000:12@s.whatsapp.net";
 
-const mockSocket = (result: unknown) => {
-  const sendMessage = jest.fn().mockResolvedValue(result);
-  (getWbot as jest.Mock).mockReturnValue({ user: { id: OWN }, sendMessage });
+const mockSocket = (result: unknown, ackError?: string, emitAck = true) => {
+  const ws = new EventEmitter();
+  const sendMessage = jest.fn().mockImplementation(async () => {
+    const id = (result as { key?: { id?: string } } | undefined)?.key?.id;
+    if (id && emitAck) {
+      setImmediate(() =>
+        ws.emit("CB:ack,class:message", {
+          attrs: { id, from: "status@broadcast", error: ackError }
+        })
+      );
+    }
+    return result;
+  });
+  (getWbot as jest.Mock).mockReturnValue({
+    user: { id: OWN },
+    sendMessage,
+    ws
+  });
   return sendMessage;
 };
 
@@ -234,6 +250,54 @@ describe("BaileysStatusProvider", () => {
     ).rejects.toEqual(
       new StatusPublishError("ERR_STATUS_NO_CONFIRMATION", true)
     );
+  });
+
+  it("fails when WhatsApp rejects the stanza after sendMessage returns an id", async () => {
+    mockSocket({ key: { id: "REJECTED1" } }, "479");
+    await expect(
+      BaileysStatusProvider.publish(post(), connection(), [])
+    ).rejects.toEqual(
+      new StatusPublishError("ERR_STATUS_SERVER_REJECTED", true)
+    );
+  });
+
+  it("accepts a server ACK that arrives before sendMessage returns", async () => {
+    const ws = new EventEmitter();
+    (getWbot as jest.Mock).mockReturnValue({
+      user: { id: OWN },
+      ws,
+      sendMessage: jest.fn().mockImplementation(async () => {
+        ws.emit("CB:ack,class:message", {
+          attrs: { id: "EARLY1", from: "status@broadcast" }
+        });
+        return { key: { id: "EARLY1" } };
+      })
+    });
+    await expect(
+      BaileysStatusProvider.publish(post(), connection(), [])
+    ).resolves.toEqual({ remoteMessageId: "EARLY1" });
+  });
+
+  it("does not mark a status as sent when the server never acknowledges it", async () => {
+    jest.useFakeTimers();
+    try {
+      mockSocket({ key: { id: "UNCONFIRMED1" } }, undefined, false);
+      const publishing = BaileysStatusProvider.publish(
+        post(),
+        connection(),
+        []
+      );
+      const result = expect(publishing).rejects.toEqual(
+        new StatusPublishError("ERR_STATUS_NO_CONFIRMATION", true)
+      );
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+      jest.advanceTimersByTime(15000);
+      await result;
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it("maps ERR_WAPP_NOT_INITIALIZED to ERR_STATUS_CONNECTION_UNAVAILABLE (transient)", async () => {
