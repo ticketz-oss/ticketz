@@ -1440,12 +1440,13 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
     );
   };
 
-  const sendReply = async body => {
+  const sendReply = async (body, quotedMessage) => {
     const message = {
       read: 1,
       fromMe: true,
       mediaUrl: "",
-      body
+      body,
+      quotedMsg: quotedMessage
     };
 
     api.post(`/messages/${ticketId}`, message).catch(err => {
@@ -1453,7 +1454,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
     });
   };
 
-  const renderReplyButton = text => {
+  const renderReplyButton = (text, parentMessage) => {
     return (
       <Button
         className={classes.messageButton}
@@ -1462,7 +1463,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
         disabled={!!readOnly}
         onClick={() => {
           if (!readOnly) {
-            sendReply(text);
+            sendReply(text, parentMessage);
           }
         }}
       >
@@ -1496,7 +1497,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
     </Button>
   );
 
-  const renderButtons = message => {
+  const renderButtons = (message, parentMessage) => {
     const objects =
       message?.buttonsMessage?.buttons ||
       message?.listMessage?.sections ||
@@ -1514,9 +1515,12 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
           url: item.urlButton.url
         });
       } else if (item.quickReplyButton) {
-        return renderReplyButton(item.quickReplyButton.displayText);
+        return renderReplyButton(
+          item.quickReplyButton.displayText,
+          parentMessage
+        );
       } else if (item.type === "RESPONSE" && item.buttonText) {
-        return renderReplyButton(item.buttonText.displayText);
+        return renderReplyButton(item.buttonText.displayText, parentMessage);
       } else if (item.buttonParamsJson) {
         const params = JSON.parse(item.buttonParamsJson);
         if (params?.payment_setting?.payment_link?.uri) {
@@ -1532,11 +1536,11 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
           });
         }
         if (params?.display_text) {
-          return renderReplyButton(params.display_text);
+          return renderReplyButton(params.display_text, parentMessage);
         }
       } else if (item.rows) {
         return item.rows.map(row => {
-          return renderReplyButton(row.title);
+          return renderReplyButton(row.title, parentMessage);
         });
       }
 
@@ -1913,7 +1917,7 @@ const MessagesList = ({ ticket, ticketId, isGroup, markAsRead, readOnly }) => {
               {message.mediaUrl &&
                 !data?.message?.extendedTextMessage &&
                 checkMessageMedia(message, data, isSticker)}
-              {renderButtons(data?.message)}
+              {renderButtons(data?.message, message)}
               {renderReplies(message.replies)}
             </div>
           </React.Fragment>
