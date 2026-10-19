@@ -1,7 +1,9 @@
-// Stub created by the shared scaffold; Task 6 implements it.
 import Whatsapp from "../../../models/Whatsapp";
+import BaileysStatusProvider from "./BaileysStatusProvider";
+import OfficialStatusProvider from "./OfficialStatusProvider";
 import { StatusProvider } from "./types";
 
-export const getStatusProvider = (_connection: Whatsapp): StatusProvider => {
-  throw new Error("not implemented");
-};
+export const getStatusProvider = (connection: Whatsapp): StatusProvider =>
+  connection.apiMode === "official"
+    ? OfficialStatusProvider
+    : BaileysStatusProvider;
