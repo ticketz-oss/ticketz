@@ -1,3 +1,4 @@
+import StardewEmblem from "../../components/StardewEmblem";
 import React, { useState, useEffect, useContext } from "react";
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
@@ -15,13 +16,13 @@ import { toast } from "react-toastify";
 import useQuickMessages from "../../hooks/useQuickMessages";
 import { AuthContext } from "../../context/Auth/AuthContext";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   mainPaper: {
     flex: 1,
     padding: theme.spacing(1),
     overflowY: "scroll",
-    ...theme.scrollbarStyles,
-  },
+    ...theme.scrollbarStyles
+  }
 }));
 
 function QuickMessages(props) {
@@ -36,7 +37,7 @@ function QuickMessages(props) {
     list: listMessages,
     save: saveMessage,
     update: updateMessage,
-    deleteRecord: deleteMessage,
+    deleteRecord: deleteMessage
   } = useQuickMessages();
 
   const { user } = useContext(AuthContext);
@@ -65,7 +66,7 @@ function QuickMessages(props) {
     setModalOpen(true);
   };
 
-  const handleOpenToEdit = (message) => {
+  const handleOpenToEdit = message => {
     setMessageSelected(message);
     setModalOpen(true);
   };
@@ -75,7 +76,7 @@ function QuickMessages(props) {
     setMessageSelected({ id: null, message: "", shortcode: "" });
   };
 
-  const handleSave = async (message) => {
+  const handleSave = async message => {
     handleCloseModal();
     try {
       await saveMessage(message);
@@ -86,7 +87,7 @@ function QuickMessages(props) {
     }
   };
 
-  const handleEdit = async (message) => {
+  const handleEdit = async message => {
     handleCloseModal();
     try {
       await updateMessage(message);
@@ -97,7 +98,7 @@ function QuickMessages(props) {
     }
   };
 
-  const handleDelete = async (message) => {
+  const handleDelete = async message => {
     handleCloseModal();
     try {
       await deleteMessage(message.id);
@@ -109,8 +110,9 @@ function QuickMessages(props) {
   };
 
   return (
-    <MainContainer>
+    <MainContainer className="sv-operations sv-screen-quick-messages">
       <MainHeader>
+        <StardewEmblem item="scroll" />
         <Title>{i18n.t("quickMessages.title")}</Title>
         <MainHeaderButtonsWrapper>
           <Button variant="contained" color="primary" onClick={handleOpenToAdd}>
@@ -124,7 +126,7 @@ function QuickMessages(props) {
           messages={messages}
           showLoading={loading}
           editMessage={handleOpenToEdit}
-          deleteMessage={(message) => {
+          deleteMessage={message => {
             setMessageSelected(message);
             setShowOnDeleteDialog(true);
           }}

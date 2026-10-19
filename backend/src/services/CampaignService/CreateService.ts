@@ -3,6 +3,7 @@ import AppError from "../../errors/AppError";
 import Campaign from "../../models/Campaign";
 import ContactList from "../../models/ContactList";
 import Whatsapp from "../../models/Whatsapp";
+import assertCampaignConnection from "./assertCampaignConnection";
 
 interface Data {
   name: string;
@@ -11,6 +12,7 @@ interface Data {
   scheduledAt: Date;
   companyId: number;
   contactListId: number;
+  whatsappId?: number;
   message1?: string;
   message2?: string;
   message3?: string;
@@ -37,6 +39,8 @@ const CreateService = async (data: Data): Promise<Campaign> => {
   } catch (err: any) {
     throw new AppError(err.message);
   }
+
+  await assertCampaignConnection(data);
 
   if (data.scheduledAt != null) {
     data.status = "PROGRAMADA";

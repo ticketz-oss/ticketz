@@ -6,6 +6,7 @@ import User from "../../models/User";
 interface Request {
   ownerId: number;
   pageNumber?: string;
+  searchParam?: string;
 }
 
 interface Response {
@@ -16,7 +17,8 @@ interface Response {
 
 const ListService = async ({
   ownerId,
-  pageNumber = "1"
+  pageNumber = "1",
+  searchParam = ""
 }: Request): Promise<Response> => {
   const chatUsers = await ChatUser.findAll({
     where: { userId: ownerId }
@@ -28,18 +30,33 @@ const ListService = async ({
   const offset = limit * (+pageNumber - 1);
 
   const { count, rows: records } = await Chat.findAndCountAll({
+    distinct: true,
     where: {
+      title: { [Op.iLike]: `%${searchParam}%` },
       id: {
         [Op.in]: chatIds
       }
     },
     include: [
-      { model: User, as: "owner" },
-      { model: ChatUser, as: "users", include: [{ model: User, as: "user" }] }
+      { model: User, as: "owner", attributes: ["id", "name", "profilePicUrl"] },
+      {
+        model: ChatUser,
+        as: "users",
+        include: [
+          {
+            model: User,
+            as: "user",
+            attributes: ["id", "name", "profilePicUrl"]
+          }
+        ]
+      }
     ],
     limit,
     offset,
-    order: [["createdAt", "DESC"]]
+    order: [
+      ["updatedAt", "DESC"],
+      ["id", "DESC"]
+    ]
   });
 
   const hasMore = count > offset + records.length;

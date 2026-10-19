@@ -57,7 +57,7 @@ const ListTicketsServiceKanban = async ({
     {
       model: Contact,
       as: "contact",
-      attributes: ["id", "name", "number", "email"]
+      attributes: ["id", "name", "number", "email", "presence"]
     },
     {
       model: Queue,
@@ -77,8 +77,8 @@ const ListTicketsServiceKanban = async ({
     {
       model: Whatsapp,
       as: "whatsapp",
-      attributes: ["name"]
-    },
+      attributes: ["id", "name", "apiMode"]
+    }
   ];
 
   if (showAll === "true") {

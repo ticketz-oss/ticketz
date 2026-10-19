@@ -1,0 +1,467 @@
+/* The embedded agent receives the application's color mode through postMessage. */
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --ink: #edf1f5;
+  --muted: #a0aab7;
+  --line: #303945;
+  --canvas: #0e1319;
+  --white: #151b22;
+  --cream: #201c1b;
+  --orange: #ff7728;
+  --bright-orange: #ff8b47;
+  --orange-soft: #302118;
+  --shadow: 0 12px 36px #0005;
+  --agent-surface: #151b22;
+  --agent-raised: #1c242d;
+  --agent-hover: #26303b;
+  --agent-line: #323d49;
+  --agent-text: #edf1f5;
+  --agent-muted: #a6b0bd;
+  --agent-soft: #d0d7df;
+  --agent-accent: #ff985f;
+  background: var(--canvas);
+  color: var(--agent-text);
+}
+
+html[data-theme="dark"] .embedded-preview,
+html[data-theme="dark"] .embedded-preview .app-shell,
+html[data-theme="dark"] .agent-panel,
+html[data-theme="dark"] .agent-view-host,
+html[data-theme="dark"] .agent-view-surface,
+html[data-theme="dark"] .cv-surface,
+html[data-theme="dark"] .tv-root,
+html[data-theme="dark"] .ch-shell,
+html[data-theme="dark"] .pv-surface {
+  background: var(--agent-surface);
+  color: var(--agent-text);
+}
+
+html[data-theme="dark"] .agent-panel {
+  border-color: var(--agent-line);
+  box-shadow: 0 12px 40px #0005;
+}
+
+html[data-theme="dark"] .agent-header,
+html[data-theme="dark"] .cv-header,
+html[data-theme="dark"] .tv-header,
+html[data-theme="dark"] .ch-phone-top,
+html[data-theme="dark"] .ch-dialog-footer {
+  border-color: var(--agent-line);
+}
+
+html[data-theme="dark"] .agent-context {
+  background: #192129;
+  border-color: var(--agent-line);
+  color: var(--agent-muted);
+}
+
+html[data-theme="dark"] .context-separator,
+html[data-theme="dark"] .agent-header-title span,
+html[data-theme="dark"] .agent-header-actions .icon-button,
+html[data-theme="dark"] .agent-menu-toggle,
+html[data-theme="dark"] .composer-caption,
+html[data-theme="dark"] .agent-disclaimer,
+html[data-theme="dark"] .welcome > p,
+html[data-theme="dark"] .suggestion small,
+html[data-theme="dark"] .message-meta,
+html[data-theme="dark"] .response-feedback,
+html[data-theme="dark"] .feedback-button,
+html[data-theme="dark"] .response-footer,
+html[data-theme="dark"] .message-note,
+html[data-theme="dark"] .mock-data-note,
+html[data-theme="dark"] .empty-history,
+html[data-theme="dark"] .agent-nav-footer,
+html[data-theme="dark"] .agent-nav-footer > small,
+html[data-theme="dark"] .agent-history-view > p,
+html[data-theme="dark"] .agent-history-date,
+html[data-theme="dark"] .agent-history-example,
+html[data-theme="dark"] .tv-intro p,
+html[data-theme="dark"] .cv-intro p,
+html[data-theme="dark"] .ch-description,
+html[data-theme="dark"] .pv-muted {
+  color: var(--agent-muted);
+}
+
+html[data-theme="dark"] .agent-header-title strong,
+html[data-theme="dark"] .welcome h2,
+html[data-theme="dark"] .response-title,
+html[data-theme="dark"] .message-agent .message-content h3,
+html[data-theme="dark"] .message-agent .message-content strong,
+html[data-theme="dark"] .popover-title,
+html[data-theme="dark"] .agent-history-view h2,
+html[data-theme="dark"] .agent-history-empty strong,
+html[data-theme="dark"] .cv-empty h4 {
+  color: var(--agent-text);
+}
+
+html[data-theme="dark"] .welcome-eyebrow,
+html[data-theme="dark"] .response-mark,
+html[data-theme="dark"] .cv-create-skill,
+html[data-theme="dark"] .ch-eyebrow,
+html[data-theme="dark"] .ch-label {
+  color: var(--agent-accent);
+}
+
+html[data-theme="dark"] .message-list,
+html[data-theme="dark"] .agent-view-host,
+html[data-theme="dark"] .cv-body,
+html[data-theme="dark"] .tv-scroll {
+  scrollbar-color: #45515f transparent;
+}
+
+html[data-theme="dark"] .message-list::-webkit-scrollbar-thumb {
+  background: #45515f;
+}
+
+html[data-theme="dark"] .suggestion,
+html[data-theme="dark"] .composer,
+html[data-theme="dark"] .popover,
+html[data-theme="dark"] .agent-navigation,
+html[data-theme="dark"] .agent-history-search,
+html[data-theme="dark"] .cv-search,
+html[data-theme="dark"] .cv-card,
+html[data-theme="dark"] .cv-action,
+html[data-theme="dark"] .cv-modal,
+html[data-theme="dark"] .cv-form-input,
+html[data-theme="dark"] .tv-search,
+html[data-theme="dark"] .tv-input,
+html[data-theme="dark"] .tv-modal,
+html[data-theme="dark"] .tv-file-item,
+html[data-theme="dark"] .tv-task-item,
+html[data-theme="dark"] .tv-project-item,
+html[data-theme="dark"] .ch-card,
+html[data-theme="dark"] .ch-dialog,
+html[data-theme="dark"] .pv-card,
+html[data-theme="dark"] .pv-dialog,
+html[data-theme="dark"] .pv-period,
+html[data-theme="dark"] .pv-input,
+html[data-theme="dark"] .pv-secondary {
+  background: var(--agent-raised);
+  border-color: var(--agent-line);
+  color: var(--agent-text);
+}
+
+html[data-theme="dark"] .suggestion:hover,
+html[data-theme="dark"] .skill-item:hover,
+html[data-theme="dark"] .history-item:hover,
+html[data-theme="dark"] .history-entry:hover,
+html[data-theme="dark"] .agent-nav-entry:hover,
+html[data-theme="dark"] .agent-history-row:hover,
+html[data-theme="dark"] .cv-card:hover,
+html[data-theme="dark"] .cv-action:hover,
+html[data-theme="dark"] .tv-file-item:hover,
+html[data-theme="dark"] .tv-task-item:hover,
+html[data-theme="dark"] .tv-project-item:hover,
+html[data-theme="dark"] .tv-button-secondary:hover,
+html[data-theme="dark"] .ch-secondary:hover {
+  background: var(--agent-hover);
+  border-color: #65422f;
+  color: var(--agent-text);
+}
+
+html[data-theme="dark"] .suggestion {
+  color: var(--agent-text);
+}
+
+html[data-theme="dark"] .suggestion-icon,
+html[data-theme="dark"] .skill-icon,
+html[data-theme="dark"] .tv-task-mark,
+html[data-theme="dark"] .tv-project-mark,
+html[data-theme="dark"] .tv-empty-mark,
+html[data-theme="dark"] .pv-success-icon {
+  background: #39271e;
+  color: var(--agent-accent);
+}
+
+html[data-theme="dark"] .suggestion-arrow,
+html[data-theme="dark"] .composer-tools .icon-button,
+html[data-theme="dark"] .agent-nav-entry,
+html[data-theme="dark"] .cv-icon-button,
+html[data-theme="dark"] .tv-icon-button,
+html[data-theme="dark"] .ch-close,
+html[data-theme="dark"] .pv-close {
+  color: var(--agent-muted);
+}
+
+html[data-theme="dark"] .composer-area {
+  background: var(--agent-surface);
+}
+
+html[data-theme="dark"] .composer:focus-within,
+html[data-theme="dark"] .cv-search:focus-within,
+html[data-theme="dark"] .tv-search:focus-within {
+  border-color: #b86b40;
+  box-shadow: 0 0 0 3px #ff772824;
+}
+
+html[data-theme="dark"] .composer textarea,
+html[data-theme="dark"] .cv-search-input,
+html[data-theme="dark"] .tv-search input,
+html[data-theme="dark"] .agent-history-search,
+html[data-theme="dark"] .cv-form-input,
+html[data-theme="dark"] .tv-input,
+html[data-theme="dark"] .pv-input {
+  color: var(--agent-text);
+}
+
+html[data-theme="dark"] .composer textarea::placeholder,
+html[data-theme="dark"] .cv-search-input::placeholder,
+html[data-theme="dark"] .tv-search input::placeholder,
+html[data-theme="dark"] .cv-form-input::placeholder,
+html[data-theme="dark"] .tv-input::placeholder {
+  color: #94a0ae;
+}
+
+html[data-theme="dark"] .skills-toggle,
+html[data-theme="dark"] .skill-item,
+html[data-theme="dark"] .history-item,
+html[data-theme="dark"] .history-entry,
+html[data-theme="dark"] .agent-history-row,
+html[data-theme="dark"] .agent-nav-entry,
+html[data-theme="dark"] .tv-button-secondary,
+html[data-theme="dark"] .ch-secondary {
+  background: transparent;
+  color: var(--agent-soft);
+}
+
+html[data-theme="dark"] .skills-toggle,
+html[data-theme="dark"] .response-tag,
+html[data-theme="dark"] .attachment-chip,
+html[data-theme="dark"] .tv-button-secondary,
+html[data-theme="dark"] .ch-secondary {
+  border: 1px solid var(--agent-line);
+}
+
+html[data-theme="dark"] .skills-toggle:hover,
+html[data-theme="dark"] .skills-toggle[aria-expanded="true"],
+html[data-theme="dark"] .agent-nav-entry[aria-current],
+html[data-theme="dark"] .history-entry[aria-current],
+html[data-theme="dark"] .tv-layout-toggle [aria-pressed="true"] {
+  background: #38271e;
+  color: var(--agent-accent);
+}
+
+html[data-theme="dark"] .send-button:disabled {
+  background: #3c332f;
+  color: #9e8d82;
+}
+
+html[data-theme="dark"] .agent-nav-channels,
+html[data-theme="dark"] .agent-nav-footer,
+html[data-theme="dark"] .popover-heading,
+html[data-theme="dark"] .tv-tabs,
+html[data-theme="dark"] .tv-project-footer,
+html[data-theme="dark"] .cv-header,
+html[data-theme="dark"] .pv-balance {
+  border-color: var(--agent-line);
+}
+
+html[data-theme="dark"] .popover-heading strong,
+html[data-theme="dark"] .skill-item strong,
+html[data-theme="dark"] .tv-file-copy strong,
+html[data-theme="dark"] .tv-task-copy strong,
+html[data-theme="dark"] .tv-project-item > strong,
+html[data-theme="dark"] .tv-empty h3,
+html[data-theme="dark"] .cv-form-label,
+html[data-theme="dark"] .cv-specialist-role {
+  color: var(--agent-text);
+}
+
+html[data-theme="dark"] .popover-heading > span,
+html[data-theme="dark"] .skill-item small,
+html[data-theme="dark"] .history-item small,
+html[data-theme="dark"] .tv-file-copy small,
+html[data-theme="dark"] .tv-file-date,
+html[data-theme="dark"] .tv-task-copy small,
+html[data-theme="dark"] .tv-task-date,
+html[data-theme="dark"] .tv-project-item > p,
+html[data-theme="dark"] .tv-project-footer,
+html[data-theme="dark"] .tv-empty p,
+html[data-theme="dark"] .cv-description,
+html[data-theme="dark"] .cv-category,
+html[data-theme="dark"] .cv-results-count,
+html[data-theme="dark"] .cv-simulation-note,
+html[data-theme="dark"] .cv-modal-subtitle,
+html[data-theme="dark"] .cv-form-note,
+html[data-theme="dark"] .ch-card > p,
+html[data-theme="dark"] .ch-card-detail,
+html[data-theme="dark"] .ch-mobile-copy > p,
+html[data-theme="dark"] .ch-benefits li p,
+html[data-theme="dark"] .ch-mobile-benefits,
+html[data-theme="dark"] .ch-dialog-description,
+html[data-theme="dark"] .pv-features li,
+html[data-theme="dark"] .pv-price span,
+html[data-theme="dark"] .pv-credit-count,
+html[data-theme="dark"] .pv-price-scope,
+html[data-theme="dark"] .pv-balance span,
+html[data-theme="dark"] .pv-renewal {
+  color: var(--agent-muted);
+}
+
+html[data-theme="dark"] .user-bubble,
+html[data-theme="dark"] .message-user .message-content {
+  background: #403025;
+  border-color: #68452f;
+  color: #ffe1cd;
+}
+
+html[data-theme="dark"] .response-paragraph,
+html[data-theme="dark"] .message-agent .message-content {
+  color: var(--agent-soft);
+}
+
+html[data-theme="dark"] blockquote.response-paragraph,
+html[data-theme="dark"] .message-agent .message-content blockquote,
+html[data-theme="dark"] .response-action,
+html[data-theme="dark"] .attachment-chip,
+html[data-theme="dark"] .cv-create-skill,
+html[data-theme="dark"] .cv-notification,
+html[data-theme="dark"] .tv-notice,
+html[data-theme="dark"] .pv-note {
+  background: #32251e;
+  border-color: #69462e;
+  color: #ffd0ad;
+}
+
+html[data-theme="dark"] .response-items,
+html[data-theme="dark"] .response-items li + li,
+html[data-theme="dark"] .response-tag {
+  border-color: var(--agent-line);
+}
+
+html[data-theme="dark"] .message-error,
+html[data-theme="dark"] .cv-form-error {
+  color: #ffad91;
+}
+
+html[data-theme="dark"] .thought-line--espaco {
+  --tl-color: #c5ced9;
+  --tl-glyph: #ff8b47;
+}
+
+html[data-theme="dark"] .agent-history-empty,
+html[data-theme="dark"] .tv-layout-toggle,
+html[data-theme="dark"] .cv-tabs,
+html[data-theme="dark"] .pv-summary {
+  background: var(--agent-raised);
+  border-color: var(--agent-line);
+  color: var(--agent-muted);
+}
+
+html[data-theme="dark"] .cv-tab[aria-selected="true"],
+html[data-theme="dark"] .pv-selected,
+html[data-theme="dark"] .pv-recommended {
+  background: #34271f;
+  color: var(--agent-text);
+  border-color: #aa6741;
+}
+
+html[data-theme="dark"] .cv-tab,
+html[data-theme="dark"] .tv-tab,
+html[data-theme="dark"] .tv-modal-description {
+  color: var(--agent-muted);
+}
+
+html[data-theme="dark"] .cv-hue-orange,
+html[data-theme="dark"] .cv-hue-yellow,
+html[data-theme="dark"] .cv-hue-red,
+html[data-theme="dark"] .cv-hue-pink,
+html[data-theme="dark"] .ch-card-mark,
+html[data-theme="dark"] .ch-phone-avatar,
+html[data-theme="dark"] .tv-file-mark {
+  background: #392a24;
+  color: #ffac75;
+}
+
+html[data-theme="dark"] .cv-hue-green,
+html[data-theme="dark"] .ch-card-mark-whatsapp,
+html[data-theme="dark"] .tv-file-mark--csv {
+  background: #20382e;
+  color: #83d6a6;
+}
+
+html[data-theme="dark"] .cv-hue-blue,
+html[data-theme="dark"] .cv-hue-purple,
+html[data-theme="dark"] .cv-hue-neutral,
+html[data-theme="dark"] .tv-file-mark--txt {
+  background: #29364a;
+  color: #a4c1f3;
+}
+
+html[data-theme="dark"] .cv-action-connected {
+  background: #1e352c;
+  border-color: #3b7054;
+  color: #94d7ac;
+}
+
+html[data-theme="dark"] .ch-mobile-section,
+html[data-theme="dark"] .ch-phone-preview,
+html[data-theme="dark"] .ch-qr-panel {
+  background: var(--agent-raised);
+  border-color: var(--agent-line);
+  color: var(--agent-text);
+}
+
+html[data-theme="dark"] .ch-phone-bubble-user,
+html[data-theme="dark"] .ch-phone-summary,
+html[data-theme="dark"] .ch-example-tag,
+html[data-theme="dark"] .pv-save {
+  background: #38271e;
+  border-color: #65422f;
+  color: #ffd0ad;
+}
+
+html[data-theme="dark"] .ch-phone-bubble,
+html[data-theme="dark"] .ch-phone-title span,
+html[data-theme="dark"] .ch-phone-day,
+html[data-theme="dark"] .ch-phone-summary span,
+html[data-theme="dark"] .ch-qr-panel p {
+  color: var(--agent-muted);
+}
+
+html[data-theme="dark"] .ch-phone-composer {
+  background: var(--agent-surface);
+  border-color: var(--agent-line);
+  color: var(--agent-muted);
+}
+
+html[data-theme="dark"] .tv-file-info,
+html[data-theme="dark"] .tv-upload-area,
+html[data-theme="dark"] .tv-project-instructions {
+  background: #2c261f;
+  border-color: #604833;
+  color: #f3bd96;
+}
+
+html[data-theme="dark"] .tv-file-info span,
+html[data-theme="dark"] .tv-detail-copy,
+html[data-theme="dark"] .tv-upload-area span,
+html[data-theme="dark"] .tv-form-note,
+html[data-theme="dark"] .tv-task-details,
+html[data-theme="dark"] .tv-project-instructions p {
+  color: var(--agent-muted);
+}
+
+html[data-theme="dark"] .tv-upload-area strong,
+html[data-theme="dark"] .tv-project-instructions h4 {
+  color: var(--agent-soft);
+}
+
+html[data-theme="dark"] .tv-status-badge {
+  background: #392a24;
+  color: #ffac75;
+}
+
+html[data-theme="dark"] .pv-overlay,
+html[data-theme="dark"] .cv-modal-backdrop,
+html[data-theme="dark"] .tv-modal-layer,
+html[data-theme="dark"] .ch-dialog::backdrop {
+  background: #06090db8;
+}
+
+html[data-theme="dark"] .pv-balance strong,
+html[data-theme="dark"] .pv-unlock-summary,
+html[data-theme="dark"] .pv-recommended-tag,
+html[data-theme="dark"] .pv-text-button {
+  color: var(--agent-accent);
+}

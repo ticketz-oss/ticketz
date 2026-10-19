@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import CompanyWhatsAppModeField from "../CompanyWhatsAppModeField";
+import React, { useState, useEffect, useContext } from "react";
 import {
   makeStyles,
   Paper,
@@ -14,6 +15,7 @@ import {
   TableRow,
   IconButton,
   Select,
+  Typography
 } from "@material-ui/core";
 import { Formik, Form, Field } from "formik";
 import ButtonWithSpinner from "../ButtonWithSpinner";
@@ -28,66 +30,104 @@ import ModalUsers from "../ModalUsers";
 import api from "../../services/api";
 import { head, isArray, has } from "lodash";
 import { useDate } from "../../hooks/useDate";
+import useSettings from "../../hooks/useSettings";
+import { SelectLanguage } from "../SelectLanguage";
 
 import moment from "moment";
 
-const useStyles = makeStyles((theme) => ({
+import { AuthContext } from "../../context/Auth/AuthContext";
+import { i18n } from "../../translate/i18n";
+import { timeZonesNames } from "@vvo/tzdb";
+import { podeVerCentralCobranca } from "../../helpers/billingConsole";
+
+const initialDueDate = () => moment().add(3, "days").format("YYYY-MM-DD");
+
+const useStyles = makeStyles(theme => ({
   root: {
-    width: "100%",
+    width: "100%"
   },
   mainPaper: {
     width: "100%",
     flex: 1,
-    padding: theme.spacing(2),
+    padding: theme.spacing(2)
   },
   fullWidth: {
-    width: "100%",
+    width: "100%"
   },
   tableContainer: {
     width: "100%",
     overflowX: "scroll",
-    ...theme.scrollbarStyles,
+    ...theme.scrollbarStyles
   },
   textfield: {
-    width: "100%",
+    width: "100%"
   },
   textRight: {
-    textAlign: "right",
+    textAlign: "right"
   },
   row: {
     paddingTop: theme.spacing(2),
-    paddingBottom: theme.spacing(2),
+    paddingBottom: theme.spacing(2)
   },
   control: {
     paddingRight: theme.spacing(1),
-    paddingLeft: theme.spacing(1),
+    paddingLeft: theme.spacing(1)
   },
   buttonContainer: {
     textAlign: "right",
-    padding: theme.spacing(1),
+    padding: theme.spacing(1)
   },
+  inactive: {
+    color: theme.isStardew ? "#805335" : "gray"
+  },
+  gracePeriod: {
+    color: theme.isStardew ? "#9e6926" : "orange"
+  },
+  almostDue: {
+    color: theme.isStardew
+      ? "#44748a"
+      : theme.mode === "light"
+        ? "blue"
+        : "#38f"
+  }
 }));
 
 export function CompanyForm(props) {
-  const { onSubmit, onDelete, onCancel, initialValue, loading } = props;
+  const { onSubmit, onDelete, onImpersonate, onCancel, initialValue, loading } =
+    props;
   const classes = useStyles();
   const [plans, setPlans] = useState([]);
+  const [partners, setPartners] = useState([]);
   const [modalUser, setModalUser] = useState(false);
   const [firstUser, setFirstUser] = useState({});
+  const { user } = useContext(AuthContext);
 
   const [record, setRecord] = useState({
+    whatsappMode: "normal",
     name: "",
     email: "",
     phone: "",
+    language: "",
+    timezone: "",
     planId: "",
     status: true,
     campaignsEnabled: false,
-    dueDate: "",
-    recurrence: "",
-    ...initialValue,
+    voiceCallsEnabled: false,
+    dueDate: initialDueDate(),
+    trialDays: 0,
+    dueDay: Number(moment(initialDueDate()).format("D")),
+    recurrence: "MENSAL",
+    slug: "",
+    partnerId: "",
+    saleValue: "",
+    introValue: "",
+    introMonths: "",
+    ...initialValue
   });
 
   const { list: listPlans } = usePlans();
+  const billingManagedInCentral =
+    podeVerCentralCobranca(user) && record.id !== undefined;
 
   useEffect(() => {
     async function fetchData() {
@@ -99,33 +139,85 @@ export function CompanyForm(props) {
   }, []);
 
   useEffect(() => {
-    setRecord((prev) => {
-      if (moment(initialValue).isValid()) {
-        initialValue.dueDate = moment(initialValue.dueDate).format(
-          "YYYY-MM-DD"
-        );
-      }
+    api
+      .get("/partners", { params: { pageNumber: 1 } })
+      .then(({ data }) => setPartners(data.partners || []))
+      .catch(() => setPartners([]));
+  }, []);
+
+  useEffect(() => {
+    setRecord(prev => {
+      const dueDate = moment(
+        initialValue.dueDate,
+        moment.ISO_8601,
+        true
+      ).isValid()
+        ? moment(initialValue.dueDate).format("YYYY-MM-DD")
+        : "";
+
       return {
         ...prev,
         ...initialValue,
+        whatsappMode: initialValue.whatsappMode || "normal",
+        timezone: initialValue.timezone || "",
+        dueDate,
+        trialDays: initialValue.trialDays ?? 0,
+        dueDay:
+          initialValue.dueDay ??
+          (dueDate ? Number(moment(dueDate).format("D")) : 1)
       };
     });
   }, [initialValue]);
 
-  const handleSubmit = async (data) => {
-    if (data.dueDate === "" || moment(data.dueDate).isValid() === false) {
-      data.dueDate = null;
+  const handleSubmit = async data => {
+    const normalizedData = { ...data };
+    normalizedData.dueDate = moment(
+      normalizedData.dueDate,
+      moment.ISO_8601,
+      true
+    ).isValid()
+      ? moment(normalizedData.dueDate).format("YYYY-MM-DD")
+      : null;
+    // Venda direta: sem parceiro o preco volta a ser o do plano.
+    normalizedData.partnerId =
+      normalizedData.partnerId === "" ? null : Number(normalizedData.partnerId);
+    normalizedData.saleValue =
+      normalizedData.saleValue === "" || normalizedData.saleValue === null
+        ? null
+        : Number(normalizedData.saleValue);
+    normalizedData.introValue =
+      normalizedData.introValue === "" || normalizedData.introValue === null
+        ? null
+        : Number(normalizedData.introValue);
+    normalizedData.introMonths =
+      normalizedData.introMonths === "" || normalizedData.introMonths === null
+        ? null
+        : Number(normalizedData.introMonths);
+    normalizedData.trialDays = Number(normalizedData.trialDays);
+    normalizedData.dueDay = Number(normalizedData.dueDay);
+    if (billingManagedInCentral) {
+      [
+        "planId",
+        "saleValue",
+        "introValue",
+        "introMonths",
+        "trialDays",
+        "dueDay",
+        "dueDate",
+        "recurrence"
+      ].forEach(field => delete normalizedData[field]);
     }
-    onSubmit(data);
-    setRecord({ ...initialValue, dueDate: "" });
+    // The parent resets only after the request succeeds. Keep the selected
+    // provider and entered data intact when validation or the network fails.
+    await onSubmit(normalizedData);
   };
 
   const handleOpenModalUsers = async () => {
     try {
       const { data } = await api.get("/users/list", {
         params: {
-          companyId: initialValue.id,
-        },
+          companyId: initialValue.id
+        }
       });
       if (isArray(data) && data.length) {
         setFirstUser(head(data));
@@ -189,16 +281,18 @@ export function CompanyForm(props) {
         enableReinitialize
         className={classes.fullWidth}
         initialValues={record}
-        onSubmit={(values, { resetForm }) =>
-          setTimeout(() => {
-            handleSubmit(values);
-            resetForm();
-          }, 500)
-        }
+        onSubmit={handleSubmit}
       >
         {(values, setValues) => (
           <Form className={classes.fullWidth}>
             <Grid spacing={2} justifyContent="flex-end" container>
+              <Grid xs={12} sm={6} item>
+                <CompanyWhatsAppModeField
+                  value={values.values.whatsappMode}
+                  onChange={values.handleChange}
+                  disabled={record.id !== undefined}
+                />
+              </Grid>
               <Grid xs={12} sm={6} md={4} item>
                 <Field
                   as={TextField}
@@ -209,7 +303,26 @@ export function CompanyForm(props) {
                   margin="dense"
                 />
               </Grid>
-              <Grid xs={12} sm={6} md={2} item>
+              <Grid xs={12} sm={6} md={4} item>
+                <Field
+                  as={TextField}
+                  label="Subdomínio (slug)"
+                  name="slug"
+                  variant="outlined"
+                  className={classes.fullWidth}
+                  margin="dense"
+                  helperText="Ex.: teste → teste.seudominio.com.br"
+                  onChange={e =>
+                    values.setFieldValue(
+                      "slug",
+                      (e.target.value || "")
+                        .toLowerCase()
+                        .replace(/[^a-z0-9-]/g, "")
+                    )
+                  }
+                />
+              </Grid>
+              <Grid xs={12} sm={6} md={4} item>
                 <Field
                   as={TextField}
                   label="E-mail"
@@ -230,23 +343,74 @@ export function CompanyForm(props) {
                   margin="dense"
                 />
               </Grid>
+              <Grid xs={12} sm={6} md={4} item>
+                <Field
+                  as={TextField}
+                  select
+                  label="Fuso horário padrão"
+                  name="timezone"
+                  variant="outlined"
+                  className={classes.fullWidth}
+                  margin="dense"
+                  helperText="Automático usa o fuso do primeiro usuário que acessar."
+                >
+                  <MenuItem value="">Automático no primeiro acesso</MenuItem>
+                  {timeZonesNames.map(timezone => (
+                    <MenuItem key={timezone} value={timezone}>
+                      {timezone}
+                    </MenuItem>
+                  ))}
+                </Field>
+              </Grid>
+              <Grid xs={12} sm={6} md={2} item>
+                <Field
+                  as={SelectLanguage}
+                  name="language"
+                  fullWidth
+                  variant="outlined"
+                  margin="dense"
+                />
+              </Grid>
+              {!billingManagedInCentral && (
+                <Grid xs={12} sm={6} md={2} item>
+                  <FormControl margin="dense" variant="outlined" fullWidth>
+                    <InputLabel htmlFor="plan-selection">Plano</InputLabel>
+                    <Field
+                      as={Select}
+                      id="plan-selection"
+                      label="Plano"
+                      labelId="plan-selection-label"
+                      name="planId"
+                      margin="dense"
+                      required
+                    >
+                      {plans.map((plan, key) => (
+                        <MenuItem key={key} value={plan.id}>
+                          {plan.name}
+                        </MenuItem>
+                      ))}
+                    </Field>
+                  </FormControl>
+                </Grid>
+              )}
               <Grid xs={12} sm={6} md={2} item>
                 <FormControl margin="dense" variant="outlined" fullWidth>
-                  <InputLabel htmlFor="plan-selection">Plano</InputLabel>
+                  <InputLabel htmlFor="voice-calls-selection">
+                    {i18n.t("voiceCalls.companySwitch")}
+                  </InputLabel>
                   <Field
                     as={Select}
-                    id="plan-selection"
-                    label="Plano"
-                    labelId="plan-selection-label"
-                    name="planId"
+                    id="voice-calls-selection"
+                    label={i18n.t("voiceCalls.companySwitch")}
+                    name="voiceCallsEnabled"
                     margin="dense"
-                    required
                   >
-                    {plans.map((plan, key) => (
-                      <MenuItem key={key} value={plan.id}>
-                        {plan.name}
-                      </MenuItem>
-                    ))}
+                    <MenuItem value={true}>
+                      {i18n.t("voiceCalls.enabled")}
+                    </MenuItem>
+                    <MenuItem value={false}>
+                      {i18n.t("voiceCalls.disabled")}
+                    </MenuItem>
                   </Field>
                 </FormControl>
               </Grid>
@@ -282,43 +446,144 @@ export function CompanyForm(props) {
                   </Field>
                 </FormControl>
               </Grid>
-              <Grid xs={12} sm={6} md={2} item>
-                <FormControl variant="outlined" fullWidth>
-                  <Field
-                    as={TextField}
-                    label="Data de Vencimento"
-                    type="date"
-                    name="dueDate"
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                    variant="outlined"
-                    fullWidth
-                    margin="dense"
-                  />
-                </FormControl>
-              </Grid>
+              {billingManagedInCentral ? (
+                <Grid xs={12} item>
+                  <Typography variant="body2" color="textSecondary">
+                    Plano, mensalidade, teste e vencimentos são gerenciados na
+                    Central de Cobrança.
+                  </Typography>
+                </Grid>
+              ) : (
+                <>
+                  <Grid xs={12} sm={6} md={2} item>
+                    <FormControl variant="outlined" fullWidth>
+                      <Field
+                        as={TextField}
+                        label="Data de Vencimento"
+                        type="date"
+                        name="dueDate"
+                        InputLabelProps={{
+                          shrink: true
+                        }}
+                        variant="outlined"
+                        fullWidth
+                        margin="dense"
+                      />
+                    </FormControl>
+                  </Grid>
+                  <Grid xs={12} sm={6} md={2} item>
+                    <Field
+                      as={TextField}
+                      label={i18n.t("billing.trialDays")}
+                      helperText={i18n.t("billing.trialDaysHelp")}
+                      type="number"
+                      name="trialDays"
+                      inputProps={{ min: 0, max: 3650, step: 1 }}
+                      variant="outlined"
+                      fullWidth
+                      margin="dense"
+                      required
+                    />
+                  </Grid>
+                  <Grid xs={12} sm={6} md={2} item>
+                    <Field
+                      as={TextField}
+                      label={i18n.t("billing.dueDay")}
+                      helperText={i18n.t("billing.dueDayHelp")}
+                      type="number"
+                      name="dueDay"
+                      inputProps={{ min: 1, max: 31, step: 1 }}
+                      variant="outlined"
+                      fullWidth
+                      margin="dense"
+                      required
+                    />
+                  </Grid>
+                  <Grid xs={12} sm={6} md={2} item>
+                    <FormControl margin="dense" variant="outlined" fullWidth>
+                      <InputLabel htmlFor="recorrencia-selection">
+                        Recorrência
+                      </InputLabel>
+                      <Field
+                        as={Select}
+                        label="Recorrência"
+                        labelId="recorrencia-selection-label"
+                        id="recurrence"
+                        name="recurrence"
+                        margin="dense"
+                      >
+                        <MenuItem value="MENSAL">Mensal</MenuItem>
+                        <MenuItem value="BIMESTRAL">Bimestral</MenuItem>
+                        <MenuItem value="TRIMESTRAL">Trimestral</MenuItem>
+                        <MenuItem value="SEMESTRAL">Semestral</MenuItem>
+                        <MenuItem value="ANUAL">Anual</MenuItem>
+                      </Field>
+                    </FormControl>
+                  </Grid>
+                </>
+              )}
               <Grid xs={12} sm={6} md={2} item>
                 <FormControl margin="dense" variant="outlined" fullWidth>
-                  <InputLabel htmlFor="recorrencia-selection">
-                    Recorrência
+                  <InputLabel htmlFor="partner-selection">
+                    Vendido por
                   </InputLabel>
                   <Field
                     as={Select}
-                    label="Recorrência"
-                    labelId="recorrencia-selection-label"
-                    id="recurrence"
-                    name="recurrence"
+                    id="partner-selection"
+                    label="Vendido por"
+                    labelId="partner-selection-label"
+                    name="partnerId"
                     margin="dense"
                   >
-                    <MenuItem value="MENSAL">Mensal</MenuItem>
-                    <MenuItem value="BIMESTRAL">Bimestral</MenuItem>
-                    <MenuItem value="TRIMESTRAL">Trimestral</MenuItem>
-                    <MenuItem value="SEMESTRAL">Semestral</MenuItem>
-                    <MenuItem value="ANUAL">Anual</MenuItem>
+                    <MenuItem value="">Venda direta</MenuItem>
+                    {partners.map(partner => (
+                      <MenuItem key={partner.id} value={partner.id}>
+                        {partner.name} ({partner.discountPct}%)
+                      </MenuItem>
+                    ))}
                   </Field>
                 </FormControl>
               </Grid>
+              {!billingManagedInCentral && (
+                <>
+                  <Grid xs={12} sm={6} md={2} item>
+                    <Field
+                      as={TextField}
+                      label="Preço de venda"
+                      name="saleValue"
+                      type="number"
+                      variant="outlined"
+                      className={classes.fullWidth}
+                      margin="dense"
+                      helperText="Vazio = valor do plano"
+                    />
+                  </Grid>
+                  <Grid xs={12} sm={6} md={2} item>
+                    <Field
+                      as={TextField}
+                      label="Valor dos primeiros meses"
+                      name="introValue"
+                      type="number"
+                      variant="outlined"
+                      className={classes.fullWidth}
+                      margin="dense"
+                      helperText="Opcional. Vazio = sempre o preço de venda"
+                    />
+                  </Grid>
+                  <Grid xs={12} sm={6} md={2} item>
+                    <Field
+                      as={TextField}
+                      label="Durante quantos meses"
+                      name="introMonths"
+                      type="number"
+                      variant="outlined"
+                      className={classes.fullWidth}
+                      margin="dense"
+                      helperText="Depois volta ao preço de venda"
+                    />
+                  </Grid>
+                </>
+              )}
               <Grid xs={12} item>
                 <Grid justifyContent="flex-end" spacing={1} container>
                   <Grid xs={4} md={1} item>
@@ -334,6 +599,18 @@ export function CompanyForm(props) {
                   </Grid>
                   {record.id !== undefined ? (
                     <>
+                      <Grid xs={6} md={2} item>
+                        <ButtonWithSpinner
+                          style={{ marginTop: 7 }}
+                          className={classes.fullWidth}
+                          loading={loading}
+                          onClick={() => onImpersonate(record)}
+                          variant="outlined"
+                          color="primary"
+                        >
+                          Acessar como
+                        </ButtonWithSpinner>
+                      </Grid>
                       <Grid xs={6} md={1} item>
                         <ButtonWithSpinner
                           style={{ marginTop: 7 }}
@@ -346,18 +623,20 @@ export function CompanyForm(props) {
                           Excluir
                         </ButtonWithSpinner>
                       </Grid>
-                      <Grid xs={6} md={2} item>
-                        <ButtonWithSpinner
-                          style={{ marginTop: 7 }}
-                          className={classes.fullWidth}
-                          loading={loading}
-                          onClick={() => incrementDueDate()}
-                          variant="contained"
-                          color="primary"
-                        >
-                          + Vencimento
-                        </ButtonWithSpinner>
-                      </Grid>
+                      {!billingManagedInCentral && (
+                        <Grid xs={6} md={2} item>
+                          <ButtonWithSpinner
+                            style={{ marginTop: 7 }}
+                            className={classes.fullWidth}
+                            loading={loading}
+                            onClick={() => incrementDueDate()}
+                            variant="contained"
+                            color="primary"
+                          >
+                            + Vencimento
+                          </ButtonWithSpinner>
+                        </Grid>
+                      )}
                       <Grid xs={6} md={1} item>
                         <ButtonWithSpinner
                           style={{ marginTop: 7 }}
@@ -398,22 +677,32 @@ export function CompaniesManagerGrid(props) {
   const { records, onSelect } = props;
   const classes = useStyles();
   const { dateToClient } = useDate();
+  const { getSetting } = useSettings();
+  const [gracePeriod, setGracePeriod] = useState(5);
 
-  const renderStatus = (row) => {
+  useEffect(() => {
+    getSetting("gracePeriod").then(value => {
+      if (!isNaN(Number(value))) {
+        setGracePeriod(Number(value));
+      }
+    });
+  }, [getSetting]);
+
+  const renderStatus = row => {
     return row.status === false ? "Não" : "Sim";
   };
 
-  const renderPlan = (row) => {
+  const renderPlan = row => {
     return row.planId !== null ? row.plan.name : "-";
   };
 
-  const renderCampaignsStatus = (row) => {
+  const renderCampaignsStatus = row => {
     if (
       has(row, "settings") &&
       isArray(row.settings) &&
       row.settings.length > 0
     ) {
-      const setting = row.settings.find((s) => s.key === "campaignsEnabled");
+      const setting = row.settings.find(s => s.key === "campaignsEnabled");
       if (setting) {
         return setting.value === "true" ? "Habilitadas" : "Desabilitadas";
       }
@@ -421,22 +710,29 @@ export function CompaniesManagerGrid(props) {
     return "Desabilitadas";
   };
 
-  const rowStyle = (record) => {
+  const renderVoiceStatus = row => {
+    const setting = row.settings?.find(s => s.key === "voiceCallsEnabled");
+    return setting?.value === "true"
+      ? i18n.t("voiceCalls.enabled")
+      : i18n.t("voiceCalls.disabled");
+  };
+
+  const rowClass = record => {
     if (moment(record.dueDate).isValid()) {
       const now = moment();
       const dueDate = moment(record.dueDate);
       const diff = dueDate.diff(now, "days");
-      if (diff === 5) {
-        return { backgroundColor: "#fffead" };
+      if (diff < -gracePeriod) {
+        return classes.inactive;
       }
-      if (diff >= -3 && diff <= 4) {
-        return { backgroundColor: "#f7cc8f" };
+      if (diff < 0) {
+        return classes.gracePeriod;
       }
-      if (diff === -4) {
-        return { backgroundColor: "#fa8c8c" };
+      if (diff < 7) {
+        return classes.almostDue;
       }
     }
-    return {};
+    return classes.active;
   };
 
   return (
@@ -456,6 +752,9 @@ export function CompaniesManagerGrid(props) {
             <TableCell align="left">Telefone</TableCell>
             <TableCell align="left">Plano</TableCell>
             <TableCell align="left">Campanhas</TableCell>
+            <TableCell align="left">
+              {i18n.t("voiceCalls.companySwitch")}
+            </TableCell>
             <TableCell align="left">Status</TableCell>
             <TableCell align="left">Criada Em</TableCell>
             <TableCell align="left">Vencimento</TableCell>
@@ -463,20 +762,37 @@ export function CompaniesManagerGrid(props) {
         </TableHead>
         <TableBody>
           {records.map((row, key) => (
-            <TableRow style={rowStyle(row)} key={key}>
+            <TableRow className={rowClass(row)} key={key}>
               <TableCell align="center" style={{ width: "1%" }}>
                 <IconButton onClick={() => onSelect(row)} aria-label="delete">
                   <EditIcon />
                 </IconButton>
               </TableCell>
-              <TableCell align="left">{row.name || "-"}</TableCell>
-              <TableCell align="left">{row.email || "-"}</TableCell>
-              <TableCell align="left">{row.phone || "-"}</TableCell>
-              <TableCell align="left">{renderPlan(row)}</TableCell>
-              <TableCell align="left">{renderCampaignsStatus(row)}</TableCell>
-              <TableCell align="left">{renderStatus(row)}</TableCell>
-              <TableCell align="left">{dateToClient(row.createdAt)}</TableCell>
-              <TableCell align="left">
+              <TableCell align="left" style={{ color: "unset" }}>
+                {row.name || "-"}
+              </TableCell>
+              <TableCell align="left" style={{ color: "unset" }}>
+                {row.email || "-"}
+              </TableCell>
+              <TableCell align="left" style={{ color: "unset" }}>
+                {row.phone || "-"}
+              </TableCell>
+              <TableCell align="left" style={{ color: "unset" }}>
+                {renderPlan(row)}
+              </TableCell>
+              <TableCell align="left" style={{ color: "unset" }}>
+                {renderCampaignsStatus(row)}
+              </TableCell>
+              <TableCell align="left" style={{ color: "unset" }}>
+                {renderVoiceStatus(row)}
+              </TableCell>
+              <TableCell align="left" style={{ color: "unset" }}>
+                {renderStatus(row)}
+              </TableCell>
+              <TableCell align="left" style={{ color: "unset" }}>
+                {dateToClient(row.createdAt)}
+              </TableCell>
+              <TableCell align="left" style={{ color: "unset" }}>
                 {dateToClient(row.dueDate)}
                 <br />
                 <span>{row.recurrence}</span>
@@ -493,19 +809,34 @@ export default function CompaniesManager() {
   const classes = useStyles();
   const { list, save, update, remove } = useCompanies();
 
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showConfirmDeleteDialog, setShowConfirmDeleteDialog] = useState(false);
+  const [showConfirmImpersonateDialog, setShowConfirmImpersonateDialog] =
+    useState(false);
   const [loading, setLoading] = useState(false);
   const [records, setRecords] = useState([]);
   const [record, setRecord] = useState({
+    whatsappMode: "normal",
     name: "",
     email: "",
     phone: "",
+    language: "",
+    timezone: "",
     planId: "",
     status: true,
     campaignsEnabled: false,
-    dueDate: "",
-    recurrence: "",
+    voiceCallsEnabled: false,
+    dueDate: initialDueDate(),
+    trialDays: 0,
+    dueDay: Number(moment(initialDueDate()).format("D")),
+    recurrence: "MENSAL",
+    slug: "",
+    partnerId: "",
+    saleValue: "",
+    introValue: "",
+    introMonths: ""
   });
+
+  const { handleImpersonate } = useContext(AuthContext);
 
   useEffect(() => {
     loadPlans();
@@ -523,7 +854,7 @@ export default function CompaniesManager() {
     setLoading(false);
   };
 
-  const handleSubmit = async (data) => {
+  const handleSubmit = async data => {
     setLoading(true);
     try {
       if (data.id !== undefined) {
@@ -555,56 +886,95 @@ export default function CompaniesManager() {
     setLoading(false);
   };
 
+  const onImpersonate = async () => {
+    handleImpersonate(record.id);
+  };
+
   const handleOpenDeleteDialog = () => {
-    setShowConfirmDialog(true);
+    setShowConfirmDeleteDialog(true);
+  };
+
+  const handleOpenImpersonateDialog = () => {
+    setShowConfirmImpersonateDialog(true);
   };
 
   const handleCancel = () => {
-    setRecord((prev) => ({
+    setRecord(prev => ({
       ...prev,
+      id: undefined,
+      slug: "",
+      whatsappMode: "normal",
       name: "",
       email: "",
       phone: "",
+      language: "",
       planId: "",
       status: true,
       campaignsEnabled: false,
-      dueDate: "",
-      recurrence: "",
+      voiceCallsEnabled: false,
+      dueDate: initialDueDate(),
+      trialDays: 0,
+      dueDay: Number(moment(initialDueDate()).format("D")),
+      recurrence: "MENSAL",
+      partnerId: "",
+      saleValue: "",
+      introValue: "",
+      introMonths: ""
     }));
   };
 
-  const handleSelect = (data) => {
+  const handleSelect = data => {
     let campaignsEnabled = false;
+    let voiceCallsEnabled = false;
 
-    const setting = data.settings.find(
-      (s) => s.key.indexOf("campaignsEnabled") > -1
+    const setting = (data.settings || []).find(
+      s => s.key.indexOf("campaignsEnabled") > -1
     );
     if (setting) {
       campaignsEnabled =
         setting.value === "true" || setting.value === "enabled";
     }
+    const voiceSetting = (data.settings || []).find(
+      s => s.key === "voiceCallsEnabled"
+    );
+    if (voiceSetting) {
+      voiceCallsEnabled = voiceSetting.value === "true";
+    }
 
-    setRecord((prev) => ({
+    setRecord(prev => ({
       ...prev,
+      whatsappMode: data.whatsappMode || "normal",
       id: data.id,
       name: data.name || "",
       phone: data.phone || "",
+      language: data.language || "",
       email: data.email || "",
       planId: data.planId || "",
       status: data.status === false ? false : true,
       campaignsEnabled,
+      voiceCallsEnabled,
       dueDate: data.dueDate || "",
+      trialDays: data.trialDays ?? 0,
+      dueDay:
+        data.dueDay ??
+        (data.dueDate ? Number(moment(data.dueDate).format("D")) : 1),
       recurrence: data.recurrence || "",
+      slug: data.slug || "",
+      partnerId: data.partnerId || "",
+      saleValue: data.saleValue ?? "",
+      introValue: data.introValue ?? "",
+      introMonths: data.introMonths ?? ""
     }));
   };
 
   return (
-    <Paper className={classes.mainPaper} elevation={0}>
+    <Paper className={`${classes.mainPaper} sd-company-register`} elevation={0}>
       <Grid spacing={2} container>
         <Grid xs={12} item>
           <CompanyForm
             initialValue={record}
             onDelete={handleOpenDeleteDialog}
+            onImpersonate={handleOpenImpersonateDialog}
             onSubmit={handleSubmit}
             onCancel={handleCancel}
             loading={loading}
@@ -616,11 +986,19 @@ export default function CompaniesManager() {
       </Grid>
       <ConfirmationModal
         title="Exclusão de Registro"
-        open={showConfirmDialog}
-        onClose={() => setShowConfirmDialog(false)}
+        open={showConfirmDeleteDialog}
+        onClose={() => setShowConfirmDeleteDialog(false)}
         onConfirm={() => handleDelete()}
       >
         Deseja realmente excluir esse registro?
+      </ConfirmationModal>
+      <ConfirmationModal
+        title="Acessar como"
+        open={showConfirmImpersonateDialog}
+        onClose={() => setShowConfirmImpersonateDialog(false)}
+        onConfirm={() => onImpersonate()}
+      >
+        Deseja acessar o sistema como esta empresa?
       </ConfirmationModal>
     </Paper>
   );

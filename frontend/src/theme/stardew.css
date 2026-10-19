@@ -1,0 +1,446 @@
+html[data-theme="stardew"] {
+  --sd-ink: #5b341f;
+  --sd-muted: #805335;
+  --sd-border: #8b451d;
+  --sd-paper: #fff1c7;
+  --sd-inset: #f5d995;
+  --sd-green: #477b38;
+  --sd-gold: #f2ba48;
+  --sd-frame:
+    inset 0 0 0 2px #dda059, inset 0 0 0 4px #fff1c7, 4px 4px 0 #3e1f0840;
+  --sd-font: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sd-heading: var(--sd-font);
+  background: #79b46a;
+}
+html[data-theme="stardew"] body {
+  font-family: var(--sd-font);
+  color: var(--sd-ink);
+  font-size: 19px;
+  background: #79b46a url("../../public/stardew/farm-background.png") center
+    bottom / cover fixed;
+}
+html[data-theme="stardew"] .ew-ui,
+html[data-theme="stardew"] .estrutura-app {
+  --ew-bg: #f5deaa !important;
+  --ew-surface: #fff1c7 !important;
+  --ew-text: #5b341f !important;
+  --ew-muted: #805335 !important;
+  --ew-border: #b88b4a !important;
+  --ew-primary: #477b38 !important;
+  --ew-on-primary: #fff9df !important;
+  --ew-error: #b52121 !important;
+  --fundo-app: transparent !important;
+  font-family: var(--sd-font);
+  font-weight: 600;
+  font-size: 18px;
+}
+html[data-theme="stardew"] .estrutura-app {
+  background: transparent !important;
+  padding: 14px;
+  position: relative;
+}
+html[data-theme="stardew"] .estrutura-app > main {
+  background: transparent;
+}
+html[data-theme="stardew"] .estrutura-app .MuiDrawer-paper {
+  border: 4px solid #5b3310;
+  border-radius: 0;
+  background: linear-gradient(#f5e8c0, #e8c872);
+  box-shadow:
+    inset 0 0 0 3px #dda059,
+    inset 0 0 0 5px #8b5e2b,
+    4px 6px 0 #3e1f0855;
+}
+html[data-theme="stardew"] .estrutura-app .MuiDrawer-paper > * {
+  border-radius: 0;
+}
+html[data-theme="stardew"] .nav-perfil.MuiButton-root {
+  background: #e8c872;
+  border-top: 3px solid #8b5e2b;
+  box-shadow: inset 0 3px #dda059;
+}
+html[data-theme="stardew"] .nav-perfil .MuiTypography-body2 {
+  font-size: 19px;
+}
+html[data-theme="stardew"] .nav-perfil .MuiTypography-caption {
+  font-size: 16px;
+}
+html[data-theme="stardew"] .estrutura-app .MuiListItemText-primary {
+  font-family: var(--sd-font);
+  font-size: 18px;
+}
+html[data-theme="stardew"] .estrutura-app .MuiListItem-button:hover {
+  background: #eed492;
+}
+html[data-theme="stardew"] .estrutura-app .MuiListItem-button.Mui-selected {
+  background: #e8c872;
+  box-shadow:
+    inset 4px 0 #477b38,
+    inset 0 -2px #b88b4a;
+}
+html[data-theme="stardew"] .estrutura-app svg.lucide {
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+}
+html[data-theme="stardew"] .stardew-main-container {
+  background: linear-gradient(#fff1c7ef, #f5deaaef) !important;
+  border: 4px solid #5b3310;
+  border-radius: 0;
+  box-shadow:
+    inset 0 0 0 3px #dda059,
+    inset 0 0 0 5px #8b5e2b,
+    4px 6px 0 #3e1f0855;
+}
+html[data-theme="stardew"] .stardew-main-header {
+  background: transparent;
+  border-bottom: 3px double #b88b4a;
+  margin-bottom: 16px;
+}
+html[data-theme="stardew"] .stardew-main-header h2,
+html[data-theme="stardew"] .stardew-main-header .MuiTypography-h6 {
+  font-family: var(--sd-heading);
+  font-size: 15px;
+  line-height: 1.8;
+}
+html[data-theme="stardew"]
+  :is(
+    .ew-button,
+    .ew-input,
+    .ew-select,
+    .ew-textarea,
+    .ew-badge,
+    .ew-tab,
+    .ew-dialog,
+    .ew-tooltip,
+    .ew-popover,
+    .ew-menu,
+    .ew-checkbox,
+    .ew-switch,
+    .ew-panel,
+    .barra-ferramentas
+  ) {
+  border-radius: 0;
+  font-family: var(--sd-font);
+  font-weight: 600;
+  font-size: 18px;
+}
+html[data-theme="stardew"] .ew-button {
+  border: 2px solid #8b451d;
+  background: linear-gradient(#f5e8c0, #e8c872);
+  box-shadow:
+    inset 0 2px #fff1c7,
+    2px 3px 0 #5b331070;
+  color: #5b341f;
+}
+html[data-theme="stardew"] .ew-button:hover {
+  background: #f2ba48;
+  border-color: #5b3310;
+}
+html[data-theme="stardew"] .ew-button--primary {
+  background: #477b38;
+  color: #fff9df;
+  box-shadow:
+    inset 0 2px #76a35b,
+    2px 3px 0 #25491e;
+}
+html[data-theme="stardew"] .ew-button--primary:hover {
+  background: #345e28;
+}
+html[data-theme="stardew"] .ew-button--danger {
+  color: #b52121;
+}
+html[data-theme="stardew"] .ew-button--ghost {
+  background: transparent;
+  box-shadow: none;
+  border-color: transparent;
+}
+html[data-theme="stardew"] :is(.ew-input, .ew-select, .ew-textarea) {
+  border: 2px solid #b88b4a;
+  background: #fff8dd;
+  box-shadow: inset 2px 2px #ddb878;
+}
+html[data-theme="stardew"]
+  :is(
+    .ew-field,
+    .ew-muted,
+    .ew-panel-head h2,
+    .ew-panel-head h3,
+    .ew-dialog-description
+  ) {
+  font-family: var(--sd-font);
+  font-weight: 600;
+  font-size: 18px;
+}
+html[data-theme="stardew"]
+  :is(.ew-dialog, .ew-popover, .ew-menu, .barra-ferramentas) {
+  border: 3px solid #8b451d;
+  background: linear-gradient(#fff1c7, #f5e1a4);
+  box-shadow: var(--sd-frame);
+}
+html[data-theme="stardew"] .ew-tooltip {
+  color: #5b341f;
+  border: 2px solid #8b451d;
+  background: #fff1c7;
+  box-shadow: 3px 3px #5b331050;
+}
+html[data-theme="stardew"] .ew-tooltip svg {
+  fill: #fff1c7;
+}
+html[data-theme="stardew"] .ew-badge {
+  background: #f5d995;
+  border: 1px solid #b88b4a;
+  font-size: 16px;
+}
+html[data-theme="stardew"] .ew-badge--brand {
+  color: #345e28;
+  background: #e1ecaf;
+}
+html[data-theme="stardew"] .ew-tabs-list {
+  border-bottom: 3px solid #8b451d;
+}
+html[data-theme="stardew"] .ew-tab {
+  font-size: 20px;
+  border-radius: 0;
+}
+html[data-theme="stardew"] .ew-tab[data-state="active"] {
+  background: #e8c872;
+  box-shadow: inset 0 -4px #477b38;
+}
+html[data-theme="stardew"] .ew-switch {
+  border: 2px solid #8b451d;
+  background: #ddb878;
+}
+html[data-theme="stardew"] .ew-switch-thumb {
+  border-radius: 0;
+  background: #fff1c7;
+}
+html[data-theme="stardew"] .ew-switch[data-state="checked"] {
+  background: #477b38;
+}
+html[data-theme="stardew"] .MuiAvatar-root {
+  border: 2px solid #8b451d;
+  border-radius: 0;
+  box-shadow: 2px 2px #b88b4a;
+}
+html[data-theme="stardew"] .MuiAlert-root {
+  border: 2px solid #b88b4a;
+  border-radius: 0;
+  font-family: var(--sd-font);
+  font-size: 19px;
+}
+html[data-theme="stardew"] .MuiPickersBasePicker-pickerView {
+  background: #fff1c7;
+}
+html[data-theme="stardew"] .MuiPickersToolbar-toolbar {
+  background: #477b38;
+}
+html[data-theme="stardew"] .MuiPickersDay-day {
+  border-radius: 0;
+}
+html[data-theme="stardew"] .Toastify__toast {
+  font-family: var(--sd-font);
+  font-size: 20px;
+  color: #5b341f;
+  border: 3px solid #8b451d;
+  border-radius: 0;
+  background: #fff1c7;
+  box-shadow: var(--sd-frame);
+}
+html[data-theme="stardew"] .Toastify__progress-bar {
+  background: #477b38;
+}
+html[data-theme="stardew"] .emoji-mart {
+  font-family: var(--sd-font);
+  border: 3px solid #8b451d;
+  border-radius: 0;
+  background: #fff1c7;
+}
+html[data-theme="stardew"]
+  .emoji-mart
+  :is(
+    .emoji-mart-category-label span,
+    .emoji-mart-search input,
+    .emoji-mart-bar
+  ) {
+  background: #fff1c7;
+  color: #5b341f;
+}
+html[data-theme="stardew"] .ql-toolbar {
+  border: 2px solid #b88b4a;
+  background: #f5d995;
+}
+html[data-theme="stardew"] .ql-container {
+  font-family: var(--sd-font);
+  font-size: 20px;
+  background: #fff8dd;
+  border: 2px solid #b88b4a;
+}
+html[data-theme="stardew"] :focus-visible {
+  outline: 3px solid #477b38;
+  outline-offset: 3px;
+}
+html[data-theme="stardew"] ::selection {
+  background: #e8c872;
+  color: #3e1f08;
+}
+html[data-theme="stardew"] ::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+html[data-theme="stardew"] ::-webkit-scrollbar-track {
+  background: #f5d995;
+}
+html[data-theme="stardew"] ::-webkit-scrollbar-thumb {
+  border-radius: 0;
+  background: #b88b4a;
+  border: 2px solid #5b3310;
+}
+html[data-theme="stardew"] .recharts-text {
+  font-family: var(--sd-font);
+  font-size: 17px;
+  fill: #805335;
+}
+html[data-theme="stardew"] .recharts-default-tooltip {
+  background: #fff1c7 !important;
+  border: 2px solid #8b451d !important;
+  border-radius: 0;
+  font-family: var(--sd-font);
+}
+html[data-theme="stardew"] .recharts-cartesian-grid line {
+  stroke: #b88b4a;
+}
+@media (max-width: 599px) {
+  html[data-theme="stardew"] .estrutura-app {
+    padding: 6px;
+  }
+  html[data-theme="stardew"] .stardew-main-container {
+    padding: 14px 10px;
+  }
+  html[data-theme="stardew"] .stardew-main-header .MuiTypography-h6 {
+    font-size: 12px;
+  }
+  html[data-theme="stardew"] .MuiDialog-paper {
+    margin: 12px;
+    max-width: calc(100% - 24px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme="stardew"] *,
+  html[data-theme="stardew"] *::before,
+  html[data-theme="stardew"] *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+html[data-theme="stardew"] .ew-menu-item {
+  font-size: 18px;
+  border-radius: 0;
+  font-family: var(--sd-font);
+}
+html[data-theme="stardew"] .estrutura-app .MuiListSubheader-root {
+  font-family: var(--sd-heading);
+  font-size: 13px;
+  letter-spacing: 0;
+  color: #805335;
+  line-height: 1.7;
+}
+html[data-theme="stardew"] .estrutura-app .ew-nav-motion {
+  border-radius: 0;
+  border: 1px solid transparent;
+}
+html[data-theme="stardew"] .estrutura-app .ew-nav-motion.ativo {
+  background: #e8c872;
+  border-color: #b88b4a;
+  box-shadow: inset 4px 0 #477b38;
+}
+
+html[data-theme="stardew"] .estrutura-app .MuiListItemText-root {
+  min-width: 0;
+}
+html[data-theme="stardew"] .estrutura-app .MuiListItemText-primary {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+}
+html[data-theme="stardew"] .ew-button {
+  font-weight: 600;
+}
+
+html[data-theme="stardew"] .ew-tabs {
+  border-radius: 0;
+  border: 2px solid #b88b4a;
+  background: #f5d995;
+}
+html[data-theme="stardew"] .ew-tabs > .ew-tab {
+  border-radius: 0;
+}
+html[data-theme="stardew"] .atendimento-layout .MuiPaper-rounded {
+  border-radius: 0 !important;
+}
+html[data-theme="stardew"]
+  :is(
+    .MuiTableContainer-root,
+    .tabela-dados,
+    .tabela-busca,
+    .tabela-rodape,
+    .tabela-selecao,
+    .fila-nome i
+  ) {
+  border-radius: 0 !important;
+}
+html[data-theme="stardew"] .tabela-dados {
+  border: 2px solid #b88b4a;
+}
+html[data-theme="stardew"]
+  :is(
+    .one-works-avatar.MuiAvatar-root,
+    .avatar-preview-image,
+    .avatar-preview-flip-face
+  ) {
+  border-radius: 0;
+  box-shadow: 3px 3px 0 #5b331060;
+}
+html[data-theme="stardew"] .avatar-preview-dialog.MuiDialog-paper {
+  border: 4px solid #8b451d;
+  background: #fff1c7;
+  box-shadow: var(--sd-frame);
+}
+html[data-theme="stardew"] .avatar-preview-close.MuiIconButton-root {
+  border: 2px solid #8b451d;
+  background: #e8c872;
+  color: #5b341f;
+  box-shadow: 2px 2px #5b331080;
+}
+html[data-theme="stardew"] .yarl__container {
+  background: #3e1f08ed;
+}
+html[data-theme="stardew"] .yarl__button {
+  border: 2px solid #8b451d;
+  border-radius: 0;
+  background: #f5d995;
+  color: #5b341f;
+  filter: none;
+  box-shadow: 3px 3px #3e1f0870;
+}
+html[data-theme="stardew"] .yarl__button:hover {
+  background: #f2ba48;
+}
+html[data-theme="stardew"] .yarl__slide_image {
+  border: 4px solid #b88b4a;
+  box-shadow: 5px 5px #3e1f08;
+}
+html[data-theme="stardew"] .yarl__thumbnails_thumbnail {
+  border: 2px solid #b88b4a;
+  border-radius: 0;
+}
+html[data-theme="stardew"] .yarl__thumbnails_thumbnail_active {
+  border-color: #f2ba48;
+}
+html[data-theme="stardew"] .yarl__slide_captions_container {
+  background: #f5d995;
+  border-top: 3px solid #8b451d;
+  color: #5b341f;
+  font-family: Inter, system-ui, sans-serif;
+}

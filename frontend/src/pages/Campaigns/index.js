@@ -1,67 +1,35 @@
-/* eslint-disable no-unused-vars */
-
-import React, { useState, useEffect, useReducer, useContext } from "react";
+import React, {
+  useState,
+  useEffect,
+  useReducer,
+  useContext,
+  useRef
+} from "react";
 import { toast } from "react-toastify";
-
 import { useHistory } from "react-router-dom";
-
-import { makeStyles } from "@material-ui/core/styles";
-import Paper from "@material-ui/core/Paper";
-import Button from "@material-ui/core/Button";
-import Table from "@material-ui/core/Table";
-import TableBody from "@material-ui/core/TableBody";
-import TableCell from "@material-ui/core/TableCell";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
-import IconButton from "@material-ui/core/IconButton";
-import SearchIcon from "@material-ui/icons/Search";
-import TextField from "@material-ui/core/TextField";
-import InputAdornment from "@material-ui/core/InputAdornment";
-
-import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
-import EditIcon from "@material-ui/icons/Edit";
-import DescriptionIcon from "@material-ui/icons/Description";
-import TimerOffIcon from "@material-ui/icons/TimerOff";
-import PlayCircleOutlineIcon from "@material-ui/icons/PlayCircleOutline";
-import PauseCircleOutlineIcon from "@material-ui/icons/PauseCircleOutline";
-
+import { Rocket, Search, RefreshCw } from "lucide-react";
+import NavegacaoEnvios from "../../components/NavegacaoEnvios";
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
-import Title from "../../components/Title";
-
+import CabecalhoPagina from "../../components/CabecalhoPagina";
+import { Botao, BotaoIcone, useIdentidade } from "../../components/interface";
 import api from "../../services/api";
 import { i18n } from "../../translate/i18n";
-import TableRowSkeleton from "../../components/TableRowSkeleton";
 import CampaignModal from "../../components/CampaignModal";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import toastError from "../../errors/toastError";
-import { Grid } from "@material-ui/core";
-import { isArray } from "lodash";
-import { useDate } from "../../hooks/useDate";
 import { SocketContext } from "../../context/Socket/SocketContext";
+import TabelaCampanhas from "./TabelaCampanhas";
+import IndicadoresCampanhas from "./IndicadoresCampanhas";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_CAMPAIGNS") {
-    const campaigns = action.payload;
-    const newCampaigns = [];
-
-    if (isArray(campaigns)) {
-      campaigns.forEach((campaign) => {
-        const campaignIndex = state.findIndex((u) => u.id === campaign.id);
-        if (campaignIndex !== -1) {
-          state[campaignIndex] = campaign;
-        } else {
-          newCampaigns.push(campaign);
-        }
-      });
-    }
-
-    return [...state, ...newCampaigns];
+    return Array.isArray(action.payload) ? action.payload : [];
   }
 
   if (action.type === "UPDATE_CAMPAIGNS") {
     const campaign = action.payload;
-    const campaignIndex = state.findIndex((u) => u.id === campaign.id);
+    const campaignIndex = state.findIndex(u => u.id === campaign.id);
 
     if (campaignIndex !== -1) {
       state[campaignIndex] = campaign;
@@ -74,7 +42,7 @@ const reducer = (state, action) => {
   if (action.type === "DELETE_CAMPAIGN") {
     const campaignId = action.payload;
 
-    const campaignIndex = state.findIndex((u) => u.id === campaignId);
+    const campaignIndex = state.findIndex(u => u.id === campaignId);
     if (campaignIndex !== -1) {
       state.splice(campaignIndex, 1);
     }
@@ -86,17 +54,11 @@ const reducer = (state, action) => {
   }
 };
 
-const useStyles = makeStyles((theme) => ({
-  mainPaper: {
-    flex: 1,
-    padding: theme.spacing(1),
-    overflowY: "scroll",
-    ...theme.scrollbarStyles,
-  },
-}));
-
 const Campaigns = () => {
-  const classes = useStyles();
+  const identidade = useIdentidade();
+  const ultimaBusca = useRef(0);
+  const [total, setTotal] = useState(0);
+  const [atualizacao, setAtualizacao] = useState(0);
 
   const history = useHistory();
 
@@ -110,8 +72,6 @@ const Campaigns = () => {
   const [searchParam, setSearchParam] = useState("");
   const [campaigns, dispatch] = useReducer(reducer, []);
 
-  const { datetimeToClient } = useDate();
-
   const socketManager = useContext(SocketContext);
 
   useEffect(() => {
@@ -124,22 +84,22 @@ const Campaigns = () => {
     const delayDebounceFn = setTimeout(() => {
       fetchCampaigns();
     }, 500);
-    return () => clearTimeout(delayDebounceFn);
+    return () => {
+      clearTimeout(delayDebounceFn);
+      ultimaBusca.current += 1;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParam, pageNumber]);
+  }, [searchParam, pageNumber, atualizacao]);
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
     const socket = socketManager.GetSocket(companyId);
 
-    const onCompanyCampaign = (data) => {
-      if (data.action === "update" || data.action === "create") {
-        dispatch({ type: "UPDATE_CAMPAIGNS", payload: data.record });
+    const onCompanyCampaign = data => {
+      if (["update", "create", "delete"].includes(data.action)) {
+        setAtualizacao(valor => valor + 1);
       }
-      if (data.action === "delete") {
-        dispatch({ type: "DELETE_CAMPAIGN", payload: +data.id });
-      }
-    }
+    };
 
     socket.on(`company-${companyId}-campaign`, onCompanyCampaign);
     return () => {
@@ -147,16 +107,23 @@ const Campaigns = () => {
     };
   }, [socketManager]);
 
-  const fetchCampaigns = async () => {
+  const fetchCampaigns = async (pagina = pageNumber, busca = searchParam) => {
+    const buscaAtual = ++ultimaBusca.current;
+    setLoading(true);
     try {
       const { data } = await api.get("/campaigns/", {
-        params: { searchParam, pageNumber },
+        params: { searchParam: busca, pageNumber: pagina }
       });
+      if (buscaAtual !== ultimaBusca.current) return;
       dispatch({ type: "LOAD_CAMPAIGNS", payload: data.records });
+      setTotal(data.count ?? data.records.length);
       setHasMore(data.hasMore);
       setLoading(false);
     } catch (err) {
-      toastError(err);
+      if (buscaAtual === ultimaBusca.current) {
+        toastError(err);
+        setLoading(false);
+      }
     }
   };
 
@@ -170,19 +137,20 @@ const Campaigns = () => {
     setCampaignModalOpen(false);
   };
 
-  const handleSearch = (event) => {
+  const handleSearch = event => {
     setSearchParam(event.target.value.toLowerCase());
   };
 
-  const handleEditCampaign = (campaign) => {
+  const handleEditCampaign = campaign => {
     setSelectedCampaign(campaign);
     setCampaignModalOpen(true);
   };
 
-  const handleDeleteCampaign = async (campaignId) => {
+  const handleDeleteCampaign = async campaignId => {
     try {
       await api.delete(`/campaigns/${campaignId}`);
       toast.success(i18n.t("campaigns.toasts.deleted"));
+      fetchCampaigns(1, "");
     } catch (err) {
       toastError(err);
     }
@@ -191,59 +159,30 @@ const Campaigns = () => {
     setPageNumber(1);
   };
 
-  const loadMore = () => {
-    setPageNumber((prevState) => prevState + 1);
-  };
-
-  const handleScroll = (e) => {
-    if (!hasMore || loading) return;
-    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-    if (scrollHeight - (scrollTop + 100) < clientHeight) {
-      loadMore();
-    }
-  };
-
-  const formatStatus = (val) => {
-    switch (val) {
-      case "INATIVA":
-        return "Inativa";
-      case "PROGRAMADA":
-        return "Programada";
-      case "EM_ANDAMENTO":
-        return "Em Andamento";
-      case "CANCELADA":
-        return "Cancelada";
-      case "FINALIZADA":
-        return "Finalizada";
-      default:
-        return val;
-    }
-  };
-
-  const cancelCampaign = async (campaign) => {
+  const cancelCampaign = async campaign => {
     try {
       await api.post(`/campaigns/${campaign.id}/cancel`);
       toast.success(i18n.t("campaigns.toasts.cancel"));
       setPageNumber(1);
-      fetchCampaigns();
+      fetchCampaigns(1);
     } catch (err) {
       toast.error(err.message);
     }
   };
 
-  const restartCampaign = async (campaign) => {
+  const restartCampaign = async campaign => {
     try {
       await api.post(`/campaigns/${campaign.id}/restart`);
       toast.success(i18n.t("campaigns.toasts.restart"));
       setPageNumber(1);
-      fetchCampaigns();
+      fetchCampaigns(1);
     } catch (err) {
       toast.error(err.message);
     }
   };
 
   return (
-    <MainContainer>
+    <MainContainer className="sd-business sd-campaigns">
       <ConfirmationModal
         title={
           deletingCampaign &&
@@ -260,7 +199,7 @@ const Campaigns = () => {
       <CampaignModal
         resetPagination={() => {
           setPageNumber(1);
-          fetchCampaigns();
+          fetchCampaigns(1);
         }}
         open={campaignModalOpen}
         onClose={handleCloseCampaignModal}
@@ -268,160 +207,61 @@ const Campaigns = () => {
         campaignId={selectedCampaign && selectedCampaign.id}
       />
       <MainHeader>
-        <Grid style={{ width: "99.6%" }} container>
-          <Grid xs={12} sm={8} item>
-            <Title>{i18n.t("campaigns.title")}</Title>
-          </Grid>
-          <Grid xs={12} sm={4} item>
-            <Grid spacing={2} container>
-              <Grid xs={6} sm={6} item>
-                <TextField
-                  fullWidth
-                  placeholder={i18n.t("campaigns.searchPlaceholder")}
+        <CabecalhoPagina
+          titulo={i18n.t("visual.campanhas")}
+          descricao={i18n.t("visual.campanhasDescricao")}
+        />
+        <div className="ew-ui" style={identidade}>
+          <Botao variante="primary" onClick={handleOpenCampaignModal}>
+            <Rocket size={16} />
+            {i18n.t("visual.novoEnvio")}
+          </Botao>
+        </div>
+      </MainHeader>
+      <NavegacaoEnvios />
+      <div className="campanhas-conteudo ew-ui" style={identidade}>
+        <IndicadoresCampanhas campanhas={campaigns} />
+        <TabelaCampanhas
+          campanhas={campaigns}
+          carregando={loading}
+          pagina={pageNumber}
+          total={total}
+          proxima={hasMore}
+          aoPaginar={setPageNumber}
+          editar={handleEditCampaign}
+          excluir={campanha => {
+            setDeletingCampaign(campanha);
+            setConfirmModalOpen(true);
+          }}
+          pausar={cancelCampaign}
+          retomar={restartCampaign}
+          relatorio={campanha =>
+            history.push(`/campaign/${campanha.id}/report`)
+          }
+          ferramentas={
+            <>
+              <label className="tabela-busca">
+                <Search size={16} />
+                <input
                   type="search"
+                  aria-label={i18n.t("campaigns.searchPlaceholder")}
+                  placeholder={i18n.t("campaigns.searchPlaceholder")}
                   value={searchParam}
                   onChange={handleSearch}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon style={{ color: "gray" }} />
-                      </InputAdornment>
-                    ),
-                  }}
                 />
-              </Grid>
-              <Grid xs={6} sm={6} item>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  onClick={handleOpenCampaignModal}
-                  color="primary"
-                >
-                  {i18n.t("campaigns.buttons.add")}
-                </Button>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
-      </MainHeader>
-      <Paper
-        className={classes.mainPaper}
-        variant="outlined"
-        onScroll={handleScroll}
-      >
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell align="center">
-                {i18n.t("campaigns.table.name")}
-              </TableCell>
-              <TableCell align="center">
-                {i18n.t("campaigns.table.status")}
-              </TableCell>
-              <TableCell align="center">
-                {i18n.t("campaigns.table.contactList")}
-              </TableCell>
-              <TableCell align="center">
-                {i18n.t("campaigns.table.whatsapp")}
-              </TableCell>
-              <TableCell align="center">
-                {i18n.t("campaigns.table.scheduledAt")}
-              </TableCell>
-              <TableCell align="center">
-                {i18n.t("campaigns.table.completedAt")}
-              </TableCell>
-              <TableCell align="center">
-                {i18n.t("campaigns.table.confirmation")}
-              </TableCell>
-              <TableCell align="center">
-                {i18n.t("campaigns.table.actions")}
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            <>
-              {campaigns.map((campaign) => (
-                <TableRow key={campaign.id}>
-                  <TableCell align="center">{campaign.name}</TableCell>
-                  <TableCell align="center">
-                    {formatStatus(campaign.status)}
-                  </TableCell>
-                  <TableCell align="center">
-                    {campaign.contactListId
-                      ? campaign.contactList.name
-                      : "Não definida"}
-                  </TableCell>
-                  <TableCell align="center">
-                    {campaign.whatsappId
-                      ? campaign.whatsapp.name
-                      : "Não definido"}
-                  </TableCell>
-                  <TableCell align="center">
-                    {campaign.scheduledAt
-                      ? datetimeToClient(campaign.scheduledAt)
-                      : "Sem agendamento"}
-                  </TableCell>
-                  <TableCell align="center">
-                    {campaign.completedAt
-                      ? datetimeToClient(campaign.completedAt)
-                      : "Não concluída"}
-                  </TableCell>
-                  <TableCell align="center">
-                    {campaign.confirmation ? "Habilitada" : "Desabilitada"}
-                  </TableCell>
-                  <TableCell align="center">
-                    {campaign.status === "EM_ANDAMENTO" && (
-                      <IconButton
-                        onClick={() => cancelCampaign(campaign)}
-                        title="Parar Campanha"
-                        size="small"
-                      >
-                        <PauseCircleOutlineIcon />
-                      </IconButton>
-                    )}
-                    {campaign.status === "CANCELADA" && (
-                      <IconButton
-                        onClick={() => restartCampaign(campaign)}
-                        title="Parar Campanha"
-                        size="small"
-                      >
-                        <PlayCircleOutlineIcon />
-                      </IconButton>
-                    )}
-                    <IconButton
-                      onClick={() =>
-                        history.push(`/campaign/${campaign.id}/report`)
-                      }
-                      size="small"
-                    >
-                      <DescriptionIcon />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleEditCampaign(campaign)}
-                    >
-                      <EditIcon />
-                    </IconButton>
-
-                    <IconButton
-                      size="small"
-                      onClick={(e) => {
-                        setConfirmModalOpen(true);
-                        setDeletingCampaign(campaign);
-                      }}
-                    >
-                      <DeleteOutlineIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {loading && <TableRowSkeleton columns={8} />}
+              </label>
+              <BotaoIcone
+                titulo={i18n.t("visual.atualizar")}
+                onClick={() => fetchCampaigns()}
+                disabled={loading}
+              >
+                <RefreshCw size={16} />
+              </BotaoIcone>
             </>
-          </TableBody>
-        </Table>
-      </Paper>
+          }
+        />
+      </div>
     </MainContainer>
   );
 };
-
 export default Campaigns;

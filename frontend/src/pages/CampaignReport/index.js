@@ -24,19 +24,19 @@ import { useDate } from "../../hooks/useDate";
 
 import { SocketContext } from "../../context/Socket/SocketContext";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   mainPaper: {
     flex: 1,
     padding: theme.spacing(2),
     overflowY: "scroll",
-    ...theme.scrollbarStyles,
+    ...theme.scrollbarStyles
   },
   textRight: {
-    textAlign: "right",
+    textAlign: "right"
   },
   tabPanelsContainer: {
-    padding: theme.spacing(2),
-  },
+    padding: theme.spacing(2)
+  }
 }));
 
 const CampaignReport = () => {
@@ -69,31 +69,6 @@ const CampaignReport = () => {
   }, []);
 
   useEffect(() => {
-    if (mounted.current && has(campaign, "shipping")) {
-      if (has(campaign, "contactList")) {
-        const contactList = get(campaign, "contactList");
-        const valids = contactList.contacts.filter((c) => c.isWhatsappValid);
-        setValidContacts(valids.length);
-      }
-
-      if (has(campaign, "shipping")) {
-        const contacts = get(campaign, "shipping");
-        const delivered = contacts.filter((c) => !isNull(c.deliveredAt));
-        const confirmationRequested = contacts.filter(
-          (c) => !isNull(c.confirmationRequestedAt)
-        );
-        const confirmed = contacts.filter(
-          (c) => !isNull(c.deliveredAt) && !isNull(c.confirmationRequestedAt)
-        );
-        setDelivered(delivered.length);
-        setConfirmationRequested(confirmationRequested.length);
-        setConfirmed(confirmed.length);
-        setDelivered(delivered.length);
-      }
-    }
-  }, [campaign]);
-
-  useEffect(() => {
     setPercent((delivered / validContacts) * 100);
   }, [delivered, validContacts]);
 
@@ -101,21 +76,24 @@ const CampaignReport = () => {
     const companyId = localStorage.getItem("companyId");
     const socket = socketManager.GetSocket(companyId);
 
-    const onCampaign = (data) => {
-  
-      if (data.record.id === +campaignId) {
-        setCampaign(data.record);
+    const onCampaign = data => {
+      if (data.campaign?.id === +campaignId) {
+        setCampaign(data.campaign);
+        setValidContacts(data.valids);
+        setConfirmationRequested(data.confirmationRequested);
+        setConfirmed(data.confirmed);
+        setDelivered(data.delivered);
 
-        if (data.record.status === "FINALIZADA") {
+        if (data.campaign.status === "FINALIZADA") {
           setTimeout(() => {
             findCampaign();
           }, 5000);
         }
       }
-    }
+    };
 
     socket.on(`company-${companyId}-campaign`, onCampaign);
-    
+
     return () => {
       socket.disconnect();
     };
@@ -125,11 +103,15 @@ const CampaignReport = () => {
   const findCampaign = async () => {
     setLoading(true);
     const { data } = await api.get(`/campaigns/${campaignId}`);
-    setCampaign(data);
+    setCampaign(data.campaign);
+    setValidContacts(data.valids);
+    setConfirmationRequested(data.confirmationRequested);
+    setConfirmed(data.confirmed);
+    setDelivered(data.delivered);
     setLoading(false);
   };
 
-  const formatStatus = (val) => {
+  const formatStatus = val => {
     switch (val) {
       case "INATIVA":
         return "Inativa";
@@ -147,7 +129,7 @@ const CampaignReport = () => {
   };
 
   return (
-    <MainContainer>
+    <MainContainer className="sd-business sd-campaign-report">
       <MainHeader>
         <Grid style={{ width: "99.6%" }} container>
           <Grid xs={12} item>

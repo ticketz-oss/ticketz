@@ -1,7 +1,7 @@
 import { Op } from "sequelize";
 import Campaign from "../../models/Campaign";
 import CampaignShipping from "../../models/CampaignShipping";
-import { campaignQueue } from "../../queues";
+import { campaignQueue } from "../../queues/campaign";
 
 export async function CancelService(id: number) {
   const campaign = await Campaign.findByPk(id);
@@ -17,7 +17,9 @@ export async function CancelService(id: number) {
 
   const promises = [];
 
-  for (let record of recordsToCancel) {
+  // eslint-disable-next-line no-restricted-syntax
+  for (const record of recordsToCancel) {
+    // eslint-disable-next-line no-await-in-loop
     const job = await campaignQueue.getJob(+record.jobId);
     promises.push(job.remove());
   }

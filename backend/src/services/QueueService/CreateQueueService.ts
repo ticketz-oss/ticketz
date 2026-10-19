@@ -3,6 +3,9 @@ import AppError from "../../errors/AppError";
 import Queue from "../../models/Queue";
 import Company from "../../models/Company";
 import Plan from "../../models/Plan";
+import sequelize from "../../database";
+import AssociateQueueWhatsapp from "./AssociateQueueWhatsapp";
+import ShowQueueService from "./ShowQueueService";
 
 interface QueueData {
   name: string;
@@ -11,10 +14,19 @@ interface QueueData {
   greetingMessage?: string;
   outOfHoursMessage?: string;
   schedules?: unknown[];
+  whatsappIds?: number[];
 }
 
 const CreateQueueService = async (queueData: QueueData): Promise<Queue> => {
-  const { color, name, companyId } = queueData;
+  const {
+    color,
+    name,
+    companyId,
+    whatsappIds,
+    greetingMessage,
+    outOfHoursMessage,
+    schedules
+  } = queueData;
 
   const company = await Company.findOne({
     where: {
@@ -79,13 +91,34 @@ const CreateQueueService = async (queueData: QueueData): Promise<Queue> => {
 
   try {
     await queueSchema.validate({ color, name });
-  } catch (err: any) {
-    throw new AppError(err.message);
+  } catch (err: unknown) {
+    throw new AppError((err as Error).message);
   }
 
-  const queue = await Queue.create(queueData);
+  const queue = await sequelize.transaction(async transaction => {
+    const createdQueue = await Queue.create(
+      {
+        color,
+        name,
+        companyId,
+        greetingMessage,
+        outOfHoursMessage,
+        schedules
+      },
+      { transaction }
+    );
 
-  return queue;
+    await AssociateQueueWhatsapp({
+      queue: createdQueue,
+      whatsappIds,
+      companyId,
+      transaction
+    });
+
+    return createdQueue;
+  });
+
+  return ShowQueueService(queue.id, companyId);
 };
 
 export default CreateQueueService;

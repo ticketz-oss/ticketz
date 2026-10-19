@@ -1,11 +1,26 @@
 import gracefulShutdown from "http-graceful-shutdown";
+import {
+  isDedicatedRuntime,
+  runtimeCompanyWhere
+} from "./helpers/tenantRuntime";
 import app from "./app";
 import { initIO } from "./libs/socket";
 import { logger } from "./utils/logger";
 import { StartAllWhatsAppsSessions } from "./services/WbotServices/StartAllWhatsAppsSessions";
 import Company from "./models/Company";
 import { startQueueProcess } from "./queues";
-import { checkOpenInvoices, payGatewayInitialize } from "./services/PaymentGatewayServices/PaymentGatewayServices";
+import {
+  checkOpenInvoices,
+  payGatewayInitialize
+} from "./services/PaymentGatewayServices/PaymentGatewayServices";
+import { i18nReady } from "./services/TranslationServices/i18nService";
+import {
+  startVoiceEventBridge,
+  stopVoiceEventBridge
+} from "./services/VoiceServices/VoiceService";
+import { recoverPendingVoiceArtifacts } from "./services/VoiceServices/VoiceArtifactService";
+import { recoverVoiceHistories } from "./services/VoiceServices/VoiceHistoryService";
+import { startAgentContextWorker, stopAgentContextWorker } from "./services/AgentServices/AgentDocumentService";
 
 // Environment Variable Validation
 if (!process.env.PORT) {
@@ -16,62 +31,83 @@ if (!process.env.PORT) {
 // Function to start server and initialize services
 async function startServer() {
   try {
-    const companies = await Company.findAll();
-    const sessionPromises = companies.map(async (company) => {
+    const companies = await Company.findAll({
+      where: runtimeCompanyWhere("id")
+    });
+    const sessionPromises = companies.map(async company => {
       try {
         await StartAllWhatsAppsSessions(company.id);
         logger.info(`Started WhatsApp session for company ID: ${company.id}`);
       } catch (error) {
-        logger.error(`Error starting WhatsApp session for company ID: ${company.id} - ${error.message}`);
+        logger.error(
+          `Error starting WhatsApp session for company ID: ${company.id} - ${error.message}`
+        );
       }
     });
 
     await Promise.all(sessionPromises);
 
     startQueueProcess();
-    logger.info(`Server started on port: ${process.env.PORT}`);
+    await startAgentContextWorker();
+    if (!isDedicatedRuntime()) {
+      startVoiceEventBridge();
+      await recoverVoiceHistories().catch(error =>
+        logger.error({ error }, "Unable to recover voice ticket histories")
+      );
+      await recoverPendingVoiceArtifacts();
+      logger.info(`Server started on port: ${process.env.PORT}`);
 
-    try {
-      await payGatewayInitialize();
-    } catch (error) {
-      logger.error(`Error initializing payment gateway: ${error.message}`);
+      try {
+        await payGatewayInitialize();
+      } catch (error) {
+        logger.error(`Error initializing payment gateway: ${error.message}`);
+      }
+
+      checkOpenInvoices();
     }
-
-    checkOpenInvoices();
   } catch (error) {
     logger.error(`Error during server startup: ${error.message}`);
     process.exit(1);
   }
 }
 
-// Create and start the server
-const server = app.listen(process.env.PORT, async () => {
-  logger.info(`Server is listening on port: ${process.env.PORT}`);
-  await startServer();
-});
+// wait for i18n initialization before starting the server
+i18nReady.then(() => {
+  // Create and start the server
+  const server = app.listen(process.env.PORT, async () => {
+    logger.info(`Server is listening on port: ${process.env.PORT}`);
 
-initIO(server);
+    await startServer();
+  });
 
-// Graceful Shutdown Setup
-gracefulShutdown(server, {
-  signals: "SIGINT SIGTERM",
-  timeout: 30000,
-  onShutdown: async () => {
-    logger.info("Shutdown initiated. Cleaning up...");
-  },
-  finally: () => {
-    logger.info("Server has shut down.");
-  }
+  initIO(server);
+
+  // Graceful Shutdown Setup
+  gracefulShutdown(server, {
+    signals: "SIGINT SIGTERM",
+    timeout: 30000,
+    onShutdown: async () => {
+      logger.info("Shutdown initiated. Cleaning up...");
+      stopVoiceEventBridge();
+      await stopAgentContextWorker();
+    },
+    finally: () => {
+      logger.info("Server has shut down.");
+    }
+  });
 });
 
 // Global Exception Handlers
-process.on("uncaughtException", (err) => {
+process.on("uncaughtException", err => {
   logger.error({ err }, `Uncaught Exception: ${err.message}`);
+  if (err["code"] && ["ERR_OSSL_BAD_DECRYPT", "ENOENT"].includes(err["code"])) {
+    return;
+  }
   process.exit(1);
 });
 
 // Global Exception Handlers for logging only
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 process.on("unhandledRejection", (reason: any, promise) => {
-  logger.debug({ promise , reason }, "Unhandled Rejection");
+  logger.debug({ promise, reason }, "Unhandled Rejection");
 });

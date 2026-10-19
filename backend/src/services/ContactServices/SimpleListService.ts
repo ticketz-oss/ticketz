@@ -7,25 +7,26 @@ export interface SearchContactParams {
   name?: string;
 }
 
-const SimpleListService = async ({ name, companyId }: SearchContactParams): Promise<Contact[]> => {
+const SimpleListService = async ({
+  name,
+  companyId
+}: SearchContactParams): Promise<Contact[]> => {
   let options: FindOptions = {
-    order: [
-      ['name', 'ASC']
-    ]
-  }
+    order: [["name", "ASC"]]
+  };
 
   if (name) {
     options.where = {
       name: {
         [Op.like]: `%${name}%`
       }
-    }
+    };
   }
 
   options.where = {
     ...options.where,
     companyId
-  }
+  };
 
   const contacts = await Contact.findAll(options);
 

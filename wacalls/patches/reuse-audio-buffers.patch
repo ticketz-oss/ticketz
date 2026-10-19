@@ -1,0 +1,72 @@
+--- a/internal/voip/call/callmanager_media.go
++++ b/internal/voip/call/callmanager_media.go
+@@ -36,9 +36,7 @@ func (m *CallManager) FeedCapturedPCM(data []float32) {
+ 		if m.encodeBufPos < frameSize {
+ 			break
+ 		}
+-		frame := make([]float32, frameSize)
+-		copy(frame, m.encodeBuf)
+ 		m.encodeBufPos = 0
+ 
+-		opus, err := m.codec.Encode(frame)
++		opus, err := m.codec.Encode(m.encodeBuf)
+ 		if err != nil {
+ 			m.log.Debug("encode error", "err", err)
+--- a/internal/voip/media/mlow/encoder.go
++++ b/internal/voip/media/mlow/encoder.go
+@@ -605,3 +605,4 @@ type MlowEncoder struct {
+ 	state SmplEncoderState
+ 	log   zerolog.Logger
++	clean []float32
+ }
+@@ -631,6 +632,10 @@ func (e *MlowEncoder) Encode(pcm []float32) ([]byte, error) {
+ 		return nil, errors.New("mlow encode: expected 960 samples (60 ms @16 kHz)")
+ 	}
+ 	e.log.Trace().Int("samples", len(pcm)).Msg("encode frame: sanitizing and analyzing")
+-	clean := make([]float32, len(pcm))
++	if cap(e.clean) < len(pcm) {
++		e.clean = make([]float32, len(pcm))
++	}
++	e.clean = e.clean[:len(pcm)]
++	clean := e.clean
+	for i, s := range pcm {
+		switch {
+--- a/internal/voip/media/mlow/fft.go
++++ b/internal/voip/media/mlow/fft.go
+@@ -38,7 +38,7 @@ func smallestFactor(n int) int {
+ 
+ // fftRec is the recursive mixed-radix Cooley-Tukey DFT. sign is -1 forward, +1
+ // inverse (unnormalized). x holds n inputs at the given stride; out is contiguous.
+-func fftRec(x []cpx, stride, n int, sign float32, out []cpx) {
++func fftRec(x []cpx, stride, n int, sign float32, out, scratch []cpx) {
+ 	// Source of truth: https://github.com/oxidezap/whatsapp-rust/blob/674e85164b35ca19115dfebcf605708d15951ee7/wacore/src/voip/mlow/smpl_perc.rs#L362-L405
+ 	if n == 1 {
+ 		out[0] = x[0]
+@@ -59,9 +59,14 @@ func fftRec(x []cpx, stride, n int, sign float32, out []cpx) {
+ 		return
+ 	}
+ 	m := n / p
+-	sub := make([]cpx, n)
++	// Keep all recursion scratch space in one caller-owned buffer. The previous
++	// implementation allocated a new slice at every node in the FFT tree,
++	// which made the real-time encoder spend a substantial amount of time in
++	// the allocator and garbage collector.
++	sub := scratch[:n]
++	childScratch := scratch[n:]
+ 	for q := 0; q < p; q++ {
+-		fftRec(x[q*stride:], stride*p, m, sign, sub[q*m:(q+1)*m])
++		fftRec(x[q*stride:], stride*p, m, sign, sub[q*m:(q+1)*m], childScratch)
+ 	}
+ 	for k := 0; k < n; k++ {
+ 		kmod := k % m
+@@ -80,7 +85,10 @@ func fftRec(x []cpx, stride, n int, sign float32, out []cpx) {
+ func cfft(input, out []cpx, sign float32) {
+ 	// Source of truth: https://github.com/oxidezap/whatsapp-rust/blob/674e85164b35ca19115dfebcf605708d15951ee7/wacore/src/voip/mlow/smpl_perc.rs#L408-L412
+-	fftRec(input, 1, len(input), sign, out)
++	// Two lengths are enough for every recursive path because
++	// n+n/p+n/(p*q)+... is strictly smaller than 2*n.
++	scratch := make([]cpx, 2*len(input))
++	fftRec(input, 1, len(input), sign, out, scratch)
+ }
+ 
+ // rfftForwardOrdered is the forward real FFT of n real samples, re-packed into the

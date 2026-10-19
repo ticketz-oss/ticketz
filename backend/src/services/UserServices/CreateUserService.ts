@@ -5,6 +5,7 @@ import { SerializeUser } from "../../helpers/SerializeUser";
 import User from "../../models/User";
 import Plan from "../../models/Plan";
 import Company from "../../models/Company";
+import { validateVisibleScreens } from "../../helpers/screenAccess";
 
 interface Request {
   email: string;
@@ -13,6 +14,7 @@ interface Request {
   queueIds?: number[];
   companyId?: number;
   profile?: string;
+  visibleScreens?: string[] | null;
 }
 
 interface Response {
@@ -20,6 +22,7 @@ interface Response {
   name: string;
   id: number;
   profile: string;
+  visibleScreens: string[] | null;
 }
 
 const CreateUserService = async ({
@@ -28,7 +31,8 @@ const CreateUserService = async ({
   name,
   queueIds = [],
   companyId,
-  profile = "admin"
+  profile = "admin",
+  visibleScreens = null
 }: Request): Promise<Response> => {
   if (companyId !== undefined) {
     const company = await Company.findOne({
@@ -84,7 +88,8 @@ const CreateUserService = async ({
       password,
       name,
       companyId,
-      profile
+      profile,
+      visibleScreens: validateVisibleScreens(visibleScreens)
     },
     { include: ["queues", "company"] }
   );

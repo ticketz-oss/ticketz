@@ -13,12 +13,15 @@ import {
   Unique,
   BelongsToMany,
   ForeignKey,
-  BelongsTo
+  BelongsTo,
+  HasOne
 } from "sequelize-typescript";
 import Queue from "./Queue";
 import Ticket from "./Ticket";
 import WhatsappQueue from "./WhatsappQueue";
 import Company from "./Company";
+import Wavoip from "./Wavoip";
+import { encryptSecret, decryptSecret } from "../helpers/cryptoSecret";
 
 @Table
 class Whatsapp extends Model<Whatsapp> {
@@ -82,6 +85,9 @@ class Whatsapp extends Model<Whatsapp> {
   @Column
   isDefault: boolean;
 
+  @Column
+  language: string;
+
   @CreatedAt
   createdAt: Date;
 
@@ -104,9 +110,6 @@ class Whatsapp extends Model<Whatsapp> {
   @BelongsTo(() => Company)
   company: Company;
 
-  @Column
-  token: string;
-
   @Column(DataType.TEXT)
   facebookUserId: string;
 
@@ -119,8 +122,49 @@ class Whatsapp extends Model<Whatsapp> {
   @Column(DataType.TEXT)
   tokenMeta: string;
 
+  @HasOne(() => Wavoip)
+  wavoip: Wavoip;
+
   @Column(DataType.TEXT)
   channel: string;
+
+  // "baileys" (Web/multi-device, nao-oficial) ou "official" (WhatsApp Cloud
+  // API da Meta). Sempre espelha Company.whatsappMode: nunca e escolhido
+  // diretamente pelo usuario, e derivado na criacao da conexao.
+  @Default("baileys")
+  @Column(DataType.STRING)
+  apiMode: string;
+
+  @Column(DataType.TEXT)
+  metaWabaId: string;
+
+  @Column(DataType.TEXT)
+  metaPhoneNumberId: string;
+
+  @Column(DataType.TEXT)
+  metaBusinessId: string;
+
+  @Column(DataType.TEXT)
+  get metaAccessToken(): string | null {
+    const value = this.getDataValue("metaAccessToken");
+    return value ? decryptSecret(value) : null;
+  }
+
+  set metaAccessToken(value: string | null) {
+    this.setDataValue("metaAccessToken", value ? encryptSecret(value) : null);
+  }
+
+  @Column(DataType.DATE)
+  metaTokenExpiresAt: Date;
+
+  @Column(DataType.STRING)
+  metaHealthStatus: string;
+
+  @Column(DataType.DATE)
+  metaHealthCheckedAt: Date;
+
+  @Column(DataType.DATE)
+  metaWebhookVerifiedAt: Date;
 }
 
 export default Whatsapp;

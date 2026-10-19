@@ -1,335 +1,437 @@
-import React, { useState, useEffect, useReducer, useContext } from "react";
-import { toast } from "react-toastify";
-
+import StardewEmblem from "../../components/StardewEmblem";
+import React, { useCallback, useContext, useEffect, useState } from "react";
+import {
+  Box,
+  Button,
+  Chip,
+  FormControl,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import Paper from "@material-ui/core/Paper";
-import Button from "@material-ui/core/Button";
-import Table from "@material-ui/core/Table";
-import TableBody from "@material-ui/core/TableBody";
-import TableCell from "@material-ui/core/TableCell";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
-import IconButton from "@material-ui/core/IconButton";
 import SearchIcon from "@material-ui/icons/Search";
-import TextField from "@material-ui/core/TextField";
-import InputAdornment from "@material-ui/core/InputAdornment";
-
-import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
 import EditIcon from "@material-ui/icons/Edit";
-
+import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
+import ImageIcon from "@material-ui/icons/Image";
+import PublicIcon from "@material-ui/icons/Public";
+import moment from "moment";
+import { toast } from "react-toastify";
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
+import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper";
 import Title from "../../components/Title";
-
-import api from "../../services/api";
-import { i18n } from "../../translate/i18n";
-import TableRowSkeleton from "../../components/TableRowSkeleton";
 import AnnouncementModal from "../../components/AnnouncementModal";
 import ConfirmationModal from "../../components/ConfirmationModal";
+import TableRowSkeleton from "../../components/TableRowSkeleton";
+import api from "../../services/api";
 import toastError from "../../errors/toastError";
-import { Grid } from "@material-ui/core";
-import { isArray } from "lodash";
+import { i18n } from "../../translate/i18n";
+import { AuthContext } from "../../context/Auth/AuthContext";
 import { SocketContext } from "../../context/Socket/SocketContext";
 
-const reducer = (state, action) => {
-  if (action.type === "LOAD_ANNOUNCEMENTS") {
-    const announcements = action.payload;
-    const newAnnouncements = [];
+const useStyles = makeStyles(theme => ({
+  mainPaper: { flex: 1, overflow: "hidden", ...theme.scrollbarStyles },
+  filters: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: theme.spacing(1),
+    padding: theme.spacing(1.5),
+    borderBottom: `1px solid ${theme.palette.divider}`
+  },
+  search: {
+    minWidth: 220,
+    flex: 1,
+    [theme.breakpoints.down("xs")]: { minWidth: "100%" }
+  },
+  filter: {
+    minWidth: 150,
+    [theme.breakpoints.down("xs")]: { flex: "1 1 calc(50% - 8px)" }
+  },
+  tableScroll: {
+    width: "100%",
+    overflowX: "auto",
+    ...theme.scrollbarStyles
+  },
+  message: {
+    maxWidth: 320,
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis"
+  },
+  chips: { display: "flex", flexWrap: "wrap", gap: theme.spacing(0.5) },
+  empty: {
+    padding: theme.spacing(6),
+    textAlign: "center",
+    color: theme.palette.text.secondary
+  },
+  number: { fontVariantNumeric: "tabular-nums" }
+}));
 
-    if (isArray(announcements)) {
-      announcements.forEach((announcement) => {
-        const announcementIndex = state.findIndex(
-          (u) => u.id === announcement.id
-        );
-        if (announcementIndex !== -1) {
-          state[announcementIndex] = announcement;
-        } else {
-          newAnnouncements.push(announcement);
-        }
-      });
-    }
-
-    return [...state, ...newAnnouncements];
-  }
-
-  if (action.type === "UPDATE_ANNOUNCEMENTS") {
-    const announcement = action.payload;
-    const announcementIndex = state.findIndex((u) => u.id === announcement.id);
-
-    if (announcementIndex !== -1) {
-      state[announcementIndex] = announcement;
-      return [...state];
-    } else {
-      return [announcement, ...state];
-    }
-  }
-
-  if (action.type === "DELETE_ANNOUNCEMENT") {
-    const announcementId = action.payload;
-
-    const announcementIndex = state.findIndex((u) => u.id === announcementId);
-    if (announcementIndex !== -1) {
-      state.splice(announcementIndex, 1);
-    }
-    return [...state];
-  }
-
-  if (action.type === "RESET") {
-    return [];
-  }
+const priorityColor = priority => {
+  if (priority === 1) return "secondary";
+  if (priority === 2) return "primary";
+  return "default";
 };
 
-const useStyles = makeStyles((theme) => ({
-  mainPaper: {
-    flex: 1,
-    padding: theme.spacing(1),
-    overflowY: "scroll",
-    ...theme.scrollbarStyles,
-  },
-}));
+const priorityLabel = priority => {
+  if (priority === 1) return i18n.t("announcements.priorities.high");
+  if (priority === 2) return i18n.t("announcements.priorities.medium");
+  return i18n.t("announcements.priorities.low");
+};
+
+/**
+ * Derived from the publication window, so an admin can tell at a glance whether
+ * a notice is live, still waiting for its start date or already expired.
+ */
+const situationOf = announcement => {
+  if (!announcement.status) return "inactive";
+  const now = new Date();
+  if (announcement.startsAt && new Date(announcement.startsAt) > now) {
+    return "scheduled";
+  }
+  if (announcement.endsAt && new Date(announcement.endsAt) < now) {
+    return "expired";
+  }
+  return "live";
+};
+
+const situationColor = situation => {
+  if (situation === "live") return "primary";
+  if (situation === "expired") return "secondary";
+  return "default";
+};
+
+const formatDate = value =>
+  value ? moment(value).format("DD/MM/YYYY HH:mm") : "—";
 
 const Announcements = () => {
   const classes = useStyles();
-
-  const [loading, setLoading] = useState(false);
-  const [pageNumber, setPageNumber] = useState(1);
-  const [hasMore, setHasMore] = useState(false);
-  const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
-  const [deletingAnnouncement, setDeletingAnnouncement] = useState(null);
-  const [announcementModalOpen, setAnnouncementModalOpen] = useState(false);
-  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-  const [searchParam, setSearchParam] = useState("");
-  const [announcements, dispatch] = useReducer(reducer, []);
-
+  const { user } = useContext(AuthContext);
   const socketManager = useContext(SocketContext);
 
-  useEffect(() => {
-    dispatch({ type: "RESET" });
-    setPageNumber(1);
-  }, [searchParam]);
+  const [announcements, setAnnouncements] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searchParam, setSearchParam] = useState("");
+  const [status, setStatus] = useState("");
+  const [priority, setPriority] = useState("");
+  const [periodFrom, setPeriodFrom] = useState("");
+  const [periodTo, setPeriodTo] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selected, setSelected] = useState(null);
+  const [deleting, setDeleting] = useState(null);
 
-  useEffect(() => {
+  const fetchAnnouncements = useCallback(async () => {
     setLoading(true);
-    const delayDebounceFn = setTimeout(() => {
-      fetchAnnouncements();
-    }, 500);
-    return () => clearTimeout(delayDebounceFn);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParam, pageNumber]);
+    try {
+      const { data } = await api.get("/announcements", {
+        params: {
+          searchParam,
+          status,
+          priority,
+          periodFrom,
+          periodTo,
+          pageNumber: 1
+        }
+      });
+      setAnnouncements(data.records);
+    } catch (err) {
+      toastError(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [searchParam, status, priority, periodFrom, periodTo]);
 
   useEffect(() => {
-    const companyId = localStorage.getItem("companyId");
-    const socket = socketManager.GetSocket(companyId);
+    const timeout = setTimeout(fetchAnnouncements, 350);
+    return () => clearTimeout(timeout);
+  }, [fetchAnnouncements]);
 
-    const onAnnouncement = (data) => {
-      if (data.action === "update" || data.action === "create") {
-        dispatch({ type: "UPDATE_ANNOUNCEMENTS", payload: data.record });
-      }
-      if (data.action === "delete") {
-        dispatch({ type: "DELETE_ANNOUNCEMENT", payload: +data.id });
-      }
-    }
-    
-    socket.on(`company-announcement`, onAnnouncement);
-    
+  useEffect(() => {
+    const socket = socketManager.GetSocket(user.companyId);
+
+    // The payload only signals a change: the audience is resolved server side,
+    // so the authoritative list always comes from a refetch.
+    const onAnnouncement = () => fetchAnnouncements();
+
+    socket.on("company-announcement", onAnnouncement);
+
     return () => {
-      socket.disconnect();
+      socket.off("company-announcement", onAnnouncement);
     };
-  }, [socketManager]);
+  }, [socketManager, user.companyId, fetchAnnouncements]);
 
-  const fetchAnnouncements = async () => {
+  const remove = async () => {
     try {
-      const { data } = await api.get("/announcements/", {
-        params: { searchParam, pageNumber },
-      });
-      dispatch({ type: "LOAD_ANNOUNCEMENTS", payload: data.records });
-      setHasMore(data.hasMore);
-      setLoading(false);
-    } catch (err) {
-      toastError(err);
-    }
-  };
-
-  const handleOpenAnnouncementModal = () => {
-    setSelectedAnnouncement(null);
-    setAnnouncementModalOpen(true);
-  };
-
-  const handleCloseAnnouncementModal = () => {
-    setSelectedAnnouncement(null);
-    setAnnouncementModalOpen(false);
-  };
-
-  const handleSearch = (event) => {
-    setSearchParam(event.target.value.toLowerCase());
-  };
-
-  const handleEditAnnouncement = (announcement) => {
-    setSelectedAnnouncement(announcement);
-    setAnnouncementModalOpen(true);
-  };
-
-  const handleDeleteAnnouncement = async (announcementId) => {
-    try {
-      await api.delete(`/announcements/${announcementId}`);
+      await api.delete(`/announcements/${deleting.id}`);
       toast.success(i18n.t("announcements.toasts.deleted"));
+      fetchAnnouncements();
     } catch (err) {
       toastError(err);
     }
-    setDeletingAnnouncement(null);
-    setSearchParam("");
-    setPageNumber(1);
+    setDeleting(null);
   };
 
-  const loadMore = () => {
-    setPageNumber((prevState) => prevState + 1);
+  const openNew = () => {
+    setSelected(null);
+    setModalOpen(true);
   };
 
-  const handleScroll = (e) => {
-    if (!hasMore || loading) return;
-    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-    if (scrollHeight - (scrollTop + 100) < clientHeight) {
-      loadMore();
-    }
+  const openEdit = announcement => {
+    setSelected(announcement);
+    setModalOpen(true);
   };
 
-  const translatePriority = (val) => {
-    if (val === 1) {
-      return "Alta";
+  const audienceSummary = announcement => {
+    if (announcement.audienceMode !== "SEGMENTED") {
+      return [{ key: "all", label: i18n.t("announcements.audience.all") }];
     }
-    if (val === 2) {
-      return "Média";
+
+    const chips = [];
+    (announcement.queues || []).forEach(queue =>
+      chips.push({
+        key: `q-${queue.id}`,
+        label: queue.name,
+        color: queue.color
+      })
+    );
+    (announcement.whatsapps || []).forEach(whatsapp =>
+      chips.push({ key: `w-${whatsapp.id}`, label: whatsapp.name })
+    );
+    (announcement.profiles || []).forEach(profile =>
+      chips.push({
+        key: `p-${profile}`,
+        label: i18n.t(`announcements.profiles.${profile}`)
+      })
+    );
+    if ((announcement.users || []).length) {
+      chips.push({
+        key: "users",
+        label: i18n.t("announcements.audience.users", {
+          count: announcement.users.length
+        })
+      });
     }
-    if (val === 3) {
-      return "Baixa";
-    }
+
+    return chips.length
+      ? chips
+      : [{ key: "none", label: i18n.t("announcements.audience.none") }];
   };
 
   return (
-    <MainContainer>
+    <MainContainer className="sv-operations sv-screen-announcements">
       <ConfirmationModal
-        title={
-          deletingAnnouncement &&
-          `${i18n.t("announcements.confirmationModal.deleteTitle")} ${
-            deletingAnnouncement.name
-          }?`
-        }
-        open={confirmModalOpen}
-        onClose={setConfirmModalOpen}
-        onConfirm={() => handleDeleteAnnouncement(deletingAnnouncement.id)}
+        title={i18n.t("announcements.confirmationModal.deleteTitle")}
+        open={Boolean(deleting)}
+        onClose={() => setDeleting(null)}
+        onConfirm={remove}
       >
         {i18n.t("announcements.confirmationModal.deleteMessage")}
       </ConfirmationModal>
       <AnnouncementModal
-        resetPagination={() => {
-          setPageNumber(1);
-          fetchAnnouncements();
+        open={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          setSelected(null);
         }}
-        open={announcementModalOpen}
-        onClose={handleCloseAnnouncementModal}
-        aria-labelledby="form-dialog-title"
-        announcementId={selectedAnnouncement && selectedAnnouncement.id}
+        reload={fetchAnnouncements}
+        announcementId={selected?.id}
       />
       <MainHeader>
-        <Grid style={{ width: "99.6%" }} container>
-          <Grid xs={12} sm={8} item>
-            <Title>{i18n.t("announcements.title")}</Title>
-          </Grid>
-          <Grid xs={12} sm={4} item>
-            <Grid spacing={2} container>
-              <Grid xs={6} sm={6} item>
-                <TextField
-                  fullWidth
-                  placeholder={i18n.t("announcements.searchPlaceholder")}
-                  type="search"
-                  value={searchParam}
-                  onChange={handleSearch}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon style={{ color: "gray" }} />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-              <Grid xs={6} sm={6} item>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  onClick={handleOpenAnnouncementModal}
-                  color="primary"
-                >
-                  {i18n.t("announcements.buttons.add")}
-                </Button>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
+        <StardewEmblem item="scroll" />
+        <Title>{i18n.t("announcements.title")}</Title>
+        <MainHeaderButtonsWrapper>
+          <Button variant="contained" color="primary" onClick={openNew}>
+            {i18n.t("announcements.buttons.add")}
+          </Button>
+        </MainHeaderButtonsWrapper>
       </MainHeader>
-      <Paper
-        className={classes.mainPaper}
-        variant="outlined"
-        onScroll={handleScroll}
-      >
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell align="center">
-                {i18n.t("announcements.table.title")}
-              </TableCell>
-              <TableCell align="center">
-                {i18n.t("announcements.table.priority")}
-              </TableCell>
-              <TableCell align="center">
-                {i18n.t("announcements.table.mediaName")}
-              </TableCell>
-              <TableCell align="center">
-                {i18n.t("announcements.table.status")}
-              </TableCell>
-              <TableCell align="center">
-                {i18n.t("announcements.table.actions")}
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            <>
-              {announcements.map((announcement) => (
-                <TableRow key={announcement.id}>
-                  <TableCell align="center">{announcement.title}</TableCell>
-                  <TableCell align="center">
-                    {translatePriority(announcement.priority)}
-                  </TableCell>
-                  <TableCell align="center">
-                    {announcement.mediaName ?? "Sem anexo"}
-                  </TableCell>
-                  <TableCell align="center">
-                    {announcement.status ? "ativo" : "inativo"}
-                  </TableCell>
-                  <TableCell align="center">
-                    <IconButton
-                      size="small"
-                      onClick={() => handleEditAnnouncement(announcement)}
+      <Paper className={classes.mainPaper} variant="outlined">
+        <Box className={classes.filters}>
+          <TextField
+            className={classes.search}
+            placeholder={i18n.t("announcements.searchPlaceholder")}
+            value={searchParam}
+            onChange={event => setSearchParam(event.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              )
+            }}
+          />
+          <FormControl className={classes.filter}>
+            <InputLabel>{i18n.t("announcements.filters.status")}</InputLabel>
+            <Select
+              value={status}
+              onChange={event => setStatus(event.target.value)}
+            >
+              <MenuItem value="">{i18n.t("common.all")}</MenuItem>
+              <MenuItem value="true">
+                {i18n.t("announcements.situations.active")}
+              </MenuItem>
+              <MenuItem value="false">
+                {i18n.t("announcements.situations.inactive")}
+              </MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl className={classes.filter}>
+            <InputLabel>{i18n.t("announcements.filters.priority")}</InputLabel>
+            <Select
+              value={priority}
+              onChange={event => setPriority(event.target.value)}
+            >
+              <MenuItem value="">{i18n.t("common.all")}</MenuItem>
+              <MenuItem value="1">
+                {i18n.t("announcements.priorities.high")}
+              </MenuItem>
+              <MenuItem value="2">
+                {i18n.t("announcements.priorities.medium")}
+              </MenuItem>
+              <MenuItem value="3">
+                {i18n.t("announcements.priorities.low")}
+              </MenuItem>
+            </Select>
+          </FormControl>
+          <TextField
+            className={classes.filter}
+            type="date"
+            label={i18n.t("announcements.filters.from")}
+            value={periodFrom}
+            onChange={event => setPeriodFrom(event.target.value)}
+            InputLabelProps={{ shrink: true }}
+          />
+          <TextField
+            className={classes.filter}
+            type="date"
+            label={i18n.t("announcements.filters.to")}
+            value={periodTo}
+            onChange={event => setPeriodTo(event.target.value)}
+            InputLabelProps={{ shrink: true }}
+          />
+        </Box>
+        <Box className={classes.tableScroll}>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>{i18n.t("announcements.table.title")}</TableCell>
+                <TableCell>{i18n.t("announcements.table.text")}</TableCell>
+                <TableCell>{i18n.t("announcements.table.priority")}</TableCell>
+                <TableCell>{i18n.t("announcements.table.window")}</TableCell>
+                <TableCell>{i18n.t("announcements.table.audience")}</TableCell>
+                <TableCell>{i18n.t("announcements.table.status")}</TableCell>
+                <TableCell align="right">
+                  {i18n.t("announcements.table.actions")}
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {announcements.map(announcement => {
+                const situation = situationOf(announcement);
+                return (
+                  <TableRow key={announcement.id} hover>
+                    <TableCell>
+                      <Box display="flex" alignItems="center" gridGap={4}>
+                        <Typography variant="body2">
+                          {announcement.title}
+                        </Typography>
+                        {announcement.mediaPath && (
+                          <ImageIcon fontSize="small" color="action" />
+                        )}
+                        {announcement.isGlobal && (
+                          <Tooltip
+                            title={i18n.t("announcements.table.globalHint")}
+                          >
+                            <PublicIcon fontSize="small" color="action" />
+                          </Tooltip>
+                        )}
+                      </Box>
+                    </TableCell>
+                    <TableCell
+                      className={classes.message}
+                      title={announcement.text}
                     >
-                      <EditIcon />
-                    </IconButton>
-
-                    <IconButton
-                      size="small"
-                      onClick={(e) => {
-                        setConfirmModalOpen(true);
-                        setDeletingAnnouncement(announcement);
-                      }}
-                    >
-                      <DeleteOutlineIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {loading && <TableRowSkeleton columns={5} />}
-            </>
-          </TableBody>
-        </Table>
+                      {announcement.text}
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        size="small"
+                        color={priorityColor(announcement.priority)}
+                        label={priorityLabel(announcement.priority)}
+                      />
+                    </TableCell>
+                    <TableCell className={classes.number}>
+                      <Typography variant="caption" display="block">
+                        {formatDate(announcement.startsAt)}
+                      </Typography>
+                      <Typography variant="caption" display="block">
+                        {formatDate(announcement.endsAt)}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Box className={classes.chips}>
+                        {audienceSummary(announcement).map(chip => (
+                          <Chip
+                            key={chip.key}
+                            size="small"
+                            variant="outlined"
+                            label={chip.label}
+                            style={
+                              chip.color
+                                ? {
+                                    backgroundColor: chip.color,
+                                    color: "#fff",
+                                    borderColor: chip.color
+                                  }
+                                : undefined
+                            }
+                          />
+                        ))}
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        size="small"
+                        color={situationColor(situation)}
+                        label={i18n.t(`announcements.situations.${situation}`)}
+                      />
+                    </TableCell>
+                    <TableCell align="right">
+                      <IconButton
+                        size="small"
+                        onClick={() => openEdit(announcement)}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => setDeleting(announcement)}
+                      >
+                        <DeleteOutlineIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+              {loading && <TableRowSkeleton columns={7} />}
+            </TableBody>
+          </Table>
+          {!loading && announcements.length === 0 && (
+            <div className={classes.empty}>{i18n.t("announcements.empty")}</div>
+          )}
+        </Box>
       </Paper>
     </MainContainer>
   );

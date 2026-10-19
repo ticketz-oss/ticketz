@@ -1,0 +1,51 @@
+--- a/internal/voip/media/mlow/lpc.go
++++ b/internal/voip/media/mlow/lpc.go
+@@ -74,18 +74,24 @@
+ 	return w
+ }
+ 
++var (
++	smplLPCSinWin      = genSinWin(smplLPCWin120msLen)
++	smplLPCCosWinLong  = genCosWin(smplWin3LongLen)
++	smplLPCCosWinShort = genCosWin(smplWin3ShortLen)
++)
++
+ // smplWindowLPC20 applies the 20 ms LPC analysis window to a raw analysis buffer,
+ // producing the windowed buffer the autocorrelation FFT consumes. useLongWin
+ // selects the 64-tap vs 32-tap trailing cosine taper.
+ func smplWindowLPC20(input *[SmplLPCBufLen]float32, useLongWin bool) [SmplLPCBufLen]float32 {
+ 	// Source of truth: https://github.com/oxidezap/whatsapp-rust/blob/674e85164b35ca19115dfebcf605708d15951ee7/wacore/src/voip/mlow/smpl_lpc.rs#L55-L90
+-	win1 := genSinWin(smplLPCWin120msLen)
++	win1 := smplLPCSinWin
+ 	var win3 []float32
+ 	var win3len int
+ 	if useLongWin {
+-		win3, win3len = genCosWin(smplWin3LongLen), smplWin3LongLen
++		win3, win3len = smplLPCCosWinLong, smplWin3LongLen
+ 	} else {
+-		win3, win3len = genCosWin(smplWin3ShortLen), smplWin3ShortLen
++		win3, win3len = smplLPCCosWinShort, smplWin3ShortLen
+ 	}
+ 	var out [SmplLPCBufLen]float32
+ 	for i := 0; i < smplLPCWin120msLen; i++ {
+@@ -145,6 +151,8 @@
+ 	return t
+ }
+ 
++var smplLPCDctTables = buildDctTables()
++
+ // bruteDct derives the autocorrelation R[0..order] from the power spectrum via the
+ // precomputed cosine sums. All accumulation in f64.
+ func bruteDct(t *dctTables, f2 []float64, order int, r []float64) {
+@@ -271,9 +279,9 @@
+ 		f2d[i] = float64(f2[i])
+ 	}
+ 
+-	tables := buildDctTables()
++	tables := &smplLPCDctTables
+ 	var r [SmplLPCOrder + 1]float64
+-	bruteDct(&tables, f2d, SmplLPCOrder, r[:])
++	bruteDct(tables, f2d, SmplLPCOrder, r[:])
+ 
+ 	var rc [SmplLPCOrder]float32
+ 	ac2rcDbl(r[:], SmplLPCOrder, smplLPCReg, rc[:])

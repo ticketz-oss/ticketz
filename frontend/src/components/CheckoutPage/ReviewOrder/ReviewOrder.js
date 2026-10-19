@@ -1,9 +1,10 @@
-import React from 'react';
-import { useFormikContext } from 'formik';
-import { Typography, Grid } from '@material-ui/core';
-import ShippingDetails from './ShippingDetails';
+import React from "react";
+import { useFormikContext } from "formik";
+import { Typography, Grid } from "@material-ui/core";
+import ShippingDetails from "./ShippingDetails";
+import PaymentMethod from "../PaymentMethod/PaymentMethod";
 
-export default function ReviewOrder() {
+export default function ReviewOrder({ invoiceId }) {
   const { values: formValues } = useFormikContext();
   return (
     <React.Fragment>
@@ -12,6 +13,7 @@ export default function ReviewOrder() {
       </Typography>
       <Grid container spacing={2}>
         <ShippingDetails formValues={formValues} />
+        <PaymentMethod invoiceId={invoiceId} />
       </Grid>
     </React.Fragment>
   );

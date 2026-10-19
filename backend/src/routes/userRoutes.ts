@@ -3,7 +3,23 @@ import { Router } from "express";
 import isAuth from "../middleware/isAuth";
 import * as UserController from "../controllers/UserController";
 
+import * as FotoUsuarioController from "../controllers/FotoUsuarioController";
+
 const userRoutes = Router();
+
+userRoutes.post(
+  "/users/:userId/photo",
+  isAuth,
+  FotoUsuarioController.autorizar,
+  FotoUsuarioController.receber,
+  FotoUsuarioController.salvar
+);
+userRoutes.delete(
+  "/users/:userId/photo",
+  isAuth,
+  FotoUsuarioController.autorizar,
+  FotoUsuarioController.salvar
+);
 
 userRoutes.get("/users", isAuth, UserController.index);
 

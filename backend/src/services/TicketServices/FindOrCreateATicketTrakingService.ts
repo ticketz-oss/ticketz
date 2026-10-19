@@ -1,5 +1,6 @@
-import { Op } from "sequelize";
+import { Op, Transaction } from "sequelize";
 import TicketTraking from "../../models/TicketTraking";
+import sequelize from "../../database";
 
 interface Params {
   ticketId: number;
@@ -7,6 +8,7 @@ interface Params {
   whatsappId?: number;
   userId?: number;
   channel?: string;
+  transaction?: Transaction;
 }
 
 const FindOrCreateATicketTrakingService = async ({
@@ -14,29 +16,41 @@ const FindOrCreateATicketTrakingService = async ({
   companyId,
   whatsappId,
   userId,
-  channel
+  transaction: externalTransaction
 }: Params): Promise<TicketTraking> => {
-  const ticketTraking = await TicketTraking.findOne({
-    where: {
-      ticketId,
-      finishedAt: {
-        [Op.is]: null
-      }
+  const execute = async (transaction: Transaction): Promise<TicketTraking> => {
+    const ticketTraking = await TicketTraking.findOne({
+      where: {
+        ticketId,
+        rated: false,
+        expired: false,
+        finishedAt: {
+          [Op.is]: null
+        }
+      },
+      transaction
+    });
+
+    if (ticketTraking) {
+      return ticketTraking;
     }
-  });
 
-  if (ticketTraking) {
-    return ticketTraking;
-  }
+    const newRecord = await TicketTraking.create(
+      {
+        ticketId,
+        companyId,
+        whatsappId,
+        userId
+      },
+      { transaction }
+    );
 
-  const newRecord = await TicketTraking.create({
-    ticketId,
-    companyId,
-    whatsappId,
-    userId,
-  });
+    return newRecord;
+  };
 
-  return newRecord;
+  return externalTransaction
+    ? execute(externalTransaction)
+    : sequelize.transaction(execute);
 };
 
 export default FindOrCreateATicketTrakingService;

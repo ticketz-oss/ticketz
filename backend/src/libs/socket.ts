@@ -1,39 +1,127 @@
+/*
+
+   DO NOT REMOVE / NÃO REMOVER
+
+   VERSÃO EM PORTUGUÊS MAIS ABAIXO
+
+   
+   BASIC LICENSE INFORMATION:
+
+   Author: Claudemir Todo Bom
+   Email: claudemir@todobom.com
+   
+   Licensed under the AGPLv3 as stated on LICENSE.md file
+   
+   Any work that uses code from this file is obligated to 
+   give access to its source code to all of its users (not only
+   the system's owner running it)
+   
+   EXCLUSIVE LICENSE to use on closed source derived work can be
+   purchased from the author and put at the root of the source
+   code tree as proof-of-purchase.
+
+
+
+   INFORMAÇÕES BÁSICAS DE LICENÇA
+
+   Autor: Claudemir Todo Bom
+   Email: claudemir@todobom.com
+
+   Licenciado sob a licença AGPLv3 conforme arquivo LICENSE.md
+    
+   Qualquer sistema que inclua este código deve ter o seu código
+   fonte fornecido a todos os usuários do sistema (não apenas ao
+   proprietário da infraestrutura que o executa)
+   
+   LICENÇA EXCLUSIVA para uso em produto derivado em código fechado
+   pode ser adquirida com o autor e colocada na raiz do projeto
+   como prova de compra. 
+   
+ */
+
 import { Server as SocketIO } from "socket.io";
 import { instrument } from "@socket.io/admin-ui";
 import { Server } from "http";
+import { verify } from "jsonwebtoken";
 import AppError from "../errors/AppError";
-import { logger } from "../utils/logger";
+import { logger, setSocketIo, socketSendBuffer } from "../utils/logger";
 import User from "../models/User";
 import Queue from "../models/Queue";
 import Ticket from "../models/Ticket";
-import { verify } from "jsonwebtoken";
 import authConfig from "../config/auth";
 import { CounterManager } from "./counter";
+import UserSocketSession from "../models/UserSocketSession";
+import GroupQueue from "../models/GroupQueue";
+import { DecoupledDriverServices } from "../services/DecoupledDriverServices/DecoupledDriverServices";
+import { corsOrigin } from "../helpers/corsOrigin";
+import Company from "../models/Company";
+import { Op } from "sequelize";
+import {
+  runtimeOwnsCompany,
+  runtimeCompanyWhere
+} from "../helpers/tenantRuntime";
+
+const decoupledDriverServices = DecoupledDriverServices.getInstance();
 
 let io: SocketIO;
+
+const joinTicketChannel = async (
+  socket,
+  ticketId: string,
+  user: User,
+  counters: CounterManager
+) => {
+  const c = counters.incrementCounter(`ticket-${ticketId}`);
+  if (c === 1) {
+    socket.join(ticketId);
+  }
+  logger.debug(`joinChatbox[${c}]: Channel: ${ticketId} by user ${user.id}`);
+};
+
+const notifyOnlineChange = (companyId: number, userId: number, online) => {
+  io.to("super")
+    .to(`company-${companyId}-admin`)
+    .emit("userOnlineChange", { userId, online });
+};
 
 export const initIO = (httpServer: Server): SocketIO => {
   io = new SocketIO(httpServer, {
     cors: {
-      origin: process.env.FRONTEND_URL
+      origin: corsOrigin
     }
   });
 
+  setSocketIo(io);
+
   if (process.env.SOCKET_ADMIN && JSON.parse(process.env.SOCKET_ADMIN)) {
-    User.findByPk(1).then(
-      (adminUser) => {
-        instrument(io, {
-          auth: {
-            type: "basic",
-            username: adminUser.email,
-            password: adminUser.passwordHash
-          },
-          mode: "development",
-        });
-      }
-    ); 
-  }  
-  
+    User.findByPk(1).then(adminUser => {
+      instrument(io, {
+        auth: {
+          type: "basic",
+          username: adminUser.email,
+          password: adminUser.passwordHash
+        },
+        mode: "development"
+      });
+    });
+  }
+
+  User.findAll({ attributes: ["id"], where: runtimeCompanyWhere() })
+    .then(users =>
+      UserSocketSession.update(
+        { active: false },
+        {
+          where: {
+            active: true,
+            userId: { [Op.in]: users.map(user => user.id) }
+          }
+        }
+      )
+    )
+    .then(_ => {
+      logger.debug("Clossing all socket sessions");
+    });
+
   io.on("connection", async socket => {
     logger.info("Client Connected");
     const { token } = socket.handshake.query;
@@ -52,12 +140,16 @@ export const initIO = (httpServer: Server): SocketIO => {
     const userId = tokenData.id;
 
     if (userId && userId !== "undefined" && userId !== "null") {
-      user = await User.findByPk(userId, { include: [Queue] });
-      if (user) {
-        user.online = true;
+      user = await User.findByPk(userId, { include: [Queue, Company] });
+      if (
+        user?.company?.status &&
+        runtimeOwnsCompany(user.companyId) &&
+        user.company.platformStatus !== "suspenso" &&
+        user.company.platformStatus !== "cancelado"
+      ) {
         await user.save();
       } else {
-        logger.info(`onConnect: User ${userId} not found`);
+        logger.info(`onConnect: User ${userId} not found or tenant inactive`);
         socket.disconnect();
         return io;
       }
@@ -67,36 +159,126 @@ export const initIO = (httpServer: Server): SocketIO => {
       return io;
     }
 
+    UserSocketSession.create({
+      id: socket.id,
+      userId,
+      active: true
+    }).then(_ => {
+      logger.debug(`started session ${socket.id} for user ${userId}`);
+      notifyOnlineChange(user.companyId, user.id, true);
+    });
+
+    socket.on("disconnect", async () => {
+      UserSocketSession.update(
+        { active: false },
+        { where: { id: socket.id } }
+      ).then(async () => {
+        logger.debug(`finished session ${socket.id} for user ${userId}`);
+        const activeSessionsCount = await UserSocketSession.count({
+          where: { userId, active: true }
+        });
+        notifyOnlineChange(user.companyId, user.id, activeSessionsCount > 0);
+      });
+    });
+
     socket.join(`company-${user.companyId}-mainchannel`);
     socket.join(`user-${user.id}`);
-    
+
     if (user.super) {
       socket.join("super");
     }
+
+    if (user.profile === "admin") {
+      socket.join(`company-${user.companyId}-admin`);
+    }
+
+    const canAccessBackendlog = user.super || tokenData?.impersonated === true;
+
+    socket.on("joinBackendlog", () => {
+      if (canAccessBackendlog) {
+        socket.join("backendlog");
+        io.to("backendlog").emit("backendlog", {
+          timestamp: Date.now(),
+          level: 30,
+          logs: [
+            { currentLevel: logger.level },
+            "started transmission of backend logs"
+          ]
+        });
+        socketSendBuffer();
+      } else {
+        logger.info(`User ${user.id} tried to join superlog channel.`);
+      }
+    });
+
+    socket.on("leaveBackendlog", () => {
+      if (canAccessBackendlog) {
+        io.to("backendlog").emit("backendlog", {
+          timestamp: Date.now(),
+          level: 30,
+          logs: ["finished transmission of backend logs"]
+        });
+        socket.leave("backendlog");
+      } else {
+        logger.info(`User ${user.id} tried to leave superlog channel.`);
+      }
+    });
+
+    socket.on("setLoglevel", (level: string) => {
+      if (canAccessBackendlog) {
+        if (logger.level === level) return;
+
+        logger.level = level;
+        io.to("backendlog").emit("backendlog", {
+          timestamp: Date.now(),
+          level: 30,
+          logs: [`Log level changed to ${level}`]
+        });
+      } else {
+        logger.info(`User ${user.id} tried to set log level.`);
+      }
+    });
 
     socket.on("joinChatBox", async (ticketId: string) => {
       if (!ticketId || ticketId === "undefined") {
         return;
       }
       Ticket.findByPk(ticketId).then(
-        (ticket) => {
-          if (ticket && ticket.companyId === user.companyId
-            && (ticket.userId === user.id || user.profile === "admin")) {
-            const c = counters.incrementCounter(`ticket-${ticketId}`);
-            if (c === 1) {
-              socket.join(ticketId);
-            }
-            logger.debug(`joinChatbox[${c}]: Channel: ${ticketId} by user ${user.id}`)
+        async ticket => {
+          if (!ticket || ticket.companyId !== user.companyId) {
+            logger.info(
+              `Invalid attempt to join channel of ticket ${ticketId} by user ${user.id}`
+            );
+            return;
+          }
+
+          let allowed = ticket.userId === user.id || user.profile === "admin";
+          if (!allowed && ticket.isGroup) {
+            const userQueueIds = user.queues.map(queue => queue.id);
+            allowed = Boolean(
+              await GroupQueue.count({
+                where: {
+                  groupContactId: ticket.contactId,
+                  queueId: userQueueIds
+                }
+              })
+            );
+          }
+
+          if (allowed) {
+            joinTicketChannel(socket, ticketId, user, counters);
           } else {
-            logger.info(`Invalid attempt to join channel of ticket ${ticketId} by user ${user.id}`)
+            logger.info(
+              `Invalid attempt to join channel of ticket ${ticketId} by user ${user.id}`
+            );
           }
         },
-        (error) => {
+        error => {
           logger.error(error, `Error fetching ticket ${ticketId}`);
         }
       );
     });
-    
+
     socket.on("leaveChatBox", async (ticketId: string) => {
       if (!ticketId || ticketId === "undefined") {
         return;
@@ -108,69 +290,91 @@ export const initIO = (httpServer: Server): SocketIO => {
         socket.leave(ticketId);
       }
 
-      logger.debug(`leaveChatbox[${c}]: Channel: ${ticketId} by user ${user.id}`)
+      logger.debug(
+        `leaveChatbox[${c}]: Channel: ${ticketId} by user ${user.id}`
+      );
     });
 
-	  socket.on("joinNotification", async () => {
+    socket.on("joinNotification", async () => {
       const c = counters.incrementCounter("notification");
       if (c === 1) {
-  		  if (user.profile === "admin") {
-  			  socket.join(`company-${user.companyId}-notification`);
-  		  } else {
-  			  user.queues.forEach((queue) => {
-  				  logger.debug(`User ${user.id} of company ${user.companyId} joined queue ${queue.id} channel.`);
-  				  socket.join(`queue-${queue.id}-notification`);
-  			  });
-  		  }
-		  }
+        if (user.profile === "admin") {
+          socket.join(`company-${user.companyId}-notification`);
+        } else {
+          user.queues.forEach(queue => {
+            logger.debug(
+              `User ${user.id} of company ${user.companyId} joined queue ${queue.id} channel.`
+            );
+            socket.join(`queue-${queue.id}-notification`);
+          });
+        }
+      }
       logger.debug(`joinNotification[${c}]: User: ${user.id}`);
-	  });
-	  
-	  socket.on("leaveNotification", async () => {
+    });
+
+    socket.on("leaveNotification", async () => {
       const c = counters.decrementCounter("notification");
       if (c === 0) {
         if (user.profile === "admin") {
           socket.leave(`company-${user.companyId}-notification`);
         } else {
-          user.queues.forEach((queue) => {
-            logger.debug(`User ${user.id} of company ${user.companyId} leaved queue ${queue.id} channel.`);
+          user.queues.forEach(queue => {
+            logger.debug(
+              `User ${user.id} of company ${user.companyId} leaved queue ${queue.id} channel.`
+            );
             socket.leave(`queue-${queue.id}-notification`);
           });
         }
       }
       logger.debug(`leaveNotification[${c}]: User: ${user.id}`);
     });
- 
-	  socket.on("joinTickets", (status: string) => {
+
+    socket.on("joinTickets", (status: string) => {
       if (counters.incrementCounter(`status-${status}`) === 1) {
         if (user.profile === "admin") {
-          logger.debug(`Admin ${user.id} of company ${user.companyId} joined ${status} tickets channel.`);
+          logger.debug(
+            `Admin ${user.id} of company ${user.companyId} joined ${status} tickets channel.`
+          );
           socket.join(`company-${user.companyId}-${status}`);
         } else if (status === "pending") {
-          user.queues.forEach((queue) => {
-            logger.debug(`User ${user.id} of company ${user.companyId} joined queue ${queue.id} pending tickets channel.`);
+          user.queues.forEach(queue => {
+            logger.debug(
+              `User ${user.id} of company ${user.companyId} joined queue ${queue.id} pending tickets channel.`
+            );
             socket.join(`queue-${queue.id}-pending`);
           });
         } else {
           logger.debug(`User ${user.id} cannot subscribe to ${status}`);
         }
-		  }
-	  });
-	  
+      }
+    });
+
     socket.on("leaveTickets", (status: string) => {
       if (counters.decrementCounter(`status-${status}`) === 0) {
         if (user.profile === "admin") {
-          logger.debug(`Admin ${user.id} of company ${user.companyId} leaved ${status} tickets channel.`);
+          logger.debug(
+            `Admin ${user.id} of company ${user.companyId} leaved ${status} tickets channel.`
+          );
           socket.leave(`company-${user.companyId}-${status}`);
         } else if (status === "pending") {
-          user.queues.forEach((queue) => {
-            logger.debug(`User ${user.id} of company ${user.companyId} leaved queue ${queue.id} pending tickets channel.`);
+          user.queues.forEach(queue => {
+            logger.debug(
+              `User ${user.id} of company ${user.companyId} leaved queue ${queue.id} pending tickets channel.`
+            );
             socket.leave(`queue-${queue.id}-pending`);
           });
         }
       }
     });
-    
+
+    socket.on("presenceUpdate", async parameters => {
+      const df = decoupledDriverServices.getFunction("presenceUpdate");
+
+      if (df) {
+        df(user, parameters);
+      }
+    });
+
     socket.emit("ready");
     return io;
   });

@@ -1,6 +1,6 @@
 import express from "express";
 import isAuth from "../middleware/isAuth";
-import isSuper from "../middleware/isSuper";
+import isAdmin from "../middleware/isAdmin";
 
 import * as AnnouncementController from "../controllers/AnnouncementController";
 import multer from "multer";
@@ -12,26 +12,41 @@ const routes = express.Router();
 
 routes.get("/announcements/list", isAuth, AnnouncementController.findList);
 
-routes.get("/announcements", isAuth, AnnouncementController.index);
+// Feed of what the logged user should actually see, used by the popover.
+routes.get("/announcements/feed", isAuth, AnnouncementController.feed);
 
-routes.get("/announcements/:id", isAuth, AnnouncementController.show);
+routes.get("/announcements", isAuth, isAdmin, AnnouncementController.index);
 
-routes.post("/announcements", isAuth, isSuper, AnnouncementController.store);
+routes.get("/announcements/:id", isAuth, isAdmin, AnnouncementController.show);
 
-routes.put("/announcements/:id", isAuth, isSuper, AnnouncementController.update);
+routes.post("/announcements", isAuth, isAdmin, AnnouncementController.store);
 
-routes.delete("/announcements/:id", isAuth, isSuper, AnnouncementController.remove);
+routes.put(
+  "/announcements/:id",
+  isAuth,
+  isAdmin,
+  AnnouncementController.update
+);
+
+routes.delete(
+  "/announcements/:id",
+  isAuth,
+  isAdmin,
+  AnnouncementController.remove
+);
 
 routes.post(
   "/announcements/:id/media-upload",
-  isAuth, isSuper,
+  isAuth,
+  isAdmin,
   upload.array("file"),
   AnnouncementController.mediaUpload
 );
 
 routes.delete(
   "/announcements/:id/media-upload",
-  isAuth, isSuper,
+  isAuth,
+  isAdmin,
   AnnouncementController.deleteMedia
 );
 

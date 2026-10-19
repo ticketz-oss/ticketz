@@ -1,3 +1,5 @@
+import StardewEmblem from "../../components/StardewEmblem";
+import NavegacaoEnvios from "../../components/NavegacaoEnvios";
 import React, { useState, useEffect, useReducer, useContext } from "react";
 import { toast } from "react-toastify";
 
@@ -41,8 +43,8 @@ const reducer = (state, action) => {
     const contactLists = action.payload;
     const newContactLists = [];
 
-    contactLists.forEach((contactList) => {
-      const contactListIndex = state.findIndex((u) => u.id === contactList.id);
+    contactLists.forEach(contactList => {
+      const contactListIndex = state.findIndex(u => u.id === contactList.id);
       if (contactListIndex !== -1) {
         state[contactListIndex] = contactList;
       } else {
@@ -55,7 +57,7 @@ const reducer = (state, action) => {
 
   if (action.type === "UPDATE_CONTACTLIST") {
     const contactList = action.payload;
-    const contactListIndex = state.findIndex((u) => u.id === contactList.id);
+    const contactListIndex = state.findIndex(u => u.id === contactList.id);
 
     if (contactListIndex !== -1) {
       state[contactListIndex] = contactList;
@@ -68,7 +70,7 @@ const reducer = (state, action) => {
   if (action.type === "DELETE_CONTACTLIST") {
     const contactListId = action.payload;
 
-    const contactListIndex = state.findIndex((u) => u.id === contactListId);
+    const contactListIndex = state.findIndex(u => u.id === contactListId);
     if (contactListIndex !== -1) {
       state.splice(contactListIndex, 1);
     }
@@ -80,13 +82,13 @@ const reducer = (state, action) => {
   }
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   mainPaper: {
     flex: 1,
     padding: theme.spacing(1),
     overflowY: "scroll",
-    ...theme.scrollbarStyles,
-  },
+    ...theme.scrollbarStyles
+  }
 }));
 
 const ContactLists = () => {
@@ -116,7 +118,7 @@ const ContactLists = () => {
       const fetchContactLists = async () => {
         try {
           const { data } = await api.get("/contact-lists/", {
-            params: { searchParam, pageNumber },
+            params: { searchParam, pageNumber }
           });
           dispatch({ type: "LOAD_CONTACTLISTS", payload: data.records });
           setHasMore(data.hasMore);
@@ -134,7 +136,7 @@ const ContactLists = () => {
     const companyId = localStorage.getItem("companyId");
     const socket = socketManager.GetSocket(companyId);
 
-    const onContactList = (data) => {
+    const onContactList = data => {
       if (data.action === "update" || data.action === "create") {
         dispatch({ type: "UPDATE_CONTACTLIST", payload: data.record });
       }
@@ -142,8 +144,8 @@ const ContactLists = () => {
       if (data.action === "delete") {
         dispatch({ type: "DELETE_CONTACTLIST", payload: +data.id });
       }
-    }
-    
+    };
+
     socket.on(`company-${companyId}-ContactList`, onContactList);
 
     return () => {
@@ -161,16 +163,16 @@ const ContactLists = () => {
     setContactListModalOpen(false);
   };
 
-  const handleSearch = (event) => {
+  const handleSearch = event => {
     setSearchParam(event.target.value.toLowerCase());
   };
 
-  const handleEditContactList = (contactList) => {
+  const handleEditContactList = contactList => {
     setSelectedContactList(contactList);
     setContactListModalOpen(true);
   };
 
-  const handleDeleteContactList = async (contactListId) => {
+  const handleDeleteContactList = async contactListId => {
     try {
       await api.delete(`/contact-lists/${contactListId}`);
       toast.success(i18n.t("contactLists.toasts.deleted"));
@@ -183,10 +185,10 @@ const ContactLists = () => {
   };
 
   const loadMore = () => {
-    setPageNumber((prevState) => prevState + 1);
+    setPageNumber(prevState => prevState + 1);
   };
 
-  const handleScroll = (e) => {
+  const handleScroll = e => {
     if (!hasMore || loading) return;
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
     if (scrollHeight - (scrollTop + 100) < clientHeight) {
@@ -194,12 +196,12 @@ const ContactLists = () => {
     }
   };
 
-  const goToContacts = (id) => {
+  const goToContacts = id => {
     history.push(`/contact-lists/${id}/contacts`);
   };
 
   return (
-    <MainContainer>
+    <MainContainer className="sv-operations sv-screen-contact-lists">
       <ConfirmationModal
         title={
           deletingContactList &&
@@ -220,6 +222,7 @@ const ContactLists = () => {
         contactListId={selectedContactList && selectedContactList.id}
       />
       <MainHeader>
+        <StardewEmblem item="book" />
         <Grid style={{ width: "99.6%" }} container>
           <Grid xs={12} sm={8} item>
             <Title>{i18n.t("contactLists.title")}</Title>
@@ -238,7 +241,7 @@ const ContactLists = () => {
                       <InputAdornment position="start">
                         <SearchIcon style={{ color: "gray" }} />
                       </InputAdornment>
-                    ),
+                    )
                   }}
                 />
               </Grid>
@@ -256,6 +259,7 @@ const ContactLists = () => {
           </Grid>
         </Grid>
       </MainHeader>
+      <NavegacaoEnvios />
       <Paper
         className={classes.mainPaper}
         variant="outlined"
@@ -277,7 +281,7 @@ const ContactLists = () => {
           </TableHead>
           <TableBody>
             <>
-              {contactLists.map((contactList) => (
+              {contactLists.map(contactList => (
                 <TableRow key={contactList.id}>
                   <TableCell align="center">{contactList.name}</TableCell>
                   <TableCell align="center">
@@ -306,7 +310,7 @@ const ContactLists = () => {
 
                     <IconButton
                       size="small"
-                      onClick={(e) => {
+                      onClick={e => {
                         setConfirmModalOpen(true);
                         setDeletingContactList(contactList);
                       }}

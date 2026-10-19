@@ -1,0 +1,297 @@
+name: espaco-whats
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      TZ: ${TZ:-America/Rio_Branco}
+    volumes:
+      # PostgreSQL 18 stores clusters below a major-version directory and
+      # expects the persistent mount at /var/lib/postgresql.
+      - postgres_data_v18:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 10
+        window: 120s
+    networks:
+      - internal
+
+  redis:
+    image: redis:8.2.1-alpine
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --save
+      - "60"
+      - "1"
+      - --requirepass
+      - ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a $$REDIS_PASSWORD ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 10
+        window: 120s
+    networks:
+      - internal
+
+  wacalls:
+    build:
+      context: ./wacalls
+      dockerfile: Dockerfile
+    env_file:
+      - path: /etc/dokploy/secrets/espaco_whats_wacalls.env
+        required: false
+    environment:
+      WACALLS_INTERNAL_TOKEN: ${WACALLS_INTERNAL_TOKEN:-}
+      WACALLS_INTERNAL_TOKEN_FILE: /run/secrets/wacalls_internal_token
+      WACALLS_ALLOWED_ORIGIN: ""
+      GOGC: ${WACALLS_GOGC:-100}
+      GOMEMLIMIT: ${WACALLS_GOMEMLIMIT:-1536MiB}
+    volumes:
+      - wacalls_data:/data
+    secrets:
+      - wacalls_internal_token
+    ports:
+      - "${WACALLS_UDP_PORT_RANGE:-50000-50020}:${WACALLS_UDP_PORT_RANGE:-50000-50020}/udp"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 20s
+    cpus: 2.0
+    mem_limit: 2g
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+        window: 120s
+    networks:
+      - internal
+
+  agent-redis:
+    image: redis:8.2.1-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    restart: unless-stopped
+    mem_limit: 128m
+    networks:
+      - internal
+
+  backend:
+    # Upgrade an existing database without seeds, imports or session resets.
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        dockerize -wait tcp://$${DB_HOST}:$${DB_PORT:-5432} -timeout 60s
+        node scripts/check-production-database.cjs
+        node node_modules/sequelize-cli/lib/sequelize db:migrate --config dist/config/database.js --migrations-path dist/database/migrations
+        exec node dist/server.js
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - path: /etc/dokploy/secrets/espaco_whats_wacalls.env
+        required: false
+      - path: /etc/dokploy/secrets/espaco_whats_clerk_production.env
+        required: false
+      - path: /etc/dokploy/secrets/espaco_whats_meta.env
+        required: false
+    environment:
+      NODE_ENV: production
+      AGENT_REDIS_URI: redis://agent-redis:6379
+      AGENT_TOOLS_BASE_URL: ${BACKEND_URL}
+      CLERK_ENVIRONMENT: production
+      CLERK_TENANT_BASE_DOMAIN: espacowhats.com.br
+      CLERK_ISSUER: https://clerk.espacowhats.com.br
+      CLERK_GOOGLE_ENABLED: ${CLERK_GOOGLE_ENABLED:-true}
+      CLERK_AUTHORIZED_PARTIES: ${CLERK_AUTHORIZED_PARTIES:-https://espacowhats.com.br,https://www.espacowhats.com.br,https://app.espacowhats.com.br,https://teste.espacowhats.com.br,https://espacosingular.espacowhats.com.br,https://pedrogay.espacowhats.com.br}
+      TENANT_RUNTIME_EXCLUDED_COMPANY_IDS: ${TENANT_RUNTIME_EXCLUDED_COMPANY_IDS:-}
+      WHATSAPP_AUTOSTART_EXISTING_ONLY: "true"
+      PORT: "3000"
+      TZ: ${TZ:-America/Rio_Branco}
+      DB_DIALECT: postgres
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USER: ${POSTGRES_USER}
+      DB_PASS: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB}
+      DB_TIMEZONE: ${DB_TIMEZONE:--05:00}
+      REDIS_URI: redis://:${REDIS_PASSWORD}@redis:6379
+      REDIS_OPT_LIMITER_MAX: ${REDIS_OPT_LIMITER_MAX:-1}
+      REDIS_OPT_LIMITER_DURATION: ${REDIS_OPT_LIMITER_DURATION:-3000}
+      FRONTEND_URL: ${FRONTEND_URL}
+      FRONTEND_URL_REGEX: ${FRONTEND_URL_REGEX}
+      BACKEND_URL: ${BACKEND_URL}
+      APP_BASE_DOMAIN: ${APP_BASE_DOMAIN}
+      MASTER_COMPANY_ID: ${MASTER_COMPANY_ID:-1}
+      EMAIL_ADDRESS: ${EMAIL_ADDRESS}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      USER_LIMIT: ${USER_LIMIT:-10000}
+      CONNECTIONS_LIMIT: ${CONNECTIONS_LIMIT:-100000}
+      CLOSED_SEND_BY_ME: ${CLOSED_SEND_BY_ME:-true}
+      SOCKET_ADMIN: ${SOCKET_ADMIN:-true}
+      VERIFY_TOKEN: ${VERIFY_TOKEN}
+      PLATFORM_API_KEY: ${PLATFORM_API_KEY}
+      PLATFORM_WEBHOOK_SECRET: ${PLATFORM_WEBHOOK_SECRET}
+      PLATFORM_WEBHOOK_URL: ${PLATFORM_WEBHOOK_URL:-}
+      PLATFORM_TENANT_URL_TEMPLATE: ${PLATFORM_TENANT_URL_TEMPLATE}
+      ABACATEPAY_TOKEN: ${ABACATEPAY_TOKEN:-}
+      ABACATEPAY_WEBHOOK_SECRET: ${ABACATEPAY_WEBHOOK_SECRET:-}
+      MCP_BASE_URL: ${MCP_BASE_URL}
+      MCP_TIMEZONE: ${MCP_TIMEZONE:-America/Rio_Branco}
+      MCP_PRIVATE_KEY: ${MCP_PRIVATE_KEY}
+      MCP_PUBLIC_KEY: ${MCP_PUBLIC_KEY}
+      MCP_CURSOR_SECRET: ${MCP_CURSOR_SECRET}
+      MCP_KEY_ID: ${MCP_KEY_ID:-espaco-whats-mcp-1}
+      # Web Push (notificacao com o app fechado). Sem o par VAPID o recurso
+      # fica desligado e o sistema segue notificando so com o app aberto.
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-}
+      WACALLS_INTERNAL_URL: http://wacalls:8080
+      WACALLS_INTERNAL_TOKEN: ${WACALLS_INTERNAL_TOKEN:-}
+      WACALLS_INTERNAL_TOKEN_FILE: /run/secrets/wacalls_internal_token
+      WACALLS_TOKEN_SECRET: ${WACALLS_TOKEN_SECRET:-}
+      WACALLS_TOKEN_SECRET_FILE: /run/secrets/wacalls_media_token_secret
+      VOICE_TRANSCRIPTION_PROVIDER: ${VOICE_TRANSCRIPTION_PROVIDER:-groq}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      # Prospecção: serviços de um projeto Compose separado, alcançáveis só pelo
+      # IP do host (o prospeccao-api não está na dokploy-network). Sem a chave a
+      # tela responde 503 em vez de quebrar.
+      PROSPECCAO_API_URL: ${PROSPECCAO_API_URL:-http://179.199.139.11:8000}
+      PROSPECCAO_BRIDGE_URL: ${PROSPECCAO_BRIDGE_URL:-http://179.199.139.11:8001}
+      PROSPECCAO_WEBHOOK_URL: ${PROSPECCAO_WEBHOOK_URL:-http://hermes-bridge:8000/webhook/prospeccao}
+      PROSPECCAO_API_KEY: ${PROSPECCAO_API_KEY:-}
+      PROSPECCAO_API_KEY_FILE: /run/secrets/prospeccao_api_key
+      PROSPECCAO_SLUGS: ${PROSPECCAO_SLUGS:-teste}
+    volumes:
+      - backend_public:/usr/src/app/public
+      - backend_private:/usr/src/app/private
+    secrets:
+      - wacalls_internal_token
+      - wacalls_media_token_secret
+      - prospeccao_api_key
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          node -e "require('http').get('http://127.0.0.1:3000/api/platform/v1/health',
+          r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 90s
+    stop_grace_period: 45s
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 5s
+        order: start-first
+        failure_action: rollback
+        monitor: 60s
+      rollback_config:
+        parallelism: 1
+        delay: 5s
+        order: stop-first
+        monitor: 60s
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+        window: 120s
+    networks:
+      - internal
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      FRONTEND_HOST: ${FRONTEND_HOST}
+      APP_BASE_DOMAIN: ${APP_BASE_DOMAIN}
+      EMAIL_ADDRESS: ${EMAIL_ADDRESS}
+      BACKEND_SERVICE: backend
+      BACKEND_PATH: /backend
+      BACKEND_PROTOCOL: ${PUBLIC_PROTOCOL:-http}
+      LANDING_WHATSAPP_NUMBER: ${LANDING_WHATSAPP_NUMBER:-}
+      LOG_LEVEL: ${LOG_LEVEL:-warn}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 30s
+    stop_grace_period: 30s
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 5s
+        order: start-first
+        failure_action: rollback
+        monitor: 45s
+      rollback_config:
+        parallelism: 1
+        delay: 5s
+        order: stop-first
+        monitor: 45s
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+        window: 120s
+    networks:
+      - internal
+
+networks:
+  internal:
+    # Dokploy executes Compose projects with regular Docker Compose. The
+    # default bridge network remains private and is attachable by the service
+    # containers, unlike a non-attachable Swarm overlay network.
+    driver: bridge
+
+volumes:
+  postgres_data_v18:
+  redis_data:
+  backend_public:
+  backend_private:
+  wacalls_data:
+
+secrets:
+  wacalls_internal_token:
+    file: /etc/dokploy/secrets/espaco_whats_wacalls_internal_token
+  wacalls_media_token_secret:
+    file: /etc/dokploy/secrets/espaco_whats_wacalls_media_token_secret
+  prospeccao_api_key:
+    file: /etc/dokploy/secrets/espaco_whats_prospeccao_api_key

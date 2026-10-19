@@ -1,0 +1,60 @@
+name: Release validated candidate to Dokploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_sha:
+        description: Full SHA already validated on main
+        required: true
+        type: string
+
+concurrency:
+  group: espaco-whats-production
+  cancel-in-progress: false
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  release:
+    name: Advance the Dokploy deployment branch
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify main and the successful validation run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_SHA: ${{ inputs.release_sha }}
+        shell: bash
+        run: |
+          if [[ ! "$RELEASE_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "release_sha must be a full Git commit SHA."
+            exit 1
+          fi
+          git fetch origin main deploy
+          main_sha="$(git rev-parse refs/remotes/origin/main)"
+          if [[ "$RELEASE_SHA" != "$main_sha" ]]; then
+            echo "Only the current head of main can be released."
+            exit 1
+          fi
+          successful_runs="$(gh api \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/ci-deploy.yml/runs?head_sha=${RELEASE_SHA}&status=success&per_page=1" \
+            --jq '.total_count')"
+          if [[ "$successful_runs" == "0" ]]; then
+            echo "No successful production-candidate validation exists for this SHA."
+            exit 1
+          fi
+
+      - name: Advance deployment branch
+        env:
+          RELEASE_SHA: ${{ inputs.release_sha }}
+        shell: bash
+        run: |
+          deployed_sha="$(git rev-parse refs/remotes/origin/deploy)"
+          git push origin "${RELEASE_SHA}:refs/heads/deploy" \
+            "--force-with-lease=refs/heads/deploy:${deployed_sha}"

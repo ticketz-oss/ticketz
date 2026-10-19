@@ -1,78 +1,39 @@
+import Navegacao from "./Navegacao";
 import React, { useContext, useEffect, useReducer, useState } from "react";
-import { Link as RouterLink, useHistory } from "react-router-dom";
 
-import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
-import ListSubheader from "@material-ui/core/ListSubheader";
-import Divider from "@material-ui/core/Divider";
-import { Badge, Collapse, List } from "@material-ui/core";
-import DashboardOutlinedIcon from "@material-ui/icons/DashboardOutlined";
-import WhatsAppIcon from "@material-ui/icons/WhatsApp";
-import SyncAltIcon from "@material-ui/icons/SyncAlt";
-import SettingsOutlinedIcon from "@material-ui/icons/SettingsOutlined";
-import PeopleAltOutlinedIcon from "@material-ui/icons/PeopleAltOutlined";
-import ContactPhoneOutlinedIcon from "@material-ui/icons/ContactPhoneOutlined";
-import AccountTreeOutlinedIcon from "@material-ui/icons/AccountTreeOutlined";
-import FlashOnIcon from "@material-ui/icons/FlashOn";
-import CalendarToday from "@material-ui/icons/CalendarToday";
-import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
-import CodeRoundedIcon from "@material-ui/icons/CodeRounded";
-import EventIcon from "@material-ui/icons/Event";
-import InfoIcon from "@material-ui/icons/Info";
-import DarkMode from "../components/DarkMode";
-
-import LocalOfferIcon from "@material-ui/icons/LocalOffer";
-import EventAvailableIcon from "@material-ui/icons/EventAvailable";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import PeopleIcon from "@material-ui/icons/People";
-import ListIcon from "@material-ui/icons/ListAlt";
-import LoyaltyRoundedIcon from '@material-ui/icons/LoyaltyRounded';
-import AnnouncementIcon from "@material-ui/icons/Announcement";
-import ForumIcon from "@material-ui/icons/Forum";
-import LocalAtmIcon from '@material-ui/icons/LocalAtm';
-import RotateRight from "@material-ui/icons/RotateRight";
-import { i18n } from "../translate/i18n";
-import BorderColorIcon from '@material-ui/icons/BorderColor';
+import { Badge } from "@material-ui/core";
+import {
+  LayoutDashboard as DashboardOutlinedIcon,
+  MessageCircle as WhatsAppIcon,
+  Refresh as SyncAltIcon,
+  Settings as SettingsOutlinedIcon,
+  Users as PeopleAltOutlinedIcon,
+  Contact as ContactPhoneOutlinedIcon,
+  Workflow as AccountTreeOutlinedIcon,
+  Zap as FlashOnIcon,
+  CircleHelp as HelpOutlineIcon,
+  MessageSquare as ChatOutlinedIcon,
+  Calendar as EventIcon,
+  Tag as LocalOfferIcon,
+  Calendar as EventAvailableIcon,
+  Users as PeopleIcon,
+  List as ListIcon,
+  Megaphone as AnnouncementIcon,
+  MessageSquare as ForumIcon,
+  Banknote as LocalAtmIcon,
+  ReceiptText as ReceiptIcon,
+  Pencil as BorderColorIcon,
+  Search as SearchIcon
+} from "../components/AnimatedIcon";
 import { WhatsAppsContext } from "../context/WhatsApp/WhatsAppsContext";
 import { AuthContext } from "../context/Auth/AuthContext";
-import { Can } from "../components/Can";
+import { podeVerCentralCobranca } from "../helpers/billingConsole";
+import { podeVerProspeccao } from "../helpers/prospeccao";
 import { SocketContext } from "../context/Socket/SocketContext";
 import { isArray } from "lodash";
 import api from "../services/api";
 import toastError from "../errors/toastError";
-import { makeStyles } from "@material-ui/core/styles";
-
-const useStyles = makeStyles((theme) => ({
-  ListSubheader: {
-    height: 26,
-    marginTop: "-15px",
-    marginBottom: "-10px",
-  },
-}));
-
-
-function ListItemLink(props) {
-  const { icon, primary, to, className } = props;
-
-  const renderLink = React.useMemo(
-    () =>
-      React.forwardRef((itemProps, ref) => (
-        <RouterLink to={to} ref={ref} {...itemProps} />
-      )),
-    [to]
-  );
-
-  return (
-    <li>
-      <ListItem button dense component={renderLink} className={className}>
-        {icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
-        <ListItemText primary={primary} />
-      </ListItem>
-    </li>
-  );
-}
+import { canSeeScreen, screenForPath } from "../helpers/screenAccess";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_CHATS") {
@@ -80,8 +41,8 @@ const reducer = (state, action) => {
     const newChats = [];
 
     if (isArray(chats)) {
-      chats.forEach((chat) => {
-        const chatIndex = state.findIndex((u) => u.id === chat.id);
+      chats.forEach(chat => {
+        const chatIndex = state.findIndex(u => u.id === chat.id);
         if (chatIndex !== -1) {
           state[chatIndex] = chat;
         } else {
@@ -95,7 +56,7 @@ const reducer = (state, action) => {
 
   if (action.type === "UPDATE_CHATS") {
     const chat = action.payload;
-    const chatIndex = state.findIndex((u) => u.id === chat.id);
+    const chatIndex = state.findIndex(u => u.id === chat.id);
 
     if (chatIndex !== -1) {
       state[chatIndex] = chat;
@@ -108,7 +69,7 @@ const reducer = (state, action) => {
   if (action.type === "DELETE_CHAT") {
     const chatId = action.payload;
 
-    const chatIndex = state.findIndex((u) => u.id === chatId);
+    const chatIndex = state.findIndex(u => u.id === chatId);
     if (chatIndex !== -1) {
       state.splice(chatIndex, 1);
     }
@@ -120,7 +81,7 @@ const reducer = (state, action) => {
   }
 
   if (action.type === "CHANGE_CHAT") {
-    const changedChats = state.map((chat) => {
+    const changedChats = state.map(chat => {
       if (chat.id === action.payload.chat.id) {
         return action.payload.chat;
       }
@@ -130,17 +91,13 @@ const reducer = (state, action) => {
   }
 };
 
-const MainListItems = (props) => {
-  const classes = useStyles();
-  const { drawerClose, drawerOpen} = props;
+const MainListItems = props => {
+  const { drawerClose, drawerOpen } = props;
   const { whatsApps } = useContext(WhatsAppsContext);
-  const { user ,handleLogout} = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const [connectionWarning, setConnectionWarning] = useState(false);
-  const [openCampaignSubmenu, setOpenCampaignSubmenu] = useState(false);
-  const [openKanbanSubmenu, setOpenKanbanSubmenu] = useState(false);
 
   const [showCampaigns, setShowCampaigns] = useState(false);
-  const history = useHistory();
   const [invisible, setInvisible] = useState(true);
   const [pageNumber, setPageNumber] = useState(1);
   const [searchParam] = useState("");
@@ -165,18 +122,18 @@ const MainListItems = (props) => {
     const companyId = localStorage.getItem("companyId");
     const socket = socketManager.GetSocket(companyId);
 
-    const onCompanyChatMainListItems = (data) => {
+    const onCompanyChatMainListItems = data => {
       if (data.action === "new-message") {
         dispatch({ type: "CHANGE_CHAT", payload: data });
       }
       if (data.action === "update") {
         dispatch({ type: "CHANGE_CHAT", payload: data });
       }
-    }
+    };
 
     socket.on(`company-${companyId}-chat`, onCompanyChatMainListItems);
     return () => {
-	    socket.disconnect();
+      socket.disconnect();
     };
   }, [socketManager]);
 
@@ -207,7 +164,7 @@ const MainListItems = (props) => {
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       if (whatsApps.length > 0) {
-        const offlineWhats = whatsApps.filter((whats) => {
+        const offlineWhats = whatsApps.filter(whats => {
           return (
             whats.status === "qrcode" ||
             whats.status === "PAIRING" ||
@@ -229,7 +186,7 @@ const MainListItems = (props) => {
   const fetchChats = async () => {
     try {
       const { data } = await api.get("/chats/", {
-        params: { searchParam, pageNumber },
+        params: { searchParam, pageNumber }
       });
       dispatch({ type: "LOAD_CHATS", payload: data.records });
     } catch (err) {
@@ -237,232 +194,162 @@ const MainListItems = (props) => {
     }
   };
 
-  const handleClickLogout = () => {
-    //handleCloseMenu();
-    handleLogout();
-  };
-
-  return (
-    <div onClick={drawerClose}>
-      <Can
-        role={user.profile}
-        perform={"drawer-service-items:view"}
-        style={{
-          overflowY: "scroll",
-        }}
-        no={()=>(
-        <>
-          <ListSubheader 
-          hidden={!drawerOpen}
-        style={{
-          position:"relative",
-          fontSize: "17px",
-          textAlign: "left",
-          paddingLeft: 20
-        }}   
-        inset
-        color="inherit">
-              {i18n.t("mainDrawer.listItems.service")}
-          </ListSubheader>
-          <>
-            
-            <ListItemLink
-              to="/tickets"
-              primary={i18n.t("mainDrawer.listItems.tickets")}
-              icon={<WhatsAppIcon />}
-            />
-      <ListItemLink
-        to="/todolist"
-        primary={i18n.t("Tarefas")}
-        icon={<BorderColorIcon />}
-      />
-            <ListItemLink
-              to="/quick-messages"
-              primary={i18n.t("mainDrawer.listItems.quickMessages")}
-              icon={<FlashOnIcon />}
-            />
-            <ListItemLink
-              to="/contacts"
-              primary={i18n.t("mainDrawer.listItems.contacts")}
-              icon={<ContactPhoneOutlinedIcon />}
-            />
-            <ListItemLink
-              to="/schedules"
-              primary={i18n.t("mainDrawer.listItems.schedules")}
-              icon={<EventIcon />}
-            />
-            <ListItemLink
-              to="/tags"
-              primary={i18n.t("mainDrawer.listItems.tags")}
-              icon={<LocalOfferIcon />}
-            />
-            <ListItemLink
-              to="/chats"
-              primary={i18n.t("mainDrawer.listItems.chats")}
-              icon={
-                <Badge color="secondary" variant="dot" invisible={invisible}>
-                  <ForumIcon />
-                </Badge>
+  const item = (to, chave, icone) => ({
+    to,
+    chave: `mainDrawer.listItems.${chave}`,
+    icone
+  });
+  const administrador =
+    user.profile === "admin" || Array.isArray(user.visibleScreens);
+  // Central de Cobrança: só no tenant dono da plataforma. O backend repete a
+  // checagem; aqui é pra não oferecer um menu que responderia 401.
+  const centralCobranca = podeVerCentralCobranca(user);
+  // Prospecção: mesma ideia da Central de Cobrança — só no tenant dono da
+  // ferramenta, e o backend repete a checagem.
+  const prospeccao = podeVerProspeccao(user);
+  const grupos = [
+    {
+      chave: "redesign.operacao",
+      itens: [
+        ...(administrador
+          ? [
+              {
+                to: "/",
+                chave: "redesign.visaoGeral",
+                icone: <DashboardOutlinedIcon />
               }
-            />
-            <ListItemLink
-              to="/helps"
-              primary={i18n.t("mainDrawer.listItems.helps")}
-              icon={<HelpOutlineIcon />}
-            />
-          </>
-        </>
-        )}
-      />
-
-      <Can
-        role={user.profile}
-        perform={"drawer-admin-items:view"}
-        yes={()=>(
-          <>
-            <Divider/>
-            <ListSubheader 
-            hidden={!drawerOpen}
-            style={{
-              position:"relative",
-              fontSize: "17px",
-              textAlign: "left",
-              paddingLeft: 20
-            }} 
-            inset
-            color="inherit">
-              {i18n.t("mainDrawer.listItems.management")}
-            </ListSubheader>
-            <ListItemLink
-            small
-            to="/"
-            primary="Dashboard"
-            icon={<DashboardOutlinedIcon />}
-            />
-        </>
-        )}
-      />
-      <Can
-        role={user.profile}
-        perform="drawer-admin-items:view"
-        yes={() => (
-          <>
-            <Divider />
-            <ListSubheader 
-            hidden={!drawerOpen}
-            style={{
-              position:"relative",
-              fontSize: "17px",
-              textAlign: "left",
-              paddingLeft: 20
-            }} 
-            inset
-            color="inherit">
-              {i18n.t("mainDrawer.listItems.administration")}
-            </ListSubheader>
-            
-            {showCampaigns && (
-              <>
-                <ListItem
-                  button
-                  onClick={() => setOpenCampaignSubmenu((prev) => !prev)}
+            ]
+          : []),
+        item("/tickets", "tickets", <WhatsAppIcon />),
+        item(
+          "/chats",
+          "chats",
+          <Badge
+            color="secondary"
+            variant="dot"
+            overlap="rectangular"
+            invisible={invisible}
+          >
+            <ForumIcon />
+          </Badge>
+        ),
+        item("/todolist", "tasks", <BorderColorIcon />)
+      ]
+    },
+    {
+      chave: "redesign.relacionamento",
+      itens: [
+        item("/contacts", "contacts", <ContactPhoneOutlinedIcon />),
+        item("/tags", "tags", <LocalOfferIcon />),
+        ...(administrador && showCampaigns
+          ? [
+              {
+                chave: "mainDrawer.listItems.campaigns",
+                icone: <EventAvailableIcon />,
+                filhos: [
+                  {
+                    to: "/campaigns",
+                    chave: "redesign.envios",
+                    icone: <ListIcon />
+                  },
+                  {
+                    to: "/contact-lists",
+                    chave: "redesign.listasContatos",
+                    icone: <PeopleIcon />
+                  },
+                  {
+                    to: "/campaigns-config",
+                    chave: "mainDrawer.listItems.settings",
+                    icone: <SettingsOutlinedIcon />
+                  }
+                ]
+              }
+            ]
+          : []),
+        item("/schedules", "schedules", <EventIcon />),
+        ...(prospeccao
+          ? [item("/prospeccao", "prospeccao", <SearchIcon />)]
+          : [])
+      ]
+    },
+    {
+      chave: "redesign.automacao",
+      itens: [
+        ...(administrador
+          ? [
+              {
+                to: "/fluxos",
+                chave: "fluxos.titulo",
+                icone: <AccountTreeOutlinedIcon />
+              },
+              item("/queues", "queues", <AccountTreeOutlinedIcon />),
+              item("/chatgpt", "chatgpt", <ChatOutlinedIcon />)
+            ]
+          : []),
+        item("/quick-messages", "quickMessages", <FlashOnIcon />),
+        ...(administrador
+          ? [
+              item(
+                "/connections",
+                "connections",
+                <Badge
+                  badgeContent={connectionWarning ? "!" : 0}
+                  color="error"
+                  overlap="rectangular"
                 >
-                  <ListItemIcon>
-                    <EventAvailableIcon />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={i18n.t("mainDrawer.listItems.campaigns")}
-                  />
-                  {openCampaignSubmenu ? (
-                    <ExpandLessIcon />
-                  ) : (
-                    <ExpandMoreIcon />
-                  )}
-                </ListItem>
-                <Collapse
-                  style={{ paddingLeft: 15 }}
-                  in={openCampaignSubmenu}
-                  timeout="auto"
-                  unmountOnExit
-                >
-                  <List component="div" disablePadding>
-                    <ListItem onClick={() => history.push("/campaigns")} button>
-                      <ListItemIcon>
-                        <ListIcon />
-                      </ListItemIcon>
-                      <ListItemText primary="Listagem" />
-                    </ListItem>
-                    <ListItem
-                      onClick={() => history.push("/contact-lists")}
-                      button
-                    >
-                      <ListItemIcon>
-                        <PeopleIcon />
-                      </ListItemIcon>
-                      <ListItemText primary="Listas de Contatos" />
-                    </ListItem>
-                    <ListItem
-                      onClick={() => history.push("/campaigns-config")}
-                      button
-                    >
-                      <ListItemIcon>
-                        <SettingsOutlinedIcon />
-                      </ListItemIcon>
-                      <ListItemText primary="Configurações" />
-                    </ListItem>
-                  </List>
-                </Collapse>
-              </>
-            )}
-            {user.super && (
-              <ListItemLink
-                to="/announcements"
-                primary={i18n.t("mainDrawer.listItems.annoucements")}
-                icon={<AnnouncementIcon />}
-              />
-            )}
-            <ListItemLink
-              to="/connections"
-              primary={i18n.t("mainDrawer.listItems.connections")}
-              icon={
-                <Badge badgeContent={connectionWarning ? "!" : 0} color="error">
                   <SyncAltIcon />
                 </Badge>
+              )
+            ]
+          : [])
+      ]
+    },
+    {
+      chave: "redesign.administracao",
+      itens: [
+        ...(administrador
+          ? [
+              item("/users", "users", <PeopleAltOutlinedIcon />),
+              item("/announcements", "annoucements", <AnnouncementIcon />),
+              item("/financeiro", "financeiro", <LocalAtmIcon />),
+              ...(centralCobranca
+                ? [item("/cobranca", "cobranca", <ReceiptIcon />)]
+                : []),
+              item("/settings", "settings", <SettingsOutlinedIcon />)
+            ]
+          : []),
+        item("/helps", "helps", <HelpOutlineIcon />)
+      ]
+    }
+  ];
+  const visibleGroups = grupos
+    .map(group => ({
+      ...group,
+      itens: group.itens
+        .map(entry =>
+          entry.filhos
+            ? {
+                ...entry,
+                filhos: entry.filhos.filter(child =>
+                  canSeeScreen(user, screenForPath(child.to))
+                )
               }
-            />
-            <ListItemLink
-              to="/queues"
-              primary={i18n.t("mainDrawer.listItems.queues")}
-              icon={<AccountTreeOutlinedIcon />}
-            />
-            <ListItemLink
-              to="/users"
-              primary={i18n.t("mainDrawer.listItems.users")}
-              icon={<PeopleAltOutlinedIcon />}
-            />
-            <ListItemLink
-              to="/messages-api"
-              primary={i18n.t("mainDrawer.listItems.messagesAPI")}
-              icon={<CodeRoundedIcon />}
-            />
-             <ListItemLink
-                to="/financeiro"
-                primary={i18n.t("mainDrawer.listItems.financeiro")}
-                icon={<LocalAtmIcon />}
-              />
-
-            <ListItemLink
-              to="/settings"
-              primary={i18n.t("mainDrawer.listItems.settings")}
-              icon={<SettingsOutlinedIcon />}
-            />
-          {}
-
-          </>
-        )}
-      />
-      <Divider />
-    </div>
+            : entry
+        )
+        .filter(entry =>
+          entry.filhos
+            ? entry.filhos.length > 0
+            : !screenForPath(entry.to) ||
+              canSeeScreen(user, screenForPath(entry.to))
+        )
+    }))
+    .filter(group => group.itens.length);
+  return (
+    <Navegacao
+      grupos={visibleGroups}
+      expandido={drawerOpen}
+      aoNavegar={drawerClose}
+    />
   );
 };
 

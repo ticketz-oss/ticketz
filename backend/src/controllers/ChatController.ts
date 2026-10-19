@@ -1,4 +1,3 @@
-import * as Yup from "yup";
 import { Request, Response } from "express";
 import { getIO } from "../libs/socket";
 
@@ -9,6 +8,7 @@ import DeleteService from "../services/ChatService/DeleteService";
 import FindMessages from "../services/ChatService/FindMessages";
 import UpdateService from "../services/ChatService/UpdateService";
 
+import AppError from "../errors/AppError";
 import Chat from "../models/Chat";
 import CreateMessageService from "../services/ChatService/CreateMessageService";
 import User from "../models/User";
@@ -16,27 +16,24 @@ import ChatUser from "../models/ChatUser";
 
 type IndexQuery = {
   pageNumber: string;
+  searchParam?: string;
   companyId: string | number;
   ownerId?: number;
 };
 
 type StoreData = {
-  users: any[];
+  users: { id: number; name?: string }[];
   title: string;
 };
 
-type FindParams = {
-  companyId: number;
-  ownerId?: number;
-};
-
 export const index = async (req: Request, res: Response): Promise<Response> => {
-  const { pageNumber } = req.query as unknown as IndexQuery;
+  const { pageNumber, searchParam } = req.query as unknown as IndexQuery;
   const ownerId = +req.user.id;
 
   const { records, count, hasMore } = await ListService({
     ownerId,
-    pageNumber
+    pageNumber,
+    searchParam
   });
 
   return res.json({ records, count, hasMore });
@@ -95,6 +92,15 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
 
   const record = await ShowFromUuidService(id);
 
+  if (
+    !record ||
+    record.companyId !== req.user.companyId ||
+    !(await ChatUser.count({
+      where: { chatId: record.id, userId: +req.user.id }
+    }))
+  ) {
+    throw new AppError("ERR_FORBIDDEN", 403);
+  }
   return res.status(200).json(record);
 };
 
@@ -128,18 +134,20 @@ export const saveMessage = async (
   const chatId = +id;
 
   let newMessage = null;
+  const novasMensagens = [];
 
-  if (medias) {
+  if (medias?.length) {
     await Promise.all(
       medias.map(async (media: Express.Multer.File) => {
         newMessage = await CreateMessageService({
           chatId,
           senderId,
-          message: media.originalname,
+          message: typeof message === "string" ? message.trim() : "",
           mediaPath: media.filename,
           mediaName: media.originalname,
           mediaType: media.mimetype.split("/")[0]
         });
+        novasMensagens.push(newMessage);
       })
     );
   } else {
@@ -148,6 +156,7 @@ export const saveMessage = async (
       senderId,
       message
     });
+    novasMensagens.push(newMessage);
   }
 
   const chat = await Chat.findByPk(chatId, {
@@ -157,19 +166,24 @@ export const saveMessage = async (
     ]
   });
 
+  const chatUsersChannels = chat.users.map(user => `user-${user.userId}`);
+
   const io = getIO();
-  io.emit(`company-${companyId}-chat-${chatId}`, {
-    action: "new-message",
-    newMessage,
-    chat
-  });
+  novasMensagens
+    .sort((a, b) => a.id - b.id)
+    .forEach(mensagem => {
+      io.to(chatUsersChannels).emit(`company-${companyId}-chat-${chatId}`, {
+        action: "new-message",
+        newMessage: mensagem,
+        chat
+      });
 
-  io.emit(`company-${companyId}-chat`, {
-    action: "new-message",
-    newMessage,
-    chat
-  });
-
+      io.to(chatUsersChannels).emit(`company-${companyId}-chat`, {
+        action: "new-message",
+        newMessage: mensagem,
+        chat
+      });
+    });
   return res.json(newMessage);
 };
 
@@ -191,13 +205,15 @@ export const checkAsRead = async (
     ]
   });
 
+  const chatUsersChannels = chat.users.map(user => `user-${user.userId}`);
+
   const io = getIO();
-  io.emit(`company-${companyId}-chat-${id}`, {
+  io.to(chatUsersChannels).emit(`company-${companyId}-chat-${id}`, {
     action: "update",
     chat
   });
 
-  io.emit(`company-${companyId}-chat`, {
+  io.to(chatUsersChannels).emit(`company-${companyId}-chat`, {
     action: "update",
     chat
   });

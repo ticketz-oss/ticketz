@@ -1,9 +1,16 @@
 /node_modules
 /dist
+/coverage
 /public/*
 /.well-known
 /.env
-/package-lock.json
 /.externalToolBuilders/
 /.project
 /.settings/
+/private/*
+!/private/index.html
+/src/generated
+/.hermes-chat-bridge*.log
+
+__pycache__/
+*.pyc

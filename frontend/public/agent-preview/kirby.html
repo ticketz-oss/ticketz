@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kirby · Agente Espaço</title>
+    <link rel="stylesheet" href="kirby-motion.css" />
+    <style>
+      html,
+      body,
+      #avatar {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+      }
+      html,
+      body {
+        overflow: hidden;
+        background: transparent;
+      }
+      #avatar {
+        display: block;
+      }
+      /* ?palco=1 — stage mode, used where the mascot acts (welcome, tour):
+         room around the avatar so hops and arms are never cut, and every
+         reaction plays once instead of looping. */
+      .palco #avatar {
+        box-sizing: border-box;
+        padding: 13%;
+      }
+      .palco svg {
+        overflow: visible;
+      }
+      .palco [data-animation] > .bs-avatar {
+        animation-iteration-count: 1 !important;
+      }
+      /* Asleep, a slow breath is the only thing that keeps going. */
+      .palco [data-animation="sleeping"] > .bs-avatar {
+        animation: kirby-breath 4.6s ease-in-out infinite !important;
+      }
+      @keyframes kirby-breath {
+        0%,
+        100% {
+          transform: scale(1, 1);
+        }
+        50% {
+          transform: scale(1.03, 0.97) translateY(2%);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <span id="avatar"></span>
+    <script>
+      if (new URLSearchParams(location.search).has("palco"))
+        document.documentElement.classList.add("palco");
+    </script>
+    <script type="module">
+      import {
+        mountKirby,
+        isKirbyAnimation,
+        kirbyExpression
+      } from "./kirby.bundle.js";
+
+      const element = document.getElementById("avatar");
+      const avatar = mountKirby(element);
+      const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+      const palco = document.documentElement.classList.contains("palco");
+      let current = "idle";
+      let lastPulse = null;
+
+      function setState(next) {
+        if (!isKirbyAnimation(next) || next === current) return;
+        current = next;
+        element.dataset.animation = next;
+        if (reducedMotion.matches) {
+          avatar.setExpression(kirbyExpression(next));
+          avatar.pause();
+        } else {
+          avatar.play(next);
+        }
+        document.body.dataset.animation = next;
+      }
+
+      // Stage mode: a reaction is one beat. The face moves to the reaction's
+      // expression and stays there (still blinking); the body gesture plays
+      // once. A new pulse replays the same reaction.
+      function react(next, pulse) {
+        if (!isKirbyAnimation(next)) return;
+        if (next === current && pulse === lastPulse) return;
+        current = next;
+        lastPulse = pulse;
+        element.removeAttribute("data-animation");
+        void element.offsetWidth;
+        element.dataset.animation = next;
+        document.body.dataset.animation = next;
+        avatar.setExpression(kirbyExpression(next));
+      }
+
+      // Arm gestures. The avatar library keeps the two arms (body nodes) in a
+      // fixed pose, but it only rewrites each path's `d` and `fill`, so a
+      // rotation set on the arm path survives its redraws. Each arm turns
+      // around its shoulder; around -65 degrees the hand clears the head.
+      const SHOULDER_X = 62;
+      const arms = () =>
+        [...element.querySelectorAll("svg > path")]
+          .map(path => ({ path, box: path.getBBox() }))
+          .filter(({ box }) => box.width > 0 && box.width < 200);
+      const setArms = (left, right) => {
+        arms().forEach(({ path, box }) => {
+          const side = Math.sign(box.x + box.width / 2) || 1;
+          const angle = side > 0 ? -right : left;
+          path.setAttribute(
+            "transform",
+            `rotate(${angle} ${side * SHOULDER_X} ${box.y + box.height * 0.25})`
+          );
+        });
+      };
+      const resetArms = () =>
+        element
+          .querySelectorAll("svg > path")
+          .forEach(path => path.removeAttribute("transform"));
+      const hands = () =>
+        arms().map(({ path }) => {
+          const rect = path.getBoundingClientRect();
+          return {
+            x: (rect.left + rect.width / 2) / innerWidth,
+            y: rect.top / innerHeight
+          };
+        });
+
+      const ease = t => 1 - (1 - t) ** 3;
+      // Frames may stop when the page is hidden; a timer keeps the gesture
+      // (and the confetti it triggers) going in that case.
+      const nextFrame = callback => {
+        let done = false;
+        const run = () => {
+          if (done) return;
+          done = true;
+          callback(performance.now());
+        };
+        requestAnimationFrame(run);
+        setTimeout(run, 32);
+      };
+      const tween = (from, to, ms, apply) =>
+        new Promise(resolve => {
+          const start = performance.now();
+          const frame = now => {
+            const t = Math.min((now - start) / ms, 1);
+            const e = ease(t);
+            apply(
+              from[0] + (to[0] - from[0]) * e,
+              from[1] + (to[1] - from[1]) * e
+            );
+            if (t < 1) nextFrame(frame);
+            else resolve();
+          };
+          nextFrame(frame);
+        });
+      const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+      // Angles are "how far up" each arm goes; 0 is the resting pose.
+      const GESTURES = {
+        async throw(count = 3) {
+          for (let i = 0; i < count; i += 1) {
+            await tween([-6, -6], [68, 68], 200, setArms);
+            parent.postMessage(
+              { type: "agent-avatar-peak", hands: hands() },
+              location.origin
+            );
+            await wait(70);
+            await tween([68, 68], [-6, -6], 260, setArms);
+          }
+          await tween([-6, -6], [0, 0], 160, setArms);
+        },
+        async cheer() {
+          await tween([0, 0], [62, 62], 220, setArms);
+          await wait(900);
+          await tween([62, 62], [0, 0], 320, setArms);
+        },
+        async wave() {
+          await tween([0, 0], [0, 58], 200, setArms);
+          for (let i = 0; i < 3; i += 1) {
+            await tween([0, 58], [0, 32], 150, setArms);
+            await tween([0, 32], [0, 58], 150, setArms);
+          }
+          await tween([0, 58], [0, 0], 220, setArms);
+        },
+        async fidget(count = 4) {
+          for (let i = 0; i < count; i += 1) {
+            await tween([0, 0], [18, 4], 90, setArms);
+            await tween([18, 4], [4, 18], 110, setArms);
+            await tween([4, 18], [0, 0], 90, setArms);
+          }
+        }
+      };
+      let gesturing = Promise.resolve();
+      const gesture = (name, count) => {
+        if (!GESTURES[name] || reducedMotion.matches) return;
+        gesturing = gesturing
+          .then(() => GESTURES[name](count))
+          .catch(() => {})
+          .finally(resetArms);
+      };
+
+      addEventListener("message", event => {
+        if (event.origin !== location.origin || event.source !== parent) {
+          return;
+        }
+        if (event.data?.type === "agent-avatar-gesture" && palco) {
+          gesture(event.data.gesture, event.data.count);
+          return;
+        }
+        if (event.data?.type !== "agent-avatar-state") return;
+        if (palco) react(event.data.state, event.data.pulse);
+        else setState(event.data.state);
+      });
+      reducedMotion.addEventListener("change", () => {
+        if (palco) return;
+        if (reducedMotion.matches) {
+          avatar.setExpression(kirbyExpression(current));
+          avatar.pause();
+        } else {
+          avatar.play(current);
+        }
+      });
+      if (palco) {
+        avatar.setExpression(kirbyExpression(current));
+      } else if (reducedMotion.matches) {
+        avatar.setExpression(kirbyExpression(current));
+        avatar.pause();
+      }
+      parent.postMessage({ type: "agent-avatar-ready" }, location.origin);
+    </script>
+  </body>
+</html>

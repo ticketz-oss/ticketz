@@ -1,0 +1,50 @@
+@font-face {
+  font-family: "Junimo Alphabet";
+  src: url("../../../public/stardew/Junimo-Alphabet.ttf") format("truetype");
+  font-display: swap;
+}
+html[data-theme="stardew"] .sd-junimo-text {
+  font-family: Inter, system-ui, sans-serif !important;
+  white-space: pre-wrap;
+  line-height: 2.9;
+}
+html[data-theme="stardew"] .sd-junimo-word {
+  display: inline;
+  white-space: nowrap;
+}
+html[data-theme="stardew"] .sd-junimo-word--long {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+html[data-theme="stardew"] .sd-junimo-glyph {
+  position: relative;
+  display: inline-block;
+  min-width: 0.62em;
+  padding-inline: 0.1em;
+  line-height: 1.5;
+  vertical-align: baseline;
+  text-align: center;
+}
+html[data-theme="stardew"] .sd-junimo-glyph .sd-junimo-latin {
+  font-family: Inter, system-ui, sans-serif !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+}
+html[data-theme="stardew"] .sd-junimo-glyph .sd-junimo-symbol {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
+html[data-theme="stardew"] .sd-junimo-glyph .sd-junimo-symbol::after {
+  content: attr(data-junimo);
+  font-family: "Junimo Alphabet" !important;
+  font-weight: normal;
+  font-size: 1.1em !important;
+  line-height: 1 !important;
+  color: #8b5e2b;
+  opacity: 0.85;
+}

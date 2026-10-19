@@ -1,51 +1,64 @@
+import { FindOptions } from "sequelize/types";
 import Whatsapp from "../../models/Whatsapp";
-import AppError from "../../errors/AppError";
 import Queue from "../../models/Queue";
 import QueueOption from "../../models/QueueOption";
-import { FindOptions, Op } from "sequelize/types";
+import Company from "../../models/Company";
+
+type ShowWhatsAppOptions = {
+  hideSession?: boolean;
+};
 
 const ShowWhatsAppService = async (
   id: string | number,
-  companyId: number,
-  session?: any
+  options: ShowWhatsAppOptions = {}
 ): Promise<Whatsapp> => {
   const findOptions: FindOptions = {
     include: [
       {
         model: Queue,
         as: "queues",
-        attributes: ["id", "name", "color", "greetingMessage","mediaPath", "mediaName"],
+        attributes: [
+          "id",
+          "name",
+          "color",
+          "greetingMessage",
+          "outOfHoursMessage",
+          "mediaPath",
+          "mediaName",
+          "order"
+        ],
         include: [
           {
             model: QueueOption,
             as: "options",
             required: false,
-            where: { parentId: null },
+            where: { parentId: null, isActive: true }
           }
         ]
+      },
+      {
+        model: Company,
+        as: "company",
+        attributes: ["id", "name", "language"]
       }
     ],
+    // A ordem do menu vem das colunas "order" (arrastar e soltar no admin).
+    // Antes era o nome da fila e um cast do campo "option" para inteiro.
     order: [
+      ["queues", "order", "ASC"],
       ["queues", "name", "ASC"],
-      ["queues", "options", "option", "ASC"],
+      ["queues", "options", "order", "ASC"]
     ]
   };
 
-  if (session !== undefined && session === 0) {
-    findOptions.attributes = { exclude: ["session"] };
-  }
+  // metaAccessToken nunca deve chegar ao frontend, independente de hideSession.
+  findOptions.attributes = {
+    exclude: options.hideSession
+      ? ["session", "metaAccessToken"]
+      : ["metaAccessToken"]
+  };
 
-  const whatsapp = await Whatsapp.findByPk(id, findOptions);
-
-  if (whatsapp?.companyId !== companyId) {
-    throw new AppError("Não é possível acessar registros de outra empresa");
-  }
-
-  if (!whatsapp) {
-    throw new AppError("ERR_NO_WAPP_FOUND", 404);
-  }
-
-  return whatsapp;
+  return Whatsapp.findByPk(id, findOptions);
 };
 
 export default ShowWhatsAppService;

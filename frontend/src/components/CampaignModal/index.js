@@ -31,30 +31,31 @@ import {
   MenuItem,
   Select,
   Tab,
-  Tabs,
+  Tabs
 } from "@material-ui/core";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import ConfirmationModal from "../ConfirmationModal";
+import { isOfficialApiConnection } from "../../helpers/officialApiRestriction";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     display: "flex",
-    flexWrap: "wrap",
+    flexWrap: "wrap"
   },
 
   textField: {
     marginRight: theme.spacing(1),
-    flex: 1,
+    flex: 1
   },
 
   extraAttr: {
     display: "flex",
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "center"
   },
 
   btnWrapper: {
-    position: "relative",
+    position: "relative"
   },
 
   buttonProgress: {
@@ -63,15 +64,15 @@ const useStyles = makeStyles((theme) => ({
     top: "50%",
     left: "50%",
     marginTop: -12,
-    marginLeft: -12,
-  },
+    marginLeft: -12
+  }
 }));
 
 const CampaignSchema = Yup.object().shape({
   name: Yup.string()
     .min(2, "Too Short!")
     .max(50, "Too Long!")
-    .required("Required"),
+    .required("Required")
 });
 
 const CampaignModal = ({
@@ -80,7 +81,7 @@ const CampaignModal = ({
   campaignId,
   initialValues,
   onSave,
-  resetPagination,
+  resetPagination
 }) => {
   const classes = useStyles();
   const isMounted = useRef(true);
@@ -104,7 +105,7 @@ const CampaignModal = ({
     scheduledAt: "",
     whatsappId: "",
     contactListId: "",
-    companyId,
+    companyId
   };
 
   const [campaign, setCampaign] = useState(initialState);
@@ -125,7 +126,7 @@ const CampaignModal = ({
   useEffect(() => {
     if (isMounted.current) {
       if (initialValues) {
-        setCampaign((prevState) => {
+        setCampaign(prevState => {
           return { ...prevState, ...initialValues };
         });
       }
@@ -141,10 +142,10 @@ const CampaignModal = ({
       if (!campaignId) return;
 
       api.get(`/campaigns/${campaignId}`).then(({ data }) => {
-        setCampaign((prev) => {
+        setCampaign(prev => {
           let prevCampaignData = Object.assign({}, prev);
 
-          Object.entries(data).forEach(([key, value]) => {
+          Object.entries(data.campaign).forEach(([key, value]) => {
             if (key === "scheduledAt" && value !== "" && value !== null) {
               prevCampaignData[key] = moment(value).format("YYYY-MM-DDTHH:mm");
             } else {
@@ -175,14 +176,14 @@ const CampaignModal = ({
     setCampaign(initialState);
   };
 
-  const handleAttachmentFile = (e) => {
+  const handleAttachmentFile = e => {
     const file = head(e.target.files);
     if (file) {
       setAttachment(file);
     }
   };
 
-  const handleSaveCampaign = async (values) => {
+  const handleSaveCampaign = async values => {
     try {
       const dataValues = {};
       Object.entries(values).forEach(([key, value]) => {
@@ -230,17 +231,18 @@ const CampaignModal = ({
 
     if (campaign.mediaPath) {
       await api.delete(`/campaigns/${campaign.id}/media-upload`);
-      setCampaign((prev) => ({ ...prev, mediaPath: null, mediaName: null }));
+      setCampaign(prev => ({ ...prev, mediaPath: null, mediaName: null }));
       toast.success(i18n.t("campaigns.toasts.deleted"));
     }
   };
 
-  const renderMessageField = (identifier) => {
+  const renderMessageField = identifier => {
     return (
       <Field
         as={TextField}
         id={identifier}
         name={identifier}
+        spellCheck={true}
         fullWidth
         rows={5}
         label={i18n.t(`campaigns.dialog.form.${identifier}`)}
@@ -253,12 +255,13 @@ const CampaignModal = ({
     );
   };
 
-  const renderConfirmationMessageField = (identifier) => {
+  const renderConfirmationMessageField = identifier => {
     return (
       <Field
         as={TextField}
         id={identifier}
         name={identifier}
+        spellCheck={true}
         fullWidth
         rows={5}
         label={i18n.t(`campaigns.dialog.form.${identifier}`)}
@@ -274,7 +277,7 @@ const CampaignModal = ({
     try {
       await api.post(`/campaigns/${campaign.id}/cancel`);
       toast.success(i18n.t("campaigns.toasts.cancel"));
-      setCampaign((prev) => ({ ...prev, status: "CANCELADA" }));
+      setCampaign(prev => ({ ...prev, status: "CANCELADA" }));
       resetPagination();
     } catch (err) {
       toast.error(err.message);
@@ -285,7 +288,7 @@ const CampaignModal = ({
     try {
       await api.post(`/campaigns/${campaign.id}/restart`);
       toast.success(i18n.t("campaigns.toasts.restart"));
-      setCampaign((prev) => ({ ...prev, status: "EM_ANDAMENTO" }));
+      setCampaign(prev => ({ ...prev, status: "EM_ANDAMENTO" }));
       resetPagination();
     } catch (err) {
       toast.error(err.message);
@@ -303,6 +306,7 @@ const CampaignModal = ({
         {i18n.t("campaigns.confirmationModal.deleteMessage")}
       </ConfirmationModal>
       <Dialog
+        PaperProps={{ className: "sd-campaign-dialog" }}
         open={open}
         onClose={handleClose}
         fullWidth
@@ -324,7 +328,7 @@ const CampaignModal = ({
           <input
             type="file"
             ref={attachmentFile}
-            onChange={(e) => handleAttachmentFile(e)}
+            onChange={e => handleAttachmentFile(e)}
           />
         </div>
         <Formik
@@ -411,7 +415,7 @@ const CampaignModal = ({
                       >
                         <MenuItem value="">Nenhuma</MenuItem>
                         {contactLists &&
-                          contactLists.map((contactList) => (
+                          contactLists.map(contactList => (
                             <MenuItem
                               key={contactList.id}
                               value={contactList.id}
@@ -444,8 +448,19 @@ const CampaignModal = ({
                       >
                         <MenuItem value="">Nenhuma</MenuItem>
                         {whatsapps &&
-                          whatsapps.map((whatsapp) => (
-                            <MenuItem key={whatsapp.id} value={whatsapp.id}>
+                          whatsapps.map(whatsapp => (
+                            <MenuItem
+                              key={whatsapp.id}
+                              value={whatsapp.id}
+                              disabled={isOfficialApiConnection(whatsapp)}
+                              title={
+                                isOfficialApiConnection(whatsapp)
+                                  ? i18n.t(
+                                      "connections.toolTips.notAvailableOfficial"
+                                    )
+                                  : undefined
+                              }
+                            >
                               {whatsapp.name}
                             </MenuItem>
                           ))}
@@ -463,7 +478,7 @@ const CampaignModal = ({
                       margin="dense"
                       type="datetime-local"
                       InputLabelProps={{
-                        shrink: true,
+                        shrink: true
                       }}
                       fullWidth
                       className={classes.textField}
@@ -478,11 +493,6 @@ const CampaignModal = ({
                       onChange={(e, v) => setMessageTab(v)}
                       variant="fullWidth"
                       centered
-                      style={{
-                        background: "#f2f2f2",
-                        border: "1px solid #e6e6e6",
-                        borderRadius: 2,
-                      }}
                     >
                       <Tab label="Msg. 1" index={0} />
                       <Tab label="Msg. 2" index={1} />

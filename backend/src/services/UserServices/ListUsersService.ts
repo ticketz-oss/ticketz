@@ -37,14 +37,27 @@ const ListUsersService = async ({
     }
   };
 
-  const limit = 20;
-  const offset = limit * (+pageNumber - 1);
+  const parsedPageNumber = +pageNumber;
 
-  const { count, rows: users } = await User.findAndCountAll({
+  if (parsedPageNumber > 1) {
+    return {
+      users: [],
+      count: 0,
+      hasMore: false
+    };
+  }
+
+  const users = await User.findAll({
     where: whereCondition,
-    attributes: ["name", "id", "email", "companyId", "profile", "createdAt"],
-    limit,
-    offset,
+    attributes: [
+      "name",
+      "id",
+      "email",
+      "profilePicUrl",
+      "companyId",
+      "profile",
+      "createdAt"
+    ],
     order: [["createdAt", "DESC"]],
     include: [
       { model: Queue, as: "queues", attributes: ["id", "name", "color"] },
@@ -52,12 +65,10 @@ const ListUsersService = async ({
     ]
   });
 
-  const hasMore = count > offset + users.length;
-
   return {
     users,
-    count,
-    hasMore
+    count: users.length,
+    hasMore: false
   };
 };
 

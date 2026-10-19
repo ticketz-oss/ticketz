@@ -1,0 +1,80 @@
+.campanhas-conteudo {
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
+}
+.campanhas-indicadores {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.campanha-indicador {
+  border: 1px solid var(--ew-border);
+  border-radius: 16px;
+  padding: 20px;
+  background: var(--ew-surface);
+}
+.campanha-indicador p {
+  color: var(--ew-muted);
+  font-size: 12px;
+  margin: 0 0 12px;
+}
+.campanha-indicador strong {
+  display: block;
+  font-size: 28px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+}
+.campanha-indicador small {
+  display: block;
+  color: var(--ew-muted);
+  font-size: 11px;
+  margin-top: 8px;
+}
+.campanha-nome {
+  min-width: 180px;
+}
+.campanha-nome strong {
+  color: var(--ew-text);
+  font-size: 13px;
+  font-weight: 600;
+  display: block;
+}
+.campanha-nome small {
+  display: block;
+  margin-top: 5px;
+  font-size: 11px;
+}
+.campanha-status {
+  white-space: nowrap;
+}
+.campanha-status i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.estado-EM_ANDAMENTO {
+  color: var(--ew-primary);
+  background: color-mix(in srgb, var(--ew-primary) 9%, var(--ew-surface));
+}
+.estado-PROGRAMADA {
+  color: #367da4;
+  background: #367da411;
+}
+.estado-FINALIZADA {
+  color: #328053;
+  background: #32805311;
+}
+.estado-CANCELADA {
+  color: #a76b20;
+  background: #a76b2011;
+}
+@media (max-width: 900px) {
+  .campanhas-indicadores {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+}

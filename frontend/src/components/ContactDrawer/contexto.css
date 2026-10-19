@@ -1,0 +1,137 @@
+.contexto-tabs {
+  margin-top: 0;
+}
+.contexto-tabs .ew-tabs {
+  width: 100%;
+  padding: 3px;
+  margin-bottom: 12px;
+  gap: 2px;
+  flex-wrap: nowrap;
+}
+.contexto-tabs .ew-tab {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 5px;
+  font-size: 10px;
+  gap: 4px;
+  justify-content: center;
+  white-space: normal;
+  text-align: center;
+}
+.contexto-tabs [role="tabpanel"] {
+  padding-top: 4px;
+}
+.contexto-dados {
+  margin: 0;
+}
+.contexto-dados > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--ew-border);
+  font-size: 12px;
+}
+.contexto-dados dt {
+  color: var(--ew-muted);
+}
+.contexto-dados dd {
+  margin: 0;
+  font-weight: 500;
+}
+.contexto-historico article {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--ew-border);
+  font-size: 12px;
+}
+.contexto-historico article > svg {
+  color: var(--ew-primary);
+  flex: none;
+}
+.contexto-historico p {
+  margin: 6px 0;
+}
+.contexto-historico time {
+  color: var(--ew-muted);
+  font-size: 11px;
+}
+.contexto-ultima {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: var(--ew-muted);
+}
+.contexto-historico a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ew-primary);
+  font-size: 11px;
+  text-decoration: none;
+}
+
+.contexto-perfil {
+  margin: 8px 0 16px;
+  text-align: center;
+}
+.contexto-perfil .MuiCardHeader-root {
+  flex-direction: column;
+}
+.contexto-perfil .MuiCardHeader-avatar {
+  margin: 0 0 12px;
+}
+.contexto-perfil .MuiCardHeader-content {
+  width: 100%;
+}
+.contexto-perfil .MuiCardHeader-title .MuiTypography-root {
+  font-size: 15px;
+  font-weight: 600;
+}
+.contexto-perfil .MuiCardHeader-subheader {
+  margin-top: 6px;
+  color: var(--ew-muted);
+}
+
+.contexto-grupo {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ew-border);
+}
+.contexto-grupo h4 {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ew-muted);
+  margin: 0 0 12px;
+}
+.contexto-cadastro {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+}
+.contexto-cadastro dt {
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--ew-muted);
+  margin-bottom: 4px;
+}
+.contexto-cadastro dd {
+  margin: 0;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.contexto-dados dd {
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.contexto-tabs .MuiPaper-root {
+  box-shadow: none;
+  border-radius: 10px;
+}

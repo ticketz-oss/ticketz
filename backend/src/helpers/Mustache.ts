@@ -1,62 +1,141 @@
 import Mustache from "mustache";
-import Contact from "../models/Contact";
 import Ticket from "../models/Ticket";
+import User from "../models/User";
+import Contact from "../models/Contact";
+import ContactListItem from "../models/ContactListItem";
+import { _t } from "../services/TranslationServices/i18nService";
+import Company from "../models/Company";
 
-export const greeting = (): string => {
-  const greetings = ["Boa madrugada", "Bom dia", "Boa tarde", "Boa noite"];
+type MustacheFormatProps = {
+  body: string;
+  ticket?: Ticket;
+  contact?: Contact | ContactListItem;
+  currentUser?: User;
+  customTags?: [string, string];
+};
+
+export const genGreeting = (
+  lngSource: Ticket | Contact | Company | string
+): string => {
+  const greetings = [
+    _t("Hello", lngSource),
+    _t("Good morning", lngSource),
+    _t("Good afternoon", lngSource),
+    _t("Good evening", lngSource)
+  ];
   const h = new Date().getHours();
-  // eslint-disable-next-line no-bitwise
+
   return greetings[(h / 6) >> 0];
 };
 
-export default (body: string, contact: Contact, ticket?: Ticket): string => {
-  let ms = "";
+export function mustacheValues(
+  ticket: Ticket,
+  contact: Contact | ContactListItem,
+  currentUser: User
+): Record<string, any> {
+  contact = contact || ticket?.contact;
 
-  const Hr = new Date();
+  const name = contact?.name || contact?.number || "{{name}}";
+  const firstname = name.trim().split(" ")[0] || "{{firstname}}";
+  const greeting = genGreeting(
+    ticket ||
+      ((contact as Contact)?.language !== undefined
+        ? (contact as Contact)
+        : (contact as ContactListItem)?.company)
+  );
+  const queue = ticket?.queue?.name || "{{queue}}";
+  const user = currentUser?.name || ticket?.user?.name || "{{user}}";
+  const email = contact?.email || "{{email}}";
+  const number = contact?.number || "{{number}}";
+  const now = new Date();
+  const protocol =
+    (ticket &&
+      `${now.toISOString().split("T")[0].replace(/-/g, "")}-${ticket.id}`) ||
+    "{{protocol}}";
+  const time = now.toLocaleTimeString("en-GB", { hour12: false });
 
-  const dd: string = `0${Hr.getDate()}`.slice(-2);
-  const mm: string = `0${Hr.getMonth() + 1}`.slice(-2);
-  const yy: string = Hr.getFullYear().toString();
-  const hh: number = Hr.getHours();
-  const min: string = `0${Hr.getMinutes()}`.slice(-2);
-  const ss: string = `0${Hr.getSeconds()}`.slice(-2);
+  let extraInfo: any;
 
-  if (hh >= 6) {
-    ms = "Bom dia";
+  if (contact instanceof ContactListItem) {
+    extraInfo = {}; // contact.extraInfo;
+  } else if (contact && contact.extraInfo) {
+    extraInfo = contact.extraInfo.reduce((acc, field) => {
+      acc[field.name] = field.value;
+      return acc;
+    }, {});
   }
-  if (hh > 11) {
-    ms = "Boa tarde";
-  }
-  if (hh > 17) {
-    ms = "Boa noite";
-  }
-  if (hh > 23 || hh < 6) {
-    ms = "Boa madrugada";
-  }
-
-  const setor =
-    ticket?.queueId === undefined || ticket.queueId === null
-      ? ""
-      : ticket.queue.name;
-
-  const usuario =
-    ticket?.userId === undefined || ticket.userId === null
-      ? ""
-      : ticket.user.name;
-
-
-  const protocol = yy + mm + dd + String(hh) + min + ss;
-
-  const hora = `${hh}:${min}:${ss}`;
 
   const view = {
-    name: contact ? contact.name : "",
-    gretting: greeting(),
-    ms,
+    ...extraInfo,
+    name,
+    firstname,
+    email,
+    number,
+    greeting,
+    queue,
     protocol,
-    hora,
-    fila: setor,
-    usuario,
+    user,
+    time,
+    ticket: ticket?.id || "{{ticket}}",
+    gretting: greeting,
+    ms: greeting,
+    hora: time,
+    fila: queue,
+    usuario: user,
+    extraInfo
   };
-  return Mustache.render(body, view);
-};
+
+  return view;
+}
+
+function placeholderVariables(template: string): Record<string, string> {
+  const tokens = Mustache.parse(template);
+
+  const placeholder: Record<string, string> = {};
+
+  tokens.forEach(token => {
+    if (token[0] === "name") {
+      placeholder[token[1]] = `{{${token[1]}}}`;
+    }
+  });
+
+  return placeholder;
+}
+
+export function mustacheFormat({
+  body,
+  ticket,
+  contact,
+  currentUser,
+  customTags = null
+}: MustacheFormatProps): string {
+  if (!body || (!ticket && !contact && !currentUser)) {
+    return body;
+  }
+
+  const view = mustacheValues(ticket, contact, currentUser);
+
+  return Mustache.render(
+    body,
+    { ...placeholderVariables(body), ...view },
+    null,
+    customTags
+  );
+}
+
+export function formatBody(
+  body: string,
+  ticket?: Ticket,
+  currentUser?: User,
+  customTags: [string, string] = null
+): string {
+  return mustacheFormat({
+    body,
+    ticket,
+    contact: ticket?.contact,
+    currentUser,
+    customTags
+  });
+}
+
+export default formatBody;

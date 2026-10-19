@@ -1,0 +1,212 @@
+.tabela-dados {
+  border: 1px solid var(--ew-border);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--ew-surface);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.tabela-ferramentas {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--ew-border);
+  flex-wrap: wrap;
+}
+.tabela-busca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ew-muted);
+  border: 1px solid var(--ew-border);
+  border-radius: 10px;
+  min-width: 180px;
+  flex: 1;
+  padding: 0 12px;
+  min-height: 38px;
+}
+.tabela-busca input {
+  width: 100%;
+  min-width: 0;
+  background: transparent;
+  color: var(--ew-text);
+  outline: 0;
+  border: 0;
+  font: inherit;
+  height: 36px;
+}
+.tabela-rolagem {
+  overflow: auto;
+  min-height: 0;
+}
+.tabela-dados table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 12px;
+}
+.tabela-dados th {
+  padding: 12px 16px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--ew-bg);
+  white-space: nowrap;
+}
+.tabela-dados td {
+  border-top: 1px solid var(--ew-border);
+  padding: 16px;
+  color: var(--ew-muted);
+}
+.tabela-dados td:first-child:has(.ew-checkbox),
+.tabela-dados th:first-child:has(.ew-checkbox) {
+  width: 44px;
+  padding-right: 0;
+}
+.tabela-dados tr[aria-selected="true"] td {
+  background: color-mix(in srgb, var(--ew-primary) 7%, var(--ew-surface));
+}
+.tabela-dados tbody tr:hover td {
+  background: color-mix(in srgb, var(--ew-primary) 4%, var(--ew-surface));
+}
+.tabela-dados .celula-acoes {
+  text-align: right;
+  width: 60px;
+}
+.tabela-pessoa {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-width: 200px;
+}
+.tabela-pessoa strong {
+  display: block;
+  color: var(--ew-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+.tabela-pessoa small {
+  display: block;
+  margin-top: 5px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.tabela-pessoa .MuiAvatar-root {
+  width: 32px;
+  height: 32px;
+  font-size: 11px;
+  font-weight: 500;
+}
+.tabela-etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-width: 110px;
+}
+.tabela-rodape {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  gap: 12px;
+  border-top: 1px solid var(--ew-border);
+  color: var(--ew-muted);
+  font-size: 12px;
+}
+.tabela-rodape > div {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+.tabela-pagina {
+  border: 1px solid var(--ew-border);
+  border-radius: 7px;
+  padding: 8px 12px;
+  color: var(--ew-text);
+}
+.tabela-selecao {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  background: color-mix(in srgb, var(--ew-primary) 7%, var(--ew-surface));
+  color: var(--ew-primary);
+  gap: 16px;
+  font-size: 12px;
+}
+.tabela-selecao > div {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+.tabela-vazia {
+  text-align: center;
+  padding: 48px !important;
+}
+.ew-checkbox {
+  display: grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  padding: 0;
+  border: 1px solid var(--ew-border);
+  border-radius: 5px;
+  background: var(--ew-surface);
+  color: var(--ew-on-primary);
+  cursor: pointer;
+}
+.ew-checkbox[data-state="checked"],
+.ew-checkbox[data-state="indeterminate"] {
+  background: var(--ew-primary);
+  border-color: var(--ew-primary);
+}
+.ew-checkbox > span {
+  display: grid;
+  place-items: center;
+}
+.ew-menu {
+  z-index: 1600;
+  min-width: 185px;
+  padding: 5px;
+  background: var(--ew-surface);
+  border: 1px solid var(--ew-border);
+  border-radius: 12px;
+  box-shadow: 0 8px 30px #0002;
+}
+.ew-menu-item {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  padding: 9px 11px;
+  border-radius: 7px;
+  cursor: pointer;
+  outline: none;
+  font-size: 12px;
+}
+.ew-menu-item[data-highlighted] {
+  background: var(--ew-bg);
+}
+.ew-menu-item[data-disabled] {
+  opacity: 0.4;
+  pointer-events: none;
+}
+.ew-menu-item--perigo {
+  color: var(--ew-error);
+}
+.ew-menu-check {
+  width: 14px;
+}
+@media (max-width: 600px) {
+  .tabela-ferramentas {
+    padding: 10px;
+    gap: 8px;
+  }
+  .tabela-selecao {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .tabela-selecao > div {
+    margin: 0;
+  }
+}

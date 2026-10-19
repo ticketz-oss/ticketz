@@ -8,9 +8,18 @@ import {
   AutoIncrement,
   DataType,
   BelongsTo,
-  ForeignKey
+  BelongsToMany,
+  Default,
+  ForeignKey,
+  HasMany
 } from "sequelize-typescript";
 import Company from "./Company";
+import Queue from "./Queue";
+import User from "./User";
+import Whatsapp from "./Whatsapp";
+import AnnouncementQueue from "./AnnouncementQueue";
+import AnnouncementUser from "./AnnouncementUser";
+import AnnouncementWhatsapp from "./AnnouncementWhatsapp";
 
 @Table
 class Announcement extends Model<Announcement> {
@@ -41,6 +50,23 @@ class Announcement extends Model<Announcement> {
   @Column
   status: boolean;
 
+  @Column
+  startsAt: Date;
+
+  @Column
+  endsAt: Date;
+
+  @Default("ALL")
+  @Column
+  audienceMode: "ALL" | "SEGMENTED";
+
+  @Column(DataType.ARRAY(DataType.STRING))
+  profiles: string[];
+
+  @Default(false)
+  @Column
+  isGlobal: boolean;
+
   @CreatedAt
   createdAt: Date;
 
@@ -49,6 +75,24 @@ class Announcement extends Model<Announcement> {
 
   @BelongsTo(() => Company)
   company: Company;
+
+  @HasMany(() => AnnouncementUser)
+  announcementUsers: AnnouncementUser[];
+
+  @HasMany(() => AnnouncementQueue)
+  announcementQueues: AnnouncementQueue[];
+
+  @HasMany(() => AnnouncementWhatsapp)
+  announcementWhatsapps: AnnouncementWhatsapp[];
+
+  @BelongsToMany(() => User, () => AnnouncementUser)
+  users: User[];
+
+  @BelongsToMany(() => Queue, () => AnnouncementQueue)
+  queues: Queue[];
+
+  @BelongsToMany(() => Whatsapp, () => AnnouncementWhatsapp)
+  whatsapps: Whatsapp[];
 }
 
 export default Announcement;

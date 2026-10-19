@@ -14,8 +14,12 @@ const FindService = async ({ ownerId, companyId }: Params): Promise<Chat[]> => {
       companyId
     },
     include: [
-      { model: Company, as: "company", attributes: ["id", "name"] },
-      { model: User, as: "owner", attributes: ["id", "name"] }
+      {
+        model: Company,
+        as: "company",
+        attributes: ["id", "name"]
+      },
+      { model: User, as: "owner", attributes: ["id", "name", "profilePicUrl"] }
     ],
     order: [["createdAt", "DESC"]]
   });

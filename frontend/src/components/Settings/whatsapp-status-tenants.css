@@ -1,0 +1,75 @@
+.status-tenants {
+  width: 100%;
+  max-width: 720px;
+  color: var(--ew-text);
+}
+.status-tenants-intro {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+.status-tenants-intro > svg {
+  flex-shrink: 0;
+  margin-top: 4px;
+  color: var(--ew-primary);
+}
+.status-tenants-intro p {
+  margin-top: 6px;
+  line-height: 1.6;
+}
+.status-tenants-alert {
+  margin-top: 12px;
+}
+.status-tenants-list {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.status-tenants-company {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.status-tenants-company:hover,
+.status-tenants-company:focus-within {
+  background: var(--ew-bg);
+  border-color: var(--ew-border);
+}
+.status-tenants-company > svg {
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 2px;
+}
+.status-tenants-text {
+  display: grid;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.status-tenants-text strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+.status-tenants-text small {
+  color: var(--ew-muted);
+  font-size: 11px;
+}
+.status-tenants-text small.status-tenants-enabled {
+  color: var(--ew-primary);
+}
+.status-tenants-text small.status-tenants-note {
+  line-height: 1.5;
+}
+.status-tenants-muted {
+  color: var(--ew-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}

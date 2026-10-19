@@ -1,0 +1,105 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+}
+.qa-root {
+  min-height: 100vh;
+  padding: 24px;
+  background: var(--ew-bg);
+  color: var(--ew-text);
+}
+.qa-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.qa-toolbar > span {
+  font-size: 12px;
+  color: var(--ew-muted);
+  margin-right: auto;
+}
+.qa-toolbar > button {
+  padding: 6px;
+  border-radius: 7px;
+  border: 1px solid var(--ew-border);
+  background: var(--ew-surface);
+  color: var(--ew-text);
+}
+.qa-workspace {
+  display: flex;
+  align-items: stretch;
+  gap: 16px;
+}
+.qa-sidebar {
+  flex-shrink: 0;
+  max-width: 100%;
+  background: var(--ew-surface);
+  border: 1px solid var(--ew-border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.qa-sidebar > header {
+  padding: 18px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+.qa-sidebar ul {
+  padding: 0;
+  margin: 0;
+}
+.qa-tabs {
+  display: flex;
+  gap: 16px;
+  justify-content: space-around;
+  padding: 12px;
+  font-size: 12px;
+  border-bottom: 1px solid var(--ew-border);
+}
+.qa-tabs small {
+  color: var(--ew-muted);
+  margin-left: 8px;
+}
+.qa-workspace > section {
+  flex: 1;
+  height: 640px;
+}
+.qa-messages {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.qa-composer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--ew-border);
+  border-radius: 12px;
+  padding: 10px;
+}
+.qa-composer input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  color: var(--ew-text);
+  outline: none;
+}
+@media (max-width: 720px) {
+  .qa-root {
+    padding: 12px;
+  }
+  .qa-workspace {
+    flex-wrap: wrap;
+  }
+  .qa-workspace > section {
+    flex: 1 1 100%;
+  }
+}

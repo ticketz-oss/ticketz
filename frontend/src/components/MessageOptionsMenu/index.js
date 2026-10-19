@@ -6,107 +6,231 @@ import MenuItem from "@material-ui/core/MenuItem";
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import ConfirmationModal from "../ConfirmationModal";
-import { Menu } from "@material-ui/core";
+import { Dialog, Menu, Tooltip } from "@material-ui/core";
+import { isOfficialApiConnection } from "../../helpers/officialApiRestriction";
 import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessageContext";
 import { EditMessageContext } from "../../context/EditingMessage/EditingMessageContext";
 import toastError from "../../errors/toastError";
 import MessageHistoryModal from "../MessageHistoryModal";
+import MessageForwardModal from "../MessageForwardModal";
+import { useStyles } from "./style";
 
-const MessageOptionsMenu = ({ message, data, menuOpen, handleClose, anchorEl }) => {
-	const { setReplyingMessage } = useContext(ReplyMessageContext);
- 	const editingContext = useContext(EditMessageContext);
- 	const setEditingMessage = editingContext ? editingContext.setEditingMessage : null;
- 	
-	const [confirmationOpen, setConfirmationOpen] = useState(false);
-	const [messageHistoryOpen, setMessageHistoryOpen] = useState(false);
+import "emoji-mart/css/emoji-mart.css";
+import { Picker } from "emoji-mart";
 
-	const handleDeleteMessage = async () => {
-		try {
-			await api.delete(`/messages/${message.id}`);
-		} catch (err) {
-			toastError(err);
-		}
-	};
+const mostUsedEmojis = ["👍", "❤️", "😂", "🎉", "😮", "😢", "🙏"];
 
-	const handleReplyMessage = () => {
-		setReplyingMessage(message);
-		handleClose();
-	};
+const MessageOptionsMenu = ({
+  message,
+  data,
+  menuOpen,
+  handleClose,
+  anchorEl,
+  ticket
+}) => {
+  const classes = useStyles();
+  const restrictedTooltip = isOfficialApiConnection(ticket?.whatsapp)
+    ? i18n.t("connections.toolTips.notAvailableOfficial")
+    : null;
+  const { setReplyingMessage } = useContext(ReplyMessageContext);
+  const editingContext = useContext(EditMessageContext);
+  const setEditingMessage = editingContext
+    ? editingContext.setEditingMessage
+    : null;
 
-	const handleOpenConfirmationModal = e => {
-		setConfirmationOpen(true);
-		handleClose();
-	};
-	
-	const handleEditMessage = async () => {
-		setEditingMessage(message);
-		handleClose();
-	}
-	
-	const handleOpenMessageHistoryModal = (e) => {
-		setMessageHistoryOpen(true);
-		handleClose();
-	}
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [forwardModalOpen, setForwardModalOpen] = useState(false);
+  const [messageHistoryOpen, setMessageHistoryOpen] = useState(false);
+  const [showEmoji, setShowEmoji] = useState(false);
 
-  const isSticker = data?.message && ("stickerMessage" in data.message);
+  const closeMenu = () => {
+    handleClose();
+    setShowEmoji(false);
+  };
 
-	return (
-		<>
-			<ConfirmationModal
-				title={i18n.t("messageOptionsMenu.confirmationModal.title")}
-				open={confirmationOpen}
-				onClose={setConfirmationOpen}
-				onConfirm={handleDeleteMessage}
-			>
-				{i18n.t("messageOptionsMenu.confirmationModal.message")}
-			</ConfirmationModal>
-			<MessageHistoryModal
-                open={messageHistoryOpen}
-                onClose={setMessageHistoryOpen}
-                oldMessages={message.oldMessages}
+  const openEmoji = () => {
+    handleClose();
+    setShowEmoji(true);
+  };
+
+  const handleDeleteMessage = async () => {
+    try {
+      await api.delete(`/messages/${message.id}`);
+    } catch (err) {
+      toastError(err);
+    }
+  };
+
+  const handleReact = async emoji => {
+    handleClose();
+    api
+      .post(`/messages/react/${message.id}`, {
+        ticketId: message.ticketId,
+        emoji
+      })
+      .catch(err => {
+        toastError(err);
+      });
+    setShowEmoji(false);
+  };
+
+  const handleReplyMessage = () => {
+    setReplyingMessage(message);
+    closeMenu();
+  };
+
+  const handleOpenConfirmationModal = e => {
+    setConfirmationOpen(true);
+    closeMenu();
+  };
+
+  const handleEditMessage = async () => {
+    setEditingMessage(message);
+    closeMenu();
+  };
+
+  const handleOpenMessageHistoryModal = e => {
+    setMessageHistoryOpen(true);
+    closeMenu();
+  };
+
+  const handleOpenForwardModal = e => {
+    setForwardModalOpen(true);
+    closeMenu();
+  };
+
+  const isSticker = data?.message && "stickerMessage" in data.message;
+
+  return (
+    <>
+      <ConfirmationModal
+        title={i18n.t("messageOptionsMenu.confirmationModal.title")}
+        open={confirmationOpen}
+        onClose={setConfirmationOpen}
+        onConfirm={handleDeleteMessage}
+      >
+        {i18n.t("messageOptionsMenu.confirmationModal.message")}
+      </ConfirmationModal>
+      <MessageHistoryModal
+        open={messageHistoryOpen}
+        onClose={setMessageHistoryOpen}
+        messageId={message.id}
+      />
+      <MessageForwardModal
+        modalOpen={forwardModalOpen}
+        onClose={setForwardModalOpen}
+        ticketId={message.ticketId}
+        messageId={message.id}
+      />
+      <Dialog
+        className="conversa-dialogo"
+        open={showEmoji}
+        onClose={() => setShowEmoji(false)}
+      >
+        <Picker
+          perLine={16}
+          showPreview={false}
+          showSkinTones={false}
+          onSelect={e => handleReact(e.native)}
+        />
+      </Dialog>
+      <Menu
+        className="conversa-menu"
+        anchorEl={anchorEl}
+        getContentAnchorEl={null}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right"
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "right"
+        }}
+        open={menuOpen}
+        onClose={closeMenu}
+      >
+        <div>
+          <div className={classes.flexContainer}>
+            {mostUsedEmojis.map((emoji, index) => (
+              <div
+                className={classes.emojiButton}
+                onClick={() => handleReact(emoji)}
+                key={index}
+              >
+                <span style={{ fontSize: "1rem" }}>{emoji}</span>
+              </div>
+            ))}
+            <div className={classes.emojiButton} onClick={openEmoji}>
+              <span style={{ fontSize: "1rem" }}>+</span>
+            </div>
+          </div>
+          {message.fromMe && [
+            <Tooltip
+              key="delete"
+              title={restrictedTooltip || ""}
+              disableHoverListener={!restrictedTooltip}
             >
-            </MessageHistoryModal>
-			<Menu
-				anchorEl={anchorEl}
-				getContentAnchorEl={null}
-				anchorOrigin={{
-					vertical: "bottom",
-					horizontal: "right",
-				}}
-				transformOrigin={{
-					vertical: "top",
-					horizontal: "right",
-				}}
-				open={menuOpen}
-				onClose={handleClose}
-			>
-				{message.fromMe && [
-					<MenuItem key="delete" onClick={handleOpenConfirmationModal}>
-						{i18n.t("messageOptionsMenu.delete")}
-					</MenuItem>,
-          !isSticker && (
-					  <MenuItem key="edit" onClick={handleEditMessage}>
-			            {i18n.t("messageOptionsMenu.edit")}
-         		</MenuItem>
-			    )]}
-				{!isSticker && message.oldMessages?.length > 0 && (
-					<MenuItem key="history" onClick={handleOpenMessageHistoryModal}>
-	                    {i18n.t("messageOptionsMenu.history")}
-				    </MenuItem>
-				)}
-				<MenuItem onClick={handleReplyMessage}>
-					{i18n.t("messageOptionsMenu.reply")}
-				</MenuItem>
-			</Menu>
-		</>
-	);
+              <span>
+                <MenuItem
+                  onClick={handleOpenConfirmationModal}
+                  disabled={!!restrictedTooltip}
+                >
+                  {i18n.t("messageOptionsMenu.delete")}
+                </MenuItem>
+              </span>
+            </Tooltip>,
+            !isSticker && (
+              <Tooltip
+                key="edit"
+                title={restrictedTooltip || ""}
+                disableHoverListener={!restrictedTooltip}
+              >
+                <span>
+                  <MenuItem
+                    onClick={handleEditMessage}
+                    disabled={!!restrictedTooltip}
+                  >
+                    {i18n.t("messageOptionsMenu.edit")}
+                  </MenuItem>
+                </span>
+              </Tooltip>
+            )
+          ]}
+          {!isSticker &&
+            (message.isEdited || message.oldMessages?.length > 0) && (
+              <MenuItem key="history" onClick={handleOpenMessageHistoryModal}>
+                {i18n.t("messageOptionsMenu.history")}
+              </MenuItem>
+            )}
+          <MenuItem onClick={handleReplyMessage}>
+            {i18n.t("messageOptionsMenu.reply")}
+          </MenuItem>
+          <Tooltip
+            key="forward"
+            title={restrictedTooltip || ""}
+            disableHoverListener={!restrictedTooltip}
+          >
+            <span>
+              <MenuItem
+                onClick={handleOpenForwardModal}
+                disabled={!!restrictedTooltip}
+              >
+                {i18n.t("messageOptionsMenu.forward")}
+              </MenuItem>
+            </span>
+          </Tooltip>
+        </div>
+      </Menu>
+    </>
+  );
 };
 
 MessageOptionsMenu.propTypes = {
   message: PropTypes.object,
   menuOpen: PropTypes.bool.isRequired,
   handleClose: PropTypes.func.isRequired,
-  anchorEl: PropTypes.object
-}
+  anchorEl: PropTypes.object,
+  ticket: PropTypes.object
+};
 
 export default MessageOptionsMenu;

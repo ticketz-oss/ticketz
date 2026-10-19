@@ -1,0 +1,99 @@
+--- a/internal/voip/media/mlow/fft.go
++++ b/internal/voip/media/mlow/fft.go
+@@ -1,6 +1,10 @@
+ package mlow
+ 
+-import "math"
++import (
++	"math"
++	"sync"
++	"sync/atomic"
++)
+ 
+ // cpx is a single-precision complex value.
+ //
+@@ -9,6 +13,56 @@
+ 	re, im float32
+ }
+ 
++var (
++	fftTwiddleMu    sync.Mutex
++	fftTwiddleCache atomic.Pointer[map[int][]cpx]
++)
++
++func init() {
++	values := make(map[int][]cpx)
++	fftTwiddleCache.Store(&values)
++}
++
++// fftTwiddleMatrix caches the exact float32 angle expansion used by fftRec.
++// The transform sizes are fixed by the codec, so the matrices are built once
++// and then shared read-only by every call encoder.
++func fftTwiddleMatrix(n int, sign float32) []cpx {
++	key := n
++	if sign > 0 {
++		key = -n
++	}
++	cache := fftTwiddleCache.Load()
++	values := (*cache)[key]
++	if values != nil {
++		return values
++	}
++
++	fftTwiddleMu.Lock()
++	defer fftTwiddleMu.Unlock()
++	cache = fftTwiddleCache.Load()
++	if values = (*cache)[key]; values != nil {
++		return values
++	}
++	values = make([]cpx, n*n)
++	for k := 0; k < n; k++ {
++		angK := sign * 2.0 * smplPI * float32(k) / float32(n)
++		for j := 0; j < n; j++ {
++			ang := angK * float32(j)
++			values[k*n+j] = cpx{
++				re: float32(math.Cos(float64(ang))),
++				im: float32(math.Sin(float64(ang))),
++			}
++		}
++	}
++	next := make(map[int][]cpx, len(*cache)+1)
++	for cacheKey, cacheValues := range *cache {
++		next[cacheKey] = cacheValues
++	}
++	next[key] = values
++	fftTwiddleCache.Store(&next)
++	return values
++}
++
+ func (a cpx) add(b cpx) cpx {
+ 	return cpx{re: a.re + b.re, im: a.im + b.im}
+ }
+@@ -45,14 +99,12 @@
+ 		return
+ 	}
+ 	p := smallestFactor(n)
++	twiddles := fftTwiddleMatrix(n, sign)
+ 	if p == n {
+ 		for k := 0; k < n; k++ {
+ 			var acc cpx
+-			angK := sign * 2.0 * smplPI * float32(k) / float32(n)
+ 			for j := 0; j < n; j++ {
+-				ang := angK * float32(j)
+-				w := cpx{re: float32(math.Cos(float64(ang))), im: float32(math.Sin(float64(ang)))}
+-				acc = acc.add(x[j*stride].mul(w))
++				acc = acc.add(x[j*stride].mul(twiddles[k*n+j]))
+ 			}
+ 			out[k] = acc
+ 		}
+@@ -72,9 +124,7 @@
+ 		kmod := k % m
+ 		var acc cpx
+ 		for q := 0; q < p; q++ {
+-			ang := sign * 2.0 * smplPI * float32(k) * float32(q) / float32(n)
+-			tw := cpx{re: float32(math.Cos(float64(ang))), im: float32(math.Sin(float64(ang)))}
+-			acc = acc.add(sub[q*m+kmod].mul(tw))
++			acc = acc.add(sub[q*m+kmod].mul(twiddles[k*n+q]))
+ 		}
+ 		out[k] = acc
+ 	}

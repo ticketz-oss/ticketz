@@ -1,0 +1,37 @@
+.ticket-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  min-width: 0;
+}
+.ticket-tag,
+.ticket-tag-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  font: inherit;
+  font-size: 10px;
+  line-height: 1.5;
+  padding: 2px 7px;
+  border-radius: 6px;
+  border: 1px solid var(--ew-border, #ddd);
+  background: var(--ew-surface, transparent);
+  color: var(--ew-text, inherit);
+  overflow-wrap: anywhere;
+}
+.ticket-tag i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.ticket-tag-more {
+  cursor: pointer;
+  color: var(--ew-primary, #2563eb);
+  font-weight: 600;
+}
+.ticket-tag-more:focus-visible {
+  outline: 2px solid var(--ew-primary, #2563eb);
+  outline-offset: 2px;
+}

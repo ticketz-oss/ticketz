@@ -1,58 +1,60 @@
 import api from "../../services/api";
 
-const usePlans = () => {
+/**
+ * CRUD dos conteúdos (vídeos e artigos) da Central de Ajuda.
+ */
+const useHelps = () => {
+  const list = async params => {
+    const { data } = await api.request({
+      url: "/helps",
+      method: "GET",
+      params
+    });
+    return data;
+  };
 
-    const findAll = async (params) => {
-        const { data } = await api.request({
-            url: `/helps`,
-            method: 'GET',
-            params
-        });
-        return data;
-    }
+  const save = async data => {
+    const { data: responseData } = await api.request({
+      url: "/helps",
+      method: "POST",
+      data
+    });
+    return responseData;
+  };
 
-    const list = async (params) => {
-        const { data } = await api.request({
-            url: '/helps/list',
-            method: 'GET',
-            params
-        });
-        return data;
-    }
+  const update = async data => {
+    const { data: responseData } = await api.request({
+      url: `/helps/${data.id}`,
+      method: "PUT",
+      data
+    });
+    return responseData;
+  };
 
-    const save = async (data) => {
-        const { data: responseData } = await api.request({
-            url: '/helps',
-            method: 'POST',
-            data
-        });
-        return responseData;
-    }
+  const remove = async id => {
+    const { data } = await api.request({
+      url: `/helps/${id}`,
+      method: "DELETE"
+    });
+    return data;
+  };
 
-    const update = async (data) => {
-        const { data: responseData } = await api.request({
-            url: `/helps/${data.id}`,
-            method: 'PUT',
-            data
-        });
-        return responseData;
-    }
+  const reorder = async items => {
+    const { data } = await api.request({
+      url: "/helps/reorder",
+      method: "PUT",
+      data: { items }
+    });
+    return data;
+  };
 
-    const remove = async (id) => {
-        const { data } = await api.request({
-            url: `/helps/${id}`,
-            method: 'DELETE'
-        });
-        return data;
-    }
+  return {
+    list,
+    save,
+    update,
+    remove,
+    reorder
+  };
+};
 
-    return {
-        findAll,
-        list,
-        save,
-        update,
-        remove
-    }
-}
-
-export default usePlans;
+export default useHelps;

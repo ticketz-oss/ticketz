@@ -1,0 +1,3595 @@
+{
+  "version": "2026-10-13",
+  "modules": [
+    {
+      "id": "message",
+      "name": "Mensagens",
+      "description": "Envio de texto e mídia, respostas, templates, reações, edição, encaminhamento e histórico. O envio acontece dentro de um atendimento e exige JWT de usuário, conexão disponível e assinatura em conformidade.",
+      "count": 8
+    },
+    {
+      "id": "contact",
+      "name": "Contatos",
+      "description": "Cadastro, pesquisa, campos adicionais, etiquetas, fotos e importação/exportação. As operações com token de contatos estão identificadas individualmente; importação e exportação exigem sessão de administrador.",
+      "count": 15
+    },
+    {
+      "id": "ticket",
+      "name": "Atendimentos",
+      "description": "Abertura, consulta, atualização, transferência, templates e encerramento de atendimentos. O acesso respeita empresa, filas e permissões do usuário.",
+      "count": 8
+    },
+    {
+      "id": "auth",
+      "name": "Autenticação",
+      "description": "Login por senha, identificação da empresa, ativação, renovação e encerramento de sessão, acesso social e impersonação administrativa. Cookies e tokens de cada fluxo não são intercambiáveis.",
+      "count": 11
+    },
+    {
+      "id": "whatsapp",
+      "name": "Conexões WhatsApp",
+      "description": "Cadastro, consulta, configuração e privacidade das conexões. As operações administrativas exigem o perfil indicado na rota.",
+      "count": 7
+    },
+    {
+      "id": "whatsappSession",
+      "name": "Sessões WhatsApp",
+      "description": "Início, atualização e encerramento da sessão de uma conexão WhatsApp.",
+      "count": 7
+    },
+    {
+      "id": "partnerAdmin",
+      "name": "Administração de parceiros",
+      "description": "Gestão interna de parceiros e operações do programa, sujeita a permissões administrativas.",
+      "count": 8
+    },
+    {
+      "id": "billingAdmin",
+      "name": "Administração financeira",
+      "description": "Gestão financeira central, planos, cobranças e operações administrativas. Acesso restrito ao administrador financeiro autorizado.",
+      "count": 13
+    },
+    {
+      "id": "schedule",
+      "name": "Agendamentos",
+      "description": "Mensagens programadas, prévia, variáveis, entregas, recorrência e envio imediato. Mídia usa multipart/form-data; o campo payload pode conter o JSON do agendamento.",
+      "count": 9
+    },
+    {
+      "id": "agent",
+      "name": "Agente",
+      "description": "Disponibilidade, conversas, sessões temporárias, ferramentas e contexto do agente. Recursos dependem de habilitação por empresa; administração do contexto é restrita.",
+      "count": 10
+    },
+    {
+      "id": "help",
+      "name": "Ajuda",
+      "description": "Conteúdos de ajuda e seus arquivos, conforme o acesso disponível.",
+      "count": 8
+    },
+    {
+      "id": "platform",
+      "name": "API da plataforma",
+      "description": "Gestão administrativa de tenants, planos, uso, acesso e financeiro em /api/platform/v1. Chave X-Platform-Key própria e Idempotency-Key UUID v4 obrigatório nas mutações protegidas. Não é a credencial de integração de uma empresa.",
+      "count": 15
+    },
+    {
+      "id": "pwa",
+      "name": "Aplicativo web",
+      "description": "Manifesto e recursos de apresentação do aplicativo instalável.",
+      "count": 2
+    },
+    {
+      "id": "files",
+      "name": "Arquivos públicos",
+      "description": "Download dos arquivos publicados em /public. O parâmetro inline=1 solicita exibição no navegador. O caminho é relativo ao diretório público de uploads.",
+      "count": 1
+    },
+    {
+      "id": "subScription",
+      "name": "Assinaturas",
+      "description": "Assinaturas, pagamento, contratação e callbacks associados aos provedores. Algumas rotas são fluxos próprios, não endpoints para uso com JWT.",
+      "count": 4
+    },
+    {
+      "id": "mobileAuth",
+      "name": "Autenticação móvel",
+      "description": "Configuração, autorização e troca de credenciais do login móvel. Disponibilidade condicionada à configuração do ambiente.",
+      "count": 3
+    },
+    {
+      "id": "announcement",
+      "name": "Avisos",
+      "description": "Feed, cadastro e mídia de comunicados para usuários.",
+      "count": 9
+    },
+    {
+      "id": "campaign",
+      "name": "Campanhas",
+      "description": "Cadastro, listas, mídia, execução, interrupção e retomada de campanhas de mensagens.",
+      "count": 10
+    },
+    {
+      "id": "voice",
+      "name": "Chamadas de voz",
+      "description": "Conexões de voz, pareamento, aceite, rejeição, encerramento, WebRTC, gravações e artefatos. Requer serviço de voz habilitado.",
+      "count": 9
+    },
+    {
+      "id": "chat",
+      "name": "Chat interno",
+      "description": "Conversas e mensagens internas entre usuários; não corresponde ao envio para WhatsApp.",
+      "count": 8
+    },
+    {
+      "id": "og",
+      "name": "Compartilhamento e páginas públicas",
+      "description": "Metadados de compartilhamento, páginas legais e apresentação pública.",
+      "count": 1
+    },
+    {
+      "id": "setting",
+      "name": "Configurações",
+      "description": "Preferências da empresa e ajustes públicos de apresentação. As rotas administrativas e públicas são distintas.",
+      "count": 7
+    },
+    {
+      "id": "campaignSetting",
+      "name": "Configurações de campanhas",
+      "description": "Parâmetros de operação das campanhas da empresa.",
+      "count": 2
+    },
+    {
+      "id": "commemorativeDate",
+      "name": "Datas comemorativas",
+      "description": "Datas utilizadas pelos fluxos de relacionamento e agendamento.",
+      "count": 4
+    },
+    {
+      "id": "company",
+      "name": "Empresas",
+      "description": "Administração de empresas e seus recursos. A existência da rota não concede acesso a outras empresas.",
+      "count": 8
+    },
+    {
+      "id": "tag",
+      "name": "Etiquetas",
+      "description": "Organização de contatos e atendimentos por etiquetas e configurações relacionadas.",
+      "count": 7
+    },
+    {
+      "id": "ticketTag",
+      "name": "Etiquetas de atendimentos",
+      "description": "Vinculação e remoção de etiquetas dos atendimentos.",
+      "count": 3
+    },
+    {
+      "id": "buildCaptureExtension",
+      "name": "Extensão de captura",
+      "description": "Geração da extensão de captura integrada ao sistema.",
+      "count": 1
+    },
+    {
+      "id": "invoices",
+      "name": "Faturas",
+      "description": "Consulta e gerenciamento de faturas conforme as permissões e o fluxo financeiro.",
+      "count": 6
+    },
+    {
+      "id": "queue",
+      "name": "Filas",
+      "description": "Filas de atendimento, usuários e configurações de distribuição.",
+      "count": 10
+    },
+    {
+      "id": "whatsappGroup",
+      "name": "Grupos",
+      "description": "Listagem, participantes, permissões, leitura, modo de operação e administração de grupos. Disponibilidade e acesso dependem da empresa, conexão e participação do usuário.",
+      "count": 5
+    },
+    {
+      "id": "helpGroup",
+      "name": "Grupos de ajuda",
+      "description": "Organização e gerenciamento dos conteúdos da central de ajuda.",
+      "count": 6
+    },
+    {
+      "id": "dashboard",
+      "name": "Indicadores",
+      "description": "Consultas de métricas e informações do painel, conforme a empresa e o perfil autenticado.",
+      "count": 5
+    },
+    {
+      "id": "chatGpt",
+      "name": "Integração ChatGPT",
+      "description": "Consulta e revogação de autorizações e controle administrativo de habilitação da integração existente.",
+      "count": 4
+    },
+    {
+      "id": "contactListItem",
+      "name": "Itens das listas",
+      "description": "Destinatários e dados individuais das listas de contatos.",
+      "count": 6
+    },
+    {
+      "id": "contactList",
+      "name": "Listas de contatos",
+      "description": "Listas utilizadas nas campanhas, importação e organização de destinatários.",
+      "count": 7
+    },
+    {
+      "id": "mcp",
+      "name": "MCP existente",
+      "description": "Transporte HTTP do MCP já presente no código, protegido por OAuth e escopos. Depende de configuração e habilitação; esta documentação não ativa, expande ou oferece um novo MCP.",
+      "count": 1
+    },
+    {
+      "id": "ticketNote",
+      "name": "Notas de atendimentos",
+      "description": "Registro, consulta e manutenção de anotações ligadas aos atendimentos.",
+      "count": 6
+    },
+    {
+      "id": "push",
+      "name": "Notificações push",
+      "description": "Registro e remoção de inscrições, preferências e recursos de notificações do navegador.",
+      "count": 3
+    },
+    {
+      "id": "oauth",
+      "name": "OAuth e descoberta",
+      "description": "Metadados, chaves públicas, registro de cliente, autorização, consentimento, emissão e revogação de tokens da integração existente. Use o fluxo completo, sem substituir JWT de usuário por token OAuth.",
+      "count": 11
+    },
+    {
+      "id": "queueOption",
+      "name": "Opções de filas",
+      "description": "Opções e etapas do atendimento automatizado configuradas nas filas.",
+      "count": 8
+    },
+    {
+      "id": "plan",
+      "name": "Planos",
+      "description": "Consulta e administração de planos, limites e recursos disponíveis.",
+      "count": 8
+    },
+    {
+      "id": "partner",
+      "name": "Portal de parceiros",
+      "description": "Autenticação, convites, empresas, planos, repasses e preferências de parceiros. JWT e renovação próprios do portal.",
+      "count": 16
+    },
+    {
+      "id": "ticketzOSS",
+      "name": "Projeto e licença",
+      "description": "Informações do projeto e recursos relacionados à distribuição do software.",
+      "count": 2
+    },
+    {
+      "id": "prospeccao",
+      "name": "Prospecção",
+      "description": "Produtos, localidades, buscas, leads, abertura de conversa e automações. Módulo com autorização específica.",
+      "count": 11
+    },
+    {
+      "id": "taskBoard",
+      "name": "Quadro de tarefas",
+      "description": "Tarefas, colunas, ordenação e movimentação no quadro. Gerenciamento de estrutura e tarefas exige as permissões indicadas.",
+      "count": 10
+    },
+    {
+      "id": "quickMessage",
+      "name": "Respostas rápidas",
+      "description": "Textos e arquivos reutilizáveis durante o atendimento.",
+      "count": 6
+    },
+    {
+      "id": "whatsappStatus",
+      "name": "Status do WhatsApp",
+      "description": "Rascunhos, agendamento, publicação e mídia dos Status (stories) da própria conta conectada. Disponível só para empresas habilitadas pelo superadministrador; conexões da API oficial da Meta ficam em rascunho, prévia e download.",
+      "count": 9
+    },
+    {
+      "id": "whatsappStatusAdmin",
+      "name": "Status do WhatsApp: disponibilidade",
+      "description": "Consulta se a empresa pode usar Status do WhatsApp e, para o superadministrador, liga ou desliga a função por empresa.",
+      "count": 3
+    },
+    {
+      "id": "i18n",
+      "name": "Traduções",
+      "description": "Idiomas e dicionários utilizados pela aplicação.",
+      "count": 3
+    },
+    {
+      "id": "user",
+      "name": "Usuários",
+      "description": "Usuários, perfis, disponibilidade e configurações de acesso dentro das regras administrativas da empresa.",
+      "count": 8
+    },
+    {
+      "id": "version",
+      "name": "Versão",
+      "description": "Informações sobre a versão instalada da aplicação.",
+      "count": 1
+    },
+    {
+      "id": "wavoip",
+      "name": "WaVoIP",
+      "description": "Recursos da integração de telefonia WaVoIP, sujeitos à configuração do provedor.",
+      "count": 3
+    },
+    {
+      "id": "metaWhatsappWebhook",
+      "name": "Webhooks Meta",
+      "description": "Verificação e recebimento de eventos enviados pela Meta. Fluxo do provedor com validação própria; não é um webhook genérico para integrações de clientes.",
+      "count": 2
+    },
+    {
+      "id": "metaWhatsapp",
+      "name": "WhatsApp oficial",
+      "description": "Configuração e onboarding da integração Meta, templates, conta de negócios e recursos de cobrança associados. Requer configuração e habilitação da integração oficial.",
+      "count": 4
+    }
+  ],
+  "operations": [
+    {
+      "id": "post-messages-ticketId",
+      "method": "POST",
+      "path": "/messages/:ticketId",
+      "module": "message",
+      "summary": "Enviar texto ou mídia",
+      "auth": "session",
+      "reviewed": true
+    },
+    {
+      "id": "get-agent-availability",
+      "method": "GET",
+      "path": "/agent/availability",
+      "module": "agent",
+      "summary": "Consultar /agent/availability",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-agent-chat",
+      "method": "POST",
+      "path": "/agent/chat",
+      "module": "agent",
+      "summary": "Executar /agent/chat",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-agent-sessions",
+      "method": "POST",
+      "path": "/agent/sessions",
+      "module": "agent",
+      "summary": "Executar /agent/sessions",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-agent-sessions-sessionId-heartbeat",
+      "method": "POST",
+      "path": "/agent/sessions/:sessionId/heartbeat",
+      "module": "agent",
+      "summary": "Executar /agent/sessions/:sessionId/heartbeat",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-agent-sessions-sessionId",
+      "method": "DELETE",
+      "path": "/agent/sessions/:sessionId",
+      "module": "agent",
+      "summary": "Remover /agent/sessions/:sessionId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-agent-tools",
+      "method": "POST",
+      "path": "/agent/tools",
+      "module": "agent",
+      "summary": "Executar /agent/tools",
+      "auth": "agent",
+      "reviewed": false
+    },
+    {
+      "id": "get-agent-admin-companies",
+      "method": "GET",
+      "path": "/agent/admin/companies",
+      "module": "agent",
+      "summary": "Consultar /agent/admin/companies",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-agent-admin-companies-companyId-context",
+      "method": "GET",
+      "path": "/agent/admin/companies/:companyId/context",
+      "module": "agent",
+      "summary": "Consultar /agent/admin/companies/:companyId/context",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-agent-admin-companies-companyId-context",
+      "method": "PUT",
+      "path": "/agent/admin/companies/:companyId/context",
+      "module": "agent",
+      "summary": "Atualizar /agent/admin/companies/:companyId/context",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-agent-admin-companies-companyId-context-rebuild",
+      "method": "POST",
+      "path": "/agent/admin/companies/:companyId/context/rebuild",
+      "module": "agent",
+      "summary": "Executar /agent/admin/companies/:companyId/context/rebuild",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-api-platform-v1-health",
+      "method": "GET",
+      "path": "/api/platform/v1/health",
+      "module": "platform",
+      "summary": "Consultar saúde da plataforma",
+      "auth": "flow",
+      "reviewed": true
+    },
+    {
+      "id": "post-api-platform-v1-acesso-trocar",
+      "method": "POST",
+      "path": "/api/platform/v1/acesso/trocar",
+      "module": "platform",
+      "summary": "Executar /api/platform/v1/acesso/trocar",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "post-api-platform-v1-tenants",
+      "method": "POST",
+      "path": "/api/platform/v1/tenants",
+      "module": "platform",
+      "summary": "Executar /api/platform/v1/tenants",
+      "auth": "platform",
+      "reviewed": false
+    },
+    {
+      "id": "get-api-platform-v1-tenants-id",
+      "method": "GET",
+      "path": "/api/platform/v1/tenants/:id",
+      "module": "platform",
+      "summary": "Consultar /api/platform/v1/tenants/:id",
+      "auth": "platform",
+      "reviewed": false
+    },
+    {
+      "id": "patch-api-platform-v1-tenants-id",
+      "method": "PATCH",
+      "path": "/api/platform/v1/tenants/:id",
+      "module": "platform",
+      "summary": "Atualizar parcialmente /api/platform/v1/tenants/:id",
+      "auth": "platform",
+      "reviewed": false
+    },
+    {
+      "id": "post-api-platform-v1-tenants-id-suspensao",
+      "method": "POST",
+      "path": "/api/platform/v1/tenants/:id/suspensao",
+      "module": "platform",
+      "summary": "Executar /api/platform/v1/tenants/:id/suspensao",
+      "auth": "platform",
+      "reviewed": false
+    },
+    {
+      "id": "delete-api-platform-v1-tenants-id",
+      "method": "DELETE",
+      "path": "/api/platform/v1/tenants/:id",
+      "module": "platform",
+      "summary": "Remover /api/platform/v1/tenants/:id",
+      "auth": "platform",
+      "reviewed": false
+    },
+    {
+      "id": "get-api-platform-v1-planos",
+      "method": "GET",
+      "path": "/api/platform/v1/planos",
+      "module": "platform",
+      "summary": "Consultar /api/platform/v1/planos",
+      "auth": "platform",
+      "reviewed": false
+    },
+    {
+      "id": "get-api-platform-v1-tenants-id-uso",
+      "method": "GET",
+      "path": "/api/platform/v1/tenants/:id/uso",
+      "module": "platform",
+      "summary": "Consultar /api/platform/v1/tenants/:id/uso",
+      "auth": "platform",
+      "reviewed": false
+    },
+    {
+      "id": "post-api-platform-v1-tenants-id-acesso",
+      "method": "POST",
+      "path": "/api/platform/v1/tenants/:id/acesso",
+      "module": "platform",
+      "summary": "Executar /api/platform/v1/tenants/:id/acesso",
+      "auth": "platform",
+      "reviewed": false
+    },
+    {
+      "id": "get-api-platform-v1-tenants-id-financeiro",
+      "method": "GET",
+      "path": "/api/platform/v1/tenants/:id/financeiro",
+      "module": "platform",
+      "summary": "Consultar /api/platform/v1/tenants/:id/financeiro",
+      "auth": "platform",
+      "reviewed": false
+    },
+    {
+      "id": "post-api-platform-v1-tenants-id-financeiro",
+      "method": "POST",
+      "path": "/api/platform/v1/tenants/:id/financeiro",
+      "module": "platform",
+      "summary": "Executar /api/platform/v1/tenants/:id/financeiro",
+      "auth": "platform",
+      "reviewed": false
+    },
+    {
+      "id": "get-api-platform-v1-financeiro-id",
+      "method": "GET",
+      "path": "/api/platform/v1/financeiro/:id",
+      "module": "platform",
+      "summary": "Consultar /api/platform/v1/financeiro/:id",
+      "auth": "platform",
+      "reviewed": false
+    },
+    {
+      "id": "patch-api-platform-v1-financeiro-id",
+      "method": "PATCH",
+      "path": "/api/platform/v1/financeiro/:id",
+      "module": "platform",
+      "summary": "Atualizar parcialmente /api/platform/v1/financeiro/:id",
+      "auth": "platform",
+      "reviewed": false
+    },
+    {
+      "id": "delete-api-platform-v1-financeiro-id",
+      "method": "DELETE",
+      "path": "/api/platform/v1/financeiro/:id",
+      "module": "platform",
+      "summary": "Remover /api/platform/v1/financeiro/:id",
+      "auth": "platform",
+      "reviewed": false
+    },
+    {
+      "id": "get-billing-admin-overview",
+      "method": "GET",
+      "path": "/billing-admin/overview",
+      "module": "billingAdmin",
+      "summary": "Consultar /billing-admin/overview",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-billing-admin-gateway",
+      "method": "GET",
+      "path": "/billing-admin/gateway",
+      "module": "billingAdmin",
+      "summary": "Consultar /billing-admin/gateway",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-billing-admin-plans",
+      "method": "GET",
+      "path": "/billing-admin/plans",
+      "module": "billingAdmin",
+      "summary": "Consultar /billing-admin/plans",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-billing-admin-clients",
+      "method": "GET",
+      "path": "/billing-admin/clients",
+      "module": "billingAdmin",
+      "summary": "Consultar /billing-admin/clients",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-billing-admin-clients-id",
+      "method": "PUT",
+      "path": "/billing-admin/clients/:id",
+      "module": "billingAdmin",
+      "summary": "Atualizar /billing-admin/clients/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-billing-admin-invoices",
+      "method": "GET",
+      "path": "/billing-admin/invoices",
+      "module": "billingAdmin",
+      "summary": "Consultar /billing-admin/invoices",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-billing-admin-invoices",
+      "method": "POST",
+      "path": "/billing-admin/invoices",
+      "module": "billingAdmin",
+      "summary": "Executar /billing-admin/invoices",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-billing-admin-invoices-id",
+      "method": "GET",
+      "path": "/billing-admin/invoices/:id",
+      "module": "billingAdmin",
+      "summary": "Consultar /billing-admin/invoices/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-billing-admin-invoices-id",
+      "method": "PUT",
+      "path": "/billing-admin/invoices/:id",
+      "module": "billingAdmin",
+      "summary": "Atualizar /billing-admin/invoices/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-billing-admin-invoices-id",
+      "method": "DELETE",
+      "path": "/billing-admin/invoices/:id",
+      "module": "billingAdmin",
+      "summary": "Remover /billing-admin/invoices/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-billing-admin-invoices-id-charge",
+      "method": "POST",
+      "path": "/billing-admin/invoices/:id/charge",
+      "module": "billingAdmin",
+      "summary": "Executar /billing-admin/invoices/:id/charge",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-billing-admin-invoices-id-send",
+      "method": "POST",
+      "path": "/billing-admin/invoices/:id/send",
+      "module": "billingAdmin",
+      "summary": "Executar /billing-admin/invoices/:id/send",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-billing-admin-invoices-id-refresh",
+      "method": "POST",
+      "path": "/billing-admin/invoices/:id/refresh",
+      "module": "billingAdmin",
+      "summary": "Executar /billing-admin/invoices/:id/refresh",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-prospeccao-produtos",
+      "method": "GET",
+      "path": "/prospeccao/produtos",
+      "module": "prospeccao",
+      "summary": "Consultar /prospeccao/produtos",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-prospeccao-localidades-paises",
+      "method": "GET",
+      "path": "/prospeccao/localidades/paises",
+      "module": "prospeccao",
+      "summary": "Consultar /prospeccao/localidades/paises",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-prospeccao-localidades-estados",
+      "method": "GET",
+      "path": "/prospeccao/localidades/estados",
+      "module": "prospeccao",
+      "summary": "Consultar /prospeccao/localidades/estados",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-prospeccao-localidades-cidades",
+      "method": "GET",
+      "path": "/prospeccao/localidades/cidades",
+      "module": "prospeccao",
+      "summary": "Consultar /prospeccao/localidades/cidades",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-prospeccao-automacao",
+      "method": "GET",
+      "path": "/prospeccao/automacao",
+      "module": "prospeccao",
+      "summary": "Consultar /prospeccao/automacao",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-prospeccao-automacao",
+      "method": "PUT",
+      "path": "/prospeccao/automacao",
+      "module": "prospeccao",
+      "summary": "Atualizar /prospeccao/automacao",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "patch-prospeccao-automacao-ativacao",
+      "method": "PATCH",
+      "path": "/prospeccao/automacao/ativacao",
+      "module": "prospeccao",
+      "summary": "Atualizar parcialmente /prospeccao/automacao/ativacao",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-prospeccao-leads",
+      "method": "GET",
+      "path": "/prospeccao/leads",
+      "module": "prospeccao",
+      "summary": "Consultar /prospeccao/leads",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-prospeccao-leads-leadId-conversa",
+      "method": "POST",
+      "path": "/prospeccao/leads/:leadId/conversa",
+      "module": "prospeccao",
+      "summary": "Executar /prospeccao/leads/:leadId/conversa",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-prospeccao-buscas",
+      "method": "POST",
+      "path": "/prospeccao/buscas",
+      "module": "prospeccao",
+      "summary": "Executar /prospeccao/buscas",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-prospeccao-buscas-jobId",
+      "method": "GET",
+      "path": "/prospeccao/buscas/:jobId",
+      "module": "prospeccao",
+      "summary": "Consultar /prospeccao/buscas/:jobId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-task-board",
+      "method": "GET",
+      "path": "/task-board",
+      "module": "taskBoard",
+      "summary": "Consultar /task-board",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-task-board-tasks-id",
+      "method": "GET",
+      "path": "/task-board/tasks/:id",
+      "module": "taskBoard",
+      "summary": "Consultar /task-board/tasks/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-task-board-columns",
+      "method": "POST",
+      "path": "/task-board/columns",
+      "module": "taskBoard",
+      "summary": "Executar /task-board/columns",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-task-board-columns-reorder",
+      "method": "PUT",
+      "path": "/task-board/columns/reorder",
+      "module": "taskBoard",
+      "summary": "Atualizar /task-board/columns/reorder",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-task-board-columns-id",
+      "method": "PUT",
+      "path": "/task-board/columns/:id",
+      "module": "taskBoard",
+      "summary": "Atualizar /task-board/columns/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-task-board-columns-id",
+      "method": "DELETE",
+      "path": "/task-board/columns/:id",
+      "module": "taskBoard",
+      "summary": "Remover /task-board/columns/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-task-board-tasks",
+      "method": "POST",
+      "path": "/task-board/tasks",
+      "module": "taskBoard",
+      "summary": "Executar /task-board/tasks",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-task-board-tasks-id",
+      "method": "PUT",
+      "path": "/task-board/tasks/:id",
+      "module": "taskBoard",
+      "summary": "Atualizar /task-board/tasks/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-task-board-tasks-id-move",
+      "method": "PUT",
+      "path": "/task-board/tasks/:id/move",
+      "module": "taskBoard",
+      "summary": "Atualizar /task-board/tasks/:id/move",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-task-board-tasks-id",
+      "method": "DELETE",
+      "path": "/task-board/tasks/:id",
+      "module": "taskBoard",
+      "summary": "Remover /task-board/tasks/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-voice-connections",
+      "method": "GET",
+      "path": "/voice/connections",
+      "module": "voice",
+      "summary": "Consultar /voice/connections",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-voice-connections-whatsappId-pair",
+      "method": "POST",
+      "path": "/voice/connections/:whatsappId/pair",
+      "module": "voice",
+      "summary": "Executar /voice/connections/:whatsappId/pair",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-voice-calls-callId-recording",
+      "method": "GET",
+      "path": "/voice/calls/:callId/recording",
+      "module": "voice",
+      "summary": "Consultar /voice/calls/:callId/recording",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-voice-connections-whatsappId",
+      "method": "DELETE",
+      "path": "/voice/connections/:whatsappId",
+      "module": "voice",
+      "summary": "Remover /voice/connections/:whatsappId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-voice-calls-callId-accept",
+      "method": "POST",
+      "path": "/voice/calls/:callId/accept",
+      "module": "voice",
+      "summary": "Executar /voice/calls/:callId/accept",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-voice-calls-callId-reject",
+      "method": "POST",
+      "path": "/voice/calls/:callId/reject",
+      "module": "voice",
+      "summary": "Executar /voice/calls/:callId/reject",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-voice-calls-callId-end",
+      "method": "POST",
+      "path": "/voice/calls/:callId/end",
+      "module": "voice",
+      "summary": "Executar /voice/calls/:callId/end",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-voice-calls-callId-artifact",
+      "method": "POST",
+      "path": "/voice/calls/:callId/artifact",
+      "module": "voice",
+      "summary": "Executar /voice/calls/:callId/artifact",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-voice-calls-callId-webrtc",
+      "method": "POST",
+      "path": "/voice/calls/:callId/webrtc",
+      "module": "voice",
+      "summary": "Executar /voice/calls/:callId/webrtc",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-whatsapp-groups",
+      "method": "GET",
+      "path": "/whatsapp-groups",
+      "module": "whatsappGroup",
+      "summary": "Consultar /whatsapp-groups",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-whatsapp-groups-unread-count",
+      "method": "GET",
+      "path": "/whatsapp-groups/unread-count",
+      "module": "whatsappGroup",
+      "summary": "Consultar /whatsapp-groups/unread-count",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-whatsapp-groups-ticketId-participants",
+      "method": "GET",
+      "path": "/whatsapp-groups/:ticketId/participants",
+      "module": "whatsappGroup",
+      "summary": "Consultar /whatsapp-groups/:ticketId/participants",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-whatsapp-groups-ticketId",
+      "method": "PUT",
+      "path": "/whatsapp-groups/:ticketId",
+      "module": "whatsappGroup",
+      "summary": "Atualizar /whatsapp-groups/:ticketId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-whatsapp-groups-ticketId-read",
+      "method": "POST",
+      "path": "/whatsapp-groups/:ticketId/read",
+      "module": "whatsappGroup",
+      "summary": "Executar /whatsapp-groups/:ticketId/read",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-well-known-oauth-protected-resource",
+      "method": "GET",
+      "path": "/.well-known/oauth-protected-resource",
+      "module": "oauth",
+      "summary": "Consultar /.well-known/oauth-protected-resource",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "get-well-known-oauth-authorization-server",
+      "method": "GET",
+      "path": "/.well-known/oauth-authorization-server",
+      "module": "oauth",
+      "summary": "Consultar /.well-known/oauth-authorization-server",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "get-well-known-jwks-json",
+      "method": "GET",
+      "path": "/.well-known/jwks.json",
+      "module": "oauth",
+      "summary": "Consultar /.well-known/jwks.json",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "post-oauth-register",
+      "method": "POST",
+      "path": "/oauth/register",
+      "module": "oauth",
+      "summary": "Executar /oauth/register",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "get-oauth-authorize",
+      "method": "GET",
+      "path": "/oauth/authorize",
+      "module": "oauth",
+      "summary": "Consultar /oauth/authorize",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "post-oauth-authorize-identify",
+      "method": "POST",
+      "path": "/oauth/authorize/identify",
+      "module": "oauth",
+      "summary": "Executar /oauth/authorize/identify",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "post-oauth-authorize-restart",
+      "method": "POST",
+      "path": "/oauth/authorize/restart",
+      "module": "oauth",
+      "summary": "Executar /oauth/authorize/restart",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "post-oauth-authorize-approve",
+      "method": "POST",
+      "path": "/oauth/authorize/approve",
+      "module": "oauth",
+      "summary": "Executar /oauth/authorize/approve",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "post-oauth-authorize-cancel",
+      "method": "POST",
+      "path": "/oauth/authorize/cancel",
+      "module": "oauth",
+      "summary": "Executar /oauth/authorize/cancel",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "post-oauth-token",
+      "method": "POST",
+      "path": "/oauth/token",
+      "module": "oauth",
+      "summary": "Executar /oauth/token",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "post-oauth-revoke",
+      "method": "POST",
+      "path": "/oauth/revoke",
+      "module": "oauth",
+      "summary": "Executar /oauth/revoke",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "post-mcp",
+      "method": "POST",
+      "path": "/mcp",
+      "module": "mcp",
+      "summary": "Enviar requisição ao MCP existente",
+      "auth": "oauth",
+      "reviewed": true
+    },
+    {
+      "id": "get-chatgpt-integration",
+      "method": "GET",
+      "path": "/chatgpt/integration",
+      "module": "chatGpt",
+      "summary": "Consultar /chatgpt/integration",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-chatgpt-integration-grants",
+      "method": "DELETE",
+      "path": "/chatgpt/integration/grants",
+      "module": "chatGpt",
+      "summary": "Remover /chatgpt/integration/grants",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-chatgpt-integration-grants-grantId",
+      "method": "DELETE",
+      "path": "/chatgpt/integration/grants/:grantId",
+      "module": "chatGpt",
+      "summary": "Remover /chatgpt/integration/grants/:grantId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-chatgpt-pilot-companyId",
+      "method": "PUT",
+      "path": "/chatgpt/pilot/:companyId",
+      "module": "chatGpt",
+      "summary": "Atualizar /chatgpt/pilot/:companyId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-commemorative-dates",
+      "method": "GET",
+      "path": "/commemorative-dates",
+      "module": "commemorativeDate",
+      "summary": "Consultar /commemorative-dates",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-commemorative-dates",
+      "method": "POST",
+      "path": "/commemorative-dates",
+      "module": "commemorativeDate",
+      "summary": "Executar /commemorative-dates",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-commemorative-dates-id",
+      "method": "PUT",
+      "path": "/commemorative-dates/:id",
+      "module": "commemorativeDate",
+      "summary": "Atualizar /commemorative-dates/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-commemorative-dates-id",
+      "method": "DELETE",
+      "path": "/commemorative-dates/:id",
+      "module": "commemorativeDate",
+      "summary": "Remover /commemorative-dates/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-partner-auth-login",
+      "method": "POST",
+      "path": "/partner/auth/login",
+      "module": "partner",
+      "summary": "Executar /partner/auth/login",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "post-partner-auth-refresh-token",
+      "method": "POST",
+      "path": "/partner/auth/refresh_token",
+      "module": "partner",
+      "summary": "Executar /partner/auth/refresh_token",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "get-partner-invite-token",
+      "method": "GET",
+      "path": "/partner/invite/:token",
+      "module": "partner",
+      "summary": "Consultar /partner/invite/:token",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "post-partner-invite-token",
+      "method": "POST",
+      "path": "/partner/invite/:token",
+      "module": "partner",
+      "summary": "Executar /partner/invite/:token",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "get-partner-auth-me",
+      "method": "GET",
+      "path": "/partner/auth/me",
+      "module": "partner",
+      "summary": "Consultar /partner/auth/me",
+      "auth": "partner",
+      "reviewed": false
+    },
+    {
+      "id": "delete-partner-auth-logout",
+      "method": "DELETE",
+      "path": "/partner/auth/logout",
+      "module": "partner",
+      "summary": "Remover /partner/auth/logout",
+      "auth": "partner",
+      "reviewed": false
+    },
+    {
+      "id": "get-partner-companies",
+      "method": "GET",
+      "path": "/partner/companies",
+      "module": "partner",
+      "summary": "Consultar /partner/companies",
+      "auth": "partner",
+      "reviewed": false
+    },
+    {
+      "id": "post-partner-companies",
+      "method": "POST",
+      "path": "/partner/companies",
+      "module": "partner",
+      "summary": "Executar /partner/companies",
+      "auth": "partner",
+      "reviewed": false
+    },
+    {
+      "id": "get-partner-companies-id",
+      "method": "GET",
+      "path": "/partner/companies/:id",
+      "module": "partner",
+      "summary": "Consultar /partner/companies/:id",
+      "auth": "partner",
+      "reviewed": false
+    },
+    {
+      "id": "put-partner-companies-id",
+      "method": "PUT",
+      "path": "/partner/companies/:id",
+      "module": "partner",
+      "summary": "Atualizar /partner/companies/:id",
+      "auth": "partner",
+      "reviewed": false
+    },
+    {
+      "id": "get-partner-plans",
+      "method": "GET",
+      "path": "/partner/plans",
+      "module": "partner",
+      "summary": "Consultar /partner/plans",
+      "auth": "partner",
+      "reviewed": false
+    },
+    {
+      "id": "get-partner-payouts",
+      "method": "GET",
+      "path": "/partner/payouts",
+      "module": "partner",
+      "summary": "Consultar /partner/payouts",
+      "auth": "partner",
+      "reviewed": false
+    },
+    {
+      "id": "get-partner-settings",
+      "method": "GET",
+      "path": "/partner/settings",
+      "module": "partner",
+      "summary": "Consultar /partner/settings",
+      "auth": "partner",
+      "reviewed": false
+    },
+    {
+      "id": "put-partner-settings",
+      "method": "PUT",
+      "path": "/partner/settings",
+      "module": "partner",
+      "summary": "Atualizar /partner/settings",
+      "auth": "partner",
+      "reviewed": false
+    },
+    {
+      "id": "get-partner-helps",
+      "method": "GET",
+      "path": "/partner/helps",
+      "module": "partner",
+      "summary": "Consultar /partner/helps",
+      "auth": "partner",
+      "reviewed": false
+    },
+    {
+      "id": "get-partner-help-groups-id",
+      "method": "GET",
+      "path": "/partner/help-groups/:id",
+      "module": "partner",
+      "summary": "Consultar /partner/help-groups/:id",
+      "auth": "partner",
+      "reviewed": false
+    },
+    {
+      "id": "get-partners",
+      "method": "GET",
+      "path": "/partners",
+      "module": "partnerAdmin",
+      "summary": "Consultar /partners",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-partners",
+      "method": "POST",
+      "path": "/partners",
+      "module": "partnerAdmin",
+      "summary": "Executar /partners",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-partners-payouts",
+      "method": "GET",
+      "path": "/partners/payouts",
+      "module": "partnerAdmin",
+      "summary": "Consultar /partners/payouts",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-partners-payouts-id-retry",
+      "method": "POST",
+      "path": "/partners/payouts/:id/retry",
+      "module": "partnerAdmin",
+      "summary": "Executar /partners/payouts/:id/retry",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-partners-id",
+      "method": "GET",
+      "path": "/partners/:id",
+      "module": "partnerAdmin",
+      "summary": "Consultar /partners/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-partners-id",
+      "method": "PUT",
+      "path": "/partners/:id",
+      "module": "partnerAdmin",
+      "summary": "Atualizar /partners/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-partners-id",
+      "method": "DELETE",
+      "path": "/partners/:id",
+      "module": "partnerAdmin",
+      "summary": "Remover /partners/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-partners-id-invite-link",
+      "method": "POST",
+      "path": "/partners/:id/invite-link",
+      "module": "partnerAdmin",
+      "summary": "Executar /partners/:id/invite-link",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-users-userId-photo",
+      "method": "POST",
+      "path": "/users/:userId/photo",
+      "module": "user",
+      "summary": "Executar /users/:userId/photo",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-users-userId-photo",
+      "method": "DELETE",
+      "path": "/users/:userId/photo",
+      "module": "user",
+      "summary": "Remover /users/:userId/photo",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-users",
+      "method": "GET",
+      "path": "/users",
+      "module": "user",
+      "summary": "Consultar /users",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-users-list",
+      "method": "GET",
+      "path": "/users/list",
+      "module": "user",
+      "summary": "Consultar /users/list",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-users",
+      "method": "POST",
+      "path": "/users",
+      "module": "user",
+      "summary": "Executar /users",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-users-userId",
+      "method": "PUT",
+      "path": "/users/:userId",
+      "module": "user",
+      "summary": "Atualizar /users/:userId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-users-userId",
+      "method": "GET",
+      "path": "/users/:userId",
+      "module": "user",
+      "summary": "Consultar /users/:userId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-users-userId",
+      "method": "DELETE",
+      "path": "/users/:userId",
+      "module": "user",
+      "summary": "Remover /users/:userId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-auth-mobile-config",
+      "method": "GET",
+      "path": "/auth/mobile/config",
+      "module": "mobileAuth",
+      "summary": "Consultar /auth/mobile/config",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "post-auth-mobile-authorize",
+      "method": "POST",
+      "path": "/auth/mobile/authorize",
+      "module": "mobileAuth",
+      "summary": "Executar /auth/mobile/authorize",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-auth-mobile-exchange",
+      "method": "POST",
+      "path": "/auth/mobile/exchange",
+      "module": "mobileAuth",
+      "summary": "Executar /auth/mobile/exchange",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "get-auth-social-providers",
+      "method": "GET",
+      "path": "/auth/social/providers",
+      "module": "auth",
+      "summary": "Consultar /auth/social/providers",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "post-auth-social-google",
+      "method": "POST",
+      "path": "/auth/social/google",
+      "module": "auth",
+      "summary": "Executar /auth/social/google",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "post-auth-login",
+      "method": "POST",
+      "path": "/auth/login",
+      "module": "auth",
+      "summary": "Iniciar sessão",
+      "auth": "flow",
+      "reviewed": true
+    },
+    {
+      "id": "post-auth-login-identify",
+      "method": "POST",
+      "path": "/auth/login/identify",
+      "module": "auth",
+      "summary": "Executar /auth/login/identify",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "get-auth-activation-token",
+      "method": "GET",
+      "path": "/auth/activation/:token",
+      "module": "auth",
+      "summary": "Consultar /auth/activation/:token",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "post-auth-password-setup",
+      "method": "POST",
+      "path": "/auth/password/setup",
+      "module": "auth",
+      "summary": "Executar /auth/password/setup",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "get-auth-impersonate-companyId",
+      "method": "GET",
+      "path": "/auth/impersonate/:companyId",
+      "module": "auth",
+      "summary": "Consultar /auth/impersonate/:companyId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-auth-impersonate-back",
+      "method": "POST",
+      "path": "/auth/impersonate/back",
+      "module": "auth",
+      "summary": "Executar /auth/impersonate/back",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-auth-refresh-token",
+      "method": "POST",
+      "path": "/auth/refresh_token",
+      "module": "auth",
+      "summary": "Renovar sessão",
+      "auth": "flow",
+      "reviewed": true
+    },
+    {
+      "id": "delete-auth-logout",
+      "method": "DELETE",
+      "path": "/auth/logout",
+      "module": "auth",
+      "summary": "Encerrar sessão",
+      "auth": "session",
+      "reviewed": true
+    },
+    {
+      "id": "get-auth-me",
+      "method": "GET",
+      "path": "/auth/me",
+      "module": "auth",
+      "summary": "Consultar usuário da sessão",
+      "auth": "session",
+      "reviewed": true
+    },
+    {
+      "id": "get-settings",
+      "method": "GET",
+      "path": "/settings",
+      "module": "setting",
+      "summary": "Consultar /settings",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-settings-settingKey",
+      "method": "GET",
+      "path": "/settings/:settingKey",
+      "module": "setting",
+      "summary": "Consultar /settings/:settingKey",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-public-settings-settingKey",
+      "method": "GET",
+      "path": "/public-settings/:settingKey",
+      "module": "setting",
+      "summary": "Consultar /public-settings/:settingKey",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "put-settings-settingKey",
+      "method": "PUT",
+      "path": "/settings/:settingKey",
+      "module": "setting",
+      "summary": "Atualizar /settings/:settingKey",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-settings-logo",
+      "method": "POST",
+      "path": "/settings/logo",
+      "module": "setting",
+      "summary": "Executar /settings/logo",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-settings-privateFile",
+      "method": "POST",
+      "path": "/settings/privateFile",
+      "module": "setting",
+      "summary": "Executar /settings/privateFile",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-settings-publicFile",
+      "method": "POST",
+      "path": "/settings/publicFile",
+      "module": "setting",
+      "summary": "Executar /settings/publicFile",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-contacts-contactId-picture-refresh",
+      "method": "POST",
+      "path": "/contacts/:contactId/picture/refresh",
+      "module": "contact",
+      "summary": "Executar /contacts/:contactId/picture/refresh",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-contacts-import",
+      "method": "POST",
+      "path": "/contacts/import",
+      "module": "contact",
+      "summary": "Executar /contacts/import",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-contacts-importCsv",
+      "method": "POST",
+      "path": "/contacts/importCsv",
+      "module": "contact",
+      "summary": "Executar /contacts/importCsv",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-contacts-exportCsv",
+      "method": "GET",
+      "path": "/contacts/exportCsv",
+      "module": "contact",
+      "summary": "Consultar /contacts/exportCsv",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-contacts",
+      "method": "GET",
+      "path": "/contacts",
+      "module": "contact",
+      "summary": "Listar contatos",
+      "auth": "contactToken",
+      "reviewed": true
+    },
+    {
+      "id": "get-contacts-selection",
+      "method": "GET",
+      "path": "/contacts/selection",
+      "module": "contact",
+      "summary": "Consultar /contacts/selection",
+      "auth": "contactToken",
+      "reviewed": false
+    },
+    {
+      "id": "get-contacts-list",
+      "method": "GET",
+      "path": "/contacts/list",
+      "module": "contact",
+      "summary": "Consultar /contacts/list",
+      "auth": "contactToken",
+      "reviewed": false
+    },
+    {
+      "id": "get-contacts-contactId",
+      "method": "GET",
+      "path": "/contacts/:contactId",
+      "module": "contact",
+      "summary": "Consultar contato",
+      "auth": "contactToken",
+      "reviewed": true
+    },
+    {
+      "id": "post-contacts-findOrInsert",
+      "method": "POST",
+      "path": "/contacts/findOrInsert",
+      "module": "contact",
+      "summary": "Localizar ou cadastrar contato",
+      "auth": "contactToken",
+      "reviewed": true
+    },
+    {
+      "id": "post-contacts",
+      "method": "POST",
+      "path": "/contacts",
+      "module": "contact",
+      "summary": "Cadastrar contato",
+      "auth": "contactToken",
+      "reviewed": true
+    },
+    {
+      "id": "put-contacts-contactId-extra-info",
+      "method": "PUT",
+      "path": "/contacts/:contactId/extra-info",
+      "module": "contact",
+      "summary": "Substituir campos adicionais",
+      "auth": "contactToken",
+      "reviewed": true
+    },
+    {
+      "id": "put-contacts-contactId",
+      "method": "PUT",
+      "path": "/contacts/:contactId",
+      "module": "contact",
+      "summary": "Atualizar /contacts/:contactId",
+      "auth": "contactToken",
+      "reviewed": false
+    },
+    {
+      "id": "delete-contacts-contactId",
+      "method": "DELETE",
+      "path": "/contacts/:contactId",
+      "module": "contact",
+      "summary": "Remover /contacts/:contactId",
+      "auth": "contactToken",
+      "reviewed": false
+    },
+    {
+      "id": "post-contacts-contactId-tags",
+      "method": "POST",
+      "path": "/contacts/:contactId/tags",
+      "module": "contact",
+      "summary": "Executar /contacts/:contactId/tags",
+      "auth": "contactToken",
+      "reviewed": false
+    },
+    {
+      "id": "delete-contacts-contactId-tags-tagId",
+      "method": "DELETE",
+      "path": "/contacts/:contactId/tags/:tagId",
+      "module": "contact",
+      "summary": "Remover /contacts/:contactId/tags/:tagId",
+      "auth": "contactToken",
+      "reviewed": false
+    },
+    {
+      "id": "get-tickets",
+      "method": "GET",
+      "path": "/tickets",
+      "module": "ticket",
+      "summary": "Listar atendimentos",
+      "auth": "session",
+      "reviewed": true
+    },
+    {
+      "id": "get-tickets-ticketId-transfer-options",
+      "method": "GET",
+      "path": "/tickets/:ticketId/transfer-options",
+      "module": "ticket",
+      "summary": "Consultar /tickets/:ticketId/transfer-options",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-tickets-ticketId-templates",
+      "method": "GET",
+      "path": "/tickets/:ticketId/templates",
+      "module": "ticket",
+      "summary": "Consultar janela e templates do atendimento",
+      "auth": "session",
+      "reviewed": true
+    },
+    {
+      "id": "get-tickets-ticketId",
+      "method": "GET",
+      "path": "/tickets/:ticketId",
+      "module": "ticket",
+      "summary": "Consultar atendimento",
+      "auth": "session",
+      "reviewed": true
+    },
+    {
+      "id": "get-tickets-u-uuid",
+      "method": "GET",
+      "path": "/tickets/u/:uuid",
+      "module": "ticket",
+      "summary": "Consultar /tickets/u/:uuid",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-tickets",
+      "method": "POST",
+      "path": "/tickets",
+      "module": "ticket",
+      "summary": "Abrir atendimento",
+      "auth": "session",
+      "reviewed": true
+    },
+    {
+      "id": "put-tickets-ticketId",
+      "method": "PUT",
+      "path": "/tickets/:ticketId",
+      "module": "ticket",
+      "summary": "Atualizar ou transferir atendimento",
+      "auth": "session",
+      "reviewed": true
+    },
+    {
+      "id": "delete-tickets-ticketId",
+      "method": "DELETE",
+      "path": "/tickets/:ticketId",
+      "module": "ticket",
+      "summary": "Remover /tickets/:ticketId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-build-capture-extension",
+      "method": "POST",
+      "path": "/build-capture-extension",
+      "module": "buildCaptureExtension",
+      "summary": "Executar /build-capture-extension",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-whatsapp",
+      "method": "GET",
+      "path": "/whatsapp",
+      "module": "whatsapp",
+      "summary": "Consultar /whatsapp",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-whatsapp",
+      "method": "POST",
+      "path": "/whatsapp",
+      "module": "whatsapp",
+      "summary": "Executar /whatsapp",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-whatsapp-whatsappId",
+      "method": "GET",
+      "path": "/whatsapp/:whatsappId",
+      "module": "whatsapp",
+      "summary": "Consultar /whatsapp/:whatsappId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-whatsapp-whatsappId",
+      "method": "PUT",
+      "path": "/whatsapp/:whatsappId",
+      "module": "whatsapp",
+      "summary": "Atualizar /whatsapp/:whatsappId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-whatsapp-whatsappId",
+      "method": "DELETE",
+      "path": "/whatsapp/:whatsappId",
+      "module": "whatsapp",
+      "summary": "Remover /whatsapp/:whatsappId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-whatsapp-privacy-whatsappId",
+      "method": "GET",
+      "path": "/whatsapp/privacy/:whatsappId",
+      "module": "whatsapp",
+      "summary": "Consultar /whatsapp/privacy/:whatsappId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-whatsapp-privacy-whatsappId",
+      "method": "PUT",
+      "path": "/whatsapp/privacy/:whatsappId",
+      "module": "whatsapp",
+      "summary": "Atualizar /whatsapp/privacy/:whatsappId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-messages-forward",
+      "method": "POST",
+      "path": "/messages/forward",
+      "module": "message",
+      "summary": "Encaminhar mensagem",
+      "auth": "session",
+      "reviewed": true
+    },
+    {
+      "id": "get-messages-ticketId",
+      "method": "GET",
+      "path": "/messages/:ticketId",
+      "module": "message",
+      "summary": "Consultar mensagens do atendimento",
+      "auth": "session",
+      "reviewed": true
+    },
+    {
+      "id": "get-messages-messageId-history",
+      "method": "GET",
+      "path": "/messages/:messageId/history",
+      "module": "message",
+      "summary": "Consultar histórico de edição",
+      "auth": "session",
+      "reviewed": true
+    },
+    {
+      "id": "post-messages-ticketId-template",
+      "method": "POST",
+      "path": "/messages/:ticketId/template",
+      "module": "message",
+      "summary": "Enviar template do WhatsApp oficial",
+      "auth": "session",
+      "reviewed": true
+    },
+    {
+      "id": "post-messages-edit-messageId",
+      "method": "POST",
+      "path": "/messages/edit/:messageId",
+      "module": "message",
+      "summary": "Editar mensagem",
+      "auth": "session",
+      "reviewed": true
+    },
+    {
+      "id": "post-messages-react-messageId",
+      "method": "POST",
+      "path": "/messages/react/:messageId",
+      "module": "message",
+      "summary": "Reagir a uma mensagem",
+      "auth": "session",
+      "reviewed": true
+    },
+    {
+      "id": "delete-messages-messageId",
+      "method": "DELETE",
+      "path": "/messages/:messageId",
+      "module": "message",
+      "summary": "Excluir mensagem",
+      "auth": "session",
+      "reviewed": true
+    },
+    {
+      "id": "post-whatsappsession-whatsappId",
+      "method": "POST",
+      "path": "/whatsappsession/:whatsappId",
+      "module": "whatsappSession",
+      "summary": "Executar /whatsappsession/:whatsappId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-whatsappsession-whatsappId",
+      "method": "PUT",
+      "path": "/whatsappsession/:whatsappId",
+      "module": "whatsappSession",
+      "summary": "Atualizar /whatsappsession/:whatsappId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-whatsappsession-whatsappId",
+      "method": "DELETE",
+      "path": "/whatsappsession/:whatsappId",
+      "module": "whatsappSession",
+      "summary": "Remover /whatsappsession/:whatsappId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-whatsappsession-refresh-whatsappId",
+      "method": "GET",
+      "path": "/whatsappsession/refresh/:whatsappId",
+      "module": "whatsappSession",
+      "summary": "Consultar /whatsappsession/refresh/:whatsappId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-whatsappsession-capture-token",
+      "method": "POST",
+      "path": "/whatsappsession/capture/:token",
+      "module": "whatsappSession",
+      "summary": "Executar /whatsappsession/capture/:token",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "post-whatsappsession-whatsappId-capture-token",
+      "method": "POST",
+      "path": "/whatsappsession/:whatsappId/capture-token",
+      "module": "whatsappSession",
+      "summary": "Executar /whatsappsession/:whatsappId/capture-token",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-whatsappsession-whatsappId-reset",
+      "method": "POST",
+      "path": "/whatsappsession/:whatsappId/reset",
+      "module": "whatsappSession",
+      "summary": "Executar /whatsappsession/:whatsappId/reset",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-queue-queueId-flow",
+      "method": "GET",
+      "path": "/queue/:queueId/flow",
+      "module": "queue",
+      "summary": "Consultar /queue/:queueId/flow",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-queue-queueId-flow",
+      "method": "PUT",
+      "path": "/queue/:queueId/flow",
+      "module": "queue",
+      "summary": "Atualizar /queue/:queueId/flow",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-queue",
+      "method": "GET",
+      "path": "/queue",
+      "module": "queue",
+      "summary": "Consultar /queue",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-queue",
+      "method": "POST",
+      "path": "/queue",
+      "module": "queue",
+      "summary": "Executar /queue",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-queue-reorder",
+      "method": "PUT",
+      "path": "/queue/reorder",
+      "module": "queue",
+      "summary": "Atualizar /queue/reorder",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-queue-queueId",
+      "method": "GET",
+      "path": "/queue/:queueId",
+      "module": "queue",
+      "summary": "Consultar /queue/:queueId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-queue-queueId",
+      "method": "PUT",
+      "path": "/queue/:queueId",
+      "module": "queue",
+      "summary": "Atualizar /queue/:queueId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-queue-queueId",
+      "method": "DELETE",
+      "path": "/queue/:queueId",
+      "module": "queue",
+      "summary": "Remover /queue/:queueId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-queue-queueId-media-upload",
+      "method": "POST",
+      "path": "/queue/:queueId/media-upload",
+      "module": "queue",
+      "summary": "Executar /queue/:queueId/media-upload",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-queue-queueId-media-upload",
+      "method": "DELETE",
+      "path": "/queue/:queueId/media-upload",
+      "module": "queue",
+      "summary": "Remover /queue/:queueId/media-upload",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-companies-list",
+      "method": "GET",
+      "path": "/companies/list",
+      "module": "company",
+      "summary": "Consultar /companies/list",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-companies",
+      "method": "GET",
+      "path": "/companies",
+      "module": "company",
+      "summary": "Consultar /companies",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-companies-id",
+      "method": "GET",
+      "path": "/companies/:id",
+      "module": "company",
+      "summary": "Consultar /companies/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-companies",
+      "method": "POST",
+      "path": "/companies",
+      "module": "company",
+      "summary": "Executar /companies",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-companies-id",
+      "method": "PUT",
+      "path": "/companies/:id",
+      "module": "company",
+      "summary": "Atualizar /companies/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-companies-id-schedules",
+      "method": "PUT",
+      "path": "/companies/:id/schedules",
+      "module": "company",
+      "summary": "Atualizar /companies/:id/schedules",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-companies-id",
+      "method": "DELETE",
+      "path": "/companies/:id",
+      "module": "company",
+      "summary": "Remover /companies/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-companies-cadastro",
+      "method": "POST",
+      "path": "/companies/cadastro",
+      "module": "company",
+      "summary": "Executar /companies/cadastro",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "get-plans",
+      "method": "GET",
+      "path": "/plans",
+      "module": "plan",
+      "summary": "Consultar /plans",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-plans-list",
+      "method": "GET",
+      "path": "/plans/list",
+      "module": "plan",
+      "summary": "Consultar /plans/list",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-plans-listpublic",
+      "method": "GET",
+      "path": "/plans/listpublic",
+      "module": "plan",
+      "summary": "Consultar /plans/listpublic",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "get-plans-all",
+      "method": "GET",
+      "path": "/plans/all",
+      "module": "plan",
+      "summary": "Consultar /plans/all",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-plans-id",
+      "method": "GET",
+      "path": "/plans/:id",
+      "module": "plan",
+      "summary": "Consultar /plans/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-plans",
+      "method": "POST",
+      "path": "/plans",
+      "module": "plan",
+      "summary": "Executar /plans",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-plans-id",
+      "method": "PUT",
+      "path": "/plans/:id",
+      "module": "plan",
+      "summary": "Atualizar /plans/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-plans-id",
+      "method": "DELETE",
+      "path": "/plans/:id",
+      "module": "plan",
+      "summary": "Remover /plans/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-ticket-notes-list",
+      "method": "GET",
+      "path": "/ticket-notes/list",
+      "module": "ticketNote",
+      "summary": "Consultar /ticket-notes/list",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-ticket-notes",
+      "method": "GET",
+      "path": "/ticket-notes",
+      "module": "ticketNote",
+      "summary": "Consultar /ticket-notes",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-ticket-notes-id",
+      "method": "GET",
+      "path": "/ticket-notes/:id",
+      "module": "ticketNote",
+      "summary": "Consultar /ticket-notes/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-ticket-notes",
+      "method": "POST",
+      "path": "/ticket-notes",
+      "module": "ticketNote",
+      "summary": "Executar /ticket-notes",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-ticket-notes-id",
+      "method": "PUT",
+      "path": "/ticket-notes/:id",
+      "module": "ticketNote",
+      "summary": "Atualizar /ticket-notes/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-ticket-notes-id",
+      "method": "DELETE",
+      "path": "/ticket-notes/:id",
+      "module": "ticketNote",
+      "summary": "Remover /ticket-notes/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-quick-messages-list",
+      "method": "GET",
+      "path": "/quick-messages/list",
+      "module": "quickMessage",
+      "summary": "Consultar /quick-messages/list",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-quick-messages",
+      "method": "GET",
+      "path": "/quick-messages",
+      "module": "quickMessage",
+      "summary": "Consultar /quick-messages",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-quick-messages-id",
+      "method": "GET",
+      "path": "/quick-messages/:id",
+      "module": "quickMessage",
+      "summary": "Consultar /quick-messages/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-quick-messages",
+      "method": "POST",
+      "path": "/quick-messages",
+      "module": "quickMessage",
+      "summary": "Executar /quick-messages",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-quick-messages-id",
+      "method": "PUT",
+      "path": "/quick-messages/:id",
+      "module": "quickMessage",
+      "summary": "Atualizar /quick-messages/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-quick-messages-id",
+      "method": "DELETE",
+      "path": "/quick-messages/:id",
+      "module": "quickMessage",
+      "summary": "Remover /quick-messages/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-helps-list",
+      "method": "GET",
+      "path": "/helps/list",
+      "module": "help",
+      "summary": "Consultar /helps/list",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-helps-groups-id",
+      "method": "GET",
+      "path": "/helps/groups/:id",
+      "module": "help",
+      "summary": "Consultar /helps/groups/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-helps",
+      "method": "GET",
+      "path": "/helps",
+      "module": "help",
+      "summary": "Consultar /helps",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-helps",
+      "method": "POST",
+      "path": "/helps",
+      "module": "help",
+      "summary": "Executar /helps",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-helps-reorder",
+      "method": "PUT",
+      "path": "/helps/reorder",
+      "module": "help",
+      "summary": "Atualizar /helps/reorder",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-helps-id",
+      "method": "GET",
+      "path": "/helps/:id",
+      "module": "help",
+      "summary": "Consultar /helps/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-helps-id",
+      "method": "PUT",
+      "path": "/helps/:id",
+      "module": "help",
+      "summary": "Atualizar /helps/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-helps-id",
+      "method": "DELETE",
+      "path": "/helps/:id",
+      "module": "help",
+      "summary": "Remover /helps/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-help-groups",
+      "method": "GET",
+      "path": "/help-groups",
+      "module": "helpGroup",
+      "summary": "Consultar /help-groups",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-help-groups",
+      "method": "POST",
+      "path": "/help-groups",
+      "module": "helpGroup",
+      "summary": "Executar /help-groups",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-help-groups-reorder",
+      "method": "PUT",
+      "path": "/help-groups/reorder",
+      "module": "helpGroup",
+      "summary": "Atualizar /help-groups/reorder",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-help-groups-id",
+      "method": "GET",
+      "path": "/help-groups/:id",
+      "module": "helpGroup",
+      "summary": "Consultar /help-groups/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-help-groups-id",
+      "method": "PUT",
+      "path": "/help-groups/:id",
+      "module": "helpGroup",
+      "summary": "Atualizar /help-groups/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-help-groups-id",
+      "method": "DELETE",
+      "path": "/help-groups/:id",
+      "module": "helpGroup",
+      "summary": "Remover /help-groups/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-dashboard-contact-report-fields",
+      "method": "GET",
+      "path": "/dashboard/contact-report/fields",
+      "module": "dashboard",
+      "summary": "Consultar /dashboard/contact-report/fields",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-dashboard-contact-report-export",
+      "method": "GET",
+      "path": "/dashboard/contact-report/export",
+      "module": "dashboard",
+      "summary": "Consultar /dashboard/contact-report/export",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-dashboard-status",
+      "method": "GET",
+      "path": "/dashboard/status",
+      "module": "dashboard",
+      "summary": "Consultar /dashboard/status",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-dashboard-tickets",
+      "method": "GET",
+      "path": "/dashboard/tickets",
+      "module": "dashboard",
+      "summary": "Consultar /dashboard/tickets",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-dashboard-users",
+      "method": "GET",
+      "path": "/dashboard/users",
+      "module": "dashboard",
+      "summary": "Consultar /dashboard/users",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-queue-options",
+      "method": "GET",
+      "path": "/queue-options",
+      "module": "queueOption",
+      "summary": "Consultar /queue-options",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-queue-options",
+      "method": "POST",
+      "path": "/queue-options",
+      "module": "queueOption",
+      "summary": "Executar /queue-options",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-queue-options-reorder",
+      "method": "PUT",
+      "path": "/queue-options/reorder",
+      "module": "queueOption",
+      "summary": "Atualizar /queue-options/reorder",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-queue-options-queueOptionId",
+      "method": "GET",
+      "path": "/queue-options/:queueOptionId",
+      "module": "queueOption",
+      "summary": "Consultar /queue-options/:queueOptionId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-queue-options-queueOptionId",
+      "method": "PUT",
+      "path": "/queue-options/:queueOptionId",
+      "module": "queueOption",
+      "summary": "Atualizar /queue-options/:queueOptionId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-queue-options-queueOptionId",
+      "method": "DELETE",
+      "path": "/queue-options/:queueOptionId",
+      "module": "queueOption",
+      "summary": "Remover /queue-options/:queueOptionId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-queue-options-queueOptionId-media-upload",
+      "method": "POST",
+      "path": "/queue-options/:queueOptionId/media-upload",
+      "module": "queueOption",
+      "summary": "Executar /queue-options/:queueOptionId/media-upload",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-queue-options-queueOptionId-media-upload",
+      "method": "DELETE",
+      "path": "/queue-options/:queueOptionId/media-upload",
+      "module": "queueOption",
+      "summary": "Remover /queue-options/:queueOptionId/media-upload",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-schedules",
+      "method": "GET",
+      "path": "/schedules",
+      "module": "schedule",
+      "summary": "Consultar /schedules",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-schedules-preview",
+      "method": "POST",
+      "path": "/schedules/preview",
+      "module": "schedule",
+      "summary": "Executar /schedules/preview",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-schedules-variables",
+      "method": "GET",
+      "path": "/schedules/variables",
+      "module": "schedule",
+      "summary": "Consultar /schedules/variables",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-schedules-scheduleId-deliveries",
+      "method": "GET",
+      "path": "/schedules/:scheduleId/deliveries",
+      "module": "schedule",
+      "summary": "Consultar /schedules/:scheduleId/deliveries",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-schedules-scheduleId-send-now",
+      "method": "POST",
+      "path": "/schedules/:scheduleId/send-now",
+      "module": "schedule",
+      "summary": "Executar /schedules/:scheduleId/send-now",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-schedules",
+      "method": "POST",
+      "path": "/schedules",
+      "module": "schedule",
+      "summary": "Executar /schedules",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-schedules-scheduleId",
+      "method": "PUT",
+      "path": "/schedules/:scheduleId",
+      "module": "schedule",
+      "summary": "Atualizar /schedules/:scheduleId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-schedules-scheduleId",
+      "method": "GET",
+      "path": "/schedules/:scheduleId",
+      "module": "schedule",
+      "summary": "Consultar /schedules/:scheduleId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-schedules-scheduleId",
+      "method": "DELETE",
+      "path": "/schedules/:scheduleId",
+      "module": "schedule",
+      "summary": "Remover /schedules/:scheduleId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-tags-list",
+      "method": "GET",
+      "path": "/tags/list",
+      "module": "tag",
+      "summary": "Consultar /tags/list",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-tags",
+      "method": "GET",
+      "path": "/tags",
+      "module": "tag",
+      "summary": "Consultar /tags",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-tags",
+      "method": "POST",
+      "path": "/tags",
+      "module": "tag",
+      "summary": "Executar /tags",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-tags-tagId",
+      "method": "PUT",
+      "path": "/tags/:tagId",
+      "module": "tag",
+      "summary": "Atualizar /tags/:tagId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-tags-tagId",
+      "method": "GET",
+      "path": "/tags/:tagId",
+      "module": "tag",
+      "summary": "Consultar /tags/:tagId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-tags-tagId",
+      "method": "DELETE",
+      "path": "/tags/:tagId",
+      "module": "tag",
+      "summary": "Remover /tags/:tagId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-tags-sync",
+      "method": "POST",
+      "path": "/tags/sync",
+      "module": "tag",
+      "summary": "Executar /tags/sync",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-contact-lists-list",
+      "method": "GET",
+      "path": "/contact-lists/list",
+      "module": "contactList",
+      "summary": "Consultar /contact-lists/list",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-contact-lists",
+      "method": "GET",
+      "path": "/contact-lists",
+      "module": "contactList",
+      "summary": "Consultar /contact-lists",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-contact-lists-id",
+      "method": "GET",
+      "path": "/contact-lists/:id",
+      "module": "contactList",
+      "summary": "Consultar /contact-lists/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-contact-lists",
+      "method": "POST",
+      "path": "/contact-lists",
+      "module": "contactList",
+      "summary": "Executar /contact-lists",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-contact-lists-id-upload",
+      "method": "POST",
+      "path": "/contact-lists/:id/upload",
+      "module": "contactList",
+      "summary": "Executar /contact-lists/:id/upload",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-contact-lists-id",
+      "method": "PUT",
+      "path": "/contact-lists/:id",
+      "module": "contactList",
+      "summary": "Atualizar /contact-lists/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-contact-lists-id",
+      "method": "DELETE",
+      "path": "/contact-lists/:id",
+      "module": "contactList",
+      "summary": "Remover /contact-lists/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-contact-list-items-list",
+      "method": "GET",
+      "path": "/contact-list-items/list",
+      "module": "contactListItem",
+      "summary": "Consultar /contact-list-items/list",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-contact-list-items",
+      "method": "GET",
+      "path": "/contact-list-items",
+      "module": "contactListItem",
+      "summary": "Consultar /contact-list-items",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-contact-list-items-id",
+      "method": "GET",
+      "path": "/contact-list-items/:id",
+      "module": "contactListItem",
+      "summary": "Consultar /contact-list-items/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-contact-list-items",
+      "method": "POST",
+      "path": "/contact-list-items",
+      "module": "contactListItem",
+      "summary": "Executar /contact-list-items",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-contact-list-items-id",
+      "method": "PUT",
+      "path": "/contact-list-items/:id",
+      "module": "contactListItem",
+      "summary": "Atualizar /contact-list-items/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-contact-list-items-id",
+      "method": "DELETE",
+      "path": "/contact-list-items/:id",
+      "module": "contactListItem",
+      "summary": "Remover /contact-list-items/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-campaigns-list",
+      "method": "GET",
+      "path": "/campaigns/list",
+      "module": "campaign",
+      "summary": "Consultar /campaigns/list",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-campaigns",
+      "method": "GET",
+      "path": "/campaigns",
+      "module": "campaign",
+      "summary": "Consultar /campaigns",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-campaigns-id",
+      "method": "GET",
+      "path": "/campaigns/:id",
+      "module": "campaign",
+      "summary": "Consultar /campaigns/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-campaigns",
+      "method": "POST",
+      "path": "/campaigns",
+      "module": "campaign",
+      "summary": "Executar /campaigns",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-campaigns-id",
+      "method": "PUT",
+      "path": "/campaigns/:id",
+      "module": "campaign",
+      "summary": "Atualizar /campaigns/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-campaigns-id",
+      "method": "DELETE",
+      "path": "/campaigns/:id",
+      "module": "campaign",
+      "summary": "Remover /campaigns/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-campaigns-id-cancel",
+      "method": "POST",
+      "path": "/campaigns/:id/cancel",
+      "module": "campaign",
+      "summary": "Executar /campaigns/:id/cancel",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-campaigns-id-restart",
+      "method": "POST",
+      "path": "/campaigns/:id/restart",
+      "module": "campaign",
+      "summary": "Executar /campaigns/:id/restart",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-campaigns-id-media-upload",
+      "method": "POST",
+      "path": "/campaigns/:id/media-upload",
+      "module": "campaign",
+      "summary": "Executar /campaigns/:id/media-upload",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-campaigns-id-media-upload",
+      "method": "DELETE",
+      "path": "/campaigns/:id/media-upload",
+      "module": "campaign",
+      "summary": "Remover /campaigns/:id/media-upload",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-campaign-settings",
+      "method": "GET",
+      "path": "/campaign-settings",
+      "module": "campaignSetting",
+      "summary": "Consultar /campaign-settings",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-campaign-settings",
+      "method": "POST",
+      "path": "/campaign-settings",
+      "module": "campaignSetting",
+      "summary": "Executar /campaign-settings",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-announcements-list",
+      "method": "GET",
+      "path": "/announcements/list",
+      "module": "announcement",
+      "summary": "Consultar /announcements/list",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-announcements-feed",
+      "method": "GET",
+      "path": "/announcements/feed",
+      "module": "announcement",
+      "summary": "Consultar /announcements/feed",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-announcements",
+      "method": "GET",
+      "path": "/announcements",
+      "module": "announcement",
+      "summary": "Consultar /announcements",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-announcements-id",
+      "method": "GET",
+      "path": "/announcements/:id",
+      "module": "announcement",
+      "summary": "Consultar /announcements/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-announcements",
+      "method": "POST",
+      "path": "/announcements",
+      "module": "announcement",
+      "summary": "Executar /announcements",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-announcements-id",
+      "method": "PUT",
+      "path": "/announcements/:id",
+      "module": "announcement",
+      "summary": "Atualizar /announcements/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-announcements-id",
+      "method": "DELETE",
+      "path": "/announcements/:id",
+      "module": "announcement",
+      "summary": "Remover /announcements/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-announcements-id-media-upload",
+      "method": "POST",
+      "path": "/announcements/:id/media-upload",
+      "module": "announcement",
+      "summary": "Executar /announcements/:id/media-upload",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-announcements-id-media-upload",
+      "method": "DELETE",
+      "path": "/announcements/:id/media-upload",
+      "module": "announcement",
+      "summary": "Remover /announcements/:id/media-upload",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-chats",
+      "method": "GET",
+      "path": "/chats",
+      "module": "chat",
+      "summary": "Consultar /chats",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-chats-id",
+      "method": "GET",
+      "path": "/chats/:id",
+      "module": "chat",
+      "summary": "Consultar /chats/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-chats-id-messages",
+      "method": "GET",
+      "path": "/chats/:id/messages",
+      "module": "chat",
+      "summary": "Consultar /chats/:id/messages",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-chats-id-messages",
+      "method": "POST",
+      "path": "/chats/:id/messages",
+      "module": "chat",
+      "summary": "Executar /chats/:id/messages",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-chats-id-read",
+      "method": "POST",
+      "path": "/chats/:id/read",
+      "module": "chat",
+      "summary": "Executar /chats/:id/read",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-chats",
+      "method": "POST",
+      "path": "/chats",
+      "module": "chat",
+      "summary": "Executar /chats",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-chats-id",
+      "method": "PUT",
+      "path": "/chats/:id",
+      "module": "chat",
+      "summary": "Atualizar /chats/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-chats-id",
+      "method": "DELETE",
+      "path": "/chats/:id",
+      "module": "chat",
+      "summary": "Remover /chats/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-subscription",
+      "method": "POST",
+      "path": "/subscription",
+      "module": "subScription",
+      "summary": "Executar /subscription",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-subscription-quote-invoiceId",
+      "method": "GET",
+      "path": "/subscription/quote/:invoiceId",
+      "module": "subScription",
+      "summary": "Consultar /subscription/quote/:invoiceId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-subscription-simulate-invoiceId",
+      "method": "POST",
+      "path": "/subscription/simulate/:invoiceId",
+      "module": "subScription",
+      "summary": "Executar /subscription/simulate/:invoiceId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-subscription-ticketz-webhook-type",
+      "method": "POST",
+      "path": "/subscription/ticketz/webhook/:type?",
+      "module": "subScription",
+      "summary": "Executar /subscription/ticketz/webhook/:type?",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "get-invoices-subscription-notice",
+      "method": "GET",
+      "path": "/invoices/subscription-notice",
+      "module": "invoices",
+      "summary": "Consultar /invoices/subscription-notice",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-invoices",
+      "method": "GET",
+      "path": "/invoices",
+      "module": "invoices",
+      "summary": "Consultar /invoices",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-invoices-list",
+      "method": "GET",
+      "path": "/invoices/list",
+      "module": "invoices",
+      "summary": "Consultar /invoices/list",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-invoices-all",
+      "method": "GET",
+      "path": "/invoices/all",
+      "module": "invoices",
+      "summary": "Consultar /invoices/all",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-invoices-Invoiceid",
+      "method": "GET",
+      "path": "/invoices/:Invoiceid",
+      "module": "invoices",
+      "summary": "Consultar /invoices/:Invoiceid",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-invoices-id",
+      "method": "PUT",
+      "path": "/invoices/:id",
+      "module": "invoices",
+      "summary": "Atualizar /invoices/:id",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-ticket-tags-ticketId-tagId",
+      "method": "PUT",
+      "path": "/ticket-tags/:ticketId/:tagId",
+      "module": "ticketTag",
+      "summary": "Atualizar /ticket-tags/:ticketId/:tagId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-ticket-tags-ticketId-tagId",
+      "method": "DELETE",
+      "path": "/ticket-tags/:ticketId/:tagId",
+      "module": "ticketTag",
+      "summary": "Remover /ticket-tags/:ticketId/:tagId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-ticket-tags-ticketId",
+      "method": "DELETE",
+      "path": "/ticket-tags/:ticketId",
+      "module": "ticketTag",
+      "summary": "Remover /ticket-tags/:ticketId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-push-public-key",
+      "method": "GET",
+      "path": "/push/public-key",
+      "module": "push",
+      "summary": "Consultar /push/public-key",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-push-subscribe",
+      "method": "POST",
+      "path": "/push/subscribe",
+      "module": "push",
+      "summary": "Executar /push/subscribe",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-push-unsubscribe",
+      "method": "POST",
+      "path": "/push/unsubscribe",
+      "module": "push",
+      "summary": "Executar /push/unsubscribe",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-manifest-json",
+      "method": "GET",
+      "path": "/manifest.json",
+      "module": "pwa",
+      "summary": "Consultar /manifest.json",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "get-favicon-ico",
+      "method": "GET",
+      "path": "/favicon.ico",
+      "module": "pwa",
+      "summary": "Consultar /favicon.ico",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "get",
+      "method": "GET",
+      "path": "/",
+      "module": "version",
+      "summary": "Consultar /",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "get-ticketz-registry",
+      "method": "GET",
+      "path": "/ticketz/registry",
+      "module": "ticketzOSS",
+      "summary": "Consultar /ticketz/registry",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-ticketz-registry",
+      "method": "POST",
+      "path": "/ticketz/registry",
+      "module": "ticketzOSS",
+      "summary": "Executar /ticketz/registry",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-translations-languages",
+      "method": "GET",
+      "path": "/translations/languages",
+      "module": "i18n",
+      "summary": "Consultar /translations/languages",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-translations",
+      "method": "GET",
+      "path": "/translations",
+      "module": "i18n",
+      "summary": "Consultar /translations",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-translations",
+      "method": "POST",
+      "path": "/translations",
+      "module": "i18n",
+      "summary": "Executar /translations",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-wavoip-whatsappId",
+      "method": "POST",
+      "path": "/wavoip/:whatsappId",
+      "module": "wavoip",
+      "summary": "Executar /wavoip/:whatsappId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "delete-wavoip-whatsappId",
+      "method": "DELETE",
+      "path": "/wavoip/:whatsappId",
+      "module": "wavoip",
+      "summary": "Remover /wavoip/:whatsappId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-wavoip-whatsappId",
+      "method": "GET",
+      "path": "/wavoip/:whatsappId",
+      "module": "wavoip",
+      "summary": "Consultar /wavoip/:whatsappId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-og-preview",
+      "method": "GET",
+      "path": "/og-preview",
+      "module": "og",
+      "summary": "Consultar /og-preview",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "get-whatsapp-meta-config",
+      "method": "GET",
+      "path": "/whatsapp/meta/config",
+      "module": "metaWhatsapp",
+      "summary": "Consultar /whatsapp/meta/config",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-whatsapp-whatsappId-meta-connect",
+      "method": "POST",
+      "path": "/whatsapp/:whatsappId/meta/connect",
+      "module": "metaWhatsapp",
+      "summary": "Executar /whatsapp/:whatsappId/meta/connect",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-whatsapp-whatsappId-meta-onboarding",
+      "method": "GET",
+      "path": "/whatsapp/:whatsappId/meta/onboarding",
+      "module": "metaWhatsapp",
+      "summary": "Consultar /whatsapp/:whatsappId/meta/onboarding",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "post-whatsapp-whatsappId-meta-manual-connect",
+      "method": "POST",
+      "path": "/whatsapp/:whatsappId/meta/manual-connect",
+      "module": "metaWhatsapp",
+      "summary": "Executar /whatsapp/:whatsappId/meta/manual-connect",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-webhooks-meta-whatsapp",
+      "method": "GET",
+      "path": "/webhooks/meta/whatsapp",
+      "module": "metaWhatsappWebhook",
+      "summary": "Consultar /webhooks/meta/whatsapp",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "post-webhooks-meta-whatsapp",
+      "method": "POST",
+      "path": "/webhooks/meta/whatsapp",
+      "module": "metaWhatsappWebhook",
+      "summary": "Executar /webhooks/meta/whatsapp",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "get-whatsapp-status-availability",
+      "method": "GET",
+      "path": "/whatsapp-status/availability",
+      "module": "whatsappStatusAdmin",
+      "summary": "Consultar /whatsapp-status/availability",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-whatsapp-status-admin-companies",
+      "method": "GET",
+      "path": "/whatsapp-status/admin/companies",
+      "module": "whatsappStatusAdmin",
+      "summary": "Consultar /whatsapp-status/admin/companies",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-whatsapp-status-admin-companies-companyId",
+      "method": "PUT",
+      "path": "/whatsapp-status/admin/companies/:companyId",
+      "module": "whatsappStatusAdmin",
+      "summary": "Atualizar /whatsapp-status/admin/companies/:companyId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-whatsapp-status-connections",
+      "method": "GET",
+      "path": "/whatsapp-status/connections",
+      "module": "whatsappStatus",
+      "summary": "Consultar /whatsapp-status/connections",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "get-whatsapp-status-connections-whatsappId-capabilities",
+      "method": "GET",
+      "path": "/whatsapp-status/connections/:whatsappId/capabilities",
+      "module": "whatsappStatus",
+      "summary": "Consultar /whatsapp-status/connections/:whatsappId/capabilities",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "get-whatsapp-status-audience-preview",
+      "method": "GET",
+      "path": "/whatsapp-status/audience-preview",
+      "module": "whatsappStatus",
+      "summary": "Consultar /whatsapp-status/audience-preview",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "get-whatsapp-status-posts",
+      "method": "GET",
+      "path": "/whatsapp-status/posts",
+      "module": "whatsappStatus",
+      "summary": "Consultar /whatsapp-status/posts",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "post-whatsapp-status-posts",
+      "method": "POST",
+      "path": "/whatsapp-status/posts",
+      "module": "whatsappStatus",
+      "summary": "Executar /whatsapp-status/posts",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "put-whatsapp-status-posts-id",
+      "method": "PUT",
+      "path": "/whatsapp-status/posts/:id",
+      "module": "whatsappStatus",
+      "summary": "Atualizar /whatsapp-status/posts/:id",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "post-whatsapp-status-posts-id-publish",
+      "method": "POST",
+      "path": "/whatsapp-status/posts/:id/publish",
+      "module": "whatsappStatus",
+      "summary": "Executar /whatsapp-status/posts/:id/publish",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "post-whatsapp-status-posts-id-cancel",
+      "method": "POST",
+      "path": "/whatsapp-status/posts/:id/cancel",
+      "module": "whatsappStatus",
+      "summary": "Executar /whatsapp-status/posts/:id/cancel",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "get-whatsapp-status-posts-id-media",
+      "method": "GET",
+      "path": "/whatsapp-status/posts/:id/media",
+      "module": "whatsappStatus",
+      "summary": "Consultar /whatsapp-status/posts/:id/media",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "get-public-file",
+      "method": "GET",
+      "path": "/public/{file}",
+      "module": "files",
+      "summary": "Consultar /public/{file}",
+      "auth": "flow",
+      "reviewed": false
+    }
+  ]
+}

@@ -1,0 +1,168 @@
+name: Validate deployment candidate
+
+on:
+  push:
+    branches: [dev, main, acnorte]
+  pull_request:
+    branches: [main, acnorte]
+  workflow_dispatch:
+
+concurrency:
+  group: espaco-whats-validation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend checks
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ticketz_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d ticketz_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:8.2.1-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      NODE_ENV: test
+      DB_DIALECT: postgres
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASS: postgres
+      DB_NAME: ticketz_test
+      DB_TIMEZONE: +00:00
+      # Jest isolates each suite and therefore instantiates multiple Sequelize
+      # pools. Keep test pools lazy/small so they cannot exhaust PostgreSQL's
+      # connection limit even as the suite count grows.
+      DB_MIN_CONNECTIONS: "0"
+      DB_MAX_CONNECTIONS: "5"
+      DB_IDLE: "1000"
+      REDIS_URI: redis://127.0.0.1:6379
+      ADMIN_PASSWORD: ci-only-password
+      EMAIL_ADDRESS: ci@espacowhats.invalid
+      BACKEND_URL: http://127.0.0.1:3000
+      FRONTEND_URL: http://127.0.0.1:3001
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npm run generate:i18nkeys
+      - name: Lint report (legacy debt)
+        run: npm run lint
+        continue-on-error: true
+      - run: npm run build
+      - run: npm test -- --runInBand --forceExit
+
+  frontend:
+    name: Frontend checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm test -- --watchAll=false
+        env:
+          CI: "true"
+      - run: npm run docs:check
+      - run: npm run typecheck
+      - run: npm run build
+        env:
+          # The legacy codebase has pre-existing ESLint warnings. Keep tests strict,
+          # but do not promote those warnings to build errors.
+          CI: "false"
+          NODE_OPTIONS: --openssl-legacy-provider
+
+  wacalls:
+    name: WaCalls checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # The image downloads a checksum-pinned upstream revision, applies the
+      # local security overlay and runs the full Go suite before compiling.
+      - run: docker build -t espaco-whats-wacalls-ci .
+        working-directory: wacalls
+
+  compose:
+    name: Deployment manifest check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate shared Docker Compose
+        env:
+          POSTGRES_DB: ci
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci-password
+          REDIS_PASSWORD: ci-password
+          FRONTEND_URL: http://espaco-whats.example.invalid
+          FRONTEND_URL_REGEX: ^http://([a-z0-9-]+\.)?espaco-whats\.example\.invalid$
+          BACKEND_URL: http://espaco-whats.example.invalid/backend
+          APP_BASE_DOMAIN: espaco-whats.example.invalid
+          FRONTEND_HOST: espaco-whats.example.invalid
+          EMAIL_ADDRESS: ci@espacowhats.invalid
+          ADMIN_PASSWORD: ci-password
+          VERIFY_TOKEN: ci-token
+          PLATFORM_API_KEY: 000000000000000000000000000000000000000000000000
+          PLATFORM_WEBHOOK_SECRET: ci-secret
+          PLATFORM_TENANT_URL_TEMPLATE: http://{slug}.espaco-whats.example.invalid
+          MCP_BASE_URL: http://espaco-whats.example.invalid/backend
+          MCP_PRIVATE_KEY: ci-private-key
+          MCP_PUBLIC_KEY: ci-public-key
+          MCP_CURSOR_SECRET: ci-cursor
+          WACALLS_ENABLED: "true"
+          WACALLS_ALLOWED_COMPANY_IDS: "1"
+          WACALLS_INTERNAL_TOKEN: 000000000000000000000000000000000000000000000000
+          WACALLS_TOKEN_SECRET: 111111111111111111111111111111111111111111111111
+          WACALLS_PUBLIC_IP: 127.0.0.1
+          WACALLS_UDP_PORT_RANGE: 50000-50020
+        run: docker compose -f docker-compose.dokploy.yml config --quiet
+
+      - name: Validate AC Norte Docker Compose
+        env:
+          ACNORTE_EMAIL_ADDRESS: ci@acnorte.invalid
+          ACNORTE_HOST: acnorte.dev.espacowhats.example.invalid
+          ACNORTE_BASE_DOMAIN: dev.espacowhats.example.invalid
+          ACNORTE_POSTGRES_DB: acnorte_ci
+          ACNORTE_POSTGRES_USER: acnorte_ci
+          ACNORTE_POSTGRES_PASSWORD: acnorte-ci-password
+          ACNORTE_REDIS_PASSWORD: acnorte-ci-password
+          ACNORTE_ADMIN_PASSWORD: acnorte-ci-password
+          ACNORTE_VERIFY_TOKEN: acnorte-ci-token
+          ACNORTE_PLATFORM_API_KEY: 111111111111111111111111111111111111111111111111
+          ACNORTE_PLATFORM_WEBHOOK_SECRET: acnorte-ci-webhook-secret
+          ACNORTE_MCP_PRIVATE_KEY: acnorte-ci-private-key
+          ACNORTE_MCP_PUBLIC_KEY: acnorte-ci-public-key
+          ACNORTE_MCP_CURSOR_SECRET: acnorte-ci-cursor
+        run: docker compose -f docker-compose.acnorte.dokploy.yml config --quiet

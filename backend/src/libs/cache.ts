@@ -63,6 +63,30 @@ export function del(key: string) {
   return delPromisefy(key);
 }
 
+export async function consume(key: string): Promise<string | null> {
+  return redis.eval(
+    "local value = redis.call('GET', KEYS[1]); if value then redis.call('DEL', KEYS[1]); end; return value",
+    1,
+    key
+  ) as Promise<string | null>;
+}
+
+// A wrong PKCE verifier must not burn the code. After verification/revalidation,
+// compare and delete the exact record atomically so concurrent exchanges cannot
+// both succeed. The raw code and verifier are never stored in Redis.
+export async function consumeIfMatch(
+  key: string,
+  expected: string
+): Promise<boolean> {
+  const result = await redis.eval(
+    "local value = redis.call('GET', KEYS[1]); if value and value == ARGV[1] then redis.call('DEL', KEYS[1]); return 1; end; return 0",
+    1,
+    key,
+    expected
+  );
+  return result === 1;
+}
+
 export async function delFromPattern(pattern: string) {
   const all = await getKeys(pattern);
   for (let item of all) {
@@ -77,6 +101,8 @@ export const cacheLayer = {
   getFromParams,
   getKeys,
   del,
+  consume,
+  consumeIfMatch,
   delFromParams,
   delFromPattern
 };

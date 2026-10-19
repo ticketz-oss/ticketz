@@ -1,29 +1,20 @@
-import {
-  WASocket,
-  BinaryNode,
-  Contact as BContact,
-} from "@whiskeysockets/baileys";
+import { BinaryNode, Contact as BContact } from "libzapitu-rf";
 import * as Sentry from "@sentry/node";
 
-import { Op } from "sequelize";
-// import { getIO } from "../../libs/socket";
-import { Store } from "../../libs/store";
+import { Mutex } from "async-mutex";
 import Contact from "../../models/Contact";
-import Setting from "../../models/Setting";
 import Ticket from "../../models/Ticket";
 import Whatsapp from "../../models/Whatsapp";
 import { logger } from "../../utils/logger";
 import createOrUpdateBaileysService from "../BaileysServices/CreateOrUpdateBaileysService";
 import CreateMessageService from "../MessageServices/CreateMessageService";
+import { _t } from "../TranslationServices/i18nService";
+import { Session } from "../../libs/wbot";
+import { invalidateProfilePicture } from "./GetProfilePicUrl";
+import { GetCompanySetting } from "../../helpers/CheckSettings";
+import { voiceEnabledForCompany } from "../VoiceServices/VoiceAccessService";
 
-type Session = WASocket & {
-  id?: number;
-  store?: Store;
-};
-
-interface IContact {
-  contacts: BContact[];
-}
+const contactMutex = new Mutex();
 
 const wbotMonitor = async (
   wbot: Session,
@@ -32,29 +23,39 @@ const wbotMonitor = async (
 ): Promise<void> => {
   try {
     wbot.ws.on("CB:call", async (node: BinaryNode) => {
-      const content = node.content[0] as any;
-
-      if (content.tag === "offer") {
-        const { from, id } = node.attrs;
-        //console.log(`${from} is calling you with id ${id}`);
-      }
+      const content = node.content[0] as BinaryNode;
 
       if (content.tag === "terminate") {
-        const sendMsgCall = await Setting.findOne({
-          where: { key: "call", companyId },
-        });
+        // The experimental voice bridge owns the full call lifecycle for its
+        // allowlisted tenant. The legacy monitor must not send the historical
+        // "calls are disabled" auto-reply after a bridged call terminates.
+        if (await voiceEnabledForCompany(companyId)) return;
 
-        if (sendMsgCall.value === "disabled") {
-          // await wbot.sendMessage(node.attrs.from, {
-          //   text:
-          //     "*Mensagem Automática:*\n\nAs chamadas de voz e vídeo estão desabilitas para esse WhatsApp, favor enviar uma mensagem de texto. Obrigado",
-          // });
+        const sendMsgCall = await GetCompanySetting(
+          companyId,
+          "call",
+          "disabled"
+        );
 
+        if (sendMsgCall === "disabled") {
           const number = node.attrs.from.replace(/\D/g, "");
 
           const contact = await Contact.findOne({
-            where: { companyId, number },
+            where: { companyId, number }
           });
+
+          const translationSource = contact || whatsapp;
+          const autoMessage = _t("*Automated message*", translationSource);
+          const callDisabledMessage = _t(
+            "Voice and video calls are disabled for this WhatsApp account, please send a text message. Thank you",
+            translationSource
+          );
+
+          await wbot.sendMessage(node.attrs.from, {
+            text: `${autoMessage}:\n\n${callDisabledMessage}`
+          });
+
+          if (!contact) return;
 
           const ticket = await Ticket.findOne({
             where: {
@@ -62,16 +63,12 @@ const wbotMonitor = async (
               whatsappId: wbot.id,
               status: "open",
               companyId
-            },
+            }
           });
           // se não existir o ticket não faz nada.
           if (!ticket) return;
 
-          const date = new Date();
-          const hours = date.getHours();
-          const minutes = date.getMinutes();
-
-          const body = `Chamada de voz/vídeo perdida às ${hours}:${minutes}`;
+          const body = _t("Missed voice/video call", translationSource);
           const messageData = {
             id: content.attrs["call-id"],
             ticketId: ticket.id,
@@ -81,36 +78,46 @@ const wbotMonitor = async (
             mediaType: "call_log",
             read: true,
             quotedMsgId: null,
-            ack: 1,
+            ack: 1
           };
 
           await ticket.update({
-            lastMessage: body,
+            lastMessage: body
           });
 
-
-          if(ticket.status === "closed") {
+          if (ticket.status === "closed") {
             await ticket.update({
-              status: "pending",
+              status: "pending"
             });
           }
 
-          return CreateMessageService({ messageData, companyId: companyId });
+          CreateMessageService({ messageData, companyId });
         }
       }
     });
 
     wbot.ev.on("contacts.upsert", async (contacts: BContact[]) => {
-      console.log("upsert", contacts);
-      await createOrUpdateBaileysService({
-        whatsappId: whatsapp.id,
-        contacts,
+      logger.debug({ contacts }, "contacts.upsert");
+      contactMutex.runExclusive(async () => {
+        await createOrUpdateBaileysService({
+          whatsappId: whatsapp.id,
+          contacts
+        });
       });
     });
 
-    //wbot.ev.on("contacts.set", async (contacts: IContact) => {
-    //  console.log("set", contacts);
-    //});
+    wbot.ev.on("contacts.update", async (contacts: Partial<BContact[]>) => {
+      logger.debug({ contacts }, "contacts.update");
+      await contactMutex.runExclusive(async () => {
+        await Promise.all(
+          contacts.map(async (c: BContact) => {
+            if (["changed", "removed"].includes(c.imgUrl)) {
+              await invalidateProfilePicture(c.id, wbot);
+            }
+          })
+        );
+      });
+    });
   } catch (err) {
     Sentry.captureException(err);
     logger.error(err);

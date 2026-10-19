@@ -1,3 +1,4 @@
+import { literal } from "sequelize";
 import Queue from "../../models/Queue";
 
 interface Request {
@@ -9,7 +10,22 @@ const ListQueuesService = async ({ companyId }: Request): Promise<Queue[]> => {
     where: {
       companyId
     },
-    order: [["name", "ASC"]]
+    // A listagem mostra quantas opcoes de chatbot a fila tem no menu inicial.
+    attributes: {
+      include: [
+        [
+          literal(
+            `(SELECT COUNT(*)::int FROM "QueueOptions" AS opt
+              WHERE opt."queueId" = "Queue"."id" AND opt."parentId" IS NULL)`
+          ),
+          "optionsCount"
+        ]
+      ]
+    },
+    order: [
+      ["order", "ASC"],
+      ["name", "ASC"]
+    ]
   });
 
   return queues;

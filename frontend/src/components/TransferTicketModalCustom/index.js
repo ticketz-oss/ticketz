@@ -1,51 +1,72 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useHistory } from "react-router-dom";
 
-import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
-import Dialog from "@material-ui/core/Dialog";
-import Select from "@material-ui/core/Select";
-import FormControl from "@material-ui/core/FormControl";
-import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
-import { makeStyles } from "@material-ui/core";
-
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
+import {
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
+  makeStyles
+} from "@material-ui/core";
 import Autocomplete, {
-  createFilterOptions,
+  createFilterOptions
 } from "@material-ui/lab/Autocomplete";
-import CircularProgress from "@material-ui/core/CircularProgress";
 
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import ButtonWithSpinner from "../ButtonWithSpinner";
 import toastError from "../../errors/toastError";
-import useQueues from "../../hooks/useQueues";
+import {
+  filterTransferQueues,
+  shouldShowConnectionSelection
+} from "./transferOptions";
 
-const useStyles = makeStyles((theme) => ({
-  maxWidth: {
+const useStyles = makeStyles(theme => ({
+  field: {
     width: "100%",
+    marginBottom: theme.spacing(2)
   },
+  hint: {
+    display: "block",
+    marginTop: theme.spacing(0.5)
+  },
+  loading: {
+    display: "flex",
+    justifyContent: "center",
+    padding: theme.spacing(3)
+  }
 }));
 
-const filterOptions = createFilterOptions({
-  trim: true,
-});
+const filterOptions = createFilterOptions({ trim: true });
 
-const TransferTicketModalCustom = ({ modalOpen, onClose, ticketid }) => {
+const TransferTicketModalCustom = ({
+  modalOpen,
+  onClose,
+  ticketid,
+  hideUserSelection = false
+}) => {
   const history = useHistory();
-  const [options, setOptions] = useState([]);
-  const [queues, setQueues] = useState([]);
-  const [allQueues, setAllQueues] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const classes = useStyles();
+  const isMounted = useRef(true);
+  const [users, setUsers] = useState([]);
+  const [connections, setConnections] = useState([]);
+  const [currentWhatsappId, setCurrentWhatsappId] = useState(null);
+  const [selectedWhatsappId, setSelectedWhatsappId] = useState("");
+  const [isGroup, setIsGroup] = useState(false);
   const [searchParam, setSearchParam] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedQueue, setSelectedQueue] = useState("");
-  const classes = useStyles();
-  const { findAll: findAllQueues } = useQueues();
-  const isMounted = useRef(true);
+  const [loadingOptions, setLoadingOptions] = useState(false);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -54,147 +75,257 @@ const TransferTicketModalCustom = ({ modalOpen, onClose, ticketid }) => {
   }, []);
 
   useEffect(() => {
-    if (isMounted.current) {
-      const loadQueues = async () => {
-        const list = await findAllQueues();
-        setAllQueues(list);
-        setQueues(list);
-      };
-      loadQueues();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (!modalOpen || !ticketid) return;
+    let active = true;
+
+    const loadTransferOptions = async () => {
+      setLoadingOptions(true);
+      setConnections([]);
+      setSelectedWhatsappId("");
+      setSelectedQueue("");
+      try {
+        const { data } = await api.get(`/tickets/${ticketid}/transfer-options`);
+        if (!active || !isMounted.current) return;
+
+        setConnections(data.connections || []);
+        setCurrentWhatsappId(data.currentWhatsappId);
+        setSelectedWhatsappId(data.currentWhatsappId || "");
+        setIsGroup(!!data.isGroup);
+      } catch (err) {
+        if (active) toastError(err);
+      } finally {
+        if (active && isMounted.current) setLoadingOptions(false);
+      }
+    };
+
+    loadTransferOptions();
+
+    return () => {
+      active = false;
+    };
+  }, [modalOpen, ticketid]);
 
   useEffect(() => {
-    if (!modalOpen || searchParam.length < 3) {
-      setLoading(false);
-      return;
+    if (hideUserSelection || !modalOpen || searchParam.length < 3) {
+      setLoadingUsers(false);
+      return undefined;
     }
-    const delayDebounceFn = setTimeout(() => {
-      setLoading(true);
-      const fetchUsers = async () => {
-        try {
-          const { data } = await api.get("/users/", {
-            params: { searchParam },
-          });
-          setOptions(data.users);
-          setLoading(false);
-        } catch (err) {
-          setLoading(false);
-          toastError(err);
-        }
-      };
 
-      fetchUsers();
+    let active = true;
+
+    const delayDebounceFn = setTimeout(async () => {
+      setLoadingUsers(true);
+      try {
+        const { data } = await api.get("/users/", {
+          params: { searchParam }
+        });
+        if (active && isMounted.current) setUsers(data.users);
+      } catch (err) {
+        if (active) toastError(err);
+      } finally {
+        if (active && isMounted.current) setLoadingUsers(false);
+      }
     }, 500);
-    return () => clearTimeout(delayDebounceFn);
-  }, [searchParam, modalOpen]);
 
-  const handleClose = () => {
-    onClose();
+    return () => {
+      active = false;
+      clearTimeout(delayDebounceFn);
+    };
+  }, [searchParam, modalOpen, hideUserSelection]);
+
+  const queues = useMemo(
+    () => filterTransferQueues(connections, selectedWhatsappId, selectedUser),
+    [connections, selectedWhatsappId, selectedUser]
+  );
+
+  const resetForm = () => {
     setSearchParam("");
     setSelectedUser(null);
+    setSelectedQueue("");
+    setConnections([]);
+    setCurrentWhatsappId(null);
+    setSelectedWhatsappId("");
+    setIsGroup(false);
   };
 
-  const handleSaveTicket = async (e) => {
-    e.preventDefault();
-    if (!ticketid) return;
-    if (!selectedQueue || selectedQueue === "") return;
-    setLoading(true);
+  const handleClose = () => {
+    if (submitting) return;
+    resetForm();
+    onClose();
+  };
+
+  const handleSaveTicket = async event => {
+    event.preventDefault();
+    if (!ticketid || !selectedQueue || !selectedWhatsappId) return;
+
+    setSubmitting(true);
     try {
-      let data = {};
+      const data = {
+        queueId: selectedQueue,
+        whatsappId: selectedWhatsappId
+      };
 
-      if (selectedUser) {
+      if (selectedUser?.id) {
         data.userId = selectedUser.id;
-      }
-
-      if (selectedQueue && selectedQueue !== null) {
-        data.queueId = selectedQueue;
-
-        if (!selectedUser) {
-          data.status = "pending";
-          data.userId = null;
-        }
+      } else {
+        data.status = "pending";
+        data.userId = null;
       }
 
       await api.put(`/tickets/${ticketid}`, data);
-      console.log(data)
-
-      history.push(`/tickets`);
+      resetForm();
+      onClose();
+      history.push("/tickets");
     } catch (err) {
-      setLoading(false);
       toastError(err);
+    } finally {
+      if (isMounted.current) setSubmitting(false);
     }
   };
 
+  const showConnectionSelection = shouldShowConnectionSelection(
+    connections,
+    isGroup
+  );
+
   return (
-    <Dialog open={modalOpen} onClose={handleClose} maxWidth="lg" scroll="paper">
+    <Dialog
+      className="conversa-dialogo"
+      open={modalOpen}
+      onClose={handleClose}
+      maxWidth="sm"
+      fullWidth
+    >
       <form onSubmit={handleSaveTicket}>
-        <DialogTitle id="form-dialog-title">
-          {i18n.t("transferTicketModal.title")}
-        </DialogTitle>
+        <DialogTitle>{i18n.t("transferTicketModal.title")}</DialogTitle>
         <DialogContent dividers>
-          <Autocomplete
-            style={{ width: 300, marginBottom: 20 }}
-            getOptionLabel={(option) => `${option.name}`}
-            onChange={(e, newValue) => {
-              setSelectedUser(newValue);
-              if (newValue != null && Array.isArray(newValue.queues)) {
-                setQueues(newValue.queues);
-              } else {
-                setQueues(allQueues);
-                setSelectedQueue("");
-              }
-            }}
-            options={options}
-            filterOptions={filterOptions}
-            freeSolo
-            autoHighlight
-            noOptionsText={i18n.t("transferTicketModal.noOptions")}
-            loading={loading}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label={i18n.t("transferTicketModal.fieldLabel")}
+          {loadingOptions ? (
+            <div className={classes.loading}>
+              <CircularProgress size={28} />
+            </div>
+          ) : (
+            <>
+              {showConnectionSelection && (
+                <FormControl
+                  variant="outlined"
+                  className={classes.field}
+                  required
+                >
+                  <InputLabel>
+                    {i18n.t("transferTicketModal.fieldConnectionLabel")}
+                  </InputLabel>
+                  <Select
+                    value={selectedWhatsappId}
+                    onChange={event => {
+                      setSelectedWhatsappId(event.target.value);
+                      setSelectedQueue("");
+                    }}
+                    label={i18n.t(
+                      "transferTicketModal.fieldConnectionPlaceholder"
+                    )}
+                  >
+                    {connections.map(connection => {
+                      const unavailable =
+                        connection.id !== currentWhatsappId &&
+                        connection.status !== "CONNECTED";
+                      return (
+                        <MenuItem
+                          key={connection.id}
+                          value={connection.id}
+                          disabled={unavailable}
+                        >
+                          {connection.name}
+                          {unavailable
+                            ? ` — ${i18n.t(
+                                "transferTicketModal.connectionUnavailable"
+                              )}`
+                            : ""}
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
+                  <Typography
+                    className={classes.hint}
+                    variant="caption"
+                    color="textSecondary"
+                  >
+                    {i18n.t("transferTicketModal.connectionHelp")}
+                  </Typography>
+                </FormControl>
+              )}
+
+              <FormControl
                 variant="outlined"
-                autoFocus
-                onChange={(e) => setSearchParam(e.target.value)}
-                InputProps={{
-                  ...params.InputProps,
-                  endAdornment: (
-                    <React.Fragment>
-                      {loading ? (
-                        <CircularProgress color="inherit" size={20} />
-                      ) : null}
-                      {params.InputProps.endAdornment}
-                    </React.Fragment>
-                  ),
-                }}
-              />
-            )}
-          />
-          <FormControl variant="outlined" className={classes.maxWidth}>
-            <InputLabel>
-              {i18n.t("transferTicketModal.fieldQueueLabel")}
-            </InputLabel>
-            <Select
-              value={selectedQueue}
-              onChange={(e) => setSelectedQueue(e.target.value)}
-              label={i18n.t("transferTicketModal.fieldQueuePlaceholder")}
-            >
-              {queues.map((queue) => (
-                <MenuItem key={queue.id} value={queue.id}>
-                  {queue.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+                className={classes.field}
+                required
+              >
+                <InputLabel>
+                  {i18n.t("transferTicketModal.fieldQueueLabel")}
+                </InputLabel>
+                <Select
+                  value={selectedQueue}
+                  onChange={event => setSelectedQueue(event.target.value)}
+                  label={i18n.t("transferTicketModal.fieldQueuePlaceholder")}
+                >
+                  {queues.map(queue => (
+                    <MenuItem key={queue.id} value={queue.id}>
+                      {queue.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {!hideUserSelection && (
+                <Autocomplete
+                  className={classes.field}
+                  getOptionLabel={option => `${option.name}`}
+                  onChange={(_event, newValue) => {
+                    setSelectedUser(newValue);
+                    const userQueueIds = newValue?.queues?.map(
+                      queue => queue.id
+                    );
+                    if (
+                      Array.isArray(userQueueIds) &&
+                      !userQueueIds.includes(Number(selectedQueue))
+                    ) {
+                      setSelectedQueue("");
+                    }
+                  }}
+                  options={users}
+                  filterOptions={filterOptions}
+                  freeSolo
+                  autoHighlight
+                  noOptionsText={i18n.t("transferTicketModal.noOptions")}
+                  loading={loadingUsers}
+                  renderInput={params => (
+                    <TextField
+                      {...params}
+                      label={i18n.t("transferTicketModal.fieldLabel")}
+                      variant="outlined"
+                      onChange={event => setSearchParam(event.target.value)}
+                      InputProps={{
+                        ...params.InputProps,
+                        endAdornment: (
+                          <>
+                            {loadingUsers ? (
+                              <CircularProgress color="inherit" size={20} />
+                            ) : null}
+                            {params.InputProps.endAdornment}
+                          </>
+                        )
+                      }}
+                    />
+                  )}
+                />
+              )}
+            </>
+          )}
         </DialogContent>
         <DialogActions>
           <Button
             onClick={handleClose}
             color="secondary"
-            disabled={loading}
+            disabled={submitting}
             variant="outlined"
           >
             {i18n.t("transferTicketModal.buttons.cancel")}
@@ -203,7 +334,8 @@ const TransferTicketModalCustom = ({ modalOpen, onClose, ticketid }) => {
             variant="contained"
             type="submit"
             color="primary"
-            loading={loading}
+            loading={submitting}
+            disabled={loadingOptions || !selectedQueue}
           >
             {i18n.t("transferTicketModal.buttons.ok")}
           </ButtonWithSpinner>

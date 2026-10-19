@@ -1,0 +1,35 @@
+--- /dev/null
++++ b/internal/voip/media/mlow/encoder_compat_test.go
+@@ -0,0 +1,32 @@
++package mlow
++
++import (
++	"crypto/sha256"
++	"fmt"
++	"math"
++	"testing"
++)
++
++func TestEncoderCompatibilityChecksum(t *testing.T) {
++	enc := NewMlowEncoder()
++	hash := sha256.New()
++	frame := make([]float32, 960)
++	for frameIndex := 0; frameIndex < 80; frameIndex++ {
++		for sampleIndex := range frame {
++			absoluteSample := frameIndex*len(frame) + sampleIndex
++			carrier := math.Sin(2 * math.Pi * float64(220+frameIndex%17*23) * float64(absoluteSample) / 16000)
++			modulator := math.Sin(2 * math.Pi * 3 * float64(absoluteSample) / 16000)
++			frame[sampleIndex] = float32(0.23 * carrier * (0.65 + 0.35*modulator))
++		}
++		encoded, err := enc.Encode(frame)
++		if err != nil {
++			t.Fatalf("encode frame %d: %v", frameIndex, err)
++		}
++		_, _ = hash.Write(encoded)
++	}
++	got := fmt.Sprintf("%x", hash.Sum(nil))
++	const want = "71ef5301eb73f7f8d3346e563996004f673592da0412cc958942dcfa5e8eaa20"
++	if got != want {
++		t.Fatalf("encoded output changed: got %s, want %s", got, want)
++	}
++}

@@ -1,0 +1,473 @@
+.fluxo-editor {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.fluxo-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.fluxo-toolbar > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.fluxo-toolbar h2 {
+  font-size: 18px;
+  letter-spacing: -0.02em;
+  margin: 0 6px 0 0;
+}
+.fluxo-builder {
+  display: grid;
+  grid-template-columns: 236px minmax(0, 1fr);
+  gap: 10px;
+  flex: 1;
+  min-height: 440px;
+  position: relative;
+}
+.fluxo-builder.com-inspetor {
+  grid-template-columns: 236px minmax(0, 1fr) 300px;
+}
+.fluxo-painel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  border: 1px solid var(--ew-border);
+  border-radius: 16px;
+  background: var(--ew-surface);
+  overflow: hidden;
+}
+.fluxo-painel-corpo {
+  padding: 12px;
+  overflow: auto;
+  flex: 1;
+}
+.fluxo-busca {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--ew-border);
+  border-radius: 7px;
+  padding: 9px;
+  color: var(--ew-muted);
+}
+.fluxo-busca input {
+  min-width: 0;
+  width: 100%;
+  border: 0;
+  background: none;
+  color: var(--ew-text);
+  outline: none;
+  font: inherit;
+  font-size: 12px;
+}
+.fluxo-grupo {
+  margin-top: 20px;
+}
+.fluxo-grupo h4 {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ew-muted);
+  margin: 0 0 10px;
+  font-weight: 600;
+}
+.fluxo-paleta-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  width: 100%;
+  padding: 11px 9px;
+  margin: 2px 0;
+  border: 1px dashed transparent;
+  border-radius: 8px;
+  background: none;
+  color: var(--ew-text);
+  cursor: grab;
+  font-size: 12px !important;
+}
+.fluxo-paleta-item svg {
+  color: var(--ew-muted);
+}
+.fluxo-paleta-item:hover {
+  background: var(--ew-bg);
+  border-color: var(--ew-border);
+}
+.fluxo-dica {
+  padding-top: 24px;
+  border-top: 1px solid var(--ew-border);
+  margin-top: 30px;
+}
+.fluxo-area .react-flow {
+  flex: 1;
+  background: var(--ew-bg);
+  min-height: 360px;
+  --xy-edge-stroke: var(--ew-muted);
+  --xy-minimap-background-color: var(--ew-surface);
+  --xy-minimap-mask-background-color: color-mix(
+    in srgb,
+    var(--ew-bg) 65%,
+    transparent
+  );
+}
+.fluxo-bloco {
+  width: 232px;
+  border: 1px solid var(--ew-border);
+  border-radius: 9px;
+  background: var(--ew-surface);
+  box-shadow: 0 1px 3px #0001;
+  color: var(--ew-text);
+  font-family: Inter, system-ui, sans-serif;
+}
+.fluxo-bloco.selecionado {
+  border-color: var(--ew-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ew-primary) 16%, transparent);
+}
+.fluxo-bloco.pausado {
+  opacity: 0.55;
+}
+.fluxo-bloco header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--ew-border);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ew-muted);
+  font-weight: 600;
+}
+.fluxo-bloco-icone {
+  width: 23px;
+  height: 23px;
+  display: grid;
+  place-items: center;
+  border-radius: 5px;
+  color: var(--ew-primary);
+  background: color-mix(in srgb, var(--ew-primary) 10%, transparent);
+}
+.fluxo-bloco-icone.tipo-inicio {
+  color: #27834b;
+  background: #27834b15;
+}
+.fluxo-bloco-icone.tipo-menu {
+  color: #357bb8;
+  background: #357bb815;
+}
+.fluxo-bloco-corpo {
+  padding: 12px;
+  font-size: 12px;
+}
+.fluxo-bloco-corpo strong {
+  display: block;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fluxo-bloco-corpo p {
+  color: var(--ew-muted);
+  margin: 7px 0;
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  white-space: pre-wrap;
+}
+.fluxo-opcoes {
+  margin-top: 12px;
+}
+.fluxo-opcoes > div {
+  display: flex;
+  gap: 8px;
+  padding: 6px 8px;
+  background: var(--ew-bg);
+  margin-top: 4px;
+  border-radius: 5px;
+  font-size: 11px;
+}
+.fluxo-opcoes span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fluxo-bloco .react-flow__handle {
+  width: 10px;
+  height: 10px;
+  background: var(--ew-surface);
+  border: 2px solid var(--ew-primary);
+}
+.fluxo-bloco .react-flow__handle-right {
+  right: -5px;
+}
+.fluxo-bloco .react-flow__handle-left {
+  left: -5px;
+}
+.fluxo-controles {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px;
+  background: var(--ew-surface);
+  border: 1px solid var(--ew-border);
+  border-radius: 9px;
+  box-shadow: 0 2px 8px #0001;
+}
+.fluxo-controles > span {
+  font-size: 11px;
+  min-width: 38px;
+  text-align: center;
+}
+.fluxo-controles .ew-button {
+  border: 0;
+}
+.fluxo-status {
+  border-top: 1px solid var(--ew-border);
+  padding: 9px 14px;
+  color: var(--ew-muted);
+  font-size: 11px;
+}
+.fluxo-inspetor .fluxo-grupo {
+  border-top: 1px solid var(--ew-border);
+  padding-top: 18px;
+}
+.fluxo-inspetor-acoes {
+  display: flex;
+  gap: 5px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+.fluxo-inspetor-acoes button {
+  font-size: 11px;
+}
+.fluxo-editor-opcao {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 5px 0;
+  font-size: 11px;
+}
+.fluxo-editor-opcao > b {
+  padding: 3px 5px;
+  border-radius: 4px;
+  background: var(--ew-bg);
+}
+.fluxo-editor-opcao > span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fluxo-editor-opcao .ew-button {
+  min-width: 24px;
+  min-height: 24px;
+  padding: 3px;
+}
+.fluxo-anexar {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  font-size: 11px;
+}
+.fluxo-anexar input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+}
+.fluxo-simulacao {
+  padding: 16px;
+  border-radius: 10px;
+  background: var(--ew-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 330px;
+  overflow: auto;
+}
+.fluxo-mensagem,
+.fluxo-resposta {
+  padding: 10px 12px;
+  border: 1px solid var(--ew-border);
+  background: var(--ew-surface);
+  border-radius: 10px;
+  line-height: 1.5;
+  max-width: 85%;
+  white-space: pre-wrap;
+}
+.fluxo-resposta {
+  align-self: flex-end;
+  background: color-mix(in srgb, var(--ew-primary) 9%, var(--ew-surface));
+}
+.fluxo-simulacao-opcoes {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+.fluxo-vazio {
+  flex: 1;
+  display: flex;
+  gap: 14px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+.fluxo-carregando {
+  animation: fluxo-girar 1s linear infinite;
+}
+@keyframes fluxo-girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (min-width: 1280px) {
+  .fluxo-paleta .ew-panel-head .ew-button {
+    display: none;
+  }
+}
+@media (max-width: 1279px) {
+  .fluxo-builder,
+  .fluxo-builder.com-inspetor {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .fluxo-paleta {
+    display: none;
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 236px;
+    z-index: 8;
+    box-shadow: 8px 0 30px #0002;
+  }
+  .paleta-aberta .fluxo-paleta {
+    display: flex;
+  }
+  .fluxo-inspetor {
+    position: absolute;
+    inset: 0 0 0 auto;
+    width: 300px;
+    z-index: 7;
+    box-shadow: -8px 0 30px #0002;
+  }
+}
+@media (max-width: 767px) {
+  .fluxo-builder {
+    min-height: 520px;
+  }
+  .fluxo-toolbar {
+    gap: 10px;
+  }
+  .fluxo-toolbar > div {
+    flex-wrap: wrap;
+  }
+  .fluxo-toolbar .ew-muted {
+    display: none;
+  }
+  .fluxo-inspetor {
+    width: min(300px, 90%);
+  }
+  .react-flow__minimap {
+    display: none;
+  }
+}
+
+fieldset.fluxo-builder {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+fieldset.fluxo-builder:disabled {
+  opacity: 0.7;
+}
+
+.fluxos-navegacao {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.fluxos-navegacao .ew-tabs {
+  margin: 0;
+}
+.fluxos-seletor {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.fluxos-seletor .ew-select {
+  width: 170px;
+  font-size: 12px;
+  min-height: 34px;
+}
+.fluxos-seletor .ew-button {
+  font-size: 12px;
+  min-height: 34px;
+}
+.acoes-fluxo,
+.acoes-fluxo > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.acoes-fluxo {
+  margin-right: 10px;
+}
+.acoes-fluxo .ew-button {
+  min-height: 32px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+.acoes-fluxo .ew-badge {
+  color: #3b7d4b;
+  background: #3b7d4b0e;
+}
+.fluxo-area .ew-panel-head h3 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ew-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+@media (max-width: 900px) {
+  .acoes-fluxo .ew-badge {
+    display: none;
+  }
+  .fluxos-navegacao {
+    gap: 10px;
+  }
+}
+@media (max-width: 600px) {
+  .acoes-fluxo > div > .ew-button:first-child {
+    font-size: 0;
+    gap: 0;
+    padding: 7px;
+  }
+  .fluxos-seletor {
+    flex: 1;
+  }
+  .fluxos-seletor .ew-select {
+    flex: 1;
+    width: 0;
+  }
+}

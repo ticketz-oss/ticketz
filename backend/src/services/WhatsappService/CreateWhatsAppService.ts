@@ -17,13 +17,13 @@ interface Request {
   transferMessage?: string;
   status?: string;
   isDefault?: boolean;
-  token?: string;
   provider?: string;
   facebookUserId?: string;
   facebookUserToken?: string;
   tokenMeta?: string;
   channel?: string;
   facebookPageUserId?: string;
+  language?: string;
 }
 
 interface Response {
@@ -42,17 +42,17 @@ const CreateWhatsAppService = async ({
   transferMessage,
   isDefault = false,
   companyId,
-  token = "",
   provider = "beta",
   facebookUserId,
   facebookUserToken,
   facebookPageUserId,
   tokenMeta,
-  channel = "whatsapp"
+  channel = "whatsapp",
+  language
 }: Request): Promise<Response> => {
   const company = await Company.findOne({
     where: {
-      id: companyId,
+      id: companyId
     },
     include: [{ model: Plan, as: "plan" }]
   });
@@ -82,7 +82,7 @@ const CreateWhatsAppService = async ({
         async value => {
           if (!value) return false;
           const nameExists = await Whatsapp.findOne({
-            where: { name: value, channel }
+            where: { name: value, companyId }
           });
           return !nameExists;
         }
@@ -96,15 +96,13 @@ const CreateWhatsAppService = async ({
     throw new AppError((err as Error).message);
   }
 
-  const whatsappFound = await Whatsapp.findOne({ where: { companyId} });
+  const whatsappFound = await Whatsapp.findOne({ where: { companyId } });
 
-  isDefault = channel === "whatsapp" ? !whatsappFound : false
-
-
+  isDefault = channel === "whatsapp" ? !whatsappFound : false;
 
   let oldDefaultWhatsapp: Whatsapp | null = null;
 
-  if(channel === "whatsapp" && isDefault) {
+  if (channel === "whatsapp" && isDefault) {
     oldDefaultWhatsapp = await Whatsapp.findOne({
       where: { isDefault: true, companyId, channel }
     });
@@ -113,39 +111,15 @@ const CreateWhatsAppService = async ({
     }
   }
 
-  if (queueIds.length > 1 && !greetingMessage) {
-    throw new AppError("ERR_WAPP_GREETING_REQUIRED");
-  }
-
-  if (token !== null && token !== "") {
-    const tokenSchema = Yup.object().shape({
-      token: Yup.string()
-        .required()
-        .min(2)
-        .test(
-          "Check-token",
-          "This whatsapp token is already used.",
-          async value => {
-            if (!value) return false;
-            const tokenExists = await Whatsapp.findOne({
-              where: { token: value, channel }
-            });
-            return !tokenExists;
-          }
-        )
-    });
-
-    try {
-      await tokenSchema.validate({ token });
-    } catch (err: unknown) {
-      throw new AppError((err as Error).message);
-    }
-  }
+  // O modo (Baileys/oficial) nunca e escolhido na criacao da conexao - ele
+  // sempre espelha o modo travado da empresa, pra nunca misturar os dois.
+  const apiMode = company?.whatsappMode === "meta" ? "official" : "baileys";
+  const connectionStatus = apiMode === "official" ? "DISCONNECTED" : status;
 
   const whatsapp = await Whatsapp.create(
     {
       name,
-      status,
+      status: connectionStatus,
       greetingMessage,
       complationMessage,
       outOfHoursMessage,
@@ -153,13 +127,14 @@ const CreateWhatsAppService = async ({
       transferMessage,
       isDefault,
       companyId,
-      token,
       provider,
       channel,
+      apiMode,
       facebookUserId,
       facebookUserToken,
       facebookPageUserId,
       tokenMeta,
+      language
     },
     { include: ["queues"] }
   );

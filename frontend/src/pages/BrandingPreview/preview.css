@@ -1,0 +1,76 @@
+.brand-system-preview {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+.brand-system-preview > main {
+  flex: 1;
+  min-width: 0;
+}
+.brand-system-logo {
+  display: flex;
+  align-items: center;
+  min-height: 60px;
+}
+.brand-system-preview .nav-abrir-atendimento {
+  margin: 4px 12px 8px;
+  gap: 8px;
+  min-width: 36px;
+}
+.brand-system-navigation {
+  padding: 8px;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.brand-system-workspace {
+  padding: 28px;
+  min-height: 250px;
+}
+.brand-link-preview {
+  min-height: 100vh;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  padding: 32px;
+  background: #e9efe9;
+}
+.brand-link-card {
+  width: min(100%, 480px);
+  border-radius: 12px;
+  background: #fff;
+  color: #1d1d1f;
+  overflow: hidden;
+}
+.brand-link-card > img {
+  width: 100%;
+  height: 240px;
+  object-fit: contain;
+  display: block;
+}
+.brand-link-card > div {
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+}
+.brand-link-card strong {
+  font-size: 18px;
+  overflow-wrap: anywhere;
+}
+.brand-link-card span {
+  font-size: 13px;
+  color: #52525b;
+  overflow-wrap: anywhere;
+}
+.brand-link-preview > p {
+  max-width: 480px;
+  color: #52525b;
+  line-height: 1.7;
+  font-size: 13px;
+}
+.brand-link-preview.dark {
+  background: #182420;
+}
+.brand-link-preview.dark > p {
+  color: #c4cdc9;
+}

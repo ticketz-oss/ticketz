@@ -1,0 +1,6 @@
+/* Animation lives on individual SVG shapes in AnimatedIcon, never the wrapper. */
+.ew-button:focus-visible,
+.ew-nav-motion:focus-visible {
+  outline: 2px solid var(--ew-primary, currentColor);
+  outline-offset: 2px;
+}

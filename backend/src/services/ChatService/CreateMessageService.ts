@@ -1,4 +1,3 @@
-import { Op } from "sequelize";
 import Chat from "../../models/Chat";
 import ChatMessage from "../../models/ChatMessage";
 import ChatUser from "../../models/ChatUser";
@@ -32,7 +31,11 @@ export default async function CreateMessageService({
 
   await newMessage.reload({
     include: [
-      { model: User, as: "sender", attributes: ["id", "name"] },
+      {
+        model: User,
+        as: "sender",
+        attributes: ["id", "name", "profilePicUrl"]
+      },
       {
         model: Chat,
         as: "chat",
@@ -43,19 +46,21 @@ export default async function CreateMessageService({
 
   const sender = await User.findByPk(senderId);
 
-  await newMessage.chat.update({ lastMessage: `${sender.name}: ${mediaName != null ? mediaName : message}` });
+  await newMessage.chat.update({
+    lastMessage: `${sender.name}: ${mediaName != null ? mediaName : message}`
+  });
 
   const chatUsers = await ChatUser.findAll({
     where: { chatId }
   });
 
-  for (let chatUser of chatUsers) {
-    if (chatUser.userId === senderId) {
-      await chatUser.update({ unreads: 0 });
-    } else {
-      await chatUser.update({ unreads: chatUser.unreads + 1 });
-    }
-  }
+  await Promise.all(
+    chatUsers.map(chatUser =>
+      chatUser.userId === senderId
+        ? chatUser.update({ unreads: 0 })
+        : chatUser.increment("unreads", { by: 1 })
+    )
+  );
 
   return newMessage;
 }

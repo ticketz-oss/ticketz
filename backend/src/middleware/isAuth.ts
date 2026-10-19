@@ -2,6 +2,9 @@ import { verify } from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import AppError from "../errors/AppError";
 import authConfig from "../config/auth";
+import Company from "../models/Company";
+import { assertRuntimeCompany } from "../helpers/tenantRuntime";
+import { initializeCompanyTimezone } from "../services/CompanyService/CompanyTimezoneService";
 
 interface TokenPayload {
   id: string;
@@ -13,28 +16,61 @@ interface TokenPayload {
   exp: number;
 }
 
-const isAuth = (req: Request, res: Response, next: NextFunction): void => {
+const ensureCompanyActive = async (companyId: number): Promise<void> => {
+  assertRuntimeCompany(companyId);
+  const company = await Company.findByPk(companyId, {
+    attributes: ["status", "platformStatus"]
+  });
+  if (company?.platformStatus === "suspenso") {
+    throw new AppError("ERR_COMPANY_SUSPENDED", 403);
+  }
+  if (!company?.status || company.platformStatus === "cancelado") {
+    throw new AppError("ERR_COMPANY_INACTIVE", 403);
+  }
+};
+
+const isAuth = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  const clientTimezone = req.get("x-client-timezone");
+
+  if (req?.user) {
+    // API-token middleware may already have authorized the user, but tenant
+    // suspension must still be enforced for every authenticated request.
+    await ensureCompanyActive(req.user.companyId);
+    await initializeCompanyTimezone(req.user.companyId, clientTimezone);
+    next();
+    return;
+  }
+
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
-    throw new AppError("ERR_SESSION_EXPIRED", 401);
+    throw new AppError("ERR_UNAUTHORIZED", 401, "debug");
   }
 
   const [, token] = authHeader.split(" ");
 
   try {
-    req.tokenData = verify(token, authConfig.secret) as TokenPayload;
+    const tokenData = verify(token, authConfig.secret) as TokenPayload;
     req.user = {
-      id: req.tokenData.id,
-      profile: req.tokenData.profile,
-      isSuper: req.tokenData.super,
-      companyId: req.tokenData.companyId
+      id: tokenData.id,
+      profile: tokenData.profile,
+      isSuper: tokenData.super,
+      companyId: tokenData.companyId
     };
+    req.companyId = tokenData.companyId;
+
+    await ensureCompanyActive(tokenData.companyId);
+    await initializeCompanyTimezone(tokenData.companyId, clientTimezone);
   } catch (err) {
-    throw new AppError("Invalid token. We'll try to assign a new one on next request", 403 );
+    if (err instanceof AppError) throw err;
+    throw new AppError("ERR_SESSION_EXPIRED", 403, "debug");
   }
 
-  return next();
+  next();
 };
 
 export default isAuth;

@@ -9,13 +9,20 @@ import {
   Default,
   BelongsTo,
   ForeignKey,
-  HasMany,
+  HasMany
 } from "sequelize-typescript";
 import Contact from "./Contact";
 import Ticket from "./Ticket";
 import Company from "./Company";
 import Queue from "./Queue";
 import OldMessage from "./OldMessage";
+import { URLCharEncoder } from "./URLCharEncoder";
+
+export type MessageErrorPayload = {
+  code: string;
+  message: string;
+  rawPayload?: unknown;
+};
 
 @Table
 class Message extends Model {
@@ -50,12 +57,27 @@ class Message extends Model {
   @Column(DataType.TEXT)
   body: string;
 
+  @Column(DataType.JSONB)
+  error: MessageErrorPayload;
+
   @Column(DataType.STRING)
   get mediaUrl(): string | null {
-    if (this.getDataValue("mediaUrl")) {
-      return `${process.env.BACKEND_URL}/public/${this.getDataValue(
-        "mediaUrl"
-      )}`;
+    const value = this.getDataValue("mediaUrl");
+    if (value) {
+      return value.match(/^https?:\/\//)
+        ? URLCharEncoder(value)
+        : `${process.env.BACKEND_URL}/public/${URLCharEncoder(value)}`;
+    }
+    return null;
+  }
+
+  @Column(DataType.STRING)
+  get thumbnailUrl(): string | null {
+    const value = this.getDataValue("thumbnailUrl");
+    if (value) {
+      return value.match(/^https?:\/\//)
+        ? URLCharEncoder(value)
+        : `${process.env.BACKEND_URL}/public/${URLCharEncoder(value)}`;
     }
     return null;
   }
@@ -114,9 +136,12 @@ class Message extends Model {
 
   @BelongsTo(() => Queue)
   queue: Queue;
-  
+
   @HasMany(() => OldMessage)
   oldMessages: OldMessage[];
+
+  @HasMany(() => Message, "quotedMsgId")
+  replies: Message[];
 }
 
 export default Message;

@@ -5,27 +5,27 @@ import { makeStyles } from "@material-ui/core/styles";
 import TicketHeaderSkeleton from "../TicketHeaderSkeleton";
 
 const useStyles = makeStyles(theme => ({
-	ticketHeader: {
-		display: "flex",
-		flex: "none",
-		borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
-	},
+  ticketHeader: {
+    display: "flex",
+    flex: "none",
+    borderBottom: "1px solid rgba(0, 0, 0, 0.12)"
+  }
 }));
 
 const TicketHeader = ({ loading, children }) => {
-	const classes = useStyles();
+  const classes = useStyles();
 
-	return (
-		<>
-			{loading ? (
-				<TicketHeaderSkeleton />
-			) : (
-				<Card square className={classes.ticketHeader}>
-					{children}
-				</Card>
-			)}
-		</>
-	);
+  return (
+    <>
+      {loading ? (
+        <TicketHeaderSkeleton />
+      ) : (
+        <Card square className={classes.ticketHeader}>
+          {children}
+        </Card>
+      )}
+    </>
+  );
 };
 
 export default TicketHeader;

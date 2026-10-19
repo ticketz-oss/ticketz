@@ -1,4 +1,13 @@
-import React, { useState, useEffect, useReducer, useRef, useContext } from "react";
+import { alpha } from "@material-ui/core/styles";
+import AudioMessage from "../AudioMessage";
+import React, {
+  useState,
+  useEffect,
+  useReducer,
+  useRef,
+  useContext,
+  useMemo
+} from "react";
 
 import { isSameDay, parseISO, format } from "date-fns";
 import clsx from "clsx";
@@ -11,33 +20,111 @@ import {
   Divider,
   IconButton,
   makeStyles,
-  Typography,
+  Tooltip,
+  Typography
 } from "@material-ui/core";
 
 import {
   AccessTime,
   Block,
+  ErrorOutline,
+  Warning,
   Done,
   DoneAll,
   ExpandMore,
   GetApp,
   Facebook,
   Instagram,
+  Description,
+  Forward,
+  Launch,
+  Reply,
+  LocationOn,
+  PlayArrow,
+  Pause,
+  CropFree
 } from "@material-ui/icons";
 
-import MarkdownWrapper from "../MarkdownWrapper";
-import ModalImageCors from "../ModalImageCors";
+import WhatsMarked from "../JunimoWhatsMarked";
+import PdfPreview from "../PdfPreview";
 import MessageOptionsMenu from "../MessageOptionsMenu";
-import whatsBackground from "../../assets/wa-background.png";
-import whatsBackgroundDark from "../../assets/wa-background-dark.png";
+import MediaGalleryLightbox, {
+  buildMediaGalleryData
+} from "../MediaGalleryLightbox";
 
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import { SocketContext } from "../../context/Socket/SocketContext";
 import { i18n } from "../../translate/i18n";
+import vCard from "vcard-parser";
+import { generateColor } from "../../helpers/colorGenerator";
+import { getInitials } from "../../helpers/getInitials";
+import { downloadFile } from "../../helpers/downloadFile";
+import { Mutex } from "async-mutex";
+import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessageContext";
 
+const loadPageMutex = new Mutex();
 
-const useStyles = makeStyles((theme) => ({
+const VoiceRecordingPlayer = ({ message }) => {
+  const [source, setSource] = useState("");
+  const callId = /^voice-(\d+)-recording$/.exec(message.id)?.[1];
+
+  useEffect(() => {
+    if (!callId) return undefined;
+    let active = true;
+    let objectUrl = "";
+    api
+      .get(`/voice/calls/${callId}/recording`, { responseType: "blob" })
+      .then(({ data }) => {
+        if (!active) return;
+        objectUrl = URL.createObjectURL(data);
+        setSource(objectUrl);
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [callId]);
+
+  return source ? (
+    <AudioMessage src={source} />
+  ) : (
+    <CircularProgress size={20} />
+  );
+};
+
+const useStyles = makeStyles(theme => ({
+  messageContainer: {
+    "& a": {
+      color: theme.palette.primary.main,
+      fontWeight: "bold",
+      textDecoration: "none"
+    },
+    "& span.ticketzMention": {
+      color: theme.palette.primary.main,
+      fontWeight: "bold",
+      cursor: "pointer"
+    },
+    marginBottom: 5
+  },
+
+  stickedMessages: {
+    backgroundColor: theme.palette.background.default,
+    flexDirection: "column",
+    flexGrow: 1,
+    padding: "5px 20px 20px 20px",
+    overflowY: "scroll",
+    ...theme.scrollbarStyles,
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    width: "100%",
+    maxHeight: "250px",
+    zIndex: 10,
+    borderTop: `1px solid ${theme.palette.divider}`
+  },
+
   messagesListWrapper: {
     overflow: "hidden",
     position: "relative",
@@ -45,18 +132,18 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "column",
     flexGrow: 1,
     width: "100%",
-    minWidth: 300,
-    minHeight: 200,
+    minWidth: 0,
+    minHeight: 150
   },
 
   messagesList: {
-    backgroundImage: theme.mode === 'light' ? `url(${whatsBackground})` : `url(${whatsBackgroundDark})`,
+    backgroundColor: theme.palette.background.default,
     display: "flex",
     flexDirection: "column",
     flexGrow: 1,
     padding: "20px 20px 20px 20px",
     overflowY: "scroll",
-    ...theme.scrollbarStyles,
+    ...theme.scrollbarStyles
   },
 
   circleLoading: {
@@ -65,27 +152,35 @@ const useStyles = makeStyles((theme) => ({
     opacity: "70%",
     top: 0,
     left: "50%",
-    marginTop: 12,
+    marginTop: 12
   },
 
   messageLeft: {
     marginRight: 20,
     marginTop: 2,
     minWidth: 100,
-    maxWidth: 600,
+    maxWidth: "min(600px, 100%)",
     height: "auto",
     display: "block",
     position: "relative",
-    "&:hover #messageActionsButton": {
+    "&:hover [id^='messageActionsButton']": {
       display: "flex",
       position: "absolute",
       top: 0,
-      right: 0,
+      right: 0
     },
+    "&:hover [id^='messageReplyButton'], &:focus-within [id^='messageReplyButton']":
+      {
+        opacity: 1
+      },
 
     whiteSpace: "pre-wrap",
-    backgroundColor: theme.mode === 'light' ? "#ffffff" : "#024481",
-    color: theme.mode === 'light' ? "#303030" : "#ffffff",
+    backgroundColor: theme.palette.background.paper,
+    color: theme.isStardew
+      ? theme.stardew.ink
+      : theme.mode === "light"
+        ? "#303030"
+        : "#ffffff",
     alignSelf: "flex-start",
     borderTopLeftRadius: 0,
     borderTopRightRadius: 8,
@@ -95,55 +190,67 @@ const useStyles = makeStyles((theme) => ({
     paddingRight: 5,
     paddingTop: 5,
     paddingBottom: 0,
-    boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000"
+    boxShadow:
+      theme.mode === "light" ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000",
+    transition: "background-color 0.5s ease-in-out"
   },
 
   quotedContainerLeft: {
-    margin: "-3px -80px 6px -6px",
+    margin: "0 0 8px",
     overflow: "hidden",
-    backgroundColor: theme.mode === 'light' ? "#f0f0f0" : "#1c2134",
+    backgroundColor: theme.mode === "light" ? "#f0f0f0" : "#1c2134",
     borderRadius: "7.5px",
     display: "flex",
     position: "relative",
+    cursor: "pointer"
   },
 
   quotedMsg: {
     padding: 10,
-    maxWidth: 300,
+    // maxWidth: 300,
+    width: "100%",
     height: "auto",
     display: "block",
     whiteSpace: "pre-wrap",
-    overflow: "hidden",
+    overflow: "hidden"
   },
 
   quotedSideColorLeft: {
     flex: "none",
     width: "4px",
-    backgroundColor: "#6bcbef",
+    backgroundColor: theme.isStardew ? theme.stardew.green : "#6bcbef"
   },
 
   quotedThumbnail: {
-    maxWidth: "74px",
-    maxHeight: "74px",
+    maxWidth: "180px",
+    height: "90px"
   },
 
   messageRight: {
     marginLeft: 20,
     marginTop: 2,
     minWidth: 100,
-    maxWidth: 600,
+    maxWidth: "min(600px, 100%)",
     height: "auto",
     display: "block",
     position: "relative",
-    "&:hover #messageActionsButton": {
+    "&:hover [id^='messageActionsButton']": {
       display: "flex",
       position: "absolute",
       top: 0,
-      right: 0,
+      right: 0
     },
+    "&:hover [id^='messageReplyButton'], &:focus-within [id^='messageReplyButton']":
+      {
+        opacity: 1
+      },
     whiteSpace: "pre-wrap",
-    backgroundColor: theme.mode === 'light' ? "#dcf8c6" : "#005c4b",
-    color: theme.mode === 'light' ? "#303030" : "#ffffff",
+    backgroundColor: alpha(theme.palette.primary.main, 0.09),
+    color: theme.isStardew
+      ? theme.stardew.ink
+      : theme.mode === "light"
+        ? "#303030"
+        : "#ffffff",
     alignSelf: "flex-end",
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
@@ -153,86 +260,187 @@ const useStyles = makeStyles((theme) => ({
     paddingRight: 5,
     paddingTop: 5,
     paddingBottom: 0,
-    boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000"
+    boxShadow:
+      theme.mode === "light" ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000",
+    transition: "background-color 0.5s ease-in-out"
   },
 
   quotedContainerRight: {
-    margin: "-3px -80px 6px -6px",
+    margin: "0 0 8px",
     overflowY: "hidden",
-    backgroundColor: theme.mode === 'light' ? "#cfe9ba" : "#075e54",
+    backgroundColor: theme.mode === "light" ? "#cfe9ba" : "#075e54",
     borderRadius: "7.5px",
     display: "flex",
-    position: "relative",
+    position: "relative"
   },
 
   quotedMsgRight: {
     padding: 10,
-    maxWidth: 300,
+    // maxWidth: 300,
     height: "auto",
-    whiteSpace: "pre-wrap",
+    whiteSpace: "pre-wrap"
   },
 
   quotedSideColorRight: {
     flex: "none",
     width: "4px",
-    backgroundColor: "#35cd96",
+    backgroundColor: theme.isStardew ? theme.stardew.green : "#35cd96"
   },
 
   messageActionsButton: {
-    display: "none",
-    position: "relative",
+    display: "flex",
+    position: "absolute",
+    top: 3,
+    right: 3,
     color: "#999",
     zIndex: 1,
     backgroundColor: "inherit",
     opacity: "90%",
-    "&:hover, &.Mui-focusVisible": { backgroundColor: "inherit" },
+    "&:hover, &.Mui-focusVisible": { backgroundColor: "inherit" }
+  },
+
+  messageReplyButton: {
+    display: "flex",
+    position: "absolute",
+    top: 3,
+    right: 37,
+    color: "#777",
+    zIndex: 1,
+    backgroundColor: "inherit",
+    opacity: 0.35,
+    transition: "opacity 120ms ease",
+    "&:hover, &.Mui-focusVisible": {
+      opacity: 1,
+      backgroundColor: "inherit"
+    },
+    [theme.breakpoints.down("sm")]: {
+      opacity: 1
+    }
   },
 
   messageContactName: {
     display: "flex",
-    color: "#6bcbef",
+    color: theme.palette.primary.main,
     fontWeight: 500,
+    cursor: "pointer"
+  },
+
+  forwardedMessage: {
+    display: "flex",
+    color: theme.isStardew
+      ? theme.stardew.muted
+      : theme.mode === "light"
+        ? "#999"
+        : "#d0d0d0",
+    fontSize: 11,
+    fontWeight: "bold"
+  },
+
+  forwardedIcon: {
+    color: theme.isStardew
+      ? theme.stardew.muted
+      : theme.mode === "light"
+        ? "#999"
+        : "#d0d0d0",
+    fontSize: 15,
+    verticalAlign: "middle",
+    marginLeft: 4
   },
 
   textContentItem: {
-    overflowWrap: "break-word",
-    padding: "3px 80px 6px 6px",
+    overflowWrap: "anywhere",
+    fontSize: 13,
+    lineHeight: 1.65,
+    padding: "3px 70px 20px 6px"
+  },
+
+  messageLocation: {
+    display: "flex",
+    padding: 5,
+    cursor: "pointer"
+  },
+
+  messageLocationText: {
+    verticalAlign: "middle",
+    paddingLeft: 5,
+    minWidth: 200,
+    marginTop: "auto",
+    marginBottom: "auto"
   },
 
   textContentItemDeleted: {
     fontStyle: "italic",
-    color: "rgba(0, 0, 0, 0.36)",
+    color: theme.isStardew ? theme.stardew.muted : "rgba(0, 0, 0, 0.36)",
     overflowWrap: "break-word",
-    padding: "3px 80px 6px 6px",
-  },
-  
-  textContentItemEdited: {
-    overflowWrap: "break-word",
-    padding: "3px 120px 6px 6px",
+    padding: "3px 80px 6px 6px"
   },
 
-  messageMedia: {
-    objectFit: "cover",
-    width: 250,
-    height: 200,
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
+  textContentItemEdited: {
+    overflowWrap: "break-word",
+    padding: "3px 120px 6px 6px"
   },
-  
+  messageMediaDeleted: {
+    filter: "grayscale(1)",
+    opacity: 0.4
+  },
+
   messageVideo: {
     width: 250,
     maxHeight: 445,
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
     borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
+    borderBottomRightRadius: 8
   },
-  
+  videoPreviewWrapper: {
+    width: 250,
+    maxHeight: 445,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+    overflow: "hidden",
+    position: "relative",
+    backgroundColor: "#000"
+  },
+  videoPreviewMedia: {
+    width: "100%",
+    maxHeight: 445,
+    display: "block"
+  },
+  videoPreviewActions: {
+    position: "absolute",
+    right: 8,
+    bottom: 8,
+    display: "flex",
+    gap: 8,
+    zIndex: 1
+  },
+  videoPreviewActionButton: {
+    backgroundColor: "rgba(15, 23, 42, 0.65)",
+    color: "#fff",
+    "&:hover": {
+      backgroundColor: "rgba(15, 23, 42, 0.82)"
+    }
+  },
+
+  messageMedia: {
+    objectFit: "cover",
+    width: "100%",
+    height: 200,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8
+  },
+
+  messageMediaClickable: {
+    cursor: "pointer"
+  },
+
   messageMediaSticker: {
     backgroundColor: "unset",
-    boxShadow: "unset",
+    boxShadow: "unset"
   },
 
   timestamp: {
@@ -240,18 +448,19 @@ const useStyles = makeStyles((theme) => ({
     position: "absolute",
     bottom: 0,
     right: 5,
-    color: theme.mode === 'light' ? "#999" : "#d0d0d0"
+    color: theme.mode === "light" ? "#999" : "#d0d0d0"
   },
-  
+
   timestampStickerLeft: {
-    backgroundColor: theme.mode === 'light' ? "#ffffff" : "#024481",
+    backgroundColor: theme.palette.background.paper,
     borderRadius: 8,
     padding: 5,
-    boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000"
+    boxShadow:
+      theme.mode === "light" ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000"
   },
 
   timestampStickerRight: {
-    backgroundColor: theme.mode === 'light' ? "#dcf8c6" : "#128c7e",
+    backgroundColor: theme.mode === "light" ? "#dcf8c6" : "#128c7e",
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
     borderBottomLeftRadius: 8,
@@ -260,51 +469,45 @@ const useStyles = makeStyles((theme) => ({
     paddingRight: 5,
     paddingTop: 5,
     paddingBottom: 0,
-    boxShadow: theme.mode === 'light' ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000"
+    boxShadow:
+      theme.mode === "light" ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000"
   },
-  
+
   dailyTimestamp: {
     alignItems: "center",
     textAlign: "center",
     alignSelf: "center",
     width: "110px",
-    backgroundColor: "#e1f3fb",
+    backgroundColor: theme.palette.backgroundContrast.paper,
     margin: "10px",
     borderRadius: "10px",
-    boxShadow: "0 1px 1px #b3b3b3",
+    boxShadow: `0 1px 1px ${theme.palette.backgroundContrast.border}`
   },
 
   dailyTimestampText: {
-    color: "#808888",
+    color: theme.palette.textCommon.main,
     padding: 8,
     alignSelf: "center",
-    marginLeft: "0px",
+    marginLeft: "0px"
   },
 
   ackIcons: {
     fontSize: 18,
     verticalAlign: "middle",
-    marginLeft: 4,
+    marginLeft: 4
   },
 
   deletedIcon: {
     fontSize: 18,
     verticalAlign: "middle",
-    marginRight: 4,
-  },
-
-  ackDoneAllIcon: {
-    color: green[500],
-    fontSize: 18,
-    verticalAlign: "middle",
-    marginLeft: 4,
+    marginRight: 4
   },
 
   ackDoneReadIcon: {
     color: blue[500],
     fontSize: 18,
     verticalAlign: "middle",
-    marginLeft: 4,
+    marginLeft: 4
   },
 
   downloadMedia: {
@@ -312,13 +515,209 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "inherit",
-    padding: 10,
+    padding: 10
   },
   imageLocation: {
-    position: 'relative',
-    width: '100%',
-    height: 80,
+    position: "relative",
+    color: "red",
+    width: 100,
+    height: 100,
     borderRadius: 5
+  },
+
+  "@global": {
+    "@keyframes wave": {
+      "0%, 60%, 100%": {
+        transform: "initial"
+      },
+      "30%": {
+        transform: "translateY(-15px)"
+      }
+    },
+    "@keyframes quiet": {
+      "25%": {
+        transform: "scaleY(.6)"
+      },
+      "50%": {
+        transform: "scaleY(.4)"
+      },
+      "75%": {
+        transform: "scaleY(.8)"
+      }
+    },
+    "@keyframes normal": {
+      "25%": {
+        transform: "scaleY(.1)"
+      },
+      "50%": {
+        transform: "scaleY(.4)"
+      },
+      "75%": {
+        transform: "scaleY(.6)"
+      }
+    },
+    "@keyframes loud": {
+      "25%": {
+        transform: "scaleY(1)"
+      },
+      "50%": {
+        transform: "scaleY(.4)"
+      },
+      "75%": {
+        transform: "scaleY(1.2)"
+      }
+    }
+  },
+  wave: {
+    position: "relative",
+    textAlign: "center",
+    height: "30px",
+    marginTop: "10px",
+    marginLeft: "auto",
+    marginRight: "auto"
+  },
+  dot: {
+    display: "inline-block",
+    width: "7px",
+    height: "7px",
+    borderRadius: "50%",
+    marginRight: "3px",
+    background: theme.isStardew
+      ? theme.stardew.green
+      : theme.mode === "light"
+        ? "#303030"
+        : "#ffffff",
+    animation: "wave 1.3s linear infinite",
+    "&:nth-child(2)": {
+      animationDelay: "-1.1s"
+    },
+    "&:nth-child(3)": {
+      animationDelay: "-0.9s"
+    }
+  },
+
+  wavebarsContainer: {
+    display: "flex",
+    justifyContent: "space-between",
+    height: "30px",
+    marginTop: "5px",
+    marginBottom: "5px",
+    marginLeft: "auto",
+    marginRight: "auto",
+    "--boxSize": "5px",
+    "--gutter": "4px",
+    width: "calc((var(--boxSize) + var(--gutter)) * 5)"
+  },
+
+  wavebars: {
+    transform: "scaleY(.4)",
+    height: "100%",
+    width: "var(--boxSize)",
+    animationDuration: "1.2s",
+    backgroundColor: theme.isStardew
+      ? theme.stardew.green
+      : theme.mode === "light"
+        ? "#303030"
+        : "#ffffff",
+    animationTimingFunction: "ease-in-out",
+    animationIterationCount: "infinite",
+    borderRadius: "8px"
+  },
+
+  wavebar1: {
+    animationName: "quiet"
+  },
+  wavebar2: {
+    animationName: "normal"
+  },
+  wavebar3: {
+    animationName: "quiet"
+  },
+  wavebar4: {
+    animationName: "loud"
+  },
+  wavebar5: {
+    animationName: "quiet"
+  },
+  linkPreviewThumbnail: {
+    width: "328px",
+    height: "172px"
+  },
+  linkPreviewTitle: {
+    fontWeight: "bold",
+    marginBottom: "4px"
+  },
+  linkPreviewDescription: {
+    marginBottom: "4px"
+  },
+  linkPreviewUrl: {
+    opacity: 0.6
+  },
+  linkPreviewAnchor: {
+    textDecoration: "none",
+    color: theme.mode === "light" ? "#303030" : "#ffffff"
+  },
+  messageHighlighted: {
+    backgroundColor: theme.palette.primary.main
+  },
+  previewThumbnail: {
+    width: "383px",
+    maxWidth: "100%"
+  },
+  audioBottom: {
+    marginBottom: "12px"
+  },
+  reactionsContainer: {
+    width: "fit-content",
+    height: 1,
+    marginLeft: "auto",
+    marginRight: "auto"
+  },
+  reactions: {
+    top: -8,
+    display: "ruby",
+    position: "relative",
+    zIndex: 1,
+    maxWidth: "75%",
+    paddingTop: 3,
+    paddingLeft: 5,
+    paddingRight: 5,
+    paddingBottom: 3,
+    borderRadius: 15,
+    backgroundColor: "gray",
+    cursor: "default"
+  },
+  mediaDescription: {
+    padding: 5,
+    marginBottom: 5,
+    borderLeft: "5px solid",
+    borderColor: theme.isStardew
+      ? theme.stardew.border
+      : theme.mode === "light"
+        ? "#000"
+        : "#fff"
+  },
+  messageButton: {
+    display: "flex",
+    width: "100%",
+    textTransform: "none",
+    margin: "auto"
+  },
+  messageErrorBand: {
+    marginTop: 6,
+    marginLeft: -5,
+    marginRight: -5,
+    overflow: "hidden",
+    backgroundColor: "#c62828",
+    color: "#ffeb3b",
+    textAlign: "center",
+    padding: "4px 6px",
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+    whiteSpace: "nowrap",
+    textOverflow: "ellipsis",
+    lineHeight: 1.3,
+    fontWeight: 700
   }
 }));
 
@@ -326,10 +725,9 @@ const reducer = (state, action) => {
   if (action.type === "LOAD_MESSAGES") {
     const messages = action.payload;
     const newMessages = [];
-    
-    messages.forEach((message) => {
-      
-      const messageIndex = state.findIndex((m) => m.id === message.id);
+
+    messages.forEach(message => {
+      const messageIndex = state.findIndex(m => m.id === message.id);
       if (messageIndex !== -1) {
         state[messageIndex] = message;
       } else {
@@ -342,7 +740,7 @@ const reducer = (state, action) => {
 
   if (action.type === "ADD_MESSAGE") {
     const newMessage = action.payload;
-    const messageIndex = state.findIndex((m) => m.id === newMessage.id);
+    const messageIndex = state.findIndex(m => m.id === newMessage.id);
 
     if (messageIndex !== -1) {
       state[messageIndex] = newMessage;
@@ -350,16 +748,51 @@ const reducer = (state, action) => {
       state.push(newMessage);
     }
 
+    if (newMessage.mediaType === "reactionMessage") {
+      const reactionIndex = state.findIndex(
+        m => m.id === newMessage.quotedMsgId
+      );
+      if (reactionIndex !== -1) {
+        state[reactionIndex].replies = state[reactionIndex].replies || [];
+        state[reactionIndex].replies.push(newMessage);
+      }
+    }
+
+    return [...state];
+  }
+
+  if (action.type === "RESET_STICKY") {
+    state.forEach(message => {
+      delete message.bottomStick;
+    });
     return [...state];
   }
 
   if (action.type === "UPDATE_MESSAGE") {
     const messageToUpdate = action.payload;
-    const messageIndex = state.findIndex((m) => m.id === messageToUpdate.id);
+    const messageIndex = state.findIndex(m => m.id === messageToUpdate.id);
 
     if (messageIndex !== -1) {
       state[messageIndex] = messageToUpdate;
     }
+
+    return [...state];
+  }
+
+  if (action.type === "MERGE_MESSAGES") {
+    const messages = action.payload;
+
+    messages.forEach(message => {
+      const messageIndex = state.findIndex(m => m.id === message.id);
+      if (messageIndex !== -1) {
+        state[messageIndex] = message;
+      } else {
+        const idx = state.findIndex(
+          m => new Date(m.createdAt) > new Date(message.createdAt)
+        );
+        state.splice(idx < 0 ? state.length : idx, 0, message);
+      }
+    });
 
     return [...state];
   }
@@ -369,47 +802,69 @@ const reducer = (state, action) => {
   }
 };
 
-const MessagesList = ({ ticket, ticketId, isGroup }) => {
+const MessagesList = ({
+  ticket,
+  ticketId,
+  isGroup,
+  markAsRead,
+  readOnly,
+  aoAtualizarMensagens
+}) => {
   const classes = useStyles();
 
   const [messagesList, dispatch] = useReducer(reducer, []);
-  const [pageNumber, setPageNumber] = useState(1);
+  const messagesListRef = useRef(messagesList);
+  useEffect(() => {
+    messagesListRef.current = messagesList;
+    aoAtualizarMensagens?.(messagesList);
+  }, [messagesList, aoAtualizarMensagens]);
+  const [nextId, setNextId] = useState(null);
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
-  const lastMessageRef = useRef();
+  const scrollRef = useRef();
+  const stickedRef = useRef();
+  const previewVideoRefs = useRef({});
 
   const [selectedMessage, setSelectedMessage] = useState({});
   const [selectedMessageData, setSelectedMessageData] = useState({});
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [previewVideoPlayingById, setPreviewVideoPlayingById] = useState({});
   const [anchorEl, setAnchorEl] = useState(null);
   const messageOptionsMenuOpen = Boolean(anchorEl);
   const currentTicketId = useRef(ticketId);
+  const [contactPresence, setContactPresence] = useState("available");
 
   const socketManager = useContext(SocketContext);
+  const { setReplyingMessage } = useContext(ReplyMessageContext);
 
-  useEffect(() => {
-    dispatch({ type: "RESET" });
-    setPageNumber(1);
+  const startReply = message => {
+    setReplyingMessage(message);
+  };
 
-    currentTicketId.current = ticketId;
-  }, [ticketId]);
+  function loadData(incrementPage = false) {
+    if (incrementPage && !nextId) {
+      return;
+    }
 
-  useEffect(() => {
     setLoading(true);
+    const thisNextId = incrementPage ? nextId : undefined;
     const delayDebounceFn = setTimeout(() => {
       const fetchMessages = async () => {
         if (ticketId === undefined) return;
         try {
           const { data } = await api.get("/messages/" + ticketId, {
-            params: { pageNumber },
+            params: { nextId: thisNextId, markAsRead }
           });
 
           if (currentTicketId.current === ticketId) {
             dispatch({ type: "LOAD_MESSAGES", payload: data.messages });
             setHasMore(data.hasMore);
+            setNextId(data.nextId || null);
             setLoading(false);
           }
 
-          if (pageNumber === 1 && data.messages.length > 1) {
+          if (!incrementPage && data.messages.length > 1) {
             scrollToBottom();
           }
         } catch (err) {
@@ -422,7 +877,25 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     return () => {
       clearTimeout(delayDebounceFn);
     };
-  }, [pageNumber, ticketId]);
+  }
+
+  function refreshMessagesList() {
+    dispatch({ type: "RESET" });
+    setNextId(null);
+    setHasMore(false);
+    loadData();
+  }
+
+  useEffect(async () => {
+    dispatch({ type: "RESET" });
+    setContactPresence("available");
+
+    currentTicketId.current = ticketId;
+
+    await loadPageMutex.runExclusive(async () => {
+      loadData();
+    });
+  }, [ticketId]);
 
   useEffect(() => {
     if (!ticket.id) {
@@ -435,40 +908,157 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
 
     const onConnect = () => {
       socket.emit("joinChatBox", `${ticket.id}`);
-    }
-	
-  	socketManager.onConnect(onConnect);
+    };
 
-    const onAppMessage = (data) => {
-	  console.log("AppMessage", data);
-      if (data.action === "create" && data.message.ticketId === currentTicketId.current) {
-        dispatch({ type: "ADD_MESSAGE", payload: data.message });
-        scrollToBottom();
-      }
+    socketManager.onConnect(onConnect);
 
-      if (data.action === "update" && data.message.ticketId === currentTicketId.current) {
-        dispatch({ type: "UPDATE_MESSAGE", payload: data.message });
+    const onAppMessage = data => {
+      if (data.message.ticketId === currentTicketId.current) {
+        setContactPresence("available");
+        if (data.action === "create") {
+          const message = data.message;
+          const { scrollTop, clientHeight, scrollHeight } = scrollRef.current;
+          const isAtBottom =
+            scrollTop + clientHeight >= scrollHeight - clientHeight / 4;
+          message.bottomStick = (!isAtBottom && !message.fromMe) || undefined;
+          dispatch({ type: "ADD_MESSAGE", payload: message });
+          if (
+            (isAtBottom || data.message.fromMe) &&
+            data.message.mediaType !== "reactionMessage"
+          ) {
+            scrollToBottom();
+          }
+          if (message.bottomStick) {
+            scrollStickedToBottom();
+          }
+        }
+
+        if (data.action === "update") {
+          dispatch({ type: "UPDATE_MESSAGE", payload: data.message });
+        }
       }
-    }
+    };
 
     socket.on(`company-${companyId}-appMessage`, onAppMessage);
+    socket.on("wsRefreshRequired", refreshRequired => {
+      if (!refreshRequired || !currentTicketId.current) {
+        return;
+      }
+
+      loadPageMutex.runExclusive(async () => {
+        const currentList = messagesListRef.current;
+        if (currentList.length > 0) {
+          const maxUpdatedAt = currentList.reduce(
+            (max, msg) => (msg.updatedAt > max ? msg.updatedAt : max),
+            currentList[0].updatedAt
+          );
+
+          try {
+            const { data } = await api.get(
+              "/messages/" + currentTicketId.current,
+              {
+                params: { minUpdatedAt: maxUpdatedAt }
+              }
+            );
+            const currentIds = new Set(currentList.map(m => m.id));
+            const newMessages = data.messages.filter(
+              m => !currentIds.has(m.id)
+            );
+            let isAtBottom = false;
+            let newestMessage = null;
+
+            if (newMessages.length > 0) {
+              const { scrollTop, clientHeight, scrollHeight } =
+                scrollRef.current;
+              isAtBottom =
+                scrollTop + clientHeight >= scrollHeight - clientHeight / 4;
+              newestMessage = newMessages.reduce((latest, msg) =>
+                new Date(msg.createdAt) > new Date(latest.createdAt)
+                  ? msg
+                  : latest
+              );
+              newestMessage.bottomStick =
+                (!isAtBottom && !newestMessage.fromMe) || undefined;
+            }
+
+            dispatch({ type: "MERGE_MESSAGES", payload: data.messages });
+
+            if (newMessages.length > 0) {
+              if (
+                (isAtBottom || newestMessage.fromMe) &&
+                newestMessage.mediaType !== "reactionMessage"
+              ) {
+                scrollToBottom();
+              }
+              if (newestMessage.bottomStick) {
+                scrollStickedToBottom();
+              }
+            }
+          } catch (err) {
+            toastError(err);
+          }
+        } else {
+          refreshMessagesList();
+        }
+      });
+    });
+
+    socket.on(`company-${companyId}-presence`, data => {
+      const { scrollTop, clientHeight, scrollHeight } = scrollRef.current;
+      console.log({
+        presence: data.presence,
+        scrollTop,
+        clientHeight,
+        scrollHeight
+      });
+      const isAtBottom =
+        scrollTop + clientHeight >= scrollHeight - clientHeight / 4;
+      if (data?.ticketId === ticket.id) {
+        setContactPresence(data.presence);
+        if (["composing", "recording"].includes(data.presence)) {
+          if (isAtBottom) {
+            scrollToBottom();
+          }
+        }
+      }
+    });
 
     return () => {
       socket.disconnect();
     };
   }, [ticketId, ticket, socketManager]);
 
-  const loadMore = () => {
-    setPageNumber((prevPageNumber) => prevPageNumber + 1);
+  const loadMore = async () => {
+    await loadPageMutex.runExclusive(async () => {
+      loadData(true);
+    });
   };
 
   const scrollToBottom = () => {
-    if (lastMessageRef.current) {
-      lastMessageRef.current.scrollIntoView({});
+    if (scrollRef.current) {
+      dispatch({ type: "RESET_STICKY" });
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   };
 
-  const handleScroll = (e) => {
+  const scrollStickedToBottom = () => {
+    if (stickedRef.current) {
+      stickedRef.current.scrollTop = stickedRef.current.scrollHeight;
+    }
+  };
+
+  const handleScroll = e => {
+    const messagesList = e.currentTarget;
+    const sticky = document.querySelector(`.${classes.stickedMessages}`);
+    if (sticky && sticky.style.display !== "none") {
+      const { scrollTop, clientHeight, scrollHeight } = messagesList;
+      const stickyHeight = sticky.offsetHeight;
+      // If any part of sticky is visible at the bottom
+      if (scrollTop + clientHeight >= scrollHeight - stickyHeight) {
+        dispatch({ type: "RESET_STICKY" });
+      }
+    }
+
     if (!hasMore) return;
     const { scrollTop } = e.currentTarget;
 
@@ -491,74 +1081,265 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     setSelectedMessageData(data);
   };
 
-  const handleCloseMessageOptionsMenu = (e) => {
+  const handleCloseMessageOptionsMenu = e => {
     setAnchorEl(null);
   };
 
-  const checkMessageMedia = (message, data) => {
-    if (message.mediaType === "image") {
-      return <ModalImageCors imageUrl={message.mediaUrl} isDeleted={message.isDeleted} data={data} />;
+  const lightboxMedia = useMemo(() => {
+    return buildMediaGalleryData(messagesList);
+  }, [messagesList]);
+
+  const openLightboxForMessage = messageId => {
+    const index = lightboxMedia.byMessageId[messageId];
+    if (index === undefined) {
+      return;
     }
-    if (message.mediaType === "audio") {
-    
+
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  };
+
+  const closeLightbox = () => {
+    setLightboxOpen(false);
+  };
+
+  const handleVideoPreviewPlayClick = (event, messageId) => {
+    event.stopPropagation();
+
+    const previewVideo = previewVideoRefs.current[messageId];
+    if (!previewVideo) {
+      return;
+    }
+
+    if (previewVideo.paused) {
+      previewVideo.play().catch(() => {});
+      return;
+    }
+
+    previewVideo.pause();
+  };
+
+  const pausePreviewVideo = messageId => {
+    const previewVideo = previewVideoRefs.current[messageId];
+    if (!previewVideo) {
+      return;
+    }
+
+    previewVideo.pause();
+  };
+
+  const checkMessageMedia = (message, data, isSticker = false) => {
+    if (message.mediaType === "voice_recording") {
+      return <VoiceRecordingPlayer message={message} />;
+    }
+    const document =
+      data?.message?.documentMessage ||
+      data?.message?.documentWithCaptionMessage?.message?.documentMessage;
+    if (isSticker) {
       return (
-        <audio controls>
-          <source src={message.mediaUrl} type="audio/ogg"></source>
-        </audio>
+        <img
+          className={clsx(classes.messageMedia, {
+            [classes.messageMediaDeleted]: message.isDeleted
+          })}
+          src={message.mediaUrl}
+          alt="sticker"
+        />
       );
     }
 
-    if (message.mediaType === "video") {
-      return (
-        <video
-          className={classes.messageVideo}
-          src={message.mediaUrl}
-          controls
-        />
-      );
-    } else {
+    if (!document && message.mediaType === "image") {
       return (
         <>
+          <img
+            className={clsx(
+              classes.messageMedia,
+              classes.messageMediaClickable,
+              {
+                [classes.messageMediaDeleted]: message.isDeleted
+              }
+            )}
+            src={message.mediaUrl}
+            alt="midia da mensagem"
+            onClick={() => openLightboxForMessage(message.id)}
+          />
+          <>
+            <div
+              className={[
+                clsx({
+                  [classes.textContentItemDeleted]: message.isDeleted,
+                  [classes.textContentItem]: !message.isDeleted
+                })
+              ]}
+            >
+              {message.body && (
+                <>
+                  <WhatsMarked>{message.body}</WhatsMarked>
+                </>
+              )}
+            </div>
+          </>
+        </>
+      );
+    }
+    if (!document && message.mediaType === "audio") {
+      return (
+        <>
+          <AudioMessage src={message.mediaUrl} />
+          {message.body && !["🔊", "Áudio"].includes(message.body) && (
+            <div className={classes.mediaDescription}>{message.body}</div>
+          )}
+        </>
+      );
+    }
+
+    if (!document || message.mediaType === "video") {
+      return (
+        <>
+          <div
+            className={clsx(classes.videoPreviewWrapper, {
+              [classes.messageMediaDeleted]: message.isDeleted
+            })}
+          >
+            <video
+              ref={element => {
+                if (element) {
+                  previewVideoRefs.current[message.id] = element;
+                } else {
+                  delete previewVideoRefs.current[message.id];
+                }
+              }}
+              className={classes.videoPreviewMedia}
+              src={message.mediaUrl}
+              preload="metadata"
+              playsInline
+              onPlay={() => {
+                setPreviewVideoPlayingById(previous => ({
+                  ...previous,
+                  [message.id]: true
+                }));
+              }}
+              onPause={() => {
+                setPreviewVideoPlayingById(previous => ({
+                  ...previous,
+                  [message.id]: false
+                }));
+              }}
+              onEnded={() => {
+                setPreviewVideoPlayingById(previous => ({
+                  ...previous,
+                  [message.id]: false
+                }));
+              }}
+            />
+            <div className={classes.videoPreviewActions}>
+              <IconButton
+                className={classes.videoPreviewActionButton}
+                aria-label="play preview"
+                onClick={event =>
+                  handleVideoPreviewPlayClick(event, message.id)
+                }
+              >
+                {previewVideoPlayingById[message.id] ? (
+                  <Pause />
+                ) : (
+                  <PlayArrow />
+                )}
+              </IconButton>
+              <IconButton
+                className={classes.videoPreviewActionButton}
+                aria-label="open video lightbox"
+                onClick={event => {
+                  event.stopPropagation();
+                  pausePreviewVideo(message.id);
+                  openLightboxForMessage(message.id);
+                }}
+              >
+                <CropFree />
+              </IconButton>
+            </div>
+          </div>
+          <div
+            className={[
+              clsx({
+                [classes.textContentItemDeleted]: message.isDeleted,
+                [classes.textContentItem]: !message.isDeleted
+              })
+            ]}
+          >
+            {message.body && (
+              <>
+                <WhatsMarked>{message.body}</WhatsMarked>
+              </>
+            )}
+          </div>
+        </>
+      );
+    } else {
+      const fileName = document?.fileName || message.body || "";
+      const isPdf =
+        fileName.toLowerCase().endsWith(".pdf") ||
+        (document?.mimetype || "").toLowerCase().includes("pdf") ||
+        (message.mediaUrl || "").toLowerCase().includes(".pdf");
+      return (
+        <>
+          {isPdf && message.mediaUrl && (
+            <PdfPreview url={message.mediaUrl} fileName={fileName} />
+          )}
           <div className={classes.downloadMedia}>
             <Button
-              startIcon={<GetApp />}
+              startIcon={<Description />}
+              endIcon={<GetApp />}
               color="primary"
               variant="outlined"
-              target="_blank"
-              href={message.mediaUrl}
+              onClick={() => downloadFile(message.mediaUrl)}
             >
-              Download
+              {document?.fileName || message.body}
             </Button>
           </div>
-          <Divider />
+          {message.body !== document?.fileName && (
+            <>
+              <div
+                className={[
+                  clsx({
+                    [classes.textContentItemDeleted]: message.isDeleted
+                  })
+                ]}
+              >
+                <WhatsMarked>{message.body}</WhatsMarked>
+              </div>
+            </>
+          )}
         </>
       );
     }
   };
 
-  const renderMessageAck = (message) => {
+  const renderMessageAck = message => {
+    if (message.ack === -1) {
+      return <ErrorOutline fontSize="small" className={classes.ackIcons} />;
+    }
     if (message.ack === 0) {
-      return <AccessTime fontSize="small" className={classes.ackIcons} />;
+      return <Warning fontSize="small" className={classes.ackIcons} />;
     }
     if (message.ack === 1) {
-      return <Done fontSize="small" className={classes.ackIcons} />;
+      return <AccessTime fontSize="small" className={classes.ackIcons} />;
     }
     if (message.ack === 2) {
-      return <DoneAll fontSize="small" className={classes.ackIcons} />;
+      return <Done fontSize="small" className={classes.ackIcons} />;
     }
     if (message.ack === 3) {
-      return <DoneAll fontSize="small" className={classes.ackDoneAllIcon} />;
+      return <DoneAll fontSize="small" className={classes.ackIcons} />;
     }
     if (message.ack === 4) {
       return <DoneAll fontSize="small" className={classes.ackDoneReadIcon} />;
-	}
+    }
   };
 
   const renderDailyTimestamps = (message, index) => {
     if (index === 0) {
       return (
         <span
-          className={classes.dailyTimestamp}
+          className={`${classes.dailyTimestamp} conversa-dia`}
           key={`timestamp-${message.id}`}
         >
           <div className={classes.dailyTimestampText}>
@@ -567,14 +1348,14 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
         </span>
       );
     }
-    if (index < messagesList.length - 1) {
+    if (index < messagesList.length) {
       let messageDay = parseISO(messagesList[index].createdAt);
       let previousMessageDay = parseISO(messagesList[index - 1].createdAt);
 
       if (!isSameDay(messageDay, previousMessageDay)) {
         return (
           <span
-            className={classes.dailyTimestamp}
+            className={`${classes.dailyTimestamp} conversa-dia`}
             key={`timestamp-${message.id}`}
           >
             <div className={classes.dailyTimestampText}>
@@ -583,15 +1364,6 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
           </span>
         );
       }
-    }
-    if (index === messagesList.length - 1) {
-      return (
-        <div
-          key={`ref-${message.createdAt}`}
-          ref={lastMessageRef}
-          style={{ float: "left", clear: "both" }}
-        />
-      );
     }
   };
 
@@ -608,20 +1380,54 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
     }
   };
 
-  const renderQuotedMessage = (message) => {
+  const scrollToMessage = id => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+
+      // Add the highlight class
+      element.classList.add(classes.messageHighlighted);
+
+      // Remove the highlight class after 2 seconds
+      setTimeout(() => {
+        element.classList.remove(classes.messageHighlighted);
+      }, 2000);
+    }
+  };
+
+  const getQuotedMessageText = quotedMsg => {
+    if (!quotedMsg?.body && quotedMsg?.mediaUrl) {
+      return "📎 " + quotedMsg.mediaUrl.split("/").pop();
+    }
+
+    if (isVCard(quotedMsg?.body)) {
+      return "🪪";
+    }
+
+    return quotedMsg?.body;
+  };
+
+  const renderQuotedMessage = message => {
     const data = JSON.parse(message.quotedMsg.dataJson);
+
     const thumbnail = data?.message?.imageMessage?.jpegThumbnail;
-    const stickerUrl = data?.message?.stickerMessage && message.quotedMsg?.mediaUrl ;
-    const imageUrl = thumbnail ? "data:image/png;base64, " + thumbnail : stickerUrl;
+    const mediaUrl =
+      message.quotedMsg?.mediaType === "image"
+        ? message.quotedMsg.mediaUrl
+        : null;
+    const imageUrl = thumbnail
+      ? "data:image/png;base64, " + thumbnail
+      : mediaUrl;
     return (
       <div
-        className={clsx(classes.quotedContainerLeft, {
-          [classes.quotedContainerRight]: message.fromMe,
+        className={clsx(classes.quotedContainerLeft, "conversa-citacao", {
+          [classes.quotedContainerRight]: message.fromMe
         })}
+        onClick={() => scrollToMessage(message.quotedMsg.id)}
       >
         <span
           className={clsx(classes.quotedSideColorLeft, {
-            [classes.quotedSideColorRight]: message.quotedMsg?.fromMe,
+            [classes.quotedSideColorRight]: message.quotedMsg?.fromMe
           })}
         ></span>
         <div className={classes.quotedMsg}>
@@ -630,272 +1436,819 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
               {message.quotedMsg?.contact?.name}
             </span>
           )}
-          {message.quotedMsg?.body}
+          <WhatsMarked>{getQuotedMessageText(message.quotedMsg)}</WhatsMarked>
         </div>
-        { imageUrl && (
-          <img className={classes.quotedThumbnail} src={ imageUrl } />
-        )}
+        {imageUrl && <img className={classes.quotedThumbnail} src={imageUrl} />}
       </div>
     );
   };
 
-  const isVCard = (message) => {
-    return message.includes('BEGIN:VCARD');
+  const renderReplies = replies => {
+    const reactions =
+      replies &&
+      replies
+        .filter(reply => reply?.mediaType === "reactionMessage")
+        .map(reply => {
+          return reply.contact?.name ? (
+            <Tooltip title={reply.contact?.name} placement="top" arrow>
+              <div key={reply.id}>{reply.body}</div>
+            </Tooltip>
+          ) : (
+            <div key={reply.id}>{reply.body}</div>
+          );
+        });
+
+    return (
+      reactions?.length > 0 && (
+        <div className={classes.reactionsContainer}>
+          <div className={`${classes.reactions} conversa-reacoes`}>
+            {reactions}
+          </div>
+        </div>
+      )
+    );
   };
 
-  const vCard = (message) => {
-    const name = message?.substring(message.indexOf("\nN:;") + 4, message.indexOf(";;;"));
-    const telLine = message?.substring(message.indexOf("\nTEL;") + 5);
-    const description = telLine.substring(telLine.indexOf(":") + 1, telLine.indexOf("\n"));
-    return (
-      <div>
-        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: 20, marginBottom: 20 }}>
-          <Avatar style={{ marginRight: 10, marginLeft: 20, width: 60, height: 60 }} />
-          <div style={{ width: 350 }}>
-            <div>
-              <Typography
-                noWrap
-                component="h4"
-                variant="body2"
-                color="textPrimary"
-                style={{ fontWeight: '700' }}
-              >
-                {name}
-              </Typography>
-            </div>
+  const getMessageErrorData = message => {
+    if (!message?.error) {
+      return null;
+    }
 
-            <div style={{ width: 350 }}>
-              <Typography
-                component="span"
-                variant="body2"
-                color="textPrimary"
-                style={{ display: 'flex' }}
-              >
+    if (typeof message.error === "string") {
+      const text = message.error.trim();
+      if (!text) {
+        return null;
+      }
+      return {
+        code: "ERROR",
+        message: text,
+        title: `[ERROR] ${text}`
+      };
+    }
+
+    const errorCode =
+      typeof message.error.code === "string" && message.error.code.trim()
+        ? message.error.code.trim()
+        : "ERROR";
+    const errorMessage =
+      typeof message.error.message === "string" && message.error.message.trim()
+        ? message.error.message.trim()
+        : "Unknown error";
+
+    return {
+      code: errorCode,
+      message: errorMessage,
+      title: `[${errorCode}] ${errorMessage}`
+    };
+  };
+
+  const renderLinkPreview = message => {
+    const data = JSON.parse(message.dataJson);
+
+    const title = data?.message?.extendedTextMessage?.title;
+    const description = data?.message?.extendedTextMessage?.description;
+    const canonicalUrl = data?.message?.extendedTextMessage?.canonicalUrl;
+    const url = canonicalUrl && new URL(canonicalUrl);
+
+    if (!title && !description && !url) {
+      return <></>;
+    }
+
+    const thumbnail = data?.message?.extendedTextMessage?.jpegThumbnail;
+    const imageUrl = thumbnail ? "data:image/png;base64, " + thumbnail : "";
+    return (
+      <a
+        href={canonicalUrl}
+        className={classes.linkPreviewAnchor}
+        target="_blank"
+        rel="noreferrer"
+      >
+        <div
+          className={clsx(classes.quotedContainerLeft, "conversa-citacao", {
+            [classes.quotedContainerRight]: message.fromMe
+          })}
+        >
+          <div className={classes.quotedMsg}>
+            {title && <div className={classes.linkPreviewTitle}>{title}</div>}
+            {description && (
+              <div className={classes.linkPreviewDescription}>
                 {description}
-              </Typography>
+              </div>
+            )}
+            {url?.hostname && (
+              <div className={classes.linkPreviewUrl}>{url.hostname}</div>
+            )}
+          </div>
+          {!message.thumbnailUrl && imageUrl && (
+            <img className={classes.quotedThumbnail} src={imageUrl} />
+          )}
+        </div>
+      </a>
+    );
+  };
+
+  const sendReply = async body => {
+    const message = {
+      read: 1,
+      fromMe: true,
+      mediaUrl: "",
+      body
+    };
+
+    api.post(`/messages/${ticketId}`, message).catch(err => {
+      toastError(err);
+    });
+  };
+
+  const renderReplyButton = text => {
+    return (
+      <Button
+        className={classes.messageButton}
+        color="primary"
+        startIcon={<Reply />}
+        disabled={!!readOnly}
+        onClick={() => {
+          if (!readOnly) {
+            sendReply(text);
+          }
+        }}
+      >
+        {text}
+      </Button>
+    );
+  };
+
+  const renderUrlButton = ({ displayText, url }) => (
+    <Button
+      className={classes.messageButton}
+      color="primary"
+      startIcon={
+        displayText === "Facebook" ? (
+          <Facebook />
+        ) : displayText === "Instagram" ? (
+          <Instagram />
+        ) : (
+          <Launch />
+        )
+      }
+    >
+      <a
+        href={url}
+        target="_blank"
+        style={{ textDecoration: "none", color: "inherit" }}
+        rel="noreferrer"
+      >
+        {displayText}
+      </a>
+    </Button>
+  );
+
+  const renderButtons = message => {
+    const objects =
+      message?.buttonsMessage?.buttons ||
+      message?.listMessage?.sections ||
+      message?.templateMessage?.hydratedTemplate?.hydratedButtons ||
+      message?.templateMessage?.interactiveMessageTemplate?.nativeFlowMessage
+        ?.buttons;
+
+    if (!objects) return <></>;
+
+    return objects.map(item => {
+      if (item.urlButton) {
+        return renderUrlButton({
+          displayText: item.urlButton.displayText,
+          url: item.urlButton.url
+        });
+      } else if (item.quickReplyButton) {
+        return renderReplyButton(item.quickReplyButton.displayText);
+      } else if (item.type === "RESPONSE" && item.buttonText) {
+        return renderReplyButton(item.buttonText.displayText);
+      } else if (item.buttonParamsJson) {
+        const params = JSON.parse(item.buttonParamsJson);
+        if (params?.url && params.display_text) {
+          return renderUrlButton({
+            displayText: params.display_text,
+            url: params.url
+          });
+        }
+        if (params?.display_text) {
+          return renderReplyButton(params.display_text);
+        }
+      } else if (item.rows) {
+        return item.rows.map(row => {
+          return renderReplyButton(row.title);
+        });
+      }
+
+      return <></>;
+    });
+  };
+
+  const formatVCardN = n => {
+    return (
+      (n[3] ? n[3] + " " : "") +
+      (n[1] ? n[1] + " " : "") +
+      (n[2] ? n[2] + " " : "") +
+      (n[0] ? n[0] + " " : "") +
+      (n[4] ? n[4] + " " : "")
+    );
+  };
+
+  const isVCard = message => {
+    return message.startsWith('{"ticketzvCard":');
+  };
+
+  const stringOrFirstElement = data => {
+    if (!data) {
+      return "";
+    }
+    if (Array.isArray(data)) {
+      return data[0];
+    }
+    return data;
+  };
+
+  const handleContactClick = (name, number) => {
+    api
+      .post(`/contacts/findOrInsert`, {
+        name,
+        number
+      })
+      .then(response => {
+        if (response?.data?.id) {
+          window.mentionClick(response.data);
+        }
+      })
+      .catch(err => {
+        toastError(err);
+      });
+  };
+
+  const renderVCard = vcardJson => {
+    const cardArray = JSON.parse(vcardJson)?.ticketzvCard;
+
+    if (!cardArray || !Array.isArray(cardArray)) {
+      return <div>Invalid VCARD data</div>;
+    }
+
+    return cardArray.map(item => {
+      const message = item?.vcard;
+      if (!message) {
+        return <></>;
+      }
+      const parsedVCard = vCard.parse(message);
+      console.debug("vCard data:", { message, parsedVCard });
+
+      const name = stringOrFirstElement(
+        parsedVCard["X-WA-BIZ-NAME"]?.[0]?.value ||
+          parsedVCard.fn?.[0]?.value ||
+          formatVCardN(parsedVCard.n?.[0]?.value)
+      );
+      const description = stringOrFirstElement(
+        parsedVCard["X-WA-BIZ-DESCRIPTION"]?.[0]?.value || ""
+      );
+      const number = stringOrFirstElement(parsedVCard?.tel?.[0]?.value);
+      const metaNumber =
+        parsedVCard?.tel?.[0]?.meta?.waid?.[0] || number || "unknown";
+
+      return (
+        <div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              marginTop: 20,
+              marginBottom: 20
+            }}
+          >
+            <Avatar
+              style={{
+                backgroundColor: generateColor(metaNumber),
+                marginRight: 10,
+                marginLeft: 20,
+                width: 60,
+                height: 60,
+                color: "white",
+                fontWeight: "bold"
+              }}
+            >
+              {getInitials(name)}
+            </Avatar>
+            <div style={{ width: 350 }}>
+              <div>
+                <Typography
+                  noWrap
+                  component="h4"
+                  variant="body2"
+                  color="textPrimary"
+                  style={{ fontWeight: "700" }}
+                >
+                  {name}
+                </Typography>
+              </div>
+
+              <div style={{ width: 350 }}>
+                <Typography
+                  component="span"
+                  variant="body2"
+                  color="textPrimary"
+                  style={{ display: "flex" }}
+                >
+                  {description}
+                </Typography>
+              </div>
+
+              <div style={{ width: 350 }}>
+                <Typography
+                  component="span"
+                  variant="body2"
+                  color="textPrimary"
+                  style={{ display: "flex" }}
+                >
+                  <span
+                    class="ticketzMention"
+                    onClick={() => handleContactClick(name, metaNumber)}
+                  >
+                    {number}
+                  </span>
+                </Typography>
+              </div>
             </div>
           </div>
-
         </div>
-        <div style={{
-          width: '100%', display: 'none',
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginTop: 20,
-          borderWidth: '1px 0 0 0',
-          borderTopColor: '#bdbdbd',
-          borderStyle: 'solid',
-          padding: 8
-        }}>
-          <Typography
-            noWrap
-            component="h4"
-            variant="body2"
-            color="textPrimary"
-            style={{ fontWeight: '700', color: '#2c9ce7' }}
-          >
-            Conversar
-          </Typography>
-        </div>
-      </div>
-    )
+      );
+    });
   };
 
-  const messageLocation = (message, createdAt) => {
+  const convertToDMS = degrees => {
+    const deg = Math.floor(degrees);
+    const minFloat = (degrees - deg) * 60;
+    const min = Math.floor(minFloat);
+    const sec = Math.floor((minFloat - min) * 60);
+    const frac = ((minFloat - min) * 60 - sec).toFixed(2).substring(1);
+    return `${deg}°${min}'${sec}${frac}"`;
+  };
+
+  const convertCoordinates = (lat, lon) => {
+    const latitude = convertToDMS(Math.abs(lat)) + (lat >= 0 ? " N" : " S");
+    const longitude = convertToDMS(Math.abs(lon)) + (lon >= 0 ? " E" : " W");
+    return `${latitude}, ${longitude}`;
+  };
+
+  const messageLocation = (data, createdAt) => {
+    const location = data?.message?.locationMessage;
+    if (!location) {
+      return <></>;
+    }
+
+    const mapUrl = `https://www.google.com/maps?q=${location?.degreesLatitude},${location?.degreesLongitude}`;
+
     return (
-      <div className={[classes.textContentItem, { display: 'flex', padding: 5 }]}>
-        <img src={message.split('|')[0]} className={classes.imageLocation} />
-        <a
-          style={{ fontWeight: '700', color: 'gray' }}
-          target="_blank"
-          href={message.split('|')[1]}> Clique para ver localização</a>
-        <span className={classes.timestamp}>
+      <div
+        onClick={() => {
+          window.open(mapUrl, "_blank");
+        }}
+        className={[clsx(classes.textContentItem, classes.messageLocation)]}
+      >
+        <div>
+          {location?.jpegThumbnail ? (
+            <img
+              src={`data:image/png;base64, ${location.jpegThumbnail}`}
+              className={classes.imageLocation}
+            />
+          ) : (
+            <LocationOn
+              className={classes.imageLocation}
+              fontSize="large"
+              color="red"
+            />
+          )}
+        </div>
+        <div className={classes.messageLocationText}>
+          {location.name ? (
+            <>
+              <b>{location.name}</b>
+              <br />
+            </>
+          ) : (
+            ""
+          )}
+          {location.url ? (
+            <>
+              <a href={location.url} target="_blank" rel="noreferrer">
+                {location.url}
+              </a>
+              <br />
+            </>
+          ) : (
+            ""
+          )}
+          {location.address ? (
+            <>
+              {location.address}
+              <br />
+            </>
+          ) : (
+            ""
+          )}
+          {convertCoordinates(
+            location.degreesLatitude,
+            location.degreesLongitude
+          )}
+        </div>
+        <span className={`${classes.timestamp} conversa-horario`}>
           {format(parseISO(createdAt), "HH:mm")}
         </span>
       </div>
-    )
+    );
   };
 
+  const getDataContextInfo = data => {
+    if (!data) {
+      return null;
+    }
+
+    return (
+      data.message?.extendedTextMessage?.contextInfo ||
+      data.message?.imageMessage?.contextInfo ||
+      data.message?.videoMessage?.contextInfo ||
+      data.message?.audioMessage?.contextInfo ||
+      data.message?.documentMessage?.contextInfo ||
+      data.message?.stickerMessage?.contextInfo ||
+      data.message?.productMessage?.contextInfo ||
+      data.message?.locationMessage?.contextInfo ||
+      data.message?.liveLocationMessage?.contextInfo ||
+      data.message?.contactMessage?.contextInfo ||
+      data.message?.listMessage?.contextInfo ||
+      data.message?.buttonsResponseMessage?.contextInfo ||
+      data.message?.paymentMessage?.contextInfo ||
+      data.message?.orderMessage?.contextInfo ||
+      data.message?.productCatalogMessage?.contextInfo ||
+      data.message?.templateButtonReplyMessage?.contextInfo ||
+      data.message?.templateMessage?.contextInfo ||
+      data.message?.documentWithCaptionMessage?.contextInfo ||
+      null
+    );
+  };
 
   const renderMessages = () => {
-      const viewMessagesList = messagesList.map((message, index) => {
-        const data = JSON.parse(message.dataJson);
-        const isSticker = data?.message && ("stickerMessage" in data.message); 
-        if (!message.fromMe) {
-          return (
-            <React.Fragment key={message.id}>
-              {renderDailyTimestamps(message, index)}
-              {renderMessageDivider(message, index)}
-              <div
-                className={[clsx(classes.messageLeft, {
-                  [classes.messageMediaSticker] : isSticker,
-                })]}
-                title={message.queueId && message.queue?.name}
-              >
-                <IconButton
-                  variant="contained"
-                  size="small"
-                  id="messageActionsButton"
-                  disabled={message.isDeleted}
-                  className={classes.messageActionsButton}
-                  onClick={(e) => handleOpenMessageOptionsMenu(e, message, data)}
+    const stickedMessages = [];
+    const viewMessagesList = messagesList.map((message, index) => {
+      if (message.mediaType === "reactionMessage") {
+        return;
+      }
+
+      const data = JSON.parse(message.dataJson);
+      const dataContext = getDataContextInfo(data);
+      const messageError = getMessageErrorData(message);
+      const isSticker = data?.message && "stickerMessage" in data.message;
+      if (!message.fromMe) {
+        const messageFragment = (
+          <React.Fragment key={message.id}>
+            {renderDailyTimestamps(message, index)}
+            {renderMessageDivider(message, index)}
+            <div
+              id={message.id}
+              data-message-side="received"
+              data-message-kind={isSticker ? "sticker" : "message"}
+              className={[
+                clsx(classes.messageContainer, classes.messageLeft, {
+                  [classes.messageMediaSticker]: isSticker
+                })
+              ]}
+              title={message.queueId && message.queue?.name}
+            >
+              {readOnly || (
+                <>
+                  <Tooltip title={i18n.t("messageOptionsMenu.reply")}>
+                    <IconButton
+                      size="small"
+                      id={`messageReplyButton-${message.id}`}
+                      aria-label={i18n.t("messageOptionsMenu.reply")}
+                      disabled={message.isDeleted}
+                      className={classes.messageReplyButton}
+                      onClick={() => startReply(message)}
+                    >
+                      <Reply fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                  <IconButton
+                    variant="contained"
+                    size="small"
+                    id={`messageActionsButton-${message.id}`}
+                    aria-label={i18n.t("conversa.maisAcoes")}
+                    disabled={message.isDeleted}
+                    className={classes.messageActionsButton}
+                    onClick={e =>
+                      handleOpenMessageOptionsMenu(e, message, data)
+                    }
+                  >
+                    <ExpandMore />
+                  </IconButton>
+                </>
+              )}
+              {dataContext?.isForwarded && (
+                <span className={classes.forwardedMessage}>
+                  <Forward fontSize="small" className={classes.forwardedIcon} />{" "}
+                  {i18n.t("message.forwarded")}
+                </span>
+              )}
+              {isGroup && (
+                <span
+                  className={classes.messageContactName}
+                  onClick={() => {
+                    window.mentionClick({
+                      contactId: message.contact?.id,
+                      name: message.contact?.name,
+                      number: message.contact?.number
+                    });
+                  }}
                 >
-                  <ExpandMore />
-                </IconButton>
-                {isGroup && (
-                  <span className={classes.messageContactName}>
-                    {message.contact?.name}
-                  </span>
-                )}
+                  {message.contact?.name}
+                </span>
+              )}
 
-                {message.mediaUrl && checkMessageMedia(message, data)}
+              {message.thumbnailUrl && !message.mediaUrl && (
+                <img
+                  className={classes.previewThumbnail}
+                  src={message.thumbnailUrl}
+                />
+              )}
 
-                {message.body.includes('data:image') ? messageLocation(message.body, message.createdAt)
-                  :
-                  isVCard(message.body) ?
-                    <div
-                      className={[clsx(classes.textContentItem, {
-                        [classes.textContentItemEdited] : message.isEdited
-                      }), { marginRight: 0 }]}>
-                      {vCard(message.body)}
-                    </div>
-
-                    :
-
-
-                    (<div className={[clsx(classes.textContentItem, {
-                        [classes.textContentItemDeleted] : message.isDeleted,
-                        [classes.textContentItemEdited] : message.isEdited
-                    }), ]}>
-                      {message.quotedMsg && renderQuotedMessage(message)}
-                      {message.isDeleted && (
-                        <Block
-                          color="disabled"
-                          fontSize="small"
-                          className={classes.deletedIcon}
-                        />
-                      )}
-                      { !isSticker && (
-                        <MarkdownWrapper>{message.body}</MarkdownWrapper>
-                        )
-                      }
-                      <span className={[clsx(classes.timestamp, {
-                        [classes.timestampStickerLeft] : isSticker
-                      })]}>
-                        {message.isEdited && <span> {i18n.t("message.edited")} </span>}
-                        {format(parseISO(message.createdAt), "HH:mm")}
-                      </span>
-                    </div>)}
-              </div>
-            </React.Fragment>
-          );
-        } else {
-          return (
-            <React.Fragment key={message.id}>
-              {renderDailyTimestamps(message, index)}
-              {renderMessageDivider(message, index)}
-              <div
-                className={[clsx(classes.messageRight, {
-                  [classes.messageMediaSticker] : isSticker,
-                })]}
-                title={message.queueId && message.queue?.name}
-              >
-                <IconButton
-                  variant="contained"
-                  size="small"
-                  id="messageActionsButton"
-                  disabled={message.isDeleted}
-                  className={classes.messageActionsButton}
-                  onClick={(e) => handleOpenMessageOptionsMenu(e, message, data)}
-                >
-                  <ExpandMore />
-                </IconButton>
-                {message.mediaUrl && checkMessageMedia(message, data)}
+              {data?.message?.locationMessage ? (
+                messageLocation(data, message.createdAt)
+              ) : isVCard(message.body) ? (
                 <div
-                  className={clsx(classes.textContentItem, {
-                    [classes.textContentItemDeleted]: message.isDeleted,
-                    [classes.textContentItemEdited]: message.isEdited,
-                  })}
+                  className={[
+                    clsx(classes.textContentItem, {
+                      [classes.textContentItemEdited]: message.isEdited
+                    }),
+                    { marginRight: 0 }
+                  ]}
                 >
-                  {message.isDeleted && (
-                    <Block
-                      color="disabled"
-                      fontSize="small"
-                      className={classes.deletedIcon}
-                    />
-                  )}
-                  {message.body.includes('data:image') ? messageLocation(message.body, message.createdAt)
-                  :
-                  isVCard(message.body) ?
-                    <div className={[classes.textContentItem]}>
-                      {vCard(message.body)}
-                    </div>
-
-                    :
-                  message.quotedMsg && renderQuotedMessage(message)}
-                  { !isSticker && (
-                    <MarkdownWrapper>{message.body}</MarkdownWrapper>
-                    )
-                  }
-                    <span className={[clsx(classes.timestamp, {
-                      [classes.timestampStickerRight] : isSticker
-                    })]}>
-                    {message.isEdited && <span> {i18n.t("message.edited")} </span>}
+                  {renderVCard(message.body)}
+                </div>
+              ) : (
+                <div
+                  className={[
+                    clsx(classes.textContentItem, {
+                      [classes.textContentItemDeleted]: message.isDeleted,
+                      [classes.textContentItemEdited]: message.isEdited
+                    })
+                  ]}
+                >
+                  {message.quotedMsg && renderQuotedMessage(message)}
+                  {renderLinkPreview(message)}
+                  {!isSticker &&
+                    (message.mediaUrl && !data?.message?.extendedTextMessage ? (
+                      ""
+                    ) : (
+                      <>
+                        {message.isDeleted && (
+                          <Block
+                            color="disabled"
+                            fontSize="small"
+                            className={classes.deletedIcon}
+                          />
+                        )}
+                        <WhatsMarked>{message.body}</WhatsMarked>
+                      </>
+                    ))}
+                  <span
+                    className={[
+                      clsx(classes.timestamp, "conversa-horario", {
+                        [classes.timestampStickerLeft]: isSticker
+                      })
+                    ]}
+                  >
+                    {message.isEdited && (
+                      <span> {i18n.t("message.edited")} </span>
+                    )}
                     {format(parseISO(message.createdAt), "HH:mm")}
-                    {renderMessageAck(message)}
                   </span>
                 </div>
-              </div>
-            </React.Fragment>
-          );
+              )}
+              {(message.mediaUrl || message.mediaType === "voice_recording") &&
+                !data?.message?.extendedTextMessage &&
+                checkMessageMedia(message, data, isSticker)}
+              {renderButtons(data?.message)}
+              {renderReplies(message.replies)}
+            </div>
+          </React.Fragment>
+        );
+        if (message.bottomStick) {
+          stickedMessages.push(messageFragment);
         }
-      });
-      return viewMessagesList;
+        return messageFragment;
+      } else {
+        return (
+          <React.Fragment key={message.id}>
+            {renderDailyTimestamps(message, index)}
+            {renderMessageDivider(message, index)}
+            <div
+              id={message.id}
+              data-message-side="sent"
+              data-message-kind={isSticker ? "sticker" : "message"}
+              className={[
+                clsx(classes.messageContainer, classes.messageRight, {
+                  [classes.messageMediaSticker]: isSticker
+                })
+              ]}
+              title={message.queueId && message.queue?.name}
+            >
+              {readOnly || (
+                <>
+                  <Tooltip title={i18n.t("messageOptionsMenu.reply")}>
+                    <IconButton
+                      size="small"
+                      id={`messageReplyButton-${message.id}`}
+                      aria-label={i18n.t("messageOptionsMenu.reply")}
+                      disabled={message.isDeleted}
+                      className={classes.messageReplyButton}
+                      onClick={() => startReply(message)}
+                    >
+                      <Reply fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                  <IconButton
+                    variant="contained"
+                    size="small"
+                    id={`messageActionsButton-${message.id}`}
+                    aria-label={i18n.t("conversa.maisAcoes")}
+                    disabled={message.isDeleted}
+                    className={classes.messageActionsButton}
+                    onClick={e =>
+                      handleOpenMessageOptionsMenu(e, message, data)
+                    }
+                  >
+                    <ExpandMore />
+                  </IconButton>
+                </>
+              )}
+
+              {dataContext?.isForwarded && (
+                <span className={classes.forwardedMessage}>
+                  <Forward fontSize="small" className={classes.forwardedIcon} />{" "}
+                  {i18n.t("message.forwarded")}
+                </span>
+              )}
+
+              {message.thumbnailUrl && !message.mediaUrl && (
+                <img
+                  className={classes.previewThumbnail}
+                  src={message.thumbnailUrl}
+                />
+              )}
+
+              <div
+                className={clsx(classes.textContentItem, {
+                  [classes.textContentItemDeleted]: message.isDeleted,
+                  [classes.textContentItemEdited]: message.isEdited
+                })}
+              >
+                {message.isDeleted && (
+                  <Block
+                    color="disabled"
+                    fontSize="small"
+                    className={classes.deletedIcon}
+                  />
+                )}
+
+                {data?.message?.locationMessage ? (
+                  messageLocation(data, message.createdAt)
+                ) : isVCard(message.body) ? (
+                  <div className={[classes.textContentItem]}>
+                    {renderVCard(message.body)}
+                  </div>
+                ) : (
+                  message.quotedMsg && renderQuotedMessage(message)
+                )}
+                {renderLinkPreview(message)}
+                {!isSticker &&
+                  (message.mediaUrl ? (
+                    ""
+                  ) : (
+                    <WhatsMarked>{message.body}</WhatsMarked>
+                  ))}
+                <span
+                  className={[
+                    clsx(classes.timestamp, "conversa-horario", {
+                      [classes.timestampStickerRight]: isSticker
+                    })
+                  ]}
+                  style={{ bottom: messageError ? 24 : 0 }}
+                >
+                  {message.isEdited && (
+                    <span> {i18n.t("message.edited")} </span>
+                  )}
+                  {format(parseISO(message.createdAt), "HH:mm")}
+                  {renderMessageAck(message)}
+                </span>
+              </div>
+              {(message.mediaUrl || message.mediaType === "voice_recording") &&
+                checkMessageMedia(message, data, isSticker)}
+              {renderReplies(message.replies)}
+              {messageError && (
+                <div
+                  className={classes.messageErrorBand}
+                  title={messageError.title}
+                >
+                  {messageError.code} - {messageError.message}
+                </div>
+              )}
+            </div>
+          </React.Fragment>
+        );
+      }
+    });
+    return (
+      <>
+        {viewMessagesList}
+        <div
+          ref={stickedRef}
+          className={`${classes.stickedMessages} conversa-fixadas`}
+          style={{ display: stickedMessages.length > 0 ? "flex" : "none" }}
+        >
+          {stickedMessages}
+        </div>
+      </>
+    );
   };
 
   return (
-    <div className={classes.messagesListWrapper}>
+    <div className={`${classes.messagesListWrapper} conversa-historico`}>
       <MessageOptionsMenu
         message={selectedMessage}
         data={selectedMessageData}
         anchorEl={anchorEl}
         menuOpen={messageOptionsMenuOpen}
         handleClose={handleCloseMessageOptionsMenu}
+        ticket={ticket}
       />
       <div
         id="messagesList"
         className={classes.messagesList}
         onScroll={handleScroll}
+        ref={scrollRef}
       >
         {messagesList.length > 0 ? renderMessages() : []}
+        {contactPresence === "composing" && (
+          <div className={classes.messageLeft}>
+            <div className={classes.wave}>
+              <span className={classes.dot}></span>
+              <span className={classes.dot}></span>
+              <span className={classes.dot}></span>
+            </div>
+          </div>
+        )}
+        {contactPresence === "recording" && (
+          <div className={classes.messageLeft}>
+            <div className={classes.wavebarsContainer}>
+              <div className={clsx(classes.wavebars, classes.wavebar1)}></div>
+              <div className={clsx(classes.wavebars, classes.wavebar2)}></div>
+              <div className={clsx(classes.wavebars, classes.wavebar3)}></div>
+              <div className={clsx(classes.wavebars, classes.wavebar4)}></div>
+              <div className={clsx(classes.wavebars, classes.wavebar5)}></div>
+            </div>
+          </div>
+        )}
       </div>
-      {ticket?.channel !== "whatsapp" || ticket.channel === undefined && (
-        <div
-          style={{
-            width: "100%",
-            display: "flex",
-            padding: "10px",
-            alignItems: "center",
-            backgroundColor: "#E1F3FB",
-          }}
-        >
-          {ticket?.channel === "facebook" ? (
-            <Facebook small />
-          ) : (
-            <Instagram small />
-          )}
+      {ticket?.channel !== "whatsapp" ||
+        (ticket.channel === undefined && (
+          <div
+            className="conversa-aviso-canal"
+            style={{
+              width: "100%",
+              display: "flex",
+              padding: "10px",
+              alignItems: "center",
+              backgroundColor: "#E1F3FB"
+            }}
+          >
+            {ticket?.channel === "facebook" ? (
+              <Facebook small />
+            ) : (
+              <Instagram small />
+            )}
 
-          <span>
-            Você tem 24h para responder após receber uma mensagem, de acordo
-            com as políticas do Facebook.
-          </span>
-        </div>
-      )}
+            <span>
+              Você tem 24h para responder após receber uma mensagem, de acordo
+              com as políticas do Facebook.
+            </span>
+          </div>
+        ))}
       {loading && (
         <div>
           <CircularProgress className={classes.circleLoading} />
         </div>
       )}
+      <MediaGalleryLightbox
+        open={lightboxOpen}
+        onClose={closeLightbox}
+        index={lightboxIndex}
+        slides={lightboxMedia.slides}
+      />
     </div>
   );
 };

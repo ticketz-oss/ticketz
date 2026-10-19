@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { BrowserRouter, Switch } from "react-router-dom";
+import React, { lazy, Suspense, useEffect, useState } from "react";
+import { BrowserRouter, Route as RouterRoute, Switch } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 
 import LoggedInLayout from "../layout";
@@ -7,14 +7,17 @@ import Dashboard from "../pages/Dashboard/";
 import TicketResponsiveContainer from "../pages/TicketResponsiveContainer";
 import Signup from "../pages/Signup/";
 import Login from "../pages/Login/";
+import MobileLogin from "../pages/MobileLogin";
 import Connections from "../pages/Connections/";
 import SettingsCustom from "../pages/SettingsCustom/";
 import Financeiro from "../pages/Financeiro/";
+import CentralCobranca from "../pages/CentralCobranca/";
+import Prospeccao from "../pages/Prospeccao/";
 import Users from "../pages/Users";
 import Contacts from "../pages/Contacts/";
 import Queues from "../pages/Queues/";
 import Tags from "../pages/Tags/";
-import MessagesAPI from "../pages/MessagesAPI/";
+import ChatGPT from "../pages/ChatGPT/";
 import Helps from "../pages/Helps/";
 import ContactLists from "../pages/ContactLists/";
 import ContactListItems from "../pages/ContactListItems/";
@@ -24,6 +27,7 @@ import { AuthProvider } from "../context/Auth/AuthContext";
 import { TicketsContextProvider } from "../context/Tickets/TicketsContext";
 import { WhatsAppsProvider } from "../context/WhatsApp/WhatsAppsContext";
 import Route from "./Route";
+import PartnerRoutes from "./PartnerRoutes";
 import Schedules from "../pages/Schedules";
 import Campaigns from "../pages/Campaigns";
 import CampaignsConfig from "../pages/CampaignsConfig";
@@ -32,6 +36,10 @@ import Annoucements from "../pages/Annoucements";
 import Chat from "../pages/Chat";
 import ToDoList from "../pages/ToDoList/";
 import Subscription from "../pages/Subscription/";
+import PlatformAccess from "../pages/PlatformAccess";
+import PlatformActivation from "../pages/PlatformActivation";
+
+const Fluxos = lazy(() => import("../pages/Fluxos"));
 
 const Routes = () => {
   const [showCampaigns, setShowCampaigns] = useState(false);
@@ -48,9 +56,21 @@ const Routes = () => {
       <AuthProvider>
         <TicketsContextProvider>
           <Switch>
+            <RouterRoute path="/login/mobile" component={MobileLogin} />
+            <RouterRoute path="/login/google/:stage" component={Login} />
             <Route exact path="/login" component={Login} />
             <Route exact path="/signup" component={Signup} />
+            <RouterRoute exact path="/sso/:token" component={PlatformAccess} />
+            <RouterRoute
+              exact
+              path="/ativar/:token"
+              component={PlatformActivation}
+            />
             {/* <Route exact path="/create-company" component={Companies} /> */}
+            {/* Portal de parceiros: sessao propria, fora do AuthProvider do
+                tenant. Route nativo porque o wrapper local redireciona quem ja
+                esta logado e quebraria a tela de convite. */}
+            <RouterRoute path="/parceiros" component={PartnerRoutes} />
             <WhatsAppsProvider>
               <LoggedInLayout>
                 <Route exact path="/" component={Dashboard} isPrivate />
@@ -78,22 +98,24 @@ const Routes = () => {
                   component={Schedules}
                   isPrivate
                 />
-                <Route
-                  exact
-                  path="/todolist"
-                  component={ToDoList}
-                  isPrivate
-                />
+                <Route exact path="/todolist" component={ToDoList} isPrivate />
                 <Route exact path="/tags" component={Tags} isPrivate />
                 <Route exact path="/contacts" component={Contacts} isPrivate />
                 <Route exact path="/helps" component={Helps} isPrivate />
-                <Route exact path="/users" component={Users} isPrivate />
                 <Route
                   exact
-                  path="/messages-api"
-                  component={MessagesAPI}
+                  path="/helps/:groupId"
+                  component={Helps}
                   isPrivate
                 />
+                <Route
+                  exact
+                  path="/helps/:groupId/:contentId"
+                  component={Helps}
+                  isPrivate
+                />
+                <Route exact path="/users" component={Users} isPrivate />
+                <Route exact path="/chatgpt" component={ChatGPT} isPrivate />
                 <Route
                   exact
                   path="/settings"
@@ -106,7 +128,27 @@ const Routes = () => {
                   component={Financeiro}
                   isPrivate
                 />
+                <Route
+                  exact
+                  path="/cobranca"
+                  component={CentralCobranca}
+                  isPrivate
+                />
+                <Route
+                  exact
+                  path="/prospeccao"
+                  component={Prospeccao}
+                  isPrivate
+                />
                 <Route exact path="/queues" component={Queues} isPrivate />
+                <Suspense fallback={null}>
+                  <Route
+                    exact
+                    path="/fluxos/:queueId?"
+                    component={Fluxos}
+                    isPrivate
+                  />
+                </Suspense>
                 <Route
                   exact
                   path="/announcements"
@@ -119,7 +161,7 @@ const Routes = () => {
                   component={Subscription}
                   isPrivate
                 />
-                
+
                 <Route exact path="/chats/:id?" component={Chat} isPrivate />
                 {showCampaigns && (
                   <>
@@ -153,7 +195,6 @@ const Routes = () => {
                       component={CampaignsConfig}
                       isPrivate
                     />
-                    
                   </>
                 )}
               </LoggedInLayout>

@@ -1,0 +1,110 @@
+import Message from "../../models/Message";
+import { logger } from "../../utils/logger";
+import Contact from "../../models/Contact";
+import Queue from "../../models/Queue";
+import GetDefaultWhatsApp from "../../helpers/GetDefaultWhatsApp";
+import AppError from "../../errors/AppError";
+import { getWbot } from "../../libs/wbot";
+import {
+  verifyMediaMessage,
+  verifyMessage
+} from "../WbotServices/wbotMessageListener";
+import User from "../../models/User";
+import CheckContactOpenTickets from "../../helpers/CheckContactOpenTickets";
+import CreateTicketService from "../TicketServices/CreateTicketService";
+import { getJidOf } from "../WbotServices/getJidOf";
+import { GetCompanySetting } from "../../helpers/CheckSettings";
+
+const ForwardMessageService = async (
+  user: User,
+  message: Message,
+  contact: Contact,
+  queue: Queue
+): Promise<Message> => {
+  const { whatsapp } = message.ticket;
+
+  if (!whatsapp) {
+    throw new AppError("ERR_NO_DEF_WAPP_FOUND", 404);
+  }
+
+  if (whatsapp.channel !== "whatsapp") {
+    throw new AppError("ERR_INVALID_CHANNEL", 400);
+  }
+
+  if (whatsapp.apiMode === "official") {
+    throw new AppError("ERR_WAPP_OFFICIAL_MODE_NOT_SUPPORTED", 400);
+  }
+
+  let ticket = await CheckContactOpenTickets(contact.id, whatsapp.id, true);
+
+  if (contact.isGroup) {
+    if (
+      (await GetCompanySetting(
+        contact.companyId,
+        "CheckMsgIsGroup",
+        "enabled"
+      )) === "enabled"
+    ) {
+      throw new AppError("ERR_FORBIDDEN", 403);
+    }
+    if (!ticket) {
+      throw new AppError("ERR_FORBIDDEN", 403);
+    }
+    if (
+      user.profile !== "admin" &&
+      !user.queues.find(q => q.id === ticket?.queueId)
+    ) {
+      throw new AppError("ERR_FORBIDDEN", 403);
+    }
+    if (
+      user.profile !== "admin" &&
+      (await GetCompanySetting(contact.companyId, "groupsTab", "disabled")) ===
+        "disabled" &&
+      ticket.userId !== user.id
+    ) {
+      throw new AppError("ERR_FORBIDDEN", 403);
+    }
+  } else if (ticket && ticket.userId !== user.id) {
+    throw new AppError("ERR_OTHER_OPEN_TICKET", 400);
+  }
+
+  if (!ticket) {
+    if (!queue) {
+      throw new AppError("ERR_FORBIDDEN", 403);
+    }
+    ticket = await CreateTicketService({
+      contactId: contact.id,
+      userId: user.id,
+      companyId: contact.companyId,
+      queueId: queue?.id
+    });
+    if (!ticket) {
+      throw new AppError("ERR_CREATING_TICKET", 500);
+    }
+  }
+
+  try {
+    const wbot = getWbot(whatsapp.id);
+    const msg = JSON.parse(message.dataJson);
+
+    const sentMessage = await wbot.sendMessage(getJidOf(contact), {
+      forward: msg
+    });
+
+    const newMessage = message.mediaUrl
+      ? await verifyMediaMessage(sentMessage, ticket, ticket.contact, {
+          wbot,
+          userId: user.id
+        })
+      : await verifyMessage(sentMessage, ticket, ticket.contact, {
+          userId: user.id
+        });
+
+    return newMessage;
+  } catch (err) {
+    logger.error(err);
+    throw new AppError("ERR_SENDING_WAPP_MSG", 500);
+  }
+};
+
+export default ForwardMessageService;

@@ -6,17 +6,32 @@ import Queue from "../../models/Queue";
 import Tag from "../../models/Tag";
 import Whatsapp from "../../models/Whatsapp";
 
-const ShowTicketUUIDService = async (uuid: string): Promise<Ticket> => {
+const ShowTicketUUIDService = async (
+  uuid: string,
+  companyId: number
+): Promise<Ticket> => {
   const ticket = await Ticket.findOne({
     where: {
-      uuid
+      uuid,
+      companyId
     },
     include: [
       {
         model: Contact,
         as: "contact",
-        attributes: ["id", "name", "number", "email", "profilePicUrl"],
-        include: ["extraInfo"]
+        attributes: [
+          "id",
+          "name",
+          "number",
+          "email",
+          "profilePicUrl",
+          "profileHiresPictureUrl",
+          "presence",
+          "disableBot",
+          "isGroup",
+          "groupMode"
+        ],
+        include: ["tags", "extraInfo", "groupQueues"]
       },
       {
         model: User,
@@ -31,7 +46,8 @@ const ShowTicketUUIDService = async (uuid: string): Promise<Ticket> => {
       {
         model: Whatsapp,
         as: "whatsapp",
-        attributes: ["name"]
+        attributes: ["id", "name", "apiMode"],
+        include: ["wavoip"]
       },
       {
         model: Tag,
@@ -39,7 +55,7 @@ const ShowTicketUUIDService = async (uuid: string): Promise<Ticket> => {
         attributes: ["id", "name", "color"]
       }
     ]
-  }); 
+  });
 
   if (!ticket) {
     throw new AppError("ERR_NO_TICKET_FOUND", 404);

@@ -1,2 +1,2 @@
-import CheckoutSuccess from './CheckoutSuccess';
+import CheckoutSuccess from "./CheckoutSuccess";
 export default CheckoutSuccess;

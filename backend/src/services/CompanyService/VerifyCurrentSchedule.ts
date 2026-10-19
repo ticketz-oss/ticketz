@@ -1,15 +1,34 @@
 import { QueryTypes } from "sequelize";
 import sequelize from "../../database";
+import { checkOpenHours, OpenHoursData } from "../../helpers/checkOpenHours";
+import Queue from "../../models/Queue";
+import Company from "../../models/Company";
 
 export type ScheduleResult = {
-  id: number;
-  currentSchedule: [];
-  startTime: string;
-  endTime: string;
   inActivity: boolean;
 };
 
-const VerifyCurrentSchedule = async (companyId?: string | number, queueId?: string | number): Promise<ScheduleResult> => {
+const VerifyCurrentSchedule = async (
+  companyId: string | number,
+  queueId?: string | number
+): Promise<ScheduleResult> => {
+  let schedule: OpenHoursData;
+  if (queueId) {
+    const queue = await Queue.findOne({ where: { id: queueId, companyId } });
+    if (queue) {
+      schedule = queue.schedules;
+    }
+  } else if (companyId) {
+    const company = await Company.findOne({ where: { id: companyId } });
+    if (company) {
+      schedule = company.schedules;
+    }
+  }
+
+  if (schedule.timezone) {
+    return { inActivity: checkOpenHours(schedule) };
+  }
+
   if (queueId === null || queueId === undefined) {
     const sql = `
         select
@@ -58,8 +77,8 @@ const VerifyCurrentSchedule = async (companyId?: string | number, queueId?: stri
     });
 
     return result;
-  } 
-    const sql = `
+  }
+  const sql = `
       select
         s.id,
         s.currentWeekday,
@@ -100,14 +119,13 @@ const VerifyCurrentSchedule = async (companyId?: string | number, queueId?: stri
       ) s     
     `;
 
-    const result: ScheduleResult = await sequelize.query(sql, {
-      replacements: { companyId, queueId },
-      type: QueryTypes.SELECT,
-      plain: true
-    });
+  const result: ScheduleResult = await sequelize.query(sql, {
+    replacements: { companyId, queueId },
+    type: QueryTypes.SELECT,
+    plain: true
+  });
 
-    return result;
-  
+  return result;
 };
 
 export default VerifyCurrentSchedule;

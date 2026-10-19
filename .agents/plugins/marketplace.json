@@ -1,0 +1,20 @@
+{
+  "name": "espaco-whats",
+  "interface": {
+    "displayName": "Espaço Whats"
+  },
+  "plugins": [
+    {
+      "name": "espaco-whats",
+      "source": {
+        "source": "local",
+        "path": "./plugins/espaco-whats"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

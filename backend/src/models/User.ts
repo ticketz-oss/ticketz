@@ -21,6 +21,8 @@ import Queue from "./Queue";
 import UserQueue from "./UserQueue";
 import Company from "./Company";
 import QuickMessage from "./QuickMessage";
+import UserSocketSession from "./UserSocketSession"; // Importação da nova model
+import GroupReadState from "./GroupReadState";
 
 @Table
 class User extends Model<User> {
@@ -35,11 +37,22 @@ class User extends Model<User> {
   @Column
   email: string;
 
+  @Column(DataType.TEXT)
+  get profilePicUrl(): string | null {
+    const arquivo = this.getDataValue("profilePicUrl");
+    if (arquivo?.startsWith("https://")) return arquivo;
+    return arquivo ? `${process.env.BACKEND_URL}/public/${arquivo}` : null;
+  }
+
   @Column(DataType.VIRTUAL)
   password: string;
 
   @Column
   passwordHash: string;
+
+  @Default(true)
+  @Column
+  passwordConfigured: boolean;
 
   @Default(0)
   @Column
@@ -49,11 +62,11 @@ class User extends Model<User> {
   @Column
   profile: string;
 
-  @Column
-  super: boolean;
+  @Column(DataType.JSONB)
+  visibleScreens: string[] | null;
 
   @Column
-  online: boolean;
+  super: boolean;
 
   @CreatedAt
   createdAt: Date;
@@ -81,11 +94,24 @@ class User extends Model<User> {
   })
   quickMessages: QuickMessage[];
 
+  @HasMany(() => UserSocketSession, {
+    onUpdate: "CASCADE",
+    onDelete: "CASCADE"
+  })
+  socketSessions: UserSocketSession[]; // Nova associação
+
+  @HasMany(() => GroupReadState)
+  groupReadStates: GroupReadState[];
+
   @BeforeUpdate
   @BeforeCreate
   static hashPassword = async (instance: User): Promise<void> => {
     if (instance.password) {
       instance.passwordHash = await hash(instance.password, 8);
+      if (!instance.isNewRecord) {
+        instance.passwordConfigured = true;
+        instance.tokenVersion = (instance.tokenVersion || 0) + 1;
+      }
     }
   };
 

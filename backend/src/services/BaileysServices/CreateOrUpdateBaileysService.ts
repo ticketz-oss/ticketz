@@ -1,57 +1,49 @@
-import { Chat, Contact } from "@whiskeysockets/baileys";
-import Baileys from "../../models/Baileys";
-import { isArray } from "lodash";
+import { Contact } from "libzapitu-rf";
+import BaileysContact from "../../models/BaileysContact";
 
 interface Request {
   whatsappId: number;
   contacts?: Contact[];
-  chats?: Chat[];
 }
+
+const toRows = (whatsappId: number, contacts: Contact[]) => {
+  const dedupedByJid = contacts.reduce((acc, contact) => {
+    if (
+      !contact?.id ||
+      contact.id === "status@broadcast" ||
+      contact.id.includes("g.us")
+    ) {
+      return acc;
+    }
+
+    acc.set(contact.id, contact);
+    return acc;
+  }, new Map<string, Contact>());
+
+  return Array.from(dedupedByJid.values()).map(contact => ({
+    whatsappId,
+    contactId: contact.id,
+    payload: contact as unknown as Record<string, unknown>
+  }));
+};
 
 const createOrUpdateBaileysService = async ({
   whatsappId,
-  contacts,
-  chats
-}: Request): Promise<Baileys> => {
-  const baileysExists = await Baileys.findOne({
-    where: { whatsappId }
-  });
-
-  if (baileysExists) {
-    const getChats = baileysExists.chats
-      ? JSON.parse(JSON.stringify(baileysExists.chats))
-      : [];
-    const getContacts = baileysExists.contacts
-      ? JSON.parse(JSON.stringify(baileysExists.contacts))
-      : [];
-
-    if (chats && isArray(getChats)) {
-      getChats.push(...chats);
-      getChats.sort();
-      getChats.filter((v, i, a) => a.indexOf(v) === i);
-    }
-
-    if (contacts && isArray(getContacts)) {
-      getContacts.push(...contacts);
-      getContacts.sort();
-      getContacts.filter((v, i, a) => a.indexOf(v) === i);
-    }
-
-    const newBaileys = await baileysExists.update({
-      chats: JSON.stringify(getChats),
-      contacts: JSON.stringify(getContacts)
-    });
-
-    return newBaileys;
+  contacts
+}: Request): Promise<void> => {
+  if (!contacts?.length) {
+    return;
   }
 
-  const baileys = await Baileys.create({
-    whatsappId,
-    contacts: JSON.stringify(contacts),
-    chats: JSON.stringify(chats)
-  });
+  const rows = toRows(whatsappId, contacts);
 
-  return baileys;
+  if (!rows.length) {
+    return;
+  }
+
+  await BaileysContact.bulkCreate(rows, {
+    updateOnDuplicate: ["payload", "updatedAt"]
+  });
 };
 
 export default createOrUpdateBaileysService;

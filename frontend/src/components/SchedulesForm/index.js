@@ -6,13 +6,12 @@ import NumberFormat from "react-number-format";
 import ButtonWithSpinner from "../ButtonWithSpinner";
 import { i18n } from "../../translate/i18n";
 
-
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
-    width: "100%",
+    width: "100%"
   },
   fullWidth: {
-    width: "100%",
+    width: "100%"
   },
   textfield: {
     width: "100%",
@@ -20,16 +19,16 @@ const useStyles = makeStyles((theme) => ({
   },
   row: {
     paddingTop: theme.spacing(2),
-    paddingBottom: theme.spacing(2),
+    paddingBottom: theme.spacing(2)
   },
   control: {
     paddingRight: theme.spacing(1),
-    paddingLeft: theme.spacing(1),
+    paddingLeft: theme.spacing(1)
   },
   buttonContainer: {
     textAlign: "right",
-    padding: theme.spacing(1),
-  },
+    padding: theme.spacing(1)
+  }
 }));
 
 function SchedulesForm(props) {
@@ -37,13 +36,62 @@ function SchedulesForm(props) {
   const classes = useStyles();
 
   const [schedules, setSchedules] = useState([
-    { weekday: i18n.t("queueModal.serviceHours.monday"), weekdayEn: "monday", startTimeA: "", endTimeA: "", startTimeB: "", endTimeB: "", },
-    { weekday: i18n.t("queueModal.serviceHours.tuesday"), weekdayEn: "tuesday", startTimeA: "", endTimeA: "", startTimeB: "", endTimeB: "", },
-    { weekday: i18n.t("queueModal.serviceHours.wednesday"), weekdayEn: "wednesday", startTimeA: "", endTimeA: "", startTimeB: "", endTimeB: "", },
-    { weekday: i18n.t("queueModal.serviceHours.thursday"), weekdayEn: "thursday", startTimeA: "", endTimeA: "", startTimeB: "", endTimeB: "", },
-    { weekday: i18n.t("queueModal.serviceHours.friday"), weekdayEn: "friday", startTimeA: "", endTimeA: "", startTimeB: "", endTimeB: "", },
-    { weekday: i18n.t("queueModal.serviceHours.saturday"), weekdayEn: "saturday", startTimeA: "", endTimeA: "", startTimeB: "", endTimeB: "", },
-    { weekday: i18n.t("queueModal.serviceHours.sunday"), weekdayEn: "sunday", startTimeA: "", endTimeA: "", startTimeB: "", endTimeB: "", },
+    {
+      weekday: i18n.t("queueModal.serviceHours.monday"),
+      weekdayEn: "monday",
+      startTimeA: "",
+      endTimeA: "",
+      startTimeB: "",
+      endTimeB: ""
+    },
+    {
+      weekday: i18n.t("queueModal.serviceHours.tuesday"),
+      weekdayEn: "tuesday",
+      startTimeA: "",
+      endTimeA: "",
+      startTimeB: "",
+      endTimeB: ""
+    },
+    {
+      weekday: i18n.t("queueModal.serviceHours.wednesday"),
+      weekdayEn: "wednesday",
+      startTimeA: "",
+      endTimeA: "",
+      startTimeB: "",
+      endTimeB: ""
+    },
+    {
+      weekday: i18n.t("queueModal.serviceHours.thursday"),
+      weekdayEn: "thursday",
+      startTimeA: "",
+      endTimeA: "",
+      startTimeB: "",
+      endTimeB: ""
+    },
+    {
+      weekday: i18n.t("queueModal.serviceHours.friday"),
+      weekdayEn: "friday",
+      startTimeA: "",
+      endTimeA: "",
+      startTimeB: "",
+      endTimeB: ""
+    },
+    {
+      weekday: i18n.t("queueModal.serviceHours.saturday"),
+      weekdayEn: "saturday",
+      startTimeA: "",
+      endTimeA: "",
+      startTimeB: "",
+      endTimeB: ""
+    },
+    {
+      weekday: i18n.t("queueModal.serviceHours.sunday"),
+      weekdayEn: "sunday",
+      startTimeA: "",
+      endTimeA: "",
+      startTimeB: "",
+      endTimeB: ""
+    }
   ]);
 
   useEffect(() => {
@@ -53,7 +101,7 @@ function SchedulesForm(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialValues]);
 
-  const handleSubmit = (data) => {
+  const handleSubmit = data => {
     onSubmit(data);
   };
 
@@ -72,7 +120,7 @@ function SchedulesForm(props) {
         <Form className={classes.fullWidth}>
           <FieldArray
             name="schedules"
-            render={(arrayHelpers) => (
+            render={arrayHelpers => (
               <Grid spacing={4} container>
                 {values.schedules.map((item, index) => {
                   return (
@@ -102,7 +150,9 @@ function SchedulesForm(props) {
                                 customInput={TextField}
                                 format="##:##"
                                 className={classes.fullWidth}
-                                label={i18n.t("queueModal.serviceHours.startTimeA")}
+                                label={i18n.t(
+                                  "queueModal.serviceHours.startTimeA"
+                                )}
                               />
                             )}
                           </FastField>
@@ -120,7 +170,9 @@ function SchedulesForm(props) {
                                 customInput={TextField}
                                 format="##:##"
                                 className={classes.fullWidth}
-                                label={i18n.t("queueModal.serviceHours.endTimeA")}
+                                label={i18n.t(
+                                  "queueModal.serviceHours.endTimeA"
+                                )}
                               />
                             )}
                           </FastField>
@@ -138,7 +190,9 @@ function SchedulesForm(props) {
                                 customInput={TextField}
                                 format="##:##"
                                 className={classes.fullWidth}
-                                label={i18n.t("queueModal.serviceHours.startTimeB")}
+                                label={i18n.t(
+                                  "queueModal.serviceHours.startTimeB"
+                                )}
                               />
                             )}
                           </FastField>
@@ -156,7 +210,9 @@ function SchedulesForm(props) {
                                 customInput={TextField}
                                 format="##:##"
                                 className={classes.fullWidth}
-                                label={i18n.t("queueModal.serviceHours.endTimeB")}
+                                label={i18n.t(
+                                  "queueModal.serviceHours.endTimeB"
+                                )}
                               />
                             )}
                           </FastField>

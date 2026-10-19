@@ -1,0 +1,266 @@
+.agent-context-manager {
+  width: 100%;
+  color: var(--ew-text);
+}
+.agent-context-intro {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+.agent-context-intro > svg {
+  flex-shrink: 0;
+  margin-top: 4px;
+  color: var(--ew-primary);
+}
+.agent-context-intro p {
+  margin-top: 6px;
+  line-height: 1.6;
+}
+.agent-context-layout {
+  display: grid;
+  grid-template-columns: minmax(200px, 250px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.agent-context-companies {
+  position: sticky;
+  top: 12px;
+}
+.agent-context-company-list {
+  display: grid;
+  gap: 6px;
+  max-height: 540px;
+  overflow: auto;
+  margin-top: 12px;
+}
+.agent-context-company {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  width: 100%;
+  padding: 14px 10px;
+  color: var(--ew-text);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font: inherit;
+}
+.agent-context-company:hover,
+.agent-context-company[aria-pressed="true"] {
+  background: var(--ew-bg);
+  border-color: var(--ew-border);
+}
+.agent-context-company[aria-pressed="true"] > svg {
+  color: var(--ew-primary);
+}
+.agent-context-company:focus-visible {
+  outline: 2px solid var(--ew-primary);
+  outline-offset: 2px;
+}
+.agent-context-company:disabled {
+  cursor: default;
+  opacity: 0.65;
+}
+.agent-context-company > svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.agent-context-company > span {
+  display: grid;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.agent-context-company strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+.agent-context-company small {
+  color: var(--ew-muted);
+  font-size: 11px;
+}
+.agent-context-company small.agent-context-enabled {
+  color: var(--ew-primary);
+}
+.agent-context-details {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.agent-context-card {
+  padding: 20px;
+  border: 1px solid var(--ew-border);
+  border-radius: 14px;
+  background: var(--ew-surface);
+  min-width: 0;
+}
+.agent-context-card-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.agent-context-muted {
+  color: var(--ew-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.agent-context-empty {
+  min-height: 230px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  text-align: center;
+  border: 1px dashed var(--ew-border);
+  border-radius: 14px;
+  padding: 24px;
+}
+.agent-context-module-list {
+  margin-top: 14px;
+}
+.agent-context-module {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 13px 0;
+  border-top: 1px solid var(--ew-border);
+}
+.agent-context-module > span {
+  display: grid;
+  gap: 5px;
+}
+.agent-context-module strong,
+.agent-context-document strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+.agent-context-module small,
+.agent-context-document small {
+  color: var(--ew-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.agent-context-editor-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 14px 0;
+}
+.agent-context-editor {
+  font-family: Consolas, Monaco, monospace !important;
+  font-size: 13px !important;
+  line-height: 1.7 !important;
+}
+.agent-context-editor-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+  margin-top: 10px;
+  color: var(--ew-muted);
+  font-size: 12px;
+}
+.agent-context-preview {
+  padding: 16px;
+  min-height: 260px;
+  max-height: 540px;
+  overflow: auto;
+  border: 1px solid var(--ew-border);
+  border-radius: 8px;
+  background: var(--ew-bg);
+}
+.agent-context-markdown {
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  line-height: 1.65;
+}
+.agent-context-markdown p {
+  white-space: pre-wrap;
+}
+.agent-context-markdown h1 {
+  font-size: 24px;
+}
+.agent-context-markdown h2 {
+  font-size: 20px;
+}
+.agent-context-markdown h3 {
+  font-size: 17px;
+}
+.agent-context-markdown h4,
+.agent-context-markdown h5,
+.agent-context-markdown h6 {
+  font-size: 15px;
+}
+.agent-context-markdown pre {
+  padding: 12px;
+  white-space: pre-wrap;
+  border: 1px solid var(--ew-border);
+  border-radius: 6px;
+}
+.agent-context-markdown code {
+  font-family: Consolas, Monaco, monospace;
+}
+.agent-context-markdown blockquote {
+  margin: 12px 0;
+  border-left: 3px solid var(--ew-primary);
+  padding-left: 14px;
+  color: var(--ew-muted);
+}
+.agent-context-markdown ul {
+  margin: 4px 0;
+  padding-left: 24px;
+}
+.agent-context-document-list {
+  margin: 14px 0;
+  max-height: 360px;
+  overflow: auto;
+}
+.agent-context-document {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--ew-border);
+}
+.agent-context-document > span:first-child {
+  display: grid;
+  gap: 4px;
+}
+.agent-context-document .agent-context-warning {
+  color: var(--ew-error);
+}
+.agent-context-actions {
+  position: sticky;
+  bottom: 0;
+  padding: 14px 0;
+  background: var(--ew-surface);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+@media (max-width: 760px) {
+  .agent-context-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .agent-context-companies {
+    position: static;
+  }
+  .agent-context-company-list {
+    max-height: 220px;
+  }
+  .agent-context-card {
+    padding: 16px;
+  }
+}

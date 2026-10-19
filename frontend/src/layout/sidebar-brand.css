@@ -1,0 +1,13 @@
+.tenant-sidebar-brand {
+  object-fit: contain;
+  margin: auto;
+  display: block;
+}
+.tenant-sidebar-brand--banner {
+  max-width: 180px;
+  max-height: 36px;
+}
+.tenant-sidebar-brand--icon {
+  width: 40px;
+  height: 40px;
+}

@@ -11,7 +11,7 @@ module.exports = {
       },
       messageId: {
         type: DataTypes.STRING,
-        references: { model: "Messages", key: "id"},
+        references: { model: "Messages", key: "id" },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
         allowNull: false

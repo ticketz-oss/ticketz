@@ -1,2 +1,29 @@
 .docker
 *~
+/.project
+/.env
+
+# Metadados do macOS e artefatos locais
+.DS_Store
+**/.DS_Store
+body.txt
+strix_runs/
+# Local authentication credentials must never be committed.
+**/.env.local
+**/.env.*.local
+**/.clerk/
+graphify-out/
+.codex
+.cursor
+.claude
+.agents
+.externalToolBuilders
+.vscode
+
+.env-backend-acme
+.env-backend-cloudflare
+.env-backend-local
+.env-cloudflared
+.env-frontend-acme
+.env-frontend-cloudflare
+.env-frontend-local

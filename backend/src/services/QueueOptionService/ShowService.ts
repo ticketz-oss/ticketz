@@ -1,7 +1,9 @@
 import AppError from "../../errors/AppError";
 import QueueOption from "../../models/QueueOption";
 
-const ShowService = async (queueOptionId: number | string): Promise<QueueOption> => {
+const ShowService = async (
+  queueOptionId: number | string
+): Promise<QueueOption> => {
   const queue = await QueueOption.findOne({
     where: {
       id: queueOptionId
@@ -9,10 +11,10 @@ const ShowService = async (queueOptionId: number | string): Promise<QueueOption>
     include: [
       {
         model: QueueOption,
-        as: 'parent',
+        as: "parent",
         where: { parentId: queueOptionId },
         required: false
-      },
+      }
     ]
   });
 

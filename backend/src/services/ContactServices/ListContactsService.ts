@@ -5,6 +5,7 @@ interface Request {
   searchParam?: string;
   pageNumber?: string;
   companyId: number;
+  isGroup?: boolean;
 }
 
 interface Response {
@@ -16,18 +17,37 @@ interface Response {
 const ListContactsService = async ({
   searchParam = "",
   pageNumber = "1",
-  companyId
+  companyId,
+  isGroup
 }: Request): Promise<Response> => {
+  const normalizedSearchParam = searchParam.toLowerCase().trim();
   const whereCondition = {
+    ...(isGroup === undefined ? {} : { isGroup }),
     [Op.or]: [
       {
         name: Sequelize.where(
-          Sequelize.fn("LOWER", Sequelize.col("name")),
-          "LIKE",
-          `%${searchParam.toLowerCase().trim()}%`
+          Sequelize.fn(
+            "LOWER",
+            Sequelize.fn("UNACCENT", Sequelize.col("Contact.name"))
+          ),
+          {
+            [Op.like]: Sequelize.fn("UNACCENT", `%${normalizedSearchParam}%`)
+          }
         )
       },
-      { number: { [Op.like]: `%${searchParam.toLowerCase().trim()}%` } }
+      {
+        nickname: Sequelize.where(
+          Sequelize.fn(
+            "LOWER",
+            Sequelize.fn("UNACCENT", Sequelize.col("Contact.nickname"))
+          ),
+          {
+            [Op.like]: Sequelize.fn("UNACCENT", `%${normalizedSearchParam}%`)
+          }
+        )
+      },
+      { email: { [Op.iLike]: `%${normalizedSearchParam}%` } },
+      { number: { [Op.like]: `%${normalizedSearchParam}%` } }
     ],
     companyId: {
       [Op.eq]: companyId
@@ -38,9 +58,10 @@ const ListContactsService = async ({
 
   const { count, rows: contacts } = await Contact.findAndCountAll({
     where: whereCondition,
+    include: ["tags"],
     limit,
     offset,
-    order: [["name", "ASC"]]
+    order: [[Sequelize.col("Contact.name"), "ASC"]]
   });
 
   const hasMore = count > offset + contacts.length;

@@ -1,8 +1,14 @@
-import React, { useState, useEffect, useReducer, useContext } from "react";
+import React, {
+  useState,
+  useEffect,
+  useReducer,
+  useContext,
+  useRef
+} from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
 import List from "@material-ui/core/List";
-import Paper from "@material-ui/core/Paper";
+import TicketListSurface from "./TicketListSurface";
 
 import TicketListItem from "../TicketListItemCustom";
 import TicketsListSkeleton from "../TicketsListSkeleton";
@@ -11,26 +17,9 @@ import useTickets from "../../hooks/useTickets";
 import { i18n } from "../../translate/i18n";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { SocketContext } from "../../context/Socket/SocketContext";
+import toastError from "../../errors/toastError";
 
-const useStyles = makeStyles((theme) => ({
-  ticketsListWrapper: {
-    position: "relative",
-    display: "flex",
-    height: "100%",
-    flexDirection: "column",
-    overflow: "hidden",
-    borderTopRightRadius: 0,
-    borderBottomRightRadius: 0,
-  },
-
-  ticketsList: {
-    flex: 1,
-    maxHeight: "100%",
-    overflowY: "scroll",
-    ...theme.scrollbarStyles,
-    borderTop: "2px solid rgba(0, 0, 0, 0.12)",
-  },
-
+const useStyles = makeStyles(theme => ({
   ticketsListHeader: {
     color: "rgb(67, 83, 105)",
     zIndex: 2,
@@ -38,28 +27,28 @@ const useStyles = makeStyles((theme) => ({
     borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
     display: "flex",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "space-between"
   },
 
   ticketsCount: {
     fontWeight: "normal",
     color: "rgb(104, 121, 146)",
     marginLeft: "8px",
-    fontSize: "14px",
+    fontSize: "14px"
   },
 
   noTicketsText: {
     textAlign: "center",
     color: "rgb(104, 121, 146)",
     fontSize: "14px",
-    lineHeight: "1.4",
+    lineHeight: "1.4"
   },
 
   noTicketsTitle: {
     textAlign: "center",
     fontSize: "16px",
     fontWeight: "600",
-    margin: "0px",
+    margin: "0px"
   },
 
   noTicketsDiv: {
@@ -68,16 +57,16 @@ const useStyles = makeStyles((theme) => ({
     margin: 40,
     flexDirection: "column",
     alignItems: "center",
-    justifyContent: "center",
-  },
+    justifyContent: "center"
+  }
 }));
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_TICKETS") {
     const newTickets = action.payload;
 
-    newTickets.forEach((ticket) => {
-      const ticketIndex = state.findIndex((t) => t.id === ticket.id);
+    newTickets.forEach(ticket => {
+      const ticketIndex = state.findIndex(t => t.id === ticket.id);
       if (ticketIndex !== -1) {
         state[ticketIndex] = ticket;
         if (ticket.unreadMessages > 0) {
@@ -94,7 +83,7 @@ const reducer = (state, action) => {
   if (action.type === "RESET_UNREAD") {
     const ticketId = action.payload;
 
-    const ticketIndex = state.findIndex((t) => t.id === ticketId);
+    const ticketIndex = state.findIndex(t => t.id === ticketId);
     if (ticketIndex !== -1) {
       state[ticketIndex].unreadMessages = 0;
     }
@@ -105,12 +94,17 @@ const reducer = (state, action) => {
   if (action.type === "UPDATE_TICKET") {
     const ticket = action.payload;
 
-    const ticketIndex = state.findIndex((t) => t.id === ticket.id);
+    const ticketIndex = state.findIndex(t => t.id === ticket.id);
     if (ticketIndex !== -1) {
-      state[ticketIndex] = ticket;
-    } else {
-      state.unshift(ticket);
+      state.splice(ticketIndex, 1);
     }
+
+    const idx = state.findIndex(
+      t =>
+        new Date(t.updatedAt) < new Date(ticket.updatedAt) ||
+        (t.updatedAt === ticket.updatedAt && t.id < ticket.id)
+    );
+    state.splice(idx < 0 ? state.length : idx, 0, ticket);
 
     return [...state];
   }
@@ -118,7 +112,7 @@ const reducer = (state, action) => {
   if (action.type === "UPDATE_TICKET_UNREAD_MESSAGES") {
     const ticket = action.payload;
 
-    const ticketIndex = state.findIndex((t) => t.id === ticket.id);
+    const ticketIndex = state.findIndex(t => t.id === ticket.id);
     if (ticketIndex !== -1) {
       state[ticketIndex] = ticket;
       state.unshift(state.splice(ticketIndex, 1)[0]);
@@ -131,16 +125,26 @@ const reducer = (state, action) => {
 
   if (action.type === "UPDATE_TICKET_CONTACT") {
     const contact = action.payload;
-    const ticketIndex = state.findIndex((t) => t.contactId === contact.id);
+    state.forEach(ticket => {
+      if (ticket.contactId === contact.id) {
+        ticket.contact = { ...ticket.contact, ...contact };
+      }
+    });
+    return [...state];
+  }
+
+  if (action.type === "UPDATE_TICKET_PRESENCE") {
+    const data = action.payload;
+    const ticketIndex = state.findIndex(t => t.id === data.ticketId);
     if (ticketIndex !== -1) {
-      state[ticketIndex].contact = contact;
+      state[ticketIndex].presence = data.presence;
     }
     return [...state];
   }
 
   if (action.type === "DELETE_TICKET") {
     const ticketId = action.payload;
-    const ticketIndex = state.findIndex((t) => t.id === ticketId);
+    const ticketIndex = state.findIndex(t => t.id === ticketId);
     if (ticketIndex !== -1) {
       state.splice(ticketIndex, 1);
     }
@@ -153,10 +157,14 @@ const reducer = (state, action) => {
   }
 };
 
-const TicketsListCustom = (props) => {
+const TicketsListCustom = props => {
   const {
     status,
+    groups,
+    groupMode,
+    isSearch,
     searchParam,
+    contactId,
     tags,
     users,
     showAll,
@@ -164,11 +172,19 @@ const TicketsListCustom = (props) => {
     updateCount,
     style,
     setTabOpen,
+    showTabGroups
   } = props;
   const classes = useStyles();
-  const [pageNumber, setPageNumber] = useState(1);
+  const [paginationCursor, setPaginationCursor] = useState({
+    nextUpdatedAt: null,
+    nextTicketId: null
+  });
   const [update, setUpdate] = useState(0);
   const [ticketsList, dispatch] = useReducer(reducer, []);
+  const ticketsListRef = useRef(ticketsList);
+  useEffect(() => {
+    ticketsListRef.current = ticketsList;
+  }, [ticketsList]);
   const [ticketsListUpdated, setTicketsListUpdated] = useState([]);
   const { user } = useContext(AuthContext);
   const { profile, queues } = user;
@@ -177,63 +193,120 @@ const TicketsListCustom = (props) => {
 
   useEffect(() => {
     dispatch({ type: "RESET" });
-    setPageNumber(1);
-  }, [status, searchParam, dispatch, showAll, tags, users, selectedQueueIds]);
+    setPaginationCursor({ nextUpdatedAt: null, nextTicketId: null });
+  }, [
+    status,
+    searchParam,
+    dispatch,
+    showAll,
+    contactId,
+    tags,
+    users,
+    selectedQueueIds,
+    groupMode
+  ]);
 
-  const { tickets, hasMore, loading } = useTickets({
-    pageNumber,
+  const {
+    tickets,
+    hasMore,
+    loading,
+    nextUpdatedAt,
+    nextTicketId,
+    refetch: refetchTickets,
+    fetchSince
+  } = useTickets({
+    nextUpdatedAt: paginationCursor.nextUpdatedAt,
+    nextTicketId: paginationCursor.nextTicketId,
+    isSearch,
     searchParam,
     status,
+    groups,
+    groupMode,
     showAll,
+    contactId,
     tags: JSON.stringify(tags),
     users: JSON.stringify(users),
-    queueIds: JSON.stringify(selectedQueueIds),
+    queueIds: JSON.stringify(selectedQueueIds)
   });
 
   useEffect(() => {
-    const queueIds = queues.map((q) => q.id);
+    const queueIds = queues.map(q => q.id);
     const filteredTickets = tickets.filter(
-      (t) => queueIds.indexOf(t.queueId) > -1
+      t => queueIds.indexOf(t.queueId) > -1
     );
 
-    if (profile === "user") {
+    if (profile === "user" && !groups) {
       dispatch({ type: "LOAD_TICKETS", payload: filteredTickets });
     } else {
       dispatch({ type: "LOAD_TICKETS", payload: tickets });
     }
-  }, [tickets, status, searchParam, queues, profile]);
+  }, [tickets, queues, profile, groups]);
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
     const socket = socketManager.GetSocket(companyId);
 
-    const shouldUpdateTicket = (ticket) =>
-      (!ticket.userId || ticket.userId === user?.id || showAll) &&
-      (!ticket.queueId || selectedQueueIds.indexOf(ticket.queueId) > -1);
+    const shouldUpdateTicket = ticket => {
+      return (
+        (!isSearch || !searchParam) &&
+        (!contactId || ticket.contactId === contactId) &&
+        (!tags?.length ||
+          tags.some(
+            tag =>
+              ticket.tags.some(t => t.id === tag) ||
+              ticket.contact.tags.some(t => t.id === tag)
+          )) &&
+        (!users?.length || users.some(u => u === ticket.userId)) &&
+        (!ticket.userId || ticket.userId === user?.id || showAll) &&
+        (!ticket.queueId || selectedQueueIds.indexOf(ticket.queueId) > -1)
+      );
+    };
 
-    const notBelongsToUserQueues = (ticket) =>
+    const notBelongsToUserQueues = ticket =>
       ticket.queueId && selectedQueueIds.indexOf(ticket.queueId) === -1;
 
     const onConnectTicketList = () => {
-      if (status) {
+      if (groups) {
+        socket.emit("joinNotification");
+      } else if (status) {
         socket.emit("joinTickets", status);
       } else {
         socket.emit("joinNotification");
       }
-    }
-    
-    const onCompanyTicket = (data) => {
+    };
+
+    const onCompanyTicket = data => {
+      if (groups && data.ticket?.isGroup && data.action === "update") {
+        refetchTickets();
+        return;
+      }
       if (data.action === "updateUnread") {
         dispatch({
           type: "RESET_UNREAD",
-          payload: data.ticketId,
+          payload: data.ticketId
         });
       }
 
-      if (data.action === "update" && shouldUpdateTicket(data.ticket) && data.ticket.status === status) {
+      if (
+        data.action === "update" &&
+        data.ticket.status === status &&
+        shouldUpdateTicket(data.ticket)
+      ) {
         dispatch({
           type: "UPDATE_TICKET",
-          payload: data.ticket,
+          payload: data.ticket
+        });
+      }
+
+      if (
+        groups &&
+        data.action === "update" &&
+        data.ticket.isGroup &&
+        shouldUpdateTicket(data.ticket)
+      ) {
+        dispatch({
+          type: "UPDATE_TICKET",
+          payload: data.ticket
         });
       }
 
@@ -243,60 +316,121 @@ const TicketsListCustom = (props) => {
 
       if (data.action === "delete") {
         dispatch({ type: "DELETE_TICKET", payload: data?.ticketId });
-        
       }
 
       if (data.action === "removeFromList") {
         dispatch({ type: "DELETE_TICKET", payload: data.ticketId });
       }
+    };
 
-    }
-    
-    const onCompanyAppMessage = (data) => {
-	  console.log("recebi mensagem", data);
+    const onCompanyAppMessage = data => {
+      if (groups && data.ticket?.isGroup) {
+        refetchTickets();
+        return;
+      }
+      console.debug("appMessage event received", data);
+      if (showTabGroups && !!data.ticket?.isGroup !== !!groups) {
+        return;
+      }
 
-      const queueIds = queues.map((q) => q.id);
+      const queueIds = queues.map(q => q.id);
       if (
         profile === "user" &&
+        !groups &&
         (queueIds.indexOf(data.ticket?.queue?.id) === -1 ||
           data.ticket.queue === null)
       ) {
         return;
       }
 
-      if (data.action === "create" && shouldUpdateTicket(data.ticket) && ( status === undefined || data.ticket.status === status)) {
+      if (
+        data.action === "create" &&
+        (!showTabGroups || !!data.ticket?.isGroup === !!groups) &&
+        shouldUpdateTicket(data.ticket) &&
+        (status === undefined || data.ticket.status === status)
+      ) {
         dispatch({
           type: "UPDATE_TICKET_UNREAD_MESSAGES",
-          payload: data.ticket,
+          payload: data.ticket
         });
       }
-    }
+    };
 
-	const onCompanyContact = (data) => {
+    const onCompanyContact = data => {
       if (data.action === "update") {
         dispatch({
           type: "UPDATE_TICKET_CONTACT",
-          payload: data.contact,
+          payload: data.contact
         });
       }
-    }
-    
-	socketManager.onConnect(onConnectTicketList);
-	
+    };
+
+    socketManager.onConnect(onConnectTicketList);
+
     socket.on(`company-${companyId}-ticket`, onCompanyTicket);
     socket.on(`company-${companyId}-appMessage`, onCompanyAppMessage);
-    socket.on(`company-${companyId}-contact`, onCompanyContact );
+    socket.on(`company-${companyId}-contact`, onCompanyContact);
+    socket.on("wsRefreshRequired", refreshRequired => {
+      if (refreshRequired) {
+        const currentList = ticketsListRef.current;
+        if (currentList.length > 0) {
+          const maxUpdatedAt = currentList.reduce(
+            (max, ticket) => (ticket.updatedAt > max ? ticket.updatedAt : max),
+            currentList[0].updatedAt
+          );
+
+          fetchSince(maxUpdatedAt)
+            .then(newTickets => {
+              newTickets.forEach(ticket => {
+                dispatch({ type: "UPDATE_TICKET", payload: ticket });
+              });
+            })
+            .catch(err => {
+              toastError(err);
+            });
+        } else {
+          dispatch({ type: "RESET" });
+          setPaginationCursor({ nextUpdatedAt: null, nextTicketId: null });
+          refetchTickets();
+        }
+      }
+    });
+
+    socket.on(`company-${companyId}-presence`, data => {
+      dispatch({
+        type: "UPDATE_TICKET_PRESENCE",
+        payload: data
+      });
+    });
 
     return () => {
-      if (status) {
+      if (groups) {
+        socket.emit("leaveNotification");
+      } else if (status) {
         socket.emit("leaveTickets", status);
       } else {
         socket.emit("leaveNotification");
       }
       socket.disconnect();
     };
-    
-  }, [status, showAll, user, selectedQueueIds, tags, users, profile, queues, socketManager]);
+  }, [
+    status,
+    isSearch,
+    searchParam,
+    showAll,
+    groups,
+    groupMode,
+    showTabGroups,
+    user,
+    selectedQueueIds,
+    contactId,
+    tags,
+    users,
+    profile,
+    queues,
+    socketManager,
+    refetchTickets
+  ]);
 
   useEffect(() => {
     if (typeof updateCount === "function") {
@@ -305,13 +439,23 @@ const TicketsListCustom = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticketsList]);
 
-
   const loadMore = () => {
-    setPageNumber((prevState) => prevState + 1);
+    const lastTicket = ticketsList[ticketsList.length - 1];
+    if (!lastTicket) return;
+    if (
+      paginationCursor.nextUpdatedAt === lastTicket.updatedAt &&
+      paginationCursor.nextTicketId === lastTicket.id
+    ) {
+      return;
+    }
+    setPaginationCursor({
+      nextUpdatedAt: lastTicket.updatedAt,
+      nextTicketId: lastTicket.id
+    });
   };
 
-  const handleScroll = (e) => {
-    if (!hasMore || loading) return;
+  const handleScroll = e => {
+    if (loading) return;
 
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
 
@@ -321,35 +465,32 @@ const TicketsListCustom = (props) => {
   };
 
   return (
-    <Paper className={classes.ticketsListWrapper} style={style}>
-      <Paper
-        square
-        name="closed"
-        elevation={0}
-        className={classes.ticketsList}
-        onScroll={handleScroll}
-      >
-        <List style={{ paddingTop: 0 }}>
-          {ticketsList.length === 0 && !loading ? (
-            <div className={classes.noTicketsDiv}>
-              <span className={classes.noTicketsTitle}>
-                {i18n.t("ticketsList.noTicketsTitle")}
-              </span>
-              <p className={classes.noTicketsText}>
-                {i18n.t("ticketsList.noTicketsMessage")}
-              </p>
-            </div>
-          ) : (
-            <>
-              {ticketsList.map((ticket) => (
-                <TicketListItem ticket={ticket} setTabOpen={setTabOpen} key={ticket.id} />
-              ))}
-            </>
-          )}
-          {loading && <TicketsListSkeleton />}
-        </List>
-      </Paper>
-    </Paper>
+    <TicketListSurface style={style} onScroll={handleScroll}>
+      <List style={{ paddingTop: 0 }}>
+        {ticketsList.length === 0 && !loading ? (
+          <div className={classes.noTicketsDiv}>
+            <span className={classes.noTicketsTitle}>
+              {i18n.t("ticketsList.noTicketsTitle")}
+            </span>
+            <p className={classes.noTicketsText}>
+              {i18n.t("ticketsList.noTicketsMessage")}
+            </p>
+          </div>
+        ) : (
+          <>
+            {ticketsList.map(ticket => (
+              <TicketListItem
+                ticket={ticket}
+                setTabOpen={setTabOpen}
+                key={ticket.id}
+                groupActionButtons={!groups || groupMode === "ticket"}
+              />
+            ))}
+          </>
+        )}
+        {loading && <TicketsListSkeleton />}
+      </List>
+    </TicketListSurface>
   );
 };
 

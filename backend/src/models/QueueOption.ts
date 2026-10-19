@@ -9,12 +9,41 @@ import {
   ForeignKey,
   BelongsTo,
   AllowNull,
-  HasMany
+  HasMany,
+  DataType,
+  Default,
+  AfterFind
 } from "sequelize-typescript";
+import { FindOptions, QueryTypes } from "sequelize";
 import Queue from "./Queue";
+
+type TopParentQueueRow = {
+  originId: number;
+  topParentQueueId: number;
+  topParentQueueCompanyId: number;
+  topParentQueueName: string;
+  topParentQueueColor: string;
+};
+
+type TopParentQueueSummary = Pick<Queue, "id" | "companyId" | "name" | "color">;
+
+type QueueOptionFindOptions = FindOptions & {
+  hooks?: boolean;
+  resolveTopParentQueue?: boolean;
+};
 
 @Table
 class QueueOption extends Model<QueueOption> {
+  static withTopParentQueue<T extends QueueOptionFindOptions>(
+    options?: T
+  ): QueueOptionFindOptions {
+    return {
+      ...(options || {}),
+      hooks: true,
+      resolveTopParentQueue: true
+    };
+  }
+
   @PrimaryKey
   @AutoIncrement
   @Column
@@ -27,14 +56,26 @@ class QueueOption extends Model<QueueOption> {
   @Column
   message: string;
 
+  // Tecla que o cliente digita no WhatsApp. E derivada: o backend recalcula
+  // como 1..N entre os irmaos ativos (RenumberSiblingsService). Inativas ficam
+  // com null. Nunca deve ser escrita diretamente pelo frontend.
   @AllowNull
   @Column
   option: string;
 
+  // Posicao entre os irmaos (0..N-1). Fonte da verdade da ordem.
+  @Default(0)
+  @Column
+  order: number;
+
+  @Default(true)
+  @Column
+  isActive: boolean;
+
   @ForeignKey(() => Queue)
   @Column
   queueId: number;
-  
+
   @ForeignKey(() => QueueOption)
   @Column
   parentId: number;
@@ -46,7 +87,7 @@ class QueueOption extends Model<QueueOption> {
 
   @Column
   exitChatbot: boolean;
-  
+
   @CreatedAt
   createdAt: Date;
 
@@ -56,7 +97,7 @@ class QueueOption extends Model<QueueOption> {
   @BelongsTo(() => Queue)
   queue: Queue;
 
-  @BelongsTo(() => QueueOption, { foreignKey: 'parentId' })
+  @BelongsTo(() => QueueOption, { foreignKey: "parentId" })
   parent: QueueOption;
 
   @BelongsTo(() => Queue, { foreignKey: "forwardQueueId" })
@@ -74,6 +115,103 @@ class QueueOption extends Model<QueueOption> {
 
   @Column
   mediaName: string;
+
+  @Column({
+    type: DataType.VIRTUAL,
+    get() {
+      return this.getDataValue("topParentQueueId");
+    }
+  })
+  topParentQueueId: number;
+
+  @Column({
+    type: DataType.VIRTUAL,
+    get() {
+      return this.getDataValue("topParentQueue");
+    }
+  })
+  topParentQueue: TopParentQueueSummary;
+
+  @AfterFind
+  static async resolveTopParentQueue(
+    found: QueueOption | QueueOption[] | null,
+    options?: QueueOptionFindOptions
+  ): Promise<void> {
+    if (!found || !options?.resolveTopParentQueue) {
+      return;
+    }
+
+    const instances = Array.isArray(found) ? found : [found];
+    const queueOptions = instances.filter(
+      item => item && Number.isInteger(item.id)
+    );
+
+    if (!queueOptions.length || !this.sequelize) {
+      return;
+    }
+
+    const ids = queueOptions.map(queueOption => queueOption.id);
+    const rows = await this.sequelize.query<TopParentQueueRow>(
+      `
+      WITH RECURSIVE option_tree AS (
+        SELECT
+          qo.id AS "originId",
+          qo."parentId",
+          qo."queueId",
+          0 AS depth
+        FROM "QueueOptions" qo
+        WHERE qo.id = ANY(ARRAY[:ids]::int[])
+
+        UNION ALL
+
+        SELECT
+          ot."originId",
+          parent."parentId",
+          parent."queueId",
+          ot.depth + 1 AS depth
+        FROM option_tree ot
+        INNER JOIN "QueueOptions" parent ON parent.id = ot."parentId"
+        WHERE ot."queueId" IS NULL
+          AND ot.depth < 100
+      )
+      SELECT DISTINCT ON (ot."originId")
+        ot."originId" AS "originId",
+        q.id AS "topParentQueueId",
+        q."companyId" AS "topParentQueueCompanyId",
+        q.name AS "topParentQueueName",
+        q.color AS "topParentQueueColor"
+      FROM option_tree ot
+      INNER JOIN "Queues" q ON q.id = ot."queueId"
+      ORDER BY ot."originId", ot.depth ASC
+      `,
+      {
+        replacements: { ids },
+        type: QueryTypes.SELECT
+      }
+    );
+
+    const rowsByOriginId = new Map<number, TopParentQueueRow>(
+      rows.map(row => [row.originId, row])
+    );
+
+    queueOptions.forEach(queueOption => {
+      const row = rowsByOriginId.get(queueOption.id);
+
+      if (!row) {
+        queueOption.setDataValue("topParentQueueId", null);
+        queueOption.setDataValue("topParentQueue", null);
+        return;
+      }
+
+      queueOption.setDataValue("topParentQueueId", row.topParentQueueId);
+      queueOption.setDataValue("topParentQueue", {
+        id: row.topParentQueueId,
+        companyId: row.topParentQueueCompanyId,
+        name: row.topParentQueueName,
+        color: row.topParentQueueColor
+      });
+    });
+  }
 }
 
 export default QueueOption;

@@ -11,15 +11,21 @@ import {
   Default,
   HasMany,
   ForeignKey,
-  BelongsTo
+  BelongsTo,
+  BelongsToMany,
+  HasOne
 } from "sequelize-typescript";
 import ContactCustomField from "./ContactCustomField";
 import Ticket from "./Ticket";
 import Company from "./Company";
 import Schedule from "./Schedule";
+import ContactTag from "./ContactTag";
+import Tag from "./Tag";
+import WhatsappLidMap from "./WhatsappLidMap";
+import GroupQueue from "./GroupQueue";
 
 @Table
-class Contact extends Model<Contact> {
+class Contact extends Model {
   @PrimaryKey
   @AutoIncrement
   @Column
@@ -27,6 +33,20 @@ class Contact extends Model<Contact> {
 
   @Column
   name: string;
+
+  @Default(false)
+  @Column
+  nameLocked: boolean;
+
+  @Default("")
+  @Column
+  nickname: string;
+
+  @Column
+  birthdayDay: number;
+
+  @Column
+  birthdayMonth: number;
 
   @AllowNull(false)
   @Unique
@@ -42,6 +62,10 @@ class Contact extends Model<Contact> {
   @Column
   profilePicUrl: string;
 
+  @Default("")
+  @Column
+  profileHiresPictureUrl: string;
+
   @Default("whatsapp")
   @Column
   channel: string;
@@ -49,6 +73,20 @@ class Contact extends Model<Contact> {
   @Default(false)
   @Column
   isGroup: boolean;
+
+  @Column
+  groupMode: "conversation" | "ticket" | null;
+
+  @Default(false)
+  @Column
+  disableBot: boolean;
+
+  @Default("available")
+  @Column
+  presence: string;
+
+  @Column
+  language: string;
 
   @CreatedAt
   createdAt: Date;
@@ -61,6 +99,9 @@ class Contact extends Model<Contact> {
 
   @HasMany(() => ContactCustomField)
   extraInfo: ContactCustomField[];
+
+  @HasOne(() => WhatsappLidMap)
+  whatsappLidMap: WhatsappLidMap;
 
   @ForeignKey(() => Company)
   @Column
@@ -75,6 +116,15 @@ class Contact extends Model<Contact> {
     hooks: true
   })
   schedules: Schedule[];
+
+  @HasMany(() => ContactTag)
+  contactTags: ContactTag[];
+
+  @BelongsToMany(() => Tag, () => ContactTag)
+  tags: Tag[];
+
+  @HasMany(() => GroupQueue)
+  groupQueues: GroupQueue[];
 }
 
 export default Contact;

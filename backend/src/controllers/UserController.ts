@@ -41,7 +41,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     name,
     profile,
     companyId: bodyCompanyId,
-    queueIds
+    queueIds,
+    visibleScreens
   } = req.body;
   let userCompanyId: number | null = null;
 
@@ -53,7 +54,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     requestUser = await User.findByPk(req.user.id);
   }
 
-  const newUserCompanyId = bodyCompanyId || userCompanyId; 
+  const newUserCompanyId = bodyCompanyId || userCompanyId;
 
   if (req.user?.profile !== "admin") {
     throw new AppError("ERR_NO_PERMISSION", 403);
@@ -67,7 +68,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     name,
     profile,
     companyId: newUserCompanyId,
-    queueIds
+    queueIds,
+    visibleScreens
   });
 
   const io = getIO();
@@ -121,6 +123,10 @@ export const remove = async (
     throw new AppError("ERR_NO_PERMISSION", 403);
   }
 
+  if (Number(userId) === 1) {
+    throw new AppError("ERR_FORBIDDEN", 403);
+  }
+
   await DeleteUserService(userId, req.user.id);
 
   const io = getIO();
@@ -135,6 +141,10 @@ export const remove = async (
 export const list = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.query;
   const { companyId: userCompanyId } = req.user;
+
+  if (!req.user.isSuper && companyId && +companyId !== userCompanyId) {
+    throw new AppError("ERR_FORBIDDEN", 403);
+  }
 
   const users = await SimpleListService({
     companyId: companyId ? +companyId : userCompanyId

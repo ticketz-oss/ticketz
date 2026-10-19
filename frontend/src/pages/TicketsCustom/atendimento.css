@@ -1,0 +1,135 @@
+.atendimento-layout {
+  padding-top: 0;
+}
+.atendimento-divisor {
+  width: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.atendimento-divisor:before {
+  content: "";
+  width: 3px;
+  height: 36px;
+  border-radius: 3px;
+  background: rgba(125, 125, 135, 0.18);
+  transition: background 0.15s;
+}
+.atendimento-divisor:hover:before,
+.atendimento-divisor[data-resize-handle-active]:before {
+  background: rgba(125, 125, 135, 0.65);
+}
+.atendimento-vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  max-width: 330px;
+  color: inherit;
+  opacity: 0.6;
+  padding: 20px;
+  font-size: 13px;
+}
+.fila-atendimento {
+  border-radius: 16px !important;
+}
+.fila-status {
+  padding: 12px;
+  border-bottom: 1px solid var(--ew-border);
+}
+.fila-status .ew-tabs {
+  width: 100%;
+  margin: 0;
+  flex-wrap: nowrap;
+}
+.fila-status .ew-tab {
+  flex: 1;
+  justify-content: center;
+  padding: 7px 5px;
+  font-size: 11px;
+  gap: 5px;
+  white-space: nowrap;
+}
+.fila-status .ew-badge {
+  font-size: 10px;
+  padding: 2px 4px;
+}
+.fila-atalhos {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--ew-border);
+}
+.fila-atalhos .ew-button {
+  font-size: 11px;
+  min-height: 28px;
+  padding: 4px 7px;
+}
+.fila-atalhos .ew-button.is-active {
+  color: var(--ew-primary);
+  background: color-mix(in srgb, var(--ew-primary) 8%, var(--ew-surface));
+}
+.fila-pesquisa {
+  display: flex;
+  gap: 7px;
+  padding: 12px 12px 4px;
+}
+.fila-pesquisa .tabela-busca {
+  min-width: 0;
+  padding: 0 9px;
+}
+.fila-pesquisa input {
+  font-size: 11px;
+}
+.fila-pesquisa .ew-button {
+  flex-shrink: 0;
+}
+.fila-atendimento .MuiListItem-root {
+  padding: 14px 14px 14px 18px;
+  border-radius: 0;
+}
+.fila-atendimento .MuiListItemAvatar-root {
+  min-width: 47px;
+}
+.fila-atendimento .MuiAvatar-root {
+  width: 36px;
+  height: 36px;
+  font-size: 12px;
+}
+.fila-atendimento .MuiListItemText-primary {
+  font-size: 13px;
+  font-weight: 600;
+}
+.fila-atendimento .MuiListItemText-secondary {
+  font-size: 12px;
+  line-height: 1.6;
+}
+.fila-atendimento .MuiBadge-badge {
+  font-size: 10px;
+  min-width: 17px;
+  height: 17px;
+}
+
+.fila-opcoes.MuiPaper-root {
+  padding: 4px 12px 8px;
+  min-height: 42px;
+  border-radius: 0;
+  box-shadow: none;
+  border-bottom: 1px solid var(--ew-border);
+}
+.fila-opcoes .MuiFormControlLabel-root {
+  margin: 0;
+}
+.fila-opcoes .MuiFormControlLabel-label {
+  font-size: 11px;
+}
+.fila-opcoes .MuiInputBase-root {
+  font-size: 11px;
+}
+.fila-opcoes .MuiSelect-select {
+  padding: 8px 30px 8px 10px;
+}
+.fila-atendimento .MuiPaper-root {
+  box-shadow: none;
+}

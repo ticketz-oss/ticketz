@@ -1,14 +1,25 @@
 import Contact from "../../models/Contact";
 import AppError from "../../errors/AppError";
+import Company from "../../models/Company";
 
 const ShowContactService = async (
   id: string | number,
-  companyId: number
+  companyId?: number
 ): Promise<Contact> => {
-  const contact = await Contact.findByPk(id, { include: ["extraInfo"] });
+  const contact = await Contact.findByPk(id, {
+    include: [
+      "tags",
+      "extraInfo",
+      {
+        model: Company,
+        as: "company",
+        attributes: ["id", "language"]
+      }
+    ]
+  });
 
-  if (contact?.companyId !== companyId) {
-    throw new AppError("Não é possível excluir registro de outra empresa");
+  if (companyId && contact?.companyId !== companyId) {
+    throw new AppError("ERR_FORBIDDEN", 403);
   }
 
   if (!contact) {

@@ -1,0 +1,143 @@
+:root {
+  color-scheme: light dark;
+  --paper: #fff;
+  --bg: #fffaf5;
+  --ink: #24211f;
+  --muted: #635b54;
+  --line: #ebdfd3;
+  --brand: #b94700;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font:
+    17px/1.75 system-ui,
+    sans-serif;
+}
+a {
+  color: var(--brand);
+  text-underline-offset: 0.2em;
+  overflow-wrap: anywhere;
+}
+a:focus-visible {
+  outline: 3px solid #ff8000;
+  outline-offset: 4px;
+}
+header,
+main,
+footer {
+  width: min(850px, calc(100% - 40px));
+  margin: auto;
+}
+header {
+  padding: 32px 0;
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.brand {
+  font-size: 22px;
+  font-weight: 750;
+  text-decoration: none;
+  color: var(--ink);
+}
+.brand span {
+  color: var(--brand);
+}
+nav {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  font-size: 14px;
+}
+main {
+  background: var(--paper);
+  padding: clamp(24px, 5vw, 56px);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+}
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--brand);
+  font-size: 12px;
+  font-weight: 750;
+}
+h1 {
+  font-size: clamp(32px, 6vw, 48px);
+  line-height: 1.15;
+  letter-spacing: -0.045em;
+  margin: 16px 0;
+}
+h2 {
+  font-size: 22px;
+  line-height: 1.4;
+  margin: 40px 0 12px;
+}
+p,
+ul {
+  margin: 12px 0;
+}
+li {
+  margin-bottom: 8px;
+}
+.meta {
+  color: var(--muted);
+  font-size: 14px;
+}
+.summary {
+  padding: 18px 22px;
+  background: var(--bg);
+  border-left: 3px solid #ff8000;
+  border-radius: 0 12px 12px 0;
+  margin: 28px 0;
+}
+footer {
+  padding: 28px 0 44px;
+  color: var(--muted);
+  font-size: 14px;
+}
+.skip {
+  position: absolute;
+  top: -100px;
+  left: 20px;
+  background: var(--paper);
+  padding: 12px;
+}
+.skip:focus {
+  top: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #211e1b;
+    --bg: #171513;
+    --ink: #faf5ef;
+    --muted: #c5b9ad;
+    --line: #40382f;
+    --brand: #ffac68;
+  }
+}
+@media print {
+  :root {
+    --paper: #fff;
+    --bg: #fff;
+    --ink: #000;
+    --muted: #333;
+    --line: #ccc;
+    --brand: #000;
+  }
+  header nav,
+  .skip {
+    display: none;
+  }
+  main {
+    border: 0;
+    padding: 0;
+  }
+}

@@ -1,4 +1,5 @@
 import { WhereOptions } from "sequelize/types";
+import { literal } from "sequelize";
 import QueueOption from "../../models/QueueOption";
 
 type QueueOptionFilter = {
@@ -7,8 +8,11 @@ type QueueOptionFilter = {
   parentId: number;
 };
 
-const ListService = async ({ queueId, queueOptionId, parentId }: QueueOptionFilter): Promise<QueueOption[]> => {
-
+const ListService = async ({
+  queueId,
+  queueOptionId,
+  parentId
+}: QueueOptionFilter): Promise<QueueOption[]> => {
   const whereOptions: WhereOptions = {};
 
   if (queueId) {
@@ -29,7 +33,23 @@ const ListService = async ({ queueId, queueOptionId, parentId }: QueueOptionFilt
 
   const queueOptions = await QueueOption.findAll({
     where: whereOptions,
-    order: [["id", "ASC"]]
+    // O editor navega um nivel por vez: precisa saber quantas respostas cada
+    // opcao tem para mostrar o atalho de entrar na ramificacao.
+    attributes: {
+      include: [
+        [
+          literal(
+            `(SELECT COUNT(*)::int FROM "QueueOptions" AS child
+              WHERE child."parentId" = "QueueOption"."id")`
+          ),
+          "childrenCount"
+        ]
+      ]
+    },
+    order: [
+      ["order", "ASC"],
+      ["id", "ASC"]
+    ]
   });
 
   return queueOptions;

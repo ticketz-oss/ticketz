@@ -13,18 +13,20 @@ import Title from "../../components/Title";
 import SubscriptionModal from "../../components/SubscriptionModal";
 import api from "../../services/api";
 import TableRowSkeleton from "../../components/TableRowSkeleton";
-
+import { safeValueFormat } from "../../helpers/safeValueFormat";
 import toastError from "../../errors/toastError";
 
 import moment from "moment";
+import { Chip, Typography } from "@material-ui/core";
+import { i18n } from "../../translate/i18n";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_INVOICES") {
     const invoices = action.payload;
     const newUsers = [];
 
-    invoices.forEach((user) => {
-      const userIndex = state.findIndex((u) => u.id === user.id);
+    invoices.forEach(user => {
+      const userIndex = state.findIndex(u => u.id === user.id);
       if (userIndex !== -1) {
         state[userIndex] = user;
       } else {
@@ -37,7 +39,7 @@ const reducer = (state, action) => {
 
   if (action.type === "UPDATE_USERS") {
     const user = action.payload;
-    const userIndex = state.findIndex((u) => u.id === user.id);
+    const userIndex = state.findIndex(u => u.id === user.id);
 
     if (userIndex !== -1) {
       state[userIndex] = user;
@@ -50,7 +52,7 @@ const reducer = (state, action) => {
   if (action.type === "DELETE_USER") {
     const userId = action.payload;
 
-    const userIndex = state.findIndex((u) => u.id === userId);
+    const userIndex = state.findIndex(u => u.id === userId);
     if (userIndex !== -1) {
       state.splice(userIndex, 1);
     }
@@ -62,13 +64,13 @@ const reducer = (state, action) => {
   }
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   mainPaper: {
     flex: 1,
     padding: theme.spacing(1),
     overflowY: "scroll",
-    ...theme.scrollbarStyles,
-  },
+    ...theme.scrollbarStyles
+  }
 }));
 
 const Invoices = () => {
@@ -77,19 +79,17 @@ const Invoices = () => {
   const [loading, setLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
   const [hasMore, setHasMore] = useState(false);
-  const [searchParam, ] = useState("");
+  const [searchParam] = useState("");
   const [invoices, dispatch] = useReducer(reducer, []);
   const [storagePlans, setStoragePlans] = React.useState([]);
   const [selectedContactId, setSelectedContactId] = useState(null);
   const [contactModalOpen, setContactModalOpen] = useState(false);
 
-
-  const handleOpenContactModal = (invoices) => {
+  const handleOpenContactModal = invoices => {
     setStoragePlans(invoices);
     setSelectedContactId(null);
     setContactModalOpen(true);
   };
-
 
   const handleCloseContactModal = () => {
     setSelectedContactId(null);
@@ -106,7 +106,7 @@ const Invoices = () => {
       const fetchInvoices = async () => {
         try {
           const { data } = await api.get("/invoices/all", {
-            params: { searchParam, pageNumber },
+            params: { searchParam, pageNumber }
           });
           dispatch({ type: "LOAD_INVOICES", payload: data });
           setHasMore(data.hasMore);
@@ -120,33 +120,36 @@ const Invoices = () => {
     return () => clearTimeout(delayDebounceFn);
   }, [searchParam, pageNumber]);
 
-
   const loadMore = () => {
-    setPageNumber((prevState) => prevState + 1);
+    setPageNumber(prevState => prevState + 1);
   };
 
-  const handleScroll = (e) => {
+  const handleScroll = e => {
     if (!hasMore || loading) return;
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
     if (scrollHeight - (scrollTop + 100) < clientHeight) {
       loadMore();
     }
   };
-  const rowStyle = (record) => {
+  const rowStyle = record => {
     const hoje = moment(moment()).format("DD/MM/yyyy");
     const vencimento = moment(record.dueDate).format("DD/MM/yyyy");
-    var diff = moment(vencimento, "DD/MM/yyyy").diff(moment(hoje, "DD/MM/yyyy"));
-    var dias = moment.duration(diff).asDays();    
+    var diff = moment(vencimento, "DD/MM/yyyy").diff(
+      moment(hoje, "DD/MM/yyyy")
+    );
+    var dias = moment.duration(diff).asDays();
     if (dias < 0 && record.status !== "paid") {
       return { backgroundColor: "#ffbcbc9c" };
     }
   };
 
-  const rowStatus = (record) => {
+  const rowStatus = record => {
     const hoje = moment(moment()).format("DD/MM/yyyy");
     const vencimento = moment(record.dueDate).format("DD/MM/yyyy");
-    var diff = moment(vencimento, "DD/MM/yyyy").diff(moment(hoje, "DD/MM/yyyy"));
-    var dias = moment.duration(diff).asDays();    
+    var diff = moment(vencimento, "DD/MM/yyyy").diff(
+      moment(hoje, "DD/MM/yyyy")
+    );
+    var dias = moment.duration(diff).asDays();
     const status = record.status;
     if (status === "paid") {
       return "Pago";
@@ -154,20 +157,18 @@ const Invoices = () => {
     if (dias < 0) {
       return "Vencido";
     } else {
-      return "Em Aberto"
+      return "Em Aberto";
     }
-
-  }
+  };
 
   return (
-    <MainContainer>
+    <MainContainer className="sd-business sd-finance">
       <SubscriptionModal
         open={contactModalOpen}
         onClose={handleCloseContactModal}
         aria-labelledby="form-dialog-title"
         Invoice={storagePlans}
         contactId={selectedContactId}
-
       ></SubscriptionModal>
       <MainHeader>
         <Title>Faturas</Title>
@@ -190,15 +191,49 @@ const Invoices = () => {
           </TableHead>
           <TableBody>
             <>
-              {invoices.map((invoices) => (
+              {invoices.map(invoices => (
                 <TableRow style={rowStyle(invoices)} key={invoices.id}>
                   <TableCell align="center">{invoices.id}</TableCell>
-                  <TableCell align="center">{invoices.detail}</TableCell>
-                  <TableCell style={{ fontWeight: 'bold' }} align="center">{invoices.value.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</TableCell>
-                  <TableCell align="center">{moment(invoices.dueDate).format("DD/MM/YYYY")}</TableCell>
-                  <TableCell style={{ fontWeight: 'bold' }} align="center">{rowStatus(invoices)}</TableCell>
                   <TableCell align="center">
-                    {rowStatus(invoices) !== "Pago" ?
+                    {invoices.detail}
+                    {invoices.billingType === "initial_prorata" && (
+                      <>
+                        <Chip
+                          size="small"
+                          color="primary"
+                          label={i18n.t("billing.prorata")}
+                          style={{ marginLeft: 8 }}
+                        />
+                        {invoices.periodStart && invoices.periodEnd && (
+                          <Typography variant="caption" display="block">
+                            {i18n.t("billing.period", {
+                              start: moment(invoices.periodStart).format("L"),
+                              end: moment(invoices.periodEnd)
+                                .subtract(1, "day")
+                                .format("L")
+                            })}
+                          </Typography>
+                        )}
+                      </>
+                    )}
+                  </TableCell>
+                  <TableCell
+                    className="sd-ledger-amount"
+                    style={{ fontWeight: "bold" }}
+                    align="center"
+                  >
+                    {safeValueFormat(invoices.value, invoices.currency)}
+                  </TableCell>
+                  <TableCell align="center">
+                    {moment(invoices.dueDate)
+                      .locale(navigator.language)
+                      .format("L")}
+                  </TableCell>
+                  <TableCell style={{ fontWeight: "bold" }} align="center">
+                    {rowStatus(invoices)}
+                  </TableCell>
+                  <TableCell align="center">
+                    {rowStatus(invoices) !== "Pago" ? (
                       <Button
                         size="small"
                         variant="outlined"
@@ -206,16 +241,17 @@ const Invoices = () => {
                         onClick={() => handleOpenContactModal(invoices)}
                       >
                         PAGAR
-                      </Button> :
+                      </Button>
+                    ) : (
                       <Button
                         size="small"
-                        variant="outlined" 
+                        variant="outlined"
                         /* color="secondary"
                         disabled */
                       >
-                        PAGO 
-                      </Button>}
-
+                        PAGO
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

@@ -6,6 +6,7 @@ import fs from "fs";
 import path from "path";
 
 import ListService from "../services/AnnouncementService/ListService";
+import ListForUserService from "../services/AnnouncementService/ListForUserService";
 import CreateService from "../services/AnnouncementService/CreateService";
 import ShowService from "../services/AnnouncementService/ShowService";
 import UpdateService from "../services/AnnouncementService/UpdateService";
@@ -19,7 +20,10 @@ import AppError from "../errors/AppError";
 type IndexQuery = {
   searchParam: string;
   pageNumber: string;
-  companyId: string | number;
+  status: string;
+  priority: string;
+  periodFrom: string;
+  periodTo: string;
 };
 
 type StoreData = {
@@ -28,6 +32,14 @@ type StoreData = {
   text: string;
   status: boolean;
   companyId: number;
+  isGlobal?: boolean;
+  startsAt?: string;
+  endsAt?: string;
+  audienceMode?: "ALL" | "SEGMENTED";
+  profiles?: string[];
+  userIds?: number[];
+  queueIds?: number[];
+  whatsappIds?: number[];
   mediaPath?: string;
   mediaName?: string;
 };
@@ -36,11 +48,74 @@ type FindParams = {
   companyId: string;
 };
 
+/**
+ * Announcements are now company scoped, so the notification must not carry the
+ * record to every tenant. Clients receive only the signal and refetch, which
+ * also keeps the per-user audience resolution on the server where it belongs.
+ */
+const notify = (record: Announcement, action: string): void => {
+  const io = getIO();
+  const payload = { action, id: String(record.id) };
+
+  if (record.isGlobal) {
+    io.emit("company-announcement", payload);
+    return;
+  }
+
+  io.to(`company-${record.companyId}-mainchannel`).emit(
+    "company-announcement",
+    payload
+  );
+};
+
+/**
+ * An announcement can only be touched by a super user or by an admin of the
+ * company that owns it — company scoping is not enforced by the route alone.
+ */
+const findManageable = async (
+  id: string,
+  req: Request
+): Promise<Announcement> => {
+  const record = await Announcement.findByPk(id);
+
+  if (!record) {
+    throw new AppError("ERR_NO_ANNOUNCEMENT_FOUND", 404);
+  }
+
+  if (record.companyId !== req.user.companyId && !req.user.isSuper) {
+    throw new AppError("ERR_NO_PERMISSION", 403);
+  }
+
+  return record;
+};
+
 export const index = async (req: Request, res: Response): Promise<Response> => {
-  const { searchParam, pageNumber } = req.query as IndexQuery;
+  const { searchParam, pageNumber, status, priority, periodFrom, periodTo } =
+    req.query as IndexQuery;
+  const { companyId } = req.user;
 
   const { records, count, hasMore } = await ListService({
+    companyId: +companyId,
+    isSuper: req.user.isSuper,
     searchParam,
+    pageNumber,
+    status,
+    priority,
+    periodFrom,
+    periodTo
+  });
+
+  return res.json({ records, count, hasMore });
+};
+
+export const feed = async (req: Request, res: Response): Promise<Response> => {
+  const { companyId, id, profile } = req.user;
+  const { pageNumber } = req.query as { pageNumber: string };
+
+  const { records, count, hasMore } = await ListForUserService({
+    companyId: +companyId,
+    userId: +id,
+    profile,
     pageNumber
   });
 
@@ -63,20 +138,19 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   const record = await CreateService({
     ...data,
-    companyId
+    isGlobal: req.user.isSuper ? !!data.isGlobal : false,
+    companyId: +companyId
   });
 
-  const io = getIO();
-  io.emit(`company-announcement`, {
-    action: "create",
-    record
-  });
+  notify(record, "create");
 
   return res.status(200).json(record);
 };
 
 export const show = async (req: Request, res: Response): Promise<Response> => {
   const { id } = req.params;
+
+  await findManageable(id, req);
 
   const record = await ShowService(id);
 
@@ -101,16 +175,16 @@ export const update = async (
 
   const { id } = req.params;
 
+  const current = await findManageable(id, req);
+
   const record = await UpdateService({
     ...data,
-    id: parseInt(id, 10)
+    isGlobal: req.user.isSuper ? !!data.isGlobal : current.isGlobal,
+    id: parseInt(id, 10),
+    companyId: current.companyId
   });
 
-  const io = getIO();
-  io.emit(`company-announcement`, {
-    action: "update",
-    record
-  });
+  notify(record, "update");
 
   return res.status(200).json(record);
 };
@@ -120,15 +194,12 @@ export const remove = async (
   res: Response
 ): Promise<Response> => {
   const { id } = req.params;
-  const { companyId } = req.user;
+
+  const current = await findManageable(id, req);
 
   await DeleteService(id);
 
-  const io = getIO();
-  io.emit(`company-${companyId}-announcement`, {
-    action: "delete",
-    id
-  });
+  notify(current, "delete");
 
   return res.status(200).json({ message: "Announcement deleted" });
 };
@@ -151,20 +222,16 @@ export const mediaUpload = async (
   const files = req.files as Express.Multer.File[];
   const file = head(files);
 
-  try {
-    const announcement = await Announcement.findByPk(id);
+  const announcement = await findManageable(id, req);
 
+  try {
     await announcement.update({
       mediaPath: file.filename,
       mediaName: file.originalname
     });
     await announcement.reload();
 
-    const io = getIO();
-    io.emit(`company-announcement`, {
-      action: "update",
-      record: announcement
-    });
+    notify(announcement, "update");
 
     return res.send({ mensagem: "Mensagem enviada" });
   } catch (err: any) {
@@ -178,12 +245,15 @@ export const deleteMedia = async (
 ): Promise<Response> => {
   const { id } = req.params;
 
+  const announcement = await findManageable(id, req);
+
   try {
-    const announcement = await Announcement.findByPk(id);
-    const filePath = path.resolve("public", announcement.mediaPath);
-    const fileExists = fs.existsSync(filePath);
-    if (fileExists) {
-      fs.unlinkSync(filePath);
+    if (announcement.mediaPath) {
+      const filePath = path.resolve("public", announcement.mediaPath);
+      const fileExists = fs.existsSync(filePath);
+      if (fileExists) {
+        fs.unlinkSync(filePath);
+      }
     }
 
     await announcement.update({
@@ -192,11 +262,7 @@ export const deleteMedia = async (
     });
     await announcement.reload();
 
-    const io = getIO();
-    io.emit(`company-announcement`, {
-      action: "update",
-      record: announcement
-    });
+    notify(announcement, "update");
 
     return res.send({ mensagem: "Arquivo excluído" });
   } catch (err: any) {

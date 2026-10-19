@@ -3,9 +3,10 @@ import React, {
   useEffect,
   useReducer,
   useRef,
-  useState,
+  useState
 } from "react";
 import { makeStyles } from "@material-ui/core/styles";
+import { useTheme } from "@material-ui/core/styles";
 import toastError from "../../errors/toastError";
 import Popover from "@material-ui/core/Popover";
 import ForumIcon from "@material-ui/icons/Forum";
@@ -16,7 +17,7 @@ import {
   ListItem,
   ListItemText,
   Paper,
-  Typography,
+  Typography
 } from "@material-ui/core";
 import api from "../../services/api";
 import { isArray } from "lodash";
@@ -26,16 +27,17 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 
 import notifySound from "../../assets/chat_notify.mp3";
 import useSound from "use-sound";
+import { i18n } from "../../translate/i18n";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   mainPaper: {
     flex: 1,
     maxHeight: 300,
     maxWidth: 500,
     padding: theme.spacing(1),
     overflowY: "scroll",
-    ...theme.scrollbarStyles,
-  },
+    ...theme.scrollbarStyles
+  }
 }));
 
 const reducer = (state, action) => {
@@ -44,8 +46,8 @@ const reducer = (state, action) => {
     const newChats = [];
 
     if (isArray(chats)) {
-      chats.forEach((chat) => {
-        const chatIndex = state.findIndex((u) => u.id === chat.id);
+      chats.forEach(chat => {
+        const chatIndex = state.findIndex(u => u.id === chat.id);
         if (chatIndex !== -1) {
           state[chatIndex] = chat;
         } else {
@@ -59,7 +61,7 @@ const reducer = (state, action) => {
 
   if (action.type === "UPDATE_CHATS") {
     const chat = action.payload;
-    const chatIndex = state.findIndex((u) => u.id === chat.id);
+    const chatIndex = state.findIndex(u => u.id === chat.id);
 
     if (chatIndex !== -1) {
       state[chatIndex] = chat;
@@ -72,7 +74,7 @@ const reducer = (state, action) => {
   if (action.type === "DELETE_CHAT") {
     const chatId = action.payload;
 
-    const chatIndex = state.findIndex((u) => u.id === chatId);
+    const chatIndex = state.findIndex(u => u.id === chatId);
     if (chatIndex !== -1) {
       state.splice(chatIndex, 1);
     }
@@ -84,7 +86,7 @@ const reducer = (state, action) => {
   }
 
   if (action.type === "CHANGE_CHAT") {
-    const changedChats = state.map((chat) => {
+    const changedChats = state.map(chat => {
       if (chat.id === action.payload.chat.id) {
         return action.payload.chat;
       }
@@ -96,6 +98,7 @@ const reducer = (state, action) => {
 
 export default function ChatPopover() {
   const classes = useStyles();
+  const theme = useTheme();
 
   const { user } = useContext(AuthContext);
 
@@ -140,18 +143,17 @@ export default function ChatPopover() {
     const companyId = localStorage.getItem("companyId");
     const socket = socketManager.GetSocket(companyId);
 
-    const onCompanyChatPopover = (data) => {
+    const onCompanyChatPopover = data => {
       if (data.action === "new-message") {
         dispatch({ type: "CHANGE_CHAT", payload: data });
         if (data.newMessage.senderId !== user.id) {
-        
           soundAlertRef.current();
         }
       }
       if (data.action === "update") {
         dispatch({ type: "CHANGE_CHAT", payload: data });
       }
-    }
+    };
 
     socket.on(`company-${companyId}-chat`, onCompanyChatPopover);
 
@@ -182,7 +184,7 @@ export default function ChatPopover() {
   const fetchChats = async () => {
     try {
       const { data } = await api.get("/chats/", {
-        params: { searchParam, pageNumber },
+        params: { searchParam, pageNumber }
       });
       dispatch({ type: "LOAD_CHATS", payload: data.records });
       setHasMore(data.hasMore);
@@ -193,10 +195,10 @@ export default function ChatPopover() {
   };
 
   const loadMore = () => {
-    setPageNumber((prevState) => prevState + 1);
+    setPageNumber(prevState => prevState + 1);
   };
 
-  const handleScroll = (e) => {
+  const handleScroll = e => {
     if (!hasMore || loading) return;
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
     if (scrollHeight - (scrollTop + 100) < clientHeight) {
@@ -204,7 +206,7 @@ export default function ChatPopover() {
     }
   };
 
-  const handleClick = (event) => {
+  const handleClick = event => {
     setAnchorEl(event.currentTarget);
     setInvisible(true);
   };
@@ -213,7 +215,7 @@ export default function ChatPopover() {
     setAnchorEl(null);
   };
 
-  const goToMessages = (chat) => {
+  const goToMessages = chat => {
     window.location.href = `/chats/${chat.uuid}`;
   };
 
@@ -228,8 +230,13 @@ export default function ChatPopover() {
         color={invisible ? "default" : "inherit"}
         onClick={handleClick}
       >
-        <Badge color="secondary" variant="dot" invisible={invisible}>
-          <ForumIcon style={{ color: "white" }} />
+        <Badge
+          color="secondary"
+          variant="dot"
+          overlap="rectangular"
+          invisible={invisible}
+        >
+          <ForumIcon style={{ color: theme.palette.text.secondary }} />
         </Badge>
       </IconButton>
       <Popover
@@ -239,11 +246,11 @@ export default function ChatPopover() {
         onClose={handleClose}
         anchorOrigin={{
           vertical: "bottom",
-          horizontal: "center",
+          horizontal: "center"
         }}
         transformOrigin={{
           vertical: "top",
-          horizontal: "center",
+          horizontal: "center"
         }}
       >
         <Paper
@@ -262,7 +269,7 @@ export default function ChatPopover() {
                   key={key}
                   style={{
                     border: "1px solid #eee",
-                    cursor: "pointer",
+                    cursor: "pointer"
                   }}
                   onClick={() => goToMessages(item)}
                   button
@@ -281,7 +288,9 @@ export default function ChatPopover() {
                 </ListItem>
               ))}
             {isArray(chats) && chats.length === 0 && (
-              <ListItemText primary="Nenhum registro" />
+              <ListItemText
+                primary={i18n.t("tickets.notification.nomessages")}
+              />
             )}
           </List>
         </Paper>

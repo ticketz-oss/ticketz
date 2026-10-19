@@ -10,6 +10,7 @@ import ShowTicketNoteService from "../services/TicketNoteService/ShowTicketNoteS
 import FindAllTicketNotesService from "../services/TicketNoteService/FindAllTicketNotesService";
 import DeleteTicketNoteService from "../services/TicketNoteService/DeleteTicketNoteService";
 import FindNotesByContactIdAndTicketId from "../services/TicketNoteService/FindNotesByContactIdAndTicketId";
+import ShowTicketService from "../services/TicketServices/ShowTicketService";
 
 type IndexQuery = {
   searchParam: string;
@@ -18,10 +19,7 @@ type IndexQuery = {
 
 type StoreTicketNoteData = {
   note: string;
-  userId: number;
-  contactId: number | 0;
-  ticketId: number | 0;
-  id?: number | string;
+  ticketId: number;
 };
 
 type UpdateTicketNoteData = {
@@ -33,16 +31,29 @@ type UpdateTicketNoteData = {
 };
 
 type QueryFilteredNotes = {
-  contactId: number | string;
   ticketId: number | string;
+  scope?: string;
+};
+
+const authorizedNote = async (
+  id: string,
+  companyId: number
+): Promise<TicketNote> => {
+  const note = await ShowTicketNoteService(id);
+  await ShowTicketService(note.ticketId, companyId);
+  return note;
 };
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
+  if (req.user.profile !== "admin") {
+    throw new AppError("ERR_NO_PERMISSION", 403);
+  }
   const { searchParam, pageNumber } = req.query as IndexQuery;
 
   const { ticketNotes, count, hasMore } = await ListTicketNotesService({
     searchParam,
-    pageNumber
+    pageNumber,
+    companyId: req.user.companyId
   });
 
   return res.json({ ticketNotes, count, hasMore });
@@ -56,10 +67,11 @@ export const list = async (req: Request, res: Response): Promise<Response> => {
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const newTicketNote: StoreTicketNoteData = req.body;
-  const { id: userId } = req.user;
+  const { id: userId, companyId } = req.user;
 
   const schema = Yup.object().shape({
-    note: Yup.string().required()
+    note: Yup.string().required(),
+    ticketId: Yup.number().integer().positive().required()
   });
 
   try {
@@ -68,8 +80,11 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     throw new AppError(err.message);
   }
 
+  const ticket = await ShowTicketService(newTicketNote.ticketId, companyId);
   const ticketNote = await CreateTicketNoteService({
-    ...newTicketNote,
+    note: newTicketNote.note,
+    ticketId: ticket.id,
+    contactId: ticket.contactId,
     userId: Number.parseInt(userId, 10)
   });
 
@@ -79,7 +94,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 export const show = async (req: Request, res: Response): Promise<Response> => {
   const { id } = req.params;
 
-  const ticketNote = await ShowTicketNoteService(id);
+  const ticketNote = await authorizedNote(id, req.user.companyId);
 
   return res.status(200).json(ticketNote);
 };
@@ -88,7 +103,12 @@ export const update = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
+  if (req.user.profile !== "admin") {
+    throw new AppError("ERR_NO_PERMISSION", 403);
+  }
   const ticketNote: UpdateTicketNoteData = req.body;
+  const { id } = req.params;
+  await authorizedNote(id, req.user.companyId);
 
   const schema = Yup.object().shape({
     note: Yup.string()
@@ -100,7 +120,10 @@ export const update = async (
     throw new AppError(err.message);
   }
 
-  const recordUpdated = await UpdateTicketNoteService(ticketNote);
+  const recordUpdated = await UpdateTicketNoteService({
+    id,
+    note: ticketNote.note
+  });
 
   return res.status(200).json(recordUpdated);
 };
@@ -115,6 +138,7 @@ export const remove = async (
     throw new AppError("ERR_NO_PERMISSION", 403);
   }
 
+  await authorizedNote(id, req.user.companyId);
   await DeleteTicketNoteService(id);
 
   return res.status(200).json({ message: "Observação removida" });
@@ -124,15 +148,15 @@ export const findFilteredList = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  try {
-    const { contactId, ticketId } = req.query as QueryFilteredNotes;
-    const notes: TicketNote[] = await FindNotesByContactIdAndTicketId({
-      contactId,
-      ticketId
-    });
+  const { ticketId, scope } = req.query as QueryFilteredNotes;
+  if (!ticketId) throw new AppError("ERR_NO_TICKET_FOUND", 400);
 
-    return res.status(200).json(notes);
-  } catch (e) {
-    return res.status(500).json({ message: e });
-  }
+  const ticket = await ShowTicketService(ticketId, req.user.companyId);
+  const notes: TicketNote[] = await FindNotesByContactIdAndTicketId({
+    contactId: ticket.contactId,
+    companyId: req.user.companyId,
+    ticketId: scope === "contact" ? undefined : ticket.id
+  });
+
+  return res.status(200).json(notes);
 };

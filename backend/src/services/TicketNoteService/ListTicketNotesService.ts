@@ -1,9 +1,11 @@
 import { Sequelize, Op } from "sequelize";
 import TicketNote from "../../models/TicketNote";
+import Ticket from "../../models/Ticket";
 
 interface Request {
   searchParam?: string;
   pageNumber?: string;
+  companyId: number;
 }
 
 interface Response {
@@ -14,7 +16,8 @@ interface Response {
 
 const ListTicketNotesService = async ({
   searchParam = "",
-  pageNumber = "1"
+  pageNumber = "1",
+  companyId
 }: Request): Promise<Response> => {
   const whereCondition = {
     [Op.or]: [
@@ -32,6 +35,15 @@ const ListTicketNotesService = async ({
 
   const { count, rows: ticketNotes } = await TicketNote.findAndCountAll({
     where: whereCondition,
+    include: [
+      {
+        model: Ticket,
+        as: "ticket",
+        where: { companyId },
+        required: true,
+        attributes: ["id", "status", "createdAt"]
+      }
+    ],
     limit,
     offset,
     order: [["createdAt", "DESC"]]

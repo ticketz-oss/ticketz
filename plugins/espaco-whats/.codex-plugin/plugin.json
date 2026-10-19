@@ -1,0 +1,41 @@
+{
+  "name": "espaco-whats",
+  "version": "1.0.0",
+  "description": "Conecte o ChatGPT ao Espaço Whats para consultar atendimentos, analisar relatórios e gerenciar respostas rápidas e agendamentos.",
+  "author": {
+    "name": "Espaço Whats",
+    "url": "https://espacowhats.com.br"
+  },
+  "homepage": "https://espacowhats.com.br/chatgpt",
+  "repository": "https://github.com/GuiZeroUm/ticketz",
+  "license": "AGPL-3.0-only",
+  "keywords": [
+    "whatsapp",
+    "atendimento",
+    "crm",
+    "chatgpt",
+    "mcp"
+  ],
+  "apps": "./.app.json",
+  "interface": {
+    "displayName": "Espaço Whats",
+    "shortDescription": "Atendimento, relatórios e agendamentos no ChatGPT.",
+    "longDescription": "Consulte conversas, contatos e métricas do Espaço Whats e, com sua confirmação, gerencie respostas rápidas e agendamentos pelo ChatGPT.",
+    "developerName": "Espaço Whats",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://espacowhats.com.br",
+    "defaultPrompt": [
+      "Resuma os atendimentos de hoje.",
+      "Mostre as métricas dos atendentes nesta semana.",
+      "Ajude-me a criar um agendamento de aniversário."
+    ],
+    "brandColor": "#FF6B00",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/logo.png",
+    "logoDark": "./assets/logo-dark.png"
+  }
+}

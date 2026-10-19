@@ -27,12 +27,20 @@ const UpdateService = async (data: Data): Promise<ContactListItem> => {
 
   try {
     const response = await CheckContactNumber(record.number, record.companyId);
-    record.isWhatsappValid = response.exists;
-    const number = response.jid.replace(/\D/g, "");
-    record.number = number;
+    // Conexao oficial nao verifica numero: sem resposta o contato fica
+    // valido e nao verificado, em vez de ser marcado invalido.
+    record.isWhatsappValid = response ? response.exists : true;
+    if (response) {
+      record.number = response.jid.replace(/\D/g, "");
+    }
     await record.save();
-  } catch (e) {
-    logger.error(`Número de contato inválido: ${record.number}`);
+  } catch (error) {
+    // A falha pode ser da conexao, nao do numero - a mensagem antiga
+    // culpava o contato e mandava investigar o lugar errado.
+    logger.error(
+      { error, number: record.number },
+      "Could not verify contact number"
+    );
   }
 
   return record;

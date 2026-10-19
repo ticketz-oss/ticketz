@@ -1,0 +1,530 @@
+/* ------------------------------------------------------------------ */
+/* First-login welcome, drawn as a manga panel starring Luiza.          */
+/* Paper and ink stay the same in light and dark mode, like a printed   */
+/* page; the company's brand color is the only accent.                  */
+/* ------------------------------------------------------------------ */
+.ew-dialog.ew-dialog--manga {
+  --ew-manga-tinta: #15171c;
+  --ew-manga-papel: #ffffff;
+  width: min(640px, calc(100vw - 24px));
+  padding: 14px;
+  overflow: visible;
+  border: 0;
+  border-radius: 18px;
+  background: var(--ew-surface);
+  box-shadow: 0 30px 90px #00000052;
+}
+.ew-manga {
+  display: grid;
+  gap: 14px;
+}
+
+/* The panel: thick ink frame on screentone paper. */
+.ew-manga-painel {
+  position: relative;
+  height: 270px;
+  overflow: hidden;
+  border: 3px solid var(--ew-manga-tinta);
+  border-radius: 6px;
+  background-color: var(--ew-manga-papel);
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--ew-manga-tinta) 13%, transparent) 1.1px,
+    transparent 1.4px
+  );
+  background-size: 7px 7px;
+  color: var(--ew-manga-tinta);
+}
+.ew-manga[data-fase="convite"] .ew-manga-painel {
+  background-color: #f1f2f6;
+}
+
+/* Concentration lines burst behind her at the climax. */
+.ew-manga-linhas {
+  position: absolute;
+  inset: -40%;
+  background: repeating-conic-gradient(
+    from 0deg at 34% 62%,
+    transparent 0deg 5deg,
+    color-mix(in srgb, var(--ew-manga-tinta) 16%, transparent) 5deg 6.4deg
+  );
+  opacity: 0;
+  transform: scale(1.6);
+  transition:
+    opacity 0.35s ease,
+    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+.ew-manga-painel.is-climax .ew-manga-linhas {
+  opacity: 1;
+  transform: scale(1);
+}
+.ew-manga-painel.is-climax {
+  animation: ew-manga-tremor 0.42s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+@keyframes ew-manga-tremor {
+  20%,
+  60% {
+    transform: translate(-3px, 1px) rotate(-0.4deg);
+  }
+  40%,
+  80% {
+    transform: translate(3px, -1px) rotate(0.4deg);
+  }
+}
+
+.ew-manga-luiza {
+  position: absolute;
+  left: 4%;
+  bottom: -14px;
+  z-index: 1;
+}
+
+/* Speech balloon: white, inked outline, tail aimed at Luiza. */
+.ew-manga-fala {
+  position: absolute;
+  top: 5%;
+  right: 3%;
+  z-index: 2;
+  width: 60%;
+  display: flex;
+  justify-content: center;
+}
+.ew-manga-balao {
+  position: relative;
+  width: 100%;
+  /* An ellipse only has room for text well inside its edge. */
+  padding: 8% 12%;
+  border: 3px solid var(--ew-manga-tinta);
+  border-radius: 50% / 46%;
+  background: var(--ew-manga-papel);
+  color: var(--ew-manga-tinta);
+  text-align: center;
+  transform-origin: 10% 100%;
+}
+.ew-manga-balao p {
+  margin: 0;
+  font:
+    700 15px/1.32 "Comic Neue",
+    "Comic Sans MS",
+    system-ui,
+    sans-serif;
+  letter-spacing: 0.01em;
+  text-wrap: balance;
+}
+.ew-manga-resto {
+  visibility: hidden;
+}
+.ew-manga-rabicho {
+  position: absolute;
+  /* The base sits where the bottom of the ellipse is flat. */
+  left: calc(36% - 70px);
+  top: calc(100% - 3px);
+  width: 110px;
+  height: 70px;
+  overflow: visible;
+}
+.ew-manga-rabicho path {
+  fill: var(--ew-manga-papel);
+  stroke: var(--ew-manga-tinta);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+/* The shout at the climax. */
+.ew-manga-grito {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 150px;
+}
+.ew-manga-grito svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.ew-manga-grito polygon {
+  fill: var(--ew-manga-papel);
+  stroke: var(--ew-manga-tinta);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.ew-manga-grito strong {
+  position: relative;
+  font:
+    400 52px/1 "Bangers",
+    Impact,
+    system-ui,
+    sans-serif;
+  letter-spacing: 0.04em;
+  color: var(--ew-primary);
+  -webkit-text-stroke: 2.5px var(--ew-manga-tinta);
+  paint-order: stroke fill;
+}
+
+/* Sound effects drawn around Luiza. */
+.ew-manga-sfx {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+.ew-manga-sfx-palavra {
+  position: absolute;
+  font:
+    400 30px/1 "Bangers",
+    Impact,
+    system-ui,
+    sans-serif;
+  letter-spacing: 0.05em;
+  color: var(--ew-primary);
+  -webkit-text-stroke: 2px var(--ew-manga-tinta);
+  paint-order: stroke fill;
+  white-space: nowrap;
+}
+.ew-manga-sfx-palavra.is-forte {
+  font-size: 40px;
+}
+.ew-manga[data-fase="convite"] .ew-manga-sfx-palavra {
+  color: var(--ew-manga-papel);
+  font-size: 26px;
+}
+
+/* Ink progress bar along the bottom of the panel. */
+.ew-manga-progresso {
+  position: absolute;
+  left: 46%;
+  right: 5%;
+  bottom: 14px;
+  z-index: 2;
+  height: 12px;
+  overflow: hidden;
+  border: 2.5px solid var(--ew-manga-tinta);
+  border-radius: 999px;
+  background: var(--ew-manga-papel);
+}
+.ew-manga-progresso span {
+  display: block;
+  height: 100%;
+  background: repeating-linear-gradient(
+      -45deg,
+      transparent 0 5px,
+      #ffffff40 5px 9px
+    )
+    var(--ew-primary);
+  transform-origin: left;
+  animation: ew-montagem-progresso var(--ew-montagem, 5400ms)
+    cubic-bezier(0.45, 0, 0.2, 1) forwards;
+}
+@keyframes ew-montagem-progresso {
+  from {
+    transform: scaleX(0.04);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* The customer's answers, as reply balloons on the right. */
+.ew-manga-respostas {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.ew-manga-resposta {
+  position: relative;
+  min-height: 46px;
+  padding: 10px 20px;
+  border: 2.5px solid var(--ew-manga-tinta);
+  border-radius: 22px 22px 6px 22px;
+  background: var(--ew-manga-papel);
+  color: var(--ew-manga-tinta);
+  font:
+    700 15px/1.2 "Comic Neue",
+    "Comic Sans MS",
+    system-ui,
+    sans-serif;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 var(--ew-manga-tinta);
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+}
+.ew-manga-resposta.is-principal {
+  background: var(--ew-primary);
+  color: var(--ew-on-primary);
+}
+.ew-manga-resposta:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--ew-manga-tinta);
+}
+.ew-manga-resposta:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--ew-manga-tinta);
+}
+.ew-manga-resposta:focus-visible {
+  outline: 3px solid var(--ew-primary);
+  outline-offset: 3px;
+}
+.ew-manga-dica {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: right;
+  color: var(--ew-muted);
+}
+
+@media (max-width: 560px) {
+  .ew-manga-painel {
+    height: 300px;
+  }
+  .ew-manga-fala {
+    top: 6%;
+    left: 6%;
+    right: 6%;
+    width: auto;
+  }
+  .ew-manga-luiza {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .ew-manga-progresso {
+    left: 8%;
+    right: 8%;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* The app assembled from nothing (celebration.js).                    */
+/* ------------------------------------------------------------------ */
+.estrutura-app[data-ew-vazio] .MuiDrawer-paper,
+.estrutura-app[data-ew-vazio] main,
+.estrutura-app[data-ew-vazio] > .MuiIconButton-root {
+  opacity: 0;
+  visibility: hidden;
+}
+[data-ew-montagem] {
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.8s ease,
+    background-color 0.4s ease,
+    color 0.35s ease;
+}
+[data-ew-montagem="oculto"] {
+  opacity: 0;
+  transform: translateX(-10px) scale(0.94);
+  pointer-events: none;
+}
+.MuiDrawer-paper[data-ew-montagem="oculto"] {
+  transform: translateX(-28px);
+}
+main[data-ew-montagem="oculto"] {
+  transform: none;
+}
+.estrutura-app [data-ew-montagem="esboco"]:not(main) {
+  position: relative;
+  overflow: hidden;
+  border-color: transparent !important;
+  border-radius: 10px;
+  background: color-mix(in srgb, currentColor 10%, transparent) !important;
+  box-shadow: none !important;
+  color: transparent !important;
+  pointer-events: none;
+  animation: ew-montagem-chega 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.estrutura-app [data-ew-montagem="esboco"]:not(main) > * {
+  opacity: 0;
+}
+.estrutura-app [data-ew-montagem="esboco"]:not(main)::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 30%,
+    color-mix(in srgb, #fff 45%, transparent) 50%,
+    transparent 70%
+  );
+  background-size: 220% 100%;
+  animation: ew-montagem-brilho 0.9s linear infinite;
+}
+main[data-ew-montagem="esboco"] {
+  filter: blur(8px) saturate(0.3);
+  opacity: 0.5;
+  pointer-events: none;
+}
+@keyframes ew-montagem-chega {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+}
+@keyframes ew-montagem-brilho {
+  from {
+    background-position: 120% 0;
+  }
+  to {
+    background-position: -120% 0;
+  }
+}
+
+/* Lighter backdrop while building, so the app can be watched. */
+.ew-overlay.ew-overlay--montagem {
+  background: #0b122014;
+}
+
+.ew-welcome-confetti {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1500;
+  pointer-events: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Tour: driver.js balloons drawn as Luiza's speech balloons.          */
+/* ------------------------------------------------------------------ */
+.driver-popover.ew-tour {
+  --ew-manga-tinta: #15171c;
+  min-width: 280px;
+  max-width: 330px;
+  margin-top: 6px;
+  padding: 16px 18px 14px;
+  overflow: visible;
+  border: 3px solid var(--ew-manga-tinta);
+  border-radius: 26px;
+  background: #ffffff;
+  color: var(--ew-manga-tinta);
+  font-family: "Comic Neue", "Comic Sans MS", system-ui, sans-serif;
+  box-shadow: 5px 5px 0 #15171c40;
+}
+/* The same wedge tail as the welcome balloons, aimed at Luiza: up when she
+   is perched above the balloon, down when she sits below it. */
+.ew-tour-rabicho {
+  position: absolute;
+  left: 4px;
+  bottom: calc(100% - 3px);
+  width: 110px;
+  height: 70px;
+  overflow: visible;
+  transform: scaleY(-1);
+  pointer-events: none;
+}
+.driver-popover.ew-tour[data-guia="abaixo"] .ew-tour-rabicho {
+  top: calc(100% - 3px);
+  bottom: auto;
+  transform: none;
+}
+.ew-tour-rabicho path {
+  fill: #ffffff;
+  stroke: var(--ew-manga-tinta);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.ew-tour .driver-popover-arrow {
+  display: none;
+}
+.ew-tour .driver-popover-title {
+  padding-right: 24px;
+  font:
+    400 22px/1.15 "Bangers",
+    Impact,
+    system-ui,
+    sans-serif;
+  letter-spacing: 0.04em;
+  color: var(--ew-primary);
+  -webkit-text-stroke: 1px var(--ew-manga-tinta);
+  paint-order: stroke fill;
+}
+.ew-tour .driver-popover-description {
+  font:
+    700 15px/1.45 "Comic Neue",
+    "Comic Sans MS",
+    system-ui,
+    sans-serif;
+  color: var(--ew-manga-tinta);
+}
+.ew-tour .driver-popover-close-btn {
+  top: 8px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: var(--ew-manga-tinta);
+  font-size: 20px;
+}
+.ew-tour .driver-popover-close-btn:hover,
+.ew-tour .driver-popover-close-btn:focus-visible {
+  background: #15171c14;
+}
+.ew-tour .driver-popover-footer {
+  margin-top: 14px;
+  align-items: center;
+}
+.ew-tour .driver-popover-progress-text {
+  font:
+    400 15px/1 "Bangers",
+    Impact,
+    system-ui,
+    sans-serif;
+  letter-spacing: 0.06em;
+  color: #15171c99;
+}
+.ew-tour .driver-popover-footer button {
+  min-height: 34px;
+  padding: 6px 14px;
+  border: 2.5px solid var(--ew-manga-tinta);
+  border-radius: 18px 18px 5px 18px;
+  background: #ffffff;
+  color: var(--ew-manga-tinta);
+  font:
+    700 14px/1.2 "Comic Neue",
+    "Comic Sans MS",
+    system-ui,
+    sans-serif;
+  text-shadow: none;
+  box-shadow: 2px 2px 0 var(--ew-manga-tinta);
+}
+.ew-tour .driver-popover-footer .driver-popover-next-btn {
+  background: var(--ew-primary);
+  color: var(--ew-on-primary);
+}
+.ew-tour .driver-popover-footer button:focus-visible {
+  outline: 3px solid var(--ew-primary);
+  outline-offset: 2px;
+}
+.ew-tour .driver-popover-footer .driver-popover-btn-disabled,
+.ew-tour .driver-popover-footer button:disabled {
+  display: none;
+}
+
+/* Luiza guiding the tour, perched on the current balloon. */
+.ew-tour-guia {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000000001;
+  pointer-events: none;
+  filter: drop-shadow(0 10px 14px #00000038);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-ew-montagem],
+  [data-ew-montagem] > *,
+  .ew-manga-progresso span,
+  .ew-manga-painel,
+  .ew-manga-linhas,
+  .driver-fade .driver-overlay,
+  .driver-fade .driver-popover {
+    animation: none !important;
+    transition: none !important;
+  }
+}

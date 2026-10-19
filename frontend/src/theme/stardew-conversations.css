@@ -1,0 +1,578 @@
+/* Adapted from StardewCN's Panel, DialogueBox and Tabs visual primitives.
+   All rules are scoped to the tenant-gated Stardew theme. */
+html[data-theme="stardew"]
+  :is(.atendimento-layout, .atendimento-mobile, .chat-layout, .pagina-fluxos) {
+  --sdv-conversation-ink: #5b341f;
+  --sdv-conversation-border: #8b451d;
+  --sdv-conversation-paper: #fff1c7;
+  --sdv-conversation-inset: #f5d995;
+  color: var(--sdv-conversation-ink);
+}
+
+/* Wooden frames wrap the queue, dialogue and character ledger. */
+html[data-theme="stardew"]
+  :is(
+    .fila-atendimento,
+    .conversa-painel,
+    .chat-fila,
+    .chat-vazio,
+    .conversa-pesquisa,
+    .conversa-contato,
+    .fluxo-painel,
+    .fluxo-convite
+  ) {
+  border: 4px solid #5b341f !important;
+  border-radius: 2px !important;
+  background: linear-gradient(180deg, #fff1c7, #f5d995) !important;
+  box-shadow:
+    inset 0 0 0 2px #f2ba48,
+    inset 0 0 0 4px #bc7c38,
+    4px 4px 0 #5b341f66 !important;
+  color: #5b341f;
+}
+html[data-theme="stardew"] .conversa-contato {
+  border-top: 4px solid #5b341f !important;
+}
+html[data-theme="stardew"]
+  :is(
+    .conversa-cabecalho,
+    .conversa-painel > .MuiCard-root,
+    .conversa-contato-cabecalho,
+    .chat-fila > header,
+    .fluxo-painel > .ew-panel-head
+  ) {
+  background: repeating-linear-gradient(
+    0deg,
+    #dfac60 0 4px,
+    #e9bb73 4px 8px
+  ) !important;
+  border-bottom: 3px solid #8b451d !important;
+  color: #5b341f;
+  box-shadow: inset 0 2px 0 #ffe2a1 !important;
+}
+html[data-theme="stardew"]
+  :is(
+    .conversa-fatos,
+    .fila-status,
+    .fila-atalhos,
+    .fila-opcoes,
+    .chat-fila-busca,
+    .conversa-acoes
+  ) {
+  background: #f5d995 !important;
+  border-color: #bc7c38 !important;
+}
+html[data-theme="stardew"] :is(.fila-superficie, .fila-rolagem) {
+  background: #fff1c7 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+html[data-theme="stardew"] :is(.ticket-card, .chat-item) {
+  margin: 6px;
+  border: 2px solid #bd8a48 !important;
+  border-radius: 1px !important;
+  background: #fff1c7;
+  box-shadow:
+    inset 0 0 0 2px #fff8e2,
+    2px 2px 0 #8b451d33;
+}
+html[data-theme="stardew"] :is(.ticket-card:hover, .chat-item:hover) {
+  background: #f9e3ac;
+  border-color: #8b451d !important;
+}
+html[data-theme="stardew"]
+  :is(.ticket-card.is-selected, .chat-item.selecionado) {
+  background: #f5d995 !important;
+  border-color: #477b38 !important;
+  box-shadow:
+    inset 4px 0 0 #477b38,
+    inset 0 0 0 2px #fff8e2,
+    2px 2px 0 #8b451d55;
+}
+html[data-theme="stardew"]
+  :is(
+    .ticket-card-heading strong,
+    .chat-item-topo strong,
+    .conversa-painel .MuiCardHeader-title,
+    .chat-identidade strong
+  ) {
+  color: #5b341f;
+  text-shadow: 1px 1px 0 #fff7dc;
+}
+html[data-theme="stardew"]
+  :is(
+    .ticket-card-preview,
+    .chat-item-previa,
+    .chat-item time,
+    .chat-identidade small,
+    .conversa-horario
+  ) {
+  color: #805335 !important;
+}
+html[data-theme="stardew"]
+  :is(
+    .ticket-card-assignment > span,
+    .chat-item-rodape > span,
+    .conversa-fatos > span
+  ) {
+  border: 1px solid #bc7c38;
+  border-radius: 0 !important;
+  background: #ffe8ae;
+  color: #5b341f;
+}
+html[data-theme="stardew"] .atendimento-divisor:before {
+  width: 4px;
+  height: 48px;
+  border-radius: 0;
+  background: #a76b37;
+  box-shadow:
+    2px 0 0 #f2ba48,
+    -1px 0 0 #5b341f;
+}
+html[data-theme="stardew"]
+  .atendimento-divisor:is(:hover, [data-resize-handle-active]):before {
+  background: #477b38;
+}
+
+/* Cream dialogue boxes on a tiny tiled meadow, like an in-game conversation. */
+html[data-theme="stardew"]
+  :is(
+    .conversa-historico #messagesList,
+    .chat-mensagens .chat-mensagens-lista
+  ) {
+  background-color: #dce8b6 !important;
+  background-image:
+    linear-gradient(90deg, #7f9a6420 2px, transparent 2px),
+    linear-gradient(#7f9a6420 2px, transparent 2px) !important;
+  background-size: 28px 28px !important;
+  padding: 22px 20px !important;
+}
+html[data-theme="stardew"]
+  :is(.conversa-historico #messagesList > [data-message-side], .chat-balao) {
+  border: 3px solid #8b451d !important;
+  border-radius: 1px !important;
+  background: #fff1c7 !important;
+  color: #5b341f !important;
+  box-shadow:
+    inset 0 0 0 2px #ffe0a0,
+    3px 3px 0 #5b341f44 !important;
+  padding: 12px 14px 7px;
+  margin-bottom: 12px;
+}
+html[data-theme="stardew"]
+  :is(
+    .conversa-historico #messagesList > [data-message-side="sent"],
+    .chat-mensagem.minha .chat-balao
+  ) {
+  border-color: #53743b !important;
+  background: #e9edbd !important;
+  box-shadow:
+    inset 0 0 0 2px #f8ffd5,
+    3px 3px 0 #344d2b44 !important;
+}
+html[data-theme="stardew"]
+  .conversa-historico
+  #messagesList
+  > [data-message-kind="sticker"] {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+html[data-theme="stardew"] :is(.conversa-dia, .chat-dia span) {
+  width: auto;
+  background: #f5d995 !important;
+  color: #805335;
+  border: 2px solid #8b451d !important;
+  border-radius: 0 !important;
+  padding: 3px 12px;
+  box-shadow: 2px 2px 0 #5b341f33 !important;
+}
+html[data-theme="stardew"] .conversa-dia > div {
+  color: #805335;
+  padding: 3px;
+}
+html[data-theme="stardew"] .chat-dia:before,
+html[data-theme="stardew"] .chat-dia:after {
+  height: 2px;
+  background: #8b451d;
+}
+html[data-theme="stardew"] :is(.conversa-citacao, .conversa-resposta-conteudo) {
+  background: #f5d995 !important;
+  border: 1px solid #bc7c38;
+  border-left: 4px solid #477b38;
+  border-radius: 0 !important;
+  color: #5b341f;
+}
+html[data-theme="stardew"] .conversa-fixadas {
+  border-top: 3px solid #8b451d;
+  background: #f5d995 !important;
+}
+html[data-theme="stardew"] .conversa-reacoes {
+  background: #fff1c7;
+  border: 2px solid #8b451d;
+  border-radius: 1px;
+}
+html[data-theme="stardew"] .conversa-historico [id^="messageActionsButton"],
+html[data-theme="stardew"] .conversa-historico [id^="messageReplyButton"] {
+  color: #805335;
+}
+html[data-theme="stardew"]
+  :is(
+    .conversa-compositor,
+    .chat-compositor,
+    .conversa-entrada,
+    .conversa-resposta-previa,
+    .conversa-anexos-previa
+  ) {
+  background: #f5d995 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+html[data-theme="stardew"] :is(.conversa-compositor, .chat-compositor) {
+  border-top: 3px solid #8b451d;
+}
+html[data-theme="stardew"]
+  :is(
+    .conversa-compositor > [role="tabpanel"],
+    .chat-compositor .MuiInputBase-root,
+    .conversa-caixa-mensagem--compact,
+    .conversa-busca,
+    .fluxo-busca,
+    .chat-anexo
+  ) {
+  border: 2px solid #8b451d !important;
+  border-radius: 1px !important;
+  background: #fff1c7 !important;
+  box-shadow: inset 2px 2px 0 #bc7c382b !important;
+}
+html[data-theme="stardew"]
+  :is(
+    .conversa-compositor > [role="tabpanel"]:focus-within,
+    .chat-compositor .MuiInputBase-root:focus-within,
+    .conversa-busca:focus-within,
+    .fluxo-busca:focus-within
+  ) {
+  outline: 2px solid #f2ba48;
+  outline-offset: 2px;
+}
+html[data-theme="stardew"] .conversa-modos button {
+  border: 2px solid #bc7c38;
+  border-radius: 0;
+  background: #e9bb73;
+  color: #5b341f;
+}
+html[data-theme="stardew"] .conversa-modos button[data-state="active"] {
+  border-color: #477b38;
+  background: #e9edbd;
+}
+html[data-theme="stardew"] .conversa-nota {
+  background: #ffdfa0;
+}
+html[data-theme="stardew"] :is(.atendimento-vazio, .chat-vazio) {
+  opacity: 1;
+  color: #5b341f;
+}
+html[data-theme="stardew"]
+  :is(.atendimento-vazio > svg, .chat-vazio > svg, .fluxo-convite > svg) {
+  color: #477b38;
+  border: 3px solid #8b451d;
+  border-radius: 0;
+  padding: 16px;
+  box-sizing: content-box;
+  background: #f5d995;
+  box-shadow: 3px 3px 0 #5b341f44;
+}
+html[data-theme="stardew"] :is(.contexto-perfil, .chat-contexto-identidade) {
+  padding: 16px 10px;
+  border: 2px solid #bc7c38;
+  background: #ffe8ae;
+  box-shadow: inset 0 0 0 2px #fff8e2;
+}
+html[data-theme="stardew"]
+  :is(
+    .contexto-grupo,
+    .contexto-dados > div,
+    .contexto-historico article,
+    .chat-participantes > div
+  ) {
+  border-color: #bc7c38;
+}
+html[data-theme="stardew"] .atendimento-mobile {
+  border: 3px solid #8b451d;
+  border-radius: 0;
+}
+html[data-theme="stardew"] .atendimento-mobile .MuiBottomNavigation-root {
+  border-bottom: 3px solid #8b451d;
+  background: #e9bb73;
+}
+html[data-theme="stardew"]
+  .atendimento-mobile
+  .MuiBottomNavigationAction-root.Mui-selected {
+  background: #fff1c7;
+  color: #477b38;
+  box-shadow: inset 0 -3px 0 #477b38;
+}
+
+/* The flow canvas becomes a plot of farmland with wooden signpost nodes. */
+html[data-theme="stardew"] .fluxo-area .react-flow {
+  background: #dce8b6;
+  --xy-edge-stroke: #8b451d;
+  --xy-edge-stroke-width: 3;
+  --xy-minimap-background-color: #fff1c7;
+  --xy-minimap-mask-background-color: #8b451d33;
+}
+html[data-theme="stardew"] .react-flow__background {
+  color: #8b451d55;
+}
+html[data-theme="stardew"] .fluxo-bloco {
+  border: 3px solid #8b451d;
+  border-radius: 1px;
+  background: #fff1c7;
+  color: #5b341f;
+  font-family: inherit;
+  box-shadow:
+    inset 0 0 0 2px #f5d995,
+    4px 4px 0 #5b341f44;
+}
+html[data-theme="stardew"] .fluxo-bloco.selecionado {
+  border-color: #477b38;
+  box-shadow:
+    inset 0 0 0 2px #f5d995,
+    0 0 0 3px #f2ba48,
+    4px 4px 0 #5b341f44;
+}
+html[data-theme="stardew"] .fluxo-bloco header {
+  background: #e9bb73;
+  border-bottom: 2px solid #8b451d;
+  color: #5b341f;
+}
+html[data-theme="stardew"] :is(.fluxo-bloco-icone, .fluxo-paleta-item) {
+  border-radius: 0;
+}
+html[data-theme="stardew"] .fluxo-paleta-item {
+  border: 2px solid #bc7c38;
+  background: #ffe8ae;
+  margin-bottom: 6px;
+  box-shadow: inset 0 0 0 1px #fff8e2;
+}
+html[data-theme="stardew"] .fluxo-paleta-item:hover {
+  background: #e9edbd;
+  border-color: #477b38;
+}
+html[data-theme="stardew"] .fluxo-bloco .react-flow__handle {
+  width: 10px;
+  height: 10px;
+  border: 2px solid #5b341f;
+  border-radius: 0;
+  background: #f2ba48;
+}
+html[data-theme="stardew"]
+  :is(.fluxo-status, .fluxo-opcoes > div, .fluxo-mensagem, .fluxo-resposta) {
+  border-radius: 0;
+  border-color: #bc7c38;
+  background: #f5d995;
+  color: #5b341f;
+}
+html[data-theme="stardew"] .fluxo-mensagem {
+  border: 2px solid #8b451d;
+  box-shadow: 2px 2px 0 #5b341f33;
+}
+html[data-theme="stardew"] .fluxo-resposta {
+  background: #e9edbd;
+  border: 2px solid #477b38;
+}
+@media (max-width: 599px) {
+  html[data-theme="stardew"]
+    :is(
+      .conversa-historico #messagesList,
+      .chat-mensagens .chat-mensagens-lista
+    ) {
+    padding: 14px 10px !important;
+  }
+  html[data-theme="stardew"] :is(.conversa-contato, .conversa-pesquisa) {
+    max-width: calc(100% - 8px);
+  }
+  html[data-theme="stardew"] :is(.ticket-card, .chat-item) {
+    margin: 4px;
+  }
+}
+@media print {
+  html[data-theme="stardew"] .conversa-historico #messagesList {
+    background: #fff !important;
+  }
+}
+
+/* The user keeps the normal interface font in conversations and atendimento.
+   This also covers the standalone history/contact surfaces and mobile layout. */
+html[data-theme="stardew"]
+  :is(
+    .atendimento-layout,
+    .atendimento-mobile,
+    .fila-atendimento,
+    .conversa-painel,
+    .conversa-historico,
+    .conversa-contato,
+    .conversa-pesquisa,
+    .conversa-compositor,
+    .chat-layout,
+    .chat-mensagens,
+    .chat-compositor,
+    .chat-dialogo,
+    .conversa-dialogo,
+    .conversa-menu
+  ) {
+  --sd-font: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sd-heading: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif !important;
+  font-size: 13px !important;
+}
+html[data-theme="stardew"]
+  :is(
+    .atendimento-layout,
+    .atendimento-mobile,
+    .fila-atendimento,
+    .conversa-painel,
+    .conversa-historico,
+    .conversa-contato,
+    .conversa-pesquisa,
+    .conversa-compositor,
+    .chat-layout,
+    .chat-mensagens,
+    .chat-compositor,
+    .chat-dialogo,
+    .conversa-dialogo,
+    .conversa-menu
+  )
+  * {
+  font-family: inherit !important;
+}
+html[data-theme="stardew"]
+  :is(
+    .atendimento-layout,
+    .atendimento-mobile,
+    .fila-atendimento,
+    .conversa-painel,
+    .conversa-historico,
+    .conversa-contato,
+    .conversa-pesquisa,
+    .conversa-compositor,
+    .chat-layout,
+    .chat-mensagens,
+    .chat-compositor,
+    .chat-dialogo,
+    .conversa-dialogo,
+    .conversa-menu
+  )
+  :is(
+    .MuiTypography-body1,
+    .MuiTypography-body2,
+    .MuiInputBase-root,
+    .MuiButton-root,
+    .MuiFormLabel-root,
+    .MuiFormControlLabel-label,
+    .MuiMenuItem-root,
+    .MuiAutocomplete-option,
+    .ew-button,
+    .ew-input,
+    .ew-select,
+    .ew-textarea,
+    .ew-field,
+    .ew-muted
+  ) {
+  font-size: 13px !important;
+}
+html[data-theme="stardew"]
+  :is(
+    .atendimento-layout,
+    .atendimento-mobile,
+    .fila-atendimento,
+    .conversa-painel,
+    .conversa-contato,
+    .chat-layout,
+    .chat-dialogo,
+    .conversa-dialogo,
+    .conversa-menu
+  )
+  :is(.MuiTypography-caption, .MuiCardHeader-subheader) {
+  font-size: 11px !important;
+}
+html[data-theme="stardew"]
+  :is(
+    .atendimento-layout,
+    .atendimento-mobile,
+    .fila-atendimento,
+    .conversa-painel,
+    .conversa-contato,
+    .chat-layout,
+    .chat-dialogo,
+    .conversa-dialogo,
+    .conversa-menu
+  )
+  :is(.MuiCardHeader-title, .MuiTypography-h6) {
+  font-size: 14px !important;
+}
+html[data-theme="stardew"] .fila-status .ew-tab,
+html[data-theme="stardew"] .fila-atalhos .ew-button {
+  font-size: 11px !important;
+}
+html[data-theme="stardew"] .contexto-tabs .ew-tab,
+html[data-theme="stardew"] .conversa-fatos .ew-badge,
+html[data-theme="stardew"] .conversa-respostas-rapidas .MuiButton-root {
+  font-size: 10px !important;
+}
+html[data-theme="stardew"] .chat-compositor .MuiInputBase-input {
+  font-size: 13px;
+}
+html[data-theme="stardew"] .conversa-dia {
+  font-size: 13px;
+}
+/* Flow editing retains the Stardew typography used elsewhere in the system. */
+html[data-theme="stardew"] .fluxo-bloco-corpo strong {
+  font-size: 20px;
+}
+html[data-theme="stardew"]
+  :is(.fluxo-busca input, .fluxo-bloco-corpo, .fluxo-paleta-item) {
+  font-size: 18px !important;
+  line-height: 1.4;
+}
+html[data-theme="stardew"] :is(.fluxo-bloco header, .fluxo-grupo h4) {
+  font-size: 15px;
+  line-height: 1.25;
+}
+html[data-theme="stardew"] .voice-message .voice-play.ew-button,
+html[data-theme="stardew"] .voice-meta button {
+  border: 2px solid #5b341f;
+  border-radius: 0;
+  box-shadow:
+    inset 0 0 0 1px #f2ba48,
+    2px 2px 0 #5b341f44;
+}
+html[data-theme="stardew"] .voice-meta button {
+  background: #fff1c7;
+  color: #805335;
+}
+html[data-theme="stardew"] .voice-track input {
+  height: 5px;
+  border-radius: 0;
+}
+html[data-theme="stardew"] .conversa-aviso-canal {
+  background: #f5d995 !important;
+  border-top: 2px solid #8b451d;
+  color: #805335;
+}
+html[data-theme="stardew"] .conversa-notas-lista {
+  background: transparent;
+}
+html[data-theme="stardew"] .conversa-nota-item {
+  margin: 8px 0;
+  background: #ffe8ae;
+  border: 2px solid #bc7c38;
+  box-shadow:
+    inset 0 0 0 2px #fff1c7,
+    2px 2px 0 #5b341f33;
+}

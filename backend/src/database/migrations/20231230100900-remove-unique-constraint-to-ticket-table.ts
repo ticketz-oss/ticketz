@@ -9,7 +9,8 @@ module.exports = {
   },
 
   down: (queryInterface: QueryInterface) => {
-    return queryInterface.addConstraint("Tickets", { fields: ["contactId", "companyId"],
+    return queryInterface.addConstraint("Tickets", {
+      fields: ["contactId", "companyId"],
       type: "unique",
       name: "contactid_companyid_unique"
     });

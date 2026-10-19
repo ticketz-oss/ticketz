@@ -4,7 +4,7 @@ module.exports = {
   up: (queryInterface: QueryInterface) => {
     return queryInterface.addColumn("Messages", "channel", {
       type: DataTypes.TEXT,
-      defaultValue: "whatsapp",
+      defaultValue: "whatsapp"
     });
   },
 

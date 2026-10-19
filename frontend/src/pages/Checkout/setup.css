@@ -1,0 +1,131 @@
+.checkout-page .co-free-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 22px 0;
+  color: var(--co-primary);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+.co-free-notice svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.co-field select {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid var(--ew-line);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ew-ink);
+  font: inherit;
+}
+.co-field select:focus-visible {
+  outline: 3px solid var(--co-primary);
+  outline-offset: 3px;
+}
+.co-billing-explanation {
+  font-size: 14px;
+  color: var(--ew-ink-soft);
+  line-height: 1.7;
+}
+.co-identity-fields {
+  margin: 28px 0;
+  display: grid;
+  gap: 22px;
+}
+.co-image-choice {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--ew-line);
+}
+.co-image-preview {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--ew-paper);
+  color: var(--ew-ink-soft);
+}
+.co-image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.co-image-preview--logo img {
+  object-fit: contain;
+  padding: 8px;
+}
+.co-image-choice label {
+  display: block;
+  font-weight: 600;
+  font-size: 16px;
+}
+.co-image-choice p {
+  margin: 5px 0 12px;
+  font-size: 13px;
+  color: var(--ew-ink-soft);
+}
+.co-image-choice input {
+  max-width: 100%;
+  width: 100%;
+  font: inherit;
+  font-size: 13px;
+}
+.co-image-choice input::file-selector-button {
+  padding: 10px 12px;
+  margin-right: 8px;
+  border: 1px solid var(--ew-line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ew-ink);
+  cursor: pointer;
+}
+.co-remove-image {
+  margin-top: 8px;
+  padding: 6px 0;
+  background: none;
+  border: 0;
+  color: var(--co-primary);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.co-field input[type="color"] {
+  width: 80px;
+  height: 48px;
+  padding: 4px;
+}
+@media (max-width: 600px) {
+  .co-stepper {
+    width: 100%;
+    justify-content: space-between;
+    gap: 4px;
+  }
+  .co-stepper li {
+    min-width: 0;
+    gap: 0;
+  }
+  .co-stepper li + li::before {
+    display: none;
+  }
+  .co-stepper button {
+    padding: 8px 2px;
+    gap: 5px;
+  }
+  .co-stepper .co-step-label {
+    font-size: 10px;
+  }
+  .co-image-choice {
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: 12px;
+  }
+  .co-image-choice input {
+    font-size: 12px;
+  }
+}

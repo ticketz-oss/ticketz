@@ -1,668 +1,915 @@
 import * as Sentry from "@sentry/node";
-import Queue from "bull";
+import Queue, { Job } from "bull";
 import moment from "moment";
-import { Op, QueryTypes } from "sequelize";
-import { isEmpty, isNil, isArray } from "lodash";
-import path from "path";
+import { Op, WhereOptions } from "sequelize";
 import { CronJob } from "cron";
-import { MessageData, SendMessage } from "./helpers/SendMessage";
+import { subDays, subMinutes } from "date-fns";
+import { SendMessage } from "./helpers/SendMessage";
 import Whatsapp from "./models/Whatsapp";
 import { logger } from "./utils/logger";
 import Schedule from "./models/Schedule";
 import Contact from "./models/Contact";
 import GetDefaultWhatsApp from "./helpers/GetDefaultWhatsApp";
-import Campaign from "./models/Campaign";
-import ContactList from "./models/ContactList";
-import ContactListItem from "./models/ContactListItem";
-import CampaignSetting from "./models/CampaignSetting";
-import CampaignShipping from "./models/CampaignShipping";
 import GetWhatsappWbot from "./helpers/GetWhatsappWbot";
-import sequelize from "./database";
-import { getMessageOptions } from "./services/WbotServices/SendWhatsAppMedia";
-import { getIO } from "./libs/socket";
 import User from "./models/User";
 import Company from "./models/Company";
-import Plan from "./models/Plan";
+import TicketTraking from "./models/TicketTraking";
+import { GetCompanySetting } from "./helpers/CheckSettings";
+import { getWbot } from "./libs/wbot";
+import { buildMetaWbot } from "./services/MetaWhatsAppServices/MetaWbotAdapter";
+import Ticket from "./models/Ticket";
+import QueueModel from "./models/Queue";
+import UpdateTicketService, {
+  UpdateTicketData
+} from "./services/TicketServices/UpdateTicketService";
+import { handleMessage } from "./services/WbotServices/wbotMessageListener";
+import formatBody from "./helpers/Mustache";
+import Setting from "./models/Setting";
+import { parseToMilliseconds } from "./helpers/parseToMilliseconds";
+import { startCampaignQueues } from "./queues/campaign";
+import OutOfTicketMessage from "./models/OutOfTicketMessages";
+import { getJidOf } from "./services/WbotServices/getJidOf";
+import { makeRandomId } from "./helpers/MakeRandomId";
+import McpAudit from "./models/McpAudit";
+import ScheduleDelivery from "./models/ScheduleDelivery";
+import ScheduleAudienceContact from "./models/ScheduleAudienceContact";
+import CommemorativeDate from "./models/CommemorativeDate";
+import ContactCustomField from "./models/ContactCustomField";
+import { DateTime } from "luxon";
+import path from "path";
+import {
+  birthdayMatches,
+  nextBirthdayScan,
+  nextCommemorativeOccurrence
+} from "./services/ScheduleServices/recurrence";
+import { renderScheduleMessage } from "./services/ScheduleServices/variables";
+import { getIO } from "./libs/socket";
+import {
+  getScheduleCadence,
+  nextCadenceDelay
+} from "./services/ScheduleServices/cadence";
+import SendPartnerPayoutsService from "./services/PartnerServices/SendPartnerPayoutsService";
+import ReconcilePartnerPayoutsService from "./services/PartnerServices/ReconcilePartnerPayoutsService";
+import { processPlatformWebhooks } from "./services/PlatformServices/PlatformWebhookService";
+import CreateCompanyInvoiceService from "./services/InvoicesService/CreateCompanyInvoiceService";
+import getCompletionMessage from "./helpers/GetCompletionMessage";
+import {
+  isDedicatedRuntime,
+  runtimeCompanyWhere,
+  runtimeOwnsCompany,
+  runtimeQueueOptions
+} from "./helpers/tenantRuntime";
+import { startProspeccaoQueue } from "./queues/prospeccao";
+import { startWhatsappStatusQueue } from "./queues/whatsappStatus";
 
 const connection = process.env.REDIS_URI || "";
-const limiterMax = process.env.REDIS_OPT_LIMITER_MAX || 1;
-const limiterDuration = process.env.REDIS_OPT_LIMITER_DURATION || 3000;
-
-interface ProcessCampaignData {
-  id: number;
-  delay: number;
-}
-
-interface PrepareContactData {
-  contactId: number;
-  campaignId: number;
-  delay: number;
-  variables: any[];
-}
-
-interface DispatchCampaignData {
-  campaignId: number;
-  campaignShippingId: number;
-  contactListItemId: number;
-}
-
-export const userMonitor = new Queue("UserMonitor", connection);
-
-
-export const messageQueue = new Queue("MessageQueue", connection, {
-  limiter: {
-    max: limiterMax as number,
-    duration: limiterDuration as number
-  }
-});
-
-export const scheduleMonitor = new Queue("ScheduleMonitor", connection);
-export const sendScheduledMessages = new Queue(
-  "SendSacheduledMessages",
-  connection
+export const userMonitor = new Queue(
+  "UserMonitor",
+  connection,
+  runtimeQueueOptions()
 );
 
-export const campaignQueue = new Queue("CampaignQueue", connection);
+export const scheduleMonitor = new Queue(
+  "ScheduleMonitor",
+  connection,
+  runtimeQueueOptions()
+);
+export const sendScheduledMessages = new Queue(
+  "SendSacheduledMessages",
+  connection,
+  runtimeQueueOptions()
+);
 
-async function handleSendMessage(job) {
-  try {
-    const { data } = job;
+// Repasses dos parceiros. Fila Bull (e nao CronJob) porque o lock do Redis
+// garante que so uma replica envia o PIX.
+export const partnerPayouts = new Queue(
+  "PartnerPayouts",
+  connection,
+  runtimeQueueOptions()
+);
+export const platformWebhooks = new Queue(
+  "PlatformWebhooks",
+  connection,
+  runtimeQueueOptions()
+);
 
-    const whatsapp = await Whatsapp.findByPk(data.whatsappId);
+let lastMcpAuditCleanupDate: string | null = null;
 
-    if (whatsapp == null) {
-      throw Error("Whatsapp não identificado");
-    }
+const recoverQueuedScheduleDeliveries = async (): Promise<void> => {
+  const queued = await ScheduleDelivery.findAll({
+    where: { status: "QUEUED" },
+    attributes: ["id"],
+    include: [
+      {
+        model: Schedule,
+        as: "schedule",
+        required: true,
+        where: runtimeCompanyWhere(),
+        attributes: []
+      }
+    ],
+    limit: 1000,
+    order: [["queuedAt", "ASC"]]
+  });
+  await Promise.all(
+    queued.map(delivery =>
+      sendScheduledMessages.add(
+        "SendMessage",
+        { deliveryId: delivery.id },
+        {
+          jobId: `schedule-delivery-${delivery.id}`,
+          removeOnComplete: true
+        }
+      )
+    )
+  );
+};
 
-    const messageData: MessageData = data.data;
+async function handleMcpAuditRetention(): Promise<void> {
+  if (isDedicatedRuntime()) return;
+  const today = new Date().toISOString().slice(0, 10);
 
-    await SendMessage(whatsapp, messageData);
-  } catch (e: unknown) {
-    Sentry.captureException(e);
-    logger.error("MessageQueue -> SendMessage: error", (e as Error).message);
-    throw e;
+  if (lastMcpAuditCleanupDate === today) {
+    return;
   }
+
+  await McpAudit.destroy({
+    where: {
+      createdAt: {
+        [Op.lt]: subDays(new Date(), 90)
+      }
+    }
+  });
+
+  lastMcpAuditCleanupDate = today;
 }
 
 async function handleVerifySchedules() {
   try {
-    const { count, rows: schedules } = await Schedule.findAndCountAll({
+    await recoverQueuedScheduleDeliveries();
+    const schedules = await Schedule.findAll({
       where: {
-        status: "PENDENTE",
-        sentAt: null,
-        sendAt: {
-          [Op.gte]: moment().format("YYYY-MM-DD HH:mm:ss"),
-          [Op.lte]: moment().add("30", "seconds").format("YYYY-MM-DD HH:mm:ss")
-        }
+        active: true,
+        ...runtimeCompanyWhere(),
+        nextRunAt: { [Op.lte]: new Date() }
       },
-      include: [{ model: Contact, as: "contact" }]
+      include: [
+        { model: CommemorativeDate, as: "commemorativeDate" },
+        {
+          model: ScheduleAudienceContact,
+          as: "audienceContacts",
+          include: [{ model: Contact, as: "contact", include: ["extraInfo"] }]
+        }
+      ]
     });
-    if (count > 0) {
-      schedules.map(async schedule => {
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const schedule of schedules) {
+      const timezone = schedule.timezone || "UTC";
+      const localOccurrence = DateTime.fromJSDate(schedule.nextRunAt).setZone(
+        timezone
+      );
+      const localNow = DateTime.now().setZone(timezone);
+      const missedRecurringDay =
+        schedule.kind !== "ONCE" && !localOccurrence.hasSame(localNow, "day");
+
+      let contacts: Contact[] = [];
+      if (!missedRecurringDay) {
+        if (schedule.audienceMode === "SELECTED") {
+          contacts = schedule.audienceContacts
+            .map(item => item.contact)
+            .filter(Boolean);
+        } else {
+          contacts = await Contact.findAll({
+            where: {
+              companyId: schedule.companyId,
+              channel: "whatsapp",
+              isGroup: false,
+              number: { [Op.regexp]: "^[0-9]{8,20}$" }
+            },
+            include: [{ model: ContactCustomField, as: "extraInfo" }]
+          });
+        }
+        if (schedule.kind === "BIRTHDAY") {
+          contacts = contacts.filter(contact =>
+            birthdayMatches(
+              contact.birthdayDay,
+              contact.birthdayMonth,
+              localOccurrence
+            )
+          );
+        }
+      }
+
+      const occurrenceKey =
+        schedule.kind === "ONCE"
+          ? `once-${schedule.id}`
+          : localOccurrence.toFormat("yyyy-LL-dd");
+      if (schedule.kind !== "ONCE") {
+        // eslint-disable-next-line no-restricted-syntax
+        for (const contact of contacts) {
+          await ScheduleDelivery.findOrCreate({
+            where: {
+              scheduleId: schedule.id,
+              contactId: contact.id,
+              occurrenceKey
+            },
+            defaults: {
+              scheduleId: schedule.id,
+              contactId: contact.id,
+              occurrenceKey,
+              scheduledAt: schedule.nextRunAt,
+              status: "PENDING",
+              contactName: contact.name,
+              contactNumber: contact.number
+            }
+          });
+        }
         await schedule.update({
-          status: "AGENDADA"
+          totalRecipients: contacts.length,
+          sentCount: 0,
+          errorCount: 0,
+          status: missedRecurringDay ? "IGNORADA" : "ATIVA"
         });
-        sendScheduledMessages.add(
-          "SendMessage",
-          { schedule },
-          { delay: 40000 }
-        );
-        logger.info(`Disparo agendado para: ${schedule.contact.name}`);
+      }
+
+      const pending = await ScheduleDelivery.findAll({
+        where: {
+          scheduleId: schedule.id,
+          occurrenceKey,
+          status: { [Op.in]: ["PENDING", "QUEUED"] }
+        },
+        order: [["id", "ASC"]]
       });
+      const cadence = await getScheduleCadence(schedule.companyId);
+      let delaySeconds = 0;
+
+      logger.info(
+        {
+          scheduleId: schedule.id,
+          kind: schedule.kind,
+          plannedAt: schedule.nextRunAt,
+          timezone,
+          deliveries: pending.length
+        },
+        "Schedule occurrence queued"
+      );
+
+      // eslint-disable-next-line no-restricted-syntax
+      for (const [index, delivery] of pending.entries()) {
+        if (delivery.status === "PENDING") {
+          await delivery.update({ status: "QUEUED", queuedAt: new Date() });
+        }
+        await sendScheduledMessages.add(
+          "SendMessage",
+          { deliveryId: delivery.id },
+          {
+            delay: Math.max(0, delaySeconds * 1000),
+            jobId: `schedule-delivery-${delivery.id}`,
+            removeOnComplete: true
+          }
+        );
+        delaySeconds = nextCadenceDelay(delaySeconds, index + 1, cadence);
+      }
+
+      if (schedule.kind === "ONCE") {
+        await schedule.update({ status: "AGENDADA", nextRunAt: null });
+      } else if (schedule.kind === "BIRTHDAY") {
+        await schedule.update({
+          nextRunAt: nextBirthdayScan(
+            schedule.sendTime,
+            timezone,
+            (missedRecurringDay ? localNow : localOccurrence).plus({
+              minutes: 1
+            })
+          ),
+          lastRunAt: new Date()
+        });
+      } else if (schedule.commemorativeDate?.active) {
+        await schedule.update({
+          nextRunAt: nextCommemorativeOccurrence(
+            schedule.commemorativeDate,
+            schedule.sendTime,
+            timezone,
+            localOccurrence.plus({ minutes: 1 })
+          ),
+          lastRunAt: new Date()
+        });
+      } else {
+        await schedule.update({ active: false, nextRunAt: null });
+      }
     }
-  } catch (e: unknown) {
-    Sentry.captureException(e);
-    logger.error("SendScheduledMessage -> Verify: error", (e as Error).message);
+  } catch (e) {
+    logger.error(
+      { message: e?.message },
+      "SendScheduledMessage -> Verify: error"
+    );
     throw e;
   }
 }
 
-async function handleSendScheduledMessage(job) {
-  const {
-    data: { schedule }
-  } = job;
-  let scheduleRecord: Schedule | null = null;
+async function handleExpireOutOfTicketMessages() {
+  if (isDedicatedRuntime()) return;
+  OutOfTicketMessage.destroy({
+    where: {
+      createdAt: {
+        [Op.lt]: subDays(new Date(), 1)
+      }
+    }
+  });
+}
 
-  try {
-    scheduleRecord = await Schedule.findByPk(schedule.id);
-  } catch (e) {
-    Sentry.captureException(e);
-    logger.info(`Erro ao tentar consultar agendamento: ${schedule.id}`);
+const updateScheduleProgress = async (
+  schedule: Schedule,
+  occurrenceKey: string
+): Promise<void> => {
+  const [sentCount, failedCount, pendingCount] = await Promise.all([
+    ScheduleDelivery.count({
+      where: { scheduleId: schedule.id, occurrenceKey, status: "SENT" }
+    }),
+    ScheduleDelivery.count({
+      where: {
+        scheduleId: schedule.id,
+        occurrenceKey,
+        status: { [Op.in]: ["ERROR", "SKIPPED"] }
+      }
+    }),
+    ScheduleDelivery.count({
+      where: {
+        scheduleId: schedule.id,
+        occurrenceKey,
+        status: { [Op.in]: ["PENDING", "QUEUED"] }
+      }
+    })
+  ]);
+  const changes: Record<string, unknown> = {
+    sentCount,
+    errorCount: failedCount
+  };
+  if (schedule.kind === "ONCE" && pendingCount === 0) {
+    changes.sentAt = new Date();
+    changes.active = false;
+    changes.status = failedCount ? (sentCount ? "PARCIAL" : "ERRO") : "ENVIADA";
+  }
+  const updated = await schedule.update(changes);
+  getIO()
+    .to(`company-${schedule.companyId}-mainchannel`)
+    .emit(`company-${schedule.companyId}-schedule`, {
+      action: "update",
+      schedule: updated
+    });
+};
+
+async function handleSendScheduledMessage(job) {
+  handleExpireOutOfTicketMessages();
+  const delivery = await ScheduleDelivery.findByPk(job.data.deliveryId, {
+    include: [
+      { model: Contact, as: "contact", include: ["extraInfo"] },
+      {
+        model: Schedule,
+        as: "schedule",
+        include: [
+          { model: User, as: "user" },
+          { model: CommemorativeDate, as: "commemorativeDate" }
+        ]
+      }
+    ]
+  });
+  if (!delivery || delivery.status === "SENT") return;
+  const schedule = delivery.schedule;
+  if (!schedule || !runtimeOwnsCompany(schedule.companyId)) return;
+  if (!delivery.contact) {
+    await delivery.update({
+      status: "SKIPPED",
+      errorMessage: "CONTACT_REMOVED"
+    });
+    await updateScheduleProgress(schedule, delivery.occurrenceKey);
+    return;
   }
 
   try {
     const whatsapp = await GetDefaultWhatsApp(schedule.companyId);
-
-    await SendMessage(whatsapp, {
-      number: schedule.contact.number,
-      body: schedule.body
+    const body = renderScheduleMessage(schedule.body, {
+      contact: delivery.contact,
+      currentUser: schedule.user,
+      commemorativeDate: schedule.commemorativeDate,
+      occurrence: delivery.scheduledAt,
+      timezone: schedule.timezone
     });
-
-    await scheduleRecord?.update({
-      sentAt: new Date(),
-      status: "ENVIADA"
-    });
-
-    logger.info(`Mensagem agendada enviada para: ${schedule.contact.name}`);
-    sendScheduledMessages.clean(15000, "completed");
-  } catch (e: unknown) {
-    Sentry.captureException(e);
-    await scheduleRecord?.update({
-      status: "ERRO"
-    });
-    logger.error("SendScheduledMessage -> SendMessage: error", (e as Error).message);
-    throw e;
-  }
-}
-
-async function handleVerifyCampaigns() {
-  /**
-   * @todo
-   * Implementar filtro de campanhas
-   */
-  const campaigns: { id: number; scheduledAt: string }[] =
-    await sequelize.query(
-      `select id, "scheduledAt" from "Campaigns" c
-    where "scheduledAt" between now() and now() + '1 hour'::interval and status = 'PROGRAMADA'`,
-      { type: QueryTypes.SELECT }
-    );
-
-  if (campaigns.length) {
-    logger.info(`Campanhas encontradas: ${campaigns.length}`);
-  }
-  campaigns.forEach( (campaign) => {
-    try {
-      const now = moment();
-      const scheduledAt = moment(campaign.scheduledAt);
-      const delay = scheduledAt.diff(now, "milliseconds");
-      logger.info(
-        `Campanha enviada para a fila de processamento: Campanha=${campaign.id}, Delay Inicial=${delay}`
+    const mediaPath = schedule.mediaPath
+      ? path.resolve("public", schedule.mediaPath)
+      : null;
+    const messages: Awaited<ReturnType<typeof SendMessage>>[] = [];
+    if (mediaPath && schedule.mediaDeliveryMode === "SEPARATE") {
+      messages.push(
+        await SendMessage(whatsapp, { number: delivery.contact.number, body })
       );
-      campaignQueue.add(
-        "ProcessCampaign",
-        {
-          id: campaign.id,
-          delay
-        },
-        {
-          removeOnComplete: true
-        }
+      messages.push(
+        await SendMessage(whatsapp, {
+          number: delivery.contact.number,
+          body: "",
+          mediaPath,
+          mediaName: schedule.mediaName
+        })
       );
-    } catch (err: unknown) {
-      Sentry.captureException(err);
+    } else {
+      messages.push(
+        await SendMessage(whatsapp, {
+          number: delivery.contact.number,
+          body,
+          mediaPath: mediaPath || undefined,
+          mediaName: schedule.mediaName
+        })
+      );
     }
-  });
-}
-
-async function getCampaign(id: number) {
-  return Campaign.findByPk(id, {
-    include: [
-      {
-        model: ContactList,
-        as: "contactList",
-        attributes: ["id", "name"],
-        include: [
-          {
-            model: ContactListItem,
-            as: "contacts",
-            attributes: ["id", "name", "number", "email", "isWhatsappValid"],
-            where: { isWhatsappValid: true }
-          }
-        ]
-      },
-      {
-        model: Whatsapp,
-        as: "whatsapp",
-        attributes: ["id", "name"]
-      },
-      {
-        model: CampaignShipping,
-        as: "shipping",
-        include: [{ model: ContactListItem, as: "contact" }]
+    if (schedule.saveMessage) {
+      // eslint-disable-next-line no-restricted-syntax
+      for (const message of messages) {
+        await handleMessage(
+          message,
+          await GetWhatsappWbot(whatsapp),
+          schedule.companyId
+        );
       }
-    ]
-  });
-}
-
-async function getContact(id) {
-  return ContactListItem.findByPk(id, {
-    attributes: ["id", "name", "number", "email"]
-  });
-}
-
-async function getSettings(campaign) {
-  const settings = await CampaignSetting.findAll({
-    where: { companyId: campaign.companyId },
-    attributes: ["key", "value"]
-  });
-
-  let messageInterval = 20;
-  let longerIntervalAfter = 20;
-  let greaterInterval = 60;
-  let variables: any[] = [];
-
-  settings.forEach(setting => {
-    if (setting.key === "messageInterval") {
-      messageInterval = JSON.parse(setting.value);
     }
-    if (setting.key === "longerIntervalAfter") {
-      longerIntervalAfter = JSON.parse(setting.value);
-    }
-    if (setting.key === "greaterInterval") {
-      greaterInterval = JSON.parse(setting.value);
-    }
-    if (setting.key === "variables") {
-      variables = JSON.parse(setting.value);
-    }
-  });
-
-  return {
-    messageInterval,
-    longerIntervalAfter,
-    greaterInterval,
-    variables
-  };
-}
-
-export function parseToMilliseconds(seconds: number) {
-  return seconds * 1000;
+    await delivery.update({
+      sentAt: new Date(),
+      status: "SENT",
+      errorMessage: null
+    });
+    logger.info(`Scheduled message sent to: ${delivery.contact.name}`);
+  } catch (e) {
+    Sentry.captureException(e);
+    await delivery.update({ status: "ERROR", errorMessage: e?.message });
+    logger.error(
+      { message: e?.message },
+      "SendScheduledMessage -> SendMessage: error"
+    );
+  } finally {
+    await updateScheduleProgress(schedule, delivery.occurrenceKey);
+  }
 }
 
 export async function sleep(seconds: number) {
   logger.info(
-    `Sleep de ${seconds} segundos iniciado: ${moment().format("HH:mm:ss")}`
+    `Sleep ${seconds} seconds started: ${moment().format("HH:mm:ss")}`
   );
   return new Promise(resolve => {
     setTimeout(() => {
       logger.info(
-        `Sleep de ${seconds} segundos finalizado: ${moment().format(
-          "HH:mm:ss"
-        )}`
+        `Sleep ${seconds} seconds completed: ${moment().format("HH:mm:ss")}`
       );
       resolve(true);
     }, parseToMilliseconds(seconds));
   });
 }
 
-function getCampaignValidMessages(campaign) {
-  const messages = [];
-
-  if (!isEmpty(campaign.message1) && !isNil(campaign.message1)) {
-    messages.push(campaign.message1);
-  }
-
-  if (!isEmpty(campaign.message2) && !isNil(campaign.message2)) {
-    messages.push(campaign.message2);
-  }
-
-  if (!isEmpty(campaign.message3) && !isNil(campaign.message3)) {
-    messages.push(campaign.message3);
-  }
-
-  if (!isEmpty(campaign.message4) && !isNil(campaign.message4)) {
-    messages.push(campaign.message4);
-  }
-
-  if (!isEmpty(campaign.message5) && !isNil(campaign.message5)) {
-    messages.push(campaign.message5);
-  }
-
-  return messages;
-}
-
-function getCampaignValidConfirmationMessages(campaign) {
-  const messages = [];
-
-  if (
-    !isEmpty(campaign.confirmationMessage1) &&
-    !isNil(campaign.confirmationMessage1)
-  ) {
-    messages.push(campaign.confirmationMessage1);
-  }
-
-  if (
-    !isEmpty(campaign.confirmationMessage2) &&
-    !isNil(campaign.confirmationMessage2)
-  ) {
-    messages.push(campaign.confirmationMessage2);
-  }
-
-  if (
-    !isEmpty(campaign.confirmationMessage3) &&
-    !isNil(campaign.confirmationMessage3)
-  ) {
-    messages.push(campaign.confirmationMessage3);
-  }
-
-  if (
-    !isEmpty(campaign.confirmationMessage4) &&
-    !isNil(campaign.confirmationMessage4)
-  ) {
-    messages.push(campaign.confirmationMessage4);
-  }
-
-  if (
-    !isEmpty(campaign.confirmationMessage5) &&
-    !isNil(campaign.confirmationMessage5)
-  ) {
-    messages.push(campaign.confirmationMessage5);
-  }
-
-  return messages;
-}
-
-function getProcessedMessage(msg: string, variables: any[], contact: any) {
-  let finalMessage = msg;
-
-  if (finalMessage.includes("{nome}")) {
-    finalMessage = finalMessage.replace(/{nome}/g, contact.name);
-  }
-
-  if (finalMessage.includes("{email}")) {
-    finalMessage = finalMessage.replace(/{email}/g, contact.email);
-  }
-
-  if (finalMessage.includes("{numero}")) {
-    finalMessage = finalMessage.replace(/{numero}/g, contact.number);
-  }
-
-  variables.forEach(variable => {
-    if (finalMessage.includes(`{${variable.key}}`)) {
-      const regex = new RegExp(`{${variable.key}}`, "g");
-      finalMessage = finalMessage.replace(regex, variable.value);
-    }
+async function setRatingExpired(tracking: TicketTraking, threshold: Date) {
+  await tracking.update({
+    expired: true
   });
 
-  return finalMessage;
-}
-
-export function randomValue(min, max) {
-  return Math.floor(Math.random() * max) + min;
-}
-
-async function verifyAndFinalizeCampaign(campaign) {
-  const { contacts } = campaign.contactList;
-
-  const count1 = contacts.length;
-  const count2 = await CampaignShipping.count({
-    where: {
-      campaignId: campaign.id,
-      deliveredAt: {
-        [Op.not]: null
-      }
-    }
-  });
-
-  if (count1 === count2) {
-    await campaign.update({ status: "FINALIZADA", completedAt: moment() });
+  if (tracking.ratingAt < subMinutes(threshold, 5)) {
+    return;
   }
 
-  const io = getIO();
-  io.emit(`company-${campaign.companyId}-campaign`, {
-    record: campaign
-  });
-}
-
-async function handleProcessCampaign(job) {
-  try {
-    const { id }: ProcessCampaignData = job.data;
-    let { delay }: ProcessCampaignData = job.data;
-    const campaign = await getCampaign(id);
-    const settings = await getSettings(campaign);
-    if (campaign) {
-      const { contacts } = campaign.contactList;
-      if (isArray(contacts)) {
-        let index = 0;
-        contacts.forEach( (contact) => {
-          campaignQueue.add(
-            "PrepareContact",
-            {
-              contactId: contact.id,
-              campaignId: campaign.id,
-              variables: settings.variables,
-              delay: delay || 0
-            },
-            {
-              removeOnComplete: true
-            }
-          );
-
-          logger.info(
-            `Registro enviado pra fila de disparo: Campanha=${campaign.id};Contato=${contact.name};delay=${delay}`
-          );
-          index+=1;
-          if (index % settings.longerIntervalAfter === 0) {
-            // intervalo maior após intervalo configurado de mensagens
-            delay += parseToMilliseconds(settings.greaterInterval);
-          } else {
-            delay += parseToMilliseconds(
-              randomValue(0, settings.messageInterval)
-            );
-          }
-        });
-        await campaign.update({ status: "EM_ANDAMENTO" });
-      }
-    }
-  } catch (err: unknown) {
-    Sentry.captureException(err);
-  }
-}
-
-async function handlePrepareContact(job: { data: PrepareContactData; }) {
-  try {
-    const { contactId, campaignId, delay, variables } = job.data;
-    const campaign = await getCampaign(campaignId);
-    const contact = await getContact(contactId);
-
-    const campaignShipping: any = {};
-    campaignShipping.number = contact.number;
-    campaignShipping.contactId = contactId;
-    campaignShipping.campaignId = campaignId;
-
-    const messages = getCampaignValidMessages(campaign);
-    if (messages.length) {
-      const radomIndex = randomValue(0, messages.length);
-      const message = getProcessedMessage(
-        messages[radomIndex],
-        variables,
-        contact
-      );
-      campaignShipping.message = `\u200c${message}`;
-    }
-
-    if (campaign.confirmation) {
-      const confirmationMessages =
-        getCampaignValidConfirmationMessages(campaign);
-      if (confirmationMessages.length) {
-        const radomIndex = randomValue(0, confirmationMessages.length);
-        const message = getProcessedMessage(
-          confirmationMessages[radomIndex],
-          variables,
-          contact
-        );
-        campaignShipping.confirmationMessage = `\u200c${message}`;
-      }
-    }
-
-    const [record, created] = await CampaignShipping.findOrCreate({
-      where: {
-        campaignId: campaignShipping.campaignId,
-        contactId: campaignShipping.contactId
-      },
-      defaults: campaignShipping
-    });
-
-    if (
-      !created &&
-      record.deliveredAt === null &&
-      record.confirmationRequestedAt === null
-    ) {
-      record.set(campaignShipping);
-      await record.save();
-    }
-
-    if (
-      record.deliveredAt === null &&
-      record.confirmationRequestedAt === null
-    ) {
-      const nextJob = await campaignQueue.add(
-        "DispatchCampaign",
-        {
-          campaignId: campaign.id,
-          campaignShippingId: record.id,
-          contactListItemId: contactId
-        },
-        {
-          delay
-        }
-      );
-
-      await record.update({ jobId: `${nextJob.id}` });
-    }
-
-    await verifyAndFinalizeCampaign(campaign);
-  } catch (err: unknown) {
-    Sentry.captureException(err);
-    logger.error(`campaignQueue -> PrepareContact -> error: ${(err as Error).message}`);
-  }
-}
-
-async function handleDispatchCampaign(job) {
-  try {
-    const { data } = job;
-    const { campaignShippingId, campaignId }: DispatchCampaignData = data;
-    const campaign = await getCampaign(campaignId);
-    const wbot = await GetWhatsappWbot(campaign.whatsapp);
-
-    logger.info(
-      `Disparo de campanha solicitado: Campanha=${campaignId};Registro=${campaignShippingId}`
-    );
-
-    const campaignShipping = await CampaignShipping.findByPk(
-      campaignShippingId,
-      {
-        include: [{ model: ContactListItem, as: "contact" }]
-      }
-    );
-
-    const chatId = `${campaignShipping.number}@s.whatsapp.net`;
-
-    if (campaign.confirmation && campaignShipping.confirmation === null) {
-      await wbot.sendMessage(chatId, {
-        text: campaignShipping.confirmationMessage
-      });
-      await campaignShipping.update({ confirmationRequestedAt: moment() });
-    } else {
-      await wbot.sendMessage(chatId, {
-        text: campaignShipping.message
-      });
-      if (campaign.mediaPath) {
-        const filePath = path.resolve("public", campaign.mediaPath);
-        const options = await getMessageOptions(campaign.mediaName, filePath);
-        if (Object.keys(options).length) {
-          await wbot.sendMessage(chatId, { ...options });
-        }
-      }
-      await campaignShipping.update({ deliveredAt: moment() });
-    }
-
-    await verifyAndFinalizeCampaign(campaign);
-
-    const io = getIO();
-    io.emit(`company-${campaign.companyId}-campaign`, {
-      action: "update",
-      record: campaign
-    });
-
-    logger.info(
-      `Campanha enviada para: Campanha=${campaignId};Contato=${campaignShipping.contact.name}`
-    );
-  } catch (err: unknown) {
-    Sentry.captureException(err);
-    logger.error((err as Error).message);
-  }
-}
-
-async function handleLoginStatus() {
-  const users: { id: number }[] = await sequelize.query(
-    "select id from \"Users\" where \"updatedAt\" < now() - '5 minutes'::interval and online = true",
-    { type: QueryTypes.SELECT }
+  const completionMessage = getCompletionMessage(
+    tracking.whatsapp.complationMessage
   );
-  users.forEach( async (item) => {
-    try {
-      const user = await User.findByPk(item.id);
-      await user.update({ online: false });
-      logger.info(`Usuário passado para offline: ${item.id}`);
-    } catch (e: unknown) {
-      Sentry.captureException(e);
-    }
-  });
-}
 
+  if (completionMessage) {
+    // So envia texto, entao a conexao oficial usa o adaptador em vez da
+    // sessao Baileys, que ela nao tem.
+    const wbot =
+      tracking.whatsapp.apiMode === "official"
+        ? buildMetaWbot(tracking.whatsapp)
+        : getWbot(tracking.whatsapp.id);
 
-async function handleInvoiceCreate() {
-  const job = new CronJob("0 * * * * *", async () => {
-
-
-    const companies = await Company.findAll();
-    companies.map(async c => {
-      const {dueDate} = c;
-      const date = moment(dueDate).format();
-      const timestamp = moment().format();
-      const hoje = moment(moment()).format("DD/MM/yyyy");
-      const vencimento = moment(dueDate).format("DD/MM/yyyy");
-
-      const diff = moment(vencimento, "DD/MM/yyyy").diff(moment(hoje, "DD/MM/yyyy"));
-      const dias = moment.duration(diff).asDays();
-
-      if (dias < 20) {
-        const plan = await Plan.findByPk(c.planId);
-
-        const sql = `SELECT COUNT(*) mycount FROM "Invoices" WHERE "companyId" = ${c.id} AND "dueDate"::text LIKE '${moment(dueDate).format("yyyy-MM-DD")}%';`
-        const invoice: { mycount: number }[] = await sequelize.query(sql,
-          { type: QueryTypes.SELECT }
-        );
-        if (+invoice[0].mycount === 0) {
-          // eslint-disable-next-line no-shadow
-          const sql = `INSERT INTO "Invoices" (detail, status, value, "updatedAt", "createdAt", "dueDate", "companyId")
-          VALUES ('${plan.name}', 'open', '${plan.value}', '${timestamp}', '${timestamp}', '${date}', ${c.id});`
-
-          await sequelize.query(sql,
-            { type: QueryTypes.INSERT }
-          );
-
-        }
-      }
-
+    await wbot.sendMessage(getJidOf(tracking.ticket), {
+      text: formatBody(`\u200e${completionMessage}`, tracking.ticket)
     });
-  });
-  job.start()
+  }
+
+  logger.debug({ tracking }, "rating timedout");
 }
 
+async function handleRatingsTimeout() {
+  const openTrackingRatings = await TicketTraking.findAll({
+    where: {
+      rated: false,
+      ...runtimeCompanyWhere(),
+      expired: false,
+      ratingAt: { [Op.not]: null }
+    },
+    include: [
+      {
+        model: Ticket,
+        include: [
+          {
+            model: Contact
+          },
+          {
+            model: User
+          },
+          {
+            model: QueueModel,
+            as: "queue"
+          }
+        ]
+      },
+      {
+        model: Whatsapp
+      }
+    ]
+  });
 
-handleInvoiceCreate()
+  const ratingThresholds = [];
+  const currentTime = new Date();
+
+  // eslint-disable-next-line no-restricted-syntax
+  for await (const tracking of openTrackingRatings) {
+    if (!ratingThresholds[tracking.companyId]) {
+      const timeout =
+        parseInt(
+          await GetCompanySetting(tracking.companyId, "ratingsTimeout", "5"),
+          10
+        ) || 5;
+
+      ratingThresholds[tracking.companyId] = subMinutes(currentTime, timeout);
+    }
+    if (tracking.ratingAt < ratingThresholds[tracking.companyId]) {
+      await setRatingExpired(tracking, ratingThresholds[tracking.companyId]);
+    }
+  }
+}
+
+async function handleNoQueueTimeout(
+  company: Company,
+  timeout: number,
+  action: number
+) {
+  logger.trace(
+    {
+      timeout,
+      action,
+      companyId: company?.id
+    },
+    "handleNoQueueTimeout: entering"
+  );
+
+  if (action) {
+    const queue = await QueueModel.findOne({
+      where: {
+        companyId: company.id,
+        id: action
+      }
+    });
+
+    if (!queue) {
+      const removed = await Setting.destroy({
+        where: {
+          companyId: company.id,
+          key: {
+            [Op.like]: "noQueueTimeout%"
+          }
+        }
+      });
+      logger.info(
+        { companyId: company.id, action, removed },
+        "handleNoQueueTimeout -> removed incorrect setting"
+      );
+      return;
+    }
+  }
+
+  const where: WhereOptions<Ticket> = {
+    status: "pending",
+    companyId: company.id,
+    queueId: null,
+    updatedAt: {
+      [Op.lt]: subMinutes(new Date(), timeout)
+    }
+  };
+
+  where[Op.or] = [
+    { isGroup: false },
+    { isGroup: true, "$contact.groupMode$": "ticket" }
+  ];
+
+  const tickets = await Ticket.findAll({
+    where,
+    include: [{ model: Contact, as: "contact", attributes: [], required: true }]
+  });
+
+  logger.debug(
+    { expiredCount: tickets.length },
+    "handleNoQueueTimeout -> tickets"
+  );
+
+  const status = action ? "pending" : "closed";
+  const queueId = action || null;
+
+  // eslint-disable-next-line no-restricted-syntax
+  for (const ticket of tickets) {
+    logger.trace(
+      { ticket: ticket.id, userId: ticket.userId, status, queueId },
+      "handleNoQueueTimeout -> UpdateTicketService"
+    );
+    const userId = status === "pending" ? null : ticket.userId;
+
+    await UpdateTicketService({
+      ticketId: ticket.id,
+      ticketData: { status, userId, queueId },
+      companyId: company.id
+    });
+  }
+
+  logger.trace(
+    {
+      timeout,
+      action,
+      companyId: company?.id
+    },
+    "handleNoQueueTimeout: exiting"
+  );
+}
+
+async function handleChatbotTicketTimeout(
+  company: Company,
+  timeout: number,
+  action: number
+) {
+  logger.trace(
+    {
+      timeout,
+      action,
+      companyId: company?.id
+    },
+    "handleChatbotTicketTimeout: entering"
+  );
+
+  if (action) {
+    const queue = await QueueModel.findOne({
+      where: {
+        companyId: company.id,
+        id: action
+      }
+    });
+
+    if (!queue) {
+      const removed = await Setting.destroy({
+        where: {
+          companyId: company.id,
+          key: {
+            [Op.like]: "chatbotTicketTimeout%"
+          }
+        }
+      });
+      logger.info(
+        { companyId: company.id, action, removed },
+        "handleChatbotTicketTimeout -> removed incorrect setting"
+      );
+      return;
+    }
+  }
+
+  const where: WhereOptions<Ticket> = {
+    status: "pending",
+    companyId: company.id,
+    isGroup: false,
+    chatbot: true,
+    updatedAt: {
+      [Op.lt]: subMinutes(new Date(), timeout)
+    }
+  };
+
+  if (action) {
+    where.queueId = {
+      [Op.or]: [{ [Op.ne]: action }, { [Op.is]: null }]
+    };
+  }
+
+  const tickets = await Ticket.findAll({ where });
+
+  logger.debug(
+    { expiredCount: tickets.length },
+    "handleChatbotTicketTimeout -> tickets"
+  );
+
+  const ticketData: UpdateTicketData = {
+    status: action ? "pending" : "closed"
+  };
+
+  if (action) {
+    ticketData.queueId = action;
+  }
+
+  // eslint-disable-next-line no-restricted-syntax
+  for (const ticket of tickets) {
+    logger.trace(
+      { ...ticketData },
+      "handleChatbotTicketTimeout -> UpdateTicketService"
+    );
+
+    await UpdateTicketService({
+      ticketId: ticket.id,
+      ticketData,
+      companyId: company.id
+    });
+  }
+
+  logger.trace(
+    {
+      timeout,
+      action,
+      companyId: company?.id
+    },
+    "handleChatbotTicketTimeout: exiting"
+  );
+}
+
+async function handleOpenTicketTimeout(
+  company: Company,
+  timeout: number,
+  status: string
+) {
+  logger.trace(
+    {
+      timeout,
+      status,
+      companyId: company?.id
+    },
+    "handleOpenTicketTimeout"
+  );
+  const tickets = await Ticket.findAll({
+    where: {
+      status: "open",
+      companyId: company.id,
+      [Op.or]: [
+        { isGroup: false },
+        { isGroup: true, "$contact.groupMode$": "ticket" }
+      ],
+      updatedAt: {
+        [Op.lt]: subMinutes(new Date(), timeout)
+      }
+    },
+    include: [{ model: Contact, as: "contact", attributes: [], required: true }]
+  });
+
+  // eslint-disable-next-line no-restricted-syntax
+  for (const ticket of tickets) {
+    await UpdateTicketService({
+      ticketId: ticket.id,
+      ticketData: {
+        status,
+        queueId: ticket.queueId,
+        userId: status !== "pending" ? ticket.userId : null
+      },
+      companyId: company.id
+    });
+  }
+}
+
+async function handleTicketTimeouts() {
+  logger.trace("handleTicketTimeouts");
+  const companies = await Company.findAll({ where: runtimeCompanyWhere("id") });
+
+  // eslint-disable-next-line no-restricted-syntax
+  for (const company of companies) {
+    logger.trace({ companyId: company?.id }, "handleTicketTimeouts -> company");
+    const noQueueTimeout = Number(
+      await GetCompanySetting(company.id, "noQueueTimeout", "0")
+    );
+    if (noQueueTimeout) {
+      const noQueueTimeoutAction = Number(
+        await GetCompanySetting(company.id, "noQueueTimeoutAction", "0")
+      );
+
+      await handleNoQueueTimeout(
+        company,
+        noQueueTimeout,
+        noQueueTimeoutAction || 0
+      );
+    }
+    const openTicketTimeout = Number(
+      await GetCompanySetting(company.id, "openTicketTimeout", "0")
+    );
+    if (openTicketTimeout) {
+      const openTicketTimeoutAction = await GetCompanySetting(
+        company.id,
+        "openTicketTimeoutAction",
+        "pending"
+      );
+
+      await handleOpenTicketTimeout(
+        company,
+        openTicketTimeout,
+        openTicketTimeoutAction
+      );
+    }
+    const chatbotTicketTimeout = Number(
+      await GetCompanySetting(company.id, "chatbotTicketTimeout", "0")
+    );
+    if (chatbotTicketTimeout) {
+      const chatbotTicketTimeoutAction =
+        Number(
+          await GetCompanySetting(company.id, "chatbotTicketTimeoutAction", "0")
+        ) || 0;
+
+      await handleChatbotTicketTimeout(
+        company,
+        chatbotTicketTimeout,
+        chatbotTicketTimeoutAction
+      );
+    }
+  }
+}
+
+async function handleEveryMinute(job: Job) {
+  const now = Date.now();
+  const delay = now - ((job.opts as { prevMillis?: number }).prevMillis || now);
+
+  // only start jobs that are up to 10s after its scheduled time
+  if (delay > 10 * 1000) {
+    logger.warn(
+      `handleEveryMinute: job skipped due to delay - delay: ${delay}ms`
+    );
+    return;
+  }
+
+  const executionId = makeRandomId(10);
+  logger.trace(`handleEveryMinute: entering - executionId: ${executionId}`);
+  try {
+    await handleMcpAuditRetention();
+    await handleRatingsTimeout();
+    await handleTicketTimeouts();
+    logger.trace(`handleEveryMinute: exiting - executionId: ${executionId}`);
+  } catch (e) {
+    logger.error(
+      { message: e?.message },
+      `handleEveryMinute: error received - executionId: ${executionId}`
+    );
+  }
+}
+
+/**
+ * Ciclo dos repasses: envia o que esta pronto (incluindo o fechamento dos
+ * parceiros agendados, que o proprio service filtra pelo dia do mes) e depois
+ * reconcilia as transferencias que ainda estao em transito.
+ */
+async function handlePartnerPayouts(): Promise<void> {
+  try {
+    await SendPartnerPayoutsService();
+  } catch (error) {
+    logger.error(`[partnerPayouts] erro no envio: ${error?.message}`);
+  }
+
+  try {
+    await ReconcilePartnerPayoutsService();
+  } catch (error) {
+    logger.error(`[partnerPayouts] erro na reconciliacao: ${error?.message}`);
+  }
+}
+
+const createInvoices = new CronJob("0 * * * * *", async () => {
+  const companies = await Company.findAll({
+    where: { platformBilling: { [Op.ne]: "plataforma" } }
+  });
+  // eslint-disable-next-line no-restricted-syntax
+  for (const c of companies) {
+    const dueDate = new Date(c.dueDate);
+    const today = new Date();
+    const diffTime = dueDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 20) {
+      await CreateCompanyInvoiceService(c.id);
+    }
+  }
+});
+
+if (!isDedicatedRuntime()) createInvoices.start();
 
 export async function startQueueProcess() {
-  logger.info("Iniciando processamento de filas");
+  logger.info("Starting queue processing");
 
-  messageQueue.process("SendMessage", handleSendMessage);
+  startCampaignQueues().then(() => {
+    logger.info("Campaign processing functions started");
+  });
+  await startProspeccaoQueue();
+  await startWhatsappStatusQueue();
 
   scheduleMonitor.process("Verify", handleVerifySchedules);
 
   sendScheduledMessages.process("SendMessage", handleSendScheduledMessage);
 
-  campaignQueue.process("VerifyCampaignsDaatabase", handleVerifyCampaigns);
+  userMonitor.process("EveryMinute", handleEveryMinute);
 
-  campaignQueue.process("ProcessCampaign", handleProcessCampaign);
-
-  campaignQueue.process("PrepareContact", handlePrepareContact);
-
-  campaignQueue.process("DispatchCampaign", handleDispatchCampaign);
-
-  userMonitor.process("VerifyLoginStatus", handleLoginStatus);
-
-
-
+  // Concorrencia 1: os envios sao espacados por causa do rate limit da API.
+  if (!isDedicatedRuntime()) {
+    partnerPayouts.process("Process", 1, handlePartnerPayouts);
+    platformWebhooks.process("Process", 1, processPlatformWebhooks);
+  }
 
   scheduleMonitor.add(
     "Verify",
@@ -673,21 +920,32 @@ export async function startQueueProcess() {
     }
   );
 
-  campaignQueue.add(
-    "VerifyCampaignsDaatabase",
-    {},
-    {
-      repeat: { cron: "*/20 * * * * *" },
-      removeOnComplete: true
-    }
-  );
-
   userMonitor.add(
-    "VerifyLoginStatus",
+    "EveryMinute",
     {},
     {
       repeat: { cron: "* * * * *" },
       removeOnComplete: true
     }
   );
+
+  if (!isDedicatedRuntime()) {
+    partnerPayouts.add(
+      "Process",
+      {},
+      {
+        repeat: { cron: "*/5 * * * *" },
+        removeOnComplete: true
+      }
+    );
+
+    platformWebhooks.add(
+      "Process",
+      {},
+      {
+        repeat: { cron: "* * * * *" },
+        removeOnComplete: true
+      }
+    );
+  }
 }

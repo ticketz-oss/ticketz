@@ -2,38 +2,69 @@ import { Router } from "express";
 import multer from "multer";
 import isAuth from "../middleware/isAuth";
 import uploadConfig from "../config/upload";
-import tokenAuth from "../middleware/tokenAuth";
 
 import * as MessageController from "../controllers/MessageController";
+import isCompliant from "../middleware/isCompliant";
 
 const messageRoutes = Router();
 
 const upload = multer(uploadConfig);
 
-messageRoutes.get("/messages/:ticketId", isAuth, MessageController.index);
+messageRoutes.post(
+  "/messages/forward",
+  isAuth,
+  isCompliant,
+  MessageController.forward
+);
+
+messageRoutes.get(
+  "/messages/:ticketId",
+  isAuth,
+  isCompliant,
+  MessageController.index
+);
+
+messageRoutes.get(
+  "/messages/:messageId/history",
+  isAuth,
+  isCompliant,
+  MessageController.historyByMessageId
+);
 
 messageRoutes.post(
   "/messages/:ticketId",
   isAuth,
+  isCompliant,
   upload.array("medias"),
   MessageController.store
 );
 
-messageRoutes.post("/messages/edit/:messageId", isAuth, MessageController.edit);
-
-messageRoutes.delete("/messages/:messageId", isAuth, MessageController.remove);
-
-messageRoutes.post("/api/messages/send",
-  tokenAuth,
-  upload.array("medias"),
-  MessageController.send
+messageRoutes.post(
+  "/messages/:ticketId/template",
+  isAuth,
+  isCompliant,
+  MessageController.storeTemplate
 );
 
-/* * /
-messageRoutes.get("/api/messages/sendGammu",
-  basicAuth,
-  MessageController.sendGammu);
+messageRoutes.post(
+  "/messages/edit/:messageId",
+  isAuth,
+  isCompliant,
+  MessageController.edit
 );
-/* */
+
+messageRoutes.post(
+  "/messages/react/:messageId",
+  isAuth,
+  isCompliant,
+  MessageController.react
+);
+
+messageRoutes.delete(
+  "/messages/:messageId",
+  isAuth,
+  isCompliant,
+  MessageController.remove
+);
 
 export default messageRoutes;

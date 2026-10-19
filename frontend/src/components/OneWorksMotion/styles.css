@@ -1,0 +1,26 @@
+.one-works-motion {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.one-works-motion > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.one-works-motion-renderer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.one-works-motion-renderer.is-ready {
+  opacity: 1;
+  pointer-events: auto;
+}

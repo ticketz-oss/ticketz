@@ -1,6 +1,6 @@
-import React from 'react';
-import { Typography, Grid } from '@material-ui/core';
-import useStyles from './styles';
+import React from "react";
+import { Typography, Grid } from "@material-ui/core";
+import useStyles from "./styles";
 
 function ShippingDetails(props) {
   const { formValues } = props;
@@ -17,7 +17,9 @@ function ShippingDetails(props) {
       <Typography gutterBottom>Usuários: {users}</Typography>
       <Typography gutterBottom>Whatsapps: {connections}</Typography>
       <Typography gutterBottom>Cobrança: Mensal</Typography>
-      <Typography gutterBottom>Total: R${price.toLocaleString('pt-br', {minimumFractionDigits: 2})}</Typography>
+      <Typography gutterBottom>
+        Total: R${price.toLocaleString("pt-br", { minimumFractionDigits: 2 })}
+      </Typography>
     </Grid>
   );
 }

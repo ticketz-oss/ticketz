@@ -4,6 +4,8 @@ import AppError from "../../errors/AppError";
 import ShowUserService from "./ShowUserService";
 import Company from "../../models/Company";
 import User from "../../models/User";
+import { revokeUserMcpGrants } from "../McpServices/RevokeMcpGrantsService";
+import { validateVisibleScreens } from "../../helpers/screenAccess";
 
 interface UserData {
   email?: string;
@@ -12,6 +14,7 @@ interface UserData {
   profile?: string;
   companyId?: number;
   queueIds?: number[];
+  visibleScreens?: string[] | null;
 }
 
 interface Request {
@@ -25,6 +28,7 @@ interface Response {
   name: string;
   email: string;
   profile: string;
+  visibleScreens: string[] | null;
 }
 
 const UpdateUserService = async ({
@@ -36,9 +40,11 @@ const UpdateUserService = async ({
 
   const requestUser = await User.findByPk(requestUserId);
 
-  if ( 
-    (requestUser.super === false && userData.companyId !== requestUser.companyId) ||
-    (requestUser.profile !== "admin" && +userId !== requestUser.id )
+  if (
+    !requestUser.super &&
+    +userId !== requestUser.id &&
+    (user.companyId !== requestUser.companyId ||
+      requestUser.profile !== "admin")
   ) {
     throw new AppError("ERR_FORBIDDEN", 403);
   }
@@ -50,7 +56,16 @@ const UpdateUserService = async ({
     password: Yup.string()
   });
 
-  const { email, password, profile, name, queueIds = [] } = userData;
+  const {
+    email,
+    password,
+    profile,
+    name,
+    queueIds = [],
+    visibleScreens
+  } = userData;
+  const securityIdentityChanged =
+    Boolean(password) || (profile !== undefined && profile !== user.profile);
 
   try {
     await schema.validate({ email, password, profile, name });
@@ -63,6 +78,10 @@ const UpdateUserService = async ({
       email,
       password,
       profile,
+      visibleScreens:
+        visibleScreens === undefined
+          ? undefined
+          : validateVisibleScreens(visibleScreens),
       name
     });
     await user.$set("queues", queueIds);
@@ -76,13 +95,20 @@ const UpdateUserService = async ({
 
   await user.reload();
 
+  if (securityIdentityChanged) {
+    await revokeUserMcpGrants(user.id);
+  }
+
   const company = await Company.findByPk(user.companyId);
 
   const serializedUser = {
     id: user.id,
     name: user.name,
     email: user.email,
+    profilePicUrl: user.profilePicUrl,
+    super: user.super,
     profile: user.profile,
+    visibleScreens: user.visibleScreens,
     companyId: user.companyId,
     company,
     queues: user.queues

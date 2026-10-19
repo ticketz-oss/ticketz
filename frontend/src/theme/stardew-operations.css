@@ -1,0 +1,487 @@
+/* StardewCN's timber panels, parchment and inventory-slot language.
+   Every rule is gated by the canonical theme attribute. */
+html[data-theme="stardew"] .sv-operations {
+  --sv-ops-ink: #5b341f;
+  --sv-ops-muted: #805335;
+  --sv-ops-border: #8b451d;
+  --sv-ops-paper: #fff1c7;
+  --sv-ops-inset: #f5d995;
+  --sv-ops-green: #477b38;
+  background-color: transparent !important;
+}
+html[data-theme="stardew"] .sv-inventory-emblem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 52px;
+  height: 52px;
+  background: #ead193;
+  border: 3px solid #5b341f;
+  box-shadow:
+    inset 2px 2px 0 #fff1c7,
+    inset -2px -2px 0 #bc863d,
+    2px 3px 0 #5b341f;
+  image-rendering: pixelated;
+}
+html[data-theme="stardew"] .sv-inventory-emblem svg {
+  width: 36px;
+  height: 36px;
+  image-rendering: pixelated;
+}
+/* Farm HUD: each live metric occupies an inventory slot. */
+html[data-theme="stardew"] .sv-screen-dashboard .painel-cabecalho {
+  align-items: center;
+  padding: 14px 18px;
+  border: 3px solid var(--sv-ops-border);
+  background: var(--sv-ops-paper);
+  box-shadow:
+    inset 0 0 0 2px #f2ba48,
+    4px 4px 0 #5b341f;
+}
+html[data-theme="stardew"] .sv-screen-dashboard .painel-card {
+  border: 4px solid var(--sv-ops-border);
+  border-radius: 0;
+  background: linear-gradient(#fff1c7, #f5d995);
+  box-shadow:
+    inset 2px 2px 0 #fff9e3,
+    inset -2px -2px 0 #cd9b54,
+    4px 4px 0 #5b341f;
+}
+html[data-theme="stardew"] .sv-screen-dashboard .painel-indicador {
+  position: relative;
+  min-height: 160px;
+  padding: 16px 12px 12px;
+  border: 3px solid var(--sv-ops-border);
+  border-radius: 0;
+  background: var(--sv-ops-paper);
+  box-shadow:
+    inset 2px 2px 0 #fff9e3,
+    inset -2px -2px 0 #cd9b54,
+    3px 4px 0 #5b341f;
+}
+html[data-theme="stardew"] .sv-screen-dashboard .sv-metric-emblem {
+  width: 34px;
+  height: 34px;
+  margin-bottom: 12px;
+  border-width: 2px;
+}
+html[data-theme="stardew"] .sv-screen-dashboard .sv-metric-emblem svg {
+  width: 26px;
+  height: 26px;
+}
+html[data-theme="stardew"] .sv-screen-dashboard .painel-indicador > span {
+  color: var(--sv-ops-muted);
+  font-size: 17px;
+  line-height: 1.05;
+}
+html[data-theme="stardew"] .sv-screen-dashboard .painel-indicador strong {
+  color: var(--sv-ops-ink);
+  font-size: 35px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1;
+  margin-top: 10px;
+  text-shadow: 1px 1px 0 #dda059;
+}
+html[data-theme="stardew"] .sv-screen-dashboard .painel-card h2 {
+  font-size: 22px;
+  line-height: 1.25;
+  color: var(--sv-ops-ink);
+  text-shadow: 1px 1px 0 #dda059;
+}
+html[data-theme="stardew"] .sv-screen-dashboard .painel-card p,
+html[data-theme="stardew"] .sv-screen-dashboard .painel-legenda {
+  font-size: 18px;
+  color: var(--sv-ops-muted);
+}
+html[data-theme="stardew"] .sv-screen-dashboard .painel-legenda i {
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--sv-ops-ink);
+  border-radius: 0;
+}
+html[data-theme="stardew"] .sv-screen-dashboard .painel-legenda > div {
+  padding: 5px 8px;
+  border-bottom: 1px solid #cd9b54;
+}
+html[data-theme="stardew"] .sv-screen-dashboard .painel-grafico {
+  min-height: 340px;
+}
+html[data-theme="stardew"] .sv-screen-dashboard .recharts-text {
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 700;
+  fill: var(--sv-ops-ink);
+}
+html[data-theme="stardew"] .sv-screen-dashboard .recharts-cartesian-grid line {
+  stroke: #cd9b54;
+  stroke-dasharray: 3 3;
+}
+/* Ledgers for contacts, lists, tags, people, calendars and dispatch records. */
+html[data-theme="stardew"] .sv-operations .MuiTable-root,
+html[data-theme="stardew"] .sv-operations .tabela-dados table {
+  background: var(--sv-ops-paper);
+}
+html[data-theme="stardew"] .sv-operations .MuiTableCell-head,
+html[data-theme="stardew"] .sv-operations .tabela-dados th {
+  color: var(--sv-ops-ink);
+  background: var(--sv-ops-inset);
+  border-bottom: 3px solid var(--sv-ops-border);
+  font-size: 18px;
+  font-weight: 700;
+}
+html[data-theme="stardew"] .sv-operations .MuiTableCell-body,
+html[data-theme="stardew"] .sv-operations .tabela-dados td {
+  font-size: 17px;
+  color: var(--sv-ops-ink);
+  border-bottom-color: #d6b477;
+}
+html[data-theme="stardew"]
+  .sv-operations
+  .MuiTableBody-root
+  > .MuiTableRow-root:nth-child(even),
+html[data-theme="stardew"]
+  .sv-operations
+  .tabela-dados
+  tbody
+  tr:nth-child(even) {
+  background: #f9e5b4;
+}
+html[data-theme="stardew"]
+  .sv-operations
+  .MuiTableBody-root
+  > .MuiTableRow-root:hover,
+html[data-theme="stardew"] .sv-operations .tabela-dados tbody tr:hover td {
+  background: #f3d392;
+}
+html[data-theme="stardew"] .sv-screen-contacts .tabela-pessoa .MuiAvatar-root,
+html[data-theme="stardew"] .sv-screen-users .MuiAvatar-root {
+  border: 2px solid var(--sv-ops-border);
+  border-radius: 0;
+  background: var(--sv-ops-inset);
+  box-shadow: 2px 2px 0 #b97836;
+}
+html[data-theme="stardew"] .sv-screen-contacts .tabela-pessoa strong {
+  font-size: 19px;
+}
+html[data-theme="stardew"] .sv-screen-contacts .tabela-pessoa small {
+  font-size: 16px;
+}
+html[data-theme="stardew"] .sv-screen-contacts .tabela-etiquetas .ew-badge,
+html[data-theme="stardew"] .sv-screen-tags .MuiChip-root {
+  border: 2px solid #8b451d;
+  border-radius: 0;
+  box-shadow: inset 1px 1px 0 #fff9e3;
+}
+html[data-theme="stardew"]
+  .sv-screen-users
+  .sv-villager-group
+  .MuiTableCell-root {
+  background: #dfbb76;
+  border-top: 2px solid var(--sv-ops-border);
+  border-bottom: 2px solid var(--sv-ops-border);
+}
+html[data-theme="stardew"]
+  .sv-screen-quick-messages
+  .MuiTableBody-root
+  .MuiTableCell-root:first-child {
+  color: #477b38;
+  font-size: 20px;
+  font-weight: 700;
+  background: #f3e8bc;
+  border-right: 2px solid #d6b477;
+}
+html[data-theme="stardew"] .sv-screen-schedules .MuiLinearProgress-root,
+html[data-theme="stardew"] .sv-screen-connections .MuiLinearProgress-root {
+  height: 10px;
+  border: 2px solid var(--sv-ops-border);
+  border-radius: 0;
+  background: var(--sv-ops-inset);
+}
+html[data-theme="stardew"]
+  .sv-screen-announcements
+  .MuiTableBody-root
+  .MuiTableCell-root:first-child {
+  border-left: 4px solid #b97836;
+}
+/* Queue cards: movable wooden signs retaining configured queue colors. */
+html[data-theme="stardew"] .sv-screen-queues .sv-queue-card {
+  border: 3px solid var(--sv-ops-border);
+  border-radius: 0;
+  background: linear-gradient(#fff1c7, #f5d995);
+  box-shadow:
+    inset 2px 2px 0 #fff9e3,
+    inset -2px -2px 0 #cd9b54,
+    3px 3px 0 #5b341f;
+  margin-bottom: 4px;
+}
+html[data-theme="stardew"] .sv-screen-queues .sv-queue-stripe {
+  width: 8px;
+  border: 1px solid var(--sv-ops-ink);
+  border-radius: 0;
+}
+html[data-theme="stardew"] .sv-screen-queues .sv-queue-handle {
+  background: #ead193;
+  border: 2px solid var(--sv-ops-border);
+  border-radius: 0;
+  box-shadow: inset 1px 1px 0 #fff1c7;
+  margin-right: 12px;
+}
+html[data-theme="stardew"] .sv-screen-queues .sv-queue-count {
+  border: 2px solid var(--sv-ops-border);
+  border-radius: 0;
+  background: #ead193;
+  color: var(--sv-ops-ink);
+  font-size: 17px;
+}
+/* Tasks: quest notices pinned onto a timber board. */
+html[data-theme="stardew"] .sv-screen-tasks .sv-quest-board {
+  padding: 8px 8px 14px;
+  background: repeating-linear-gradient(
+    0deg,
+    #b97836 0 18px,
+    #a66a2e 18px 20px
+  );
+  border: 3px solid var(--sv-ops-border);
+  box-shadow: inset 2px 2px 0 #dda059;
+}
+html[data-theme="stardew"] .sv-screen-tasks .sv-quest-column {
+  border: 3px solid var(--sv-ops-border);
+  border-radius: 0;
+  background: #e8c887;
+  box-shadow: 3px 4px 0 #75431c;
+}
+html[data-theme="stardew"] .sv-screen-tasks .sv-quest-column-header {
+  border-bottom: 3px solid #5b341f;
+  box-shadow: inset 0 2px 0 #fff1c766;
+}
+html[data-theme="stardew"]
+  .sv-screen-tasks
+  .sv-quest-column-header
+  .MuiTypography-root {
+  font-size: 22px;
+  line-height: 1.1;
+}
+html[data-theme="stardew"] .sv-screen-tasks .sv-quest-count {
+  border: 2px solid #5b341f;
+  border-radius: 0;
+  min-width: 28px;
+  font-size: 18px;
+}
+html[data-theme="stardew"] .sv-screen-tasks .sv-quest-card,
+html[data-theme="stardew"] .sv-quest-overlay {
+  border: 2px solid #8b451d;
+  border-radius: 0;
+  background: #fff1c7;
+  box-shadow:
+    inset 1px 1px 0 #fff9e3,
+    2px 3px 0 #b97836;
+}
+html[data-theme="stardew"] .sv-screen-tasks .sv-quest-card:hover {
+  background: #fff6dd;
+  box-shadow:
+    inset 1px 1px 0 #fff9e3,
+    2px 4px 0 #8b451d;
+}
+html[data-theme="stardew"]
+  .sv-screen-tasks
+  .sv-quest-card
+  > div
+  .MuiTypography-root {
+  font-size: 20px;
+  line-height: 1.2;
+}
+html[data-theme="stardew"] .sv-screen-tasks .sv-quest-deadline {
+  border: 1px solid currentColor;
+  border-radius: 0;
+  font-size: 15px;
+}
+html[data-theme="stardew"] .sv-screen-tasks .sv-quest-empty {
+  border: 2px dashed #a16b32;
+  border-radius: 0;
+  font-size: 19px;
+  background: #f5d995;
+}
+html[data-theme="stardew"] .sv-quest-details.MuiPaper-root {
+  border-left: 5px solid #8b451d;
+  background: linear-gradient(#fff1c7, #f5d995);
+  box-shadow: inset 3px 0 0 #f2ba48;
+}
+html[data-theme="stardew"] .sv-quest-details .MuiListItem-root {
+  border-bottom: 2px dashed #d6b477;
+}
+/* Help: the town library's books and tutorial scrolls. */
+html[data-theme="stardew"] .sv-screen-helps .sv-library-card {
+  border: 3px solid var(--sv-ops-border);
+  border-radius: 0;
+  background: linear-gradient(#fff1c7, #f5d995);
+  box-shadow:
+    inset 2px 2px 0 #fff9e3,
+    3px 4px 0 #b97836;
+}
+html[data-theme="stardew"] .sv-screen-helps .sv-library-card:hover {
+  background: #fff6dd;
+  box-shadow:
+    inset 2px 2px 0 #fff9e3,
+    3px 5px 0 #8b451d;
+}
+html[data-theme="stardew"] .sv-screen-helps .sv-library-icon {
+  border: 2px solid var(--sv-ops-border);
+  border-radius: 0;
+  background: #ead193;
+  color: var(--sv-ops-green);
+  box-shadow: inset 2px 2px 0 #fff1c7;
+}
+html[data-theme="stardew"] .sv-screen-helps .sv-library-article {
+  font-size: 21px;
+  color: var(--sv-ops-ink);
+  padding: 20px;
+  background: #fff1c7;
+  border: 2px solid #d6b477;
+  box-shadow: inset 2px 2px 0 #fff9e3;
+}
+html[data-theme="stardew"] .sv-screen-helps .sv-library-article blockquote {
+  background: #f5d995;
+  border-left: 4px solid #b97836;
+  padding: 12px 16px;
+}
+@media (max-width: 600px) {
+  html[data-theme="stardew"] .sv-inventory-emblem {
+    width: 40px;
+    height: 40px;
+  }
+  html[data-theme="stardew"] .sv-inventory-emblem svg {
+    width: 28px;
+    height: 28px;
+  }
+  html[data-theme="stardew"] .sv-screen-dashboard .painel-cabecalho {
+    padding: 10px;
+    gap: 12px;
+  }
+  html[data-theme="stardew"] .sv-screen-dashboard .painel-card {
+    padding: 16px 12px;
+  }
+  html[data-theme="stardew"] .sv-screen-dashboard .painel-indicadores {
+    gap: 12px;
+  }
+  html[data-theme="stardew"] .sv-screen-dashboard .painel-indicador {
+    min-height: 148px;
+    padding: 12px;
+  }
+  html[data-theme="stardew"] .sv-screen-dashboard .painel-indicador strong {
+    font-size: 30px;
+  }
+  html[data-theme="stardew"] .sv-screen-helps .sv-library-article {
+    padding: 12px;
+  }
+}
+/* Fidelity audit: controls rendered by the native data-table implementation. */
+html[data-theme="stardew"] .sv-operations .tabela-dados {
+  border: 3px solid #8b451d;
+  border-radius: 0;
+  box-shadow:
+    inset 2px 2px 0 #fff9e3,
+    3px 4px 0 #5b341f;
+}
+html[data-theme="stardew"] .sv-operations .tabela-busca {
+  border: 2px solid #b97836;
+  border-radius: 0;
+  background: #fff8dd;
+  box-shadow: inset 2px 2px 0 #ddb878;
+}
+html[data-theme="stardew"] .sv-operations .tabela-rodape,
+html[data-theme="stardew"] .sv-operations .tabela-selecao {
+  font-size: 18px;
+  background: #f5d995;
+  border-color: #b97836;
+}
+html[data-theme="stardew"] .sv-operations .tabela-pagina {
+  border: 2px solid #b97836;
+  border-radius: 0;
+  background: #fff1c7;
+  box-shadow: inset 1px 1px 0 #fff9e3;
+}
+html[data-theme="stardew"]
+  .sv-operations
+  .painel-cabecalho
+  .MuiTypography-body1,
+html[data-theme="stardew"]
+  .sv-operations
+  .stardew-main-header
+  .MuiTypography-body1 {
+  font-size: 18px;
+}
+html[data-theme="stardew"] .sv-screen-dashboard .recharts-bar-rectangle {
+  shape-rendering: crispEdges;
+}
+html[data-theme="stardew"] .sv-pixel-distribution {
+  position: relative;
+}
+html[data-theme="stardew"] .sv-pixel-distribution svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+html[data-theme="stardew"] .sv-pixel-distribution-tooltip {
+  position: absolute;
+  z-index: 1;
+  left: 8px;
+  bottom: 6px;
+  max-width: 144px;
+  pointer-events: none;
+}
+html[data-theme="stardew"] .sv-screen-tags .MuiChip-root {
+  text-shadow: 1px 1px 0 #5b341f !important;
+}
+html[data-theme="stardew"] .sv-quest-overlay {
+  font-size: 20px;
+}
+html[data-theme="stardew"] .sv-operations .MuiCircularProgress-svg {
+  shape-rendering: crispEdges;
+}
+html[data-theme="stardew"]
+  .sv-screen-helps
+  .sv-library-article
+  :is(p, span, div, h1, h2, h3, h4, h5, h6, li, blockquote, code, pre) {
+  font-family: var(--sd-font) !important;
+}
+
+/* The supplied game font has light interior strokes at its regular weight.
+   Keep that family and strengthen its ink for readable operational text. */
+html[data-theme="stardew"] .sv-operations {
+  font-weight: 700;
+}
+html[data-theme="stardew"]
+  .sv-operations
+  :is(
+    .MuiTypography-root,
+    .MuiInputBase-root,
+    .MuiFormLabel-root,
+    .MuiButton-root,
+    .MuiChip-root,
+    .MuiTableCell-root,
+    .ew-button,
+    .ew-tab,
+    .painel-indicador > span,
+    .painel-indicador strong,
+    .painel-card p,
+    .painel-legenda,
+    .tabela-rodape,
+    .tabela-selecao,
+    .tabela-dados th,
+    .tabela-dados td,
+    .tabela-pessoa strong,
+    .tabela-pessoa small,
+    .sv-quest-deadline,
+    .sv-quest-empty
+  ) {
+  font-weight: 700 !important;
+}
+html[data-theme="stardew"] .sv-screen-dashboard .painel-indicador > span,
+html[data-theme="stardew"] .sv-screen-dashboard .painel-card p {
+  color: var(--sv-ops-ink);
+}
+html[data-theme="stardew"] .sv-quest-details .MuiTypography-root {
+  font-weight: 700;
+}

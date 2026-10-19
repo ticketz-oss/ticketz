@@ -25,11 +25,6 @@ type StoreData = {
   userId: number | number;
 };
 
-type FindParams = {
-  companyId: string;
-  userId: string;
-};
-
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const { searchParam, pageNumber, userId } = req.query as IndexQuery;
   const { companyId } = req.user;
@@ -79,6 +74,10 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
 
   const record = await ShowService(id);
 
+  if (record.companyId !== req.user.companyId) {
+    throw new AppError("ERR_NO_QUICKMESSAGE_FOUND", 404);
+  }
+
   return res.status(200).json(record);
 };
 
@@ -104,8 +103,9 @@ export const update = async (
 
   const record = await UpdateService({
     ...data,
+    companyId,
     userId: Number.parseInt(req.user.id, 10),
-    id: Number.parseInt(id, 10),
+    id: Number.parseInt(id, 10)
   });
 
   const io = getIO();
@@ -124,7 +124,7 @@ export const remove = async (
   const { id } = req.params;
   const { companyId } = req.user;
 
-  await DeleteService(id);
+  await DeleteService(id, companyId);
 
   const io = getIO();
   io.emit(`company-${companyId}-quickmessage`, {
@@ -139,8 +139,10 @@ export const findList = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const params = req.query as FindParams;
-  const records: QuickMessage[] = await FindService(params);
+  const records: QuickMessage[] = await FindService({
+    userId: parseInt(req.user.id, 10),
+    companyId: req.user.companyId
+  });
 
   return res.status(200).json(records);
 };

@@ -1,0 +1,68 @@
+name: Release AC Norte candidate to Dokploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_sha:
+        description: Full SHA already validated on acnorte
+        required: true
+        type: string
+
+concurrency:
+  group: espaco-whats-acnorte-production
+  cancel-in-progress: false
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  release:
+    name: Advance the AC Norte Dokploy branch
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: acnorte-production
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify AC Norte head, global baseline and validation
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_SHA: ${{ inputs.release_sha }}
+        shell: bash
+        run: |
+          if [[ ! "$RELEASE_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "release_sha must be a full Git commit SHA."
+            exit 1
+          fi
+
+          git fetch origin acnorte acnorte-deploy deploy
+          acnorte_sha="$(git rev-parse refs/remotes/origin/acnorte)"
+          if [[ "$RELEASE_SHA" != "$acnorte_sha" ]]; then
+            echo "Only the current head of acnorte can be released."
+            exit 1
+          fi
+
+          if ! git merge-base --is-ancestor refs/remotes/origin/deploy "$RELEASE_SHA"; then
+            echo "acnorte must contain the currently deployed global baseline."
+            exit 1
+          fi
+
+          successful_runs="$(gh api \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/ci-deploy.yml/runs?branch=acnorte&head_sha=${RELEASE_SHA}&status=success&per_page=1" \
+            --jq '.total_count')"
+          if [[ "$successful_runs" == "0" ]]; then
+            echo "No successful AC Norte validation exists for this SHA."
+            exit 1
+          fi
+
+      - name: Advance AC Norte deployment branch
+        env:
+          RELEASE_SHA: ${{ inputs.release_sha }}
+        shell: bash
+        run: |
+          deployed_sha="$(git rev-parse refs/remotes/origin/acnorte-deploy)"
+          git push origin "${RELEASE_SHA}:refs/heads/acnorte-deploy" \
+            "--force-with-lease=refs/heads/acnorte-deploy:${deployed_sha}"

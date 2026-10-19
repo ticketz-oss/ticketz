@@ -1,4 +1,4 @@
-import { proto, WASocket } from "@whiskeysockets/baileys";
+import { WASocket } from "libzapitu-rf";
 import AppError from "../../errors/AppError";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
 import GetWbotMessage from "../../helpers/GetWbotMessage";
@@ -11,7 +11,7 @@ const DeleteWhatsAppMessage = async (messageId: string): Promise<Message> => {
       {
         model: Ticket,
         as: "ticket",
-        include: ["contact"]
+        include: ["contact", "whatsapp"]
       }
     ]
   });
@@ -22,24 +22,24 @@ const DeleteWhatsAppMessage = async (messageId: string): Promise<Message> => {
 
   const { ticket } = message;
 
+  if (ticket.whatsapp?.apiMode === "official") {
+    throw new AppError("ERR_WAPP_OFFICIAL_MODE_NOT_SUPPORTED", 400);
+  }
+
   const messageToDelete = await GetWbotMessage(ticket, messageId);
 
   try {
     const wbot = await GetTicketWbot(ticket);
-    const messageDelete = messageToDelete as proto.WebMessageInfo;
+    const messageDelete = messageToDelete as Message;
 
-    
-      const menssageDelete = messageToDelete as Message;
-
-      await (wbot as WASocket).sendMessage(menssageDelete.remoteJid, {
-        delete: {
-          id: menssageDelete.id,
-          remoteJid: menssageDelete.remoteJid,
-          participant: menssageDelete.participant,
-          fromMe: menssageDelete.fromMe
-        }
-      });
-    
+    await (wbot as WASocket).sendMessage(messageDelete.remoteJid, {
+      delete: {
+        id: messageDelete.id,
+        remoteJid: messageDelete.remoteJid,
+        participant: messageDelete.participant,
+        fromMe: messageDelete.fromMe
+      }
+    });
   } catch (err) {
     console.log(err);
     throw new AppError("ERR_DELETE_WAPP_MSG");

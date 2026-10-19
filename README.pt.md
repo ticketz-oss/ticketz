@@ -66,17 +66,17 @@ Antes de começar, você deve completar esta lista de verificação:
 
 - [ ] Ter um servidor limpo rodando Ubuntu 20 ou mais recente
 - [ ] Portas 80 e 443 disponíveis e não filtradas pelo firewall
-- [ ] Dois nomes de host com DNS configurado apontando para o seu servidor (um para o backend e outro para o frontend)
+- [ ] Um nome de host com DNS configurado apontando para o seu servidor
 
 Após isso, basta fazer login no seu servidor e emitir o seguinte comando, substituindo os nomes de host que você já configurou e seu endereço de email:
 
 ```bash
-curl -sSL get.ticke.tz | sudo bash -s backend.exemplo.com frontend.exemplo.com nome@exemplo.com
+curl -sSL get.ticke.tz | sudo bash -s app.exemplo.com nome@exemplo.com
 ```
 
-Após alguns minutos, você terá o servidor rodando no nome que você deu para o host do frontend.
+Após alguns minutos, você terá o servidor rodando no nome que você deu para o host.
 
-O login padrão é `admin@admin.com` e a senha padrão é `123456`, você deve alterá-la imediatamente.
+O login padrão é o endereço de email fornecido no comando de instalação e a senha padrão é `123456`, você deve alterá-la imediatamente.
 
 ### Atualização
 
@@ -112,51 +112,130 @@ Se você quiser "seguir" os logs em tempo real, basta adicionar um parâmetro `-
 docker compose logs -t -f
 ```
 
-Rodando o projeto a partir do Código Fonte usando Docker:
----------------------------------------------------------
+Rodando o projeto a partir do código fonte usando Docker
+--------------------------------------------------------
 
-Para a
-instalação é necessário ter o Docker Community Edition e o cliente Git
-instalados. O ideal é buscar a melhor forma de instalar estes recursos no
-sistema operacional de sua preferência. [O guia oficial de instalação do
-Docker pode ser encontrado aqui](https://docs.docker.com/engine/install/).
+Para a instalação é necessário ter o Docker Community Edition, Docker Compose
+e o cliente Git instalados. O ideal é buscar a melhor forma de instalar estes
+recursos no sistema operacional de sua preferência. [O guia oficial de
+instalação do Docker pode ser encontrado aqui](https://docs.docker.com/engine/install/).
 
-
-Em ambos os casos é necessário clonar o repositório, necessário então abrir
-um terminal de comandos:
+Clone o repositório e execute os comandos sempre a partir da raiz do projeto:
 
 ```bash
-git clone https://github.com/allgood/ticketz.git
+git clone https://github.com/GuiZeroUm/ticketz.git
 cd ticketz
 ```
 
-## Rodando localmente
+## Rodando localmente: guia para pessoas e agentes de IA
+
+Resumo do ambiente local:
+
+- O repositório não tem `package.json` na raiz; backend e frontend são pacotes
+  separados.
+- O caminho mais simples é Docker Compose a partir da raiz do repositório.
+- O frontend fica em `http://localhost:3000/login`.
+- O backend é acessado pelo frontend por `http://localhost:3000/backend`.
+- A porta direta padrão do backend é `8080`, mas ela pode ser trocada sem
+  quebrar o frontend.
+- O usuário padrão é `admin@ticketz.host` e a senha padrão é `123456`.
+
+### Subida padrão
+
+Use este comando quando as portas `3000` e `8080` estiverem livres:
+
+```bash
+docker compose -f docker-compose-local.yaml up -d --build
+```
+
+Na primeira execução o sistema vai inicializar os bancos de dados e tabelas,
+e após alguns minutos o Ticketz estará acessível em:
+
+```text
+http://localhost:3000/login
+```
+
+### Quando a porta 8080 já estiver em uso
+
+Se já existir outro container ou serviço usando a porta `8080`, mantenha o
+frontend na porta `3000` e publique o backend em outra porta. Este foi o
+comando usado neste ambiente:
+
+```bash
+BACKEND_PORT=18080 docker compose -f docker-compose-local.yaml up -d --build
+```
+
+O navegador continua acessando `http://localhost:3000/login`. A porta
+`18080` serve apenas para acesso direto ao backend pelo host, quando necessário.
+
+### Alternativa quando a imagem runtime do backend estiver lenta
+
+O `backend/Dockerfile` padrão usa a imagem runtime
+`ghcr.io/ticketz-oss/ticketz-node-24`. Em alguns ambientes o download dessa
+imagem pode ficar muito lento. Para desenvolvimento local existe um override
+pequeno:
+
+- `docker-compose.localruntime.yaml`
+- `backend/Dockerfile.localruntime`
+
+Ele troca apenas o runtime local do backend para a imagem oficial `node:24`,
+mantendo Postgres, Redis, frontend, volumes e variáveis do compose local. Use
+assim:
+
+```bash
+BACKEND_PORT=18080 docker compose -f docker-compose-local.yaml -f docker-compose.localruntime.yaml up -d --build
+```
+
+Essa alternativa é para desenvolvimento local e inicialização rápida. Para
+publicar na internet ou validar o runtime completo do projeto, use os compose
+padrão do projeto.
+
+### Verificação após subir
+
+Verifique os containers:
+
+```bash
+BACKEND_PORT=18080 docker compose -f docker-compose-local.yaml -f docker-compose.localruntime.yaml ps
+```
+
+Verifique os logs do backend e aguarde uma linha indicando que o servidor
+iniciou:
+
+```bash
+BACKEND_PORT=18080 docker compose -f docker-compose-local.yaml -f docker-compose.localruntime.yaml logs -f backend
+```
+
+Verifique HTTP:
+
+```bash
+curl -I http://localhost:3000/
+curl -I http://localhost:3000/backend/
+```
+
+As duas chamadas devem responder `200 OK` quando frontend, proxy e backend
+estiverem prontos.
+
+### Parar e limpar
+
+Para parar mantendo banco e uploads:
+
+```bash
+BACKEND_PORT=18080 docker compose -f docker-compose-local.yaml -f docker-compose.localruntime.yaml down
+```
+
+Para apagar também volumes locais, banco, Redis e arquivos enviados:
+
+```bash
+BACKEND_PORT=18080 docker compose -f docker-compose-local.yaml -f docker-compose.localruntime.yaml down -v
+```
+
+### Rodando em uma rede local
 
 Por padrão a configuração está ajustada para executar o sistema apenas no
 próprio computador. Para executar em uma rede local é necessário editar os
 arquivos `.env-backend-local` e `.env-frontend-local` e alterar os endereços
-de backend e frontend de `localhost` para o ip desejado, por exemplo
-`192.168.0.10`
-
-Para executar o sistema basta executar o comando abaixo:
-
-```bash
-docker compose -f docker-compose-local.yaml up -d
-```
-
-Na primeira execução o sistema vai inicializar os bancos de dados e tabelas,
-e após alguns minutos o Ticketz estará acessível pela porta 3000
-
-O usuário padrão é admin@admin.com e a senha padrão é 123456
-
-A aplicação irá se reiniciar automaticamente a cada reboot do servidor.
-
-A execução pode ser interrompida com o comando:
-
-```bash
-docker compose -f docker-compose-local.yaml down
-```
-
+de backend e frontend de `localhost` para o IP desejado, por exemplo
+`192.168.0.10`.
 
 ## Rodando e servindo na internet
 
@@ -191,7 +270,7 @@ conteiners, e após isso o ticketz vai inicializar os bancos de dados e
 tabelas. Esta operação pode levar bastante tempo, depois disso o Ticketz
 estará acessível pelo endereço fornecido para oo frontend.
 
-O usuário padrão é admin@admin.com e a senha padrão é 123456
+O usuário padrão será o endereço de email fornecido na configuração do arquivo `.env-backend-acme` e a senha padrão é `123456`
 
 A aplicação irá se reiniciar automaticamente a cada reboot do servidor.
 

@@ -1,20 +1,17 @@
-import { verify } from "jsonwebtoken";
 import { Response as Res } from "express";
 
 import User from "../../models/User";
+import { assertRuntimeCompany } from "../../helpers/tenantRuntime";
 import AppError from "../../errors/AppError";
 import ShowUserService from "../UserServices/ShowUserService";
-import authConfig from "../../config/auth";
 import {
   createAccessToken,
   createRefreshToken
 } from "../../helpers/CreateTokens";
-
-interface RefreshTokenPayload {
-  id: string;
-  tokenVersion: number;
-  companyId: number;
-}
+import {
+  decodeRefreshToken,
+  RefreshTokenPayload
+} from "../../helpers/DecodeRefreshToken";
 
 interface Response {
   user: User;
@@ -26,23 +23,42 @@ export const RefreshTokenService = async (
   res: Res,
   token: string
 ): Promise<Response> => {
+  let decoded: RefreshTokenPayload;
   try {
-    const decoded = verify(token, authConfig.refreshSecret);
-    const { id, tokenVersion, companyId } = decoded as RefreshTokenPayload;
-
-    const user = await ShowUserService(id);
-
-    if (user.tokenVersion !== tokenVersion) {
-      res.clearCookie("jrt");
-      throw new AppError("ERR_SESSION_EXPIRED", 401);
-    }
-
-    const newToken = createAccessToken(user);
-    const refreshToken = createRefreshToken(user);
-
-    return { user, newToken, refreshToken };
-  } catch (err) {
+    decoded = decodeRefreshToken(token);
+  } catch {
     res.clearCookie("jrt");
     throw new AppError("ERR_SESSION_EXPIRED", 401);
   }
+
+  const { id, tokenVersion, impersonated, originalUserId, originalCompanyId } =
+    decoded;
+  const user = await ShowUserService(id);
+  assertRuntimeCompany(user.companyId);
+
+  if (user.company?.platformStatus === "suspenso") {
+    res.clearCookie("jrt");
+    throw new AppError("ERR_COMPANY_SUSPENDED", 403);
+  }
+  if (
+    user.tokenVersion !== tokenVersion ||
+    !user.company?.status ||
+    user.company.platformStatus === "cancelado"
+  ) {
+    res.clearCookie("jrt");
+    throw new AppError("ERR_SESSION_EXPIRED", 401);
+  }
+
+  const newToken = createAccessToken(user, {
+    impersonated: impersonated === true,
+    originalUserId,
+    originalCompanyId
+  });
+  const refreshToken = createRefreshToken(user, {
+    impersonated: impersonated === true,
+    originalUserId,
+    originalCompanyId
+  });
+
+  return { user, newToken, refreshToken };
 };

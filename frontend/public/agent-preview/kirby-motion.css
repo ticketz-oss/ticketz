@@ -1,0 +1,195 @@
+/* Body accents complement the official Avatar Lab expression animations. */
+[data-animation] > .bs-avatar {
+  transform-origin: 50% 82%;
+  transition: filter 420ms ease;
+  will-change: transform;
+}
+
+[data-animation="idle"] > .bs-avatar,
+[data-animation="happy"] > .bs-avatar {
+  animation: kirby-float 3.8s ease-in-out infinite;
+}
+
+[data-animation="listening"] > .bs-avatar,
+[data-animation="curious"] > .bs-avatar {
+  animation: kirby-curious 3s ease-in-out infinite;
+}
+
+[data-animation="thinking"] > .bs-avatar,
+[data-animation="suspicious"] > .bs-avatar,
+[data-animation="confused"] > .bs-avatar {
+  animation: kirby-ponder 2.7s ease-in-out infinite;
+}
+
+[data-animation="working"] > .bs-avatar,
+[data-animation="searching"] > .bs-avatar {
+  animation: kirby-focus 1.65s ease-in-out infinite;
+}
+
+[data-animation="excited"] > .bs-avatar,
+[data-animation="celebrate"] > .bs-avatar,
+[data-animation="waking"] > .bs-avatar {
+  animation: kirby-hop 1.45s ease-in-out infinite;
+}
+
+[data-animation="playful"] > .bs-avatar,
+[data-animation="laughing"] > .bs-avatar {
+  animation: kirby-wiggle 1.8s ease-in-out infinite;
+}
+
+[data-animation="proud"] > .bs-avatar,
+[data-animation="shy"] > .bs-avatar {
+  animation: kirby-proud 3s ease-in-out infinite;
+}
+
+[data-animation="surprised"] > .bs-avatar {
+  animation: kirby-surprise 1.5s ease-in-out infinite;
+}
+
+[data-animation="angry"] > .bs-avatar {
+  animation: kirby-angry 1.7s ease-in-out infinite;
+  filter: drop-shadow(0 2px 9px #e747423d);
+}
+
+[data-animation="sad"] > .bs-avatar {
+  animation: kirby-sad 4s ease-in-out infinite;
+  filter: drop-shadow(0 3px 10px #b7d9ff29);
+}
+
+[data-resting="true"] > .bs-avatar {
+  animation: none;
+  will-change: auto;
+}
+
+@keyframes kirby-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-3%) rotate(1deg);
+  }
+}
+
+@keyframes kirby-curious {
+  0%,
+  100% {
+    transform: rotate(-4deg) translateY(0);
+  }
+  50% {
+    transform: rotate(5deg) translateY(-2%);
+  }
+}
+
+@keyframes kirby-ponder {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  35% {
+    transform: rotate(4deg) translateY(-2%);
+  }
+  65% {
+    transform: rotate(1deg) translateY(1%);
+  }
+}
+
+@keyframes kirby-focus {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(3%) rotate(2deg);
+  }
+}
+
+@keyframes kirby-hop {
+  0%,
+  70%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  30% {
+    transform: translateY(-9%) rotate(4deg);
+  }
+  48% {
+    transform: translateY(1%) rotate(-3deg);
+  }
+}
+
+@keyframes kirby-wiggle {
+  0%,
+  100% {
+    transform: rotate(-6deg) translateY(0);
+  }
+  25% {
+    transform: rotate(5deg) translateY(-3%);
+  }
+  50% {
+    transform: rotate(-4deg) translateY(-5%);
+  }
+  75% {
+    transform: rotate(6deg) translateY(-2%);
+  }
+}
+
+@keyframes kirby-proud {
+  0%,
+  100% {
+    transform: rotate(-3deg) translateY(0);
+  }
+  50% {
+    transform: rotate(3deg) translateY(-4%);
+  }
+}
+
+@keyframes kirby-surprise {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  20% {
+    transform: translateY(-7%) rotate(-4deg);
+  }
+  45% {
+    transform: translateY(-2%) rotate(3deg);
+  }
+}
+
+@keyframes kirby-angry {
+  0%,
+  50%,
+  100% {
+    transform: translateX(0) rotate(0);
+  }
+  10%,
+  30% {
+    transform: translateX(-2%) rotate(-4deg);
+  }
+  20%,
+  40% {
+    transform: translateX(2%) rotate(4deg);
+  }
+  75% {
+    transform: translateY(-2%);
+  }
+}
+
+@keyframes kirby-sad {
+  0%,
+  100% {
+    transform: translateY(3%) rotate(-5deg);
+  }
+  50% {
+    transform: translateY(5%) rotate(-2deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-animation] > .bs-avatar {
+    animation: none;
+    transition: none;
+    will-change: auto;
+  }
+}

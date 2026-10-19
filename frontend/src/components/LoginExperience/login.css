@@ -1,0 +1,247 @@
+/* Tenant branding shared by the real SignInPage and the settings preview. */
+.login-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.login-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.login-tools .MuiIconButton-root {
+  color: var(--login-muted);
+  padding: 9px;
+}
+.login-register {
+  display: block;
+  text-align: center;
+  margin-top: 24px;
+  font-size: 13px;
+  color: var(--login-accent);
+}
+.login-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px 24px;
+  padding-bottom: 4px;
+}
+.login-footer a {
+  color: var(--login-muted);
+  font-size: 12px;
+  text-decoration: none;
+}
+.login-footer a:hover {
+  text-decoration: underline;
+}
+.login-brand-panel {
+  --login-glow: #ff7900;
+  order: 2;
+  position: relative;
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--login-ink, #242426);
+  background: transparent;
+}
+.login-brand-panel--preview {
+  min-height: 400px;
+  border-radius: 18px;
+  overflow: hidden;
+  isolation: isolate;
+  background: #fafafa;
+  --login-ink: #242426;
+  --login-muted: #747477;
+}
+.login-brand-visual {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 16%);
+}
+.login-brand-panel--preview .login-brand-visual {
+  mask-image: none;
+}
+.login-reveal-shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, #ffffff70, #ffffffc2 42%, #ffffffad);
+}
+.login-brand-panel--reveal {
+  --login-ink: #242426;
+  --login-muted: #4f4f55;
+}
+.login-brand-panel--reveal[data-theme="dark"] {
+  --login-ink: #fff;
+  --login-muted: #f0eeee;
+}
+.login-brand-panel--reveal[data-theme="dark"] .login-reveal-shade {
+  background: linear-gradient(180deg, #15151520, #15151588 42%, #15151599);
+}
+.login-brand-panel--reveal .login-brand-content {
+  pointer-events: none;
+  padding-left: 64px;
+}
+.login-brand-panel--reveal[data-theme="dark"] .login-brand-content {
+  text-shadow: 0 2px 14px #0005;
+}
+.login-brand-grid,
+.login-brand-media,
+.login-brand-shade,
+.login-brand-orbits {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.login-brand-grid {
+  display: none;
+}
+.login-brand-media {
+  object-fit: cover;
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    #000 28%,
+    #000 85%,
+    transparent
+  );
+  opacity: 0.18;
+}
+.login-brand-shade {
+  display: none;
+}
+.login-brand-content {
+  z-index: 1;
+  position: relative;
+  text-align: center;
+  width: 100%;
+  max-width: 570px;
+  padding: 80px 38px;
+}
+.login-brand-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+.login-brand-logo img {
+  object-fit: contain;
+  max-width: 280px;
+  max-height: 80px;
+}
+.login-brand-logo img[src$="espaco-whats.png"] {
+  width: 62px;
+  height: 62px;
+  border-radius: 18px;
+}
+.login-brand-logo span {
+  font-size: 36px;
+  letter-spacing: -0.055em;
+  font-weight: 650;
+  line-height: 1;
+}
+.login-brand-logo--compact {
+  justify-content: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+.login-brand-logo--compact img {
+  max-width: 140px;
+  max-height: 34px;
+}
+.login-brand-logo--compact img[src$="espaco-whats.png"] {
+  width: 29px;
+  height: 29px;
+  border-radius: 8px;
+}
+.login-brand-logo--compact span {
+  font-size: 16px;
+  white-space: nowrap;
+}
+.login-brand-content h2 {
+  font-size: clamp(28px, 2.5vw, 36px);
+  letter-spacing: -0.035em;
+  line-height: 1.28;
+  font-weight: 500;
+  margin: 38px 0 24px;
+  overflow-wrap: anywhere;
+}
+.login-brand-content p {
+  color: var(--login-muted, #747477);
+  font-size: 16px;
+  line-height: 1.8;
+  max-width: 420px;
+  margin: auto;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+.login-brand-line {
+  display: none;
+}
+.login-brand-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: var(--login-glow);
+  opacity: 0.24;
+  mask-image: linear-gradient(0deg, transparent, #000 50%, transparent);
+}
+.login-orbit {
+  position: absolute;
+  border: 0;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.login-orbit--0 {
+  width: 420px;
+  height: 420px;
+  top: calc(50% - 230px);
+  left: calc(50% - 210px);
+  background: radial-gradient(ellipse at 50% 50%, #ff790026, transparent 68%);
+  filter: blur(48px);
+}
+.login-orbit--1 {
+  width: 220px;
+  height: 220px;
+  top: 22%;
+  right: 7%;
+  background: radial-gradient(ellipse, #ffb77524, transparent 65%);
+  filter: blur(48px);
+}
+.login-orbit--2 {
+  display: none;
+}
+.login-brand-panel--preview .login-brand-content {
+  padding: 42px 28px;
+}
+.login-brand-panel--preview .login-brand-content h2 {
+  font-size: 27px;
+  margin-top: 26px;
+}
+.login-brand-panel--preview .login-brand-content p {
+  font-size: 14px;
+}
+.login-brand-panel--preview .login-brand-logo span {
+  font-size: 26px;
+}
+@media (max-width: 960px) {
+  .login-brand-content {
+    padding: 64px 30px;
+  }
+  .login-brand-panel .login-brand-logo span {
+    font-size: 28px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .login-brand-panel * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -5,11 +5,11 @@ module.exports = {
     return Promise.all([
       queryInterface.changeColumn("Plans", "value", {
         type: DataTypes.FLOAT,
-        allowNull: true,
+        allowNull: true
       })
     ]);
   },
-  
+
   down: (queryInterface: QueryInterface) => {
     return Promise.all([
       queryInterface.changeColumn("Plans", "value", {
@@ -18,5 +18,5 @@ module.exports = {
         defaultValue: 199.99
       })
     ]);
-  },
+  }
 };

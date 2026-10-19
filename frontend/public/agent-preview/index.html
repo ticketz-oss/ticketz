@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f7f7f8" />
+    <title>Agente Espaço · Prévia visual</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="thought-line.css" />
+    <link rel="stylesheet" href="app.css" />
+    <link rel="stylesheet" href="navigation.css" />
+    <link rel="stylesheet" href="tool-views.css" />
+    <link rel="stylesheet" href="catalog-views.css" />
+    <link rel="stylesheet" href="channel-views.css" />
+    <link rel="stylesheet" href="plan-views.css" />
+    <link rel="stylesheet" href="dark.css" />
+    <link rel="stylesheet" href="kirby-motion.css" />
+  </head>
+  <body>
+    <svg
+      class="icon-definitions"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <symbol id="i-grid" viewBox="0 0 24 24">
+        <rect x="3" y="3" width="7" height="7" rx="1.5" />
+        <rect x="14" y="3" width="7" height="7" rx="1.5" />
+        <rect x="3" y="14" width="7" height="7" rx="1.5" />
+        <rect x="14" y="14" width="7" height="7" rx="1.5" />
+      </symbol>
+      <symbol id="i-chat" viewBox="0 0 24 24">
+        <path
+          d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H5l-3 2v-9.5A8.5 8.5 0 0 1 10.5 4h2A8.5 8.5 0 0 1 21 11.5Z"
+        />
+        <path d="M7 9h9M7 13h6" />
+      </symbol>
+      <symbol id="i-headset" viewBox="0 0 24 24">
+        <path d="M4 13v-2a8 8 0 0 1 16 0v6a4 4 0 0 1-4 4h-2" />
+        <rect x="2" y="11" width="5" height="8" rx="2" />
+        <rect x="17" y="11" width="5" height="8" rx="2" />
+      </symbol>
+      <symbol id="i-users" viewBox="0 0 24 24">
+        <circle cx="9" cy="8" r="3" />
+        <path
+          d="M2 21v-2a7 7 0 0 1 14 0v2M17 5a3 3 0 0 1 0 6M22 21v-2a7 7 0 0 0-4-6"
+        />
+      </symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 7v5l3 2" />
+      </symbol>
+      <symbol id="i-check" viewBox="0 0 24 24">
+        <path d="m5 12 4 4L19 6" />
+      </symbol>
+      <symbol id="i-settings" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="3" />
+        <path
+          d="m9 3-.6 2.2-2 .9L4.3 5.5 2 9l1.7 1.6v2.8L2 15l2.3 3.5 2.1-.6 2 .9L9 21h6l.6-2.2 2-.9 2.1.6L22 15l-1.7-1.6v-2.8L22 9l-2.3-3.5-2.1.6-2-.9L15 3Z"
+        />
+      </symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24">
+        <path d="m9 5 7 7-7 7" />
+      </symbol>
+      <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></symbol>
+      <symbol id="i-search" viewBox="0 0 24 24">
+        <circle cx="10.5" cy="10.5" r="6.5" />
+        <path d="m16 16 5 5" />
+      </symbol>
+      <symbol id="i-bell" viewBox="0 0 24 24">
+        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" />
+      </symbol>
+      <symbol id="i-spark" viewBox="0 0 24 24">
+        <path d="m12 3 2.8 6.2L21 12l-6.2 2.8L12 21l-2.8-6.2L3 12l6.2-2.8Z" />
+      </symbol>
+      <symbol id="i-history" viewBox="0 0 24 24">
+        <path d="M3 11a9 9 0 1 1 3 8M3 4v7h7M12 7v5l3 2" />
+      </symbol>
+      <symbol id="i-new" viewBox="0 0 24 24">
+        <path
+          d="M12 5H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M16 3l5 5M9 15l2-6 8-8 5 5-8 8Z"
+        />
+      </symbol>
+      <symbol id="i-expand" viewBox="0 0 24 24">
+        <path d="M14 3h7v7M21 3l-7 7M10 21H3v-7M3 21l7-7" />
+      </symbol>
+      <symbol id="i-close" viewBox="0 0 24 24">
+        <path d="m6 6 12 12M18 6 6 18" />
+      </symbol>
+      <symbol id="i-clip" viewBox="0 0 24 24">
+        <path d="m8 13 7-7a3 3 0 0 1 4 4L9 20a5 5 0 0 1-7-7L13 2M5 15l8-8" />
+      </symbol>
+      <symbol id="i-send" viewBox="0 0 24 24">
+        <path d="M12 20V4M5 11l7-7 7 7" />
+      </symbol>
+      <symbol id="i-zap" viewBox="0 0 24 24">
+        <path d="m14 2-10 12h7l-1 8 10-12h-7Z" />
+      </symbol>
+      <symbol id="i-copy" viewBox="0 0 24 24">
+        <rect x="8" y="8" width="12" height="13" rx="2" />
+        <path d="M16 8V3H3v13h5" />
+      </symbol>
+      <symbol id="i-stop" viewBox="0 0 24 24">
+        <rect x="6" y="6" width="12" height="12" rx="2" />
+      </symbol>
+      <symbol id="i-link" viewBox="0 0 24 24">
+        <path
+          d="m9 15 6-6M8 17l-2 2a4 4 0 0 1-6-6l5-5a4 4 0 0 1 6 0M16 7l2-2a4 4 0 0 1 6 6l-5 5a4 4 0 0 1-6 0"
+        />
+      </symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24">
+        <path d="M4 12h16m-6-6 6 6-6 6" />
+      </symbol>
+    </svg>
+
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Navegação principal">
+        <a class="brand" href="#" aria-label="Espaço Whats, página inicial">
+          <img
+            class="brand-logo"
+            src="logo-light.png"
+            alt="Espaço Whats"
+            width="118"
+            height="49"
+          />
+        </a>
+
+        <button
+          class="agent-launcher"
+          id="agent-toggle"
+          aria-label="Agente Espaço"
+          type="button"
+          aria-controls="agent-panel"
+          aria-expanded="true"
+        >
+          <span class="launcher-orb"
+            ><iframe
+              src="kirby.html"
+              title="Kirby, personagem do Agente Espaço"
+              tabindex="-1"
+              aria-hidden="true"
+            ></iframe
+          ></span>
+          <span class="launcher-copy"
+            ><strong>Agente Espaço</strong
+            ><span>Uma mão extra na operação</span></span
+          >
+          <svg class="icon launcher-arrow"><use href="#i-chevron" /></svg>
+        </button>
+        <button
+          class="open-ticket"
+          type="button"
+          data-demo="Abrir atendimento faz parte do aplicativo. Esta prévia demonstra o agente."
+        >
+          <svg class="icon"><use href="#i-headset" /></svg>Abrir atendimento
+        </button>
+
+        <nav class="navigation">
+          <span class="nav-label">Operação</span>
+          <a class="nav-item active" href="#" aria-current="page"
+            ><svg class="icon"><use href="#i-grid" /></svg>Visão geral da
+            operação</a
+          >
+          <a class="nav-item" href="#"
+            ><svg class="icon"><use href="#i-chat" /></svg>Atendimentos<span
+              class="nav-count"
+              >18</span
+            ></a
+          >
+          <a class="nav-item" href="#"
+            ><svg class="icon"><use href="#i-users" /></svg>Contatos</a
+          >
+          <a class="nav-item" href="#"
+            ><svg class="icon"><use href="#i-clock" /></svg>Agendamentos</a
+          >
+          <span class="nav-label management">Gestão</span>
+          <a class="nav-item" href="#"
+            ><svg class="icon"><use href="#i-users" /></svg>Equipe e filas</a
+          >
+          <a class="nav-item" href="#"
+            ><svg class="icon"><use href="#i-zap" /></svg>Automações</a
+          >
+          <a class="nav-item" href="#"
+            ><svg class="icon"><use href="#i-settings" /></svg>Configurações</a
+          >
+        </nav>
+        <div class="sidebar-footer">
+          <div class="avatar small">G</div>
+          <div><strong>Guilherme</strong><span>Administrador</span></div>
+          <svg class="icon"><use href="#i-down" /></svg>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <header class="workspace-header">
+          <div class="breadcrumb">
+            Empresa 1<svg class="icon"><use href="#i-chevron" /></svg
+            ><strong>Operação</strong>
+          </div>
+          <div class="header-tools">
+            <span class="prototype-badge"
+              ><span></span>Prévia visual · dados fictícios</span
+            ><button
+              class="icon-button"
+              aria-label="Notificações da prévia"
+              type="button"
+            >
+              <svg class="icon"><use href="#i-bell" /></svg>
+            </button>
+            <div class="avatar">G</div>
+          </div>
+        </header>
+        <div class="workspace-content">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">Seu espaço de trabalho</p>
+              <h1>Visão geral da operação</h1>
+              <p>Um olhar sobre as conversas e a sua equipe.</p>
+            </div>
+            <button class="period-button" type="button">
+              <svg class="icon"><use href="#i-clock" /></svg>Hoje<svg
+                class="icon"
+              >
+                <use href="#i-down" />
+              </svg>
+            </button>
+          </div>
+          <section class="metrics" aria-label="Indicadores de exemplo">
+            <article class="metric-card">
+              <span class="metric-icon orange"
+                ><svg class="icon"><use href="#i-chat" /></svg></span
+              ><span class="metric-label">Em atendimento</span
+              ><strong>18</strong
+              ><span class="metric-description"
+                ><span class="status-dot"></span>6 pessoas na equipe</span
+              >
+            </article>
+            <article class="metric-card">
+              <span class="metric-icon amber"
+                ><svg class="icon"><use href="#i-clock" /></svg></span
+              ><span class="metric-label">Aguardando</span><strong>7</strong
+              ><span class="metric-description">Primeira resposta: 2m 14s</span>
+            </article>
+            <article class="metric-card">
+              <span class="metric-icon green"
+                ><svg class="icon"><use href="#i-check" /></svg></span
+              ><span class="metric-label">Concluídos hoje</span
+              ><strong>46</strong
+              ><span class="metric-description">+8 em relação a ontem</span>
+            </article>
+          </section>
+          <section class="queue-card">
+            <div class="section-heading">
+              <div>
+                <h2>Como estão as filas</h2>
+                <p>Distribuição dos atendimentos neste momento</p>
+              </div>
+              <button class="text-button" type="button">
+                Ver todos<svg class="icon"><use href="#i-arrow" /></svg>
+              </button>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Fila</th>
+                    <th>Em atendimento</th>
+                    <th>Aguardando</th>
+                    <th>Equipe</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><span class="queue-dot orange-dot"></span>Comercial</td>
+                    <td>7</td>
+                    <td><span class="waiting-badge">2</span></td>
+                    <td>
+                      <div class="avatar-stack">
+                        <span>AL</span><span>BR</span><span>+1</span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><span class="queue-dot blue-dot"></span>Suporte</td>
+                    <td>8</td>
+                    <td><span class="waiting-badge">4</span></td>
+                    <td>
+                      <div class="avatar-stack">
+                        <span>CA</span><span>DA</span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><span class="queue-dot sage-dot"></span>Financeiro</td>
+                    <td>3</td>
+                    <td><span class="waiting-badge neutral">1</span></td>
+                    <td>
+                      <div class="avatar-stack"><span>EL</span></div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+          <section class="activity-card">
+            <div class="section-heading">
+              <div>
+                <h2>A operação segue em movimento</h2>
+                <p>Últimas atividades da equipe</p>
+              </div>
+              <span class="live-label"
+                ><span class="status-dot"></span>Hoje</span
+              >
+            </div>
+            <div class="activity-row">
+              <span class="activity-check"
+                ><svg class="icon"><use href="#i-check" /></svg
+              ></span>
+              <div>
+                <strong>Ana concluiu um atendimento</strong
+                ><span>Comercial · Conversa com Mariana</span>
+              </div>
+              <time>Há 2 min</time>
+            </div>
+            <div class="activity-row">
+              <span class="activity-person"
+                ><svg class="icon"><use href="#i-users" /></svg
+              ></span>
+              <div>
+                <strong>Carlos assumiu uma conversa</strong
+                ><span>Suporte · Conversa com Rafael</span>
+              </div>
+              <time>Há 5 min</time>
+            </div>
+          </section>
+          <div class="workspace-footnote">
+            Dados ilustrativos para explorar a experiência do agente.
+          </div>
+        </div>
+      </main>
+
+      <aside class="agent-panel" id="agent-panel" aria-label="Agente Espaço">
+        <header class="agent-header">
+          <div class="agent-header-title">
+            <button
+              class="icon-button agent-menu-toggle"
+              id="agent-menu"
+              type="button"
+              aria-label="Menu do agente"
+              aria-controls="agent-navigation"
+              aria-expanded="false"
+            >
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M8 6h12M8 12h12M8 18h12M3 6h1M3 12h1M3 18h1" />
+              </svg>
+            </button>
+            <span class="mini-orb" data-kirby-avatar aria-hidden="true"></span>
+            <div>
+              <strong>Agente Espaço</strong
+              ><span id="agent-view-caption">Do seu lado, na operação</span>
+            </div>
+          </div>
+          <div class="agent-header-actions">
+            <button
+              class="icon-button"
+              id="agent-history"
+              type="button"
+              aria-label="Histórico de conversas"
+              aria-expanded="false"
+              aria-controls="history-popover"
+              hidden
+            >
+              <svg class="icon"><use href="#i-history" /></svg></button
+            ><button
+              class="icon-button"
+              id="agent-new"
+              type="button"
+              aria-label="Nova conversa"
+            >
+              <svg class="icon"><use href="#i-new" /></svg></button
+            ><button
+              class="icon-button"
+              id="agent-expand"
+              type="button"
+              aria-label="Expandir painel"
+              aria-expanded="false"
+            >
+              <svg class="icon"><use href="#i-expand" /></svg></button
+            ><button
+              class="icon-button"
+              id="agent-close"
+              type="button"
+              aria-label="Fechar agente"
+            >
+              <svg class="icon"><use href="#i-close" /></svg>
+            </button>
+          </div>
+        </header>
+        <div class="history-popover popover" id="history-popover" hidden>
+          <div class="popover-heading">
+            <strong>Suas conversas</strong
+            ><span>Por aqui, o contexto continua.</span>
+          </div>
+          <div id="history-items" class="history-items">
+            <p class="empty-history">Suas conversas vão aparecer aqui.</p>
+          </div>
+        </div>
+        <div class="agent-context">
+          <span class="context-indicator"></span><span>Empresa 1</span
+          ><span class="context-separator">/</span
+          ><span>Visão geral da operação</span>
+        </div>
+        <section
+          id="agent-view-host"
+          class="agent-view-host"
+          aria-label="Ferramentas do agente"
+          hidden
+        ></section>
+        <div
+          class="message-list"
+          id="message-list"
+          aria-live="polite"
+          aria-relevant="additions"
+        >
+          <section class="welcome" id="welcome">
+            <div class="welcome-orb" data-kirby-avatar aria-hidden="true"></div>
+            <span class="welcome-eyebrow">Menos tarefas. Mais espaço.</span>
+            <h2>Olá, Guilherme.</h2>
+            <p>
+              Vamos cuidar da sua operação?<br />Me conte o que você precisa.
+            </p>
+            <div class="suggestions">
+              <button
+                class="suggestion"
+                type="button"
+                data-prompt="Resuma os atendimentos de hoje."
+              >
+                <span class="suggestion-icon"
+                  ><svg class="icon"><use href="#i-grid" /></svg></span
+                ><span
+                  >Resuma os atendimentos de hoje<small
+                    >Um panorama rápido da operação</small
+                  ></span
+                ><svg class="icon suggestion-arrow">
+                  <use href="#i-arrow" />
+                </svg></button
+              ><button
+                class="suggestion"
+                type="button"
+                data-prompt="Me ajude a organizar as filas de atendimento."
+              >
+                <span class="suggestion-icon"
+                  ><svg class="icon"><use href="#i-users" /></svg></span
+                ><span
+                  >Me ajude a organizar as filas<small
+                    >Encontre onde a equipe precisa de apoio</small
+                  ></span
+                ><svg class="icon suggestion-arrow">
+                  <use href="#i-arrow" />
+                </svg></button
+              ><button
+                class="suggestion"
+                type="button"
+                data-prompt="Prepare uma mensagem de retorno para um cliente."
+              >
+                <span class="suggestion-icon"
+                  ><svg class="icon"><use href="#i-chat" /></svg></span
+                ><span
+                  >Prepare uma mensagem de retorno<small
+                    >Uma resposta cuidadosa, do seu jeito</small
+                  ></span
+                ><svg class="icon suggestion-arrow">
+                  <use href="#i-arrow" />
+                </svg>
+              </button>
+            </div>
+          </section>
+        </div>
+        <div
+          class="thought-container"
+          id="thought-container"
+          hidden
+          aria-live="polite"
+        >
+          <div
+            id="thinking-avatar"
+            class="thinking-avatar"
+            data-kirby-avatar
+            aria-hidden="true"
+            hidden
+          ></div>
+        </div>
+        <div class="composer-area">
+          <div class="skills-popover popover" id="skills-popover" hidden>
+            <div class="popover-heading">
+              <strong>Uma ajuda para cada momento</strong
+              ><span>Escolha por onde começar.</span>
+            </div>
+            <button
+              class="skill-item"
+              type="button"
+              data-prompt="Resuma os atendimentos de hoje."
+            >
+              <span class="skill-icon"
+                ><svg class="icon"><use href="#i-grid" /></svg></span
+              ><span
+                ><strong>Panorama da operação</strong
+                ><small>Atendimentos, filas e próximos passos</small></span
+              ></button
+            ><button
+              class="skill-item"
+              type="button"
+              data-prompt="Prepare uma mensagem de retorno para um cliente."
+            >
+              <span class="skill-icon"
+                ><svg class="icon"><use href="#i-chat" /></svg></span
+              ><span
+                ><strong>Escrever uma resposta</strong
+                ><small>Mensagens claras para seus clientes</small></span
+              ></button
+            ><button
+              class="skill-item"
+              type="button"
+              data-prompt="Me ajude a organizar as filas de atendimento."
+            >
+              <span class="skill-icon"
+                ><svg class="icon"><use href="#i-users" /></svg></span
+              ><span
+                ><strong>Organizar o atendimento</strong
+                ><small>Distribuição e prioridades da equipe</small></span
+              >
+            </button>
+          </div>
+          <form class="composer" id="composer">
+            <div class="composer-caption" id="composer-caption">
+              Pode deixar comigo
+            </div>
+            <div class="attachment-chip" id="attachment-chip" hidden>
+              <svg class="icon"><use href="#i-clip" /></svg
+              ><span>Documento de exemplo.pdf</span
+              ><button
+                class="icon-button"
+                id="attachment-remove"
+                type="button"
+                aria-label="Remover anexo"
+              >
+                <svg class="icon"><use href="#i-close" /></svg>
+              </button>
+            </div>
+            <label class="sr-only" for="message-input"
+              >Sua mensagem para o Agente Espaço</label
+            ><textarea
+              id="message-input"
+              rows="2"
+              placeholder="O que vamos resolver hoje?"
+              maxlength="2000"
+            ></textarea>
+            <div class="composer-toolbar">
+              <div class="composer-tools">
+                <button
+                  class="icon-button"
+                  id="attachment-toggle"
+                  type="button"
+                  aria-label="Adicionar anexo de exemplo"
+                  aria-pressed="false"
+                >
+                  <svg class="icon"><use href="#i-clip" /></svg></button
+                ><button
+                  class="skills-toggle"
+                  id="skill-toggle"
+                  type="button"
+                  aria-expanded="false"
+                  aria-controls="skills-popover"
+                >
+                  <svg class="icon"><use href="#i-spark" /></svg>Habilidades
+                </button>
+              </div>
+              <button
+                class="send-button"
+                id="message-send"
+                type="submit"
+                aria-label="Enviar mensagem"
+              >
+                <svg class="icon"><use href="#i-send" /></svg>
+              </button>
+            </div>
+          </form>
+          <p class="agent-disclaimer">
+            Você conduz. O agente ajuda a abrir caminho.
+          </p>
+        </div>
+      </aside>
+    </div>
+    <div id="notice" role="status" hidden></div>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

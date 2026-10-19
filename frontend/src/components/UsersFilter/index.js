@@ -1,12 +1,18 @@
 import { Box, Chip, TextField } from "@material-ui/core";
 import Autocomplete from "@material-ui/lab/Autocomplete";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { i18n } from "../../translate/i18n";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 
-export function UsersFilter({ onFiltered, initialUsers }) {
+export function UsersFilter({
+  onFiltered,
+  initialUsers,
+  excludeId,
+  multiple = false
+}) {
   const [users, setUsers] = useState([]);
-  const [selecteds, setSelecteds] = useState([]);
+  const [selected, setSelected] = useState(multiple ? [] : null);
 
   useEffect(() => {
     async function fetchData() {
@@ -16,41 +22,57 @@ export function UsersFilter({ onFiltered, initialUsers }) {
   }, []);
 
   useEffect(() => {
-    setSelecteds([]);
-    if (
-      Array.isArray(initialUsers) &&
-      Array.isArray(users) &&
-      users.length > 0
-    ) {
-      onChange(initialUsers);
+    if (multiple) {
+      setSelected(Array.isArray(initialUsers) ? initialUsers : []);
+      if (
+        Array.isArray(initialUsers) &&
+        Array.isArray(users) &&
+        users.length > 0 &&
+        initialUsers.length > 0
+      ) {
+        onChange(initialUsers);
+      }
+    } else {
+      setSelected(null);
+      if (
+        Array.isArray(initialUsers) &&
+        Array.isArray(users) &&
+        users.length > 0 &&
+        initialUsers.length > 0
+      ) {
+        onChange(initialUsers[0]);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialUsers, users]);
+  }, [initialUsers, users, multiple]);
 
   const loadUsers = async () => {
     try {
       const { data } = await api.get(`/users/list`);
-      const userList = data.map((u) => ({ id: u.id, name: u.name }));
+      let userList = data.map(u => ({ id: u.id, name: u.name }));
+      if (excludeId) {
+        userList = userList.filter(user => user.id !== excludeId);
+      }
       setUsers(userList);
     } catch (err) {
       toastError(err);
     }
   };
 
-  const onChange = async (value) => {
-    setSelecteds(value);
-    onFiltered(value);
+  const onChange = async value => {
+    setSelected(value);
+    onFiltered(multiple ? value || [] : value ? [value] : []);
   };
 
   return (
     <Box style={{ padding: "0px 10px 10px" }}>
       <Autocomplete
-        multiple
         size="small"
+        multiple={multiple}
         options={users}
-        value={selecteds}
+        value={selected}
         onChange={(e, v, r) => onChange(v)}
-        getOptionLabel={(option) => option.name}
+        getOptionLabel={option => option.name}
         getOptionSelected={(option, value) => {
           return (
             option?.id === value?.id ||
@@ -58,25 +80,43 @@ export function UsersFilter({ onFiltered, initialUsers }) {
           );
         }}
         renderTags={(value, getUserProps) =>
-          value.map((option, index) => (
-            <Chip
-              variant="outlined"
-              style={{
-                backgroundColor: "#bfbfbf",
-                textShadow: "1px 1px 1px #000",
-                color: "white",
-              }}
-              label={option.name}
-              {...getUserProps({ index })}
-              size="small"
-            />
-          ))
+          multiple
+            ? value.map((v, idx) => (
+                <Chip
+                  key={v.id}
+                  variant="outlined"
+                  style={{
+                    backgroundColor: "#bfbfbf",
+                    textShadow: "1px 1px 1px #000",
+                    color: "white"
+                  }}
+                  label={v.name}
+                  {...getUserProps({ index: idx })}
+                  size="small"
+                />
+              ))
+            : value
+              ? [
+                  <Chip
+                    key={value.id}
+                    variant="outlined"
+                    style={{
+                      backgroundColor: "#bfbfbf",
+                      textShadow: "1px 1px 1px #000",
+                      color: "white"
+                    }}
+                    label={value.name}
+                    {...getUserProps({ index: 0 })}
+                    size="small"
+                  />
+                ]
+              : []
         }
-        renderInput={(params) => (
+        renderInput={params => (
           <TextField
             {...params}
             variant="outlined"
-            placeholder="Filtro por Users"
+            placeholder={i18n.t("tickets.search.filterByUsers")}
           />
         )}
       />

@@ -1,17 +1,19 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext } from "react";
 import { useHistory } from "react-router-dom";
-import QRCode from 'react-qr-code';
-import { SuccessContent, Total } from './style';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { FaCopy, FaCheckCircle } from 'react-icons/fa';
+import QRCode from "react-qr-code";
+import { SuccessContent, Total } from "./style";
+import { CopyToClipboard } from "react-copy-to-clipboard";
+import { FaCopy, FaCheckCircle, FaExternalLinkAlt } from "react-icons/fa";
+import { Button } from "@material-ui/core";
 import { SocketContext } from "../../../context/Socket/SocketContext";
 import { useDate } from "../../../hooks/useDate";
 import { toast } from "react-toastify";
 
 function CheckoutSuccess(props) {
-
   const { pix } = props;
-  const [pixString,] = useState(pix.qrcode.qrcode);
+  const pixString = pix?.qrcode?.qrcode || "";
+  const redirectUrl = pix?.redirectUrl || "";
+  const isRedirect = !pixString && !!redirectUrl;
   const [copied, setCopied] = useState(false);
   const history = useHistory();
   const onClose = props.onClose;
@@ -24,26 +26,27 @@ function CheckoutSuccess(props) {
     const companyId = localStorage.getItem("companyId");
     const socket = socketManager.GetSocket(companyId);
 
-    const onCompanyPayment = (data) => {
-
+    const onCompanyPayment = data => {
       if (data.action === "CONCLUIDA") {
-        toast.success(`Sua licença foi renovada até ${dateToClient(data.company.dueDate)}!`);
+        toast.success(
+          `Sua licença foi renovada até ${dateToClient(data.company.dueDate)}!`
+        );
         setTimeout(() => {
           history.push("/");
         }, 4000);
       }
-      
+
       if (data.action === "EXPIRADA") {
         toast.error("Transação de cobrança expirou");
         onClose();
       }
-    }
+    };
 
     socket.on(`company-${companyId}-payment`, onCompanyPayment);
-    
+
     return () => {
       socket.disconnect();
-    }
+    };
   }, [history, dateToClient, socketManager]);
 
   const handleCopyQR = () => {
@@ -53,41 +56,72 @@ function CheckoutSuccess(props) {
     setCopied(true);
   };
 
+  const total = pix?.valor?.original || 0;
+
   return (
     <React.Fragment>
-      <Total>
+      <Total className="sd-checkout-total">
         <span>TOTAL</span>
-        <strong>R${pix.valor.original.toLocaleString('pt-br', { minimumFractionDigits: 2 })}</strong>
+        <strong>
+          R$
+          {Number(total).toLocaleString("pt-br", {
+            minimumFractionDigits: 2
+          })}
+        </strong>
       </Total>
-      <SuccessContent>
-        <QRCode value={pixString}
-          style={
-            { borderStyle: "solid",
-              borderWidth: "1px",
-              padding: "5px", 
-              borderColor: "black",
-              backgroundColor: "white",
-              height: "auto",
-              maxWidth: "100%" }} />
-        <CopyToClipboard text={pixString} onCopy={handleCopyQR}>
-          <button className="copy-button" type="button">
-            {copied ? (
-              <>
-                <span>Copiado</span>
-                <FaCheckCircle size={18} />
-              </>
-            ) : (
-              <>
-                <span>Copiar código QR</span>
-                <FaCopy size={18} />
-              </>
-            )}
-          </button>
-        </CopyToClipboard>
-        <span>
-          Para finalizar, basta realizar o pagamento escaneando ou colando o
-          código Pix acima :)
-        </span>
+      <SuccessContent className="sd-checkout-success">
+        {isRedirect ? (
+          <>
+            <span>
+              Clique no botão abaixo para concluir o pagamento na página segura
+              da AbacatePay. Assim que o pagamento for confirmado, sua licença
+              será renovada automaticamente.
+            </span>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<FaExternalLinkAlt size={14} />}
+              onClick={() => window.open(redirectUrl, "_blank", "noopener")}
+              style={{ marginTop: 16 }}
+            >
+              Ir para o pagamento
+            </Button>
+          </>
+        ) : (
+          <>
+            <QRCode
+              value={pixString}
+              style={{
+                borderStyle: "solid",
+                borderWidth: "1px",
+                padding: "5px",
+                borderColor: "black",
+                backgroundColor: "white",
+                height: "auto",
+                maxWidth: "100%"
+              }}
+            />
+            <CopyToClipboard text={pixString} onCopy={handleCopyQR}>
+              <button className="copy-button" type="button">
+                {copied ? (
+                  <>
+                    <span>Copiado</span>
+                    <FaCheckCircle size={18} />
+                  </>
+                ) : (
+                  <>
+                    <span>Copiar código QR</span>
+                    <FaCopy size={18} />
+                  </>
+                )}
+              </button>
+            </CopyToClipboard>
+            <span>
+              Para finalizar, basta realizar o pagamento escaneando ou colando o
+              código Pix acima :)
+            </span>
+          </>
+        )}
       </SuccessContent>
     </React.Fragment>
   );

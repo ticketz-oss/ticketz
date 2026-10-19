@@ -2,6 +2,7 @@ import AppError from "../../errors/AppError";
 import Campaign from "../../models/Campaign";
 import ContactList from "../../models/ContactList";
 import Whatsapp from "../../models/Whatsapp";
+import assertCampaignConnection from "./assertCampaignConnection";
 
 interface Data {
   id: number;
@@ -11,6 +12,7 @@ interface Data {
   scheduledAt: Date;
   companyId: number;
   contactListId: number;
+  whatsappId?: number;
   message1?: string;
   message2?: string;
   message3?: string;
@@ -39,10 +41,12 @@ const UpdateService = async (data: Data): Promise<Campaign> => {
     );
   }
 
-  if (
-    data.scheduledAt != null &&
-    data.status === "INATIVA"
-  ) {
+  await assertCampaignConnection({
+    whatsappId: data.whatsappId,
+    companyId: data.companyId
+  });
+
+  if (data.scheduledAt != null && data.status === "INATIVA") {
     data.status = "PROGRAMADA";
   }
 

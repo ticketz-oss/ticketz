@@ -4,15 +4,13 @@ import PropTypes from "prop-types";
 const EditMessageContext = createContext();
 
 const EditMessageProvider = ({ children }) => {
-	const [editingMessage, setEditingMessage] = useState(null);
+  const [editingMessage, setEditingMessage] = useState(null);
 
-	return (
-		<EditMessageContext.Provider
-			value={{ editingMessage, setEditingMessage }}
-		>
-			{children}
-		</EditMessageContext.Provider>
-	);
+  return (
+    <EditMessageContext.Provider value={{ editingMessage, setEditingMessage }}>
+      {children}
+    </EditMessageContext.Provider>
+  );
 };
 
-export { EditMessageContext, EditMessageProvider};
+export { EditMessageContext, EditMessageProvider };

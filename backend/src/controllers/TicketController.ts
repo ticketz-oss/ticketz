@@ -1,3 +1,6 @@
+import GetTicketServiceWindowService from "../services/TicketServices/TicketServiceWindowService";
+import ListTicketTemplatesService from "../services/MetaWhatsAppServices/ListTicketTemplatesService";
+import Whatsapp from "../models/Whatsapp";
 import { Request, Response } from "express";
 import { Mutex } from "async-mutex";
 import { getIO } from "../libs/socket";
@@ -9,18 +12,28 @@ import ListTicketsService from "../services/TicketServices/ListTicketsService";
 import ShowTicketUUIDService from "../services/TicketServices/ShowTicketFromUUIDService";
 import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import UpdateTicketService from "../services/TicketServices/UpdateTicketService";
+import GetTicketTransferOptionsService from "../services/TicketServices/GetTicketTransferOptionsService";
 import ListTicketsServiceKanban from "../services/TicketServices/ListTicketsServiceKanban";
-
+import { assertGroupAccess } from "../services/WhatsappGroupServices/GroupAccessService";
+import AppError from "../errors/AppError";
 
 type IndexQuery = {
+  isSearch?: string;
   searchParam: string;
-  pageNumber: string;
+  pageNumber?: string;
+  nextUpdatedAt?: string;
+  nextTicketId?: string;
   status: string;
+  groups: string;
   date: string;
   updatedAt?: string;
+  minUpdatedAt?: string;
   showAll: string;
   withUnreadMessages: string;
+  notClosed: string;
+  all: string;
   queueIds: string;
+  contactId: string;
   tags: string;
   users: string;
 };
@@ -32,18 +45,26 @@ interface TicketData {
   userId: number;
 }
 
+const updateMutex = new Mutex();
+
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const {
-    pageNumber,
+    nextUpdatedAt,
     status,
+    groups,
     date,
     updatedAt,
+    minUpdatedAt,
+    isSearch,
     searchParam,
     showAll,
     queueIds: queueIdsStringified,
+    contactId,
     tags: tagIdsStringified,
     users: userIdsStringified,
-    withUnreadMessages
+    withUnreadMessages,
+    notClosed,
+    all
   } = req.query as IndexQuery;
 
   const userId = req.user.id;
@@ -65,25 +86,37 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     usersIds = JSON.parse(userIdsStringified);
   }
 
-  const { tickets, count, hasMore } = await ListTicketsService({
+  const { tickets, count } = await ListTicketsService({
+    isSearch: isSearch === "true",
     searchParam,
+    contactId: Number(contactId) || undefined,
     tags: tagsIds,
     users: usersIds,
-    pageNumber,
+    nextUpdatedAt,
     status,
+    groups,
     date,
     updatedAt,
+    minUpdatedAt,
     showAll,
     userId,
     queueIds,
     withUnreadMessages,
+    notClosed: !!notClosed,
+    all: !!all,
     companyId
   });
 
-  return res.status(200).json({ tickets, count, hasMore });
+  return res.status(200).json({
+    tickets,
+    count
+  });
 };
 
-export const kanban = async (req: Request, res: Response): Promise<Response> => {
+export const kanban = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const {
     pageNumber,
     status,
@@ -97,14 +130,12 @@ export const kanban = async (req: Request, res: Response): Promise<Response> => 
     withUnreadMessages
   } = req.query as IndexQuery;
 
-
   const userId = req.user.id;
   const { companyId } = req.user;
 
   let queueIds: number[] = [];
   let tagsIds: number[] = [];
   let usersIds: number[] = [];
-
 
   if (queueIdsStringified) {
     queueIds = JSON.parse(queueIdsStringified);
@@ -117,7 +148,6 @@ export const kanban = async (req: Request, res: Response): Promise<Response> => 
   if (userIdsStringified) {
     usersIds = JSON.parse(userIdsStringified);
   }
-
 
   const { tickets, count, hasMore } = await ListTicketsServiceKanban({
     searchParam,
@@ -132,19 +162,17 @@ export const kanban = async (req: Request, res: Response): Promise<Response> => 
     queueIds,
     withUnreadMessages,
     companyId
-
   });
 
   return res.status(200).json({ tickets, count, hasMore });
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
-  const { contactId, status, userId, queueId }: TicketData = req.body;
+  const { contactId, userId, queueId }: TicketData = req.body;
   const { companyId } = req.user;
 
   const ticket = await CreateTicketService({
     contactId,
-    status,
     userId,
     companyId,
     queueId
@@ -152,11 +180,11 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   const io = getIO();
   io.to(`company-${companyId}-${ticket.status}`)
-	.to(`queue-${ticket.queueId}-${ticket.status}`)
+    .to(`queue-${ticket.queueId}-${ticket.status}`)
     .emit(`company-${companyId}-ticket`, {
-    action: "update",
-    ticket
-  });
+      action: "update",
+      ticket
+    });
 
   return res.status(200).json(ticket);
 };
@@ -167,6 +195,10 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
 
   const contact = await ShowTicketService(ticketId, companyId);
 
+  if (contact.isGroup) {
+    await assertGroupAccess(ticketId, req.user);
+  }
+
   return res.status(200).json(contact);
 };
 
@@ -176,7 +208,11 @@ export const showFromUUID = async (
 ): Promise<Response> => {
   const { uuid } = req.params;
 
-  const ticket: Ticket = await ShowTicketUUIDService(uuid);
+  const ticket: Ticket = await ShowTicketUUIDService(uuid, req.user.companyId);
+
+  if (ticket.isGroup) {
+    await assertGroupAccess(ticket.id, req.user);
+  }
 
   return res.status(200).json(ticket);
 };
@@ -187,17 +223,80 @@ export const update = async (
 ): Promise<Response> => {
   const { ticketId } = req.params;
 
-  const mutex = new Mutex();
-  const { ticket } = await mutex.runExclusive(async () => {
+  const current = await ShowTicketService(ticketId, req.user.companyId);
+  if (current.isGroup) {
+    await assertGroupAccess(ticketId, req.user);
+    if (current.contact?.groupMode !== "ticket") {
+      throw new AppError("ERR_GROUP_CONVERSATION_NOT_TICKET", 400);
+    }
+  }
+
+  const { ticket } = await updateMutex.runExclusive(async () => {
     const result = await UpdateTicketService({
       ticketData: req.body,
       ticketId: Number.parseInt(ticketId, 10),
-      tokenData: req.tokenData
+      reqUserId: Number(req.user.id)
     });
     return result;
   });
 
   return res.status(200).json(ticket);
+};
+
+export const transferOptions = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { ticketId } = req.params;
+  const { companyId } = req.user;
+
+  const current = await ShowTicketService(ticketId, companyId);
+  if (current.isGroup) {
+    await assertGroupAccess(ticketId, req.user);
+    if (current.contact?.groupMode !== "ticket") {
+      throw new AppError("ERR_GROUP_CONVERSATION_NOT_TICKET", 400);
+    }
+  }
+
+  const options = await GetTicketTransferOptionsService({
+    ticketId,
+    companyId
+  });
+
+  return res.status(200).json(options);
+};
+
+// A tela do atendimento precisa saber, numa chamada so, se ainda da pra mandar
+// texto livre e, se nao der, quais templates estao aprovados para reabrir a
+// conversa.
+export const templates = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { ticketId } = req.params;
+  const { companyId } = req.user;
+
+  const ticket = await ShowTicketService(ticketId, companyId);
+
+  if (ticket.isGroup) {
+    await assertGroupAccess(ticketId, req.user);
+  }
+
+  const window = await GetTicketServiceWindowService(ticket);
+  const connection = await Whatsapp.findByPk(ticket.whatsappId);
+  const official = connection?.apiMode === "official";
+
+  // A lista so importa quando a janela fechou; buscar sempre gastaria uma
+  // chamada a Graph API a cada atendimento aberto, sem serventia nenhuma.
+  const needsTemplates = official && !window.open;
+
+  return res.status(200).json({
+    official,
+    window,
+    templates: needsTemplates
+      ? await ListTicketTemplatesService(connection)
+      : []
+  });
 };
 
 export const remove = async (
@@ -207,7 +306,13 @@ export const remove = async (
   const { ticketId } = req.params;
   const { companyId } = req.user;
 
-  await ShowTicketService(ticketId, companyId);
+  const current = await ShowTicketService(ticketId, companyId);
+  if (current.isGroup) {
+    await assertGroupAccess(ticketId, req.user);
+    if (current.contact?.groupMode !== "ticket") {
+      throw new AppError("ERR_GROUP_CONVERSATION_NOT_TICKET", 400);
+    }
+  }
 
   const ticket = await DeleteTicketService(ticketId);
 

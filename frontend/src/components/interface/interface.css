@@ -1,0 +1,307 @@
+.ew-ui {
+  color: var(--ew-text);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+}
+.ew-ui * {
+  box-sizing: border-box;
+}
+.ew-ui button,
+.ew-ui input,
+.ew-ui textarea,
+.ew-ui select {
+  font: inherit;
+}
+.ew-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 1px solid var(--ew-border);
+  border-radius: 8px;
+  background: var(--ew-surface);
+  color: var(--ew-text);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    transform 0.15s;
+}
+.ew-button:hover {
+  background: var(--ew-bg);
+  border-color: var(--ew-muted);
+}
+.ew-button:active {
+  transform: translateY(1px);
+}
+.ew-button--primary {
+  background: var(--ew-primary);
+  border-color: var(--ew-primary);
+  color: var(--ew-on-primary);
+}
+.ew-button--primary:hover {
+  background: var(--ew-primary);
+  filter: brightness(0.96);
+}
+.ew-button--ghost {
+  border-color: transparent;
+  background: transparent;
+}
+.ew-button--danger {
+  color: var(--ew-error);
+}
+.ew-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.ew-icon-button {
+  padding: 7px;
+  min-width: 32px;
+  min-height: 32px;
+}
+.ew-ui :focus-visible {
+  outline: 2px solid var(--ew-primary);
+  outline-offset: 3px;
+}
+.ew-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 18px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.ew-input,
+.ew-select,
+.ew-textarea {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid var(--ew-border);
+  border-radius: 8px;
+  padding: 9px 11px;
+  color: var(--ew-text);
+  background: var(--ew-surface);
+  font: inherit;
+}
+.ew-textarea {
+  resize: vertical;
+  min-height: 104px;
+  line-height: 1.6;
+}
+.ew-muted {
+  color: var(--ew-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.ew-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid var(--ew-border);
+  border-radius: 6px;
+  color: var(--ew-muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.ew-badge--brand {
+  color: var(--ew-primary);
+  background: color-mix(in srgb, var(--ew-primary) 8%, transparent);
+  border-color: color-mix(in srgb, var(--ew-primary) 20%, transparent);
+}
+.ew-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--ew-border);
+}
+.ew-panel-head h2,
+.ew-panel-head h3 {
+  font-size: 13px;
+  margin: 0;
+  font-weight: 600;
+  flex: 1;
+}
+.ew-overlay {
+  position: fixed;
+  inset: 0;
+  background: #0b12205e;
+  z-index: 1400;
+  animation: ew-fade 0.16s ease;
+}
+.ew-dialog {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(540px, calc(100vw - 24px));
+  max-height: 85dvh;
+  overflow: auto;
+  z-index: 1401;
+  border: 1px solid var(--ew-border);
+  border-radius: 14px;
+  background: var(--ew-surface);
+  box-shadow: 0 24px 80px #0003;
+  animation: ew-fade 0.16s ease;
+}
+.ew-dialog-description {
+  margin: 16px 20px;
+  color: var(--ew-muted);
+  line-height: 1.6;
+}
+.ew-dialog-body {
+  padding: 0 20px 20px;
+}
+.ew-tooltip {
+  z-index: 1600;
+  background: #20242c;
+  color: white;
+  font:
+    12px Inter,
+    system-ui,
+    sans-serif;
+  border-radius: 6px;
+  padding: 7px 10px;
+}
+.ew-tooltip svg {
+  fill: #20242c;
+}
+.ew-switch-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+}
+.ew-switch {
+  border: 0;
+  padding: 3px;
+  border-radius: 99px;
+  width: 36px;
+  height: 21px;
+  background: var(--ew-border);
+  cursor: pointer;
+}
+.ew-switch[data-state="checked"] {
+  background: var(--ew-primary);
+}
+.ew-switch-thumb {
+  display: block;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: white;
+  transition: transform 0.15s;
+}
+.ew-switch-thumb[data-state="checked"] {
+  transform: translateX(15px);
+}
+.ew-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+  padding: 4px;
+  background: var(--ew-surface);
+  border: 1px solid var(--ew-border);
+  border-radius: 10px;
+  width: fit-content;
+}
+.ew-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: none;
+  border: 0;
+  border-radius: 6px;
+  color: var(--ew-muted);
+  cursor: pointer;
+}
+.ew-tab[data-state="active"] {
+  color: var(--ew-primary);
+  background: color-mix(in srgb, var(--ew-primary) 8%, transparent);
+}
+@keyframes ew-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ew-ui *,
+  .ew-overlay {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+.ew-tab {
+  text-decoration: none;
+}
+.ew-tab-ativa {
+  color: var(--ew-primary);
+  background: color-mix(in srgb, var(--ew-primary) 8%, transparent);
+}
+
+.ew-tabs {
+  padding: 3px;
+  border: 0;
+  background: var(--ew-bg);
+  gap: 3px;
+  border-radius: 10px;
+  margin-bottom: 24px;
+}
+.ew-tab {
+  min-height: 34px;
+  border: 1px solid transparent;
+  font-size: 12px;
+  padding: 7px 12px;
+}
+.ew-tab[data-state="active"],
+.ew-tab-ativa {
+  background: var(--ew-surface);
+  border-color: var(--ew-border);
+  color: var(--ew-text);
+  box-shadow: 0 1px 3px #00000008;
+}
+.ew-button {
+  border-radius: 10px;
+}
+.ew-badge {
+  font-size: 11px;
+  padding: 3px 7px;
+  border: 0;
+  background: var(--ew-bg);
+}
+.ew-badge--brand {
+  color: var(--ew-primary);
+  background: color-mix(in srgb, var(--ew-primary) 9%, var(--ew-surface));
+}
+.ew-sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.ew-panel-head--flutuante {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  min-height: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}

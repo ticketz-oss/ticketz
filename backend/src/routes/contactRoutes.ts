@@ -1,27 +1,115 @@
 import express from "express";
+import rateLimit from "express-rate-limit";
+import multer from "multer";
 import isAuth from "../middleware/isAuth";
+import isAdmin from "../middleware/isAdmin";
+import uploadConfig from "../config/upload";
 
 import * as ContactController from "../controllers/ContactController";
 import * as ImportPhoneContactsController from "../controllers/ImportPhoneContactsController";
+import apiTokenAuth from "../middleware/apiTokenAuth";
 
 const contactRoutes = express.Router();
+const upload = multer(uploadConfig);
+
+contactRoutes.post(
+  "/contacts/:contactId/picture/refresh",
+  isAuth,
+  rateLimit({
+    windowMs: 60_000,
+    limit: 120,
+    keyGenerator: req => String(req.user.companyId)
+  }),
+  ContactController.refreshPicture
+);
 
 contactRoutes.post(
   "/contacts/import",
   isAuth,
+  isAdmin,
   ImportPhoneContactsController.store
 );
 
-contactRoutes.get("/contacts", isAuth, ContactController.index);
+contactRoutes.post(
+  "/contacts/importCsv",
+  isAuth,
+  isAdmin,
+  upload.single("contacts"),
+  ContactController.importCsv
+);
 
-contactRoutes.get("/contacts/list", isAuth, ContactController.list);
+contactRoutes.get(
+  "/contacts/exportCsv",
+  isAuth,
+  isAdmin,
+  ContactController.exportCsv
+);
 
-contactRoutes.get("/contacts/:contactId", isAuth, ContactController.show);
+contactRoutes.get("/contacts", apiTokenAuth, isAuth, ContactController.index);
 
-contactRoutes.post("/contacts", isAuth, ContactController.store);
+contactRoutes.get(
+  "/contacts/selection",
+  apiTokenAuth,
+  isAuth,
+  ContactController.selection
+);
 
-contactRoutes.put("/contacts/:contactId", isAuth, ContactController.update);
+contactRoutes.get(
+  "/contacts/list",
+  apiTokenAuth,
+  isAuth,
+  ContactController.list
+);
 
-contactRoutes.delete("/contacts/:contactId", isAuth, ContactController.remove);
+contactRoutes.get(
+  "/contacts/:contactId",
+  apiTokenAuth,
+  isAuth,
+  ContactController.show
+);
+
+contactRoutes.post(
+  "/contacts/findOrInsert",
+  apiTokenAuth,
+  isAuth,
+  ContactController.findOrInsertContact
+);
+
+contactRoutes.post("/contacts", apiTokenAuth, isAuth, ContactController.store);
+
+contactRoutes.put(
+  "/contacts/:contactId/extra-info",
+  apiTokenAuth,
+  isAuth,
+  ContactController.updateExtraInfo
+);
+
+contactRoutes.put(
+  "/contacts/:contactId",
+  apiTokenAuth,
+  isAuth,
+  ContactController.update
+);
+
+contactRoutes.delete(
+  "/contacts/:contactId",
+  apiTokenAuth,
+  isAuth,
+  ContactController.remove
+);
+
+contactRoutes.post(
+  "/contacts/:contactId/tags",
+  apiTokenAuth,
+  isAuth,
+  ContactController.storeTag
+);
+
+contactRoutes.delete(
+  "/contacts/:contactId/tags/:tagId",
+  apiTokenAuth,
+  isAuth,
+  ContactController.removeTag
+);
 
 export default contactRoutes;

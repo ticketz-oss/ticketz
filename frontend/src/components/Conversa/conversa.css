@@ -1,0 +1,504 @@
+.conversa-painel {
+  min-width: 0;
+}
+.conversa-painel > .MuiCard-root,
+.conversa-cabecalho {
+  min-height: 70px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--ew-border);
+  background: var(--ew-surface);
+  box-shadow: none;
+  gap: 12px;
+}
+.conversa-painel > .MuiCard-root .MuiCardHeader-root {
+  padding: 12px 0;
+  min-width: 0;
+  flex: 1;
+}
+.conversa-painel .MuiCardHeader-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+.conversa-painel .MuiCardHeader-subheader {
+  font-size: 11px;
+  margin-top: 3px;
+}
+.conversa-cabecalho-acoes {
+  display: flex;
+  gap: 5px;
+  margin-left: auto;
+}
+.conversa-cabecalho-acoes .ew-button {
+  border-color: transparent;
+}
+.conversa-fatos {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 8px 16px;
+  gap: 7px;
+  border-bottom: 1px solid var(--ew-border);
+}
+.conversa-fatos > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: var(--ew-muted);
+  border: 1px solid var(--ew-border);
+  border-radius: 5px;
+  padding: 3px 6px;
+}
+.conversa-corpo {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+.conversa-principal {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+.conversa-principal > div:first-child {
+  min-width: 0;
+  min-height: 0;
+}
+.conversa-acoes {
+  width: 52px;
+  flex: 0 0 52px;
+  padding: 10px 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  border-left: 1px solid var(--ew-border);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.conversa-acoes > .MuiIconButton-root,
+.conversa-acoes .ew-icon-button {
+  width: 38px;
+  height: 38px;
+  min-height: 38px;
+  min-width: 38px;
+  padding: 8px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+}
+.conversa-acoes > .MuiIconButton-root:hover,
+.conversa-acoes .ew-icon-button:hover {
+  background: color-mix(in srgb, var(--ew-primary) 9%, var(--ew-surface));
+  color: var(--ew-primary);
+}
+.conversa-acoes .MuiIconButton-colorPrimary {
+  background: #16a34a12;
+}
+.conversa-acoes .MuiSvgIcon-root {
+  font-size: 20px;
+}
+.conversa-acoes .MuiButton-root {
+  writing-mode: vertical-rl;
+  min-width: 34px;
+  padding: 8px;
+}
+.conversa-separador {
+  width: 22px;
+  height: 1px;
+  background: var(--ew-border);
+  margin: 5px 0;
+  flex-shrink: 0;
+}
+.conversa-compositor {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  border-top: 1px solid var(--ew-border);
+  background: var(--ew-surface);
+}
+.conversa-compositor--compact {
+  padding: 8px 12px;
+}
+.conversa-modos {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+.conversa-modos button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+  color: var(--ew-muted);
+  font: inherit;
+  font-size: 11px;
+  border-radius: 6px;
+  padding: 6px 9px;
+  cursor: pointer;
+}
+.conversa-modos button[data-state="active"] {
+  background: color-mix(in srgb, var(--ew-primary) 10%, var(--ew-surface));
+  color: var(--ew-text);
+  font-weight: 600;
+}
+.conversa-compositor > [role="tabpanel"] {
+  border: 1px solid var(--ew-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.conversa-compositor > [role="tabpanel"]:focus-within {
+  border-color: var(--ew-primary);
+}
+.conversa-compositor--compact > [role="tabpanel"] {
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+}
+.conversa-compositor [hidden] {
+  display: none !important;
+}
+.conversa-compositor [role="tabpanel"] > div {
+  border: 0;
+}
+.conversa-compositor .MuiInputBase-root {
+  font-size: 13px;
+}
+.conversa-caixa-mensagem--compact {
+  flex-wrap: nowrap !important;
+  width: 100% !important;
+  min-height: 46px;
+  margin: 0 !important;
+  padding: 4px 6px !important;
+  gap: 0;
+  border-radius: 24px !important;
+}
+.conversa-caixa-mensagem--compact .conversa-entrada-texto {
+  order: 0;
+  flex: 1 1 auto;
+  flex-basis: auto;
+  min-height: 0;
+  padding: 0 4px;
+}
+.conversa-caixa-mensagem--compact .conversa-respostas-rapidas {
+  display: none;
+}
+.conversa-caixa-mensagem--compact .MuiInputBase-inputMultiline {
+  padding: 8px 4px;
+  line-height: 1.35;
+}
+.conversa-caixa-mensagem--compact .MuiIconButton-root,
+.conversa-caixa-mensagem--compact > label .MuiIconButton-root {
+  width: 34px;
+  height: 34px;
+  padding: 7px;
+}
+.conversa-teclado {
+  font-size: 10px;
+  color: var(--ew-muted);
+  margin-top: 8px;
+}
+.conversa-nota {
+  background: #f59e0b0b;
+  padding: 10px;
+}
+.conversa-nota textarea {
+  width: 100%;
+  resize: vertical;
+  border: 0;
+  background: transparent;
+  color: var(--ew-text);
+  outline: none;
+  font: inherit;
+  font-size: 13px;
+}
+.conversa-nota footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: space-between;
+}
+.conversa-nota small {
+  color: var(--ew-muted);
+  font-size: 10px;
+}
+.conversa-principal #messagesList,
+.chat-mensagens-lista {
+  background-color: var(--ew-bg);
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    color-mix(in srgb, var(--ew-muted) 9%, transparent) 1px,
+    transparent 0
+  );
+  background-size: 22px 22px;
+  padding: 20px;
+}
+.conversa-principal #messagesList > div[id] {
+  border: 1px solid var(--ew-border);
+  border-radius: 14px;
+  box-shadow: 0 1px 1px #00000006;
+  padding: 8px 10px 4px;
+  margin-top: 8px;
+  max-width: min(600px, 85%);
+}
+.conversa-pesquisa {
+  width: 300px;
+  flex: 0 0 300px;
+  display: flex;
+  flex-direction: column;
+  padding: 14px;
+  margin-left: 10px;
+  border: 1px solid var(--ew-border);
+  border-radius: 16px;
+  background: var(--ew-surface);
+  min-height: 0;
+}
+.conversa-pesquisa header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  font-size: 13px;
+}
+.conversa-busca {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  min-height: 36px;
+  border: 1px solid var(--ew-border);
+  border-radius: 9px;
+  color: var(--ew-muted);
+}
+.conversa-busca input {
+  width: 100%;
+  border: 0;
+  outline: none;
+  min-width: 0;
+  font: inherit;
+  font-size: 12px;
+  color: var(--ew-text);
+  background: transparent;
+}
+.conversa-pesquisa > small {
+  font-size: 10px;
+  color: var(--ew-muted);
+  margin: 10px 0;
+}
+.conversa-resultados {
+  overflow-y: auto;
+  flex: 1;
+}
+.conversa-resultados article a,
+.conversa-resultados article button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  border-bottom: 1px solid var(--ew-border);
+  padding: 14px 0;
+  font-size: 12px;
+  color: var(--ew-text);
+  text-decoration: none;
+  width: 100%;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+.conversa-resultados article button {
+  flex-direction: column;
+  align-items: stretch;
+}
+.conversa-resultados article span {
+  overflow-wrap: anywhere;
+  min-width: 0;
+  flex: 1;
+}
+.conversa-resultados time {
+  display: block;
+  font-size: 10px;
+  color: var(--ew-muted);
+  margin-top: 5px;
+}
+.conversa-sem-resultados {
+  color: var(--ew-muted);
+  font-size: 12px;
+  text-align: center;
+  padding: 24px;
+}
+@media (max-width: 1399px) {
+  .atendimento-conversa > .conversa-pesquisa {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 110;
+    box-shadow: 0 8px 32px #0002;
+    max-width: 95%;
+  }
+}
+@media (max-width: 599px) {
+  .conversa-corpo {
+    flex-direction: column;
+  }
+  .conversa-acoes {
+    width: 100%;
+    flex: 0 0 46px;
+    flex-direction: row;
+    border-left: 0;
+    border-top: 1px solid var(--ew-border);
+    padding: 3px 6px;
+    overflow-x: auto;
+  }
+  .conversa-acoes .MuiButton-root {
+    writing-mode: horizontal-tb;
+  }
+  .conversa-separador {
+    width: 1px;
+    height: 20px;
+    margin: 0 3px;
+  }
+  .conversa-compositor {
+    padding: 8px;
+  }
+  .conversa-principal #messagesList {
+    padding: 12px;
+  }
+  .conversa-fatos {
+    padding: 6px 10px;
+  }
+}
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .atendimento-conversa .conversa-painel,
+  .atendimento-conversa .conversa-painel * {
+    visibility: visible;
+  }
+  .atendimento-conversa .conversa-painel {
+    position: fixed;
+    inset: 0;
+    overflow: visible;
+    height: auto;
+    border: 0;
+  }
+  .atendimento-conversa .conversa-compositor,
+  .atendimento-conversa .conversa-acoes,
+  .atendimento-conversa .conversa-cabecalho-acoes {
+    display: none;
+  }
+  .atendimento-conversa #messagesList {
+    overflow: visible;
+    height: auto;
+  }
+}
+
+.conversa-compositor .conversa-caixa-mensagem {
+  border: 0;
+  border-radius: 0;
+  width: 100%;
+  margin: 0;
+}
+.conversa-respostas-rapidas {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 0 4px 10px;
+  max-width: 100%;
+  scrollbar-width: none;
+}
+.conversa-respostas-rapidas .MuiButton-root {
+  flex-shrink: 0;
+  min-width: 0;
+  padding: 3px 8px;
+  border: 1px solid var(--ew-border);
+  border-radius: 6px;
+  text-transform: none;
+  font-size: 10px;
+  color: var(--ew-muted);
+}
+
+/* Shared conversation language for WhatsApp, groups and team chat. */
+.conversa-principal #messagesList,
+.chat-mensagens .chat-mensagens-lista {
+  background-image: none;
+  background-color: color-mix(in srgb, var(--ew-primary) 2%, var(--ew-bg));
+  padding: 24px clamp(14px, 3vw, 40px);
+  overscroll-behavior: contain;
+}
+.conversa-principal #messagesList > div[data-message-side],
+.chat-mensagem .chat-balao {
+  margin-top: 5px;
+  margin-bottom: 7px;
+  padding: 10px 12px 5px;
+  max-width: min(620px, 88%);
+  border-radius: 16px 16px 16px 5px;
+  border-color: color-mix(in srgb, var(--ew-border) 75%, transparent);
+  box-shadow: 0 2px 5px #00000004;
+}
+.conversa-principal #messagesList > div[data-message-side="sent"],
+.chat-mensagem.minha .chat-balao {
+  border-radius: 16px 16px 5px 16px;
+  background-color: color-mix(
+    in srgb,
+    var(--ew-primary) 10%,
+    var(--ew-surface)
+  );
+  border-color: color-mix(in srgb, var(--ew-primary) 16%, var(--ew-border));
+}
+.conversa-principal [id^="messageActionsButton"] {
+  opacity: 0.35;
+  width: 24px;
+  height: 24px;
+}
+.conversa-principal #messagesList > div[data-message-kind="sticker"] {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+.conversa-principal [data-message-side]:hover [id^="messageActionsButton"],
+.conversa-principal [id^="messageActionsButton"]:focus-visible {
+  opacity: 1;
+}
+.conversa-cabecalho {
+  min-height: 76px;
+}
+.conversa-cabecalho-acoes {
+  align-items: center;
+  flex-wrap: wrap;
+}
+.conversa-compositor {
+  padding: 14px 18px;
+  box-shadow: 0 -4px 16px #00000003;
+}
+.conversa-compositor > [role="tabpanel"],
+.chat-compositor .MuiInputBase-root {
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--ew-bg) 50%, var(--ew-surface));
+}
+.conversa-compositor > [role="tabpanel"]:focus-within,
+.chat-compositor .MuiInputBase-root:focus-within {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ew-primary) 9%, transparent);
+}
+@media (max-width: 599px) {
+  .conversa-principal #messagesList,
+  .chat-mensagens .chat-mensagens-lista {
+    padding: 14px 10px;
+  }
+  .conversa-principal #messagesList > div[data-message-side] {
+    max-width: 94%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  .conversa-compositor {
+    padding: 10px;
+  }
+  .conversa-cabecalho {
+    gap: 8px;
+    padding: 8px 10px;
+    flex-wrap: wrap;
+  }
+}

@@ -1,41 +1,121 @@
-import { proto, WASocket } from "@whiskeysockets/baileys";
-import { cacheLayer } from "../libs/cache";
+import Whatsapp from "../models/Whatsapp";
+import { WASocket, proto } from "libzapitu-rf";
+import { Op, WhereOptions } from "sequelize";
 import { getIO } from "../libs/socket";
 import Message from "../models/Message";
 import Ticket from "../models/Ticket";
 import { logger } from "../utils/logger";
 import GetTicketWbot from "./GetTicketWbot";
+import MarkMetaMessageAsReadService from "../services/MetaWhatsAppServices/MarkMetaMessageAsReadService";
 
 const SetTicketMessagesAsRead = async (ticket: Ticket): Promise<void> => {
-  await ticket.update({ unreadMessages: 0 });
-  await cacheLayer.set(`contacts:${ticket.contactId}:unreads`, "0");
-  let companyid;
+  await ticket.update({ unreadMessages: 0 }, { silent: true });
+  // Antes so era preenchido dentro do ramo Baileys, entao em conexao oficial o
+  // socket de "nao lidas" nunca era emitido e o contador so caia no refresh.
+  let companyId: number = ticket.companyId;
+
   try {
-    const wbot = await GetTicketWbot(ticket);
+    const official = ticket.whatsapp?.apiMode === "official";
+    const wbot = official ? null : await GetTicketWbot(ticket);
 
-    const getJsonMessage = await Message.findAll({
-      where: {
-        ticketId: ticket.id,
-        fromMe: false,
-        read: false
-      },
-      order: [["createdAt", "DESC"]]
-    });
-     companyid = getJsonMessage[0]?.companyId;
+    if (official) {
+      // Uma chamada marca a mais nova e tudo que veio antes dela.
+      const newest = await Message.findOne({
+        attributes: ["id"],
+        where: { ticketId: ticket.id, fromMe: false, read: false },
+        order: [
+          ["createdAt", "DESC"],
+          ["id", "DESC"]
+        ]
+      });
 
-    if (getJsonMessage.length > 0) {
-      const lastMessages: proto.IWebMessageInfo = JSON.parse(
-        JSON.stringify(getJsonMessage[0].dataJson)
-      );
-      const number = ticket.isGroup ? `${ticket.contact.number.substring(12,0)}-${ticket.contact.number.substring(12)}@g.us` : `${ticket.contact.number}@s.whatsapp.net`
-      if (lastMessages.key && lastMessages.key.fromMe === false) {
-        await (wbot as WASocket).chatModify(
-          { markRead: true, lastMessages: [lastMessages] },
-          number
-          // `${ticket.contact.number}@${
-          //   ticket.isGroup ? "g.us" : "s.whatsapp.net"
-          // }`
+      if (newest) {
+        await MarkMetaMessageAsReadService(
+          await Whatsapp.findByPk(ticket.whatsappId),
+          newest.id
         );
+      }
+    }
+
+    if (wbot) {
+      const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      const batchSize = 250;
+      let hasMore = true;
+      let lastCreatedAt: Date = null;
+      let isFirstBatch = true;
+
+      while (hasMore) {
+        const whereClause: WhereOptions<Message> = {
+          ticketId: ticket.id,
+          fromMe: false,
+          read: false
+        };
+        if (lastCreatedAt) {
+          whereClause[Op.and] = [
+            { createdAt: { [Op.lt]: lastCreatedAt } },
+            { createdAt: { [Op.gte]: oneWeekAgo } }
+          ];
+        }
+
+        const messages = await Message.findAll({
+          attributes: ["id", "companyId", "dataJson", "createdAt"],
+          where: whereClause,
+          order: [
+            ["createdAt", "DESC"],
+            ["id", "DESC"]
+          ],
+          limit: batchSize
+        });
+
+        if (messages.length === 0) break;
+
+        if (isFirstBatch) {
+          const lastMessage: proto.IWebMessageInfo = JSON.parse(
+            messages[0].dataJson
+          );
+          if (lastMessage?.key?.remoteJid && !lastMessage.key.fromMe) {
+            (wbot as WASocket)
+              .chatModify(
+                { markRead: true, lastMessages: [lastMessage] },
+                lastMessage.key.remoteJid
+              )
+              .catch(err => {
+                if (err.output?.statusCode === 404) return;
+                logger.error(
+                  { error: err as Error },
+                  `Could not modify chat. Err: ${err?.message}`
+                );
+              });
+          }
+          companyId = messages[0]?.companyId;
+          isFirstBatch = false;
+        }
+
+        const messageKeys = messages
+          .map(m => {
+            const message: proto.IWebMessageInfo = JSON.parse(m.dataJson);
+            return message.key;
+          })
+          .filter(key => key !== undefined);
+
+        logger.debug(
+          { messageKeys, ticketId: ticket.id },
+          `Marking ${messageKeys.length} messages of ticket ${ticket.id} as read`
+        );
+
+        try {
+          await (wbot as WASocket).readMessages(messageKeys);
+        } catch (err) {
+          logger.error(
+            { error: err as Error },
+            `Could not mark messages as read. Err: ${err?.message}`
+          );
+          break;
+        }
+
+        const lastMsg = messages[messages.length - 1];
+        lastCreatedAt = lastMsg.createdAt;
+        hasMore = messages.length === batchSize;
       }
     }
 
@@ -49,24 +129,22 @@ const SetTicketMessagesAsRead = async (ticket: Ticket): Promise<void> => {
       }
     );
   } catch (err) {
-    console.log(err);
-    logger.warn(
-      `Could not mark messages as read. Maybe whatsapp session disconnected? Err: ${err}`
+    logger.error(
+      { error: err as Error },
+      `Could not mark messages as read. Err: ${err?.message}`
     );
   }
 
   const io = getIO();
-  if (companyid){
-    io.to(`company-${companyid}-mainchannel`).emit(`company-${companyid}-ticket`, {
-      action: "updateUnread",
-      ticketId: ticket?.id
-    });
+  if (companyId) {
+    io.to(ticket.id.toString())
+      .to(`company-${companyId}-${ticket.status}`)
+      .to(`queue-${ticket.queueId}-${ticket.status}`)
+      .emit(`company-${companyId}-ticket`, {
+        action: "updateUnread",
+        ticketId: ticket.id
+      });
   }
-
-  io.to(ticket.status).to("notification").emit("ticket", {
-    action: "updateUnread",
-    ticketId: ticket.id
-  });
 };
 
 export default SetTicketMessagesAsRead;

@@ -1,0 +1,146 @@
+--- a/internal/voip/media/mlow/celp_enc.go
++++ b/internal/voip/media/mlow/celp_enc.go
+@@ -285,9 +285,9 @@
+ 	return i
+ }
+ 
+-func celpGetMaxiK(x []float32, idx []int32, xLen, k int) {
++func celpGetMaxiK(x []float32, idx []int32, taken []bool, xLen, k int) {
+ 	// Source of truth: https://github.com/oxidezap/whatsapp-rust/blob/ed12f359a086b28e807ba236f0977af1000859fe/wacore/src/voip/mlow/smpl_celp.rs#L445-L462
+-	taken := make([]bool, xLen)
++	clear(taken[:xLen])
+ 	for kk := 0; kk < k; kk++ {
+ 		var best float32 = -math.MaxFloat32
+ 		bi := 0
+@@ -555,6 +555,19 @@
+ 	impLpcBuf []float32
+ 	phi       []float32
+ 	phiFlip   []float32
++
++	// FCB search runs once per CELP subframe. Keep its workspaces on the
++	// per-call encoder instead of allocating thousands of short-lived slices.
++	fcbScratch   *fcbSearchScratch
++	bestFcbState [smplCelpMaxRates]fcbState
++	fcbDNew      [smplMaxSfLen]float32
++	fcbDAbs      [smplMaxSfLen]float32
++	fcbDSign     [smplMaxSfLen]float32
++	fcbNum       [smplMaxSfLen]float32
++	fcbDen       [smplMaxSfLen]float32
++	fcbQ         [smplMaxSfLen]float32
++	fcbDdDen     [smplMaxSfLen]float32
++	fcbTaken     [smplMaxSfLen]bool
+ }
+ 
+ // NewCelpEncoder builds the encoder (mirrors CelpEncoder::new).
+@@ -592,6 +605,8 @@
+ 		impLpcBuf:      make([]float32, smplMaxSfLen+SmplLPCOrder),
+ 		phi:            make([]float32, smplMaxSfLen),
+ 		phiFlip:        make([]float32, 2*smplMaxSfLen),
++		fcbScratch:     newFcbSearchScratch(),
++		bestFcbState:   [smplCelpMaxRates]fcbState{newFcbState(), newFcbState()},
+ 	}
+ 	return e
+ }
+@@ -615,10 +630,10 @@
+ 	*nPulses = [smplCelpMaxRates]int16{}
+ 
+ 	var positions [smplMaxPulsesPerSf]int32
+-	dAbs := make([]float32, smplMaxSfLen)
+-	dSign := make([]float32, smplMaxSfLen)
+-	num := make([]float32, smplMaxSfLen)
+-	den := make([]float32, smplMaxSfLen)
++	dAbs := e.fcbDAbs[:]
++	dSign := e.fcbDSign[:]
++	num := e.fcbNum[:]
++	den := e.fcbDen[:]
+ 	phi0 := e.phi[0]
+ 	celpCalcDAbsAndSign(d, fcbSubfrlen, dAbs, dSign)
+ 
+@@ -668,7 +683,7 @@
+ 		for i := nz0; i < nz1; i++ {
+ 			den[i] += 2.0 * sgn * dSign[i] * e.phiFlip[int(colOff)+i]
+ 		}
+-		q := make([]float32, smplMaxSfLen)
++		q := e.fcbQ[:]
+ 		celpQ(num, den, fcbSubfrlen, q)
+ 		positions[pulseNr] = int32(celpGetMaxi(q, fcbSubfrlen))
+ 		pp := int(positions[pulseNr])
+@@ -821,7 +836,8 @@
+ 		for i := 0; i < fcbSubfrlen; i++ {
+ 			sc.fcbStates[wi][idx].den[i] += dDen
+ 		}
+-		ddDen := make([]float32, smplMaxSfLen)
++		ddDen := e.fcbDdDen[:]
++		clear(ddDen[:fcbSubfrlen])
+ 		g1 = 1.0
+ 		for pos := fcbPosNew; pos < int32(fcbSubfrlen); pos += lag {
+ 			nz0, nz1 := celpNonZeroRange(pos, percRespLen, fcbSubfrlen)
+@@ -856,10 +872,10 @@
+ 	sc.fcbStates[wi][idx].pulseSigns[fcbNPulses] = fcbSignNew
+ 
+ 	newNPulses := fcbNPulses + 1
+-	q := make([]float32, smplMaxSfLen)
++	q := e.fcbQ[:]
+ 	celpQ(sc.fcbStates[wi][idx].num, sc.fcbStates[wi][idx].den, fcbSubfrlen, q)
+ 	var sortIx [celpMaxNumsurv]int32
+-	celpGetMaxiK(q, sortIx[:], fcbSubfrlen, numsurv)
++	celpGetMaxiK(q, sortIx[:], e.fcbTaken[:], fcbSubfrlen, numsurv)
+ 	for i := 0; i < numsurv; i++ {
+ 		pos := int(sortIx[i])
+ 		sgntr := fcbSgntrBase + e.sgntrs[pos]
+@@ -876,11 +892,11 @@
+ 	pulses *[smplCelpMaxRates][smplMaxPulsesPerSf]int16, nPulses *[smplCelpMaxRates]int16, wnrg, gainFromSearch, fcbWnrg *[smplCelpMaxRates]float32) {
+ 	// Source of truth: https://github.com/oxidezap/whatsapp-rust/blob/ed12f359a086b28e807ba236f0977af1000859fe/wacore/src/voip/mlow/smpl_celp.rs#L1247-L1494
+ 	fcbSubfrlen := e.fcbSubfrlen
+-	sc := newFcbSearchScratch()
++	sc := e.fcbScratch
+ 
+-	dNew := make([]float32, smplMaxSfLen)
+-	dAbs := make([]float32, smplMaxSfLen)
+-	dSign := make([]float32, smplMaxSfLen)
++	dNew := e.fcbDNew[:]
++	dAbs := e.fcbDAbs[:]
++	dSign := e.fcbDSign[:]
+ 	phi0 := e.phi[0]
+ 
+ 	if pitchSharp != 0.0 && lag > 0 && lag < int32(fcbSubfrlen) {
+@@ -900,8 +916,11 @@
+ 
+ 	sc.readIdx = 0
+ 	sc.writeIdx = 1
++	sc.fcbsSize = 0
++	sc.fcbCandidatesSize = 0
++	sc.uniqueSgntrSize = 0
+ 	var bestFcb [smplCelpMaxRates]fcb
+-	bestFcbState := [smplCelpMaxRates]fcbState{newFcbState(), newFcbState()}
++	bestFcbState := &e.bestFcbState
+ 	var nrgThr [smplCelpMaxRates]float32
+ 
+ 	{
+@@ -938,7 +957,7 @@
+ 	}
+ 
+ 	sc.swapRw()
+-	q := make([]float32, smplMaxSfLen)
++	q := e.fcbQ[:]
+ 	{
+ 		ri := sc.readIdx
+ 		if pitchSharp == 0.0 {
+@@ -949,7 +968,7 @@
+ 	}
+ 
+ 	var sortIx [celpMaxNumsurv]int32
+-	celpGetMaxiK(q, sortIx[:], fcbSubfrlen, int(surv[0]))
++	celpGetMaxiK(q, sortIx[:], e.fcbTaken[:], fcbSubfrlen, int(surv[0]))
+ 	sc.fcbsSize = 0
+ 	{
+ 		ri := sc.readIdx
+@@ -983,7 +1002,7 @@
+ 			for i := 0; i < candSize; i++ {
+ 				q[i] = sc.fcbCandidates[i].wnrg
+ 			}
+-			celpGetMaxiK(q, sortIx[:], candSize, int(surv[pulseNr-1]))
++			celpGetMaxiK(q, sortIx[:], e.fcbTaken[:], candSize, int(surv[pulseNr-1]))
+ 			sc.fcbsSize = 0
+ 			for i := 0; i < int(surv[pulseNr-1]); i++ {
+ 				sc.fcbs[sc.fcbsSize] = sc.fcbCandidates[sortIx[i]]

@@ -22,47 +22,55 @@ import toastError from "../../errors/toastError";
 import ColorPicker from "../ColorPicker";
 import {
   Grid,
+  Checkbox,
+  FormControl,
   IconButton,
   InputAdornment,
+  InputLabel,
+  ListItemText,
+  MenuItem,
   Paper,
+  Select,
   Tab,
   Tabs,
+  Typography
 } from "@material-ui/core";
 import { AttachFile, Colorize, DeleteOutline } from "@material-ui/icons";
-import { QueueOptions } from "../QueueOptions";
+import ChatbotFlow from "../ChatbotFlow";
 import SchedulesForm from "../SchedulesForm";
+import OpenHoursEditor from "../../components/OpenHoursEditor";
 import ConfirmationModal from "../ConfirmationModal";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     display: "flex",
-    flexWrap: "wrap",
+    flexWrap: "wrap"
   },
   textField: {
     marginRight: theme.spacing(1),
-    flex: 1,
+    flex: 1
   },
 
   btnWrapper: {
-    position: "relative",
+    position: "relative"
   },
 
   buttonProgress: {
-    color: green[500],
+    color: theme.isStardew ? theme.stardew.green : green[500],
     position: "absolute",
     top: "50%",
     left: "50%",
     marginTop: -12,
-    marginLeft: -12,
+    marginLeft: -12
   },
   formControl: {
     margin: theme.spacing(1),
-    minWidth: 120,
+    minWidth: 120
   },
   colorAdorment: {
     width: 20,
-    height: 20,
-  },
+    height: 20
+  }
 }));
 
 const QueueSchema = Yup.object().shape({
@@ -71,44 +79,48 @@ const QueueSchema = Yup.object().shape({
     .max(50, "Too Long!")
     .required("Required"),
   color: Yup.string().min(3, "Too Short!").max(9, "Too Long!").required(),
-  greetingMessage: Yup.string(),
+  greetingMessage: Yup.string()
 });
+
+// Helper to check if value is OpenHours format or empty
+const isOpenHoursFormat = schedules => {
+  if (!schedules || Object.keys(schedules).length === 0) return true;
+  return (
+    typeof schedules === "object" &&
+    Array.isArray(schedules.weeklyRules) &&
+    Array.isArray(schedules.overrides)
+  );
+};
+
+const initialQueue = {
+  name: "",
+  color: "",
+  greetingMessage: "",
+  outOfHoursMessage: ""
+};
 
 const QueueModal = ({ open, onClose, queueId }) => {
   const classes = useStyles();
 
-  const initialState = {
-    name: "",
-    color: "",
-    greetingMessage: "",
-    outOfHoursMessage: "",
-
-  };
-
   const [colorPickerModalOpen, setColorPickerModalOpen] = useState(false);
-  const [queue, setQueue] = useState(initialState);
+  const [queue, setQueue] = useState(initialQueue);
   const [tab, setTab] = useState(0);
   const [schedulesEnabled, setSchedulesEnabled] = useState(false);
   const greetingRef = useRef();
   const [attachment, setAttachment] = useState(null);
   const attachmentFile = useRef(null);
-  const [queueEditable, setQueueEditable] = useState(true);
+  const queueEditable = true;
   const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [connections, setConnections] = useState([]);
+  const [selectedWhatsappIds, setSelectedWhatsappIds] = useState([]);
+  const [connectionsLoaded, setConnectionsLoaded] = useState(false);
 
-  const [schedules, setSchedules] = useState([
-    { weekday: "Segunda-feira",weekdayEn: "monday",startTime: "08:00",endTime: "18:00",},
-    { weekday: "Terça-feira",weekdayEn: "tuesday",startTime: "08:00",endTime: "18:00",},
-    { weekday: "Quarta-feira",weekdayEn: "wednesday",startTime: "08:00",endTime: "18:00",},
-    { weekday: "Quinta-feira",weekdayEn: "thursday",startTime: "08:00",endTime: "18:00",},
-    { weekday: "Sexta-feira", weekdayEn: "friday",startTime: "08:00",endTime: "18:00",},
-    { weekday: "Sábado", weekdayEn: "saturday",startTime: "08:00",endTime: "12:00",},
-    { weekday: "Domingo", weekdayEn: "sunday",startTime: "00:00",endTime: "00:00",},
-  ]);
+  const [schedules, setSchedules] = useState({});
 
   useEffect(() => {
     api.get(`/settings`).then(({ data }) => {
       if (Array.isArray(data)) {
-        const scheduleType = data.find((d) => d.key === "scheduleType");
+        const scheduleType = data.find(d => d.key === "scheduleType");
         if (scheduleType) {
           setSchedulesEnabled(scheduleType.value === "queue");
         }
@@ -117,34 +129,65 @@ const QueueModal = ({ open, onClose, queueId }) => {
   }, []);
 
   useEffect(() => {
+    let active = true;
+
     (async () => {
-      if (!queueId) return;
+      if (!open) return;
+      setConnectionsLoaded(false);
       try {
-        const { data } = await api.get(`/queue/${queueId}`);
-        setQueue((prevState) => {
-          return { ...prevState, ...data };
-        });
-        setSchedules(data.schedules);
+        const [connectionsResponse, queueResponse] = await Promise.all([
+          api.get("/whatsapp"),
+          queueId ? api.get(`/queue/${queueId}`) : Promise.resolve(null)
+        ]);
+
+        if (!active) return;
+
+        const availableConnections = connectionsResponse.data || [];
+        setConnections(availableConnections);
+        setConnectionsLoaded(true);
+
+        if (queueResponse) {
+          const data = queueResponse.data;
+          setQueue(prevState => ({ ...prevState, ...data }));
+          setSchedules(data.schedules || {});
+
+          const assignedIds = data.whatsapps?.map(item => item.id) || [];
+          setSelectedWhatsappIds(
+            assignedIds.length > 0
+              ? assignedIds
+              : availableConnections.map(item => item.id)
+          );
+        } else {
+          setQueue(initialQueue);
+          setSchedules({});
+          setSelectedWhatsappIds(availableConnections.map(item => item.id));
+        }
       } catch (err) {
-        toastError(err);
+        if (active) toastError(err);
       }
     })();
 
     return () => {
-      setQueue({
-        name: "",
-        color: "",
-        greetingMessage: "",
-      });
+      active = false;
+      setQueue(initialQueue);
+      setConnections([]);
+      setSelectedWhatsappIds([]);
+      setConnectionsLoaded(false);
     };
   }, [queueId, open]);
 
   const handleClose = () => {
     onClose();
-    setQueue(initialState);
+    setQueue(initialQueue);
+    setConnections([]);
+    setSelectedWhatsappIds([]);
+    setConnectionsLoaded(false);
+    // O diálogo não desmonta entre aberturas: sem isto, abrir "nova fila"
+    // depois de editar o chatbot cairia numa aba desabilitada e vazia.
+    setTab(0);
   };
 
-  const handleAttachmentFile = (e) => {
+  const handleAttachmentFile = e => {
     const file = head(e.target.files);
     if (file) {
       setAttachment(file);
@@ -159,36 +202,52 @@ const QueueModal = ({ open, onClose, queueId }) => {
 
     if (queue.mediaPath) {
       await api.delete(`/queue/${queue.id}/media-upload`);
-      setQueue((prev) => ({ ...prev, mediaPath: null, mediaName: null }));
+      setQueue(prev => ({ ...prev, mediaPath: null, mediaName: null }));
       toast.success(i18n.t("queueModal.toasts.deleted"));
     }
   };
 
-  const handleSaveQueue = async (values) => {
+  const handleSaveQueue = async values => {
+    if (
+      connectionsLoaded &&
+      connections.length > 1 &&
+      selectedWhatsappIds.length === 0
+    ) {
+      toast.warn(i18n.t("queueModal.validation.connectionRequired"));
+      return;
+    }
+
     try {
+      let savedId = queueId;
+      const payload = {
+        ...values,
+        schedules,
+        ...(connectionsLoaded ? { whatsappIds: selectedWhatsappIds } : {})
+      };
+      delete payload.whatsapps;
+
       if (queueId) {
-        await api.put(`/queue/${queueId}`, { ...values, schedules });
-        if (attachment != null) {
-          const formData = new FormData();
-          formData.append("file", attachment);
-          await api.post(`/queue/${queueId}/media-upload`, formData);
-        }
+        await api.put(`/queue/${queueId}`, payload);
       } else {
-        await api.post("/queue", { ...values, schedules });
-        if (attachment != null) {
-          const formData = new FormData();
-          formData.append("file", attachment);
-          await api.post(`/queue/${queueId}/media-upload`, formData);
-        }
+        // O id só existe depois do POST: usar "queueId" aqui perdia o anexo
+        // silenciosamente ao criar uma fila.
+        const { data } = await api.post("/queue", payload);
+        savedId = data.id;
       }
-      toast.success("Queue saved successfully");
+
+      if (attachment != null) {
+        const formData = new FormData();
+        formData.append("file", attachment);
+        await api.post(`/queue/${savedId}/media-upload`, formData);
+      }
+      toast.success(i18n.t("queueModal.toasts.saved"));
       handleClose();
     } catch (err) {
       toastError(err);
     }
   };
 
-  const handleSaveSchedules = async (values) => {
+  const handleSaveSchedules = async values => {
     toast.success("Clique em salvar para registar as alterações");
     setSchedules(values);
     setTab(0);
@@ -196,7 +255,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
 
   return (
     <div className={classes.root}>
-       <ConfirmationModal
+      <ConfirmationModal
         title={i18n.t("queueModal.confirmationModal.deleteTitle")}
         open={confirmationOpen}
         onClose={() => setConfirmationOpen(false)}
@@ -215,11 +274,11 @@ const QueueModal = ({ open, onClose, queueId }) => {
           {queueId
             ? `${i18n.t("queueModal.title.edit")}`
             : `${i18n.t("queueModal.title.add")}`}
-           <div style={{ display: "none" }}>
+          <div style={{ display: "none" }}>
             <input
               type="file"
               ref={attachmentFile}
-              onChange={(e) => handleAttachmentFile(e)}
+              onChange={e => handleAttachmentFile(e)}
             />
           </div>
         </DialogTitle>
@@ -228,10 +287,17 @@ const QueueModal = ({ open, onClose, queueId }) => {
           indicatorColor="primary"
           textColor="primary"
           onChange={(_, v) => setTab(v)}
-          aria-label="disabled tabs example"
+          aria-label={i18n.t("queueModal.tabs.label")}
         >
-          <Tab label="Dados da Fila" />
-          {schedulesEnabled && <Tab label="Horários de Atendimento" />}
+          <Tab label={i18n.t("queueModal.tabs.data")} />
+          <Tab
+            label={i18n.t("queueModal.tabs.chatbot")}
+            disabled={!queueId}
+            title={queueId ? undefined : i18n.t("queueModal.tabs.chatbotHint")}
+          />
+          {schedulesEnabled && (
+            <Tab label={i18n.t("queueModal.tabs.schedules")} />
+          )}
         </Tabs>
         {tab === 0 && (
           <Paper>
@@ -239,11 +305,9 @@ const QueueModal = ({ open, onClose, queueId }) => {
               initialValues={queue}
               enableReinitialize={true}
               validationSchema={QueueSchema}
-              onSubmit={(values, actions) => {
-                setTimeout(() => {
-                  handleSaveQueue(values);
-                  actions.setSubmitting(false);
-                }, 400);
+              onSubmit={async (values, actions) => {
+                await handleSaveQueue(values);
+                actions.setSubmitting(false);
               }}
             >
               {({ touched, errors, isSubmitting, values }) => (
@@ -288,7 +352,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
                           >
                             <Colorize />
                           </IconButton>
-                        ),
+                        )
                       }}
                       variant="outlined"
                       margin="dense"
@@ -296,8 +360,9 @@ const QueueModal = ({ open, onClose, queueId }) => {
                     />
                     <ColorPicker
                       open={colorPickerModalOpen}
+                      currentColor={values.color}
                       handleClose={() => setColorPickerModalOpen(false)}
-                      onChange={(color) => {
+                      onChange={color => {
                         values.color = color;
                         setQueue(() => {
                           return { ...values, color };
@@ -305,64 +370,104 @@ const QueueModal = ({ open, onClose, queueId }) => {
                       }}
                     />
                     <div style={{ marginTop: 5 }}>
-                          <Field
-                            as={TextField}
-                            label={i18n.t("queueModal.form.greetingMessage")}
-                            type="greetingMessage"
-                            multiline
-                            inputRef={greetingRef}
-                            rows={5}
-                            fullWidth
-                            name="greetingMessage"
-                            error={
-                              touched.greetingMessage &&
-                              Boolean(errors.greetingMessage)
-                            }
-                            helperText={
-                              touched.greetingMessage && errors.greetingMessage
-                            }
-                            variant="outlined"
-                            margin="dense"
-                          />
-                        {schedulesEnabled && (
-                            <Field
-                              as={TextField}
-                              label={i18n.t("queueModal.form.outOfHoursMessage")}
-                              type="outOfHoursMessage"
-                              multiline
-                              rows={5}
-                              fullWidth
-                              name="outOfHoursMessage"
-                              error={
-                                touched.outOfHoursMessage &&
-                                Boolean(errors.outOfHoursMessage)
-                              }
-                              helperText={
-                                touched.outOfHoursMessage && errors.outOfHoursMessage
-                              }
-                              variant="outlined"
-                              margin="dense"
-                            />
-                        )}
-                    </div>
-                    <QueueOptions queueId={queueId} />
-                    {(queue.mediaPath || attachment) && (
-                    <Grid xs={12} item>
-                      <Button startIcon={<AttachFile />}>
-                        {attachment != null
-                          ? attachment.name
-                          : queue.mediaName}
-                      </Button>
-                      {queueEditable && (
-                        <IconButton
-                          onClick={() => setConfirmationOpen(true)}
-                          color="secondary"
-                        >
-                          <DeleteOutline />
-                        </IconButton>
+                      <Field
+                        as={TextField}
+                        label={i18n.t("queueModal.form.greetingMessage")}
+                        type="greetingMessage"
+                        multiline
+                        inputRef={greetingRef}
+                        rows={5}
+                        fullWidth
+                        name="greetingMessage"
+                        spellCheck={true}
+                        error={
+                          touched.greetingMessage &&
+                          Boolean(errors.greetingMessage)
+                        }
+                        helperText={
+                          touched.greetingMessage && errors.greetingMessage
+                        }
+                        variant="outlined"
+                        margin="dense"
+                      />
+                      {schedulesEnabled && (
+                        <Field
+                          as={TextField}
+                          InputLabelProps={{ shrink: true }}
+                          label={i18n.t("queueModal.form.outOfHoursMessage")}
+                          type="outOfHoursMessage"
+                          multiline
+                          rows={5}
+                          fullWidth
+                          name="outOfHoursMessage"
+                          spellCheck={true}
+                          error={
+                            touched.outOfHoursMessage &&
+                            Boolean(errors.outOfHoursMessage)
+                          }
+                          helperText={
+                            touched.outOfHoursMessage &&
+                            errors.outOfHoursMessage
+                          }
+                          variant="outlined"
+                          margin="dense"
+                        />
                       )}
-                    </Grid>
-                  )}
+                    </div>
+                    {connections.length > 1 && (
+                      <FormControl variant="outlined" margin="dense" fullWidth>
+                        <InputLabel>
+                          {i18n.t("queueModal.form.connections")}
+                        </InputLabel>
+                        <Select
+                          multiple
+                          value={selectedWhatsappIds}
+                          onChange={event =>
+                            setSelectedWhatsappIds(event.target.value)
+                          }
+                          label={i18n.t("queueModal.form.connections")}
+                          renderValue={selected =>
+                            connections
+                              .filter(connection =>
+                                selected.includes(connection.id)
+                              )
+                              .map(connection => connection.name)
+                              .join(", ")
+                          }
+                        >
+                          {connections.map(connection => (
+                            <MenuItem key={connection.id} value={connection.id}>
+                              <Checkbox
+                                checked={selectedWhatsappIds.includes(
+                                  connection.id
+                                )}
+                              />
+                              <ListItemText primary={connection.name} />
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        <Typography variant="caption" color="textSecondary">
+                          {i18n.t("queueModal.form.connectionsHelp")}
+                        </Typography>
+                      </FormControl>
+                    )}
+                    {(queue.mediaPath || attachment) && (
+                      <Grid xs={12} item>
+                        <Button startIcon={<AttachFile />}>
+                          {attachment != null
+                            ? attachment.name
+                            : queue.mediaName}
+                        </Button>
+                        {queueEditable && (
+                          <IconButton
+                            onClick={() => setConfirmationOpen(true)}
+                            color="secondary"
+                          >
+                            <DeleteOutline />
+                          </IconButton>
+                        )}
+                      </Grid>
+                    )}
                   </DialogContent>
                   <DialogActions>
                     {!attachment && !queue.mediaPath && queueEditable && (
@@ -408,12 +513,57 @@ const QueueModal = ({ open, onClose, queueId }) => {
         )}
         {tab === 1 && (
           <Paper style={{ padding: 20 }}>
-            <SchedulesForm
-              loading={false}
-              onSubmit={handleSaveSchedules}
-              initialValues={schedules}
-              labelSaveButton="Adicionar"
+            <ChatbotFlow
+              onOpen={handleClose}
+              queueId={queueId}
+              greetingMessage={queue.greetingMessage}
             />
+          </Paper>
+        )}
+        {tab === 2 && (
+          <Paper style={{ padding: 20 }}>
+            {isOpenHoursFormat(schedules) ? (
+              <>
+                <OpenHoursEditor value={schedules} onChange={setSchedules} />
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    marginTop: 16
+                  }}
+                >
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleSaveSchedules(schedules)}
+                  >
+                    {i18n.t("common.save")}
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <Grid spacing={4} container>
+                  <Grid item xs={12}>
+                    <div>
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        onClick={() => setSchedules({})}
+                      >
+                        ⚠️ {i18n.t("settings.schedules.updateToNewFormat")}
+                      </Button>
+                    </div>
+                  </Grid>
+                </Grid>
+                <SchedulesForm
+                  loading={false}
+                  onSubmit={handleSaveSchedules}
+                  initialValues={schedules}
+                  labelSaveButton="Adicionar"
+                />
+              </>
+            )}
           </Paper>
         )}
       </Dialog>

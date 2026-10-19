@@ -6,20 +6,22 @@ module.exports = {
       queryInterface.removeConstraint("Queues", "Queues_color_key"),
       queryInterface.removeConstraint("Queues", "Queues_name_key"),
       queryInterface.removeIndex("Queues", "Queues_color_key"),
-      queryInterface.removeIndex("Queues", "Queues_name_key"),
+      queryInterface.removeIndex("Queues", "Queues_name_key")
     ]);
   },
 
   down: (queryInterface: QueryInterface) => {
     return Promise.all([
-      queryInterface.addConstraint("Queues", { fields: ["color"],
+      queryInterface.addConstraint("Queues", {
+        fields: ["color"],
         name: "Queues_color_key",
-        type: 'unique'
+        type: "unique"
       }),
-      queryInterface.addConstraint("Queues", { fields: ["name"],
+      queryInterface.addConstraint("Queues", {
+        fields: ["name"],
         name: "Queues_name_key",
-        type: 'unique'
-      }),
+        type: "unique"
+      })
     ]);
   }
 };

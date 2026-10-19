@@ -1,3 +1,44 @@
+/*
+
+   DO NOT REMOVE / NÃO REMOVER
+
+   VERSÃO EM PORTUGUÊS MAIS ABAIXO
+
+   
+   BASIC LICENSE INFORMATION:
+
+   Author: Claudemir Todo Bom
+   Email: claudemir@todobom.com
+   
+   Licensed under the AGPLv3 as stated on LICENSE.md file
+   
+   Any work that uses code from this file is obligated to 
+   give access to its source code to all of its users (not only
+   the system's owner running it)
+   
+   EXCLUSIVE LICENSE to use on closed source derived work can be
+   purchased from the author and put at the root of the source
+   code tree as proof-of-purchase.
+
+
+
+   INFORMAÇÕES BÁSICAS DE LICENÇA
+
+   Autor: Claudemir Todo Bom
+   Email: claudemir@todobom.com
+
+   Licenciado sob a licença AGPLv3 conforme arquivo LICENSE.md
+    
+   Qualquer sistema que inclua este código deve ter o seu código
+   fonte fornecido a todos os usuários do sistema (não apenas ao
+   proprietário da infraestrutura que o executa)
+   
+   LICENÇA EXCLUSIVA para uso em produto derivado em código fechado
+   pode ser adquirida com o autor e colocada na raiz do projeto
+   como prova de compra. 
+   
+ */
+
 import React, { useEffect, useState } from "react";
 
 import Grid from "@material-ui/core/Grid";
@@ -6,17 +47,15 @@ import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import useSettings from "../../hooks/useSettings";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 import { makeStyles } from "@material-ui/core/styles";
-import EfiSettings from "../PaymentGateways/Efi/EfiSettings";
-import OwenSettings from "../PaymentGateways/Owen/OwenSettings";
-import OwenAd from "../PaymentGateways/Owen/OwenAd";
+import AbacatePaySettings from "../PaymentGateways/AbacatePay/AbacatePaySettings";
 
-const useStyles = makeStyles((_) => ({
+const useStyles = makeStyles(_ => ({
   fieldContainer: {
     width: "100%",
-    textAlign: "left",
-  },
+    textAlign: "left"
+  }
 }));
 
 export default function PaymentGateway(props) {
@@ -28,7 +67,9 @@ export default function PaymentGateway(props) {
 
   useEffect(() => {
     if (Array.isArray(settings) && settings.length) {
-      const paymentGatewaySetting = settings.find((s) => s.key === "_paymentGateway");
+      const paymentGatewaySetting = settings.find(
+        s => s.key === "_paymentGateway"
+      );
       if (paymentGatewaySetting) {
         setPaymentGateway(paymentGatewaySetting.value);
       }
@@ -39,7 +80,7 @@ export default function PaymentGateway(props) {
     setPaymentGateway(value);
     await update({
       key: "_paymentGateway",
-      value,
+      value
     });
     toast.success("Operação atualizada com sucesso.");
   }
@@ -53,26 +94,19 @@ export default function PaymentGateway(props) {
             <Select
               labelId="paymentgateway-label"
               value={paymentGateway}
-              onChange={async (e) => {
+              onChange={async e => {
                 handleChangePaymentGateway(e.target.value);
               }}
             >
               <MenuItem value={""}>None</MenuItem>
-              <MenuItem value={"owen"}>Owen Payments 💎</MenuItem>
-              <MenuItem value={"efi"}>Efí</MenuItem>
+              <MenuItem value={"abacatepay"}>AbacatePay 🥑</MenuItem>
             </Select>
           </FormControl>
         </Grid>
       </Grid>
-      { paymentGateway === "efi" && 
-        <EfiSettings settings={settings} />
-      }
-      { paymentGateway === "owen" && 
-        <OwenSettings settings={settings} />
-      }
-      { paymentGateway === "" && 
-        <OwenAd />
-      }
+      {paymentGateway === "abacatepay" && (
+        <AbacatePaySettings settings={settings} />
+      )}
     </>
   );
 }

@@ -1,471 +1,277 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
-
-import { useParams, useHistory } from "react-router-dom";
-
+import React, { useState } from "react";
+import { useMediaQuery } from "@material-ui/core";
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { PanelRight, Files } from "lucide-react";
 import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  makeStyles,
-  Paper,
-  Tab,
-  Tabs,
-  TextField,
-} from "@material-ui/core";
+  MessageSquare,
+  Plus,
+  Search,
+  Users,
+  X,
+  Pencil
+} from "../../components/AnimatedIcon";
+import ChatModal from "./ChatModal";
 import ChatList from "./ChatList";
 import ChatMessages from "./ChatMessages";
-import { UsersFilter } from "../../components/UsersFilter";
-import api from "../../services/api";
-import { SocketContext } from "../../context/Socket/SocketContext";
-
-import { has, isObject } from "lodash";
-
-import { AuthContext } from "../../context/Auth/AuthContext";
-import withWidth, { isWidthUp } from "@material-ui/core/withWidth";
-import whatsBackground from "../../assets/wa-background.png"
-import whatsBackgroundDark from "../../assets/wa-background-dark.png";
-
+import useChatInterno from "./useChatInterno";
+import useFecharConversaComEscape from "../../hooks/useFecharConversaComEscape";
+import AvatarUsuario from "../../components/AvatarUsuario";
+import { Botao, BotaoIcone, useIdentidade } from "../../components/interface";
+import PainelMensagens from "../../components/Conversa/PainelMensagens";
 import { i18n } from "../../translate/i18n";
-import Title from "../../components/Title";
-const useStyles = makeStyles((theme) => ({
-  mainContainer: {
-    display: "flex",
-    flexDirection: "column",
-    position: "relative",
-    flex: 1,
-    padding: theme.spacing(2),
-    height: `calc(100% - 48px)`,
-    overflowY: "hidden",
-    border: "1px solid rgba(0, 0, 0, 0.12)",
-    backgroundImage: theme.mode === 'light' ? `url(${whatsBackground})` : `url(${whatsBackgroundDark})`,
-		backgroundPosition: 'center', 
-		backgroundSize: 'cover', 
-		backgroundRepeat: 'no-repeat', 
-  },
-  gridContainer: {
-    flex: 1,
-    height: "100%",
-    border: "1px solid rgba(0, 0, 0, 0.12)",
-    backgroundColor: "inherit",
-  },
-  gridItem: {
-    height: "100%",
-  },
-  gridItemTab: {
-    height: "92%",
-    width: "100%",
-  },
-  btnContainer: {
-    textAlign: "right",
-    padding: 10,
-  },
-}));
+import "../../components/Conversa/conversa.css";
+import "./chat.css";
 
-export function ChatModal({
-  open,
-  chat,
-  type,
-  handleClose,
-  handleLoadNewChat,
-}) {
-  const [users, setUsers] = useState([]);
-  const [title, setTitle] = useState("");
+export { ChatModal };
 
-  useEffect(() => {
-    setTitle("");
-    setUsers([]);
-    if (type === "edit") {
-      const userList = chat.users.map((u) => ({
-        id: u.user.id,
-        name: u.user.name,
-      }));
-      setUsers(userList);
-      setTitle(chat.title);
-    }
-  }, [chat, open, type]);
-
-  const handleSave = async () => {
-    try {
-      if (!title) {
-        alert("Por favor, preencha o título da conversa.");
-        return;
-      }
-
-      if (!users || users.length === 0) {
-        alert("Por favor, selecione pelo menos um usuário.");
-        return;
-      }
-
-      if (type === "edit") {
-        await api.put(`/chats/${chat.id}`, {
-          users,
-          title,
-        });
-      } else {
-        const { data } = await api.post("/chats", {
-          users,
-          title,
-        });
-        handleLoadNewChat(data);
-      }
-      handleClose();
-    } catch (err) {}
-  };  
-
-  return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      aria-labelledby="alert-dialog-title"
-      aria-describedby="alert-dialog-description"
-    >
-      <DialogTitle id="alert-dialog-title">Conversa</DialogTitle>
-      <DialogContent>
-        <Grid spacing={2} container>
-          <Grid xs={12} style={{ padding: 18 }} item>
-            <TextField
-              label="Título"
-              placeholder="Título"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              variant="outlined"
-              size="small"
-              fullWidth
-            />
-          </Grid>
-          <Grid xs={12} item>
-            <UsersFilter
-              onFiltered={(users) => setUsers(users)}
-              initialUsers={users}
-            />
-          </Grid>
-        </Grid>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose} color="primary">
-          Fechar
-        </Button>
-        <Button onClick={handleSave} color="primary" variant="contained">
-          Salvar
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-}
-
-function Chat(props) {
-  const classes = useStyles();
-  const { user } = useContext(AuthContext);
-  const history = useHistory();
-
-  const [showDialog, setShowDialog] = useState(false);
-  const [dialogType, setDialogType] = useState("new");
-  const [currentChat, setCurrentChat] = useState({});
-  const [chats, setChats] = useState([]);
-  const [chatsPageInfo, setChatsPageInfo] = useState({ hasMore: false });
-  const [messages, setMessages] = useState([]);
-  const [messagesPageInfo, setMessagesPageInfo] = useState({ hasMore: false });
-  const [messagesPage, setMessagesPage] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [tab, setTab] = useState(0);
-  const isMounted = useRef(true);
-  const scrollToBottomRef = useRef();
-  const { id } = useParams();
-
-  const socketManager = useContext(SocketContext);
-
-  useEffect(() => {
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (isMounted.current) {
-      findChats().then((data) => {
-        const { records } = data;
-        if (records.length > 0) {
-          setChats(records);
-          setChatsPageInfo(data);
-
-          if (id && records.length) {
-            const chat = records.find((r) => r.uuid === id);
-            selectChat(chat);
-          }
-        }
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (isObject(currentChat) && has(currentChat, "id")) {
-      findMessages(currentChat.id).then(() => {
-        if (typeof scrollToBottomRef.current === "function") {
-          setTimeout(() => {
-            scrollToBottomRef.current();
-          }, 300);
-        }
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentChat]);
-
-  useEffect(() => {
-    const companyId = localStorage.getItem("companyId");
-    const socket = socketManager.GetSocket(companyId);
-
-    const onChatUser = (data) => {
-      if (data.action === "create") {
-        setChats((prev) => [data.record, ...prev]);
-      }
-      if (data.action === "update") {
-        const changedChats = chats.map((chat) => {
-          if (chat.id === data.record.id) {
-            setCurrentChat(data.record);
-            return {
-              ...data.record,
-            };
-          }
-          return chat;
-        });
-        setChats(changedChats);
-      }
-    }
-
-    const onChat = (data) => {
-      if (data.action === "delete") {
-        const filteredChats = chats.filter((c) => c.id !== +data.id);
-        setChats(filteredChats);
-        setMessages([]);
-        setMessagesPage(1);
-        setMessagesPageInfo({ hasMore: false });
-        setCurrentChat({});
-        history.push("/chats");
-      }
-    }
-
-    const onCurrentChat = (data) => {
-        if (data.action === "new-message") {
-          setMessages((prev) => [...prev, data.newMessage]);
-          const changedChats = chats.map((chat) => {
-            if (chat.id === data.newMessage.chatId) {
-              return {
-                ...data.chat,
-              };
-            }
-            return chat;
-          });
-          setChats(changedChats);
-          scrollToBottomRef.current();
-        }
-
-        if (data.action === "update") {
-          const changedChats = chats.map((chat) => {
-            if (chat.id === data.chat.id) {
-              return {
-                ...data.chat,
-              };
-            }
-            return chat;
-          });
-          setChats(changedChats);
-          scrollToBottomRef.current();
-        }
-      }
-
-    socket.on(`company-${companyId}-chat-user-${user.id}`, onChatUser); 
-    socket.on(`company-${companyId}-chat`, onChat);
-    if (isObject(currentChat) && has(currentChat, "id")) {
-      socket.on(`company-${companyId}-chat-${currentChat.id}`, onCurrentChat);
-    }
-        
-    return () => {
-      socket.disconnect();
-    };
-    
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentChat, socketManager]);
-
-  const selectChat = (chat) => {
-    try {
-      setMessages([]);
-      setMessagesPage(1);
-      setCurrentChat(chat);
-      setTab(1);
-    } catch (err) {}
+export default function Chat() {
+  const chat = useChatInterno();
+  const identidade = useIdentidade();
+  const compacto = useMediaQuery("(max-width:959px)");
+  const [modal, definirModal] = useState(null);
+  const [contexto, definirContexto] = useState(null);
+  const fecharConversa = () => {
+    definirContexto(null);
+    chat.voltar();
   };
-
-  const sendMessage = async (contentMessage) => {
-    setLoading(true);
-    try {
-      await api.post(`/chats/${currentChat.id}/messages`, {
-        message: contentMessage,
-      });
-    } catch (err) {}
-    setLoading(false);
-  };
-
-  const deleteChat = async (chat) => {
-    try {
-      await api.delete(`/chats/${chat.id}`);
-    } catch (err) {}
-  };
-
-  const findMessages = async (chatId) => {
-    setLoading(true);
-    try {
-      const { data } = await api.get(
-        `/chats/${chatId}/messages?pageNumber=${messagesPage}`
-      );
-      setMessagesPage((prev) => prev + 1);
-      setMessagesPageInfo(data);
-      setMessages((prev) => [...data.records, ...prev]);
-    } catch (err) {}
-    setLoading(false);
-  };
-
-  const loadMoreMessages = async () => {
-    if (!loading) {
-      findMessages(currentChat.id);
-    }
-  };
-
-  const findChats = async () => {
-    try {
-      const { data } = await api.get("/chats");
-      return data;
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const renderGrid = () => {
-    return (
-      <>
-      <Title>{i18n.t("internalChat.title")}</Title>
-      <Grid className={classes.gridContainer} container>
-        <Grid className={classes.gridItem} md={3} item>
-         
-            <div className={classes.btnContainer}>
-              <Button
-                onClick={() => {
-                  setDialogType("new");
-                  setShowDialog(true);
-                }}
-                color="primary"
-                variant="contained"
-              >
-                Nova
-              </Button>
-            </div>
-        
-          <ChatList
-            chats={chats}
-            pageInfo={chatsPageInfo}
-            loading={loading}
-            handleSelectChat={(chat) => selectChat(chat)}
-            handleDeleteChat={(chat) => deleteChat(chat)}
-            handleEditChat={() => {
-              setDialogType("edit");
-              setShowDialog(true);
-            }}
+  useFecharConversaComEscape(fecharConversa, Boolean(chat.conversa) && !modal);
+  const tituloFechar = `${i18n.t("conversa.voltar")} (Esc)`;
+  const participante = chat.conversa?.users?.find(
+    item => item.userId !== chat.user.id
+  )?.user;
+  const usuarioAvatar =
+    chat.conversa?.users?.length === 2
+      ? participante
+      : { name: chat.conversa?.title };
+  const lista = (
+    <section className="chat-fila">
+      <header>
+        <div>
+          <strong>{i18n.t("internalChat.title")}</strong>
+          <small>{i18n.t("conversa.equipe")}</small>
+        </div>
+        <BotaoIcone
+          titulo={i18n.t("conversa.nova")}
+          onClick={() => definirModal("new")}
+        >
+          <Plus size={18} />
+        </BotaoIcone>
+      </header>
+      <div className="chat-fila-busca">
+        <label className="conversa-busca">
+          <Search size={16} />
+          <input
+            value={chat.busca}
+            onChange={e => chat.definirBusca(e.target.value)}
+            aria-label={i18n.t("conversa.buscarConversas")}
+            placeholder={i18n.t("conversa.buscarConversas")}
           />
-        </Grid>
-        <Grid className={classes.gridItem} md={9} item>
-          {isObject(currentChat) && has(currentChat, "id") && (
-            <ChatMessages
-              chat={currentChat}
-              scrollToBottomRef={scrollToBottomRef}
-              pageInfo={messagesPageInfo}
-              messages={messages}
-              loading={loading}
-              handleSendMessage={sendMessage}
-              handleLoadMore={loadMoreMessages}
-            />
-          )}
-        </Grid>
-      </Grid>
-      </>
-    );
-  };
-
-  const renderTab = () => {
-    return (
-      <Grid className={classes.gridContainer} container>
-        <Grid md={12} item>
-          <Tabs
-            value={tab}
-            indicatorColor="primary"
-            textColor="primary"
-            onChange={(e, v) => setTab(v)}
-            aria-label="disabled tabs example"
-          >
-            <Tab label="Chats" />
-            <Tab label="Mensagens" />
-          </Tabs>
-        </Grid>
-        {tab === 0 && (
-          <Grid className={classes.gridItemTab} md={12} item>
-            <div className={classes.btnContainer}>
-              <Button
-                onClick={() => setShowDialog(true)}
-                color="primary"
-                variant="contained"
-              >
-                Novo
-              </Button>
-            </div>
-            <ChatList
-              chats={chats}
-              pageInfo={chatsPageInfo}
-              loading={loading}
-              handleSelectChat={(chat) => selectChat(chat)}
-              handleDeleteChat={(chat) => deleteChat(chat)}
-            />
-          </Grid>
-        )}
-        {tab === 1 && (
-          <Grid className={classes.gridItemTab} md={12} item>
-            {isObject(currentChat) && has(currentChat, "id") && (
-              <ChatMessages
-                scrollToBottomRef={scrollToBottomRef}
-                pageInfo={messagesPageInfo}
-                messages={messages}
-                loading={loading}
-                handleSendMessage={sendMessage}
-                handleLoadMore={loadMoreMessages}
-              />
-            )}
-          </Grid>
-        )}
-      </Grid>
-    );
-  };
-
-  return (
-    <>
-      <ChatModal
-        type={dialogType}
-        open={showDialog}
-        chat={currentChat}
-        handleLoadNewChat={(data) => {
-          setMessages([]);
-          setMessagesPage(1);
-          setCurrentChat(data);
-          setTab(1);
-          history.push(`/chats/${data.uuid}`);
+        </label>
+      </div>
+      <ChatList
+        chats={chat.conversas}
+        loading={chat.carregandoConversas}
+        handleSelectChat={chat.selecionar}
+        handleDeleteChat={chat.excluir}
+        handleEditChat={conversa => {
+          chat.selecionar(conversa);
+          definirModal("edit");
         }}
-        handleClose={() => setShowDialog(false)}
       />
-      <Paper className={classes.mainContainer}>
-        {isWidthUp("md", props.width) ? renderGrid() : renderTab()}
-      </Paper>
-    </>
+      {chat.maisConversas && (
+        <Botao
+          className="chat-carregar"
+          disabled={chat.carregandoConversas}
+          onClick={() => chat.carregarConversas()}
+        >
+          {i18n.t("conversa.carregarMais")}
+        </Botao>
+      )}
+    </section>
+  );
+  const conversa = chat.conversa ? (
+    <section className="chat-conversa conversa-painel">
+      <header className="conversa-cabecalho">
+        {compacto && <span className="chat-espaco-menu" aria-hidden="true" />}
+        <AvatarUsuario usuario={usuarioAvatar} tamanho={40} />
+        <div className="chat-identidade">
+          <strong>{chat.conversa.title}</strong>
+          <small>
+            {i18n.t("conversa.participantes", {
+              count: chat.conversa.users?.length || 0
+            })}
+          </small>
+        </div>
+        <div className="conversa-cabecalho-acoes">
+          <BotaoIcone
+            titulo={tituloFechar}
+            aria-keyshortcuts="Escape"
+            onClick={fecharConversa}
+          >
+            <X size={18} />
+          </BotaoIcone>
+          <BotaoIcone
+            titulo={i18n.t("conversa.pesquisa")}
+            onClick={() =>
+              definirContexto(contexto === "pesquisa" ? null : "pesquisa")
+            }
+          >
+            <Search size={18} />
+          </BotaoIcone>
+          <BotaoIcone
+            titulo={i18n.t("conversa.pessoas")}
+            onClick={() =>
+              definirContexto(contexto === "pessoas" ? null : "pessoas")
+            }
+          >
+            <PanelRight size={18} />
+          </BotaoIcone>
+        </div>
+      </header>
+      <div className="conversa-fatos">
+        <span>
+          <Users size={12} />
+          {i18n.t("conversa.somenteEquipe")}
+        </span>
+      </div>
+      <div className="conversa-corpo">
+        <ChatMessages
+          key={chat.conversa.id}
+          chat={chat.conversa}
+          messages={chat.mensagens}
+          handleSendMessage={chat.enviar}
+          handleLoadMore={chat.carregarMensagens}
+          scrollToBottomRef={chat.scrollToBottomRef}
+          pageInfo={{ hasMore: chat.maisMensagens }}
+          carregandoHistorico={chat.carregando}
+        />
+        <aside className="conversa-acoes">
+          <BotaoIcone
+            titulo={i18n.t("conversa.pessoas")}
+            onClick={() => definirContexto("pessoas")}
+          >
+            <Users size={18} />
+          </BotaoIcone>
+          <BotaoIcone
+            titulo={i18n.t("conversa.arquivos")}
+            onClick={() => definirContexto("arquivos")}
+          >
+            <Files size={18} />
+          </BotaoIcone>
+          {chat.conversa.ownerId === chat.user.id && (
+            <BotaoIcone
+              titulo={i18n.t("conversa.editar")}
+              onClick={() => definirModal("edit")}
+            >
+              <Pencil size={18} />
+            </BotaoIcone>
+          )}
+        </aside>
+      </div>
+    </section>
+  ) : (
+    <section className="chat-vazio">
+      <MessageSquare size={44} strokeWidth={1.2} />
+      <strong>{i18n.t("conversa.selecione")}</strong>
+      <p>{i18n.t("conversa.selecioneAjuda")}</p>
+      <Botao onClick={() => definirModal("new")} variante="primary">
+        <Plus size={16} />
+        {i18n.t("conversa.nova")}
+      </Botao>
+    </section>
+  );
+  return (
+    <div
+      className="ew-ui chat-layout"
+      data-stardew-screen="chat"
+      style={identidade}
+    >
+      <ChatModal
+        open={Boolean(modal)}
+        type={modal || "new"}
+        chat={chat.conversa}
+        user={chat.user}
+        handleClose={() => definirModal(null)}
+        handleLoadNewChat={chat.selecionar}
+      />
+      {compacto ? (
+        chat.conversa ? (
+          conversa
+        ) : (
+          lista
+        )
+      ) : (
+        <PanelGroup direction="horizontal" autoSaveId="chat-interno-paineis">
+          <Panel defaultSize={29} minSize={23} maxSize={42}>
+            {lista}
+          </Panel>
+          <PanelResizeHandle className="atendimento-divisor" />
+          <Panel minSize={40}>{conversa}</Panel>
+        </PanelGroup>
+      )}
+      {chat.conversa && contexto === "pessoas" && (
+        <aside className="conversa-pesquisa chat-contexto">
+          <header>
+            <strong>{i18n.t("conversa.pessoas")}</strong>
+            <BotaoIcone
+              titulo={i18n.t("fluxos.fechar")}
+              onClick={() => definirContexto(null)}
+            >
+              <X size={16} />
+            </BotaoIcone>
+          </header>
+          <div className="chat-contexto-identidade">
+            <AvatarUsuario usuario={usuarioAvatar} tamanho={56} />
+            <strong>{chat.conversa.title}</strong>
+            <small>
+              {i18n.t("conversa.participantes", {
+                count: chat.conversa.users?.length || 0
+              })}
+            </small>
+          </div>
+          <div className="chat-participantes">
+            {chat.conversa.users?.map(membro => (
+              <div key={membro.userId}>
+                <AvatarUsuario
+                  usuario={membro.user || { id: membro.userId }}
+                  tamanho={34}
+                />
+                <span>
+                  <strong>
+                    {membro.user?.name || i18n.t("conversa.usuario")}
+                  </strong>
+                  <small>
+                    {i18n.t(
+                      membro.userId === chat.conversa.ownerId
+                        ? "conversa.criador"
+                        : "conversa.membro"
+                    )}
+                  </small>
+                </span>
+              </div>
+            ))}
+          </div>
+          {chat.conversa.ownerId === chat.user.id && (
+            <Botao onClick={() => definirModal("edit")}>
+              <Users size={16} />
+              {i18n.t("conversa.gerenciar")}
+            </Botao>
+          )}
+        </aside>
+      )}
+      {chat.conversa && ["pesquisa", "arquivos"].includes(contexto) && (
+        <PainelMensagens
+          key={`${chat.conversa.id}-${contexto}`}
+          modo={contexto}
+          mensagens={chat.mensagens}
+          aoFechar={() => definirContexto(null)}
+          aoSelecionar={id =>
+            document
+              .getElementById(`chat-mensagem-${id}`)
+              ?.scrollIntoView({ behavior: "smooth", block: "center" })
+          }
+        />
+      )}
+    </div>
   );
 }
-
-export default withWidth()(Chat);

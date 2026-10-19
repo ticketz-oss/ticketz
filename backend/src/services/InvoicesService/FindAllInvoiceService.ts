@@ -1,15 +1,25 @@
 import Invoices from "../../models/Invoices";
-
-interface Request {
-  companyId: number;
-}
+import { Op } from "sequelize";
 
 const FindAllPlanService = async (companyId: number): Promise<Invoices[]> => {
   const invoice = await Invoices.findAll({
-    attributes: [ "id", "detail", "value", "dueDate", "status", "createdAt", "updatedAt" ],
+    attributes: [
+      "id",
+      "detail",
+      "value",
+      "currency",
+      "dueDate",
+      "status",
+      "billingType",
+      "periodStart",
+      "periodEnd",
+      "createdAt",
+      "updatedAt"
+    ],
     where: {
-      companyId
-    }, 
+      companyId,
+      status: { [Op.ne]: "deleted" }
+    },
     order: [["id", "ASC"]]
   });
   return invoice;

@@ -1,0 +1,51 @@
+name: Keep AC Norte aligned with main
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  sync:
+    name: Open the main to AC Norte sync PR
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create sync pull request when AC Norte is behind
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          git fetch origin main acnorte
+
+          if git merge-base --is-ancestor \
+            refs/remotes/origin/main refs/remotes/origin/acnorte; then
+            echo "acnorte already contains main."
+            exit 0
+          fi
+
+          existing="$(gh pr list \
+            --base acnorte \
+            --head main \
+            --state open \
+            --json number \
+            --jq '.[0].number // empty')"
+
+          if [[ -n "$existing" ]]; then
+            echo "Sync PR #${existing} is already open."
+            exit 0
+          fi
+
+          gh pr create \
+            --base acnorte \
+            --head main \
+            --title "chore(acnorte): sync main" \
+            --body "Automated synchronization of the shared product baseline into the AC Norte edition. Resolve conflicts in favor of generic behavior unless an AC Norte-specific test documents the exception."

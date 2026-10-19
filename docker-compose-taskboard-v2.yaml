@@ -1,0 +1,14 @@
+name: espaco-whats-taskboard-v2
+
+services:
+  backend:
+    environment:
+      NODE_ENV: development
+      FRONTEND_URL: http://localhost:3301
+      BACKEND_URL: http://localhost:3301/backend
+      MASTER_COMPANY_ID: "1"
+    ports: !override
+      - "8181:3000"
+  frontend:
+    ports: !override
+      - "3301:80"

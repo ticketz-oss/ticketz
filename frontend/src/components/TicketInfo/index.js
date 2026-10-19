@@ -1,46 +1,57 @@
 import React, { useState, useEffect } from "react";
 
-import { Avatar, CardHeader } from "@material-ui/core";
+import { CardHeader } from "@material-ui/core";
+import AvatarContato from "../AvatarContato";
 
 import { i18n } from "../../translate/i18n";
+import {
+  formatWhatsappContactName,
+  formatWhatsappContactNumber
+} from "../../helpers/formatWhatsappDisplay";
+import { getInitials } from "../../helpers/getInitials";
+import { corAvatar as generateColor } from "../../helpers/coresAvatar";
 
 const TicketInfo = ({ contact, ticket, onClick }) => {
-	const { user } = ticket
-	const [userName, setUserName] = useState('')
-	const [contactName, setContactName] = useState('')
+  const { user } = ticket;
+  const [userName, setUserName] = useState("");
 
-	useEffect(() => {
-		if (contact) {
-			setContactName(contact.name);
-			if(document.body.offsetWidth < 600) {
-				if (contact.name.length > 10) {
-					const truncadName = contact.name.substring(0, 10) + '...';
-					setContactName(truncadName);
-				}
-			}
-		}
+  const contactName = contact ? formatWhatsappContactName(contact, ticket) : "";
+  useEffect(() => {
+    if (user && contact) {
+      setUserName(`${i18n.t("messagesList.header.assignedTo")} ${user.name}`);
 
-		if (user && contact) {
-			setUserName(`${i18n.t("messagesList.header.assignedTo")} ${user.name}`);
+      if (document.body.offsetWidth < 600) {
+        setUserName(`${user.name}`);
+      }
+    }
+  }, [contact, user]);
 
-			if(document.body.offsetWidth < 600) {
-				setUserName(`${user.name}`);
-			}
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [])
-
-	return (
-		<CardHeader
-			onClick={onClick}
-			style={{ cursor: "pointer" }}
-			titleTypographyProps={{ noWrap: true }}
-			subheaderTypographyProps={{ noWrap: true }}
-			avatar={<Avatar src={contact.profilePicUrl} alt="contact_image" />}
-			title={`${contactName} #${ticket.id}`}
-			subheader={ticket.user && `${userName}`}
-		/>
-	);
+  return (
+    <>
+      <CardHeader
+        onClick={onClick}
+        style={{ cursor: "pointer" }}
+        titleTypographyProps={{ noWrap: true }}
+        subheaderTypographyProps={{ noWrap: true }}
+        avatar={
+          <AvatarContato
+            style={{
+              backgroundColor: generateColor(contact?.number),
+              color: "white",
+              fontWeight: "bold"
+            }}
+            contact={contact}
+            alt={contactName}
+            preview
+          >
+            {getInitials(contactName)}
+          </AvatarContato>
+        }
+        title={contactName}
+        subheader={formatWhatsappContactNumber(contact) || userName}
+      />
+    </>
+  );
 };
 
 export default TicketInfo;

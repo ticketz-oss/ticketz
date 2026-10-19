@@ -1,11 +1,16 @@
-import Help from "../../models/Help";
+import FindPublicService, {
+  PublicHelpGroup
+} from "../HelpGroupServices/FindPublicService";
 
-const FindService = async (): Promise<Help[]> => {
-  const notes: Help[] = await Help.findAll({
-    order: [["title", "ASC"]]
-  });
-
-  return notes;
+/**
+ * Grade de cards da tela /helps do tenant: material da plataforma mais o da
+ * propria empresa.
+ */
+const FindService = async (
+  companyId: number,
+  isAdmin: boolean
+): Promise<PublicHelpGroup[]> => {
+  return FindPublicService("company", companyId, isAdmin);
 };
 
 export default FindService;

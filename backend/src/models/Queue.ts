@@ -22,9 +22,12 @@ import Company from "./Company";
 import Whatsapp from "./Whatsapp";
 import WhatsappQueue from "./WhatsappQueue";
 import QueueOption from "./QueueOption";
+import Ticket from "./Ticket";
+import { OpenHoursData } from "../helpers/checkOpenHours";
+import GroupQueue from "./GroupQueue";
 
 @Table
-class Queue extends Model<Queue> {
+class Queue extends Model {
   @PrimaryKey
   @AutoIncrement
   @Column
@@ -51,7 +54,15 @@ class Queue extends Model<Queue> {
   @Column({
     type: DataType.JSONB
   })
-  schedules: unknown[];
+  schedules: OpenHoursData;
+
+  // Ordem da fila no menu inicial do chatbot.
+  @Default(0)
+  @Column
+  order: number;
+
+  @Column(DataType.JSONB)
+  flowLayout: Record<string, unknown>;
 
   @CreatedAt
   createdAt: Date;
@@ -84,6 +95,12 @@ class Queue extends Model<Queue> {
 
   @Column
   mediaName: string;
+
+  @HasMany(() => Ticket)
+  tickets: Ticket[];
+
+  @HasMany(() => GroupQueue)
+  groupQueues: GroupQueue[];
 }
 
 export default Queue;

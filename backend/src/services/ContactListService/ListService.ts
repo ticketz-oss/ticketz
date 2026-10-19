@@ -65,8 +65,8 @@ const ListService = async ({
   });
 
   let count = 0;
-  
-  Object.keys(counters).forEach((key)=> {
+
+  Object.keys(counters).forEach(key => {
     count += counters[key].count;
   });
 

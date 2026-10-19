@@ -1,0 +1,172 @@
+.estrutura-app {
+  padding: 10px;
+  gap: 0;
+  background: var(--fundo-app, #f7f7f8);
+}
+.estrutura-app--sem-header > main {
+  min-height: 0;
+  height: 100%;
+}
+.estrutura-app > .MuiDrawer-docked {
+  width: var(--largura-nav);
+  margin-right: 10px;
+  flex-shrink: 0;
+  border: 0;
+  background: transparent;
+}
+.estrutura-app > .MuiDrawer-docked > .MuiDrawer-paper {
+  width: 100%;
+  height: 100%;
+  border: 1px solid rgba(125, 125, 135, 0.2);
+  border-radius: 18px;
+  box-shadow: 0 0 0 1px rgba(125, 125, 135, 0.025);
+}
+.estrutura-app > .MuiAppBar-root {
+  top: 10px;
+  right: 10px;
+  left: auto;
+  margin: 0;
+  width: calc(100% - var(--largura-nav) - 30px);
+  border-radius: 18px;
+  border: 1px solid rgba(125, 125, 135, 0.2);
+  overflow: visible;
+}
+.estrutura-app > .MuiAppBar-root > .MuiToolbar-root {
+  border: 0;
+  border-radius: 18px;
+  min-height: 58px;
+  padding: 0 16px;
+  gap: 2px;
+}
+.estrutura-app > .MuiAppBar-root .MuiIconButton-root {
+  padding: 8px;
+}
+.estrutura-app > main > div:first-child {
+  min-height: 70px;
+}
+.caminho-pagina {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  font-size: 13px;
+}
+.caminho-pagina a {
+  color: inherit;
+  text-decoration: none;
+  opacity: 0.65;
+  padding-left: 12px;
+  border-left: 1px solid rgba(125, 125, 135, 0.2);
+}
+.caminho-pagina strong {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.caminho-pagina svg {
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+.barra-avatar.MuiAvatar-root {
+  width: 32px;
+  height: 32px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #416971;
+  color: white;
+}
+.barra-ferramentas {
+  z-index: 1500;
+  padding: 14px;
+  background: var(--ew-surface);
+  border: 1px solid var(--ew-border);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px #0002;
+}
+.barra-ferramentas[data-state="closed"] {
+  display: none;
+}
+.barra-ferramentas > strong {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 12px;
+}
+.barra-ferramentas > div {
+  display: flex;
+  gap: 6px;
+}
+@media (max-width: 599px) {
+  .estrutura-app {
+    padding: 6px;
+    gap: 0;
+  }
+  .estrutura-app > .MuiAppBar-root {
+    top: 6px;
+    right: 6px;
+    width: calc(100% - 12px);
+  }
+  .caminho-pagina a,
+  .caminho-pagina > svg {
+    display: none;
+  }
+  .estrutura-app > .MuiAppBar-root > .MuiToolbar-root {
+    padding: 0 10px;
+  }
+}
+
+.nav-perfil.MuiButton-root {
+  padding: 14px 16px;
+  min-height: 72px;
+}
+.nav-perfil .MuiButton-label {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  min-width: 0;
+}
+.nav-perfil .MuiTypography-body2 {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+.nav-perfil .MuiTypography-caption {
+  display: block;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.estrutura-app[data-navegacao="fechada"] .nav-abrir-atendimento.MuiButton-root,
+.estrutura-app[data-navegacao="fechada"] nav .MuiListItem-root {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  margin: 3px auto;
+  padding: 0;
+  border-radius: 10px;
+  justify-content: center;
+}
+.estrutura-app[data-navegacao="fechada"] nav {
+  padding: 8px 0;
+  scrollbar-width: thin;
+}
+.estrutura-app[data-navegacao="fechada"] nav .MuiListItemIcon-root {
+  min-width: 0;
+  justify-content: center;
+}
+.estrutura-app[data-navegacao="fechada"] .nav-perfil {
+  padding: 14px 0;
+  min-width: 0;
+}
+.estrutura-app[data-navegacao="fechada"] .nav-perfil .MuiButton-label {
+  justify-content: center;
+}
+
+.estrutura-app[data-navegacao="fechada"] nav {
+  scrollbar-width: none;
+}
+.estrutura-app[data-navegacao="fechada"] nav::-webkit-scrollbar {
+  width: 0;
+}

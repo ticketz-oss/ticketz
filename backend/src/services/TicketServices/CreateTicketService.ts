@@ -4,53 +4,91 @@ import GetDefaultWhatsApp from "../../helpers/GetDefaultWhatsApp";
 import Ticket from "../../models/Ticket";
 import ShowContactService from "../ContactServices/ShowContactService";
 import { getIO } from "../../libs/socket";
+import FindOrCreateATicketTrakingService from "./FindOrCreateATicketTrakingService";
+import Contact from "../../models/Contact";
+import { incrementCounter } from "../CounterServices/IncrementCounter";
+import Whatsapp from "../../models/Whatsapp";
 
 interface Request {
   contactId: number;
-  status: string;
   userId: number;
   companyId: number;
   queueId?: number;
+  whatsappId?: number;
 }
 
 const CreateTicketService = async ({
   contactId,
-  status,
   userId,
   queueId,
-  companyId
+  companyId,
+  whatsappId
 }: Request): Promise<Ticket> => {
-  const defaultWhatsapp = await GetDefaultWhatsApp(companyId);
+  const defaultWhatsapp = whatsappId
+    ? await Whatsapp.findOne({ where: { id: whatsappId, companyId } })
+    : await GetDefaultWhatsApp(companyId);
+  if (!defaultWhatsapp) throw new AppError("ERR_WAPP_NOT_FOUND");
 
-  await CheckContactOpenTickets(contactId);
+  let ticket = await CheckContactOpenTickets(
+    contactId,
+    defaultWhatsapp.id,
+    true
+  );
+
+  const include = [
+    {
+      model: Contact,
+      as: "contact",
+      include: ["tags", "extraInfo"]
+    },
+    "queue",
+    {
+      model: Whatsapp,
+      as: "whatsapp",
+      attributes: { exclude: ["metaAccessToken"] }
+    },
+    "user",
+    "tags"
+  ];
+
+  if (ticket) {
+    if (ticket.status === "open" && ticket.userId === userId) {
+      await ticket.reload({
+        include
+      });
+      return ticket;
+    }
+    throw new AppError("ERR_OTHER_OPEN_TICKET");
+  }
 
   const { isGroup } = await ShowContactService(contactId, companyId);
 
-  const [{ id }] = await Ticket.findOrCreate({
-    where: {
-      contactId,
-      companyId
-    },
-    defaults: {
-      contactId,
-      companyId,
-      whatsappId: defaultWhatsapp.id,
-      status,
-      isGroup,
-      userId
-    }
+  ticket = await Ticket.create({
+    contactId,
+    companyId,
+    queueId,
+    whatsappId: defaultWhatsapp.id,
+    status: "open",
+    isGroup,
+    userId
   });
-
-  await Ticket.update(
-    { companyId, queueId, userId, whatsappId: defaultWhatsapp.id, status: "open" },
-    { where: { id } }
-  );
-
-  const ticket = await Ticket.findByPk(id, { include: ["contact", "queue"] });
 
   if (!ticket) {
     throw new AppError("ERR_CREATING_TICKET");
   }
+
+  await FindOrCreateATicketTrakingService({
+    ticketId: ticket.id,
+    companyId: ticket.companyId,
+    whatsappId: ticket.whatsappId,
+    userId: ticket.userId
+  });
+
+  incrementCounter(ticket.companyId, "ticket-create");
+
+  await ticket.reload({
+    include
+  });
 
   const io = getIO();
 

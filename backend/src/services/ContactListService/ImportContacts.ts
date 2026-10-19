@@ -1,6 +1,5 @@
-import { head } from "lodash";
+import { head, has } from "lodash";
 import XLSX from "xlsx";
-import { has } from "lodash";
 import ContactListItem from "../../models/ContactListItem";
 import CheckContactNumber from "../WbotServices/CheckNumber";
 import { logger } from "../../utils/logger";
@@ -65,12 +64,20 @@ export async function ImportContacts(
     for (let newContact of contactList) {
       try {
         const response = await CheckContactNumber(newContact.number, companyId);
-        newContact.isWhatsappValid = response.exists;
-        const number = response.jid.replace(/\D/g, "");
-        newContact.number = number;
+        // Conexao oficial nao verifica numero: sem resposta o contato fica
+        // valido e nao verificado, em vez de ser marcado invalido.
+        newContact.isWhatsappValid = response ? response.exists : true;
+        if (response) {
+          newContact.number = response.jid.replace(/\D/g, "");
+        }
         await newContact.save();
-      } catch (e) {
-        logger.error(`Número de contato inválido: ${newContact.number}`);
+      } catch (error) {
+        // A falha pode ser da conexao, nao do numero - a mensagem antiga
+        // culpava o contato e mandava investigar o lugar errado.
+        logger.error(
+          { error, number: newContact.number },
+          "Could not verify contact number"
+        );
       }
     }
   }

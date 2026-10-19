@@ -1,4 +1,4 @@
-import { WASocket, WAMessage } from "@whiskeysockets/baileys";
+import { WAMessage } from "libzapitu-rf";
 import * as Sentry from "@sentry/node";
 import AppError from "../../errors/AppError";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
@@ -6,62 +6,90 @@ import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
 
 import formatBody from "../../helpers/Mustache";
+import { verifyMediaMessage, verifyMessage } from "./wbotMessageListener";
+import User from "../../models/User";
+import { getJidOf } from "./getJidOf";
+import Whatsapp from "../../models/Whatsapp";
+import SendMetaTextMessageService, {
+  MetaSentMessage
+} from "../MetaWhatsAppServices/SendMetaTextMessageService";
 
 interface Request {
   body: string;
   ticket: Ticket;
+  userId?: number;
   quotedMsg?: Message;
 }
 
 const SendWhatsAppMessage = async ({
   body,
   ticket,
+  userId,
   quotedMsg
-}: Request): Promise<WAMessage> => {
+}: Request): Promise<WAMessage | MetaSentMessage> => {
   let options = {};
+
+  const connection = await Whatsapp.findByPk(ticket.whatsappId);
+
+  if (!connection) {
+    throw new AppError("ERR_WAPP_NOT_FOUND");
+  }
+
+  if (connection.status !== "CONNECTED") {
+    throw new AppError("ERR_WAPP_NOT_INITIALIZED");
+  }
+
+  if (connection.apiMode === "official") {
+    return SendMetaTextMessageService({
+      body,
+      ticket,
+      connection,
+      userId,
+      quotedMsg
+    });
+  }
 
   const wbot = await GetTicketWbot(ticket);
 
-  const number = ticket.isGroup ? `${ticket.contact.number}@g.us` : `${ticket.contact.number}@s.whatsapp.net`
-  // const number = `${ticket.contact.number.substring(12,0)}-${ticket.contact.number.substring(12)}@${
-
-  //   ticket.isGroup ? "g.us" : "s.whatsapp.net"
-  // }`;
   if (quotedMsg) {
+    const chatMessage = await Message.findOne({
+      where: {
+        id: quotedMsg.id
+      }
+    });
 
+    if (chatMessage) {
+      const msgFound = JSON.parse(chatMessage.dataJson);
 
-      const chatMessage = await Message.findOne({
-        where: {
-          id: quotedMsg.id
+      options = {
+        quoted: {
+          key: msgFound?.key || chatMessage.id,
+          message: msgFound?.message
         }
-      });
-
-      if (chatMessage) {
-        const msgFound = JSON.parse(chatMessage.dataJson);
-
-        options = {
-          quoted: {
-            key: msgFound?.key || chatMessage.id,
-            message: {
-              extendedTextMessage: msgFound?.message.extendedTextMessage
-            }
-          }
-        };
-          }
+      };
+    }
   }
 
   try {
-
-    const sentMessage = await wbot.sendMessage(number,{
-        text: formatBody(body, ticket.contact)
+    const user = userId && (await User.findByPk(userId));
+    const formattedBody = formatBody(body, ticket, user);
+    const sentMessage = await wbot.sendMessage(
+      getJidOf(ticket),
+      {
+        text: formattedBody
       },
       {
         ...options
       }
     );
 
-    await ticket.update({ lastMessage: formatBody(body, ticket.contact) });
+    wbot.cacheMessage(sentMessage);
 
+    if (sentMessage?.message?.extendedTextMessage?.thumbnailDirectPath) {
+      await verifyMediaMessage(sentMessage, ticket, ticket.contact, { wbot });
+    } else {
+      await verifyMessage(sentMessage, ticket, ticket.contact);
+    }
     return sentMessage;
   } catch (err) {
     Sentry.captureException(err);

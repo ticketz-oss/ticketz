@@ -18,7 +18,7 @@ export interface WhatsappData {
   transferMessage?: string;
   queueIds?: number[];
   companyId?: number;
-  token?: string;
+  language?: string;
 }
 
 interface Request {
@@ -53,18 +53,14 @@ const UpdateWhatsAppService = async ({
     outOfHoursMessage,
     ratingMessage,
     transferMessage,
-    queueIds = [],
-    token
+    queueIds,
+    language
   } = whatsappData;
 
   try {
     await schema.validate({ name, status, isDefault });
   } catch (err: unknown) {
     throw new AppError((err as Error).message);
-  }
-
-  if (queueIds.length > 1 && !greetingMessage) {
-    throw new AppError("ERR_WAPP_GREETING_REQUIRED");
   }
 
   let oldDefaultWhatsapp: Whatsapp | null = null;
@@ -82,9 +78,12 @@ const UpdateWhatsAppService = async ({
     }
   }
 
-  const whatsapp = await ShowWhatsAppService(whatsappId, companyId);
-  // console.log(transferMessage)
-  console.log(whatsapp)
+  const whatsapp = await ShowWhatsAppService(whatsappId);
+
+  if (!whatsapp) {
+    throw new AppError("ERR_WAPP_NOT_FOUND", 404);
+  }
+
   await whatsapp.update({
     name,
     status,
@@ -95,11 +94,13 @@ const UpdateWhatsAppService = async ({
     ratingMessage,
     isDefault,
     companyId,
-    token,
     transferMessage,
+    language
   });
 
-  await AssociateWhatsappQueue(whatsapp, queueIds);
+  if (queueIds) {
+    await AssociateWhatsappQueue(whatsapp, queueIds);
+  }
 
   return { whatsapp, oldDefaultWhatsapp };
 };

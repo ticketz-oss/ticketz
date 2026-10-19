@@ -1,9 +1,10 @@
 import AppError from "../../errors/AppError";
+import { OpenHoursData } from "../../helpers/checkOpenHours";
 import Company from "../../models/Company";
 
 type ScheduleData = {
   id: number | string;
-  schedules: [];
+  schedules: OpenHoursData;
 };
 
 const UpdateSchedulesService = async ({

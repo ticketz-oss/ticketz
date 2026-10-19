@@ -1,0 +1,183 @@
+name: espaco-whats-acnorte
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    mem_limit: 768m
+    environment:
+      POSTGRES_DB: ${ACNORTE_POSTGRES_DB}
+      POSTGRES_USER: ${ACNORTE_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${ACNORTE_POSTGRES_PASSWORD}
+      TZ: ${TZ:-America/Rio_Branco}
+    volumes:
+      - postgres_data_v18:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+    networks:
+      - internal
+
+  redis:
+    image: redis:8.2.1-alpine
+    mem_limit: 256m
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --save
+      - "60"
+      - "1"
+      - --requirepass
+      - ${ACNORTE_REDIS_PASSWORD}
+    environment:
+      REDIS_PASSWORD: ${ACNORTE_REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a $$REDIS_PASSWORD ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - internal
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - path: /etc/dokploy/secrets/espaco_whats_clerk_development.env
+        required: false
+    mem_limit: 1536m
+    environment:
+      NODE_ENV: production
+      CLERK_ENVIRONMENT: development
+      CLERK_TENANT_BASE_DOMAIN: dev.espacowhats.com.br
+      CLERK_ISSUER: https://trusted-jaybird-7472.clerk.accounts.dev
+      CLERK_GOOGLE_ENABLED: ${CLERK_GOOGLE_ENABLED:-true}
+      CLERK_AUTHORIZED_PARTIES: https://acnorte.dev.espacowhats.com.br
+      PORT: "3000"
+      TZ: ${TZ:-America/Rio_Branco}
+      DB_DIALECT: postgres
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USER: ${ACNORTE_POSTGRES_USER}
+      DB_PASS: ${ACNORTE_POSTGRES_PASSWORD}
+      DB_NAME: ${ACNORTE_POSTGRES_DB}
+      DB_TIMEZONE: ${DB_TIMEZONE:--05:00}
+      REDIS_URI: redis://:${ACNORTE_REDIS_PASSWORD}@redis:6379
+      REDIS_OPT_LIMITER_MAX: ${REDIS_OPT_LIMITER_MAX:-1}
+      REDIS_OPT_LIMITER_DURATION: ${REDIS_OPT_LIMITER_DURATION:-3000}
+      FRONTEND_URL: ${PUBLIC_PROTOCOL:-https}://${ACNORTE_HOST}
+      FRONTEND_URL_REGEX: ^${PUBLIC_PROTOCOL:-https}://${ACNORTE_HOST}$$
+      BACKEND_URL: ${PUBLIC_PROTOCOL:-https}://${ACNORTE_HOST}/backend
+      APP_BASE_DOMAIN: ${ACNORTE_BASE_DOMAIN}
+      MASTER_COMPANY_ID: ${ACNORTE_MASTER_COMPANY_ID:-1}
+      EMAIL_ADDRESS: ${ACNORTE_EMAIL_ADDRESS}
+      ADMIN_PASSWORD: ${ACNORTE_ADMIN_PASSWORD}
+      USER_LIMIT: ${USER_LIMIT:-10000}
+      CONNECTIONS_LIMIT: ${CONNECTIONS_LIMIT:-100000}
+      CLOSED_SEND_BY_ME: ${CLOSED_SEND_BY_ME:-true}
+      SOCKET_ADMIN: ${SOCKET_ADMIN:-true}
+      VERIFY_TOKEN: ${ACNORTE_VERIFY_TOKEN}
+      PLATFORM_API_KEY: ${ACNORTE_PLATFORM_API_KEY}
+      PLATFORM_WEBHOOK_SECRET: ${ACNORTE_PLATFORM_WEBHOOK_SECRET}
+      PLATFORM_WEBHOOK_URL: ${ACNORTE_PLATFORM_WEBHOOK_URL:-}
+      PLATFORM_TENANT_URL_TEMPLATE: ${PUBLIC_PROTOCOL:-https}://{slug}.${ACNORTE_BASE_DOMAIN}
+      MCP_BASE_URL: ${PUBLIC_PROTOCOL:-https}://${ACNORTE_HOST}/backend
+      MCP_TIMEZONE: ${MCP_TIMEZONE:-America/Rio_Branco}
+      MCP_PRIVATE_KEY: ${ACNORTE_MCP_PRIVATE_KEY}
+      MCP_PUBLIC_KEY: ${ACNORTE_MCP_PUBLIC_KEY}
+      MCP_CURSOR_SECRET: ${ACNORTE_MCP_CURSOR_SECRET}
+      MCP_KEY_ID: ${ACNORTE_MCP_KEY_ID:-acnorte-mcp-1}
+      # Web Push (notificacao com o app fechado). Sem o par VAPID o recurso
+      # fica desligado e o sistema segue notificando so com o app aberto.
+      VAPID_PUBLIC_KEY: ${ACNORTE_VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${ACNORTE_VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${ACNORTE_VAPID_SUBJECT:-}
+      WACALLS_ENABLED: "false"
+      WACALLS_ALLOWED_COMPANY_IDS: ""
+    volumes:
+      - backend_public:/usr/src/app/public
+      - backend_private:/usr/src/app/private
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          node -e "require('http').get('http://127.0.0.1:3000/api/platform/v1/health',
+          r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 90s
+    stop_grace_period: 45s
+    restart: unless-stopped
+    networks:
+      - internal
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    mem_limit: 256m
+    environment:
+      FRONTEND_HOST: ${ACNORTE_HOST}
+      APP_BASE_DOMAIN: ${ACNORTE_BASE_DOMAIN}
+      EMAIL_ADDRESS: ${ACNORTE_EMAIL_ADDRESS}
+      BACKEND_SERVICE: backend
+      BACKEND_PATH: /backend
+      BACKEND_PROTOCOL: http
+      LANDING_WHATSAPP_NUMBER: ${LANDING_WHATSAPP_NUMBER:-}
+      LOG_LEVEL: ${LOG_LEVEL:-warn}
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 30s
+    stop_grace_period: 30s
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=dokploy-network"
+      - "traefik.http.routers.espacowhats-acnorte-http.rule=Host(`${ACNORTE_HOST}`)"
+      - "traefik.http.routers.espacowhats-acnorte-http.entrypoints=web"
+      - "traefik.http.routers.espacowhats-acnorte-http.priority=200"
+      - "traefik.http.routers.espacowhats-acnorte-http.middlewares=redirect-to-https@file"
+      - "traefik.http.routers.espacowhats-acnorte-http.service=espacowhats-acnorte-frontend"
+      - "traefik.http.routers.espacowhats-acnorte-https.rule=Host(`${ACNORTE_HOST}`)"
+      - "traefik.http.routers.espacowhats-acnorte-https.entrypoints=websecure"
+      - "traefik.http.routers.espacowhats-acnorte-https.priority=200"
+      - "traefik.http.routers.espacowhats-acnorte-https.service=espacowhats-acnorte-frontend"
+      - "traefik.http.routers.espacowhats-acnorte-https.tls=true"
+      - "traefik.http.routers.espacowhats-acnorte-https.tls.certresolver=letsencrypt"
+      - "traefik.http.services.espacowhats-acnorte-frontend.loadbalancer.server.port=80"
+    networks:
+      - internal
+      - dokploy-network
+
+networks:
+  internal:
+    driver: bridge
+  dokploy-network:
+    external: true
+
+volumes:
+  postgres_data_v18:
+  redis_data:
+  backend_public:
+  backend_private:

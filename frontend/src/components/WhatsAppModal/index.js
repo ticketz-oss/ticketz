@@ -3,7 +3,7 @@ import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
 import { toast } from "react-toastify";
 
-import { makeStyles } from "@material-ui/core/styles";
+import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { green } from "@material-ui/core/colors";
 
 import {
@@ -22,7 +22,7 @@ import {
   Tooltip,
   Paper,
   Grid,
-  Checkbox,
+  Checkbox
 } from "@material-ui/core";
 
 import api from "../../services/api";
@@ -31,42 +31,45 @@ import toastError from "../../errors/toastError";
 import QueueSelect from "../QueueSelect";
 import HelpOutlineOutlinedIcon from "@material-ui/icons/HelpOutlineOutlined";
 
-const useStyles = makeStyles((theme) => ({
+import { SelectLanguage } from "../SelectLanguage";
+
+const useStyles = makeStyles(theme => ({
   root: {
     display: "flex",
-    flexWrap: "wrap",
+    flexWrap: "wrap"
   },
 
   multFieldLine: {
     display: "flex",
     "& > *:not(:last-child)": {
-      marginRight: theme.spacing(1),
-    },
+      marginRight: theme.spacing(1)
+    }
   },
 
   btnWrapper: {
-    position: "relative",
+    position: "relative"
   },
 
   buttonProgress: {
-    color: green[500],
+    color: theme.isStardew ? theme.stardew.green : green[500],
     position: "absolute",
     top: "50%",
     left: "50%",
     marginTop: -12,
-    marginLeft: -12,
-  },
+    marginLeft: -12
+  }
 }));
 
 const SessionSchema = Yup.object().shape({
   name: Yup.string()
     .min(2, "Too Short!")
     .max(50, "Too Long!")
-    .required("Required"),
+    .required("Required")
 });
 
 const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
   const classes = useStyles();
+  const theme = useTheme();
   const initialState = {
     name: "",
     greetingMessage: "",
@@ -75,8 +78,8 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
     ratingMessage: "",
     transferMessage: "",
     isDefault: false,
-    token: "",
     provider: "beta",
+    language: localStorage.getItem("language") || ""
   };
   const [whatsApp, setWhatsApp] = useState(initialState);
   const [selectedQueueIds, setSelectedQueueIds] = useState([]);
@@ -89,7 +92,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
         const { data } = await api.get(`whatsapp/${whatsAppId}?session=0`);
         setWhatsApp(data);
 
-        const whatsQueueIds = data.queues?.map((queue) => queue.id);
+        const whatsQueueIds = data.queues?.map(queue => queue.id);
         setSelectedQueueIds(whatsQueueIds);
       } catch (err) {
         toastError(err);
@@ -98,7 +101,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
     fetchSession();
   }, [whatsAppId]);
 
-  const handleSaveWhatsApp = async (values) => {
+  const handleSaveWhatsApp = async values => {
     const whatsappData = { ...values, queueIds: selectedQueueIds };
     delete whatsappData["queues"];
     delete whatsappData["session"];
@@ -188,6 +191,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                     rows={4}
                     fullWidth
                     name="greetingMessage"
+                    spellCheck={true}
                     error={
                       touched.greetingMessage && Boolean(errors.greetingMessage)
                     }
@@ -199,11 +203,11 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                   />
                 </div>
                 <div>
-                 <Typography style={{fontSize: "11px"}}>
-                  {`Variaveis: ( {{ms}}=> Turno, 
+                  <Typography style={{ fontSize: theme.isStardew ? 17 : 11 }}>
+                    {`Variaveis: ( {{ms}}=> Turno, 
                   {{name}}=> Nome do contato, 
                   {{protocol}}=> protocolo, {{hora}}=> hora )`}
-                 </Typography>
+                  </Typography>
                 </div>
                 <div>
                   <Field
@@ -214,6 +218,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                     rows={4}
                     fullWidth
                     name="complationMessage"
+                    spellCheck={true}
                     error={
                       touched.complationMessage &&
                       Boolean(errors.complationMessage)
@@ -234,9 +239,9 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                     rows={4}
                     fullWidth
                     name="transferMessage"
+                    spellCheck={true}
                     error={
-                      touched.transferMessage &&
-                      Boolean(errors.transferMessage)
+                      touched.transferMessage && Boolean(errors.transferMessage)
                     }
                     helperText={
                       touched.transferMessage && errors.transferMessage
@@ -254,6 +259,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                     rows={4}
                     fullWidth
                     name="outOfHoursMessage"
+                    spellCheck={true}
                     error={
                       touched.outOfHoursMessage &&
                       Boolean(errors.outOfHoursMessage)
@@ -274,6 +280,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                     rows={4}
                     fullWidth
                     name="ratingMessage"
+                    spellCheck={true}
                     error={
                       touched.ratingMessage && Boolean(errors.ratingMessage)
                     }
@@ -282,21 +289,19 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                     margin="dense"
                   />
                 </div>
+                <QueueSelect
+                  selectedQueueIds={selectedQueueIds}
+                  onChange={selectedIds => setSelectedQueueIds(selectedIds)}
+                />
                 <div>
                   <Field
-                    as={TextField}
-                    label={i18n.t("queueModal.form.token")}
-                    type="token"
+                    as={SelectLanguage}
+                    name="language"
                     fullWidth
-                    name="token"
                     variant="outlined"
                     margin="dense"
                   />
                 </div>
-                <QueueSelect
-                  selectedQueueIds={selectedQueueIds}
-                  onChange={(selectedIds) => setSelectedQueueIds(selectedIds)}
-                />
               </DialogContent>
               <DialogActions>
                 <Button

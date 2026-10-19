@@ -4,33 +4,19 @@ import { Request, Response } from "express";
 import AppError from "../errors/AppError";
 import Invoices from "../models/Invoices";
 
-import CreatePlanService from "../services/PlanService/CreatePlanService";
-import UpdatePlanService from "../services/PlanService/UpdatePlanService";
-import ShowPlanService from "../services/PlanService/ShowPlanService";
-import DeletePlanService from "../services/PlanService/DeletePlanService";
-
 import FindAllInvoiceService from "../services/InvoicesService/FindAllInvoiceService";
 import ListInvoicesServices from "../services/InvoicesService/ListInvoicesServices";
 import ShowInvoceService from "../services/InvoicesService/ShowInvoiceService";
 import UpdateInvoiceService from "../services/InvoicesService/UpdateInvoiceService";
+import SubscriptionNoticeService from "../services/InvoicesService/SubscriptionNoticeService";
 
 type IndexQuery = {
   searchParam: string;
   pageNumber: string;
 };
- 
-type StorePlanData = {
-  name: string;
-  id?: number | string;
-  users: number | 0;
-  connections: number | 0;
-  queues: number | 0;
-  value: number;
-};
 
 type UpdateInvoiceData = {
   status: string;
-  id?: string;
 };
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
@@ -47,11 +33,10 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 export const show = async (req: Request, res: Response): Promise<Response> => {
   const { Invoiceid } = req.params;
 
-  const invoice = await ShowInvoceService(Invoiceid);
+  const invoice = await ShowInvoceService(Invoiceid, req.user.companyId);
 
   return res.status(200).json(invoice);
 };
-
 
 export const list = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.user;
@@ -66,9 +51,10 @@ export const update = async (
 ): Promise<Response> => {
   const InvoiceData: UpdateInvoiceData = req.body;
 
-  const schema = Yup.object().shape({
-    name: Yup.string()
-  });
+  const schema = Yup.object()
+    .shape({ status: Yup.string().oneOf(["paid", "cancelled"]).required() })
+    .noUnknown(true)
+    .strict(true);
 
   try {
     await schema.validate(InvoiceData);
@@ -76,12 +62,12 @@ export const update = async (
     throw new AppError(err.message);
   }
 
-  const { id, status } = InvoiceData;
+  const { id } = req.params;
+  const { status } = InvoiceData;
 
   const plan = await UpdateInvoiceService({
     id,
-    status,
-
+    status
   });
 
   // const io = getIO();
@@ -170,3 +156,9 @@ export const remove = async (
 
   return res.status(200).json(plan);
 }; */
+export const subscriptionNotice = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  return res.json(await SubscriptionNoticeService(req.user.companyId));
+};

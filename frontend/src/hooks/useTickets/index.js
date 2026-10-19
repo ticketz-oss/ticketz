@@ -1,45 +1,59 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import toastError from "../../errors/toastError";
 
 import api from "../../services/api";
 
 const useTickets = ({
+  isSearch,
   searchParam,
+  contactId,
   tags,
   users,
-  pageNumber,
+  nextUpdatedAt,
+  nextTicketId,
   status,
+  groups,
+  groupMode,
   date,
   updatedAt,
   showAll,
   queueIds,
   withUnreadMessages,
+  notClosed,
+  all
 }) => {
   const [loading, setLoading] = useState(true);
-  const [hasMore, setHasMore] = useState(false);
   const [tickets, setTickets] = useState([]);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     setLoading(true);
     const delayDebounceFn = setTimeout(() => {
       const fetchTickets = async () => {
         try {
-          const { data } = await api.get("/tickets", {
+          const endpoint = groups ? "/whatsapp-groups" : "/tickets";
+          const { data } = await api.get(endpoint, {
             params: {
+              isSearch,
               searchParam,
-              pageNumber,
+              nextUpdatedAt,
+              nextTicketId,
+              contactId,
               tags,
               users,
               status,
+              groups,
+              mode: groupMode,
               date,
               updatedAt,
               showAll,
               queueIds,
               withUnreadMessages,
-            },
+              notClosed,
+              all
+            }
           });
-          setTickets(data.tickets);
-          setHasMore(data.hasMore);
+          setTickets(groups ? data.groups : data.tickets);
           setLoading(false);
         } catch (err) {
           setLoading(false);
@@ -51,18 +65,79 @@ const useTickets = ({
     return () => clearTimeout(delayDebounceFn);
   }, [
     searchParam,
+    contactId,
     tags,
     users,
-    pageNumber,
+    nextUpdatedAt,
+    nextTicketId,
     status,
+    groups,
+    groupMode,
     date,
     updatedAt,
     showAll,
     queueIds,
     withUnreadMessages,
+    isSearch,
+    notClosed,
+    all,
+    refreshTrigger
   ]);
 
-  return { tickets, loading, hasMore };
+  const refetch = useCallback(() => {
+    setRefreshTrigger(prevState => prevState + 1);
+  }, []);
+
+  const fetchSince = useCallback(
+    async minUpdatedAt => {
+      const endpoint = groups ? "/whatsapp-groups" : "/tickets";
+      const { data } = await api.get(endpoint, {
+        params: {
+          isSearch,
+          searchParam,
+          contactId,
+          tags,
+          users,
+          status,
+          groups,
+          mode: groupMode,
+          date,
+          updatedAt,
+          showAll,
+          queueIds,
+          withUnreadMessages,
+          notClosed,
+          all,
+          minUpdatedAt
+        }
+      });
+      return groups ? data.groups : data.tickets;
+    },
+    [
+      isSearch,
+      searchParam,
+      contactId,
+      tags,
+      users,
+      status,
+      groups,
+      groupMode,
+      date,
+      updatedAt,
+      showAll,
+      queueIds,
+      withUnreadMessages,
+      notClosed,
+      all
+    ]
+  );
+
+  return {
+    tickets,
+    loading,
+    refetch,
+    fetchSince
+  };
 };
 
 export default useTickets;

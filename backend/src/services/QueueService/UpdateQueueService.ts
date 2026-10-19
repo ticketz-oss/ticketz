@@ -3,13 +3,16 @@ import * as Yup from "yup";
 import AppError from "../../errors/AppError";
 import Queue from "../../models/Queue";
 import ShowQueueService from "./ShowQueueService";
+import sequelize from "../../database";
+import AssociateQueueWhatsapp from "./AssociateQueueWhatsapp";
 
 interface QueueData {
   name?: string;
   color?: string;
   greetingMessage?: string;
   outOfHoursMessage?: string;
-  schedules?: any[];
+  schedules?: unknown[];
+  whatsappIds?: number[];
 }
 
 const UpdateQueueService = async (
@@ -17,7 +20,14 @@ const UpdateQueueService = async (
   queueData: QueueData,
   companyId: number
 ): Promise<Queue> => {
-  const { color, name } = queueData;
+  const {
+    color,
+    name,
+    whatsappIds,
+    greetingMessage,
+    outOfHoursMessage,
+    schedules
+  } = queueData;
 
   const queueSchema = Yup.object().shape({
     name: Yup.string()
@@ -62,8 +72,8 @@ const UpdateQueueService = async (
 
   try {
     await queueSchema.validate({ color, name });
-  } catch (err: any) {
-    throw new AppError(err.message);
+  } catch (err: unknown) {
+    throw new AppError((err as Error).message);
   }
 
   const queue = await ShowQueueService(queueId, companyId);
@@ -72,9 +82,20 @@ const UpdateQueueService = async (
     throw new AppError("Não é permitido alterar registros de outra empresa");
   }
 
-  await queue.update(queueData);
+  await sequelize.transaction(async transaction => {
+    await queue.update(
+      { color, name, greetingMessage, outOfHoursMessage, schedules },
+      { transaction }
+    );
+    await AssociateQueueWhatsapp({
+      queue,
+      whatsappIds,
+      companyId,
+      transaction
+    });
+  });
 
-  return queue;
+  return ShowQueueService(queue.id, companyId);
 };
 
 export default UpdateQueueService;

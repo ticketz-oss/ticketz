@@ -6,12 +6,12 @@ import {
   TableBody,
   TableCell,
   TableRow,
-  IconButton,
+  IconButton
 } from "@material-ui/core";
 import {
   Edit as EditIcon,
   DeleteOutline as DeleteOutlineIcon,
-  People as PeopleIcon,
+  People as PeopleIcon
 } from "@material-ui/icons";
 
 import TableRowSkeleton from "../../components/TableRowSkeleton";
@@ -22,7 +22,7 @@ function ContactListsTable(props) {
     showLoading,
     editContactList,
     deleteContactList,
-    readOnly,
+    readOnly
   } = props;
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState([]);
@@ -36,16 +36,16 @@ function ContactListsTable(props) {
     }
   }, [contactLists, showLoading]);
 
-  const handleEdit = (contactList) => {
+  const handleEdit = contactList => {
     editContactList(contactList);
   };
 
-  const handleDelete = (contactList) => {
+  const handleDelete = contactList => {
     deleteContactList(contactList);
   };
 
   const renderRows = () => {
-    return rows.map((contactList) => {
+    return rows.map(contactList => {
       return (
         <TableRow key={contactList.id}>
           <TableCell align="left">{contactList.name}</TableCell>
@@ -97,7 +97,7 @@ ContactListsTable.propTypes = {
   contactLists: PropTypes.array.isRequired,
   showLoading: PropTypes.bool,
   editContactList: PropTypes.func.isRequired,
-  deleteContactList: PropTypes.func.isRequired,
+  deleteContactList: PropTypes.func.isRequired
 };
 
 export default ContactListsTable;
