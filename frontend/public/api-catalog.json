@@ -284,6 +284,18 @@
       "count": 6
     },
     {
+      "id": "whatsappStatus",
+      "name": "Status do WhatsApp",
+      "description": "Rascunhos, agendamento, publicação e mídia dos Status (stories) da própria conta conectada. Disponível só para empresas habilitadas pelo superadministrador; conexões da API oficial da Meta ficam em rascunho, prévia e download.",
+      "count": 9
+    },
+    {
+      "id": "whatsappStatusAdmin",
+      "name": "Status do WhatsApp: disponibilidade",
+      "description": "Consulta se a empresa pode usar Status do WhatsApp e, para o superadministrador, liga ou desliga a função por empresa.",
+      "count": 3
+    },
+    {
       "id": "i18n",
       "name": "Traduções",
       "description": "Idiomas e dicionários utilizados pela aplicação.",
@@ -3459,6 +3471,114 @@
       "path": "/webhooks/meta/whatsapp",
       "module": "metaWhatsappWebhook",
       "summary": "Executar /webhooks/meta/whatsapp",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "get-whatsapp-status-availability",
+      "method": "GET",
+      "path": "/whatsapp-status/availability",
+      "module": "whatsappStatusAdmin",
+      "summary": "Consultar /whatsapp-status/availability",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-whatsapp-status-admin-companies",
+      "method": "GET",
+      "path": "/whatsapp-status/admin/companies",
+      "module": "whatsappStatusAdmin",
+      "summary": "Consultar /whatsapp-status/admin/companies",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "put-whatsapp-status-admin-companies-companyId",
+      "method": "PUT",
+      "path": "/whatsapp-status/admin/companies/:companyId",
+      "module": "whatsappStatusAdmin",
+      "summary": "Atualizar /whatsapp-status/admin/companies/:companyId",
+      "auth": "session",
+      "reviewed": false
+    },
+    {
+      "id": "get-whatsapp-status-connections",
+      "method": "GET",
+      "path": "/whatsapp-status/connections",
+      "module": "whatsappStatus",
+      "summary": "Consultar /whatsapp-status/connections",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "get-whatsapp-status-connections-whatsappId-capabilities",
+      "method": "GET",
+      "path": "/whatsapp-status/connections/:whatsappId/capabilities",
+      "module": "whatsappStatus",
+      "summary": "Consultar /whatsapp-status/connections/:whatsappId/capabilities",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "get-whatsapp-status-audience-preview",
+      "method": "GET",
+      "path": "/whatsapp-status/audience-preview",
+      "module": "whatsappStatus",
+      "summary": "Consultar /whatsapp-status/audience-preview",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "get-whatsapp-status-posts",
+      "method": "GET",
+      "path": "/whatsapp-status/posts",
+      "module": "whatsappStatus",
+      "summary": "Consultar /whatsapp-status/posts",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "post-whatsapp-status-posts",
+      "method": "POST",
+      "path": "/whatsapp-status/posts",
+      "module": "whatsappStatus",
+      "summary": "Executar /whatsapp-status/posts",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "put-whatsapp-status-posts-id",
+      "method": "PUT",
+      "path": "/whatsapp-status/posts/:id",
+      "module": "whatsappStatus",
+      "summary": "Atualizar /whatsapp-status/posts/:id",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "post-whatsapp-status-posts-id-publish",
+      "method": "POST",
+      "path": "/whatsapp-status/posts/:id/publish",
+      "module": "whatsappStatus",
+      "summary": "Executar /whatsapp-status/posts/:id/publish",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "post-whatsapp-status-posts-id-cancel",
+      "method": "POST",
+      "path": "/whatsapp-status/posts/:id/cancel",
+      "module": "whatsappStatus",
+      "summary": "Executar /whatsapp-status/posts/:id/cancel",
+      "auth": "flow",
+      "reviewed": false
+    },
+    {
+      "id": "get-whatsapp-status-posts-id-media",
+      "method": "GET",
+      "path": "/whatsapp-status/posts/:id/media",
+      "module": "whatsappStatus",
+      "summary": "Consultar /whatsapp-status/posts/:id/media",
       "auth": "flow",
       "reviewed": false
     },

@@ -211,6 +211,14 @@
       "description": "Textos e arquivos reutilizáveis durante o atendimento."
     },
     {
+      "name": "Status do WhatsApp",
+      "description": "Rascunhos, agendamento, publicação e mídia dos Status (stories) da própria conta conectada. Disponível só para empresas habilitadas pelo superadministrador; conexões da API oficial da Meta ficam em rascunho, prévia e download."
+    },
+    {
+      "name": "Status do WhatsApp: disponibilidade",
+      "description": "Consulta se a empresa pode usar Status do WhatsApp e, para o superadministrador, liga ou desliga a função por empresa."
+    },
+    {
       "name": "Traduções",
       "description": "Idiomas e dicionários utilizados pela aplicação."
     },
@@ -18531,6 +18539,474 @@
         "x-contract-level": "observed"
       }
     },
+    "/whatsapp-status/availability": {
+      "get": {
+        "tags": [
+          "Status do WhatsApp: disponibilidade"
+        ],
+        "operationId": "get-whatsapp-status-availability",
+        "summary": "Consultar /whatsapp-status/availability",
+        "description": "**Acesso:** Sessão do usuário (JWT).\n\nOperação do módulo Status do WhatsApp: disponibilidade. Consulta se a empresa pode usar Status do WhatsApp e, para o superadministrador, liga ou desliga a função por empresa.\n\nOs campos abaixo são leituras observadas no controlador. Tipos, obrigatoriedade, validações delegadas aos serviços e formato final de resposta não são inferidos. Esta operação faz parte do sistema existente, não representa um contrato público versionado independente.\n\nChaves de resposta observadas (podem variar por caminho de execução): `enabled`.\n\n[Implementação desta rota](https://github.com/GuiZeroUm/ticketz/blob/main/backend/src/routes/whatsappStatusAdminRoutes.ts#L8)",
+        "security": [
+          {
+            "sessionBearer": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "default": {
+            "description": "Resposta ou erro do fluxo. Consulte as regras, os códigos do módulo e as permissões."
+          }
+        },
+        "x-codeSamples": [],
+        "x-source": {
+          "file": "backend/src/routes/whatsappStatusAdminRoutes.ts",
+          "line": 8
+        },
+        "x-contract-level": "observed"
+      }
+    },
+    "/whatsapp-status/admin/companies": {
+      "get": {
+        "tags": [
+          "Status do WhatsApp: disponibilidade"
+        ],
+        "operationId": "get-whatsapp-status-admin-companies",
+        "summary": "Consultar /whatsapp-status/admin/companies",
+        "description": "**Acesso:** Sessão do usuário (JWT).\n\nPermissão administrativa restrita (superadministrador ou verificação específica da rota)\n\nOperação do módulo Status do WhatsApp: disponibilidade. Consulta se a empresa pode usar Status do WhatsApp e, para o superadministrador, liga ou desliga a função por empresa.\n\nOs campos abaixo são leituras observadas no controlador. Tipos, obrigatoriedade, validações delegadas aos serviços e formato final de resposta não são inferidos. Esta operação faz parte do sistema existente, não representa um contrato público versionado independente.\n\nErros declarados neste controlador: `ERR_STATUS_INVALID_REQUEST`. Outros erros podem vir dos serviços e permissões.\n\n[Implementação desta rota](https://github.com/GuiZeroUm/ticketz/blob/main/backend/src/routes/whatsappStatusAdminRoutes.ts#L14)",
+        "security": [
+          {
+            "sessionBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "searchParam",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Parâmetro lido pelo controlador. Consulte as regras do módulo."
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Parâmetro lido pelo controlador. Consulte as regras do módulo."
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Resposta ou erro do fluxo. Consulte as regras, os códigos do módulo e as permissões."
+          }
+        },
+        "x-codeSamples": [],
+        "x-source": {
+          "file": "backend/src/routes/whatsappStatusAdminRoutes.ts",
+          "line": 14
+        },
+        "x-contract-level": "observed"
+      }
+    },
+    "/whatsapp-status/admin/companies/{companyId}": {
+      "put": {
+        "tags": [
+          "Status do WhatsApp: disponibilidade"
+        ],
+        "operationId": "put-whatsapp-status-admin-companies-companyId",
+        "summary": "Atualizar /whatsapp-status/admin/companies/:companyId",
+        "description": "**Acesso:** Sessão do usuário (JWT).\n\nPermissão administrativa restrita (superadministrador ou verificação específica da rota)\n\nOperação do módulo Status do WhatsApp: disponibilidade. Consulta se a empresa pode usar Status do WhatsApp e, para o superadministrador, liga ou desliga a função por empresa.\n\nOs campos abaixo são leituras observadas no controlador. Tipos, obrigatoriedade, validações delegadas aos serviços e formato final de resposta não são inferidos. Esta operação faz parte do sistema existente, não representa um contrato público versionado independente.\n\nErros declarados neste controlador: `ERR_STATUS_INVALID_REQUEST`. Outros erros podem vir dos serviços e permissões.\n\n[Implementação desta rota](https://github.com/GuiZeroUm/ticketz/blob/main/backend/src/routes/whatsappStatusAdminRoutes.ts#L21)",
+        "security": [
+          {
+            "sessionBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "companyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identificador do recurso na URL."
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Resposta ou erro do fluxo. Consulte as regras, os códigos do módulo e as permissões."
+          }
+        },
+        "x-codeSamples": [],
+        "x-source": {
+          "file": "backend/src/routes/whatsappStatusAdminRoutes.ts",
+          "line": 21
+        },
+        "x-contract-level": "observed",
+        "requestBody": {
+          "description": "Campos identificados na implementação. Os serviços podem validar campos adicionais.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/whatsapp-status/connections": {
+      "get": {
+        "tags": [
+          "Status do WhatsApp"
+        ],
+        "operationId": "get-whatsapp-status-connections",
+        "summary": "Consultar /whatsapp-status/connections",
+        "description": "**Acesso:** Autenticação/validação própria do fluxo.\n\nOperação do módulo Status do WhatsApp. Rascunhos, agendamento, publicação e mídia dos Status (stories) da própria conta conectada. Disponível só para empresas habilitadas pelo superadministrador; conexões da API oficial da Meta ficam em rascunho, prévia e download.\n\nOs campos abaixo são leituras observadas no controlador. Tipos, obrigatoriedade, validações delegadas aos serviços e formato final de resposta não são inferidos. Esta operação faz parte do sistema existente, não representa um contrato público versionado independente.\n\n[Implementação desta rota](https://github.com/GuiZeroUm/ticketz/blob/main/backend/src/routes/whatsappStatusRoutes.ts#L59)",
+        "security": [],
+        "parameters": [],
+        "responses": {
+          "default": {
+            "description": "Resposta ou erro do fluxo. Consulte as regras, os códigos do módulo e as permissões."
+          }
+        },
+        "x-codeSamples": [],
+        "x-source": {
+          "file": "backend/src/routes/whatsappStatusRoutes.ts",
+          "line": 59
+        },
+        "x-contract-level": "observed"
+      }
+    },
+    "/whatsapp-status/connections/{whatsappId}/capabilities": {
+      "get": {
+        "tags": [
+          "Status do WhatsApp"
+        ],
+        "operationId": "get-whatsapp-status-connections-whatsappId-capabilities",
+        "summary": "Consultar /whatsapp-status/connections/:whatsappId/capabilities",
+        "description": "**Acesso:** Autenticação/validação própria do fluxo.\n\nOperação do módulo Status do WhatsApp. Rascunhos, agendamento, publicação e mídia dos Status (stories) da própria conta conectada. Disponível só para empresas habilitadas pelo superadministrador; conexões da API oficial da Meta ficam em rascunho, prévia e download.\n\nOs campos abaixo são leituras observadas no controlador. Tipos, obrigatoriedade, validações delegadas aos serviços e formato final de resposta não são inferidos. Esta operação faz parte do sistema existente, não representa um contrato público versionado independente.\n\n[Implementação desta rota](https://github.com/GuiZeroUm/ticketz/blob/main/backend/src/routes/whatsappStatusRoutes.ts#L65)",
+        "security": [],
+        "parameters": [
+          {
+            "name": "whatsappId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identificador do recurso na URL."
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Resposta ou erro do fluxo. Consulte as regras, os códigos do módulo e as permissões."
+          }
+        },
+        "x-codeSamples": [],
+        "x-source": {
+          "file": "backend/src/routes/whatsappStatusRoutes.ts",
+          "line": 65
+        },
+        "x-contract-level": "observed"
+      }
+    },
+    "/whatsapp-status/audience-preview": {
+      "get": {
+        "tags": [
+          "Status do WhatsApp"
+        ],
+        "operationId": "get-whatsapp-status-audience-preview",
+        "summary": "Consultar /whatsapp-status/audience-preview",
+        "description": "**Acesso:** Autenticação/validação própria do fluxo.\n\nOperação do módulo Status do WhatsApp. Rascunhos, agendamento, publicação e mídia dos Status (stories) da própria conta conectada. Disponível só para empresas habilitadas pelo superadministrador; conexões da API oficial da Meta ficam em rascunho, prévia e download.\n\nOs campos abaixo são leituras observadas no controlador. Tipos, obrigatoriedade, validações delegadas aos serviços e formato final de resposta não são inferidos. Esta operação faz parte do sistema existente, não representa um contrato público versionado independente.\n\n[Implementação desta rota](https://github.com/GuiZeroUm/ticketz/blob/main/backend/src/routes/whatsappStatusRoutes.ts#L71)",
+        "security": [],
+        "parameters": [
+          {
+            "name": "whatsappId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Parâmetro lido pelo controlador. Consulte as regras do módulo."
+          },
+          {
+            "name": "audienceMode",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Parâmetro lido pelo controlador. Consulte as regras do módulo."
+          },
+          {
+            "name": "contactListId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Parâmetro lido pelo controlador. Consulte as regras do módulo."
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Resposta ou erro do fluxo. Consulte as regras, os códigos do módulo e as permissões."
+          }
+        },
+        "x-codeSamples": [],
+        "x-source": {
+          "file": "backend/src/routes/whatsappStatusRoutes.ts",
+          "line": 71
+        },
+        "x-contract-level": "observed"
+      }
+    },
+    "/whatsapp-status/posts": {
+      "get": {
+        "tags": [
+          "Status do WhatsApp"
+        ],
+        "operationId": "get-whatsapp-status-posts",
+        "summary": "Consultar /whatsapp-status/posts",
+        "description": "**Acesso:** Autenticação/validação própria do fluxo.\n\nOperação do módulo Status do WhatsApp. Rascunhos, agendamento, publicação e mídia dos Status (stories) da própria conta conectada. Disponível só para empresas habilitadas pelo superadministrador; conexões da API oficial da Meta ficam em rascunho, prévia e download.\n\nOs campos abaixo são leituras observadas no controlador. Tipos, obrigatoriedade, validações delegadas aos serviços e formato final de resposta não são inferidos. Esta operação faz parte do sistema existente, não representa um contrato público versionado independente.\n\n[Implementação desta rota](https://github.com/GuiZeroUm/ticketz/blob/main/backend/src/routes/whatsappStatusRoutes.ts#L77)",
+        "security": [],
+        "parameters": [
+          {
+            "name": "whatsappId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Parâmetro lido pelo controlador. Consulte as regras do módulo."
+          },
+          {
+            "name": "active",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Parâmetro lido pelo controlador. Consulte as regras do módulo."
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Resposta ou erro do fluxo. Consulte as regras, os códigos do módulo e as permissões."
+          }
+        },
+        "x-codeSamples": [],
+        "x-source": {
+          "file": "backend/src/routes/whatsappStatusRoutes.ts",
+          "line": 77
+        },
+        "x-contract-level": "observed"
+      },
+      "post": {
+        "tags": [
+          "Status do WhatsApp"
+        ],
+        "operationId": "post-whatsapp-status-posts",
+        "summary": "Executar /whatsapp-status/posts",
+        "description": "**Acesso:** Autenticação/validação própria do fluxo.\n\nOperação do módulo Status do WhatsApp. Rascunhos, agendamento, publicação e mídia dos Status (stories) da própria conta conectada. Disponível só para empresas habilitadas pelo superadministrador; conexões da API oficial da Meta ficam em rascunho, prévia e download.\n\nOs campos abaixo são leituras observadas no controlador. Tipos, obrigatoriedade, validações delegadas aos serviços e formato final de resposta não são inferidos. Esta operação faz parte do sistema existente, não representa um contrato público versionado independente.\n\nErros declarados neste controlador: `ERR_STATUS_IDEMPOTENCY_REQUIRED`. Outros erros podem vir dos serviços e permissões.\n\n[Implementação desta rota](https://github.com/GuiZeroUm/ticketz/blob/main/backend/src/routes/whatsappStatusRoutes.ts#L83)",
+        "security": [],
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Resposta do controlador; o conteúdo depende da operação."
+          },
+          "default": {
+            "description": "Resposta ou erro do fluxo. Consulte as regras, os códigos do módulo e as permissões."
+          }
+        },
+        "x-codeSamples": [],
+        "x-source": {
+          "file": "backend/src/routes/whatsappStatusRoutes.ts",
+          "line": 83
+        },
+        "x-contract-level": "observed",
+        "requestBody": {
+          "description": "Campos identificados na implementação. Os serviços podem validar campos adicionais.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/whatsapp-status/posts/{id}": {
+      "put": {
+        "tags": [
+          "Status do WhatsApp"
+        ],
+        "operationId": "put-whatsapp-status-posts-id",
+        "summary": "Atualizar /whatsapp-status/posts/:id",
+        "description": "**Acesso:** Autenticação/validação própria do fluxo.\n\nOperação do módulo Status do WhatsApp. Rascunhos, agendamento, publicação e mídia dos Status (stories) da própria conta conectada. Disponível só para empresas habilitadas pelo superadministrador; conexões da API oficial da Meta ficam em rascunho, prévia e download.\n\nOs campos abaixo são leituras observadas no controlador. Tipos, obrigatoriedade, validações delegadas aos serviços e formato final de resposta não são inferidos. Esta operação faz parte do sistema existente, não representa um contrato público versionado independente.\n\n[Implementação desta rota](https://github.com/GuiZeroUm/ticketz/blob/main/backend/src/routes/whatsappStatusRoutes.ts#L91)",
+        "security": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identificador do recurso na URL."
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Resposta ou erro do fluxo. Consulte as regras, os códigos do módulo e as permissões."
+          }
+        },
+        "x-codeSamples": [],
+        "x-source": {
+          "file": "backend/src/routes/whatsappStatusRoutes.ts",
+          "line": 91
+        },
+        "x-contract-level": "observed",
+        "requestBody": {
+          "description": "Campos identificados na implementação. Os serviços podem validar campos adicionais.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/whatsapp-status/posts/{id}/publish": {
+      "post": {
+        "tags": [
+          "Status do WhatsApp"
+        ],
+        "operationId": "post-whatsapp-status-posts-id-publish",
+        "summary": "Executar /whatsapp-status/posts/:id/publish",
+        "description": "**Acesso:** Autenticação/validação própria do fluxo.\n\nOperação do módulo Status do WhatsApp. Rascunhos, agendamento, publicação e mídia dos Status (stories) da própria conta conectada. Disponível só para empresas habilitadas pelo superadministrador; conexões da API oficial da Meta ficam em rascunho, prévia e download.\n\nOs campos abaixo são leituras observadas no controlador. Tipos, obrigatoriedade, validações delegadas aos serviços e formato final de resposta não são inferidos. Esta operação faz parte do sistema existente, não representa um contrato público versionado independente.\n\nErros declarados neste controlador: `ERR_STATUS_SCHEDULE_INVALID`. Outros erros podem vir dos serviços e permissões.\n\n[Implementação desta rota](https://github.com/GuiZeroUm/ticketz/blob/main/backend/src/routes/whatsappStatusRoutes.ts#L98)",
+        "security": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identificador do recurso na URL."
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Resposta ou erro do fluxo. Consulte as regras, os códigos do módulo e as permissões."
+          }
+        },
+        "x-codeSamples": [],
+        "x-source": {
+          "file": "backend/src/routes/whatsappStatusRoutes.ts",
+          "line": 98
+        },
+        "x-contract-level": "observed",
+        "requestBody": {
+          "description": "Campos identificados na implementação. Os serviços podem validar campos adicionais.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "scheduledAt": {
+                    "description": "Campo observado no controlador ou no tipo declarado; tipo e obrigatoriedade não inferidos."
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/whatsapp-status/posts/{id}/cancel": {
+      "post": {
+        "tags": [
+          "Status do WhatsApp"
+        ],
+        "operationId": "post-whatsapp-status-posts-id-cancel",
+        "summary": "Executar /whatsapp-status/posts/:id/cancel",
+        "description": "**Acesso:** Autenticação/validação própria do fluxo.\n\nOperação do módulo Status do WhatsApp. Rascunhos, agendamento, publicação e mídia dos Status (stories) da própria conta conectada. Disponível só para empresas habilitadas pelo superadministrador; conexões da API oficial da Meta ficam em rascunho, prévia e download.\n\nOs campos abaixo são leituras observadas no controlador. Tipos, obrigatoriedade, validações delegadas aos serviços e formato final de resposta não são inferidos. Esta operação faz parte do sistema existente, não representa um contrato público versionado independente.\n\n[Implementação desta rota](https://github.com/GuiZeroUm/ticketz/blob/main/backend/src/routes/whatsappStatusRoutes.ts#L104)",
+        "security": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identificador do recurso na URL."
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Resposta ou erro do fluxo. Consulte as regras, os códigos do módulo e as permissões."
+          }
+        },
+        "x-codeSamples": [],
+        "x-source": {
+          "file": "backend/src/routes/whatsappStatusRoutes.ts",
+          "line": 104
+        },
+        "x-contract-level": "observed"
+      }
+    },
+    "/whatsapp-status/posts/{id}/media": {
+      "get": {
+        "tags": [
+          "Status do WhatsApp"
+        ],
+        "operationId": "get-whatsapp-status-posts-id-media",
+        "summary": "Consultar /whatsapp-status/posts/:id/media",
+        "description": "**Acesso:** Autenticação/validação própria do fluxo.\n\nOperação do módulo Status do WhatsApp. Rascunhos, agendamento, publicação e mídia dos Status (stories) da própria conta conectada. Disponível só para empresas habilitadas pelo superadministrador; conexões da API oficial da Meta ficam em rascunho, prévia e download.\n\nOs campos abaixo são leituras observadas no controlador. Tipos, obrigatoriedade, validações delegadas aos serviços e formato final de resposta não são inferidos. Esta operação faz parte do sistema existente, não representa um contrato público versionado independente.\n\n[Implementação desta rota](https://github.com/GuiZeroUm/ticketz/blob/main/backend/src/routes/whatsappStatusRoutes.ts#L110)",
+        "security": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identificador do recurso na URL."
+          },
+          {
+            "name": "download",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Parâmetro lido pelo controlador. Consulte as regras do módulo."
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Resposta ou erro do fluxo. Consulte as regras, os códigos do módulo e as permissões."
+          }
+        },
+        "x-codeSamples": [],
+        "x-source": {
+          "file": "backend/src/routes/whatsappStatusRoutes.ts",
+          "line": 110
+        },
+        "x-contract-level": "observed"
+      }
+    },
     "/public/{file}": {
       "get": {
         "tags": [
@@ -18676,6 +19152,8 @@
         "Prospecção",
         "Quadro de tarefas",
         "Respostas rápidas",
+        "Status do WhatsApp",
+        "Status do WhatsApp: disponibilidade",
         "Traduções",
         "Usuários",
         "Versão",

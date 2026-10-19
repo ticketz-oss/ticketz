@@ -35,6 +35,14 @@ const entries = {
     "WhatsApp oficial",
     "Configuração e onboarding da integração Meta, templates, conta de negócios e recursos de cobrança associados. Requer configuração e habilitação da integração oficial."
   ],
+  whatsappStatus: [
+    "Status do WhatsApp",
+    "Rascunhos, agendamento, publicação e mídia dos Status (stories) da própria conta conectada. Disponível só para empresas habilitadas pelo superadministrador; conexões da API oficial da Meta ficam em rascunho, prévia e download."
+  ],
+  whatsappStatusAdmin: [
+    "Status do WhatsApp: disponibilidade",
+    "Consulta se a empresa pode usar Status do WhatsApp e, para o superadministrador, liga ou desliga a função por empresa."
+  ],
   metaWhatsappWebhook: [
     "Webhooks Meta",
     "Verificação e recebimento de eventos enviados pela Meta. Fluxo do provedor com validação própria; não é um webhook genérico para integrações de clientes."
