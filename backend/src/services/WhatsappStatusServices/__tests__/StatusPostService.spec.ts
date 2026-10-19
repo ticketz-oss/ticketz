@@ -54,6 +54,12 @@ jest.mock("../StatusSocket", () => ({
 }));
 
 const NOW = new Date("2026-10-19T12:00:00Z");
+const AUTHOR = { id: 2, name: "Ana" };
+
+const lastEmitted = () => {
+  const { calls } = (emitStatusPost as jest.Mock).mock;
+  return calls[calls.length - 1][2];
+};
 
 const makePost = (fields: Record<string, unknown> = {}) => {
   const post: Record<string, unknown> = {
@@ -82,6 +88,13 @@ const makePost = (fields: Record<string, unknown> = {}) => {
   post.update = jest.fn(async (patch: Record<string, unknown>) =>
     Object.assign(post, patch)
   );
+  // Like Sequelize, the author is only loaded when the reload includes it.
+  post.reload = jest.fn(async (options?: { include?: { as?: string }[] }) => {
+    if (options?.include?.some(include => include.as === "createdBy")) {
+      post.createdBy = AUTHOR;
+    }
+    return post;
+  });
   return post as never as WhatsappStatusPost & {
     update: jest.Mock;
     set: jest.Mock;
@@ -160,6 +173,11 @@ describe("StatusPostService.createPost", () => {
       contactListId: null
     });
     expect(emitStatusPost).toHaveBeenCalledWith(7, "create", post);
+  });
+
+  it("emits the created post with its author (createdBy)", async () => {
+    await createPost(7, 2, textInput);
+    expect(lastEmitted().createdBy).toEqual(AUTHOR);
   });
 
   it("returns the existing post for a repeated idempotency key", async () => {
@@ -489,6 +507,49 @@ describe("StatusPostService.cancelPost", () => {
     expect(removeStatusMedia).not.toHaveBeenCalled();
   });
 
+  it("cancels a failed post even when its send had started", async () => {
+    const post = makePost({
+      state: "failed",
+      kind: "image",
+      mediaPath: "whatsapp-status/7/a.jpg",
+      attemptStartedAt: NOW,
+      failureCode: "ERR_STATUS_OUTCOME_UNKNOWN"
+    });
+    (WhatsappStatusPost.findOne as jest.Mock).mockResolvedValue(post);
+    const result = await cancelPost(7, 5);
+    expect(WhatsappStatusPost.update).toHaveBeenCalledWith(
+      expect.objectContaining({ state: "cancelled", mediaPath: null }),
+      { where: { id: 5, companyId: 7, state: "failed" } }
+    );
+    expect(removeStatusMedia).toHaveBeenCalledWith(
+      7,
+      "whatsapp-status/7/a.jpg"
+    );
+    expect(removeStatusJob).not.toHaveBeenCalled();
+    expect(result.state).toBe("cancelled");
+  });
+
+  it("cancels an unsupported post", async () => {
+    (WhatsappStatusPost.findOne as jest.Mock).mockResolvedValue(
+      makePost({ state: "unsupported", failureCode: "ERR_STATUS_OFFICIAL_API" })
+    );
+    await expect(cancelPost(7, 5)).resolves.toMatchObject({
+      state: "cancelled"
+    });
+  });
+
+  it("refuses to cancel a published post", async () => {
+    (WhatsappStatusPost.findOne as jest.Mock).mockResolvedValue(
+      makePost({ state: "published", attemptStartedAt: NOW })
+    );
+    await expect(cancelPost(7, 5)).rejects.toMatchObject({
+      message: "ERR_STATUS_INVALID_STATE",
+      statusCode: 409
+    });
+    expect(WhatsappStatusPost.update).not.toHaveBeenCalled();
+    expect(removeStatusMedia).not.toHaveBeenCalled();
+  });
+
   it("refuses when the worker claimed the post in the meantime", async () => {
     (WhatsappStatusPost.findOne as jest.Mock).mockResolvedValue(
       makePost({ state: "queued" })
@@ -517,9 +578,9 @@ describe("StatusPostService.cancelPendingForCompany", () => {
     const b = makePost({ id: 2, state: "queued" });
     (WhatsappStatusPost.findAll as jest.Mock).mockResolvedValue([a, b]);
     await cancelPendingForCompany(7);
-    expect(WhatsappStatusPost.findAll).toHaveBeenCalledWith({
-      where: { companyId: 7, state: "queued" }
-    });
+    expect(WhatsappStatusPost.findAll).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { companyId: 7, state: "queued" } })
+    );
     expect(WhatsappStatusPost.update).toHaveBeenCalledWith(
       { state: "cancelled", failureCode: "ERR_STATUS_FEATURE_DISABLED" },
       {
@@ -531,6 +592,23 @@ describe("StatusPostService.cancelPendingForCompany", () => {
     expect(a.state).toBe("cancelled");
     expect(b.failureCode).toBe("ERR_STATUS_FEATURE_DISABLED");
     expect(emitStatusPost).toHaveBeenCalledTimes(2);
+  });
+
+  it("emits cancelled posts with their author (createdBy)", async () => {
+    (WhatsappStatusPost.findAll as jest.Mock).mockImplementation(
+      async (options: { include?: { as?: string }[] }) => [
+        makePost({
+          id: 1,
+          state: "queued",
+          ...(options.include?.some(include => include.as === "createdBy")
+            ? { createdBy: AUTHOR }
+            : {})
+        })
+      ]
+    );
+    await cancelPendingForCompany(7);
+    expect(lastEmitted().state).toBe("cancelled");
+    expect(lastEmitted().createdBy).toEqual(AUTHOR);
   });
 });
 
@@ -556,10 +634,40 @@ describe("StatusPostService reads", () => {
       { state: { [Op.in]: ["queued", "publishing"] } },
       {
         state: { [Op.in]: ["failed", "unsupported"] },
-        createdAt: { [Op.gte]: new Date(NOW.getTime() - 24 * 3600 * 1000) }
+        updatedAt: { [Op.gte]: new Date(NOW.getTime() - 24 * 3600 * 1000) }
+      },
+      {
+        state: "draft",
+        updatedAt: {
+          [Op.gte]: new Date(NOW.getTime() - 7 * 24 * 3600 * 1000)
+        }
       }
     ]);
     expect(options.order).toEqual([["createdAt", "ASC"]]);
+  });
+
+  it("lists drafts edited in the last 7 days so Cloud API drafts can be reopened", async () => {
+    (WhatsappStatusPost.findAll as jest.Mock).mockResolvedValue([]);
+    await listPosts(7, { active: true });
+    const options = (WhatsappStatusPost.findAll as jest.Mock).mock.calls[0][0];
+    expect(options.where[Op.or]).toContainEqual({
+      state: "draft",
+      updatedAt: { [Op.gte]: new Date(NOW.getTime() - 7 * 24 * 3600 * 1000) }
+    });
+  });
+
+  it("keeps a scheduled post that failed days after creation visible for 24h after failing", async () => {
+    (WhatsappStatusPost.findAll as jest.Mock).mockResolvedValue([]);
+    await listPosts(7, { active: true });
+    const options = (WhatsappStatusPost.findAll as jest.Mock).mock.calls[0][0];
+    const failedClause = options.where[Op.or].find(
+      (clause: { state: Record<symbol, string[]> }) =>
+        clause.state[Op.in]?.includes("failed")
+    );
+    expect(failedClause).not.toHaveProperty("createdAt");
+    expect(failedClause.updatedAt).toEqual({
+      [Op.gte]: new Date(NOW.getTime() - 24 * 3600 * 1000)
+    });
   });
 
   it("reports capabilities only for connections of the company", async () => {

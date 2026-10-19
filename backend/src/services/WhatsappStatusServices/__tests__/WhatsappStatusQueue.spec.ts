@@ -32,6 +32,7 @@ jest.mock("../../../models/Whatsapp", () => ({
   __esModule: true,
   default: { findOne: jest.fn() }
 }));
+jest.mock("../../../models/User", () => ({ __esModule: true, default: {} }));
 jest.mock("../providers", () => ({ getStatusProvider: jest.fn() }));
 jest.mock("../StatusAudienceService", () => ({
   resolveAudienceJids: jest.fn()
@@ -100,6 +101,25 @@ const mockProvider = (caps = capabilities()) => {
   return provider;
 };
 
+const AUTHOR = { id: 2, name: "Ana" };
+
+// Like Sequelize, the author is only present when the query includes it.
+const withAuthor = (
+  options: { include?: { as?: string }[] } | undefined,
+  fields: Record<string, unknown> = {}
+) =>
+  makePost({
+    ...fields,
+    ...(options?.include?.some(include => include.as === "createdBy")
+      ? { createdBy: AUTHOR }
+      : {})
+  });
+
+const lastEmitted = () => {
+  const { calls } = (emitStatusPost as jest.Mock).mock;
+  return calls[calls.length - 1][2];
+};
+
 const usePost = (post: WhatsappStatusPost) =>
   (WhatsappStatusPost.findByPk as jest.Mock).mockResolvedValue(post);
 
@@ -158,6 +178,17 @@ describe("handlePublishStatus", () => {
     });
     expect(emitStatusPost).toHaveBeenCalledTimes(2);
     expect(emitStatusPost).toHaveBeenLastCalledWith(7, "update", post);
+  });
+
+  it("emits a published post with its author (createdBy)", async () => {
+    (WhatsappStatusPost.findByPk as jest.Mock).mockImplementation(
+      async (_id: number, options) => withAuthor(options)
+    );
+
+    await handlePublishStatus(job());
+
+    expect(lastEmitted().state).toBe("published");
+    expect(lastEmitted().createdBy).toEqual(AUTHOR);
   });
 
   it("never resends a post that was already handed to the session (ERR_STATUS_OUTCOME_UNKNOWN)", async () => {
@@ -459,9 +490,11 @@ describe("whatsappStatus queue", () => {
       {},
       expect.objectContaining({ repeat: { cron: "0 4 * * *" } })
     );
-    expect(WhatsappStatusPost.findAll).toHaveBeenCalledWith({
-      where: { state: { [Op.in]: ["queued", "publishing"] } }
-    });
+    expect(WhatsappStatusPost.findAll).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { state: { [Op.in]: ["queued", "publishing"] } }
+      })
+    );
     const publishAdds = queue.add.mock.calls.filter(
       call => call[0] === "Publish"
     );
@@ -483,6 +516,67 @@ describe("whatsappStatus queue", () => {
     expect(cleanupOrphanStatusMedia).toHaveBeenCalled();
   });
 
+  it("fails a publishing post whose job ended failed (stalled) without resending", async () => {
+    const stalled = makePost({
+      id: 4,
+      state: "publishing",
+      attemptStartedAt: NOW
+    });
+    (WhatsappStatusPost.findAll as jest.Mock).mockResolvedValue([stalled]);
+    const failedJob = {
+      isFailed: jest.fn().mockResolvedValue(true),
+      isCompleted: jest.fn().mockResolvedValue(false),
+      remove: jest.fn()
+    };
+    queue.getJob.mockResolvedValue(failedJob);
+    const provider = mockProvider();
+
+    await startWhatsappStatusQueue();
+
+    expect(stalled.state).toBe("failed");
+    expect(stalled.failureCode).toBe("ERR_STATUS_OUTCOME_UNKNOWN");
+    expect(emitStatusPost).toHaveBeenCalledWith(7, "update", stalled);
+    expect(provider.publish).not.toHaveBeenCalled();
+    expect(queue.add.mock.calls.filter(call => call[0] === "Publish")).toEqual(
+      []
+    );
+  });
+
+  it("leaves a publishing post alone while its job is still pending", async () => {
+    const running = makePost({
+      id: 6,
+      state: "publishing",
+      attemptStartedAt: NOW
+    });
+    (WhatsappStatusPost.findAll as jest.Mock).mockResolvedValue([running]);
+    queue.getJob.mockResolvedValue({
+      isFailed: jest.fn().mockResolvedValue(false),
+      isCompleted: jest.fn().mockResolvedValue(false)
+    });
+
+    await startWhatsappStatusQueue();
+
+    expect(running.state).toBe("publishing");
+    expect(running.update).not.toHaveBeenCalled();
+  });
+
+  it("emits a recovered post with its author (createdBy)", async () => {
+    (WhatsappStatusPost.findAll as jest.Mock).mockImplementation(
+      async options => [
+        withAuthor(options, {
+          id: 3,
+          state: "publishing",
+          attemptStartedAt: NOW
+        })
+      ]
+    );
+
+    await startWhatsappStatusQueue();
+
+    expect(lastEmitted().failureCode).toBe("ERR_STATUS_OUTCOME_UNKNOWN");
+    expect(lastEmitted().createdBy).toEqual(AUTHOR);
+  });
+
   it("limits startup recovery to companies of a dedicated runtime", async () => {
     process.env.TENANT_RUNTIME_COMPANY_ID = "7";
     process.env.QUEUE_PREFIX = "tenant7";
@@ -493,8 +587,10 @@ describe("whatsappStatus queue", () => {
       delete process.env.TENANT_RUNTIME_COMPANY_ID;
       delete process.env.QUEUE_PREFIX;
     }
-    expect(WhatsappStatusPost.findAll).toHaveBeenCalledWith({
-      where: { state: { [Op.in]: ["queued", "publishing"] }, companyId: 7 }
-    });
+    expect(WhatsappStatusPost.findAll).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { state: { [Op.in]: ["queued", "publishing"] }, companyId: 7 }
+      })
+    );
   });
 });

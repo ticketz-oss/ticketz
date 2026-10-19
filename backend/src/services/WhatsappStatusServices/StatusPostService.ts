@@ -39,6 +39,7 @@ export type UpdateStatusPostInput = Partial<
 const MAX_BODY = 700;
 const MAX_SCHEDULE_MS = 30 * 24 * 60 * 60 * 1000;
 const DAY_MS = 24 * 60 * 60 * 1000;
+const DRAFT_RETENTION_MS = 7 * DAY_MS;
 const KINDS: StatusKind[] = ["text", "image", "video"];
 const AUDIENCE_MODES: StatusAudienceMode[] = [
   "connection_contacts",
@@ -46,13 +47,18 @@ const AUDIENCE_MODES: StatusAudienceMode[] = [
 ];
 const EDITABLE: StatusPostState[] = ["draft", "failed", "unsupported"];
 const PUBLISHABLE: StatusPostState[] = ["draft", "failed", "unsupported"];
-// A queued post only while the worker has not handed it to the session.
-const CANCELLABLE: StatusPostState[] = [
-  "draft",
-  "queued",
-  "failed",
-  "unsupported"
-];
+// Finished posts can always be cancelled: cancel only changes the row and
+// removes the media. Pending ones only while the worker has not handed them
+// to the session.
+const CANCELLABLE_FINISHED: StatusPostState[] = ["failed", "unsupported"];
+const CANCELLABLE_PENDING: StatusPostState[] = ["draft", "queued"];
+
+// The author shown on the story; every post sent to the browser carries it.
+const createdByInclude = () => ({
+  model: User,
+  as: "createdBy",
+  attributes: ["id", "name"]
+});
 
 const notFound = () => new AppError("ERR_STATUS_NOT_FOUND", 404);
 const invalid = (code = "ERR_STATUS_INVALID_INPUT") => new AppError(code, 400);
@@ -64,7 +70,7 @@ const findPost = async (
 ): Promise<WhatsappStatusPost> => {
   const post = await WhatsappStatusPost.findOne({
     where: { id, companyId },
-    include: [{ model: User, as: "createdBy", attributes: ["id", "name"] }]
+    include: [createdByInclude()]
   });
   if (!post) throw notFound();
   return post;
@@ -167,14 +173,21 @@ export const listPosts = async (
       { state: "published", expiresAt: { [Op.gt]: now } },
       { state: { [Op.in]: ["queued", "publishing"] } },
       {
+        // A scheduled post may fail days after creation; count from failing.
         state: { [Op.in]: ["failed", "unsupported"] },
-        createdAt: { [Op.gte]: new Date(now.getTime() - DAY_MS) }
+        updatedAt: { [Op.gte]: new Date(now.getTime() - DAY_MS) }
+      },
+      // Drafts (Cloud API ones included) stay reachable until the daily
+      // cleanup cancels them after DRAFT_RETENTION_MS without edits.
+      {
+        state: "draft",
+        updatedAt: { [Op.gte]: new Date(now.getTime() - DRAFT_RETENTION_MS) }
       }
     ];
   }
   return WhatsappStatusPost.findAll({
     where,
-    include: [{ model: User, as: "createdBy", attributes: ["id", "name"] }],
+    include: [createdByInclude()],
     order: [["createdAt", "ASC"]]
   });
 };
@@ -239,6 +252,7 @@ export const createPost = async (
     if (!winner) throw error;
     return winner;
   }
+  await post.reload({ include: [createdByInclude()] });
   emitStatusPost(companyId, "create", post);
   return post;
 };
@@ -373,9 +387,10 @@ export const cancelPost = async (
   id: number
 ): Promise<WhatsappStatusPost> => {
   const post = await findPost(companyId, id);
-  if (!CANCELLABLE.includes(post.state) || post.attemptStartedAt) {
-    throw invalidState();
-  }
+  const finished = CANCELLABLE_FINISHED.includes(post.state);
+  const pending =
+    CANCELLABLE_PENDING.includes(post.state) && !post.attemptStartedAt;
+  if (!finished && !pending) throw invalidState();
   const previousState = post.state;
   const { mediaPath } = post;
   const changes = {
@@ -390,7 +405,7 @@ export const cancelPost = async (
       id: post.id,
       companyId,
       state: previousState,
-      attemptStartedAt: null
+      ...(pending ? { attemptStartedAt: null } : {})
     }
   });
   if (!count) throw invalidState();
@@ -411,7 +426,8 @@ export const cancelPendingForCompany = async (
   companyId: number
 ): Promise<void> => {
   const posts = await WhatsappStatusPost.findAll({
-    where: { companyId, state: "queued" }
+    where: { companyId, state: "queued" },
+    include: [createdByInclude()]
   });
   const changes = {
     state: "cancelled" as StatusPostState,

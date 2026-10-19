@@ -2,6 +2,7 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import sharp from "sharp";
+import { Op } from "sequelize";
 import privateFiles from "../../../config/privateFiles";
 import WhatsappStatusPost from "../../../models/WhatsappStatusPost";
 import {
@@ -223,6 +224,7 @@ describe("StatusMediaService", () => {
       update: jest.fn().mockResolvedValue(undefined)
     };
     (WhatsappStatusPost.findAll as jest.Mock)
+      .mockResolvedValue([])
       .mockResolvedValueOnce([
         { mediaPath: "whatsapp-status/9/referenced.jpg" },
         { mediaPath: "whatsapp-status/9/expired.mp4" }
@@ -237,5 +239,100 @@ describe("StatusMediaService", () => {
     expect(fs.existsSync(expired)).toBe(false);
     expect(expiredPost.update).toHaveBeenCalledWith({ mediaPath: null });
     expect(removed).toBe(2);
+  });
+
+  it("cancels drafts and unsupported posts untouched for 7 days and removes their media", async () => {
+    const now = new Date();
+    const retentionLimit = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const companyDir = path.join(
+      privateFiles.directory,
+      "whatsapp-status",
+      "12"
+    );
+    fs.mkdirSync(companyDir, { recursive: true });
+    const draftFile = path.join(companyDir, "draft.jpg");
+    fs.writeFileSync(draftFile, "x");
+
+    const staleDraft = {
+      id: 41,
+      companyId: 12,
+      state: "draft",
+      mediaPath: "whatsapp-status/12/draft.jpg"
+    };
+    const staleUnsupported = {
+      id: 42,
+      companyId: 12,
+      state: "unsupported",
+      mediaPath: null
+    };
+    (WhatsappStatusPost.findAll as jest.Mock).mockImplementation(
+      async (options: { where: { state?: Record<symbol, string[]> } }) =>
+        options.where.state?.[Op.in]?.includes("draft")
+          ? [staleDraft, staleUnsupported]
+          : []
+    );
+    (WhatsappStatusPost.update as jest.Mock).mockResolvedValue([1]);
+
+    await cleanupOrphanStatusMedia(now);
+
+    expect(WhatsappStatusPost.findAll).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          state: { [Op.in]: ["draft", "unsupported"] },
+          updatedAt: { [Op.lt]: retentionLimit }
+        }
+      })
+    );
+    const changes = {
+      state: "cancelled",
+      failureCode: "ERR_STATUS_EXPIRED_DRAFT",
+      mediaPath: null,
+      mediaMime: null
+    };
+    // Conditional, so a draft edited or published meanwhile is kept.
+    expect(WhatsappStatusPost.update).toHaveBeenCalledWith(changes, {
+      where: {
+        id: 41,
+        state: "draft",
+        updatedAt: { [Op.lt]: retentionLimit }
+      }
+    });
+    expect(WhatsappStatusPost.update).toHaveBeenCalledWith(changes, {
+      where: {
+        id: 42,
+        state: "unsupported",
+        updatedAt: { [Op.lt]: retentionLimit }
+      }
+    });
+    expect(fs.existsSync(draftFile)).toBe(false);
+  });
+
+  it("keeps the media of a stale draft that was edited meanwhile", async () => {
+    const companyDir = path.join(
+      privateFiles.directory,
+      "whatsapp-status",
+      "13"
+    );
+    fs.mkdirSync(companyDir, { recursive: true });
+    const draftFile = path.join(companyDir, "draft.jpg");
+    fs.writeFileSync(draftFile, "x");
+    (WhatsappStatusPost.findAll as jest.Mock).mockImplementation(
+      async (options: { where: { state?: Record<symbol, string[]> } }) =>
+        options.where.state?.[Op.in]?.includes("draft")
+          ? [
+              {
+                id: 43,
+                companyId: 13,
+                state: "draft",
+                mediaPath: "whatsapp-status/13/draft.jpg"
+              }
+            ]
+          : []
+    );
+    (WhatsappStatusPost.update as jest.Mock).mockResolvedValue([0]);
+
+    await cleanupOrphanStatusMedia(new Date());
+
+    expect(fs.existsSync(draftFile)).toBe(true);
   });
 });

@@ -165,10 +165,57 @@ const listDir = async (dir: string) => {
   }
 };
 
+// Drafts and unsupported posts nobody touched for 7 days are cancelled and
+// lose their media. Conditional, so a post edited or published meanwhile is
+// kept. Returns how many files were removed.
+const cancelStaleDrafts = async (retentionLimit: Date): Promise<number> => {
+  let removed = 0;
+  const stale = await WhatsappStatusPost.findAll({
+    where: {
+      state: { [Op.in]: ["draft", "unsupported"] },
+      updatedAt: { [Op.lt]: retentionLimit }
+    }
+  });
+  await Promise.all(
+    stale.map(async post => {
+      const [count] = await WhatsappStatusPost.update(
+        {
+          state: "cancelled",
+          failureCode: "ERR_STATUS_EXPIRED_DRAFT",
+          mediaPath: null,
+          mediaMime: null
+        },
+        {
+          where: {
+            id: post.id,
+            state: post.state,
+            updatedAt: { [Op.lt]: retentionLimit }
+          }
+        }
+      );
+      if (!count || !post.mediaPath) return;
+      try {
+        await fs.unlink(resolveStatusMediaPath(post.companyId, post.mediaPath));
+        removed += 1;
+      } catch (error) {
+        // A file left behind is unreferenced now; the orphan sweep removes it.
+        if (error?.code !== "ENOENT") {
+          logger.warn(
+            { error, postId: post.id },
+            "Could not remove stale draft status media"
+          );
+        }
+      }
+    })
+  );
+  return removed;
+};
+
 // Removes files nobody references (older than 24h, so an upload whose post
 // is still being created is not raced) and the media of posts that no longer
-// need it: published and expired for more than 7 days, or cancelled/failed
-// for more than 7 days. Returns how many files were removed.
+// need it: published and expired for more than 7 days, cancelled/failed for
+// more than 7 days, or drafts/unsupported posts untouched for 7 days (which
+// are cancelled). Returns how many files were removed.
 export const cleanupOrphanStatusMedia = async (
   now: Date = new Date()
 ): Promise<number> => {
@@ -245,6 +292,8 @@ export const cleanupOrphanStatusMedia = async (
       await post.update({ mediaPath: null });
     })
   );
+
+  removed += await cancelStaleDrafts(retentionLimit);
 
   return removed;
 };

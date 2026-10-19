@@ -6,6 +6,7 @@ import {
   runtimeCompanyWhere,
   runtimeQueueOptions
 } from "../helpers/tenantRuntime";
+import User from "../models/User";
 import Whatsapp from "../models/Whatsapp";
 import WhatsappStatusPost, {
   StatusPostState
@@ -31,6 +32,13 @@ const queue = new Queue(
 const DAY_MS = 24 * 60 * 60 * 1000;
 const OUTCOME_UNKNOWN = "ERR_STATUS_OUTCOME_UNKNOWN";
 const CONNECTION_UNAVAILABLE = "ERR_STATUS_CONNECTION_UNAVAILABLE";
+
+// Posts are emitted to the browser, which shows who created them.
+const createdByInclude = () => ({
+  model: User,
+  as: "createdBy",
+  attributes: ["id", "name"]
+});
 
 const jobIdOf = (postId: number): string => `status-post-${postId}`;
 
@@ -197,7 +205,9 @@ const publishOnce = async (post: WhatsappStatusPost): Promise<void> => {
 export const handlePublishStatus = async (
   job: Job<PublishJobData>
 ): Promise<void> => {
-  const post = await WhatsappStatusPost.findByPk(job.data.postId);
+  const post = await WhatsappStatusPost.findByPk(job.data.postId, {
+    include: [createdByInclude()]
+  });
   if (!post || !["queued", "publishing"].includes(post.state)) return;
 
   // A previous run handed the post to the session and died before saving the
@@ -239,19 +249,28 @@ const handleCleanup = async (): Promise<void> => {
   logger.info({ removed }, "Whatsapp status media cleanup finished");
 };
 
+// A job that ended (for example failed after stalling twice) will never run
+// the handler again, so it counts as missing.
+const hasPendingJob = async (postId: number): Promise<boolean> => {
+  const job = await queue.getJob(jobIdOf(postId));
+  if (!job) return false;
+  return !(await job.isFailed()) && !(await job.isCompleted());
+};
+
 // Jobs may be lost when Redis is flushed or the backend restarts mid-flight.
 const recoverPendingPosts = async (): Promise<void> => {
   const posts = await WhatsappStatusPost.findAll({
     where: {
       state: { [Op.in]: ["queued", "publishing"] },
       ...runtimeCompanyWhere()
-    }
+    },
+    include: [createdByInclude()]
   });
   for (const post of posts) {
     try {
       if (post.state === "queued") {
         await enqueueStatusPost(post);
-      } else if (!(await queue.getJob(jobIdOf(post.id)))) {
+      } else if (!(await hasPendingJob(post.id))) {
         await finish(post, { state: "failed", failureCode: OUTCOME_UNKNOWN });
       }
     } catch (error) {
