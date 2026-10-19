@@ -11,6 +11,26 @@ import {
 const NOW = new Date("2026-10-19T12:00:00Z").getTime();
 
 describe("story state helpers", () => {
+  it("ignores a stale post that arrives after a newer update", () => {
+    const published = {
+      id: 1,
+      state: "published",
+      updatedAt: "2026-10-19T12:00:05Z"
+    };
+    const staleQueued = {
+      id: 1,
+      state: "queued",
+      updatedAt: "2026-10-19T12:00:01Z"
+    };
+    expect(upsertPost([published], staleQueued)).toEqual([published]);
+    const edited = {
+      ...staleQueued,
+      state: "draft",
+      updatedAt: "2026-10-19T12:01:00Z"
+    };
+    expect(upsertPost([published], edited)).toEqual([edited]);
+  });
+
   it("labels a future queued post as scheduled and a published one as sent", () => {
     expect(
       storyStateLabel(

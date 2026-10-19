@@ -146,6 +146,16 @@ export const groupPostsByConnection = (posts, now = Date.now()) => {
 export const upsertPost = (posts, post) => {
   const list = posts || [];
   const previous = list.find(item => item.id === post.id);
+  // A publish response can arrive after the socket already reported a newer
+  // state; keep whichever version the server updated last.
+  if (
+    previous &&
+    toTime(previous.updatedAt) &&
+    toTime(post.updatedAt) &&
+    toTime(post.updatedAt) < toTime(previous.updatedAt)
+  ) {
+    return list;
+  }
   const others = list.filter(item => item.id !== post.id);
   const next =
     previous && post.createdBy == null && previous.createdBy != null
