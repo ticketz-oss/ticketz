@@ -32,7 +32,7 @@ import "../LandingPage/styles.css";
 import "./styles.css";
 import "./refinement.css";
 import "./setup.css";
-import { slugFromName, tenantLoginUrl } from "./setup";
+import { isReservedSlug, slugFromName, tenantLoginUrl } from "./setup";
 import Summary from "./Summary";
 import BrandingPreview from "./BrandingPreview";
 
@@ -847,6 +847,8 @@ const validate = form => {
   if (form.password.length < 6) errors.password = t("errors.password");
   if (!/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(form.slug))
     errors.slug = mt("slugError");
+  else if (isReservedSlug(form.slug))
+    errors.slug = t("errors.ERR_COMPANY_SLUG_RESERVED");
   if (!Number.isInteger(form.dueDay) || form.dueDay < 1 || form.dueDay > 31)
     errors.dueDay = mt("dueDayError");
   if (!form.terms) errors.terms = t("errors.terms");

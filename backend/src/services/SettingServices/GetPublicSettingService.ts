@@ -1,6 +1,7 @@
 import Setting from "../../models/Setting";
 import Company from "../../models/Company";
 import normalizeSlug from "../../helpers/normalizeSlug";
+import { getMasterCompanyId } from "../../helpers/masterCompany";
 
 interface Request {
   key: string;
@@ -26,15 +27,6 @@ const publicSettingsKeys = [
   "vapidPublicKey",
   "extensionDownloadUrl"
 ];
-
-// Empresa "master" usada como fallback (dominio raiz / sem slug / slug
-// desconhecido). Configuravel via MASTER_COMPANY_ID. Quando nao definida (ou
-// invalida), NAO usamos nenhuma empresa cliente como padrao: retornamos null
-// para que o frontend caia na marca neutra/generica embutida.
-const getMasterCompanyId = (): number | null => {
-  const raw = Number(process.env.MASTER_COMPANY_ID);
-  return Number.isInteger(raw) && raw > 0 ? raw : null;
-};
 
 // Resolve o companyId a partir do slug (subdominio). Slug valido e existente
 // -> empresa do slug. Caso contrario -> empresa master configurada, ou null

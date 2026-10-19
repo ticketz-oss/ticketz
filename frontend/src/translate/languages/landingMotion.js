@@ -182,9 +182,9 @@ const landingMotion = {
     ],
     accountTitle: "O seu espaço. Com a sua identidade.",
     accountDescription:
-      "Crie sua conta e experimente por 14 dias. Depois, deixe o espaço com a sua marca antes de entrar.",
+      "Crie sua conta e experimente por 7 dias. Depois, deixe o espaço com a sua marca antes de entrar.",
     freeTrial:
-      "14 dias grátis, sem cartão de crédito. Basta criar a conta e usar!",
+      "7 dias grátis, sem cartão de crédito. Basta criar a conta e usar!",
     slugLabel: "Endereço do seu espaço",
     slugHint:
       "Use letras minúsculas, números e hífens. Esse endereço identifica seu espaço e sua tela de login.",
@@ -241,7 +241,7 @@ const landingMotion = {
     login: "Entrar na minha conta",
     summaryLayout: {
       title: "Resumo da assinatura",
-      trialTitle: "14 dias para experimentar",
+      trialTitle: "7 dias para experimentar",
       trialText: "Sem cartão. Sem pagamento agora.",
       today: "Total hoje",
       dueDay: "Vencimento mensal",

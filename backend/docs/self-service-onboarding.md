@@ -9,9 +9,9 @@ O servidor fixa os seguintes valores, independentemente do conteúdo enviado pel
 | Campo em Companies | Significado |
 | --- | --- |
 | `signupSource = self_service` | Cliente criou a própria conta pelo site |
-| `trialDays = 14` | Duração do teste |
+| `trialDays = 7` | Duração do teste |
 | `trialStartedAt` | Instante UTC de início |
-| `trialExpiresAt` | Instante UTC de expiração, exatamente 14 dias depois |
+| `trialExpiresAt` | Instante UTC de expiração, exatamente 7 dias depois |
 | `trialEndsAt` | Data civil UTC mantida para compatibilidade com o faturamento |
 | `dueDay` | Dia escolhido para vencimentos futuros |
 | `dueDate` | Primeiro vencimento estritamente após a data do teste; dias inexistentes são ajustados ao último dia do mês |
