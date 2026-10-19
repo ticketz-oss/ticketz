@@ -634,10 +634,24 @@ describe("StatusPostService reads", () => {
       { state: { [Op.in]: ["queued", "publishing"] } },
       {
         state: { [Op.in]: ["failed", "unsupported"] },
-        createdAt: { [Op.gte]: new Date(NOW.getTime() - 24 * 3600 * 1000) }
+        updatedAt: { [Op.gte]: new Date(NOW.getTime() - 24 * 3600 * 1000) }
       }
     ]);
     expect(options.order).toEqual([["createdAt", "ASC"]]);
+  });
+
+  it("keeps a scheduled post that failed days after creation visible for 24h after failing", async () => {
+    (WhatsappStatusPost.findAll as jest.Mock).mockResolvedValue([]);
+    await listPosts(7, { active: true });
+    const options = (WhatsappStatusPost.findAll as jest.Mock).mock.calls[0][0];
+    const failedClause = options.where[Op.or].find(
+      (clause: { state: Record<symbol, string[]> }) =>
+        clause.state[Op.in]?.includes("failed")
+    );
+    expect(failedClause).not.toHaveProperty("createdAt");
+    expect(failedClause.updatedAt).toEqual({
+      [Op.gte]: new Date(NOW.getTime() - 24 * 3600 * 1000)
+    });
   });
 
   it("reports capabilities only for connections of the company", async () => {

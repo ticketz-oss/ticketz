@@ -172,8 +172,9 @@ export const listPosts = async (
       { state: "published", expiresAt: { [Op.gt]: now } },
       { state: { [Op.in]: ["queued", "publishing"] } },
       {
+        // A scheduled post may fail days after creation; count from failing.
         state: { [Op.in]: ["failed", "unsupported"] },
-        createdAt: { [Op.gte]: new Date(now.getTime() - DAY_MS) }
+        updatedAt: { [Op.gte]: new Date(now.getTime() - DAY_MS) }
       }
     ];
   }
