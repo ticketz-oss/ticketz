@@ -26,7 +26,8 @@ export const serializeStatusPost = (
     publishedAt: post.publishedAt ?? null,
     expiresAt: post.expiresAt ?? null,
     failureCode: post.failureCode ?? null,
-    createdAt: post.createdAt ?? null
+    createdAt: post.createdAt ?? null,
+    updatedAt: post.updatedAt ?? null
   };
   if (post.createdBy) {
     serialized.createdBy = { id: post.createdBy.id, name: post.createdBy.name };
