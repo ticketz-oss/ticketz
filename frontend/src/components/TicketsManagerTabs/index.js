@@ -35,6 +35,7 @@ import useSettings from "../../hooks/useSettings";
 import { ContactSelect } from "../ContactSelect";
 import api from "../../services/api";
 import { SocketContext } from "../../context/Socket/SocketContext";
+import StoriesStrip from "../WhatsappStatus/StoriesStrip";
 
 const useStyles = makeStyles(theme => ({
   ticketsWrapper: {
@@ -315,6 +316,7 @@ const TicketsManagerTabs = () => {
           handleCloseOrOpenTicket(ticket);
         }}
       />
+      <StoriesStrip companyId={user.companyId} userId={user.id} />
       <Abas.Root
         value={tab === "open" ? tabOpen : tab}
         onValueChange={valor => {
