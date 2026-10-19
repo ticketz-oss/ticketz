@@ -52,6 +52,8 @@ import agentRoutes from "./agentRoutes";
 
 import metaWhatsappRoutes from "./metaWhatsappRoutes";
 import metaWhatsappWebhookRoutes from "./metaWhatsappWebhookRoutes";
+import whatsappStatusAdminRoutes from "./whatsappStatusAdminRoutes";
+import whatsappStatusRoutes from "./whatsappStatusRoutes";
 
 const routes = Router();
 routes.use(agentRoutes);
@@ -107,5 +109,7 @@ routes.use(ogRoutes);
 
 routes.use(metaWhatsappRoutes);
 routes.use(metaWhatsappWebhookRoutes);
+routes.use(whatsappStatusAdminRoutes);
+routes.use(whatsappStatusRoutes);
 
 export default routes;
