@@ -60,6 +60,7 @@ import {
   runtimeQueueOptions
 } from "./helpers/tenantRuntime";
 import { startProspeccaoQueue } from "./queues/prospeccao";
+import { startWhatsappStatusQueue } from "./queues/whatsappStatus";
 
 const connection = process.env.REDIS_URI || "";
 export const userMonitor = new Queue(
@@ -896,6 +897,7 @@ export async function startQueueProcess() {
     logger.info("Campaign processing functions started");
   });
   await startProspeccaoQueue();
+  await startWhatsappStatusQueue();
 
   scheduleMonitor.process("Verify", handleVerifySchedules);
 
