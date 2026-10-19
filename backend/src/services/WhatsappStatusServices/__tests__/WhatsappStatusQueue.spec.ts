@@ -178,14 +178,13 @@ describe("handlePublishStatus", () => {
       remoteMessageId: "3EB0ABC",
       publishedAt: NOW,
       expiresAt: new Date(NOW.getTime() + 24 * 3600 * 1000),
-      failureCode: null,
-      mediaPath: null
+      failureCode: null
     });
     expect(emitStatusPost).toHaveBeenCalledTimes(2);
     expect(emitStatusPost).toHaveBeenLastCalledWith(7, "update", post);
   });
 
-  it("removes a video only after WhatsApp confirms it and the post is saved", async () => {
+  it("keeps a published video available for 24 hours and schedules its expiry", async () => {
     const mediaPath = "whatsapp-status/7/video.mp4";
     const post = makePost({ kind: "video", mediaPath });
     usePost(post);
@@ -199,13 +198,21 @@ describe("handlePublishStatus", () => {
       AUDIENCE
     );
     expect(post.state).toBe("published");
-    expect(post.mediaPath).toBeNull();
-    expect(removeStatusMedia).toHaveBeenCalledWith(7, mediaPath);
+    expect(post.mediaPath).toBe(mediaPath);
+    expect(removeStatusMedia).not.toHaveBeenCalled();
+    expect(queue.add).toHaveBeenCalledWith(
+      "ExpireMedia",
+      { postId: 5 },
+      expect.objectContaining({
+        jobId: "status-media-expire-5",
+        delay: 24 * 3600 * 1000
+      })
+    );
     expect(provider.publish.mock.invocationCallOrder[0]).toBeLessThan(
       post.update.mock.invocationCallOrder[0]
     );
     expect(post.update.mock.invocationCallOrder[0]).toBeLessThan(
-      (removeStatusMedia as jest.Mock).mock.invocationCallOrder[0]
+      queue.add.mock.invocationCallOrder[0]
     );
   });
 
@@ -529,10 +536,15 @@ describe("whatsappStatus queue", () => {
       1,
       expect.any(Function)
     );
+    expect(queue.process).toHaveBeenCalledWith(
+      "ExpireMedia",
+      1,
+      expect.any(Function)
+    );
     expect(queue.add).toHaveBeenCalledWith(
       "Cleanup",
       {},
-      expect.objectContaining({ repeat: { cron: "0 4 * * *" } })
+      expect.objectContaining({ repeat: { cron: "0 * * * *" } })
     );
     expect(WhatsappStatusPost.findAll).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -558,6 +570,32 @@ describe("whatsappStatus queue", () => {
     )[2];
     await cleanup();
     expect(cleanupOrphanStatusMedia).toHaveBeenCalled();
+  });
+
+  it("removes published media when its 24-hour window ends", async () => {
+    const mediaPath = "whatsapp-status/7/video.mp4";
+    const published = makePost({
+      state: "published",
+      kind: "video",
+      mediaPath,
+      expiresAt: new Date(NOW.getTime() + 24 * 3600 * 1000)
+    });
+    (WhatsappStatusPost.findAll as jest.Mock).mockResolvedValue([]);
+    usePost(published);
+    await startWhatsappStatusQueue();
+    const expireMedia = queue.process.mock.calls.find(
+      call => call[0] === "ExpireMedia"
+    )[2];
+
+    await expireMedia(job());
+    expect(removeStatusMedia).not.toHaveBeenCalled();
+    expect(published.mediaPath).toBe(mediaPath);
+
+    jest.setSystemTime(new Date(NOW.getTime() + 24 * 3600 * 1000));
+    await expireMedia(job());
+    expect(removeStatusMedia).toHaveBeenCalledWith(7, mediaPath);
+    expect(published.mediaPath).toBeNull();
+    expect(emitStatusPost).toHaveBeenCalledWith(7, "update", published);
   });
 
   it("fails a publishing post whose job ended failed (stalled) without resending", async () => {

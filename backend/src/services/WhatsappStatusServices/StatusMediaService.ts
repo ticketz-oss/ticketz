@@ -213,9 +213,9 @@ const cancelStaleDrafts = async (retentionLimit: Date): Promise<number> => {
 
 // Removes files nobody references (older than 24h, so an upload whose post
 // is still being created is not raced) and the media of posts that no longer
-// need it: published posts, cancelled/failed posts older than 7 days, or
+// need it: published posts after their 24-hour expiry, cancelled/failed posts older than 7 days, or
 // drafts/unsupported posts untouched for 7 days (which are cancelled).
-// Published media left by earlier releases is removed at the next sweep.
+// This hourly sweep is a fallback if the per-post expiry job is lost.
 export const cleanupOrphanStatusMedia = async (
   now: Date = new Date()
 ): Promise<number> => {
@@ -266,7 +266,7 @@ export const cleanupOrphanStatusMedia = async (
     where: {
       mediaPath: { [Op.ne]: null },
       [Op.or]: [
-        { state: "published" },
+        { state: "published", expiresAt: { [Op.lte]: now } },
         {
           state: { [Op.in]: ["cancelled", "failed"] },
           updatedAt: { [Op.lt]: retentionLimit }

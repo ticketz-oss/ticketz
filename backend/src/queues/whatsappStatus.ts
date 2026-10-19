@@ -64,7 +64,6 @@ const finish = async (
     remoteMessageId?: string;
     publishedAt?: Date;
     expiresAt?: Date;
-    mediaPath?: null;
   }
 ): Promise<void> => {
   await post.update(fields);
@@ -196,26 +195,33 @@ const publishOnce = async (post: WhatsappStatusPost): Promise<void> => {
     }
 
     const publishedAt = new Date();
-    const mediaPath = post.mediaPath;
+    const expiresAt = new Date(publishedAt.getTime() + DAY_MS);
     await finish(post, {
       state: "published",
       remoteMessageId,
       publishedAt,
-      expiresAt: new Date(publishedAt.getTime() + DAY_MS),
-      failureCode: null,
-      mediaPath: null
+      expiresAt,
+      failureCode: null
     });
-    // The provider has returned a WhatsApp message id and the database no
-    // longer references the file. Do not retain a copy of a published story.
-    if (mediaPath) {
+    // Keep the media preview while the Status is within its 24-hour window.
+    // The periodic sweep also handles a lost or stalled expiry job.
+    if (post.mediaPath) {
       try {
-        await removeStatusMedia(post.companyId, mediaPath);
+        await queue.add(
+          "ExpireMedia",
+          { postId: post.id },
+          {
+            jobId: `status-media-expire-${post.id}`,
+            delay: Math.max(0, expiresAt.getTime() - Date.now()),
+            attempts: 3,
+            backoff: { type: "exponential", delay: 30000 },
+            removeOnComplete: true
+          }
+        );
       } catch (error) {
-        // A cleanup problem must not turn a confirmed send into a failed post.
-        // The daily orphan sweep will remove any file left behind.
         logger.warn(
           { error: error?.message, postId: post.id },
-          "Could not remove published whatsapp status media"
+          "Could not schedule whatsapp status media expiry"
         );
       }
     }
@@ -269,6 +275,15 @@ const handleCleanup = async (): Promise<void> => {
   logger.info({ removed }, "Whatsapp status media cleanup finished");
 };
 
+const handleExpireMedia = async (job: Job<PublishJobData>): Promise<void> => {
+  const post = await WhatsappStatusPost.findByPk(job.data.postId);
+  if (!post?.mediaPath || post.state !== "published" || !post.expiresAt) return;
+  if (new Date(post.expiresAt).getTime() > Date.now()) return;
+  await removeStatusMedia(post.companyId, post.mediaPath);
+  await post.update({ mediaPath: null });
+  emitStatusPost(post.companyId, "update", post);
+};
+
 // A job that ended (for example failed after stalling twice) will never run
 // the handler again, so it counts as missing.
 const hasPendingJob = async (postId: number): Promise<boolean> => {
@@ -305,11 +320,12 @@ const recoverPendingPosts = async (): Promise<void> => {
 export const startWhatsappStatusQueue = async (): Promise<void> => {
   queue.process("Publish", 4, handlePublishStatus);
   queue.process("Cleanup", 1, handleCleanup);
+  queue.process("ExpireMedia", 1, handleExpireMedia);
   await queue.add(
     "Cleanup",
     {},
     {
-      repeat: { cron: "0 4 * * *" },
+      repeat: { cron: "0 * * * *" },
       jobId: "whatsapp-status-cleanup",
       removeOnComplete: true
     }

@@ -263,6 +263,37 @@ describe("New story modal", () => {
     ).toBe(false);
   });
 
+  it("offers a manual download when QR story publishing is unverified", async () => {
+    mockGets({
+      connections: [
+        {
+          ...baileys,
+          capabilities: {
+            publishStatus: false,
+            kinds: [],
+            reason: "LIB_NOT_VERIFIED",
+            manualExport: true,
+            ownPostsSync: false
+          }
+        }
+      ]
+    });
+    renderModal();
+    expect(
+      await screen.findByText(
+        /A publicação automática nesta conexão está em teste/
+      )
+    ).toBeVisible();
+    fireEvent.click(screen.getByRole("tab", { name: "Vídeo" }));
+    expect(publishButton()).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Salvar rascunho" })
+    ).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Baixar arquivo" })
+    ).toBeVisible();
+  });
+
   it("schedules with the chosen date and labels the button Agendar story", async () => {
     mockGets();
     api.post

@@ -264,6 +264,16 @@ describe("StatusMediaService", () => {
 
     const removed = await cleanupOrphanStatusMedia(now);
 
+    expect(WhatsappStatusPost.findAll).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          [Op.or]: expect.arrayContaining([
+            { state: "published", expiresAt: { [Op.lte]: now } }
+          ])
+        })
+      })
+    );
+
     expect(fs.existsSync(orphan)).toBe(false);
     expect(fs.existsSync(referenced)).toBe(true);
     expect(fs.existsSync(fresh)).toBe(true);

@@ -170,7 +170,7 @@ const pt = {
         OFFICIAL_API:
           "Esta conexão usa a API oficial da Meta, que não publica Status. Salve o rascunho e baixe o arquivo para publicar pelo aplicativo.",
         LIB_NOT_VERIFIED:
-          "Publicação de Status ainda não liberada para esta conexão.",
+          "A publicação automática nesta conexão está em teste. Salve o rascunho e baixe a mídia para publicar pelo WhatsApp.",
         DISCONNECTED: "Conexão desconectada."
       },
       genericError: "Não foi possível salvar o story. Tente novamente."
@@ -297,7 +297,7 @@ const en = {
         OFFICIAL_API:
           "This connection uses Meta's official API, which does not publish Status. Save the draft and download the file to publish from the app.",
         LIB_NOT_VERIFIED:
-          "Status publishing is not enabled for this connection yet.",
+          "Automatic publishing on this connection is under test. Save the draft and download the media to post from WhatsApp.",
         DISCONNECTED: "Connection disconnected."
       },
       genericError: "The story could not be saved. Try again."

@@ -138,6 +138,9 @@ services:
       CLERK_ISSUER: https://trusted-jaybird-7472.clerk.accounts.dev
       CLERK_GOOGLE_ENABLED: ${CLERK_GOOGLE_ENABLED:-true}
       CLERK_AUTHORIZED_PARTIES: ${CLERK_AUTHORIZED_PARTIES:-https://dev.espacowhats.com.br,https://teste.dev.espacowhats.com.br}
+      # Keep the unverified QR Status implementation available only for tests.
+      WHATSAPP_STATUS_VERIFIED_LIBS: 1.0.0-alpha.16
+      BAILEYS_LOG_LEVEL: warn
       PORT: "3000"
       TZ: ${TZ:-America/Rio_Branco}
       DB_DIALECT: postgres

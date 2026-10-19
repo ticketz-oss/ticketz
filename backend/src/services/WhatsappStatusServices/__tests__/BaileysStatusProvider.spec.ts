@@ -58,11 +58,11 @@ afterAll(() => {
 });
 
 describe("BaileysStatusProvider", () => {
-  it("verifies the installed version without WHATSAPP_STATUS_VERIFIED_LIBS", () => {
+  it("disables the unverified version without an explicit test override", () => {
     delete process.env.WHATSAPP_STATUS_VERIFIED_LIBS;
-    expect(VERIFIED_LIBZAPITU_VERSIONS).toContain(INSTALLED);
+    expect(VERIFIED_LIBZAPITU_VERSIONS).not.toContain(INSTALLED);
     expect(BaileysStatusProvider.capabilities(connection()).publishStatus).toBe(
-      true
+      false
     );
   });
 
@@ -74,7 +74,7 @@ describe("BaileysStatusProvider", () => {
       publishStatus: false,
       kinds: [],
       reason: "LIB_NOT_VERIFIED",
-      manualExport: false,
+      manualExport: true,
       ownPostsSync: false
     });
 
