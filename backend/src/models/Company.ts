@@ -97,6 +97,12 @@ class Company extends Model<Company> {
   @Column(DataType.STRING)
   whatsappMode: "normal" | "meta";
 
+  // WhatsApp Status (stories) stays off for every tenant until a super admin
+  // switches it on.
+  @Default(false)
+  @Column(DataType.BOOLEAN)
+  whatsappStatusEnabled: boolean;
+
   @Column
   platformStatus: string;
 

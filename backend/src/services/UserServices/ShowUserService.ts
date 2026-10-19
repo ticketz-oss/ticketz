@@ -38,6 +38,7 @@ const ShowUserService = async (
           "name",
           "slug",
           "whatsappMode",
+          "whatsappStatusEnabled",
           "signupSource",
           "trialStartedAt",
           "trialExpiresAt",
