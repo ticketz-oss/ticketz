@@ -277,7 +277,7 @@ const ScheduleModal = ({
             <Form>
               <DialogContent dividers>
                 <div className={classes.multFieldLine}>
-                  <FormControl variant="outlined" fullWidth>
+                  <FormControl fullWidth>
                     <Autocomplete
                       fullWidth
                       value={currentContact}
@@ -293,70 +293,12 @@ const ScheduleModal = ({
                       }}
                       renderInput={params => (
                         <TextField
-                          {...params}
                           variant="outlined"
+                          margin="dense"
+                          {...params}
                           placeholder="Contato"
                         />
                       )}
-                    />
-                  </FormControl>
-                </div>
-                <br />
-                <div className={classes.multFieldLine}>
-                  <Field
-                    as={TextField}
-                    rows={9}
-                    multiline={true}
-                    label={i18n.t("scheduleModal.form.body")}
-                    name="body"
-                    error={touched.body && Boolean(errors.body)}
-                    helperText={touched.body && errors.body}
-                    variant="outlined"
-                    margin="dense"
-                    fullWidth
-                  />
-                </div>
-                <br />
-                <div className={classes.multFieldLine}>
-                  <Field
-                    as={TextField}
-                    label={i18n.t("scheduleModal.form.sendAt")}
-                    type="datetime-local"
-                    name="sendAt"
-                    InputLabelProps={{
-                      shrink: true
-                    }}
-                    error={touched.sendAt && Boolean(errors.sendAt)}
-                    helperText={touched.sendAt && errors.sendAt}
-                    variant="outlined"
-                    fullWidth
-                  />
-                </div>
-                <br />
-                <div className={classes.multFieldLine}>
-                  <FormControl variant="outlined" fullWidth>
-                    <Autocomplete
-                      value={
-                        ALL_TIMEZONES.find(tz => tz.value === timezone) || null
-                      }
-                      onChange={(event, newValue) => {
-                        if (newValue) {
-                          setTimezone(newValue.value);
-                        }
-                      }}
-                      options={ALL_TIMEZONES}
-                      getOptionLabel={option => option.label}
-                      renderInput={params => (
-                        <TextField
-                          {...params}
-                          label={i18n.t("openHours.timezone.placeholder")}
-                          variant="outlined"
-                          placeholder={i18n.t(
-                            "openHours.timezone.searchPlaceholder"
-                          )}
-                        />
-                      )}
-                      fullWidth
                     />
                   </FormControl>
                 </div>
@@ -375,6 +317,64 @@ const ScheduleModal = ({
                         color="primary"
                       />
                     }
+                  />
+                </div>
+                <div className={classes.multFieldLine}>
+                  <Field
+                    variant="outlined"
+                    margin="dense"
+                    as={TextField}
+                    label={i18n.t("scheduleModal.form.sendAt")}
+                    type="datetime-local"
+                    name="sendAt"
+                    InputLabelProps={{
+                      shrink: true
+                    }}
+                    error={touched.sendAt && Boolean(errors.sendAt)}
+                    helperText={touched.sendAt && errors.sendAt}
+                    fullWidth
+                  />
+                </div>
+                <div className={classes.multFieldLine}>
+                  <FormControl variant="outlined" margin="dense" fullWidth>
+                    <Autocomplete
+                      value={
+                        ALL_TIMEZONES.find(tz => tz.value === timezone) || null
+                      }
+                      onChange={(event, newValue) => {
+                        if (newValue) {
+                          setTimezone(newValue.value);
+                        }
+                      }}
+                      options={ALL_TIMEZONES}
+                      getOptionLabel={option => option.label}
+                      renderInput={params => (
+                        <TextField
+                          {...params}
+                          label={i18n.t("openHours.timezone.placeholder")}
+                          variant="outlined"
+                          margin="dense"
+                          placeholder={i18n.t(
+                            "openHours.timezone.searchPlaceholder"
+                          )}
+                        />
+                      )}
+                      fullWidth
+                    />
+                  </FormControl>
+                </div>
+                <div className={classes.multFieldLine}>
+                  <Field
+                    variant="outlined"
+                    margin="dense"
+                    as={TextField}
+                    name="body"
+                    rows={9}
+                    multiline={true}
+                    label={i18n.t("scheduleModal.form.body")}
+                    error={touched.body && Boolean(errors.body)}
+                    helperText={touched.body && errors.body}
+                    fullWidth
                   />
                 </div>
               </DialogContent>
