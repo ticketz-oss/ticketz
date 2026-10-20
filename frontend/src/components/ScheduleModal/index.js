@@ -24,6 +24,12 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import moment from "moment";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { isArray, capitalize } from "lodash";
+import { timeZonesNames } from "@vvo/tzdb";
+
+const ALL_TIMEZONES = timeZonesNames.map(tz => ({
+  value: tz,
+  label: tz.replace(/_/g, " ")
+}));
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -90,6 +96,9 @@ const ScheduleModal = ({
   const [schedule, setSchedule] = useState(initialState);
   const [currentContact, setCurrentContact] = useState(initialContact);
   const [contacts, setContacts] = useState([initialContact]);
+  const [timezone, setTimezone] = useState(
+    Intl.DateTimeFormat().resolvedOptions().timeZone
+  );
 
   useEffect(() => {
     if (contactId && contacts.length) {
@@ -139,10 +148,82 @@ const ScheduleModal = ({
   const handleClose = () => {
     onClose();
     setSchedule(initialState);
+    setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
   };
 
   const handleSaveSchedule = async values => {
-    const scheduleData = { ...values, userId: user.id };
+    const [datePart, timePart] = values.sendAt.split("T");
+    const [year, month, day] = datePart.split("-");
+    const [hour, minute] = timePart.split(":");
+    const second = "00";
+
+    const naiveDate = new Date(
+      Number(year),
+      Number(month) - 1,
+      Number(day),
+      Number(hour),
+      Number(minute),
+      0
+    );
+
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: timezone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false
+    });
+
+    const utcDate = new Date(
+      Date.UTC(
+        Number(year),
+        Number(month) - 1,
+        Number(day),
+        Number(hour),
+        Number(minute),
+        0
+      )
+    );
+
+    const tzParts = formatter.formatToParts(utcDate);
+    const get = type => tzParts.find(p => p.type === type)?.value || "00";
+    const tzYear = get("year");
+    const tzMonth = get("month");
+    const tzDay = get("day");
+    const tzHour = get("hour") === "24" ? "00" : get("hour");
+    const tzMinute = get("minute");
+
+    const tzDate = new Date(
+      Date.UTC(
+        Number(tzYear),
+        Number(tzMonth) - 1,
+        Number(tzDay),
+        Number(tzHour),
+        Number(tzMinute),
+        0
+      )
+    );
+
+    const offsetMs = tzDate.getTime() - utcDate.getTime();
+    const offsetMinutes = Math.round(offsetMs / 60000);
+    const offsetHours = Math.abs(Math.floor(offsetMinutes / 60))
+      .toString()
+      .padStart(2, "0");
+    const offsetMins = Math.abs(offsetMinutes % 60)
+      .toString()
+      .padStart(2, "0");
+    const offsetSign = offsetMinutes >= 0 ? "+" : "-";
+
+    const sendAtWithTimezone = `${year}-${month}-${day}T${hour}:${minute}:${second}${offsetSign}${offsetHours}:${offsetMins}`;
+
+    const scheduleData = {
+      ...values,
+      userId: user.id,
+      sendAt: sendAtWithTimezone
+    };
     try {
       if (scheduleId) {
         await api.put(`/schedules/${scheduleId}`, scheduleData);
@@ -250,6 +331,34 @@ const ScheduleModal = ({
                     variant="outlined"
                     fullWidth
                   />
+                </div>
+                <br />
+                <div className={classes.multFieldLine}>
+                  <FormControl variant="outlined" fullWidth>
+                    <Autocomplete
+                      value={
+                        ALL_TIMEZONES.find(tz => tz.value === timezone) || null
+                      }
+                      onChange={(event, newValue) => {
+                        if (newValue) {
+                          setTimezone(newValue.value);
+                        }
+                      }}
+                      options={ALL_TIMEZONES}
+                      getOptionLabel={option => option.label}
+                      renderInput={params => (
+                        <TextField
+                          {...params}
+                          label={i18n.t("openHours.timezone.placeholder")}
+                          variant="outlined"
+                          placeholder={i18n.t(
+                            "openHours.timezone.searchPlaceholder"
+                          )}
+                        />
+                      )}
+                      fullWidth
+                    />
+                  </FormControl>
                 </div>
                 <div className={classes.multFieldLine}>
                   <FormControlLabel

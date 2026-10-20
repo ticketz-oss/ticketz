@@ -317,7 +317,9 @@ const Schedules = () => {
                     {truncate(schedule.body, 25)}
                   </TableCell>
                   <TableCell align="center">
-                    {moment(schedule.sendAt).format("DD/MM/YYYY HH:mm:ss")}
+                    {moment(schedule.sendAt)
+                      .local()
+                      .format("DD/MM/YYYY HH:mm:ss")}
                   </TableCell>
                   <TableCell align="center">
                     {capitalize(schedule.status)}
