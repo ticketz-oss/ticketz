@@ -239,7 +239,9 @@ const messages = {
           resetPasskey: "Reset passkey session"
         },
         table: {
+          id: "ID",
           name: "Name",
+          number: "Number",
           status: "Status",
           lastUpdate: "Last Update",
           default: "Default",

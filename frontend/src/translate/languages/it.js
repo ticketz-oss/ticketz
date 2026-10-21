@@ -175,7 +175,9 @@ const messages = {
           resetPasskey: "Reimposta sessione passkey"
         },
         table: {
+          id: "ID",
           name: "Nome",
+          number: "Numero",
           status: "Stato",
           lastUpdate: "Ultimo aggiornamento",
           default: "Predefinito",
