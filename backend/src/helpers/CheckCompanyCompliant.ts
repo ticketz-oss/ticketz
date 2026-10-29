@@ -4,7 +4,10 @@ import { logger } from "../utils/logger";
 import { GetCompanySetting } from "./CheckSettings";
 import { SimpleObjectCache } from "./simpleObjectCache";
 
-const companyComplianceCache = new SimpleObjectCache(60 * 1000, logger);
+const companyComplianceCache = new SimpleObjectCache<boolean>(
+  60 * 1000,
+  logger
+);
 const checkMutex = new Mutex();
 
 export async function checkCompanyCompliant(
