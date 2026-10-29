@@ -10,6 +10,11 @@ const companyComplianceCache = new SimpleObjectCache<boolean>(
 );
 const checkMutex = new Mutex();
 
+export function invalidateCompanyComplianceCache(companyId: number): void {
+  const cacheKey = `company-${companyId}`;
+  companyComplianceCache.remove(cacheKey);
+}
+
 export async function checkCompanyCompliant(
   company: number | Company
 ): Promise<boolean> {
