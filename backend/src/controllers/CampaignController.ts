@@ -22,6 +22,8 @@ type IndexQuery = {
   searchParam: string;
   pageNumber: string;
   companyId: string | number;
+  status?: string;
+  showAll?: string;
 };
 
 type StoreData = {
@@ -38,13 +40,15 @@ type FindParams = {
 };
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
-  const { searchParam, pageNumber } = req.query as IndexQuery;
+  const { searchParam, pageNumber, status, showAll } = req.query as IndexQuery;
   const { companyId } = req.user;
 
   const { records, count, hasMore } = await ListService({
     searchParam,
     pageNumber,
-    companyId
+    companyId,
+    status,
+    showAll: showAll === "true"
   });
 
   return res.json({ records, count, hasMore });

@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useContext, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useContext,
+  useRef,
+  useCallback
+} from "react";
 import { useHistory } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import { toast } from "react-toastify";
@@ -108,11 +114,97 @@ const CampaignDashboard = () => {
 
   const socketManager = useContext(SocketContext);
 
+  const fetchCampaigns = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data } = await api.get("/campaigns/", {
+        params: {
+          searchParam,
+          pageNumber: campaignPage,
+          showAll: showAll ? "true" : "false"
+        }
+      });
+      if (campaignPage === 1) {
+        setCampaigns(data.records || []);
+      } else {
+        setCampaigns(prev => [...prev, ...(data.records || [])]);
+      }
+      setHasMoreCampaigns(data.hasMore);
+    } catch (err) {
+      toastError(err);
+    }
+    setLoading(false);
+  }, [searchParam, campaignPage, showAll]);
+
+  const fetchContactLists = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data } = await api.get("/contact-lists/", {
+        params: { searchParam, pageNumber: contactListPage }
+      });
+      if (contactListPage === 1) {
+        setContactLists(Array.isArray(data.records) ? data.records : []);
+      } else {
+        setContactLists(prev => [
+          ...prev,
+          ...(Array.isArray(data.records) ? data.records : [])
+        ]);
+      }
+      setHasMoreContactLists(data.hasMore);
+    } catch (err) {
+      toastError(err);
+    }
+    setLoading(false);
+  }, [searchParam, contactListPage]);
+
+  const loadMoreCampaigns = useCallback(() => {
+    if (hasMoreCampaigns && !loading) {
+      setCampaignPage(prev => prev + 1);
+    }
+  }, [hasMoreCampaigns, loading]);
+
+  const loadMoreContactLists = useCallback(() => {
+    if (hasMoreContactLists && !loading) {
+      setContactListPage(prev => prev + 1);
+    }
+  }, [hasMoreContactLists, loading]);
+
   useEffect(() => {
     return () => {
       isMounted.current = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (loading) return;
+
+    const checkAndLoadMore = () => {
+      const mainPaper = document.querySelector(`.${classes.mainPaper}`);
+      if (!mainPaper) return;
+
+      const { scrollHeight, clientHeight } = mainPaper;
+      if (scrollHeight <= clientHeight) {
+        if (viewMode === "campaigns" && hasMoreCampaigns) {
+          loadMoreCampaigns();
+        } else if (viewMode === "contactLists" && hasMoreContactLists) {
+          loadMoreContactLists();
+        }
+      }
+    };
+
+    const timer = setTimeout(checkAndLoadMore, 300);
+    return () => clearTimeout(timer);
+  }, [
+    campaigns,
+    contactLists,
+    loading,
+    viewMode,
+    hasMoreCampaigns,
+    hasMoreContactLists,
+    classes.mainPaper,
+    loadMoreCampaigns,
+    loadMoreContactLists
+  ]);
 
   useEffect(() => {
     setCampaignPage(1);
@@ -127,7 +219,15 @@ const CampaignDashboard = () => {
     } else {
       fetchContactLists();
     }
-  }, [viewMode, campaignPage, contactListPage, showAll, searchParam]);
+  }, [
+    viewMode,
+    campaignPage,
+    contactListPage,
+    showAll,
+    searchParam,
+    fetchCampaigns,
+    fetchContactLists
+  ]);
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
@@ -135,6 +235,7 @@ const CampaignDashboard = () => {
 
     const onCampaignUpdate = data => {
       if (data.action === "update" || data.action === "create") {
+        setCampaignPage(1);
         fetchCampaigns();
       }
       if (data.action === "delete") {
@@ -174,58 +275,7 @@ const CampaignDashboard = () => {
       socket.off(`company-${companyId}-campaign`, onCampaignProgress);
       socket.off(`company-${companyId}-contactList`, onContactListUpdate);
     };
-  }, [socketManager]);
-
-  const fetchCampaigns = async () => {
-    setLoading(true);
-    try {
-      const { data } = await api.get("/campaigns/", {
-        params: { searchParam, pageNumber: campaignPage, showAll }
-      });
-      if (campaignPage === 1) {
-        setCampaigns(data.records || []);
-      } else {
-        setCampaigns(prev => [...prev, ...(data.records || [])]);
-      }
-      setHasMoreCampaigns(data.hasMore);
-    } catch (err) {
-      toastError(err);
-    }
-    setLoading(false);
-  };
-
-  const fetchContactLists = async () => {
-    setLoading(true);
-    try {
-      const { data } = await api.get("/contact-lists/", {
-        params: { searchParam, pageNumber: contactListPage }
-      });
-      if (contactListPage === 1) {
-        setContactLists(Array.isArray(data.records) ? data.records : []);
-      } else {
-        setContactLists(prev => [
-          ...prev,
-          ...(Array.isArray(data.records) ? data.records : [])
-        ]);
-      }
-      setHasMoreContactLists(data.hasMore);
-    } catch (err) {
-      toastError(err);
-    }
-    setLoading(false);
-  };
-
-  const loadMoreCampaigns = () => {
-    if (hasMoreCampaigns && !loading) {
-      setCampaignPage(prev => prev + 1);
-    }
-  };
-
-  const loadMoreContactLists = () => {
-    if (hasMoreContactLists && !loading) {
-      setContactListPage(prev => prev + 1);
-    }
-  };
+  }, [socketManager, fetchCampaigns, fetchContactLists]);
 
   const handleScroll = e => {
     if (loading) return;
