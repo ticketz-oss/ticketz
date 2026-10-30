@@ -27,7 +27,7 @@ import Route from "./Route";
 import Schedules from "../pages/Schedules";
 import Campaigns from "../pages/Campaigns";
 import CampaignsConfig from "../pages/CampaignsConfig";
-import CampaignReport from "../pages/CampaignReport";
+import CampaignDashboard from "../pages/CampaignDashboard";
 import Annoucements from "../pages/Annoucements";
 import Chat from "../pages/Chat";
 import ToDoList from "../pages/ToDoList/";
@@ -120,6 +120,12 @@ const Routes = () => {
                   <>
                     <Route
                       exact
+                      path="/campaign-dashboard"
+                      component={CampaignDashboard}
+                      isPrivate
+                    />
+                    <Route
+                      exact
                       path="/contact-lists"
                       component={ContactLists}
                       isPrivate
@@ -134,12 +140,6 @@ const Routes = () => {
                       exact
                       path="/campaigns"
                       component={Campaigns}
-                      isPrivate
-                    />
-                    <Route
-                      exact
-                      path="/campaign/:campaignId/report"
-                      component={CampaignReport}
                       isPrivate
                     />
                     <Route

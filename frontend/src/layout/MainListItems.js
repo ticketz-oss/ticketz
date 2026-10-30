@@ -438,100 +438,26 @@ const MainListItems = props => {
             </ListSubheader>
 
             {showCampaigns && (
-              <>
-                <Tooltip
-                  title={i18n.t("mainDrawer.listItems.campaigns")}
-                  placement="right"
-                  arrow
-                  disableHoverListener={drawerOpen}
-                  classes={{ tooltip: classes.tooltip }}
+              <Tooltip
+                title={i18n.t("mainDrawer.listItems.campaigns")}
+                placement="right"
+                arrow
+                disableHoverListener={drawerOpen}
+                classes={{ tooltip: classes.tooltip }}
+              >
+                <ListItem
+                  className={classes.menuLink}
+                  button
+                  onClick={() => history.push("/campaign-dashboard")}
                 >
-                  <ListItem
-                    className={classes.menuLink}
-                    button
-                    onClick={e => {
-                      e.stopPropagation();
-                      setOpenCampaignSubmenu(prev => !prev);
-                    }}
-                  >
-                    <ListItemIcon className={classes.menuIcon}>
-                      <EventAvailableIcon />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={i18n.t("mainDrawer.listItems.campaigns")}
-                    />
-                    {drawerOpen &&
-                      (openCampaignSubmenu ? (
-                        <ExpandLessIcon />
-                      ) : (
-                        <ExpandMoreIcon />
-                      ))}
-                  </ListItem>
-                </Tooltip>
-                <Collapse
-                  className={classes.collapseMenu}
-                  in={openCampaignSubmenu}
-                  timeout="auto"
-                  unmountOnExit
-                >
-                  <List component="div" disablePadding>
-                    <Tooltip
-                      title="Listagem"
-                      placement="right"
-                      arrow
-                      disableHoverListener={drawerOpen}
-                      classes={{ tooltip: classes.tooltip }}
-                    >
-                      <ListItem
-                        className={classes.submenuLink}
-                        onClick={() => history.push("/campaigns")}
-                        button
-                      >
-                        <ListItemIcon className={classes.submenuIcon}>
-                          <ListIcon />
-                        </ListItemIcon>
-                        <ListItemText primary="Listagem" />
-                      </ListItem>
-                    </Tooltip>
-                    <Tooltip
-                      title="Listas de Contatos"
-                      placement="right"
-                      arrow
-                      disableHoverListener={drawerOpen}
-                      classes={{ tooltip: classes.tooltip }}
-                    >
-                      <ListItem
-                        className={classes.submenuLink}
-                        onClick={() => history.push("/contact-lists")}
-                        button
-                      >
-                        <ListItemIcon className={classes.submenuIcon}>
-                          <PeopleIcon />
-                        </ListItemIcon>
-                        <ListItemText primary="Listas de Contatos" />
-                      </ListItem>
-                    </Tooltip>
-                    <Tooltip
-                      title="Configurações"
-                      placement="right"
-                      arrow
-                      disableHoverListener={drawerOpen}
-                      classes={{ tooltip: classes.tooltip }}
-                    >
-                      <ListItem
-                        className={classes.submenuLink}
-                        onClick={() => history.push("/campaigns-config")}
-                        button
-                      >
-                        <ListItemIcon className={classes.submenuIcon}>
-                          <SettingsOutlinedIcon />
-                        </ListItemIcon>
-                        <ListItemText primary="Configurações" />
-                      </ListItem>
-                    </Tooltip>
-                  </List>
-                </Collapse>
-              </>
+                  <ListItemIcon className={classes.menuIcon}>
+                    <EventAvailableIcon />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={i18n.t("mainDrawer.listItems.campaigns")}
+                  />
+                </ListItem>
+              </Tooltip>
             )}
             {user.super && (
               <ListItemLink
