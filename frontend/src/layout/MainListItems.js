@@ -6,7 +6,7 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import ListSubheader from "@material-ui/core/ListSubheader";
 import Divider from "@material-ui/core/Divider";
-import { Badge, Collapse, List } from "@material-ui/core";
+import { Badge, Collapse, List, Tooltip } from "@material-ui/core";
 import DashboardOutlinedIcon from "@material-ui/icons/DashboardOutlined";
 import WhatsAppIcon from "@material-ui/icons/WhatsApp";
 import SyncAltIcon from "@material-ui/icons/SyncAlt";
@@ -79,12 +79,24 @@ const useStyles = makeStyles(theme => ({
     borderLeftStyle: "solid",
     borderWidth: "1px",
     borderColor: theme.palette.primary.main
+  },
+  tooltip: {
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.primary.contrastText,
+    fontSize: theme.typography.body2.fontSize,
+    fontWeight: theme.typography.fontWeightMedium,
+    padding: "8px 16px",
+    borderRadius: theme.shape.borderRadius,
+    boxShadow: theme.shadows[4],
+    "& .MuiTooltip-arrow": {
+      color: theme.palette.primary.main
+    }
   }
 }));
 
 function ListItemLink(props) {
   const classes = useStyles();
-  const { icon, primary, to } = props;
+  const { icon, primary, to, drawerOpen } = props;
 
   const renderLink = React.useMemo(
     () =>
@@ -94,7 +106,7 @@ function ListItemLink(props) {
     [to]
   );
 
-  return (
+  const listItem = (
     <li>
       <ListItem
         button
@@ -109,6 +121,21 @@ function ListItemLink(props) {
       </ListItem>
     </li>
   );
+
+  if (!drawerOpen) {
+    return (
+      <Tooltip
+        title={primary}
+        placement="right"
+        arrow
+        classes={{ tooltip: classes.tooltip }}
+      >
+        {listItem}
+      </Tooltip>
+    );
+  }
+
+  return listItem;
 }
 
 const reducer = (state, action) => {
@@ -308,31 +335,37 @@ const MainListItems = props => {
                 to="/tickets"
                 primary={i18n.t("mainDrawer.listItems.tickets")}
                 icon={<WhatsAppIcon />}
+                drawerOpen={drawerOpen}
               />
               <ListItemLink
                 to="/todolist"
                 primary={i18n.t("mainDrawer.listItems.tasks")}
                 icon={<BorderColorIcon />}
+                drawerOpen={drawerOpen}
               />
               <ListItemLink
                 to="/quick-messages"
                 primary={i18n.t("mainDrawer.listItems.quickMessages")}
                 icon={<FlashOnIcon />}
+                drawerOpen={drawerOpen}
               />
               <ListItemLink
                 to="/contacts"
                 primary={i18n.t("mainDrawer.listItems.contacts")}
                 icon={<ContactPhoneOutlinedIcon />}
+                drawerOpen={drawerOpen}
               />
               <ListItemLink
                 to="/schedules"
                 primary={i18n.t("mainDrawer.listItems.schedules")}
                 icon={<EventIcon />}
+                drawerOpen={drawerOpen}
               />
               <ListItemLink
                 to="/tags"
                 primary={i18n.t("mainDrawer.listItems.tags")}
                 icon={<LocalOfferIcon />}
+                drawerOpen={drawerOpen}
               />
               <ListItemLink
                 to="/chats"
@@ -342,11 +375,13 @@ const MainListItems = props => {
                     <ForumIcon />
                   </Badge>
                 }
+                drawerOpen={drawerOpen}
               />
               <ListItemLink
                 to="/helps"
                 primary={i18n.t("mainDrawer.listItems.helps")}
                 icon={<HelpOutlineIcon />}
+                drawerOpen={drawerOpen}
               />
             </>
           </>
@@ -377,6 +412,7 @@ const MainListItems = props => {
               to="/"
               primary="Dashboard"
               icon={<DashboardOutlinedIcon />}
+              drawerOpen={drawerOpen}
             />
           </>
         )}
@@ -403,23 +439,32 @@ const MainListItems = props => {
 
             {showCampaigns && (
               <>
-                <ListItem
-                  className={classes.menuLink}
-                  button
-                  onClick={() => setOpenCampaignSubmenu(prev => !prev)}
+                <Tooltip
+                  title={i18n.t("mainDrawer.listItems.campaigns")}
+                  placement="right"
+                  arrow
+                  disableHoverListener={drawerOpen}
+                  classes={{ tooltip: classes.tooltip }}
                 >
-                  <ListItemIcon className={classes.menuIcon}>
-                    <EventAvailableIcon />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={i18n.t("mainDrawer.listItems.campaigns")}
-                  />
-                  {openCampaignSubmenu ? (
-                    <ExpandLessIcon />
-                  ) : (
-                    <ExpandMoreIcon />
-                  )}
-                </ListItem>
+                  <ListItem
+                    className={classes.menuLink}
+                    button
+                    onClick={() => setOpenCampaignSubmenu(prev => !prev)}
+                  >
+                    <ListItemIcon className={classes.menuIcon}>
+                      <EventAvailableIcon />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={i18n.t("mainDrawer.listItems.campaigns")}
+                    />
+                    {drawerOpen &&
+                      (openCampaignSubmenu ? (
+                        <ExpandLessIcon />
+                      ) : (
+                        <ExpandMoreIcon />
+                      ))}
+                  </ListItem>
+                </Tooltip>
                 <Collapse
                   className={classes.collapseMenu}
                   in={openCampaignSubmenu}
@@ -427,36 +472,60 @@ const MainListItems = props => {
                   unmountOnExit
                 >
                   <List component="div" disablePadding>
-                    <ListItem
-                      className={classes.submenuLink}
-                      onClick={() => history.push("/campaigns")}
-                      button
+                    <Tooltip
+                      title="Listagem"
+                      placement="right"
+                      arrow
+                      disableHoverListener={drawerOpen}
+                      classes={{ tooltip: classes.tooltip }}
                     >
-                      <ListItemIcon className={classes.submenuIcon}>
-                        <ListIcon />
-                      </ListItemIcon>
-                      <ListItemText primary="Listagem" />
-                    </ListItem>
-                    <ListItem
-                      className={classes.submenuLink}
-                      onClick={() => history.push("/contact-lists")}
-                      button
+                      <ListItem
+                        className={classes.submenuLink}
+                        onClick={() => history.push("/campaigns")}
+                        button
+                      >
+                        <ListItemIcon className={classes.submenuIcon}>
+                          <ListIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Listagem" />
+                      </ListItem>
+                    </Tooltip>
+                    <Tooltip
+                      title="Listas de Contatos"
+                      placement="right"
+                      arrow
+                      disableHoverListener={drawerOpen}
+                      classes={{ tooltip: classes.tooltip }}
                     >
-                      <ListItemIcon className={classes.submenuIcon}>
-                        <PeopleIcon />
-                      </ListItemIcon>
-                      <ListItemText primary="Listas de Contatos" />
-                    </ListItem>
-                    <ListItem
-                      className={classes.submenuLink}
-                      onClick={() => history.push("/campaigns-config")}
-                      button
+                      <ListItem
+                        className={classes.submenuLink}
+                        onClick={() => history.push("/contact-lists")}
+                        button
+                      >
+                        <ListItemIcon className={classes.submenuIcon}>
+                          <PeopleIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Listas de Contatos" />
+                      </ListItem>
+                    </Tooltip>
+                    <Tooltip
+                      title="Configurações"
+                      placement="right"
+                      arrow
+                      disableHoverListener={drawerOpen}
+                      classes={{ tooltip: classes.tooltip }}
                     >
-                      <ListItemIcon className={classes.submenuIcon}>
-                        <SettingsOutlinedIcon />
-                      </ListItemIcon>
-                      <ListItemText primary="Configurações" />
-                    </ListItem>
+                      <ListItem
+                        className={classes.submenuLink}
+                        onClick={() => history.push("/campaigns-config")}
+                        button
+                      >
+                        <ListItemIcon className={classes.submenuIcon}>
+                          <SettingsOutlinedIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Configurações" />
+                      </ListItem>
+                    </Tooltip>
                   </List>
                 </Collapse>
               </>
@@ -466,6 +535,7 @@ const MainListItems = props => {
                 to="/announcements"
                 primary={i18n.t("mainDrawer.listItems.annoucements")}
                 icon={<AnnouncementIcon />}
+                drawerOpen={drawerOpen}
               />
             )}
             <ListItemLink
@@ -476,32 +546,38 @@ const MainListItems = props => {
                   <SyncAltIcon />
                 </Badge>
               }
+              drawerOpen={drawerOpen}
             />
             <ListItemLink
               to="/queues"
               primary={i18n.t("mainDrawer.listItems.queues")}
               icon={<AccountTreeOutlinedIcon />}
+              drawerOpen={drawerOpen}
             />
             <ListItemLink
               to="/users"
               primary={i18n.t("mainDrawer.listItems.users")}
               icon={<PeopleAltOutlinedIcon />}
+              drawerOpen={drawerOpen}
             />
             <ListItemLink
               to="/messages-api"
               primary={i18n.t("mainDrawer.listItems.messagesAPI")}
               icon={<CodeRoundedIcon />}
+              drawerOpen={drawerOpen}
             />
             <ListItemLink
               to="/financeiro"
               primary={i18n.t("mainDrawer.listItems.financeiro")}
               icon={<LocalAtmIcon />}
+              drawerOpen={drawerOpen}
             />
 
             <ListItemLink
               to="/settings"
               primary={i18n.t("mainDrawer.listItems.settings")}
               icon={<SettingsOutlinedIcon />}
+              drawerOpen={drawerOpen}
             />
           </>
         )}
