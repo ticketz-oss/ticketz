@@ -449,7 +449,10 @@ const MainListItems = props => {
                   <ListItem
                     className={classes.menuLink}
                     button
-                    onClick={() => setOpenCampaignSubmenu(prev => !prev)}
+                    onClick={e => {
+                      e.stopPropagation();
+                      setOpenCampaignSubmenu(prev => !prev);
+                    }}
                   >
                     <ListItemIcon className={classes.menuIcon}>
                       <EventAvailableIcon />
