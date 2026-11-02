@@ -18,7 +18,7 @@ const DeleteCompanyService = async (id: string): Promise<void> => {
   const companyMediaPath = join(getPublicPath(), "media", id);
 
   // recursively remove company media folder
-  fs.rmSync(companyMediaPath, { recursive: true });
+  fs.rmSync(companyMediaPath, { recursive: true, force: true });
 };
 
 export default DeleteCompanyService;
