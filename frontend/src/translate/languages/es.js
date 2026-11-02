@@ -110,7 +110,9 @@ const messages = {
           almostDue: "Casi Vencido"
         },
         section: {
-          info: "Información"
+          info: "Información",
+          basicInfo: "Información Básica",
+          subscription: "Suscripción"
         },
         form: {
           campaigns: "Campañas",

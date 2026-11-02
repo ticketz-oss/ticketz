@@ -74,7 +74,9 @@ const messages = {
           almostDue: "Hampir Jatuh Tempo"
         },
         section: {
-          info: "Informasi"
+          info: "Informasi",
+          basicInfo: "Informasi Dasar",
+          subscription: "Langganan"
         },
         form: {
           campaigns: "Kampanye",

@@ -74,7 +74,9 @@ const messages = {
           almostDue: "Fast Faellig"
         },
         section: {
-          info: "Information"
+          info: "Information",
+          basicInfo: "Grundinformationen",
+          subscription: "Abonnement"
         },
         form: {
           campaigns: "Kampagnen",

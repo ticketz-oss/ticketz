@@ -107,7 +107,9 @@ const messages = {
           almostDue: "Quase Vencido"
         },
         section: {
-          info: "Informações"
+          info: "Informações",
+          basicInfo: "Informações Básicas",
+          subscription: "Assinatura"
         },
         form: {
           campaigns: "Campanhas",

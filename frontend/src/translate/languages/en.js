@@ -110,7 +110,9 @@ const messages = {
           almostDue: "Almost Due"
         },
         section: {
-          info: "Information"
+          info: "Information",
+          basicInfo: "Basic Information",
+          subscription: "Subscription"
         },
         form: {
           campaigns: "Campaigns",

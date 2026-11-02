@@ -203,6 +203,16 @@ const useStyles = makeStyles(theme => ({
     textAlign: "right",
     padding: theme.spacing(1)
   },
+  formSection: {
+    marginBottom: theme.spacing(2)
+  },
+  sectionTitle: {
+    fontSize: "0.875rem",
+    fontWeight: 600,
+    color: theme.palette.text.secondary,
+    textTransform: "uppercase",
+    marginBottom: theme.spacing(1)
+  },
   loadingContainer: {
     display: "flex",
     justifyContent: "center",
@@ -211,12 +221,9 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export function CompanyForm(props) {
-  const { onSubmit, onDelete, onImpersonate, onCancel, initialValue, loading } =
-    props;
+  const { onSubmit, onCancel, initialValue, loading } = props;
   const classes = useStyles();
   const [plans, setPlans] = useState([]);
-  const [modalUser, setModalUser] = useState(false);
-  const [firstUser, setFirstUser] = useState({});
 
   const [record, setRecord] = useState({
     name: "",
@@ -264,71 +271,8 @@ export function CompanyForm(props) {
     setRecord({ ...initialValue, dueDate: "" });
   };
 
-  const handleOpenModalUsers = async () => {
-    try {
-      const { data } = await api.get("/users/list", {
-        params: {
-          companyId: initialValue.id
-        }
-      });
-      if (isArray(data) && data.length) {
-        setFirstUser(head(data));
-      }
-      setModalUser(true);
-    } catch (e) {
-      toast.error(e);
-    }
-  };
-
-  const handleCloseModalUsers = () => {
-    setFirstUser({});
-    setModalUser(false);
-  };
-
-  const incrementDueDate = () => {
-    const data = { ...record };
-    if (data.dueDate !== "" && data.dueDate !== null) {
-      switch (data.recurrence) {
-        case "MENSAL":
-          data.dueDate = moment(data.dueDate)
-            .add(1, "month")
-            .format("YYYY-MM-DD");
-          break;
-        case "BIMESTRAL":
-          data.dueDate = moment(data.dueDate)
-            .add(2, "month")
-            .format("YYYY-MM-DD");
-          break;
-        case "TRIMESTRAL":
-          data.dueDate = moment(data.dueDate)
-            .add(3, "month")
-            .format("YYYY-MM-DD");
-          break;
-        case "SEMESTRAL":
-          data.dueDate = moment(data.dueDate)
-            .add(6, "month")
-            .format("YYYY-MM-DD");
-          break;
-        case "ANUAL":
-          data.dueDate = moment(data.dueDate)
-            .add(12, "month")
-            .format("YYYY-MM-DD");
-          break;
-        default:
-          break;
-      }
-    }
-    setRecord(data);
-  };
-
   return (
     <>
-      <ModalUsers
-        userId={firstUser.id}
-        companyId={initialValue.id}
-        open={modalUser}
-        onClose={handleCloseModalUsers}
-      />
       <Formik
         enableReinitialize
         className={classes.fullWidth}
@@ -342,232 +286,194 @@ export function CompanyForm(props) {
       >
         {(values, setValues) => (
           <Form className={classes.fullWidth}>
-            <Grid spacing={2} justifyContent="flex-end" container>
-              <Grid xs={12} sm={6} md={4} item>
-                <Field
-                  as={TextField}
-                  label={i18n.t("common.name")}
-                  name="name"
-                  variant="outlined"
-                  className={classes.fullWidth}
-                  margin="dense"
-                />
-              </Grid>
-              <Grid xs={12} sm={6} md={4} item>
-                <Field
-                  as={TextField}
-                  label={i18n.t("common.email")}
-                  name="email"
-                  variant="outlined"
-                  className={classes.fullWidth}
-                  margin="dense"
-                  required
-                />
-              </Grid>
-              <Grid xs={12} sm={6} md={2} item>
-                <Field
-                  as={TextField}
-                  label={i18n.t("common.phone")}
-                  name="phone"
-                  variant="outlined"
-                  className={classes.fullWidth}
-                  margin="dense"
-                />
-              </Grid>
-              <Grid xs={12} sm={6} md={2} item>
-                <Field
-                  as={SelectLanguage}
-                  name="language"
-                  fullWidth
-                  variant="outlined"
-                  margin="dense"
-                />
-              </Grid>
-              <Grid xs={12} sm={6} md={2} item>
-                <FormControl margin="dense" variant="outlined" fullWidth>
-                  <InputLabel htmlFor="plan-selection">
-                    {i18n.t("companies.form.plan")}
-                  </InputLabel>
-                  <Field
-                    as={Select}
-                    id="plan-selection"
-                    label={i18n.t("companies.form.plan")}
-                    labelId="plan-selection-label"
-                    name="planId"
-                    margin="dense"
-                    required
-                  >
-                    {plans.map((plan, key) => (
-                      <MenuItem key={key} value={plan.id}>
-                        {plan.name}
-                      </MenuItem>
-                    ))}
-                  </Field>
-                </FormControl>
-              </Grid>
-              <Grid xs={12} sm={6} md={2} item>
-                <FormControl margin="dense" variant="outlined" fullWidth>
-                  <InputLabel htmlFor="status-selection">
-                    {i18n.t("common.status")}
-                  </InputLabel>
-                  <Field
-                    as={Select}
-                    id="status-selection"
-                    label={i18n.t("common.status")}
-                    labelId="status-selection-label"
-                    name="status"
-                    margin="dense"
-                  >
-                    <MenuItem value={true}>{i18n.t("common.yes")}</MenuItem>
-                    <MenuItem value={false}>{i18n.t("common.no")}</MenuItem>
-                  </Field>
-                </FormControl>
-              </Grid>
-              <Grid xs={12} sm={6} md={2} item>
-                <FormControl margin="dense" variant="outlined" fullWidth>
-                  <InputLabel htmlFor="campaigns-selection">
-                    {i18n.t("companiesManager.form.campaigns")}
-                  </InputLabel>
-                  <Field
-                    as={Select}
-                    id="campaigns-selection"
-                    label={i18n.t("companiesManager.form.campaigns")}
-                    labelId="campaigns-selection-label"
-                    name="campaignsEnabled"
-                    margin="dense"
-                  >
-                    <MenuItem value={true}>{i18n.t("common.enabled")}</MenuItem>
-                    <MenuItem value={false}>
-                      {i18n.t("common.disabled")}
-                    </MenuItem>
-                  </Field>
-                </FormControl>
-              </Grid>
-              <Grid xs={12} sm={6} md={2} item>
-                <FormControl variant="outlined" fullWidth>
+            <div className={classes.formSection}>
+              <Typography className={classes.sectionTitle}>
+                {i18n.t("companiesManager.section.basicInfo")}
+              </Typography>
+              <Grid spacing={2} container>
+                <Grid xs={12} sm={6} item>
                   <Field
                     as={TextField}
-                    label={i18n.t("common.dueDate")}
-                    type="date"
-                    name="dueDate"
-                    InputLabelProps={{
-                      shrink: true
-                    }}
+                    label={i18n.t("common.name")}
+                    name="name"
                     variant="outlined"
-                    fullWidth
+                    className={classes.fullWidth}
                     margin="dense"
                   />
-                </FormControl>
-              </Grid>
-              <Grid xs={12} sm={6} md={2} item>
-                <FormControl margin="dense" variant="outlined" fullWidth>
-                  <InputLabel htmlFor="recorrencia-selection">
-                    {i18n.t("companiesManager.form.recurrence")}
-                  </InputLabel>
-                  <Field
-                    as={Select}
-                    label={i18n.t("companiesManager.form.recurrence")}
-                    labelId="recorrencia-selection-label"
-                    id="recurrence"
-                    name="recurrence"
-                    margin="dense"
-                  >
-                    <MenuItem value="MENSAL">
-                      {i18n.t("companiesManager.form.monthly")}
-                    </MenuItem>
-                    <MenuItem value="BIMESTRAL">
-                      {i18n.t("companiesManager.form.bimonthly")}
-                    </MenuItem>
-                    <MenuItem value="TRIMESTRAL">
-                      {i18n.t("companiesManager.form.quarterly")}
-                    </MenuItem>
-                    <MenuItem value="SEMESTRAL">
-                      {i18n.t("companiesManager.form.semiannual")}
-                    </MenuItem>
-                    <MenuItem value="ANUAL">
-                      {i18n.t("companiesManager.form.annual")}
-                    </MenuItem>
-                  </Field>
-                </FormControl>
-              </Grid>
-              <Grid xs={12} item>
-                <Grid justifyContent="flex-end" spacing={1} container>
-                  <Grid xs={4} md={1} item>
-                    <ButtonWithSpinner
-                      className={classes.fullWidth}
-                      style={{ marginTop: 7 }}
-                      loading={loading}
-                      onClick={() => onCancel()}
-                      variant="contained"
-                    >
-                      {i18n.t("companiesManager.buttons.clear")}
-                    </ButtonWithSpinner>
-                  </Grid>
-                  {record.id !== undefined ? (
-                    <>
-                      <Grid xs={6} md={2} item>
-                        <ButtonWithSpinner
-                          style={{ marginTop: 7 }}
-                          className={classes.fullWidth}
-                          loading={loading}
-                          onClick={() => onImpersonate(record)}
-                          variant="outlined"
-                          color="primary"
-                        >
-                          {i18n.t("companiesManager.buttons.accessAs")}
-                        </ButtonWithSpinner>
-                      </Grid>
-                      <Grid xs={6} md={1} item>
-                        <ButtonWithSpinner
-                          style={{ marginTop: 7 }}
-                          className={classes.fullWidth}
-                          loading={loading}
-                          onClick={() => onDelete(record)}
-                          variant="contained"
-                          color="secondary"
-                        >
-                          {i18n.t("common.delete")}
-                        </ButtonWithSpinner>
-                      </Grid>
-                      <Grid xs={6} md={2} item>
-                        <ButtonWithSpinner
-                          style={{ marginTop: 7 }}
-                          className={classes.fullWidth}
-                          loading={loading}
-                          onClick={() => incrementDueDate()}
-                          variant="contained"
-                          color="primary"
-                        >
-                          {i18n.t("companiesManager.buttons.incrementDueDate")}
-                        </ButtonWithSpinner>
-                      </Grid>
-                      <Grid xs={6} md={1} item>
-                        <ButtonWithSpinner
-                          style={{ marginTop: 7 }}
-                          className={classes.fullWidth}
-                          loading={loading}
-                          onClick={() => handleOpenModalUsers()}
-                          variant="contained"
-                          color="primary"
-                        >
-                          {i18n.t("common.user")}
-                        </ButtonWithSpinner>
-                      </Grid>
-                    </>
-                  ) : null}
-                  <Grid xs={6} md={1} item>
-                    <ButtonWithSpinner
-                      className={classes.fullWidth}
-                      style={{ marginTop: 7 }}
-                      loading={loading}
-                      type="submit"
-                      variant="contained"
-                      color="primary"
-                    >
-                      {i18n.t("common.save")}
-                    </ButtonWithSpinner>
-                  </Grid>
                 </Grid>
+                <Grid xs={12} sm={6} item>
+                  <Field
+                    as={TextField}
+                    label={i18n.t("common.email")}
+                    name="email"
+                    variant="outlined"
+                    className={classes.fullWidth}
+                    margin="dense"
+                    required
+                  />
+                </Grid>
+                <Grid xs={12} sm={6} item>
+                  <Field
+                    as={TextField}
+                    label={i18n.t("common.phone")}
+                    name="phone"
+                    variant="outlined"
+                    className={classes.fullWidth}
+                    margin="dense"
+                  />
+                </Grid>
+                <Grid xs={12} sm={6} item>
+                  <Field
+                    as={SelectLanguage}
+                    name="language"
+                    fullWidth
+                    variant="outlined"
+                    margin="dense"
+                  />
+                </Grid>
+              </Grid>
+            </div>
+
+            <div className={classes.formSection}>
+              <Typography className={classes.sectionTitle}>
+                {i18n.t("companiesManager.section.subscription")}
+              </Typography>
+              <Grid spacing={2} container>
+                <Grid xs={12} sm={6} md={4} item>
+                  <FormControl margin="dense" variant="outlined" fullWidth>
+                    <InputLabel htmlFor="plan-selection">
+                      {i18n.t("companies.form.plan")}
+                    </InputLabel>
+                    <Field
+                      as={Select}
+                      id="plan-selection"
+                      label={i18n.t("companies.form.plan")}
+                      labelId="plan-selection-label"
+                      name="planId"
+                      margin="dense"
+                      required
+                    >
+                      {plans.map((plan, key) => (
+                        <MenuItem key={key} value={plan.id}>
+                          {plan.name}
+                        </MenuItem>
+                      ))}
+                    </Field>
+                  </FormControl>
+                </Grid>
+                <Grid xs={12} sm={6} md={4} item>
+                  <FormControl margin="dense" variant="outlined" fullWidth>
+                    <InputLabel htmlFor="status-selection">
+                      {i18n.t("common.status")}
+                    </InputLabel>
+                    <Field
+                      as={Select}
+                      id="status-selection"
+                      label={i18n.t("common.status")}
+                      labelId="status-selection-label"
+                      name="status"
+                      margin="dense"
+                    >
+                      <MenuItem value={true}>{i18n.t("common.yes")}</MenuItem>
+                      <MenuItem value={false}>{i18n.t("common.no")}</MenuItem>
+                    </Field>
+                  </FormControl>
+                </Grid>
+                <Grid xs={12} sm={6} md={4} item>
+                  <FormControl margin="dense" variant="outlined" fullWidth>
+                    <InputLabel htmlFor="campaigns-selection">
+                      {i18n.t("companiesManager.form.campaigns")}
+                    </InputLabel>
+                    <Field
+                      as={Select}
+                      id="campaigns-selection"
+                      label={i18n.t("companiesManager.form.campaigns")}
+                      labelId="campaigns-selection-label"
+                      name="campaignsEnabled"
+                      margin="dense"
+                    >
+                      <MenuItem value={true}>
+                        {i18n.t("common.enabled")}
+                      </MenuItem>
+                      <MenuItem value={false}>
+                        {i18n.t("common.disabled")}
+                      </MenuItem>
+                    </Field>
+                  </FormControl>
+                </Grid>
+                <Grid xs={12} sm={6} md={6} item>
+                  <FormControl variant="outlined" fullWidth>
+                    <Field
+                      as={TextField}
+                      label={i18n.t("common.dueDate")}
+                      type="date"
+                      name="dueDate"
+                      InputLabelProps={{
+                        shrink: true
+                      }}
+                      variant="outlined"
+                      fullWidth
+                      margin="dense"
+                    />
+                  </FormControl>
+                </Grid>
+                <Grid xs={12} sm={6} md={6} item>
+                  <FormControl margin="dense" variant="outlined" fullWidth>
+                    <InputLabel htmlFor="recorrencia-selection">
+                      {i18n.t("companiesManager.form.recurrence")}
+                    </InputLabel>
+                    <Field
+                      as={Select}
+                      label={i18n.t("companiesManager.form.recurrence")}
+                      labelId="recorrencia-selection-label"
+                      id="recurrence"
+                      name="recurrence"
+                      margin="dense"
+                    >
+                      <MenuItem value="MENSAL">
+                        {i18n.t("companiesManager.form.monthly")}
+                      </MenuItem>
+                      <MenuItem value="BIMESTRAL">
+                        {i18n.t("companiesManager.form.bimonthly")}
+                      </MenuItem>
+                      <MenuItem value="TRIMESTRAL">
+                        {i18n.t("companiesManager.form.quarterly")}
+                      </MenuItem>
+                      <MenuItem value="SEMESTRAL">
+                        {i18n.t("companiesManager.form.semiannual")}
+                      </MenuItem>
+                      <MenuItem value="ANUAL">
+                        {i18n.t("companiesManager.form.annual")}
+                      </MenuItem>
+                    </Field>
+                  </FormControl>
+                </Grid>
+              </Grid>
+            </div>
+
+            <Grid justifyContent="flex-end" spacing={1} container>
+              <Grid xs={6} md={2} item>
+                <ButtonWithSpinner
+                  className={classes.fullWidth}
+                  style={{ marginTop: 7 }}
+                  loading={loading}
+                  onClick={() => onCancel()}
+                  variant="outlined"
+                >
+                  {i18n.t("common.cancel")}
+                </ButtonWithSpinner>
+              </Grid>
+              <Grid xs={6} md={2} item>
+                <ButtonWithSpinner
+                  className={classes.fullWidth}
+                  style={{ marginTop: 7 }}
+                  loading={loading}
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                >
+                  {i18n.t("common.save")}
+                </ButtonWithSpinner>
               </Grid>
             </Grid>
           </Form>

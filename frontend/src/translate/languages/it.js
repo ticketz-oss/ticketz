@@ -75,7 +75,9 @@ const messages = {
           almostDue: "Quasi Scaduto"
         },
         section: {
-          info: "Informazioni"
+          info: "Informazioni",
+          basicInfo: "Informazioni di Base",
+          subscription: "Abbonamento"
         },
         form: {
           campaigns: "Campagne",

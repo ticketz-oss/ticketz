@@ -75,7 +75,9 @@ const messages = {
           almostDue: "Bientôt Échu"
         },
         section: {
-          info: "Information"
+          info: "Information",
+          basicInfo: "Informations de Base",
+          subscription: "Abonnement"
         },
         form: {
           campaigns: "Campagnes",
