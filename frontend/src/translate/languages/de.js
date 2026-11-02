@@ -24,6 +24,9 @@ const messages = {
         queue: "Warteschlange",
         contact: "Kontakt",
         status: "Status",
+        active: "Aktiv",
+        inactive: "Inaktiv",
+        all: "Alle",
         serverTime: "Serverzeit:",
         clientTime: "Clientzeit:",
         differenceMinutes: "Unterschied: {{count}} Minute(n)"
@@ -66,6 +69,13 @@ const messages = {
         }
       },
       companiesManager: {
+        status: {
+          gracePeriod: "Kulanzfrist",
+          almostDue: "Fast Faellig"
+        },
+        section: {
+          info: "Information"
+        },
         form: {
           campaigns: "Kampagnen",
           recurrence: "Wiederkehrend",
@@ -97,7 +107,10 @@ const messages = {
           deleteMessage: "Moechten Sie diesen Datensatz wirklich loeschen?",
           impersonateTitle: "Zugreifen als",
           impersonateMessage:
-            "Moechten Sie das System als dieses Unternehmen aufrufen?"
+            "Moechten Sie das System als dieses Unternehmen aufrufen?",
+          addPeriodTitle: "Zeitraum hinzufuegen",
+          addPeriodMessage:
+            "Moechten Sie einen Zeitraum zum Faelligkeitsdatum dieses Unternehmens hinzufuegen?"
         },
         modal: {
           newTitle: "Neues Unternehmen",

@@ -25,6 +25,9 @@ const messages = {
         queue: "Coda",
         contact: "Contatto",
         status: "Stato",
+        active: "Attivo",
+        inactive: "Inattivo",
+        all: "Tutti",
         serverTime: "Ora del server:",
         clientTime: "Ora del client:",
         differenceMinutes: "Differenza: {{count}} minuto(i)"
@@ -67,6 +70,13 @@ const messages = {
         }
       },
       companiesManager: {
+        status: {
+          gracePeriod: "Periodo di Grazia",
+          almostDue: "Quasi Scaduto"
+        },
+        section: {
+          info: "Informazioni"
+        },
         form: {
           campaigns: "Campagne",
           recurrence: "Ricorrenza",
@@ -97,7 +107,10 @@ const messages = {
           deleteTitle: "Eliminazione record",
           deleteMessage: "Vuoi eliminare davvero questo record?",
           impersonateTitle: "Accedi come",
-          impersonateMessage: "Vuoi accedere al sistema come questa azienda?"
+          impersonateMessage: "Vuoi accedere al sistema come questa azienda?",
+          addPeriodTitle: "Aggiungi Periodo",
+          addPeriodMessage:
+            "Vuoi aggiungere un periodo alla data di scadenza di questa azienda?"
         },
         modal: {
           newTitle: "Nuova Azienda",

@@ -60,6 +60,9 @@ const messages = {
           invalidPhone: "Invalid phone number"
         },
         status: "Status",
+        active: "Active",
+        inactive: "Inactive",
+        all: "All",
         serverTime: "Server time:",
         clientTime: "Client time:",
         differenceMinutes: "Difference: {{count}} minute(s)"
@@ -102,6 +105,13 @@ const messages = {
         }
       },
       companiesManager: {
+        status: {
+          gracePeriod: "Grace Period",
+          almostDue: "Almost Due"
+        },
+        section: {
+          info: "Information"
+        },
         form: {
           campaigns: "Campaigns",
           recurrence: "Recurrence",
@@ -133,7 +143,10 @@ const messages = {
           deleteMessage: "Do you really want to delete this record?",
           impersonateTitle: "Access as",
           impersonateMessage:
-            "Do you want to access the system as this company?"
+            "Do you want to access the system as this company?",
+          addPeriodTitle: "Add Period",
+          addPeriodMessage:
+            "Do you want to add one period to the due date of this company?"
         },
         modal: {
           newTitle: "New Company",

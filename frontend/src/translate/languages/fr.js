@@ -25,7 +25,10 @@ const messages = {
         queue: "File d'attente",
         contact: "Contact",
         status: "Statut",
-        serverTime: "Heure du serveur :",
+        active: "Actif",
+        inactive: "Inactif",
+        all: "Tous",
+        serverTime: "Heure du serveur:",
         clientTime: "Heure du client :",
         differenceMinutes: "Différence : {{count}} minute(s)"
       },
@@ -67,6 +70,13 @@ const messages = {
         }
       },
       companiesManager: {
+        status: {
+          gracePeriod: "Période de Grâce",
+          almostDue: "Bientôt Échu"
+        },
+        section: {
+          info: "Information"
+        },
         form: {
           campaigns: "Campagnes",
           recurrence: "Récurrence",
@@ -98,7 +108,10 @@ const messages = {
           deleteMessage: "Voulez-vous vraiment supprimer cet enregistrement ?",
           impersonateTitle: "Accéder en tant que",
           impersonateMessage:
-            "Voulez-vous accéder au système en tant que cette entreprise ?"
+            "Voulez-vous accéder au système en tant que cette entreprise ?",
+          addPeriodTitle: "Ajouter une Période",
+          addPeriodMessage:
+            "Voulez-vous ajouter une période à la date d'échéance de cette entreprise ?"
         },
         modal: {
           newTitle: "Nouvelle Entreprise",

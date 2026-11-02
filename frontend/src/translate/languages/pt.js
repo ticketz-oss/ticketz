@@ -60,6 +60,9 @@ const messages = {
           invalidPhone: "Número de telefone inválido"
         },
         status: "Status",
+        active: "Ativo",
+        inactive: "Inativo",
+        all: "Todos",
         serverTime: "Hora do servidor:",
         clientTime: "Hora do cliente:",
         differenceMinutes: "Diferença: {{count}} minuto(s)"
@@ -102,6 +105,13 @@ const messages = {
         }
       },
       companiesManager: {
+        status: {
+          gracePeriod: "Período de Graça",
+          almostDue: "Quase Vencido"
+        },
+        section: {
+          info: "Informações"
+        },
         form: {
           campaigns: "Campanhas",
           recurrence: "Recorrência",
@@ -132,7 +142,10 @@ const messages = {
           deleteTitle: "Exclusão de Registro",
           deleteMessage: "Deseja realmente excluir esse registro?",
           impersonateTitle: "Acessar como",
-          impersonateMessage: "Deseja acessar o sistema como esta empresa?"
+          impersonateMessage: "Deseja acessar o sistema como esta empresa?",
+          addPeriodTitle: "Adicionar Período",
+          addPeriodMessage:
+            "Deseja adicionar um período à data de vencimento desta empresa?"
         },
         modal: {
           newTitle: "Nova Empresa",

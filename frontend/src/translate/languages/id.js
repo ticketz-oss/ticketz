@@ -24,6 +24,9 @@ const messages = {
         queue: "Antrian",
         contact: "Kontak",
         status: "Status",
+        active: "Aktif",
+        inactive: "Tidak Aktif",
+        all: "Semua",
         serverTime: "Waktu server:",
         clientTime: "Waktu klien:",
         differenceMinutes: "Selisih: {{count}} menit"
@@ -66,6 +69,13 @@ const messages = {
         }
       },
       companiesManager: {
+        status: {
+          gracePeriod: "Masa Tenggang",
+          almostDue: "Hampir Jatuh Tempo"
+        },
+        section: {
+          info: "Informasi"
+        },
         form: {
           campaigns: "Kampanye",
           recurrence: "Berulang",
@@ -97,7 +107,10 @@ const messages = {
           deleteMessage: "Apakah Anda yakin ingin menghapus rekaman ini?",
           impersonateTitle: "Akses sebagai",
           impersonateMessage:
-            "Apakah Anda ingin mengakses sistem sebagai perusahaan ini?"
+            "Apakah Anda ingin mengakses sistem sebagai perusahaan ini?",
+          addPeriodTitle: "Tambah Periode",
+          addPeriodMessage:
+            "Apakah Anda ingin menambahkan satu periode ke tanggal jatuh tempo perusahaan ini?"
         },
         modal: {
           newTitle: "Perusahaan Baru",

@@ -26,6 +26,15 @@ const useCompanies = () => {
     return data;
   };
 
+  const listPaginated = async (pageNumber, searchParam = "") => {
+    const { data } = await api.request({
+      url: `/companies`,
+      method: "GET",
+      params: { pageNumber, searchParam }
+    });
+    return data;
+  };
+
   const find = async id => {
     const { data } = await api.request({
       url: `/companies/${id}`,
@@ -73,6 +82,7 @@ const useCompanies = () => {
     update,
     remove,
     list,
+    listPaginated,
     find,
     finding,
     findAll,
