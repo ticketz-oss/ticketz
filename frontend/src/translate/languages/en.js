@@ -260,6 +260,7 @@ const messages = {
           name: "Name",
           status: "Status",
           lastUpdate: "Last Update",
+          connectedNumber: "Connected Number",
           default: "Default",
           actions: "Actions",
           session: "Session"

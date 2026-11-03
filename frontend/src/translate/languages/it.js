@@ -201,6 +201,7 @@ const messages = {
           name: "Nome",
           status: "Stato",
           lastUpdate: "Ultimo aggiornamento",
+          connectedNumber: "Numero connesso",
           default: "Predefinito",
           actions: "Azioni",
           session: "Sessione"

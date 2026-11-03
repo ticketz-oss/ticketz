@@ -202,6 +202,7 @@ const messages = {
           name: "Nama",
           status: "Status",
           lastUpdate: "Pembaruan Terakhir",
+          connectedNumber: "Nomor Terhubung",
           default: "Default",
           actions: "Aksi",
           session: "Sesi"

@@ -54,6 +54,7 @@ import toastError from "../../errors/toastError";
 import wavoipIcon from "../../assets/wavoip.webp";
 import WavoipModal from "../../components/WavoipModal";
 import { wavoipAvailable } from "../../helpers/wavoipCallManager";
+import { formatWhatsappDigits } from "../../helpers/formatWhatsappDisplay";
 
 // BEGIN: Feature flag for filtering unsupported channels
 // Set to false on branches that support multiple channels
@@ -634,6 +635,30 @@ const Connections = () => {
                                         {i18n.t("connections.table.session")}
                                       </Typography>
                                       <Grid container spacing={1}>
+                                        {whatsApp.connectedNumber && (
+                                          <Grid
+                                            item
+                                            xs={12}
+                                            className={classes.statItem}
+                                          >
+                                            <Box>
+                                              <Typography
+                                                className={classes.statLabel}
+                                              >
+                                                {i18n.t(
+                                                  "connections.table.connectedNumber"
+                                                )}
+                                              </Typography>
+                                              <Typography
+                                                className={classes.statValue}
+                                              >
+                                                {formatWhatsappDigits(
+                                                  whatsApp.connectedNumber
+                                                )}
+                                              </Typography>
+                                            </Box>
+                                          </Grid>
+                                        )}
                                         <Grid
                                           item
                                           xs={12}
