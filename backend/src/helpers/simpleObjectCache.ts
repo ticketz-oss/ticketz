@@ -62,13 +62,39 @@ export class SimpleObjectCache<T = unknown> {
    * @returns The value stored in the cache
    * @example cache.get('foo');
    */
-  get(key: string) {
+  get<U = T>(key: string): U | null {
     const data = this.cache.get(key);
     if (!data) {
       return null;
     }
 
+    data.timer.refresh();
+
     this.logger?.debug(`Cache key ${key} was accessed`);
-    return data.value;
+    return data.value as unknown as U;
+  }
+
+  /**
+   * Delete a key from the cache (alias for remove)
+   * @param key
+   * @returns void
+   * @example cache.delete('foo');
+   */
+  delete(key: string) {
+    this.remove(key);
+  }
+
+  /**
+   * Delete all keys that start with the given prefix
+   * @param prefix
+   * @returns void
+   * @example cache.deleteByPrefix('user-');
+   */
+  deleteByPrefix(prefix: string) {
+    Array.from(this.cache.keys()).forEach(key => {
+      if (key.startsWith(prefix)) {
+        this.remove(key);
+      }
+    });
   }
 }
