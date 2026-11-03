@@ -161,7 +161,9 @@ const messages = {
           tryAgain: "Riprova",
           qrcode: "QR CODE",
           newQr: "Nuovo QR CODE",
-          connecting: "Connessione in corso"
+          connecting: "Connessione in corso",
+          showUnsupported: "Mostra Non Supportati",
+          hideUnsupported: "Nascondi Non Supportati"
         },
         toolTips: {
           disconnected: {
@@ -183,11 +185,17 @@ const messages = {
               "Assicurati che il tuo telefono sia connesso a Internet e che WhatsApp sia aperto, oppure clicca sul pulsante 'Disconnetti' per ottenere un nuovo QR Code"
           },
           passkey: {
-            title: "Passkey authentication required",
+            title: "Autenticazione passkey richiesta",
             content:
-              "Click the passkey button and use the browser extension to capture the authenticated WhatsApp Web session."
+              "Clicca sul pulsante passkey e usa l'estensione del browser per catturare la sessione autenticata di WhatsApp Web."
           },
-          resetPasskey: "Reimposta sessione passkey"
+          refresh: "Aggiorna connessione",
+          disconnect: "Disconnetti",
+          scan: "Scansiona QR Code",
+          newQr: "Genera nuovo QR Code",
+          retry: "Riprova",
+          resetPasskey: "Reimposta sessione passkey",
+          privacy: "Impostazioni Privacy"
         },
         table: {
           name: "Nome",
@@ -196,7 +204,18 @@ const messages = {
           default: "Predefinito",
           actions: "Azioni",
           session: "Sessione"
-        }
+        },
+        status: {
+          connected: "Connesso",
+          disconnected: "Disconnesso",
+          opening: "Apertura",
+          qrcode: "In attesa del QR Code",
+          timeout: "Timeout",
+          passkey: "Passkey Richiesto",
+          pending: "In attesa",
+          unsupported: "Non Supportato"
+        },
+        noConnections: "Nessuna connessione trovata"
       },
       internalChat: {
         title: "Chat Interno"

@@ -162,7 +162,9 @@ const messages = {
           tryAgain: "Erneut versuchen",
           qrcode: "QR CODE",
           newQr: "Neuer QR CODE",
-          connecting: "Verbinden"
+          connecting: "Verbinden",
+          showUnsupported: "Nicht unterstützte anzeigen",
+          hideUnsupported: "Nicht unterstützte ausblenden"
         },
         toolTips: {
           disconnected: {
@@ -184,11 +186,17 @@ const messages = {
               "Stellen Sie sicher, dass Ihr Telefon mit dem Internet verbunden ist und WhatsApp geöffnet ist, oder klicken Sie auf die Schaltfläche 'Trennen', um einen neuen QR-Code zu erhalten"
           },
           passkey: {
-            title: "Passkey authentication required",
+            title: "Passkey-Authentifizierung erforderlich",
             content:
-              "Click the passkey button and use the browser extension to capture the authenticated WhatsApp Web session."
+              "Klicken Sie auf die Passkey-Schaltfläche und verwenden Sie die Browser-Erweiterung, um die authentifizierte WhatsApp Web-Sitzung zu erfassen."
           },
-          resetPasskey: "Passkey-Sitzung zurücksetzen"
+          refresh: "Verbindung aktualisieren",
+          disconnect: "Trennen",
+          scan: "QR-Code scannen",
+          newQr: "Neuen QR-Code generieren",
+          retry: "Erneut versuchen",
+          resetPasskey: "Passkey-Sitzung zurücksetzen",
+          privacy: "Datenschutzeinstellungen"
         },
         table: {
           name: "Name",
@@ -197,7 +205,18 @@ const messages = {
           default: "Standard",
           actions: "Aktionen",
           session: "Sitzung"
-        }
+        },
+        status: {
+          connected: "Verbunden",
+          disconnected: "Getrennt",
+          opening: "Öffnen",
+          qrcode: "Warte auf QR-Code",
+          timeout: "Zeitüberschreitung",
+          passkey: "Passkey Erforderlich",
+          pending: "Ausstehend",
+          unsupported: "Nicht Unterstützt"
+        },
+        noConnections: "Keine Verbindungen gefunden"
       },
       internalChat: {
         title: "Interner Chat"

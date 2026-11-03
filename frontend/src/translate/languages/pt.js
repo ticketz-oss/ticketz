@@ -219,7 +219,9 @@ const messages = {
           tryAgain: "Tentar novamente",
           qrcode: "QR CODE",
           newQr: "Novo QR CODE",
-          connecting: "Conectando"
+          connecting: "Conectando",
+          showUnsupported: "Mostrar Não Suportados",
+          hideUnsupported: "Ocultar Não Suportados"
         },
         toolTips: {
           disconnected: {
@@ -250,7 +252,8 @@ const messages = {
           scan: "Ler QR Code",
           newQr: "Gerar novo QR Code",
           retry: "Tentar novamente",
-          resetPasskey: "Reiniciar sessão passkey"
+          resetPasskey: "Reiniciar sessão passkey",
+          privacy: "Configurações de Privacidade"
         },
         table: {
           name: "Nome",
@@ -259,7 +262,18 @@ const messages = {
           default: "Padrão",
           actions: "Ações",
           session: "Sessão"
-        }
+        },
+        status: {
+          connected: "Conectado",
+          disconnected: "Desconectado",
+          opening: "Abrindo",
+          qrcode: "Aguardando QR Code",
+          timeout: "Tempo esgotado",
+          passkey: "Passkey Necessário",
+          pending: "Pendente",
+          unsupported: "Não Suportado"
+        },
+        noConnections: "Nenhuma conexão encontrada"
       },
       internalChat: {
         title: "Chat Interno"

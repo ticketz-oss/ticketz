@@ -162,7 +162,9 @@ const messages = {
           tryAgain: "Coba Lagi",
           qrcode: "KODE QR",
           newQr: "Kode QR Baru",
-          connecting: "Menghubungkan"
+          connecting: "Menghubungkan",
+          showUnsupported: "Tampilkan Tidak Didukung",
+          hideUnsupported: "Sembunyikan Tidak Didukung"
         },
         toolTips: {
           disconnected: {
@@ -184,15 +186,17 @@ const messages = {
               "Pastikan ponsel Anda terhubung ke internet dan WhatsApp terbuka, atau klik 'Putuskan' untuk mendapatkan Kode QR baru."
           },
           passkey: {
-            title: "Passkey authentication required",
+            title: "Autentikasi passkey diperlukan",
             content:
-              "Click the passkey button and use the browser extension to capture the authenticated WhatsApp Web session."
+              "Klik tombol passkey dan gunakan ekstensi browser untuk menangkap sesi WhatsApp Web yang terautentikasi."
           },
           refresh: "Muat ulang",
           disconnect: "Putuskan",
           scan: "Pindai",
           newQr: "Kode QR Baru",
-          retry: "Coba Lagi"
+          retry: "Coba Lagi",
+          resetPasskey: "Reset sesi passkey",
+          privacy: "Pengaturan Privasi"
         },
         table: {
           name: "Nama",
@@ -201,7 +205,18 @@ const messages = {
           default: "Default",
           actions: "Aksi",
           session: "Sesi"
-        }
+        },
+        status: {
+          connected: "Terhubung",
+          disconnected: "Terputus",
+          opening: "Membuka",
+          qrcode: "Menunggu Kode QR",
+          timeout: "Waktu Habis",
+          passkey: "Passkey Diperlukan",
+          pending: "Tertunda",
+          unsupported: "Tidak Didukung"
+        },
+        noConnections: "Tidak ada koneksi ditemukan"
       },
       internalChat: {
         title: "Obrolan Internal"

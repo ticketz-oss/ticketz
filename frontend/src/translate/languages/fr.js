@@ -162,7 +162,9 @@ const messages = {
           tryAgain: "Réessayer",
           qrcode: "QR CODE",
           newQr: "Nouveau QR CODE",
-          connecting: "Connexion en cours"
+          connecting: "Connexion en cours",
+          showUnsupported: "Afficher Non Supportés",
+          hideUnsupported: "Masquer Non Supportés"
         },
         toolTips: {
           disconnected: {
@@ -184,11 +186,17 @@ const messages = {
               "Assurez-vous que votre téléphone est connecté à Internet et que WhatsApp est ouvert, ou cliquez sur le bouton 'Déconnecter' pour obtenir un nouveau QR Code"
           },
           passkey: {
-            title: "Passkey authentication required",
+            title: "Authentification par passkey requise",
             content:
-              "Click the passkey button and use the browser extension to capture the authenticated WhatsApp Web session."
+              "Cliquez sur le bouton passkey et utilisez l'extension du navigateur pour capturer la session WhatsApp Web authentifiée."
           },
-          resetPasskey: "Réinitialiser la session passkey"
+          refresh: "Rafraîchir la connexion",
+          disconnect: "Déconnecter",
+          scan: "Scanner le QR Code",
+          newQr: "Générer un nouveau QR Code",
+          retry: "Réessayer",
+          resetPasskey: "Réinitialiser la session passkey",
+          privacy: "Paramètres de confidentialité"
         },
         table: {
           name: "Nom",
@@ -197,7 +205,18 @@ const messages = {
           default: "Par défaut",
           actions: "Actions",
           session: "Session"
-        }
+        },
+        status: {
+          connected: "Connecté",
+          disconnected: "Déconnecté",
+          opening: "Ouverture",
+          qrcode: "En attente du QR Code",
+          timeout: "Délai expiré",
+          passkey: "Passkey Requis",
+          pending: "En attente",
+          unsupported: "Non Supporté"
+        },
+        noConnections: "Aucune connexion trouvée"
       },
       internalChat: {
         title: "Chat Interne"
