@@ -982,6 +982,9 @@ const messages = {
             disabled: "Dinonaktifkan"
           }
         },
+        DesktopActionIconZoom: {
+          title: "Ukuran ikon aksi tiket"
+        },
         VoiceAndVideoCalls: {
           title: "Panggilan suara dan video",
           options: {

@@ -63,6 +63,9 @@ const messages = {
         active: "Ativo",
         inactive: "Inativo",
         all: "Todos",
+        small: "Pequeno",
+        medium: "Médio",
+        large: "Grande",
         serverTime: "Hora do servidor:",
         clientTime: "Hora do cliente:",
         differenceMinutes: "Diferença: {{count}} minuto(s)"
@@ -1047,6 +1050,9 @@ const messages = {
             enabled: "Ativado",
             disabled: "Desativado"
           }
+        },
+        DesktopActionIconZoom: {
+          title: "Tamanho do ícone de ação do ticket"
         },
         VoiceAndVideoCalls: {
           title: "Chamadas de Voz e Vídeo",

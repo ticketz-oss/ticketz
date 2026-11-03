@@ -983,6 +983,9 @@ const messages = {
             disabled: "Deaktiviert"
           }
         },
+        DesktopActionIconZoom: {
+          title: "Größe des Ticket-Aktionssymbols"
+        },
         VoiceAndVideoCalls: {
           title: "Sprach- und Videoanrufe",
           options: {

@@ -13,7 +13,8 @@ const safeSettingsKeys = new Set([
   "groupsTab",
   "CheckMsgIsGroup",
   "soundGroupNotifications",
-  "tagsMode"
+  "tagsMode",
+  "desktopActionIconZoom"
 ]);
 
 const useSettings = () => {
@@ -34,7 +35,6 @@ const useSettings = () => {
 
     return data;
   };
-
   const get = async key => {
     const { data } = await api.request({
       url: `/settings/${key}`,

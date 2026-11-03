@@ -63,6 +63,9 @@ const messages = {
         active: "Active",
         inactive: "Inactive",
         all: "All",
+        small: "Small",
+        medium: "Medium",
+        large: "Large",
         serverTime: "Server time:",
         clientTime: "Client time:",
         differenceMinutes: "Difference: {{count}} minute(s)"
@@ -1048,6 +1051,9 @@ const messages = {
             enabled: "enabled",
             disabled: "disabled"
           }
+        },
+        DesktopActionIconZoom: {
+          title: "Ticket action icon size"
         },
         VoiceAndVideoCalls: {
           title: "Voice and video calls",

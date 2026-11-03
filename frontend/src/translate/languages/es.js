@@ -1053,6 +1053,9 @@ const messages = {
             disabled: "Desactivado"
           }
         },
+        DesktopActionIconZoom: {
+          title: "Tamaño del icono de acción del ticket"
+        },
         VoiceAndVideoCalls: {
           title: "Llamadas de voz y vídeo",
           options: {
