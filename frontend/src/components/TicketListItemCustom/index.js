@@ -546,6 +546,9 @@ const TicketListItemCustom = ({
                   component="span"
                   variant="body2"
                   color="textPrimary"
+                  style={{
+                    fontWeight: ticket.unreadMessages ? "bold" : "normal"
+                  }}
                 >
                   {sanitizedName(ticket.contact)}
                 </Typography>
