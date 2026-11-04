@@ -498,43 +498,29 @@ export function CompaniesManagerGrid(props) {
   } = props;
   const classes = useStyles();
   const { dateToClient } = useDate();
-  const { getSetting } = useSettings();
-  const [gracePeriod, setGracePeriod] = useState(5);
   const observerRef = useRef(null);
 
-  useEffect(() => {
-    getSetting("gracePeriod").then(value => {
-      if (!isNaN(Number(value))) {
-        setGracePeriod(Number(value));
-      }
-    });
-  }, [getSetting]);
-
   const getStatusInfo = record => {
-    if (moment(record.dueDate).isValid()) {
-      const now = moment();
-      const dueDate = moment(record.dueDate);
-      const diff = dueDate.diff(now, "days");
-      if (diff < -gracePeriod) {
-        return {
-          label: i18n.t("common.inactive"),
-          class: classes.statusInactive
-        };
+    const statusMap = {
+      inactive: {
+        label: i18n.t("common.inactive"),
+        class: classes.statusInactive
+      },
+      gracePeriod: {
+        label: i18n.t("companiesManager.status.gracePeriod"),
+        class: classes.statusGracePeriod
+      },
+      almostDue: {
+        label: i18n.t("companiesManager.status.almostDue"),
+        class: classes.statusAlmostDue
+      },
+      active: {
+        label: i18n.t("common.active"),
+        class: classes.statusActive
       }
-      if (diff < 0) {
-        return {
-          label: i18n.t("companiesManager.status.gracePeriod"),
-          class: classes.statusGracePeriod
-        };
-      }
-      if (diff < 7) {
-        return {
-          label: i18n.t("companiesManager.status.almostDue"),
-          class: classes.statusAlmostDue
-        };
-      }
-    }
-    return { label: i18n.t("common.active"), class: classes.statusActive };
+    };
+
+    return statusMap[record.subscriptionStatus] || statusMap.active;
   };
 
   const renderPlan = row => {
@@ -808,17 +794,6 @@ export default function CompaniesManager() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const { getSetting } = useSettings();
-  const [gracePeriod, setGracePeriod] = useState(5);
-
-  useEffect(() => {
-    getSetting("gracePeriod").then(value => {
-      if (!isNaN(Number(value))) {
-        setGracePeriod(Number(value));
-      }
-    });
-  }, [getSetting]);
-
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       loadInitial();
@@ -836,15 +811,9 @@ export default function CompaniesManager() {
       let filteredCompanies = companies;
 
       if (statusFilter === "active") {
-        filteredCompanies = companies.filter(company => {
-          if (!company.dueDate || !moment(company.dueDate).isValid()) {
-            return true;
-          }
-          const now = moment();
-          const dueDate = moment(company.dueDate);
-          const diff = dueDate.diff(now, "days");
-          return diff >= -gracePeriod;
-        });
+        filteredCompanies = companies.filter(
+          company => company.subscriptionStatus !== "inactive"
+        );
       }
 
       setRecords(filteredCompanies);
@@ -867,15 +836,9 @@ export default function CompaniesManager() {
       let filteredCompanies = companies;
 
       if (statusFilter === "active") {
-        filteredCompanies = companies.filter(company => {
-          if (!company.dueDate || !moment(company.dueDate).isValid()) {
-            return true;
-          }
-          const now = moment();
-          const dueDate = moment(company.dueDate);
-          const diff = dueDate.diff(now, "days");
-          return diff >= -gracePeriod;
-        });
+        filteredCompanies = companies.filter(
+          company => company.subscriptionStatus !== "inactive"
+        );
       }
 
       setRecords(prev => [...prev, ...filteredCompanies]);
