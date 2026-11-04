@@ -48,7 +48,8 @@ import {
   List as AllIcon,
   Delete as DeleteIcon,
   ExitToApp as ImpersonateIcon,
-  DateRange as AddPeriodIcon
+  DateRange as AddPeriodIcon,
+  Person as PersonIcon
 } from "@material-ui/icons";
 
 import { toast } from "react-toastify";
@@ -492,7 +493,8 @@ export function CompaniesManagerGrid(props) {
     loading,
     onImpersonate,
     onDelete,
-    onAddPeriod
+    onAddPeriod,
+    onUsers
   } = props;
   const classes = useStyles();
   const { dateToClient } = useDate();
@@ -714,6 +716,17 @@ export function CompaniesManagerGrid(props) {
                     size="small"
                     onClick={e => {
                       e.stopPropagation();
+                      onUsers(row);
+                    }}
+                    aria-label="users"
+                    title={i18n.t("companiesManager.buttons.users")}
+                  >
+                    <PersonIcon />
+                  </IconButton>
+                  <IconButton
+                    size="small"
+                    onClick={e => {
+                      e.stopPropagation();
                       onImpersonate(row);
                     }}
                     aria-label="impersonate"
@@ -767,6 +780,7 @@ export default function CompaniesManager() {
     useState(false);
   const [showConfirmAddPeriodDialog, setShowConfirmAddPeriodDialog] =
     useState(false);
+  const [showUsersModal, setShowUsersModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [records, setRecords] = useState([]);
@@ -1042,6 +1056,36 @@ export default function CompaniesManager() {
     handleOpenAddPeriodDialog();
   };
 
+  const handleCardUsers = async data => {
+    setRecord(prev => ({
+      ...prev,
+      id: data.id,
+      name: data.name || "",
+      email: data.email || ""
+    }));
+
+    // Check if user exists with company email
+    if (data.email) {
+      try {
+        const { data: usersData } = await api.get("/users", {
+          params: { companyId: data.id }
+        });
+        const existingUser = usersData.users?.find(u => u.email === data.email);
+        if (existingUser) {
+          setRecord(prev => ({
+            ...prev,
+            userId: existingUser.id
+          }));
+        }
+      } catch (err) {
+        // If API call fails, just open modal without userId
+        console.error("Error fetching users:", err);
+      }
+    }
+
+    setShowUsersModal(true);
+  };
+
   const handleNew = () => {
     setRecord({
       name: "",
@@ -1105,6 +1149,7 @@ export default function CompaniesManager() {
             onImpersonate={handleCardImpersonate}
             onDelete={handleCardDelete}
             onAddPeriod={handleCardAddPeriod}
+            onUsers={handleCardUsers}
           />
         </Grid>
       </Grid>
@@ -1162,6 +1207,16 @@ export default function CompaniesManager() {
       >
         {i18n.t("companiesManager.confirmationModal.addPeriodMessage")}
       </ConfirmationModal>
+      <ModalUsers
+        open={showUsersModal}
+        onClose={() => {
+          setShowUsersModal(false);
+          setRecord(prev => ({ ...prev, userId: undefined }));
+        }}
+        companyId={record.id}
+        companyEmail={record.email}
+        userId={record.userId}
+      />
     </Paper>
   );
 }

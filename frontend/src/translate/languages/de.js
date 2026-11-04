@@ -91,7 +91,8 @@ const messages = {
           clear: "Leeren",
           accessAs: "Zugreifen als",
           incrementDueDate: "+ Faelligkeitsdatum",
-          user: "Benutzer"
+          user: "Benutzer",
+          users: "Benutzer"
         },
         table: {
           campaigns: "Kampagnen",

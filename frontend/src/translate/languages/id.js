@@ -91,7 +91,8 @@ const messages = {
           clear: "Bersihkan",
           accessAs: "Akses sebagai",
           incrementDueDate: "+ Jatuh Tempo",
-          user: "Pengguna"
+          user: "Pengguna",
+          users: "Pengguna"
         },
         table: {
           campaigns: "Kampanye",

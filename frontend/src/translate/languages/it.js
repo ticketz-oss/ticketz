@@ -92,7 +92,8 @@ const messages = {
           clear: "Cancella",
           accessAs: "Accedi come",
           incrementDueDate: "+ Scadenza",
-          user: "Utente"
+          user: "Utente",
+          users: "Utenti"
         },
         table: {
           campaigns: "Campagne",

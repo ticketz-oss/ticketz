@@ -130,7 +130,8 @@ const messages = {
           clear: "Clear",
           accessAs: "Access as",
           incrementDueDate: "+ Due Date",
-          user: "User"
+          user: "User",
+          users: "Users"
         },
         table: {
           campaigns: "Campaigns",

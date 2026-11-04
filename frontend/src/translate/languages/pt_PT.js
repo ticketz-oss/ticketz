@@ -124,7 +124,8 @@ const messages = {
           clear: "Limpar",
           accessAs: "Aceder como",
           incrementDueDate: "+ Vencimento",
-          user: "Utilizador"
+          user: "Utilizador",
+          users: "Utilizadores"
         },
         table: {
           campaigns: "Campanhas",

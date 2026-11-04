@@ -65,12 +65,12 @@ const UserSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Required")
 });
 
-const ModalUsers = ({ open, onClose, userId, companyId }) => {
+const ModalUsers = ({ open, onClose, userId, companyId, companyEmail }) => {
   const classes = useStyles();
 
   const initialState = {
     name: "",
-    email: "",
+    email: companyEmail || "",
     password: "",
     profile: "user"
   };
@@ -79,6 +79,17 @@ const ModalUsers = ({ open, onClose, userId, companyId }) => {
 
   const [user, setUser] = useState(initialState);
   const [selectedQueueIds, setSelectedQueueIds] = useState([]);
+
+  useEffect(() => {
+    if (open && !userId) {
+      setUser({
+        name: "",
+        email: companyEmail || "",
+        password: "",
+        profile: "user"
+      });
+    }
+  }, [open, userId, companyEmail]);
 
   useEffect(() => {
     const fetchUser = async () => {
