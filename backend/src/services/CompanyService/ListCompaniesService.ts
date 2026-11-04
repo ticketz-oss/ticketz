@@ -1,5 +1,6 @@
 import { Sequelize, Op } from "sequelize";
 import Company from "../../models/Company";
+import Plan from "../../models/Plan";
 
 interface Request {
   searchParam?: string;
@@ -21,21 +22,21 @@ const ListCompaniesService = async ({
     [Op.or]: [
       {
         name: Sequelize.where(
-          Sequelize.fn("LOWER", Sequelize.col("name")),
+          Sequelize.fn("LOWER", Sequelize.col("Company.name")),
           "LIKE",
           searchQuery
         )
       },
       {
         phone: Sequelize.where(
-          Sequelize.fn("LOWER", Sequelize.col("phone")),
+          Sequelize.fn("LOWER", Sequelize.col("Company.phone")),
           "LIKE",
           searchQuery
         )
       },
       {
         email: Sequelize.where(
-          Sequelize.fn("LOWER", Sequelize.col("email")),
+          Sequelize.fn("LOWER", Sequelize.col("Company.email")),
           "LIKE",
           searchQuery
         )
@@ -47,6 +48,7 @@ const ListCompaniesService = async ({
 
   const { count, rows: companies } = await Company.findAndCountAll({
     where: whereCondition,
+    include: [{ model: Plan, as: "plan", attributes: ["id", "name", "value"] }],
     limit,
     offset,
     order: [["name", "ASC"]]
