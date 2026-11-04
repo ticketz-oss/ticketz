@@ -103,7 +103,7 @@ const messages = {
       },
       companiesManager: {
         status: {
-          gracePeriod: "Período de Graça",
+          gracePeriod: "Período de Carência",
           almostDue: "Quase Vencido"
         },
         section: {
