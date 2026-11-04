@@ -16,13 +16,28 @@ const ListCompaniesService = async ({
   searchParam = "",
   pageNumber = "1"
 }: Request): Promise<Response> => {
+  const searchQuery = `%${searchParam.toLowerCase().trim()}%`;
   const whereCondition = {
     [Op.or]: [
       {
         name: Sequelize.where(
           Sequelize.fn("LOWER", Sequelize.col("name")),
           "LIKE",
-          `%${searchParam.toLowerCase().trim()}%`
+          searchQuery
+        )
+      },
+      {
+        phone: Sequelize.where(
+          Sequelize.fn("LOWER", Sequelize.col("phone")),
+          "LIKE",
+          searchQuery
+        )
+      },
+      {
+        email: Sequelize.where(
+          Sequelize.fn("LOWER", Sequelize.col("email")),
+          "LIKE",
+          searchQuery
         )
       }
     ]
