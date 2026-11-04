@@ -864,7 +864,21 @@ export default function CompaniesManager() {
         nextPage,
         searchParam
       );
-      setRecords(prev => [...prev, ...companies]);
+      let filteredCompanies = companies;
+
+      if (statusFilter === "active") {
+        filteredCompanies = companies.filter(company => {
+          if (!company.dueDate || !moment(company.dueDate).isValid()) {
+            return true;
+          }
+          const now = moment();
+          const dueDate = moment(company.dueDate);
+          const diff = dueDate.diff(now, "days");
+          return diff >= -gracePeriod;
+        });
+      }
+
+      setRecords(prev => [...prev, ...filteredCompanies]);
       setPageNumber(nextPage);
       setHasMore(more);
     } catch (e) {
