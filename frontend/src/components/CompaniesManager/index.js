@@ -1044,10 +1044,10 @@ export default function CompaniesManager() {
     // Check if user exists with company email
     if (data.email) {
       try {
-        const { data: usersData } = await api.get("/users", {
+        const { data: usersData } = await api.get("/users/list", {
           params: { companyId: data.id }
         });
-        const existingUser = usersData.users?.find(u => u.email === data.email);
+        const existingUser = usersData.find(u => u.email === data.email);
         if (existingUser) {
           setRecord(prev => ({
             ...prev,
