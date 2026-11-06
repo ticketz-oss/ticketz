@@ -259,7 +259,8 @@ const CampaignDashboard = () => {
 
     const onContactListUpdate = data => {
       if (data.action === "update" || data.action === "create") {
-        fetchContactLists();
+        setContactListPage(1);
+        setContactLists([]);
       }
       if (data.action === "delete") {
         setContactLists(prev => prev.filter(c => c.id !== +data.id));
@@ -349,7 +350,8 @@ const CampaignDashboard = () => {
     try {
       await api.delete(`/contact-lists/${deletingContactList.id}`);
       toast.success(i18n.t("campaigns.toasts.deleted"));
-      fetchContactLists();
+      setContactListPage(1);
+      setContactLists([]);
     } catch (err) {
       toastError(err);
     }
@@ -385,7 +387,8 @@ const CampaignDashboard = () => {
   const handleCloseContactListDialog = () => {
     setSelectedContactList(null);
     setContactListDialogOpen(false);
-    fetchContactLists();
+    setContactListPage(1);
+    setContactLists([]);
   };
 
   const handleViewContactListContacts = contactList => {
@@ -611,9 +614,15 @@ const CampaignDashboard = () => {
 
       <Fab
         color="primary"
-        aria-label="add campaign"
+        aria-label={
+          viewMode === "campaigns" ? "add campaign" : "add contact list"
+        }
         className={classes.fabButton}
-        onClick={handleOpenCampaignModal}
+        onClick={
+          viewMode === "campaigns"
+            ? handleOpenCampaignModal
+            : () => handleOpenContactListDialog(null)
+        }
       >
         <AddIcon />
       </Fab>
