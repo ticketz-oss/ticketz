@@ -64,11 +64,7 @@ const ListService = async ({
     group: ["ContactList.id"]
   });
 
-  let count = 0;
-
-  Object.keys(counters).forEach(key => {
-    count += counters[key].count;
-  });
+  const count = Array.isArray(counters) ? counters.length : Number(counters);
 
   const hasMore = count > offset + records.length;
 
