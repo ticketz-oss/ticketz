@@ -260,7 +260,7 @@ const CampaignDashboard = () => {
     const onContactListUpdate = data => {
       if (data.action === "update" || data.action === "create") {
         setContactListPage(1);
-        setContactLists([]);
+        fetchContactLists();
       }
       if (data.action === "delete") {
         setContactLists(prev => prev.filter(c => c.id !== +data.id));
@@ -351,7 +351,7 @@ const CampaignDashboard = () => {
       await api.delete(`/contact-lists/${deletingContactList.id}`);
       toast.success(i18n.t("campaigns.toasts.deleted"));
       setContactListPage(1);
-      setContactLists([]);
+      fetchContactLists();
     } catch (err) {
       toastError(err);
     }
@@ -388,7 +388,7 @@ const CampaignDashboard = () => {
     setSelectedContactList(null);
     setContactListDialogOpen(false);
     setContactListPage(1);
-    setContactLists([]);
+    fetchContactLists();
   };
 
   const handleViewContactListContacts = contactList => {
