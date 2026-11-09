@@ -154,8 +154,12 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   if (medias) {
     if (channel === "whatsapp") {
       await Promise.all(
-        medias.map(async (media: Express.Multer.File) => {
-          await SendWhatsAppMedia({ media, ticket });
+        medias.map(async (media: Express.Multer.File, index: number) => {
+          await SendWhatsAppMedia({
+            media,
+            ticket,
+            caption: index === 0 && body ? body : undefined
+          });
           fs.unlinkSync(media.path);
         })
       );
@@ -349,7 +353,7 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
 
     if (medias) {
       await Promise.all(
-        medias.map(async (media: Express.Multer.File) => {
+        medias.map(async (media: Express.Multer.File, index: number) => {
           await req.app.get("queues").messageQueue.add(
             "SendMessage",
             {

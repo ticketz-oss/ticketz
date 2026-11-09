@@ -48,15 +48,7 @@ const CreateContactService = async ({
     where,
     include: returnFound
       ? [
-          {
-            association: "tags",
-            include: [
-              {
-                association: "funnelStep",
-                include: ["funnel"]
-              }
-            ]
-          },
+          "tags",
           "extraInfo"
         ]
       : undefined
