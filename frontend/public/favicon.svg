@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#020617" />
+    </linearGradient>
+    <linearGradient id="neoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="50%" stop-color="#25D366" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+    <linearGradient id="tail2Grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4" />
+      <stop offset="100%" stop-color="#3b82f6" />
+    </linearGradient>
+    <linearGradient id="glowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#25D366" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#06b6d4" stop-opacity="0.05" />
+    </linearGradient>
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Squircle Base -->
+  <rect x="20" y="20" width="472" height="472" rx="112" fill="url(#bgGrad)" stroke="#1e293b" stroke-width="4" />
+
+  <!-- Ambient Backdrop Glow -->
+  <circle cx="256" cy="245" r="130" fill="url(#glowGrad)" filter="url(#softGlow)" />
+
+  <!-- Secondary Tail (2Caudas Accent) -->
+  <path d="M125 345 C110 375, 85 395, 60 405 C95 400, 130 380, 150 355 Z" fill="url(#tail2Grad)" opacity="0.85" />
+
+  <!-- Primary Chat Bubble Body with Main Tail -->
+  <path d="M140 120 C220 120, 390 120, 390 120 C420 120, 440 140, 440 170 L440 300 C440 330, 420 350, 390 350 L180 350 C140 350, 110 395, 95 425 C95 385, 95 365, 90 350 C70 350, 55 330, 55 300 L55 170 C55 140, 75 120, 105 120 Z" 
+        fill="#0b1329" stroke="url(#neoGrad)" stroke-width="14" stroke-linejoin="round" />
+
+  <!-- The "N" Neo Energy Monogram / Waveform Inside Bubble -->
+  <!-- Left Pillar -->
+  <rect x="155" y="180" width="28" height="110" rx="14" fill="url(#neoGrad)" />
+
+  <!-- Right Pillar -->
+  <rect x="315" y="180" width="28" height="110" rx="14" fill="url(#neoGrad)" />
+
+  <!-- Dynamic Diagonal Pulse -->
+  <path d="M162 188 L328 282" stroke="url(#neoGrad)" stroke-width="26" stroke-linecap="round" />
+
+  <!-- Wave / Signal Spark Accent Dots -->
+  <circle cx="205" cy="235" r="6" fill="#ffffff" />
+  <circle cx="285" cy="235" r="6" fill="#ffffff" />
+</svg>

@@ -1,0 +1,161 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light dark;
+  --whatsapp-primary: #00a884;
+}
+
+textarea:focus, input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Hide scrollbar for clean UI rails */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  user-select: none;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Prevent accidental dragging of in-app images, avatars, or media triggering file upload dropzone */
+img, video, audio, svg {
+  -webkit-user-drag: none;
+  user-drag: none;
+}
+
+/* Allow text selection where explicitly required */
+.select-text,
+.select-text *,
+[data-selectable="true"] {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+}
+
+/* Custom scrollbars matching WhatsApp */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(134, 150, 160, 0.25);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(134, 150, 160, 0.45);
+}
+
+/* WhatsApp Authentic Chat Wallpaper */
+.chat-wallpaper {
+  background-color: #efeae2;
+  background-image: url("./assets/wa-background-light.png");
+  background-repeat: repeat;
+  background-size: 420px auto;
+}
+
+.dark .chat-wallpaper {
+  background-color: #0b141a !important;
+  background-image: url("./assets/wa-background-dark.png") !important;
+  background-repeat: repeat;
+  background-size: 420px auto;
+}
+
+/* Quoted message jump & flash animation */
+@keyframes quoteFlash {
+  0% {
+    background-color: rgba(37, 211, 102, 0.45);
+    transform: scale(1.02);
+  }
+  50% {
+    background-color: rgba(37, 211, 102, 0.2);
+  }
+  100% {
+    background-color: transparent;
+    transform: scale(1);
+  }
+}
+
+.highlight-quote-flash {
+  animation: quoteFlash 1.6s ease-out;
+  border-radius: 8px;
+}
+
+/* Fallback legacy classes */
+.chat-wallpaper-light {
+  background-color: #efeae2;
+  background-image: url("./assets/wa-background-light.png");
+  background-repeat: repeat;
+  background-size: 420px auto;
+}
+
+.chat-wallpaper-dark {
+  background-color: #0b141a !important;
+  background-image: url("./assets/wa-background-dark.png") !important;
+  background-repeat: repeat;
+  background-size: 420px auto;
+}
+
+/* Message speech bubble tail shapes */
+.bubble-tail-right::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -8px;
+  width: 0;
+  height: 0;
+  border-top: 10px solid inherit;
+  border-right: 8px solid transparent;
+}
+
+/* Audio Waveform animation */
+@keyframes wave-pulse {
+  0%, 100% { height: 4px; }
+  50% { height: 16px; }
+}
+
+.audio-bar-anim {
+  animation: wave-pulse 1s ease-in-out infinite;
+}
+
+/* Safe Area Insets for iOS & Android Edge-to-Edge */
+.pb-safe {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+}
+.pt-safe {
+  padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+}
+
+/* Mobile-Specific Adaptations (Preserves 100% of Desktop Behavior) */
+@media screen and (max-width: 768px) {
+  /* Prevent iOS Safari auto-zoom when focusing inputs/textareas */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+
+  /* Remove default mobile tap grey box and prevent magnify callout */
+  button, [role="button"], a {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+}

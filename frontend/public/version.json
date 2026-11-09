@@ -1,0 +1,15 @@
+{
+  "version": "2.5.1",
+  "versionCode": 251,
+  "apkUrl": "/download",
+  "releaseDate": "31/10/2026",
+  "mandatory": false,
+  "notes": [
+    "Nova Identidade Visual & Ícone Ticketz Neo em alta resolução",
+    "Roteamento Multi-Host: suporte simultâneo a múltiplos domínios",
+    "Deduplicação de Armazenamento de Figurinhas (SHA-256) e Galeria Unificada",
+    "Áudio WhatsApp PTT com normalização de loudness (-16 LUFS) e waveform nativo",
+    "Visualizador de PDFs integrado e preservação de anexos",
+    "Melhorias de navegação: tecla Esc para limpar busca e persistência de abas"
+  ]
+}

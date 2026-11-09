@@ -1,25 +1,31 @@
 {
-  "short_name": "Ticketz",
-  "name": "Ticketz - Chat Based Ticket System",
+  "name": "Ticketz Neo - Atendimento WhatsApp",
+  "short_name": "Ticketz Neo",
+  "description": "Sistema Comercial de Atendimento WhatsApp Multicanal",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#111b21",
+  "theme_color": "#111b21",
   "icons": [
     {
-      "src": "vector/favicon.ico",
-      "sizes": "512x512 192x192 64x64 32x32 24x24 16x16",
-      "type": "image/svg+xml"
-    },
-    {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    },
-    {
-      "src": "/android-chrome-192x192.png",
+      "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
-  ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  ]
 }

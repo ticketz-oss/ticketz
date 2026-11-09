@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Ticketz Neo</string>
+    <string name="title_activity_main">Ticketz Neo</string>
+    <string name="package_name">com.ticketzneo.app</string>
+    <string name="custom_url_scheme">com.ticketzneo.app</string>
+</resources>
