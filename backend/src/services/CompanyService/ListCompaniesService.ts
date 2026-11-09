@@ -1,6 +1,7 @@
 import { Sequelize, Op } from "sequelize";
 import Company from "../../models/Company";
 import Plan from "../../models/Plan";
+import Setting from "../../models/Setting";
 import { GetCompanySetting } from "../../helpers/CheckSettings";
 
 interface Request {
@@ -55,7 +56,10 @@ const ListCompaniesService = async ({
 
   const { count, rows: companies } = await Company.findAndCountAll({
     where: whereCondition,
-    include: [{ model: Plan, as: "plan", attributes: ["id", "name", "value"] }],
+    include: [
+      { model: Plan, as: "plan", attributes: ["id", "name", "value"] },
+      { model: Setting, as: "settings", attributes: ["key", "value"] }
+    ],
     limit,
     offset,
     order: [["name", "ASC"]]
