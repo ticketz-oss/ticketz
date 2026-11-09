@@ -3,12 +3,12 @@ import { Logger } from "pino";
 /**
  * A simple object cache with a time-to-live (TTL) for each key
  */
-export class SimpleObjectCache {
+export class SimpleObjectCache<T = unknown> {
   private ttl: number;
 
   private logger: Logger;
 
-  private cache: Map<string, { value: any; timer: NodeJS.Timeout }>;
+  private cache: Map<string, { value: T; timer: NodeJS.Timeout }>;
 
   /**
    * @param ttl Time to live in milliseconds
@@ -28,12 +28,8 @@ export class SimpleObjectCache {
    * @example cache.set('foo', 'bar');
    * @example cache.set('foo', { bar: 'baz' });
    */
-  set(key: string, value: any) {
-    // If a timer already exists for this key, clear it
-    if (this.cache.has(key)) {
-      clearTimeout(this.cache.get(key)!.timer);
-      this.logger?.debug(`Cache key ${key} was cleared`);
-    }
+  set(key: string, value: T) {
+    this.remove(key);
 
     // Set a new timer
     const timer = setTimeout(() => {
@@ -47,18 +43,58 @@ export class SimpleObjectCache {
   }
 
   /**
+   * Remove a key from the cache
+   * @param key
+   * @returns void
+   */
+  remove(key: string) {
+    const data = this.cache.get(key);
+    if (data) {
+      clearTimeout(data.timer);
+      this.cache.delete(key);
+      this.logger?.debug(`Cache key ${key} was removed`);
+    }
+  }
+
+  /**
    * Get a value from the cache
    * @param key
    * @returns The value stored in the cache
    * @example cache.get('foo');
    */
-  get(key: string) {
+  get<U = T>(key: string): U | null {
     const data = this.cache.get(key);
     if (!data) {
       return null;
     }
 
+    data.timer.refresh();
+
     this.logger?.debug(`Cache key ${key} was accessed`);
-    return data.value;
+    return data.value as unknown as U;
+  }
+
+  /**
+   * Delete a key from the cache (alias for remove)
+   * @param key
+   * @returns void
+   * @example cache.delete('foo');
+   */
+  delete(key: string) {
+    this.remove(key);
+  }
+
+  /**
+   * Delete all keys that start with the given prefix
+   * @param prefix
+   * @returns void
+   * @example cache.deleteByPrefix('user-');
+   */
+  deleteByPrefix(prefix: string) {
+    Array.from(this.cache.keys()).forEach(key => {
+      if (key.startsWith(prefix)) {
+        this.remove(key);
+      }
+    });
   }
 }

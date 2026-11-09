@@ -94,8 +94,8 @@ interface IMe {
 const wbotMutex = new Mutex();
 const ackMutex = new Mutex();
 
-const groupContactCache = new SimpleObjectCache(1000 * 30, logger);
-const outOfHoursCache = new SimpleObjectCache(1000 * 60 * 5, logger);
+const groupContactCache = new SimpleObjectCache<Contact>(1000 * 30, logger);
+const outOfHoursCache = new SimpleObjectCache<boolean>(1000 * 60 * 5, logger);
 
 const getTypeMessage = (msg: proto.IWebMessageInfo): string => {
   return getContentType(msg.message);

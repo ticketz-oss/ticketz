@@ -8,6 +8,8 @@ interface Request {
   companyId: number | string;
   searchParam?: string;
   pageNumber?: string;
+  status?: string;
+  showAll?: boolean;
 }
 
 interface Response {
@@ -19,11 +21,32 @@ interface Response {
 const ListService = async ({
   searchParam = "",
   pageNumber = "1",
-  companyId
+  companyId,
+  status,
+  showAll = false
 }: Request): Promise<Response> => {
   let whereCondition: any = {
     companyId
   };
+
+  if (status) {
+    whereCondition.status = status;
+  }
+
+  if (!showAll && !status) {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    whereCondition = {
+      ...whereCondition,
+      [Op.or]: [
+        { status: { [Op.in]: ["PROGRAMADA", "EM_ANDAMENTO"] } },
+        {
+          status: "FINALIZADA",
+          completedAt: { [Op.gte]: sevenDaysAgo }
+        }
+      ]
+    };
+  }
 
   if (!isEmpty(searchParam)) {
     whereCondition = {
@@ -47,7 +70,7 @@ const ListService = async ({
     where: whereCondition,
     limit,
     offset,
-    order: [["name", "ASC"]],
+    order: [["createdAt", "DESC"]],
     include: [
       { model: ContactList },
       { model: Whatsapp, attributes: ["id", "name"] }

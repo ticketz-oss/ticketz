@@ -3,6 +3,7 @@ import AppError from "../../errors/AppError";
 import Company from "../../models/Company";
 import Invoices from "../../models/Invoices";
 import Setting from "../../models/Setting";
+import { invalidateCompanyComplianceCache } from "../../helpers/CheckCompanyCompliant";
 
 interface CompanyData {
   name: string;
@@ -49,6 +50,10 @@ const UpdateCompanyService = async (
     recurrence,
     language
   });
+
+  if (dueDate !== undefined) {
+    invalidateCompanyComplianceCache(company.id);
+  }
 
   if (companyData.campaignsEnabled !== undefined) {
     const [setting, created] = await Setting.findOrCreate({

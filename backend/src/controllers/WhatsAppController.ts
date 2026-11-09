@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { Op } from "sequelize";
 import { cacheLayer } from "../libs/cache";
 import { getIO } from "../libs/socket";
-import { removeWbot } from "../libs/wbot";
+import { getConnectedNumber, removeWbot } from "../libs/wbot";
 import DeleteBaileysService from "../services/BaileysServices/DeleteBaileysService";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
 
@@ -38,7 +38,15 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 
   const whatsapps = await ListWhatsAppsService({ companyId });
 
-  return res.status(200).json(whatsapps);
+  const whatsappsWithNumber = whatsapps.map(whatsapp => {
+    if (whatsapp.channel === "whatsapp" && whatsapp.status === "CONNECTED") {
+      const connectedNumber = getConnectedNumber(whatsapp.id);
+      return { ...whatsapp.toJSON(), connectedNumber };
+    }
+    return whatsapp;
+  });
+
+  return res.status(200).json(whatsappsWithNumber);
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
@@ -96,6 +104,11 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
 
   if (!whatsapp) {
     throw new AppError("ERR_NO_WAPP_FOUND", 404);
+  }
+
+  if (whatsapp.channel === "whatsapp" && whatsapp.status === "CONNECTED") {
+    const connectedNumber = getConnectedNumber(whatsapp.id);
+    return res.status(200).json({ ...whatsapp.toJSON(), connectedNumber });
   }
 
   return res.status(200).json(whatsapp);

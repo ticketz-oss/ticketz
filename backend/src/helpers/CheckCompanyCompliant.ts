@@ -4,8 +4,16 @@ import { logger } from "../utils/logger";
 import { GetCompanySetting } from "./CheckSettings";
 import { SimpleObjectCache } from "./simpleObjectCache";
 
-const companyComplianceCache = new SimpleObjectCache(60 * 1000, logger);
+const companyComplianceCache = new SimpleObjectCache<boolean>(
+  60 * 1000,
+  logger
+);
 const checkMutex = new Mutex();
+
+export function invalidateCompanyComplianceCache(companyId: number): void {
+  const cacheKey = `company-${companyId}`;
+  companyComplianceCache.remove(cacheKey);
+}
 
 export async function checkCompanyCompliant(
   company: number | Company

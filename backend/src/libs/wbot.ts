@@ -30,6 +30,7 @@ import DeleteBaileysService from "../services/BaileysServices/DeleteBaileysServi
 import Contact from "../models/Contact";
 import Ticket from "../models/Ticket";
 import { GitInfo } from "../gitinfo";
+import { sendWhatsappUpdate } from "../services/WhatsappService/SocketSendWhatsappUpdate";
 import GetPublicSettingService from "../services/SettingServices/GetPublicSettingService";
 import waVersion from "../waversion.json";
 import Message from "../models/Message";
@@ -88,7 +89,16 @@ export const getWbot = (whatsappId: number): Session => {
   if (sessionIndex === -1) {
     throw new AppError("ERR_WAPP_NOT_INITIALIZED");
   }
+
   return sessions[sessionIndex];
+};
+
+export const getConnectedNumber = (whatsappId: number): string | undefined => {
+  const sessionIndex = sessions.findIndex(s => s.id === whatsappId);
+  if (sessionIndex === -1) return undefined;
+  const myJid = sessions[sessionIndex].myJid;
+  if (!myJid) return undefined;
+  return myJid.split("@")[0];
 };
 
 export const removeWbot = async (
@@ -548,6 +558,8 @@ export const initWASocket = async (
                   duplicatedWbot.ws.close();
                 }
               });
+
+              sendWhatsappUpdate(whatsapp);
 
               if (wsocket.isRefreshing) {
                 setTimeout(() => {
