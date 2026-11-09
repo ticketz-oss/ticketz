@@ -33,6 +33,8 @@ import AnnouncementIcon from "@material-ui/icons/Announcement";
 import ForumIcon from "@material-ui/icons/Forum";
 import LocalAtmIcon from "@material-ui/icons/LocalAtm";
 import RotateRight from "@material-ui/icons/RotateRight";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBullhorn } from "@fortawesome/free-solid-svg-icons";
 import { i18n } from "../translate/i18n";
 import BorderColorIcon from "@material-ui/icons/BorderColor";
 import { WhatsAppsContext } from "../context/WhatsApp/WhatsAppsContext";
@@ -451,7 +453,10 @@ const MainListItems = props => {
                   onClick={() => history.push("/campaign-dashboard")}
                 >
                   <ListItemIcon className={classes.menuIcon}>
-                    <EventAvailableIcon />
+                    <FontAwesomeIcon
+                      style={{ fontSize: "1.4em" }}
+                      icon={faBullhorn}
+                    />
                   </ListItemIcon>
                   <ListItemText
                     primary={i18n.t("mainDrawer.listItems.campaigns")}
