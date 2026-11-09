@@ -14,6 +14,8 @@ const safeSettingsKeys = new Set([
   "CheckMsgIsGroup",
   "soundGroupNotifications",
   "tagsMode",
+  "allowSilentlyClose",
+  "allowSpy",
   "desktopActionIconZoom"
 ]);
 

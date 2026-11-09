@@ -4,11 +4,13 @@ import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
 import ShowTicketService from "../TicketServices/ShowTicketService";
 import Queue from "../../models/Queue";
+import User from "../../models/User";
 import { GetCompanySetting } from "../../helpers/CheckSettings";
 
 interface Request {
   ticketId: string;
   companyId: number;
+  user: User;
   nextId?: string;
   queues?: number[];
   minUpdatedAt?: string;
@@ -25,14 +27,31 @@ interface Response {
 const ListMessagesService = async ({
   nextId,
   ticketId,
+  user,
   companyId,
   queues = [],
   minUpdatedAt
 }: Request): Promise<Response> => {
-  const ticket = await ShowTicketService(ticketId, companyId);
+  const ticket = await ShowTicketService(ticketId, companyId, user.id);
 
   if (!ticket) {
     throw new AppError("ERR_NO_TICKET_FOUND", 404);
+  }
+
+  if (ticket.companyId !== companyId) {
+    throw new AppError("ERR_NO_PERMISSION", 403);
+  }
+
+  if (ticket.status === "pending" && user.profile !== "admin") {
+    const userQueues = user.queues.map(queue => queue.id);
+    if (
+      !userQueues.includes(ticket.queueId) ||
+      (!ticket.isGroup &&
+        (await GetCompanySetting(companyId, "allowSpy", "disabled", true)) !==
+          "enabled")
+    ) {
+      throw new AppError("ERR_NO_PERMISSION", 403);
+    }
   }
 
   const limit = 100;

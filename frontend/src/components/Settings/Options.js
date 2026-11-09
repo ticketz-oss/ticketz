@@ -140,6 +140,8 @@ export default function Options(props) {
   const [autoReopenTimeout, setAutoReopenTimeout] = useState(false);
   const [gracePeriod, setGracePeriod] = useState(0);
   const [tagsMode, setTagsMode] = useState("ticket");
+  const [allowSilentlyClose, setAllowSilentlyClose] = useState("enabled");
+  const [allowSpy, setAllowSpy] = useState("disabled");
   const [ticketAcceptedMessage, setTicketAcceptedMessage] = useState("");
   const [transferMessage, setTransferMessage] = useState("");
   const [desktopActionIconZoom, setDesktopActionIconZoom] = useState(0.8);
@@ -326,6 +328,14 @@ export default function Options(props) {
 
       const tagsMode = settings.find(s => s.key === "tagsMode");
       setTagsMode(tagsMode?.value || "ticket");
+
+      const allowSilentlyClose = settings.find(
+        s => s.key === "allowSilentlyClose"
+      );
+      setAllowSilentlyClose(allowSilentlyClose?.value || "enabled");
+
+      const allowSpy = settings.find(s => s.key === "allowSpy");
+      setAllowSpy(allowSpy?.value || "disabled");
 
       const ticketAcceptedMessage = settings.find(
         s => s.key === "ticketAcceptedMessage"
@@ -1149,6 +1159,60 @@ export default function Options(props) {
               <MenuItem value={1.0}>{i18n.t("common.large")}</MenuItem>
               <MenuItem value={0.8}>{i18n.t("common.medium")}</MenuItem>
               <MenuItem value={0.6}>{i18n.t("common.small")}</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+
+        <Grid item xs={12}>
+          <h2 className={classes.groupTitle}>
+            {i18n.t("settings.group.userpermissions")}
+          </h2>
+        </Grid>
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="allow-silentlyclose-label">
+              {i18n.t("settings.AllowSilentlyClose.title")}
+            </InputLabel>
+            <Select
+              labelId="allow-silentlyclose-label"
+              value={allowSilentlyClose || "enabled"}
+              onChange={async e => {
+                setAllowSilentlyClose(e.target.value);
+                await handleSetting(
+                  "allowSilentlyClose",
+                  e.target.value,
+                  setAllowSilentlyClose
+                );
+                i18nToast.success("settings.success");
+              }}
+            >
+              <MenuItem value={"disabled"}>
+                {i18n.t("common.disabled")}
+              </MenuItem>
+              <MenuItem value={"enabled"}>{i18n.t("common.enabled")}</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+
+        <Grid xs={12} sm={6} md={4} item>
+          <FormControl className={classes.selectContainer}>
+            <InputLabel id="allow-spy-label">
+              {i18n.t("settings.AllowSpy.title")}
+            </InputLabel>
+            <Select
+              labelId="allow-spy-label"
+              value={allowSpy || "disabled"}
+              onChange={async e => {
+                setAllowSpy(e.target.value);
+                await handleSetting("allowSpy", e.target.value, setAllowSpy);
+                i18nToast.success("settings.success");
+              }}
+            >
+              <MenuItem value={"disabled"}>
+                {i18n.t("common.disabled")}
+              </MenuItem>
+              <MenuItem value={"enabled"}>{i18n.t("common.enabled")}</MenuItem>
             </Select>
           </FormControl>
         </Grid>

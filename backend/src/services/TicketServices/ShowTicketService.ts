@@ -10,7 +10,8 @@ import Company from "../../models/Company";
 
 const ShowTicketService = async (
   id: string | number,
-  companyId?: number
+  companyId?: number,
+  _requesterUserId?: string | number
 ): Promise<Ticket> => {
   const ticket = await Ticket.findOne({
     where: {

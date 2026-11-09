@@ -238,6 +238,8 @@ const TicketListItemCustom = ({
   const history = useHistory();
   const [ticketUser, setTicketUser] = useState(null);
   const [whatsAppName, setWhatsAppName] = useState(null);
+  const [allowClose, setAllowClose] = useState(false);
+  const [allowSpy, setAllowSpy] = useState(false);
   const [groupsTab, setGroupsTab] = useState(false);
   const [desktopActionIconZoom, setDesktopActionIconZoom] = useState(0.8);
 
@@ -252,9 +254,15 @@ const TicketListItemCustom = ({
 
   useEffect(() => {
     if (user)
-      getCachedSetting("groupsTab", "disabled").then(res => {
-        setGroupsTab(res === "enabled");
+      getCachedSetting("allowSilentlyClose", "enabled").then(res => {
+        setAllowClose(user.profile === "admin" || res === "enabled");
       });
+    getCachedSetting("allowSpy", "disabled").then(res => {
+      setAllowSpy(user.profile === "admin" || res === "enabled");
+    });
+    getCachedSetting("groupsTab", "disabled").then(res => {
+      setGroupsTab(res === "enabled");
+    });
     getCachedSetting("desktopActionIconZoom", "0.6").then(res => {
       setDesktopActionIconZoom(parseFloat(res));
     });
@@ -328,7 +336,7 @@ const TicketListItemCustom = ({
           <>
             {["open", "pending"].includes(ticket.status) &&
               (groupActionButtons || !ticket.isGroup) &&
-              profile === "admin" && (
+              allowClose && (
                 <Tooltip title="Fechar Conversa">
                   <ClearOutlinedIcon
                     onClick={() => handleCloseTicket(ticket.id)}
@@ -341,20 +349,22 @@ const TicketListItemCustom = ({
                   />
                 </Tooltip>
               )}
-            <Tooltip title="Espiar Conversa">
-              <VisibilityIcon
-                onClick={e => {
-                  e.stopPropagation();
-                  setOpenTicketMessageDialog(true);
-                }}
-                fontSize="small"
-                className={classes.actionButton}
-                style={{
-                  color: "#fff",
-                  backgroundColor: blue[700]
-                }}
-              />
-            </Tooltip>
+            {allowSpy && (
+              <Tooltip title="Espiar Conversa">
+                <VisibilityIcon
+                  onClick={e => {
+                    e.stopPropagation();
+                    setOpenTicketMessageDialog(true);
+                  }}
+                  fontSize="small"
+                  className={classes.actionButton}
+                  style={{
+                    color: "#fff",
+                    backgroundColor: blue[700]
+                  }}
+                />
+              </Tooltip>
+            )}
             {ticket.status === "pending" &&
               (groupActionButtons || !ticket.isGroup) && (
                 <Tooltip title="Aceitar Conversa">

@@ -988,6 +988,7 @@ const messages = {
           officeHours: "Horas de oficina",
           groups: "Grupos",
           confidenciality: "Confidencialidad",
+          userpermissions: "Permisos de usuario",
           api: "API",
           externalServices: "Servicios externos",
           serveradmin: "Administración del servidor"
@@ -1184,6 +1185,12 @@ const messages = {
             contact: "Contacto",
             both: "Ticket y contacto"
           }
+        },
+        AllowSilentlyClose: {
+          title: "Permitir Cerrar Ticket Silenciosamente"
+        },
+        AllowSpy: {
+          title: "Permitir Espiar Tickets"
         },
         docker: {
           title: "Contenedores Docker",
