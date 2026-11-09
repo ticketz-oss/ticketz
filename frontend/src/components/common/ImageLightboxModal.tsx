@@ -35,19 +35,21 @@ export const ImageLightboxModal: React.FC<ImageLightboxModalProps> = ({
   alt = "Visualização da Imagem",
   onClose,
 }) => {
-  // Build the list of images
-  const imageList = images.length > 0 ? images : src ? [src] : [];
+  // Check if src belongs to the provided conversation images list
+  const isSrcInList = Boolean(
+    src && images.length > 0 && images.some((img) => normalizeUrl(img) === normalizeUrl(src))
+  );
+
+  // If src is explicitly provided and NOT in the conversation images list (e.g. contact profile picture),
+  // treat it as a standalone single image with NO carousel!
+  const imageList = isSrcInList ? images : src ? [src] : [];
 
   // Determine initial src: if src matches an item in imageList, pick that item;
-  // otherwise, default to the last image in the conversation (most recent)
+  // otherwise, default to src itself
   const getInitialSrc = () => {
-    if (src && imageList.length > 0) {
+    if (src && isSrcInList) {
       const match = imageList.find((img) => normalizeUrl(img) === normalizeUrl(src));
       if (match) return match;
-      return src;
-    }
-    if (imageList.length > 0) {
-      return imageList[imageList.length - 1];
     }
     return src;
   };
@@ -69,18 +71,13 @@ export const ImageLightboxModal: React.FC<ImageLightboxModalProps> = ({
       setCurrentSrc(null);
       return;
     }
-    if (imageList.length > 0) {
+    if (isSrcInList && imageList.length > 0) {
       const match = imageList.find((img) => normalizeUrl(img) === normalizeUrl(src));
-      if (match) {
-        setCurrentSrc(match);
-      } else {
-        // Fallback to the latest image if src is not matched
-        setCurrentSrc(imageList[imageList.length - 1]);
-      }
+      setCurrentSrc(match || src);
     } else {
       setCurrentSrc(src);
     }
-  }, [src, images]);
+  }, [src, images, isSrcInList]);
 
   // Use capture-phase Escape listener to close ONLY this lightbox
   useEscapeKey(onClose, Boolean(currentSrc));
