@@ -13,11 +13,7 @@ import {
   InputLabel,
   MenuItem,
   TextField,
-  Card,
-  CardContent,
-  CardActions,
   Typography,
-  IconButton,
   Select,
   Dialog,
   DialogTitle,
@@ -32,6 +28,7 @@ import {
 import { Formik, Form, Field } from "formik";
 import ButtonWithSpinner from "../ButtonWithSpinner";
 import ConfirmationModal from "../ConfirmationModal";
+import ActionCard from "../ActionCard";
 
 import {
   Edit as EditIcon,
@@ -83,18 +80,10 @@ const useStyles = makeStyles(theme => ({
     width: "100%",
     padding: theme.spacing(1)
   },
-  card: {
-    position: "relative",
-    transition: "all 0.3s ease",
-    "&:hover": {
-      transform: "translateY(-4px)",
-      boxShadow: theme.shadows[4]
-    }
-  },
   statusChip: {
     position: "absolute",
     top: 8,
-    right: 8,
+    right: 40,
     fontWeight: 600
   },
   statusActive: {
@@ -112,22 +101,6 @@ const useStyles = makeStyles(theme => ({
   statusAlmostDue: {
     backgroundColor: theme.mode === "light" ? "#2196f3" : "#38f",
     color: "#fff"
-  },
-  cardContent: {
-    paddingBottom: theme.spacing(1),
-    "&:last-child": {
-      paddingBottom: theme.spacing(1)
-    }
-  },
-  cardActions: {
-    justifyContent: "flex-end",
-    paddingTop: 0,
-    gap: theme.spacing(0.5)
-  },
-  companyName: {
-    fontWeight: 600,
-    marginBottom: theme.spacing(1),
-    paddingRight: theme.spacing(10)
   },
   statsContainer: {
     marginTop: theme.spacing(2)
@@ -564,186 +537,145 @@ export function CompaniesManagerGrid(props) {
       <Grid container spacing={2}>
         {records.map((row, key) => {
           const statusInfo = getStatusInfo(row);
+          const cardActions = [
+            {
+              icon: <EditIcon />,
+              label: i18n.t("common.edit"),
+              onClick: () => onSelect(row)
+            },
+            {
+              icon: <AddPeriodIcon />,
+              label: i18n.t("companiesManager.buttons.incrementDueDate"),
+              onClick: () => onAddPeriod(row)
+            },
+            {
+              icon: <PersonIcon />,
+              label: i18n.t("companiesManager.buttons.users"),
+              onClick: () => onUsers(row)
+            },
+            {
+              icon: <ImpersonateIcon />,
+              label: i18n.t("companiesManager.buttons.accessAs"),
+              onClick: () => onImpersonate(row)
+            },
+            { divider: true },
+            {
+              icon: <DeleteIcon />,
+              label: i18n.t("common.delete"),
+              onClick: () => onDelete(row)
+            }
+          ];
           return (
             <Grid item xs={12} sm={6} md={6} lg={6} xl={4} key={key}>
-              <Card
-                className={classes.card}
-                variant="outlined"
+              <ActionCard
+                actions={cardActions}
                 onClick={() => onSelect(row)}
-                style={{ cursor: "pointer" }}
+                title={row.name || "-"}
+                titleEllipsis
+                statusChip={{
+                  label: statusInfo.label,
+                  className: statusInfo.class
+                }}
               >
-                <CardContent className={classes.cardContent}>
-                  <Chip
-                    label={statusInfo.label}
-                    size="small"
-                    className={`${classes.statusChip} ${statusInfo.class}`}
-                  />
-
-                  <Typography
-                    variant="h6"
-                    component="h2"
-                    className={classes.companyName}
-                  >
-                    {row.name || "-"}
+                <Box className={classes.statsContainer}>
+                  <Typography className={classes.sectionTitle}>
+                    {i18n.t("companiesManager.section.info")}
                   </Typography>
-
-                  <Box className={classes.statsContainer}>
-                    <Typography className={classes.sectionTitle}>
-                      {i18n.t("companiesManager.section.info")}
-                    </Typography>
-                    <Grid container spacing={1}>
-                      <Grid item xs={12} className={classes.statItem}>
-                        <EmailIcon className={classes.statIcon} />
-                        <Box>
-                          <Typography className={classes.statLabel}>
-                            {i18n.t("common.email")}
-                          </Typography>
-                          <Typography className={classes.statValue}>
-                            {row.email || "-"}
-                          </Typography>
-                        </Box>
-                      </Grid>
-                      <Grid item xs={6} className={classes.statItem}>
-                        <PhoneIcon className={classes.statIcon} />
-                        <Box>
-                          <Typography className={classes.statLabel}>
-                            {i18n.t("common.phone")}
-                          </Typography>
-                          <Typography className={classes.statValue}>
-                            {row.phone || "-"}
-                          </Typography>
-                        </Box>
-                      </Grid>
-                      <Grid item xs={6} className={classes.statItem}>
-                        <PlanIcon className={classes.statIcon} />
-                        <Box>
-                          <Typography className={classes.statLabel}>
-                            {i18n.t("companies.form.plan")}
-                          </Typography>
-                          <Typography className={classes.statValue}>
-                            {renderPlan(row)}
-                          </Typography>
-                        </Box>
-                      </Grid>
-                      <Grid item xs={6} className={classes.statItem}>
-                        <CampaignsIcon className={classes.statIcon} />
-                        <Box>
-                          <Typography className={classes.statLabel}>
-                            {i18n.t("companiesManager.table.campaigns")}
-                          </Typography>
-                          <Typography className={classes.statValue}>
-                            {renderCampaignsStatus(row)}
-                          </Typography>
-                        </Box>
-                      </Grid>
-                      <Grid item xs={6} className={classes.statItem}>
-                        <StatusIcon className={classes.statIcon} />
-                        <Box>
-                          <Typography className={classes.statLabel}>
-                            {i18n.t("common.status")}
-                          </Typography>
-                          <Typography className={classes.statValue}>
-                            {row.status === false
-                              ? i18n.t("common.no")
-                              : i18n.t("common.yes")}
-                          </Typography>
-                        </Box>
-                      </Grid>
+                  <Grid container spacing={1}>
+                    <Grid item xs={12} className={classes.statItem}>
+                      <EmailIcon className={classes.statIcon} />
+                      <Box>
+                        <Typography className={classes.statLabel}>
+                          {i18n.t("common.email")}
+                        </Typography>
+                        <Typography className={classes.statValue}>
+                          {row.email || "-"}
+                        </Typography>
+                      </Box>
                     </Grid>
-                  </Box>
-
-                  <Divider className={classes.divider} />
-
-                  <Box>
-                    <Grid container spacing={1}>
-                      <Grid item xs={6} className={classes.statItem}>
-                        <CreatedIcon className={classes.statIcon} />
-                        <Box>
-                          <Typography className={classes.statLabel}>
-                            {i18n.t("companiesManager.table.createdAt")}
-                          </Typography>
-                          <Typography className={classes.statValue}>
-                            {dateToClient(row.createdAt)}
-                          </Typography>
-                        </Box>
-                      </Grid>
-                      <Grid item xs={6} className={classes.statItem}>
-                        <DueDateIcon className={classes.statIcon} />
-                        <Box>
-                          <Typography className={classes.statLabel}>
-                            {i18n.t("common.dueDate")}
-                          </Typography>
-                          <Typography className={classes.statValue}>
-                            {dateToClient(row.dueDate)}
-                          </Typography>
-                          {row.recurrence && (
-                            <Typography variant="caption" display="block">
-                              {row.recurrence}
-                            </Typography>
-                          )}
-                        </Box>
-                      </Grid>
+                    <Grid item xs={6} className={classes.statItem}>
+                      <PhoneIcon className={classes.statIcon} />
+                      <Box>
+                        <Typography className={classes.statLabel}>
+                          {i18n.t("common.phone")}
+                        </Typography>
+                        <Typography className={classes.statValue}>
+                          {row.phone || "-"}
+                        </Typography>
+                      </Box>
                     </Grid>
-                  </Box>
-                </CardContent>
-                <CardActions className={classes.cardActions}>
-                  <IconButton
-                    size="small"
-                    onClick={e => {
-                      e.stopPropagation();
-                      onAddPeriod(row);
-                    }}
-                    aria-label="add period"
-                    title={i18n.t("companiesManager.buttons.incrementDueDate")}
-                  >
-                    <AddPeriodIcon />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    onClick={e => {
-                      e.stopPropagation();
-                      onUsers(row);
-                    }}
-                    aria-label="users"
-                    title={i18n.t("companiesManager.buttons.users")}
-                  >
-                    <PersonIcon />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    onClick={e => {
-                      e.stopPropagation();
-                      onImpersonate(row);
-                    }}
-                    aria-label="impersonate"
-                    title={i18n.t("companiesManager.buttons.accessAs")}
-                  >
-                    <ImpersonateIcon />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    onClick={e => {
-                      e.stopPropagation();
-                      onDelete(row);
-                    }}
-                    aria-label="delete"
-                    title={i18n.t("common.delete")}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    onClick={e => {
-                      e.stopPropagation();
-                      onSelect(row);
-                    }}
-                    aria-label="edit"
-                    title={i18n.t("common.edit")}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                </CardActions>
-              </Card>
+                    <Grid item xs={6} className={classes.statItem}>
+                      <PlanIcon className={classes.statIcon} />
+                      <Box>
+                        <Typography className={classes.statLabel}>
+                          {i18n.t("companies.form.plan")}
+                        </Typography>
+                        <Typography className={classes.statValue}>
+                          {renderPlan(row)}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={6} className={classes.statItem}>
+                      <CampaignsIcon className={classes.statIcon} />
+                      <Box>
+                        <Typography className={classes.statLabel}>
+                          {i18n.t("companiesManager.table.campaigns")}
+                        </Typography>
+                        <Typography className={classes.statValue}>
+                          {renderCampaignsStatus(row)}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={6} className={classes.statItem}>
+                      <StatusIcon className={classes.statIcon} />
+                      <Box>
+                        <Typography className={classes.statLabel}>
+                          {i18n.t("common.status")}
+                        </Typography>
+                        <Typography className={classes.statValue}>
+                          {row.status === false
+                            ? i18n.t("common.no")
+                            : i18n.t("common.yes")}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </Box>
+
+                <Divider className={classes.divider} />
+
+                <Box>
+                  <Grid container spacing={1}>
+                    <Grid item xs={6} className={classes.statItem}>
+                      <CreatedIcon className={classes.statIcon} />
+                      <Box>
+                        <Typography className={classes.statLabel}>
+                          {i18n.t("companiesManager.table.createdAt")}
+                        </Typography>
+                        <Typography className={classes.statValue}>
+                          {dateToClient(row.createdAt)}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={6} className={classes.statItem}>
+                      <DueDateIcon className={classes.statIcon} />
+                      <Box>
+                        <Typography className={classes.statLabel}>
+                          {i18n.t("common.dueDate")}
+                        </Typography>
+                        <Typography className={classes.statValue}>
+                          {dateToClient(row.dueDate)}
+                        </Typography>
+                        {row.recurrence && (
+                          <Typography variant="caption" display="block">
+                            {row.recurrence}
+                          </Typography>
+                        )}
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </Box>
+              </ActionCard>
             </Grid>
           );
         })}

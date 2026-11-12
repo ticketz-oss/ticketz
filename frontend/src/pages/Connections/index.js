@@ -6,12 +6,8 @@ import { makeStyles } from "@material-ui/core/styles";
 import { green } from "@material-ui/core/colors";
 import {
   Button,
-  IconButton,
-  Tooltip,
   Typography,
   CircularProgress,
-  Card,
-  CardContent,
   Grid,
   Box,
   Divider,
@@ -41,6 +37,7 @@ import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
 import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper";
 import Title from "../../components/Title";
+import ActionCard from "../../components/ActionCard";
 
 import api from "../../services/api";
 import WhatsAppModal from "../../components/WhatsAppModal";
@@ -72,18 +69,10 @@ const useStyles = makeStyles(theme => ({
     width: "100%",
     padding: theme.spacing(1)
   },
-  card: {
-    position: "relative",
-    transition: "all 0.3s ease",
-    "&:hover": {
-      transform: "translateY(-4px)",
-      boxShadow: theme.shadows[4]
-    }
-  },
   statusChip: {
     position: "absolute",
     top: 8,
-    right: 8,
+    right: 40,
     fontWeight: 600
   },
   statusConnected: {
@@ -117,12 +106,6 @@ const useStyles = makeStyles(theme => ({
   statusUnsupported: {
     backgroundColor: "#9e9e9e",
     color: "#fff"
-  },
-  cardContent: {
-    paddingBottom: theme.spacing(1),
-    "&:last-child": {
-      paddingBottom: theme.spacing(1)
-    }
   },
   connectionName: {
     fontWeight: 600,
@@ -389,100 +372,97 @@ const Connections = () => {
     }
   };
 
-  const renderActionButtons = whatsApp => {
-    const buttons = [];
+  const getCardActions = whatsApp => {
+    const actions = [];
 
-    if (whatsApp.status === "qrcode") {
-      buttons.push(
-        <Tooltip key="qr" title={i18n.t("connections.toolTips.scan")}>
-          <IconButton size="small" onClick={() => handleOpenQrModal(whatsApp)}>
-            <FontAwesomeIcon icon={faQrcode} />
-          </IconButton>
-        </Tooltip>
-      );
+    if (!isUnsupportedChannel(whatsApp)) {
+      actions.push({
+        icon: <Edit />,
+        label: i18n.t("common.edit"),
+        onClick: () => handleEditWhatsApp(whatsApp)
+      });
+
+      if (whatsApp.status === "CONNECTED" && whatsApp.channel === "whatsapp") {
+        actions.push({
+          icon: <Lock />,
+          label: i18n.t("connections.toolTips.privacy"),
+          onClick: () => handleOpenPrivacyWhatsApp(whatsApp)
+        });
+      }
+
+      if (whatsApp.status === "qrcode") {
+        actions.push({
+          icon: <FontAwesomeIcon icon={faQrcode} />,
+          label: i18n.t("connections.toolTips.scan"),
+          onClick: () => handleOpenQrModal(whatsApp)
+        });
+      }
+
+      if (whatsApp.status === "passkey_required") {
+        actions.push({
+          icon: <FontAwesomeIcon icon={faUserLock} />,
+          label: i18n.t("connections.toolTips.passkey.title"),
+          onClick: () => handleOpenPasskeyModal(whatsApp)
+        });
+        actions.push({
+          icon: <SettingsBackupRestore />,
+          label: i18n.t("connections.toolTips.resetPasskey"),
+          onClick: () => handleResetPasskeySession(whatsApp.id)
+        });
+      }
+
+      if (whatsApp.status === "DISCONNECTED") {
+        actions.push({
+          icon: <Replay />,
+          label: i18n.t("connections.toolTips.retry"),
+          onClick: () => handleStartWhatsAppSession(whatsApp.id)
+        });
+        actions.push({
+          icon: <FontAwesomeIcon icon={faWandMagicSparkles} />,
+          label: i18n.t("connections.toolTips.newQr"),
+          onClick: () => handleRequestNewQrCode(whatsApp.id)
+        });
+      }
+
+      if (
+        whatsApp.status === "CONNECTED" ||
+        whatsApp.status === "PAIRING" ||
+        whatsApp.status === "TIMEOUT"
+      ) {
+        actions.push({
+          icon: <FontAwesomeIcon icon={faPhoneSlash} />,
+          label: i18n.t("connections.toolTips.disconnect"),
+          onClick: () => handleOpenConfirmationModal("disconnect", whatsApp.id)
+        });
+      }
+
+      if (whatsApp.status === "CONNECTED" && whatsApp.channel === "whatsapp") {
+        actions.push({
+          icon: <Refresh />,
+          label: i18n.t("connections.toolTips.refresh"),
+          onClick: () => refreshWhatsApp(whatsApp)
+        });
+      }
+
+      actions.push({ divider: true });
     }
 
-    if (whatsApp.status === "passkey_required") {
-      buttons.push(
-        <Tooltip
-          key="passkey"
-          title={i18n.t("connections.toolTips.passkey.title")}
-        >
-          <IconButton
-            size="small"
-            onClick={() => handleOpenPasskeyModal(whatsApp)}
-          >
-            <FontAwesomeIcon icon={faUserLock} />
-          </IconButton>
-        </Tooltip>,
-        <Tooltip
-          key="reset"
-          title={i18n.t("connections.toolTips.resetPasskey")}
-        >
-          <IconButton
-            size="small"
-            onClick={() => handleResetPasskeySession(whatsApp.id)}
-          >
-            <SettingsBackupRestore />
-          </IconButton>
-        </Tooltip>
-      );
-    }
+    actions.push({
+      icon: <DeleteOutline />,
+      label: i18n.t("common.delete"),
+      onClick: () => handleOpenConfirmationModal("delete", whatsApp.id)
+    });
 
-    if (whatsApp.status === "DISCONNECTED") {
-      buttons.push(
-        <Tooltip key="retry" title={i18n.t("connections.toolTips.retry")}>
-          <IconButton
-            size="small"
-            onClick={() => handleStartWhatsAppSession(whatsApp.id)}
-          >
-            <Replay />
-          </IconButton>
-        </Tooltip>,
-        <Tooltip key="newqr" title={i18n.t("connections.toolTips.newQr")}>
-          <IconButton
-            size="small"
-            onClick={() => handleRequestNewQrCode(whatsApp.id)}
-          >
-            <FontAwesomeIcon icon={faWandMagicSparkles} />
-          </IconButton>
-        </Tooltip>
-      );
-    }
+    return actions;
+  };
 
-    if (
-      whatsApp.status === "CONNECTED" ||
-      whatsApp.status === "PAIRING" ||
-      whatsApp.status === "TIMEOUT"
-    ) {
-      buttons.push(
-        <Tooltip
-          key="disconnect"
-          title={i18n.t("connections.toolTips.disconnect")}
-        >
-          <IconButton
-            size="small"
-            onClick={() => {
-              handleOpenConfirmationModal("disconnect", whatsApp.id);
-            }}
-          >
-            <FontAwesomeIcon icon={faPhoneSlash} />
-          </IconButton>
-        </Tooltip>
-      );
-    }
-
-    if (whatsApp.status === "CONNECTED" && whatsApp.channel === "whatsapp") {
-      buttons.push(
-        <Tooltip key="refresh" title={i18n.t("connections.toolTips.refresh")}>
-          <IconButton size="small" onClick={() => refreshWhatsApp(whatsApp)}>
-            <Refresh />
-          </IconButton>
-        </Tooltip>
-      );
-    }
-
-    return buttons;
+  const isUnsupportedChannel = whatsApp => {
+    return (
+      FILTER_UNSUPPORTED_CHANNELS &&
+      whatsApp.channel !== "whatsapp" &&
+      whatsApp.channel !== "instagram" &&
+      whatsApp.channel !== "telegram"
+    );
   };
 
   return (
@@ -601,207 +581,91 @@ const Connections = () => {
                             : getStatusInfo(whatsApp);
                           return (
                             <Grid item xs={12} sm={6} md={4} key={whatsApp.id}>
-                              <Card className={classes.card} variant="outlined">
-                                <CardContent className={classes.cardContent}>
+                              <ActionCard actions={getCardActions(whatsApp)}>
+                                <Chip
+                                  label={statusInfo.label}
+                                  size="small"
+                                  className={`${classes.statusChip} ${statusInfo.class}`}
+                                />
+
+                                <Typography
+                                  variant="h6"
+                                  component="h2"
+                                  className={classes.connectionName}
+                                >
+                                  {whatsApp.name || "-"}
+                                </Typography>
+
+                                {whatsApp.isDefault && !isUnsupported && (
                                   <Chip
-                                    label={statusInfo.label}
+                                    label={i18n.t("connections.table.default")}
                                     size="small"
-                                    className={`${classes.statusChip} ${statusInfo.class}`}
+                                    className={classes.defaultChip}
                                   />
+                                )}
 
-                                  <Typography
-                                    variant="h6"
-                                    component="h2"
-                                    className={classes.connectionName}
-                                  >
-                                    {whatsApp.name || "-"}
-                                  </Typography>
-
-                                  {whatsApp.isDefault && !isUnsupported && (
-                                    <Chip
-                                      label={i18n.t(
-                                        "connections.table.default"
-                                      )}
-                                      size="small"
-                                      className={classes.defaultChip}
-                                    />
-                                  )}
-
-                                  {!isUnsupported && (
-                                    <Box className={classes.statsContainer}>
-                                      <Typography
-                                        className={classes.sectionTitle}
-                                      >
-                                        {i18n.t("connections.table.session")}
-                                      </Typography>
-                                      <Grid container spacing={1}>
-                                        {whatsApp.connectedNumber && (
-                                          <Grid
-                                            item
-                                            xs={12}
-                                            className={classes.statItem}
-                                          >
-                                            <Box>
-                                              <Typography
-                                                className={classes.statLabel}
-                                              >
-                                                {i18n.t(
-                                                  "connections.table.connectedNumber"
-                                                )}
-                                              </Typography>
-                                              <Typography
-                                                className={classes.statValue}
-                                              >
-                                                {formatWhatsappDigits(
-                                                  whatsApp.connectedNumber
-                                                )}
-                                              </Typography>
-                                            </Box>
-                                          </Grid>
-                                        )}
+                                {!isUnsupported && (
+                                  <Box className={classes.statsContainer}>
+                                    <Typography
+                                      className={classes.sectionTitle}
+                                    >
+                                      {i18n.t("connections.table.session")}
+                                    </Typography>
+                                    <Grid container spacing={1}>
+                                      {whatsApp.connectedNumber && (
                                         <Grid
                                           item
                                           xs={12}
                                           className={classes.statItem}
                                         >
-                                          <UpdateIcon
-                                            className={classes.statIcon}
-                                          />
                                           <Box>
                                             <Typography
                                               className={classes.statLabel}
                                             >
                                               {i18n.t(
-                                                "connections.table.lastUpdate"
+                                                "connections.table.connectedNumber"
                                               )}
                                             </Typography>
                                             <Typography
                                               className={classes.statValue}
                                             >
-                                              {format(
-                                                parseISO(whatsApp.updatedAt),
-                                                "dd/MM/yy HH:mm"
+                                              {formatWhatsappDigits(
+                                                whatsApp.connectedNumber
                                               )}
                                             </Typography>
                                           </Box>
                                         </Grid>
-                                      </Grid>
-                                    </Box>
-                                  )}
-
-                                  {!isUnsupported && (
-                                    <Divider className={classes.divider} />
-                                  )}
-
-                                  <Box>
-                                    <Typography
-                                      className={classes.sectionTitle}
-                                    >
-                                      {i18n.t("connections.table.actions")}
-                                    </Typography>
-                                    <Box
-                                      display="flex"
-                                      flexWrap="wrap"
-                                      style={{ gap: 4 }}
-                                    >
-                                      {isUnsupported ? (
-                                        <Tooltip
-                                          title={i18n.t("common.delete")}
-                                        >
-                                          <IconButton
-                                            size="small"
-                                            onClick={e => {
-                                              handleOpenConfirmationModal(
-                                                "delete",
-                                                whatsApp.id
-                                              );
-                                            }}
-                                          >
-                                            <DeleteOutline />
-                                          </IconButton>
-                                        </Tooltip>
-                                      ) : (
-                                        <>
-                                          <Tooltip
-                                            title={i18n.t("common.edit")}
-                                          >
-                                            <IconButton
-                                              size="small"
-                                              onClick={() =>
-                                                handleEditWhatsApp(whatsApp)
-                                              }
-                                            >
-                                              <Edit />
-                                            </IconButton>
-                                          </Tooltip>
-
-                                          {whatsApp.status === "CONNECTED" &&
-                                            whatsApp.channel === "whatsapp" && (
-                                              <Tooltip
-                                                title={i18n.t(
-                                                  "connections.toolTips.privacy"
-                                                )}
-                                              >
-                                                <IconButton
-                                                  size="small"
-                                                  onClick={() =>
-                                                    handleOpenPrivacyWhatsApp(
-                                                      whatsApp
-                                                    )
-                                                  }
-                                                >
-                                                  <Lock />
-                                                </IconButton>
-                                              </Tooltip>
-                                            )}
-
-                                          {false &&
-                                            whatsApp.channel === "whatsapp" &&
-                                            wavoipAvailable() && (
-                                              <Tooltip title="Wavoip">
-                                                <IconButton
-                                                  size="small"
-                                                  onClick={() =>
-                                                    handleOpenWavoipModal(
-                                                      whatsApp
-                                                    )
-                                                  }
-                                                >
-                                                  <img
-                                                    src={wavoipIcon}
-                                                    alt="Wavoip"
-                                                    style={{
-                                                      width: 20,
-                                                      height: 20
-                                                    }}
-                                                  />
-                                                </IconButton>
-                                              </Tooltip>
-                                            )}
-
-                                          <Tooltip
-                                            title={i18n.t("common.delete")}
-                                          >
-                                            <IconButton
-                                              size="small"
-                                              onClick={e => {
-                                                handleOpenConfirmationModal(
-                                                  "delete",
-                                                  whatsApp.id
-                                                );
-                                              }}
-                                            >
-                                              <DeleteOutline />
-                                            </IconButton>
-                                          </Tooltip>
-
-                                          {renderActionButtons(whatsApp)}
-                                        </>
                                       )}
-                                    </Box>
+                                      <Grid
+                                        item
+                                        xs={12}
+                                        className={classes.statItem}
+                                      >
+                                        <UpdateIcon
+                                          className={classes.statIcon}
+                                        />
+                                        <Box>
+                                          <Typography
+                                            className={classes.statLabel}
+                                          >
+                                            {i18n.t(
+                                              "connections.table.lastUpdate"
+                                            )}
+                                          </Typography>
+                                          <Typography
+                                            className={classes.statValue}
+                                          >
+                                            {format(
+                                              parseISO(whatsApp.updatedAt),
+                                              "dd/MM/yy HH:mm"
+                                            )}
+                                          </Typography>
+                                        </Box>
+                                      </Grid>
+                                    </Grid>
                                   </Box>
-                                </CardContent>
-                              </Card>
+                                )}
+                              </ActionCard>
                             </Grid>
                           );
                         })}
@@ -826,134 +690,51 @@ const Connections = () => {
                       const statusInfo = getStatusInfo(whatsApp);
                       return (
                         <Grid item xs={12} sm={6} md={4} key={whatsApp.id}>
-                          <Card className={classes.card} variant="outlined">
-                            <CardContent className={classes.cardContent}>
+                          <ActionCard actions={getCardActions(whatsApp)}>
+                            <Chip
+                              label={statusInfo.label}
+                              size="small"
+                              className={`${classes.statusChip} ${statusInfo.class}`}
+                            />
+
+                            <Typography
+                              variant="h6"
+                              component="h2"
+                              className={classes.connectionName}
+                            >
+                              {whatsApp.name || "-"}
+                            </Typography>
+
+                            {whatsApp.isDefault && (
                               <Chip
-                                label={statusInfo.label}
+                                label={i18n.t("connections.table.default")}
                                 size="small"
-                                className={`${classes.statusChip} ${statusInfo.class}`}
+                                className={classes.defaultChip}
                               />
+                            )}
 
-                              <Typography
-                                variant="h6"
-                                component="h2"
-                                className={classes.connectionName}
-                              >
-                                {whatsApp.name || "-"}
+                            <Box className={classes.statsContainer}>
+                              <Typography className={classes.sectionTitle}>
+                                {i18n.t("connections.table.session")}
                               </Typography>
-
-                              {whatsApp.isDefault && (
-                                <Chip
-                                  label={i18n.t("connections.table.default")}
-                                  size="small"
-                                  className={classes.defaultChip}
-                                />
-                              )}
-
-                              <Box className={classes.statsContainer}>
-                                <Typography className={classes.sectionTitle}>
-                                  {i18n.t("connections.table.session")}
-                                </Typography>
-                                <Grid container spacing={1}>
-                                  <Grid
-                                    item
-                                    xs={12}
-                                    className={classes.statItem}
-                                  >
-                                    <UpdateIcon className={classes.statIcon} />
-                                    <Box>
-                                      <Typography className={classes.statLabel}>
-                                        {i18n.t("connections.table.lastUpdate")}
-                                      </Typography>
-                                      <Typography className={classes.statValue}>
-                                        {format(
-                                          parseISO(whatsApp.updatedAt),
-                                          "dd/MM/yy HH:mm"
-                                        )}
-                                      </Typography>
-                                    </Box>
-                                  </Grid>
+                              <Grid container spacing={1}>
+                                <Grid item xs={12} className={classes.statItem}>
+                                  <UpdateIcon className={classes.statIcon} />
+                                  <Box>
+                                    <Typography className={classes.statLabel}>
+                                      {i18n.t("connections.table.lastUpdate")}
+                                    </Typography>
+                                    <Typography className={classes.statValue}>
+                                      {format(
+                                        parseISO(whatsApp.updatedAt),
+                                        "dd/MM/yy HH:mm"
+                                      )}
+                                    </Typography>
+                                  </Box>
                                 </Grid>
-                              </Box>
-
-                              <Divider className={classes.divider} />
-
-                              <Box>
-                                <Typography className={classes.sectionTitle}>
-                                  {i18n.t("connections.table.actions")}
-                                </Typography>
-                                <Box
-                                  display="flex"
-                                  flexWrap="wrap"
-                                  style={{ gap: 4 }}
-                                >
-                                  <Tooltip title={i18n.t("common.edit")}>
-                                    <IconButton
-                                      size="small"
-                                      onClick={() =>
-                                        handleEditWhatsApp(whatsApp)
-                                      }
-                                    >
-                                      <Edit />
-                                    </IconButton>
-                                  </Tooltip>
-
-                                  {whatsApp.status === "CONNECTED" &&
-                                    whatsApp.channel === "whatsapp" && (
-                                      <Tooltip
-                                        title={i18n.t(
-                                          "connections.toolTips.privacy"
-                                        )}
-                                      >
-                                        <IconButton
-                                          size="small"
-                                          onClick={() =>
-                                            handleOpenPrivacyWhatsApp(whatsApp)
-                                          }
-                                        >
-                                          <Lock />
-                                        </IconButton>
-                                      </Tooltip>
-                                    )}
-
-                                  {false &&
-                                    whatsApp.channel === "whatsapp" &&
-                                    wavoipAvailable() && (
-                                      <Tooltip title="Wavoip">
-                                        <IconButton
-                                          size="small"
-                                          onClick={() =>
-                                            handleOpenWavoipModal(whatsApp)
-                                          }
-                                        >
-                                          <img
-                                            src={wavoipIcon}
-                                            alt="Wavoip"
-                                            style={{ width: 20, height: 20 }}
-                                          />
-                                        </IconButton>
-                                      </Tooltip>
-                                    )}
-
-                                  <Tooltip title={i18n.t("common.delete")}>
-                                    <IconButton
-                                      size="small"
-                                      onClick={e => {
-                                        handleOpenConfirmationModal(
-                                          "delete",
-                                          whatsApp.id
-                                        );
-                                      }}
-                                    >
-                                      <DeleteOutline />
-                                    </IconButton>
-                                  </Tooltip>
-
-                                  {renderActionButtons(whatsApp)}
-                                </Box>
-                              </Box>
-                            </CardContent>
-                          </Card>
+                              </Grid>
+                            </Box>
+                          </ActionCard>
                         </Grid>
                       );
                     })}
