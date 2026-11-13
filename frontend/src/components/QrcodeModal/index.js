@@ -48,7 +48,7 @@ const QrcodeModal = ({
 
   useEffect(() => {
     const fetchSession = async () => {
-      if (!whatsAppId) return;
+      if (!open || !whatsAppId) return;
 
       try {
         const { data } = await api.get(`/whatsapp/${whatsAppId}`);
@@ -58,25 +58,26 @@ const QrcodeModal = ({
       }
     };
     fetchSession();
-  }, [whatsAppId]);
+  }, [open, whatsAppId]);
 
   useEffect(() => {
-    if (!whatsAppId) return;
+    if (!open || !whatsAppId) return;
     const companyId = localStorage.getItem("companyId");
     const socket = socketManager.GetSocket(companyId);
 
     const onCompanyWhatsappSession = data => {
-      if (data.action === "update" && data.session.id === whatsAppId) {
-        if (data.session.status === "qrcode") {
-          setQrCode(data.session.qrcode);
-        }
-
-        if (data.session.status === "passkey_required" && onOpenPasskeyModal) {
-          onOpenPasskeyModal();
-        }
+      if (data.action !== "update" || data.session.id !== whatsAppId) {
+        return;
       }
 
-      if (data.action === "update" && data.session.status !== "qrcode") {
+      if (data.session.status === "qrcode") {
+        setQrCode(data.session.qrcode);
+      } else if (
+        data.session.status === "passkey_required" &&
+        onOpenPasskeyModal
+      ) {
+        onOpenPasskeyModal();
+      } else {
         onClose();
       }
     };
@@ -86,7 +87,7 @@ const QrcodeModal = ({
     return () => {
       socket.disconnect();
     };
-  }, [whatsAppId, onClose, socketManager, onOpenPasskeyModal]);
+  }, [open, whatsAppId, onClose, socketManager, onOpenPasskeyModal]);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg" scroll="paper">

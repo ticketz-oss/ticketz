@@ -19,7 +19,6 @@ import { format } from "date-fns";
 import { Op } from "sequelize";
 import { Agent } from "https";
 import { Mutex } from "async-mutex";
-import { Socket } from "socket.io-client";
 import Whatsapp from "../models/Whatsapp";
 import { logger, loggerBaileys } from "../utils/logger";
 import authState from "../helpers/authState";
@@ -41,7 +40,6 @@ import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import GetTicketWbot from "../helpers/GetTicketWbot";
 import { getJidOf } from "../services/WbotServices/getJidOf";
 import WhatsappLidMap from "../models/WhatsappLidMap";
-import { reach } from "yup";
 import crypto from "crypto";
 import { GetCompanySetting } from "../helpers/CheckSettings";
 
@@ -59,10 +57,7 @@ export function getPasskeyToken(whatsappId: number): string | undefined {
 }
 
 export function resolvePasskeyToken(token: string): number | undefined {
-  for (const [id, t] of passkeyTokens.entries()) {
-    if (t === token) return id;
-  }
-  return undefined;
+  return Array.from(passkeyTokens.entries()).find(([, t]) => t === token)?.[0];
 }
 
 export function createCaptureToken(whatsappId: number): string {
@@ -184,7 +179,7 @@ const getProjectWAVersion = async () => {
     const res = await fetch("https://waversion.ticke.tz");
     const version = await res.json();
     return version;
-  } catch (error) {
+  } catch {
     logger.warn("Failed to get current WA Version from project repository");
   }
   return waVersion;
@@ -338,7 +333,7 @@ export const initWASocket = async (
             }
             return value as T;
           },
-          set: async (key: string, value: any) => {
+          set: async <T>(key: string, value: T) => {
             logger.debug({ key, value }, `groupCache.set ${key}`);
             return internalGroupCache.set(key, value);
           },
@@ -593,10 +588,13 @@ export const initWASocket = async (
                   qrcode: ""
                 });
                 await DeleteBaileysService(whatsappUpdate.id);
-                io.emit("whatsappSession", {
-                  action: "update",
-                  session: whatsappUpdate
-                });
+                io.to(`company-${whatsappUpdate.companyId}-admin`).emit(
+                  `company-${whatsappUpdate.companyId}-whatsappSession`,
+                  {
+                    action: "update",
+                    session: whatsappUpdate
+                  }
+                );
                 wsocket.ev.removeAllListeners("connection.update");
                 wsocket.ws.close();
                 wsocket = null;
@@ -744,7 +742,7 @@ export const initWASocket = async (
           try {
             const metadata = await wsocket.groupMetadata(event.id);
             groupCache.set(event.id, metadata);
-          } catch (error) {
+          } catch {
             groupCache.del(event.id);
           }
         });

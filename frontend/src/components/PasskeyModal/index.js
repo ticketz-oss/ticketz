@@ -95,7 +95,7 @@ const PasskeyModal = ({
 
   useEffect(() => {
     const fetchSession = async () => {
-      if (!whatsAppId) return;
+      if (!open || !whatsAppId) return;
       try {
         const { data } = await api.get(`/whatsapp/${whatsAppId}?session=0`);
         setWhatsApp(data);
@@ -104,7 +104,7 @@ const PasskeyModal = ({
       }
     };
     fetchSession();
-  }, [whatsAppId]);
+  }, [open, whatsAppId]);
 
   const handleMessage = useCallback(
     event => {
@@ -152,24 +152,27 @@ const PasskeyModal = ({
   }, [handleMessage, onConnectorReady]);
 
   useEffect(() => {
-    if (!whatsAppId) return;
+    if (!open || !whatsAppId) return;
     const companyId = localStorage.getItem("companyId");
     const socket = socketManager.GetSocket(companyId);
+    let closeTimeout;
 
     const onSession = data => {
       if (data.action === "update" && data.session.id === whatsAppId) {
         setWhatsApp(data.session);
+        clearTimeout(closeTimeout);
         if (data.session.status !== "passkey_required") {
-          setTimeout(() => onClose(), 1500);
+          closeTimeout = setTimeout(() => onClose(), 1500);
         }
       }
     };
 
     socket.on(`company-${companyId}-whatsappSession`, onSession);
     return () => {
+      clearTimeout(closeTimeout);
       socket.disconnect();
     };
-  }, [whatsAppId, onClose, socketManager]);
+  }, [open, whatsAppId, onClose, socketManager]);
 
   const handleStartCapture = async () => {
     let token = captureToken || whatsApp?.qrcode;

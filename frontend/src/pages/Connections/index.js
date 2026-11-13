@@ -10,7 +10,6 @@ import {
   CircularProgress,
   Grid,
   Box,
-  Divider,
   Chip,
   Fab
 } from "@material-ui/core";
@@ -48,9 +47,6 @@ import PrivacyModal from "../../components/PrivacyModal";
 import { i18n } from "../../translate/i18n";
 import { WhatsAppsContext } from "../../context/WhatsApp/WhatsAppsContext";
 import toastError from "../../errors/toastError";
-import wavoipIcon from "../../assets/wavoip.webp";
-import WavoipModal from "../../components/WavoipModal";
-import { wavoipAvailable } from "../../helpers/wavoipCallManager";
 import { formatWhatsappDigits } from "../../helpers/formatWhatsappDisplay";
 
 // BEGIN: Feature flag for filtering unsupported channels
@@ -68,6 +64,22 @@ const useStyles = makeStyles(theme => ({
   cardsContainer: {
     width: "100%",
     padding: theme.spacing(1)
+  },
+  cardsGrid: {
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1fr)",
+    gridAutoRows: "1fr",
+    gap: theme.spacing(2),
+    [theme.breakpoints.up("sm")]: {
+      gridTemplateColumns: "repeat(2, minmax(0, 1fr))"
+    },
+    [theme.breakpoints.up("md")]: {
+      gridTemplateColumns: "repeat(3, minmax(0, 1fr))"
+    }
+  },
+  connectionCard: {
+    height: "100%",
+    boxSizing: "border-box"
   },
   statusChip: {
     position: "absolute",
@@ -110,16 +122,17 @@ const useStyles = makeStyles(theme => ({
   connectionName: {
     fontWeight: 600,
     marginBottom: theme.spacing(1),
-    paddingRight: theme.spacing(10)
+    paddingRight: theme.spacing(10),
+    overflowWrap: "anywhere"
   },
   statsContainer: {
     marginTop: theme.spacing(2)
   },
   statItem: {
     display: "flex",
-    alignItems: "center",
+    alignItems: "flex-start",
     gap: theme.spacing(1),
-    padding: theme.spacing(0.5, 0)
+    minWidth: 0
   },
   statIcon: {
     color: theme.palette.primary.main,
@@ -131,7 +144,8 @@ const useStyles = makeStyles(theme => ({
   },
   statValue: {
     fontWeight: 600,
-    fontSize: "0.875rem"
+    fontSize: "0.875rem",
+    overflowWrap: "anywhere"
   },
   divider: {
     margin: theme.spacing(2, 0)
@@ -152,8 +166,24 @@ const useStyles = makeStyles(theme => ({
   defaultChip: {
     backgroundColor: green[500],
     color: "#fff",
-    fontWeight: 600,
-    marginBottom: theme.spacing(1)
+    fontWeight: 600
+  },
+  defaultChipSlot: {
+    minHeight: 32,
+    display: "grid",
+    gridTemplateColumns: "auto minmax(0, 1fr)",
+    alignItems: "center",
+    gap: theme.spacing(1)
+  },
+  qrActionSlot: {
+    display: "flex",
+    justifyContent: "flex-end",
+    minWidth: 0,
+    "& .MuiButton-root": {
+      minWidth: 0,
+      maxWidth: "100%",
+      overflowWrap: "anywhere"
+    }
   },
   loadingContainer: {
     display: "flex",
@@ -181,7 +211,6 @@ const Connections = () => {
   const [confirmModalInfo, setConfirmModalInfo] = useState(
     confirmationModalInitialState
   );
-  const [wavoipModalOpen, setWavoipModalOpen] = useState(false);
   const [passkeyModalOpen, setPasskeyModalOpen] = useState(false);
   const [passkeyInitialToken, setPasskeyInitialToken] = useState("");
   const [connectorReady, setConnectorReady] = useState(false);
@@ -308,16 +337,6 @@ const Connections = () => {
     setConfirmModalInfo(confirmationModalInitialState);
   };
 
-  const handleOpenWavoipModal = whatsApp => {
-    setSelectedWhatsApp(whatsApp);
-    setWavoipModalOpen(true);
-  };
-
-  const handleCloseWavoipModal = useCallback(() => {
-    setWavoipModalOpen(false);
-    setSelectedWhatsApp(null);
-  }, [setWavoipModalOpen, setSelectedWhatsApp]);
-
   const refreshWhatsApp = async whatsApp => {
     try {
       await api.get(`/whatsappsession/refresh/${whatsApp.id}`);
@@ -372,8 +391,38 @@ const Connections = () => {
     }
   };
 
+  const getQrAction = whatsApp => {
+    if (isUnsupportedChannel(whatsApp)) {
+      return null;
+    }
+
+    if (whatsApp.status === "qrcode") {
+      return {
+        icon: <FontAwesomeIcon icon={faQrcode} data-testid="scan-qr-icon" />,
+        label: i18n.t("connections.toolTips.scan"),
+        onClick: () => handleOpenQrModal(whatsApp)
+      };
+    }
+
+    if (whatsApp.status === "DISCONNECTED") {
+      return {
+        icon: (
+          <FontAwesomeIcon
+            icon={faWandMagicSparkles}
+            data-testid="generate-qr-icon"
+          />
+        ),
+        label: i18n.t("connections.toolTips.newQr"),
+        onClick: () => handleRequestNewQrCode(whatsApp.id)
+      };
+    }
+
+    return null;
+  };
+
   const getCardActions = whatsApp => {
     const actions = [];
+    const qrAction = getQrAction(whatsApp);
 
     if (!isUnsupportedChannel(whatsApp)) {
       actions.push({
@@ -391,11 +440,7 @@ const Connections = () => {
       }
 
       if (whatsApp.status === "qrcode") {
-        actions.push({
-          icon: <FontAwesomeIcon icon={faQrcode} />,
-          label: i18n.t("connections.toolTips.scan"),
-          onClick: () => handleOpenQrModal(whatsApp)
-        });
+        actions.push(qrAction);
       }
 
       if (whatsApp.status === "passkey_required") {
@@ -417,11 +462,7 @@ const Connections = () => {
           label: i18n.t("connections.toolTips.retry"),
           onClick: () => handleStartWhatsAppSession(whatsApp.id)
         });
-        actions.push({
-          icon: <FontAwesomeIcon icon={faWandMagicSparkles} />,
-          label: i18n.t("connections.toolTips.newQr"),
-          onClick: () => handleRequestNewQrCode(whatsApp.id)
-        });
+        actions.push(qrAction);
       }
 
       if (
@@ -462,6 +503,108 @@ const Connections = () => {
       whatsApp.channel !== "whatsapp" &&
       whatsApp.channel !== "instagram" &&
       whatsApp.channel !== "telegram"
+    );
+  };
+
+  const renderConnectionCard = (whatsApp, isUnsupported = false) => {
+    const qrAction = getQrAction(whatsApp);
+    const statusInfo = isUnsupported
+      ? {
+          label: i18n.t("connections.status.unsupported"),
+          class: classes.statusUnsupported
+        }
+      : getStatusInfo(whatsApp);
+
+    return (
+      <div key={whatsApp.id}>
+        <ActionCard
+          actions={getCardActions(whatsApp)}
+          className={classes.connectionCard}
+          data-testid="connection-card"
+        >
+          <Chip
+            label={statusInfo.label}
+            size="small"
+            className={`${classes.statusChip} ${statusInfo.class}`}
+          />
+          <Typography
+            variant="h6"
+            component="h2"
+            className={classes.connectionName}
+          >
+            {whatsApp.name || "-"}
+          </Typography>
+          <div
+            className={classes.defaultChipSlot}
+            data-testid="connection-actions"
+          >
+            <div>
+              {whatsApp.isDefault && !isUnsupported && (
+                <Chip
+                  label={i18n.t("connections.table.default")}
+                  size="small"
+                  className={classes.defaultChip}
+                />
+              )}
+            </div>
+            <div className={classes.qrActionSlot} data-testid="qr-action-slot">
+              {qrAction && (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  startIcon={qrAction.icon}
+                  onClick={qrAction.onClick}
+                >
+                  {qrAction.label}
+                </Button>
+              )}
+            </div>
+          </div>
+          {!isUnsupported && (
+            <Box className={classes.statsContainer}>
+              <Typography className={classes.sectionTitle}>
+                {i18n.t("connections.table.session")}
+              </Typography>
+              <Grid container spacing={1}>
+                <Grid
+                  item
+                  xs={6}
+                  className={classes.statItem}
+                  data-testid="last-update-column"
+                >
+                  <UpdateIcon className={classes.statIcon} />
+                  <Box minWidth={0}>
+                    <Typography className={classes.statLabel}>
+                      {i18n.t("connections.table.lastUpdate")}
+                    </Typography>
+                    <Typography className={classes.statValue}>
+                      {format(parseISO(whatsApp.updatedAt), "dd/MM/yy HH:mm")}
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid
+                  item
+                  xs={6}
+                  className={classes.statItem}
+                  data-testid="connected-number-column"
+                >
+                  {whatsApp.connectedNumber && (
+                    <Box minWidth={0}>
+                      <Typography className={classes.statLabel}>
+                        {i18n.t("connections.table.connectedNumber")}
+                      </Typography>
+                      <Typography className={classes.statValue}>
+                        {formatWhatsappDigits(whatsApp.connectedNumber)}
+                      </Typography>
+                    </Box>
+                  )}
+                </Grid>
+              </Grid>
+            </Box>
+          )}
+        </ActionCard>
+      </div>
     );
   };
 
@@ -507,11 +650,6 @@ const Connections = () => {
         open={privacyModalOpen}
         onClose={handleClosePrivacyWhatsAppModal}
         whatsAppId={!qrModalOpen && !whatsAppModalOpen && selectedWhatsApp?.id}
-      />
-      <WavoipModal
-        open={wavoipModalOpen}
-        onClose={handleCloseWavoipModal}
-        whatsappId={selectedWhatsApp?.id}
       />
       <MainHeader>
         <Title>{i18n.t("connections.title")}</Title>
@@ -570,106 +708,17 @@ const Connections = () => {
                       </Box>
                     )}
                     {filteredConnections?.length > 0 ? (
-                      <Grid container spacing={2}>
-                        {filteredConnections.map(whatsApp => {
-                          const isUnsupported = whatsApp.channel !== "whatsapp";
-                          const statusInfo = isUnsupported
-                            ? {
-                                label: i18n.t("connections.status.unsupported"),
-                                class: classes.statusUnsupported
-                              }
-                            : getStatusInfo(whatsApp);
-                          return (
-                            <Grid item xs={12} sm={6} md={4} key={whatsApp.id}>
-                              <ActionCard actions={getCardActions(whatsApp)}>
-                                <Chip
-                                  label={statusInfo.label}
-                                  size="small"
-                                  className={`${classes.statusChip} ${statusInfo.class}`}
-                                />
-
-                                <Typography
-                                  variant="h6"
-                                  component="h2"
-                                  className={classes.connectionName}
-                                >
-                                  {whatsApp.name || "-"}
-                                </Typography>
-
-                                {whatsApp.isDefault && !isUnsupported && (
-                                  <Chip
-                                    label={i18n.t("connections.table.default")}
-                                    size="small"
-                                    className={classes.defaultChip}
-                                  />
-                                )}
-
-                                {!isUnsupported && (
-                                  <Box className={classes.statsContainer}>
-                                    <Typography
-                                      className={classes.sectionTitle}
-                                    >
-                                      {i18n.t("connections.table.session")}
-                                    </Typography>
-                                    <Grid container spacing={1}>
-                                      {whatsApp.connectedNumber && (
-                                        <Grid
-                                          item
-                                          xs={12}
-                                          className={classes.statItem}
-                                        >
-                                          <Box>
-                                            <Typography
-                                              className={classes.statLabel}
-                                            >
-                                              {i18n.t(
-                                                "connections.table.connectedNumber"
-                                              )}
-                                            </Typography>
-                                            <Typography
-                                              className={classes.statValue}
-                                            >
-                                              {formatWhatsappDigits(
-                                                whatsApp.connectedNumber
-                                              )}
-                                            </Typography>
-                                          </Box>
-                                        </Grid>
-                                      )}
-                                      <Grid
-                                        item
-                                        xs={12}
-                                        className={classes.statItem}
-                                      >
-                                        <UpdateIcon
-                                          className={classes.statIcon}
-                                        />
-                                        <Box>
-                                          <Typography
-                                            className={classes.statLabel}
-                                          >
-                                            {i18n.t(
-                                              "connections.table.lastUpdate"
-                                            )}
-                                          </Typography>
-                                          <Typography
-                                            className={classes.statValue}
-                                          >
-                                            {format(
-                                              parseISO(whatsApp.updatedAt),
-                                              "dd/MM/yy HH:mm"
-                                            )}
-                                          </Typography>
-                                        </Box>
-                                      </Grid>
-                                    </Grid>
-                                  </Box>
-                                )}
-                              </ActionCard>
-                            </Grid>
-                          );
-                        })}
-                      </Grid>
+                      <div
+                        className={classes.cardsGrid}
+                        data-testid="connections-grid"
+                      >
+                        {filteredConnections.map(whatsApp =>
+                          renderConnectionCard(
+                            whatsApp,
+                            whatsApp.channel !== "whatsapp"
+                          )
+                        )}
+                      </div>
                     ) : (
                       <Box className={classes.loadingContainer}>
                         <Typography variant="body1" color="textSecondary">
@@ -685,60 +734,12 @@ const Connections = () => {
             {!FILTER_UNSUPPORTED_CHANNELS && (
               <>
                 {whatsApps?.length > 0 ? (
-                  <Grid container spacing={2}>
-                    {whatsApps.map(whatsApp => {
-                      const statusInfo = getStatusInfo(whatsApp);
-                      return (
-                        <Grid item xs={12} sm={6} md={4} key={whatsApp.id}>
-                          <ActionCard actions={getCardActions(whatsApp)}>
-                            <Chip
-                              label={statusInfo.label}
-                              size="small"
-                              className={`${classes.statusChip} ${statusInfo.class}`}
-                            />
-
-                            <Typography
-                              variant="h6"
-                              component="h2"
-                              className={classes.connectionName}
-                            >
-                              {whatsApp.name || "-"}
-                            </Typography>
-
-                            {whatsApp.isDefault && (
-                              <Chip
-                                label={i18n.t("connections.table.default")}
-                                size="small"
-                                className={classes.defaultChip}
-                              />
-                            )}
-
-                            <Box className={classes.statsContainer}>
-                              <Typography className={classes.sectionTitle}>
-                                {i18n.t("connections.table.session")}
-                              </Typography>
-                              <Grid container spacing={1}>
-                                <Grid item xs={12} className={classes.statItem}>
-                                  <UpdateIcon className={classes.statIcon} />
-                                  <Box>
-                                    <Typography className={classes.statLabel}>
-                                      {i18n.t("connections.table.lastUpdate")}
-                                    </Typography>
-                                    <Typography className={classes.statValue}>
-                                      {format(
-                                        parseISO(whatsApp.updatedAt),
-                                        "dd/MM/yy HH:mm"
-                                      )}
-                                    </Typography>
-                                  </Box>
-                                </Grid>
-                              </Grid>
-                            </Box>
-                          </ActionCard>
-                        </Grid>
-                      );
-                    })}
-                  </Grid>
+                  <div
+                    className={classes.cardsGrid}
+                    data-testid="connections-grid"
+                  >
+                    {whatsApps.map(whatsApp => renderConnectionCard(whatsApp))}
+                  </div>
                 ) : (
                   <Box className={classes.loadingContainer}>
                     <Typography variant="body1" color="textSecondary">
