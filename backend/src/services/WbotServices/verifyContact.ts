@@ -110,11 +110,7 @@ async function getLid(msgContact: IMe, wbot: Session): Promise<string> {
   }
 
   const [ow] = await wbot.onWhatsApp(msgContact.id);
-  if (!ow?.exists) {
-    throw new Error("ERR_WAPP_CONTACT_NOT_FOUND");
-  }
-
-  return (ow.lid as string) || null;
+  return (ow?.lid as string) || null;
 }
 
 export async function verifyContact(
