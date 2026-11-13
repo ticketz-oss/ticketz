@@ -93,6 +93,7 @@ Compact guidance for OpenCode sessions working in this repo.
 
 ## Cross-stack conventions
 
+- **Prettify all new and modified code, including tests, before completing a task.** Use the relevant package's formatting configuration and commands above; format only the files changed.
 - **Never use inline/dynamic imports** (e.g. `const x = require(...)`, `import(...)` inside functions, or `require()` anywhere inside function bodies). All imports must be at the top of the file. Inline imports break bundlers, tree-shaking, and static analysis.
 - **Backend messages** emitted to chat channels (WhatsApp, etc.) must be translated on the backend using `_t(key, entity)` before sending. Never send raw translation keys to end users.
 - **Error codes** returned by API responses should remain as keys or codes; the frontend translates them with its own i18n stack.
