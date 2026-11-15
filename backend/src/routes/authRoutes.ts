@@ -1,7 +1,7 @@
 import { Router } from "express";
 import * as SessionController from "../controllers/SessionController";
 import isAuth from "../middleware/isAuth";
-import isSuper from "../middleware/isAdmin";
+import isSuper from "../middleware/isSuper";
 
 const authRoutes = Router();
 
