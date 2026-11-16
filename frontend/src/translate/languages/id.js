@@ -20,6 +20,7 @@ const messages = {
         email: "Email",
         phone: "Telepon",
         company: "Perusahaan",
+        user: "Pengguna",
         connection: "Koneksi",
         queue: "Antrian",
         contact: "Kontak",
@@ -1201,6 +1202,10 @@ const messages = {
         }
       },
       confirmationModal: {
+        deleteRecordTitle: "Hapus: {{type}} - {{name}}",
+        deleteRecordMessage: 'Hapus data ini? {{type}}: "{{name}}"',
+        confirmationWord: "kecualikan",
+        typeToConfirm: "Ketik {{word}} untuk mengonfirmasi",
         buttons: {
           confirm: "Oke",
           cancel: "Batal"

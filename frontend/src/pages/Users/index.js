@@ -28,6 +28,7 @@ import TableRowSkeleton from "../../components/TableRowSkeleton";
 import UserModal from "../../components/UserModal";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import toastError from "../../errors/toastError";
+import { getDeleteConfirmationText } from "../../helpers/deleteConfirmation";
 import { SocketContext } from "../../context/Socket/SocketContext";
 
 const reducer = (state, action) => {
@@ -187,20 +188,25 @@ const Users = () => {
     }
   };
 
+  const deleteConfirmation =
+    deletingUser && getDeleteConfirmationText("user", deletingUser.name);
+
   return (
     <MainContainer>
       <ConfirmationModal
-        title={
-          deletingUser &&
-          `${i18n.t("users.confirmationModal.deleteTitle")} ${
-            deletingUser.name
-          }?`
-        }
+        title={deleteConfirmation?.title}
         open={confirmModalOpen}
         onClose={setConfirmModalOpen}
         onConfirm={() => handleDeleteUser(deletingUser.id)}
+        confirmButtonText={i18n.t("common.delete")}
+        confirmationText={i18n.t("confirmationModal.confirmationWord")}
       >
-        {i18n.t("users.confirmationModal.deleteMessage")}
+        {deleteConfirmation && (
+          <>
+            <p>{deleteConfirmation.message}</p>
+            <p>{i18n.t("users.confirmationModal.deleteMessage")}</p>
+          </>
+        )}
       </ConfirmationModal>
       <UserModal
         open={userModalOpen}

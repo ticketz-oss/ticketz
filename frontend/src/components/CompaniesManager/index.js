@@ -59,6 +59,7 @@ import { useDate } from "../../hooks/useDate";
 import useSettings from "../../hooks/useSettings";
 import { SelectLanguage } from "../SelectLanguage";
 import { i18n } from "../../translate/i18n";
+import { getDeleteConfirmationText } from "../../helpers/deleteConfirmation";
 
 import moment from "moment";
 
@@ -718,6 +719,7 @@ export default function CompaniesManager() {
     dueDate: "",
     recurrence: ""
   });
+  const deleteConfirmation = getDeleteConfirmationText("company", record.name);
 
   const { handleImpersonate } = useContext(AuthContext);
 
@@ -1093,12 +1095,14 @@ export default function CompaniesManager() {
         </DialogContent>
       </Dialog>
       <ConfirmationModal
-        title={i18n.t("companiesManager.confirmationModal.deleteTitle")}
+        title={deleteConfirmation.title}
         open={showConfirmDeleteDialog}
         onClose={() => setShowConfirmDeleteDialog(false)}
         onConfirm={() => handleDelete()}
+        confirmButtonText={i18n.t("common.delete")}
+        confirmationText={i18n.t("confirmationModal.confirmationWord")}
       >
-        {i18n.t("companiesManager.confirmationModal.deleteMessage")}
+        {deleteConfirmation.message}
       </ConfirmationModal>
       <ConfirmationModal
         title={i18n.t("companiesManager.confirmationModal.impersonateTitle")}

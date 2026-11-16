@@ -1302,6 +1302,10 @@ const messages = {
         }
       },
       confirmationModal: {
+        deleteRecordTitle: "Delete: {{type}} - {{name}}",
+        deleteRecordMessage: 'Delete this record? {{type}}: "{{name}}"',
+        confirmationWord: "exclude",
+        typeToConfirm: "Type {{word}} to confirm",
         buttons: {
           confirm: "Ok",
           cancel: "Cancel"

@@ -1,12 +1,11 @@
 import React from "react";
 import "@testing-library/jest-dom";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import Connections from "./index";
 import { WhatsAppsContext } from "../../context/WhatsApp/WhatsAppsContext";
 import api from "../../services/api";
 
 jest.mock("../../components/WhatsAppModal", () => () => null);
-jest.mock("../../components/ConfirmationModal", () => () => null);
 jest.mock(
   "../../components/QrcodeModal",
   () =>
@@ -16,10 +15,25 @@ jest.mock(
 jest.mock("../../components/PasskeyModal", () => () => null);
 jest.mock("../../components/PrivacyModal", () => () => null);
 jest.mock("../../services/api", () => ({
-  put: jest.fn().mockResolvedValue({})
+  put: jest.fn().mockResolvedValue({}),
+  delete: jest.fn().mockResolvedValue({})
 }));
 jest.mock("../../translate/i18n", () => ({
-  i18n: { t: key => key }
+  i18n: {
+    t: (key, options) => {
+      if (key === "confirmationModal.deleteRecordTitle") {
+        return `Delete: ${options.type} - ${options.name}`;
+      }
+      if (key === "confirmationModal.deleteRecordMessage") {
+        return `Delete ${options.type}: ${options.name}?`;
+      }
+      if (key === "confirmationModal.confirmationWord") return "exclude";
+      if (key === "confirmationModal.typeToConfirm") {
+        return `Type ${options.word} to confirm`;
+      }
+      return key;
+    }
+  }
 }));
 jest.mock("../../helpers/formatWhatsappDisplay", () => ({
   formatWhatsappDigits: number => number
@@ -164,4 +178,41 @@ test("places the connected number beside the last update", () => {
   expect(
     within(cards[1]).queryByText("connections.table.connectedNumber")
   ).toBeNull();
+});
+
+test("identifies the selected connection and deletes its id after confirmation", async () => {
+  render(
+    <WhatsAppsContext.Provider
+      value={{ whatsApps: connections, loading: false }}
+    >
+      <Connections />
+    </WhatsAppsContext.Provider>
+  );
+
+  const card = screen.getAllByTestId("connection-card")[1];
+  fireEvent.click(within(card).getByLabelText("actions"));
+  fireEvent.click(screen.getByRole("menuitem", { name: "common.delete" }));
+
+  const dialog = screen.getByRole("dialog");
+  expect(
+    within(dialog).getByText("Delete: common.connection - Other")
+  ).toBeInTheDocument();
+  expect(
+    within(dialog).getByText("Delete common.connection: Other?")
+  ).toBeInTheDocument();
+  expect(
+    within(dialog).getByText("connections.confirmationModal.deleteMessage")
+  ).toBeInTheDocument();
+
+  const button = within(dialog).getByRole("button", { name: "common.delete" });
+  expect(button).toBeDisabled();
+  fireEvent.change(within(dialog).getByRole("textbox"), {
+    target: { value: "exclude" }
+  });
+  await act(async () => {
+    fireEvent.click(button);
+  });
+  expect(api.delete).toHaveBeenCalledWith("/whatsapp/2", {
+    params: { closeTickets: false }
+  });
 });

@@ -48,6 +48,7 @@ import { i18n } from "../../translate/i18n";
 import { WhatsAppsContext } from "../../context/WhatsApp/WhatsAppsContext";
 import toastError from "../../errors/toastError";
 import { formatWhatsappDigits } from "../../helpers/formatWhatsappDisplay";
+import { getDeleteConfirmationText } from "../../helpers/deleteConfirmation";
 
 // BEGIN: Feature flag for filtering unsupported channels
 // Set to false on branches that support multiple channels
@@ -293,22 +294,31 @@ const Connections = () => {
     setPrivacyModalOpen(false);
   }, [setPrivacyModalOpen, setSelectedWhatsApp]);
 
-  const handleOpenConfirmationModal = (action, whatsAppId) => {
+  const handleOpenConfirmationModal = (action, whatsApp) => {
     if (action === "disconnect") {
       setConfirmModalInfo({
         action: action,
         title: i18n.t("connections.confirmationModal.disconnectTitle"),
         message: i18n.t("connections.confirmationModal.disconnectMessage"),
-        whatsAppId: whatsAppId
+        whatsAppId: whatsApp.id
       });
     }
 
     if (action === "delete") {
+      const deleteConfirmation = getDeleteConfirmationText(
+        "connection",
+        whatsApp.name
+      );
       setConfirmModalInfo({
         action: action,
-        title: i18n.t("connections.confirmationModal.deleteTitle"),
-        message: i18n.t("connections.confirmationModal.deleteMessage"),
-        whatsAppId: whatsAppId
+        title: deleteConfirmation.title,
+        message: (
+          <>
+            <p>{deleteConfirmation.message}</p>
+            <p>{i18n.t("connections.confirmationModal.deleteMessage")}</p>
+          </>
+        ),
+        whatsAppId: whatsApp.id
       });
     }
     setConfirmModalOpen(true);
@@ -473,7 +483,7 @@ const Connections = () => {
         actions.push({
           icon: <FontAwesomeIcon icon={faPhoneSlash} />,
           label: i18n.t("connections.toolTips.disconnect"),
-          onClick: () => handleOpenConfirmationModal("disconnect", whatsApp.id)
+          onClick: () => handleOpenConfirmationModal("disconnect", whatsApp)
         });
       }
 
@@ -491,7 +501,7 @@ const Connections = () => {
     actions.push({
       icon: <DeleteOutline />,
       label: i18n.t("common.delete"),
-      onClick: () => handleOpenConfirmationModal("delete", whatsApp.id)
+      onClick: () => handleOpenConfirmationModal("delete", whatsApp)
     });
 
     return actions;
@@ -615,9 +625,19 @@ const Connections = () => {
         open={confirmModalOpen}
         onClose={setConfirmModalOpen}
         onConfirm={handleSubmitConfirmationModal}
+        confirmButtonText={
+          confirmModalInfo.action === "delete"
+            ? i18n.t("common.delete")
+            : undefined
+        }
         checkbox={
           confirmModalInfo.action === "delete"
             ? i18n.t("connections.confirmationModal.closeTickets")
+            : undefined
+        }
+        confirmationText={
+          confirmModalInfo.action === "delete"
+            ? i18n.t("confirmationModal.confirmationWord")
             : undefined
         }
       >

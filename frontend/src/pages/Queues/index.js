@@ -19,6 +19,7 @@ import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper"
 import TableRowSkeleton from "../../components/TableRowSkeleton";
 import Title from "../../components/Title";
 import { i18nToast } from "../../helpers/i18nToast";
+import { getDeleteConfirmationText } from "../../helpers/deleteConfirmation";
 import { i18n } from "../../translate/i18n";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
@@ -162,20 +163,25 @@ const Queues = () => {
     setSelectedQueue(null);
   };
 
+  const deleteConfirmation =
+    selectedQueue && getDeleteConfirmationText("queue", selectedQueue.name);
+
   return (
     <MainContainer>
       <ConfirmationModal
-        title={
-          selectedQueue &&
-          `${i18n.t("queues.confirmationModal.deleteTitle")} ${
-            selectedQueue.name
-          }?`
-        }
+        title={deleteConfirmation?.title}
         open={confirmModalOpen}
         onClose={handleCloseConfirmationModal}
         onConfirm={() => handleDeleteQueue(selectedQueue.id)}
+        confirmButtonText={i18n.t("common.delete")}
+        confirmationText={i18n.t("confirmationModal.confirmationWord")}
       >
-        {i18n.t("queues.confirmationModal.deleteMessage")}
+        {deleteConfirmation && (
+          <>
+            <p>{deleteConfirmation.message}</p>
+            <p>{i18n.t("queues.confirmationModal.deleteMessage")}</p>
+          </>
+        )}
       </ConfirmationModal>
       <QueueModal
         open={queueModalOpen}

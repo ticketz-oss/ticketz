@@ -1180,6 +1180,10 @@ const messages = {
         }
       },
       confirmationModal: {
+        deleteRecordTitle: "Elimina: {{type}} - {{name}}",
+        deleteRecordMessage: 'Eliminare questo elemento? {{type}}: "{{name}}"',
+        confirmationWord: "escludere",
+        typeToConfirm: "Digita {{word}} per confermare",
         buttons: {
           confirm: "Ok",
           cancel: "Annulla"

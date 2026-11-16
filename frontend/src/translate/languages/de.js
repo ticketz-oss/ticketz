@@ -20,6 +20,7 @@ const messages = {
         email: "E-Mail",
         phone: "Telefon",
         company: "Firma",
+        user: "Benutzer",
         connection: "Verbindung",
         queue: "Warteschlange",
         contact: "Kontakt",
@@ -1188,6 +1189,10 @@ const messages = {
         }
       },
       confirmationModal: {
+        deleteRecordTitle: "Löschen: {{type}} - {{name}}",
+        deleteRecordMessage: 'Diesen Eintrag löschen? {{type}}: "{{name}}"',
+        confirmationWord: "ausschließen",
+        typeToConfirm: "Geben Sie {{word}} zur Bestätigung ein",
         buttons: {
           confirm: "Ok",
           cancel: "Abbrechen"
