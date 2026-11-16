@@ -570,7 +570,6 @@ export function CompaniesManagerGrid(props) {
             <Grid item xs={12} sm={6} md={6} lg={6} xl={4} key={key}>
               <ActionCard
                 actions={cardActions}
-                onClick={() => onSelect(row)}
                 title={row.name || "-"}
                 titleEllipsis
                 statusChip={{
