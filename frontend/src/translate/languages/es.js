@@ -1093,6 +1093,13 @@ const messages = {
             disabled: "Desactivado"
           }
         },
+        RecaptchaSiteKey: {
+          title: "Clave del sitio reCAPTCHA",
+          helperText: "Solo se admite reCAPTCHA invisible"
+        },
+        RecaptchaSecretKey: {
+          title: "Clave secreta reCAPTCHA"
+        },
         MultiThreadedWbot: {
           title: "Worker Multihilo de WhatsApp",
           options: {

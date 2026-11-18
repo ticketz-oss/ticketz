@@ -6,6 +6,7 @@ interface Request {
 
 const publicSettingsKeys = [
   "allowSignup",
+  "recaptchaSiteKey",
   "primaryColorLight",
   "primaryColorDark",
   "appLogoLight",

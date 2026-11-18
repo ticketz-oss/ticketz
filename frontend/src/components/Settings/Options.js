@@ -104,6 +104,8 @@ export default function Options(props) {
   const [quickMessages, setQuickMessages] = useState("");
   const [defaultLanguage, setDefaultLanguage] = useState("");
   const [allowSignup, setAllowSignup] = useState("disabled");
+  const [recaptchaSiteKey, setRecaptchaSiteKey] = useState("");
+  const [recaptchaSecretKey, setRecaptchaSecretKey] = useState("");
   const [chatbotAutoExit, setChatbotAutoExit] = useState("disabled");
   const [showNumericIcons, setShowNumericIcons] = useState("disabled");
   const [CheckMsgIsGroup, setCheckMsgIsGroupType] = useState("enabled");
@@ -241,6 +243,14 @@ export default function Options(props) {
       if (allowSignup) {
         setAllowSignup(allowSignup.value);
       }
+
+      const recaptchaSiteKey = settings.find(s => s.key === "recaptchaSiteKey");
+      setRecaptchaSiteKey(recaptchaSiteKey?.value || "");
+
+      const recaptchaSecretKey = settings.find(
+        s => s.key === "recaptchaSecretKey"
+      );
+      setRecaptchaSecretKey(recaptchaSecretKey?.value || "");
       const quickMessages = settings.find(s => s.key === "quickMessages");
       setQuickMessages(quickMessages?.value || "individual");
 
@@ -1378,6 +1388,47 @@ export default function Options(props) {
                       {i18n.t("settings.AllowRegistration.options.enabled")}
                     </MenuItem>
                   </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid xs={12} sm={6} md={6} item>
+                <FormControl className={classes.selectContainer}>
+                  <TextField
+                    id="recaptcha-site-key-field"
+                    label={i18n.t("settings.RecaptchaSiteKey.title")}
+                    helperText={i18n.t("settings.RecaptchaSiteKey.helperText")}
+                    variant="standard"
+                    name="recaptchaSiteKey"
+                    value={recaptchaSiteKey}
+                    onChange={e => {
+                      setRecaptchaSiteKey(e.target.value);
+                    }}
+                    onBlur={async _ => {
+                      await handleSetting("recaptchaSiteKey", recaptchaSiteKey);
+                    }}
+                  />
+                </FormControl>
+              </Grid>
+
+              <Grid xs={12} sm={6} md={6} item>
+                <FormControl className={classes.selectContainer}>
+                  <TextField
+                    id="recaptcha-secret-key-field"
+                    label={i18n.t("settings.RecaptchaSecretKey.title")}
+                    variant="standard"
+                    name="recaptchaSecretKey"
+                    type="password"
+                    value={recaptchaSecretKey}
+                    onChange={e => {
+                      setRecaptchaSecretKey(e.target.value);
+                    }}
+                    onBlur={async _ => {
+                      await handleSetting(
+                        "recaptchaSecretKey",
+                        recaptchaSecretKey
+                      );
+                    }}
+                  />
                 </FormControl>
               </Grid>
 

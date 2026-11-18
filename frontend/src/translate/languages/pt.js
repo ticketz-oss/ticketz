@@ -1091,6 +1091,13 @@ const messages = {
             disabled: "Desativado"
           }
         },
+        RecaptchaSiteKey: {
+          title: "Chave do site reCAPTCHA",
+          helperText: "Apenas reCAPTCHA invisível é suportado"
+        },
+        RecaptchaSecretKey: {
+          title: "Chave secreta reCAPTCHA"
+        },
         MultiThreadedWbot: {
           title: "Worker Multithread do WhatsApp",
           options: {

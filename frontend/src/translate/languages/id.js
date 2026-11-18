@@ -1022,6 +1022,13 @@ const messages = {
             disabled: "Dinonaktifkan"
           }
         },
+        RecaptchaSiteKey: {
+          title: "Kunci situs reCAPTCHA",
+          helperText: "Hanya reCAPTCHA tak terlihat yang didukung"
+        },
+        RecaptchaSecretKey: {
+          title: "Kunci rahasia reCAPTCHA"
+        },
         MultiThreadedWbot: {
           title: "Worker WhatsApp Multithread",
           options: {
