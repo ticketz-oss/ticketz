@@ -17,7 +17,8 @@ export const safeSettingsKeys = {
   soundGroupNotifications: "disabled",
   tagsMode: "ticket",
   allowSilentlyClose: "enabled",
-  allowSpy: "disabled"
+  allowSpy: "disabled",
+  desktopActionIconZoom: 0.8
 };
 
 export const GetSettingService = async ({
