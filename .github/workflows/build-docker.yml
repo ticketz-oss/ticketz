@@ -9,31 +9,40 @@ on:
       - 'test-**'
     tags:
       - 'v*.*.*'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   REGISTRY: ghcr.io
-  IMAGE_BACKEND: ticketz-oss/ticketz-backend
-  IMAGE_FRONTEND: ticketz-oss/ticketz-frontend
+
+permissions:
+  contents: read
+  packages: write
+  attestations: write
 
 jobs:
-  build-and-push-images:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-      attestations: write
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [backend, frontend]
+        platform: [amd64, arm64]
+        include:
+          - platform: amd64
+            runner: ubuntu-latest
+          - platform: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Get git info and setup version files
+      - name: Generate git info
         run: |
-          cat <<EOT > backend/src/gitinfo.ts
+          if [ "${{ matrix.image }}" = "backend" ]; then
+            cat <<EOT > backend/src/gitinfo.ts
           export const GitInfo = {
               commitHash: "$(git rev-parse --short HEAD)",
               commitTimestamp: "$(date -u -d "$(git log -1 --format=%cI)" +'%Y-%m-%dT%H:%M:%SZ')",
@@ -42,7 +51,8 @@ jobs:
               buildTimestamp: "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
           };
           EOT
-          cat <<EOT > frontend/public/gitinfo.json
+          else
+            cat <<EOT > frontend/public/gitinfo.json
           {
               "commitHash": "$(git rev-parse --short HEAD)",
               "commitTimestamp": "$(date -u -d "$(git log -1 --format=%cI)" +'%Y-%m-%dT%H:%M:%SZ')",
@@ -51,22 +61,28 @@ jobs:
               "buildTimestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
           }
           EOT
+          fi
 
-      - name: Log in to the Container registry
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Docker meta Backend
-        id: metabackend
-        uses: docker/metadata-action@v3
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
         with:
-          images: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_BACKEND }}
+          images: ${{ env.REGISTRY }}/ticketz-oss/ticketz-${{ matrix.image }}
           labels: |
-            org.opencontainers.image.title=ticketz-backend
+            org.opencontainers.image.title=ticketz-${{ matrix.image }}
+          flavor: |
+            suffix=-${{ matrix.platform }}
+            latest=auto
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}
@@ -74,14 +90,46 @@ jobs:
             type=semver,pattern={{major}}
             type=sha
 
-      - name: Docker meta Frontend
-        id: metafrontend
-        uses: docker/metadata-action@v3
+      - name: Build and push
+        uses: docker/build-push-action@v6
         with:
-          images: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_FRONTEND }}
+          context: ./${{ matrix.image }}
+          push: true
+          platforms: linux/${{ matrix.platform }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: TICKETZ_REGISTRY_URL=${{ secrets.TICKETZ_REGISTRY_URL }}
+          cache-from: type=gha,scope=${{ matrix.image }}-${{ matrix.platform }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}-${{ matrix.platform }}
+          provenance: true
+          sbom: true
+
+  merge:
+    needs: build
+    strategy:
+      matrix:
+        image: [backend, frontend]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/ticketz-oss/ticketz-${{ matrix.image }}
           labels: |
-            org.opencontainers.image.title=ticketz-frontend
+            org.opencontainers.image.title=ticketz-${{ matrix.image }}
+          flavor: |
+            latest=auto
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}
@@ -89,23 +137,10 @@ jobs:
             type=semver,pattern={{major}}
             type=sha
 
-      - name: Build and push backend Docker image
-        id: backend
-        uses: docker/build-push-action@v2
-        with:
-          context: ./backend
-          push: true
-          platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.metabackend.outputs.tags }}
-          labels: ${{ steps.metabackend.outputs.labels }}
-          build-args: TICKETZ_REGISTRY_URL=${{secrets.TICKETZ_REGISTRY_URL}}
-
-      - name: Build and push frontend Docker image
-        id: frontend
-        uses: docker/build-push-action@v2
-        with:
-          context: ./frontend
-          push: true
-          platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.metafrontend.outputs.tags }}
-          labels: ${{ steps.metafrontend.outputs.labels }}
+      - name: Create and push multi-arch manifest
+        run: |
+          for tag in $(echo "${{ steps.meta.outputs.tags }}" | tr '\n' ' '); do
+            docker buildx imagetools create -t "$tag" \
+              "${tag}-amd64" \
+              "${tag}-arm64"
+          done
