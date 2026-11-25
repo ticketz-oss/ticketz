@@ -1,4 +1,4 @@
-FROM node:24-alpine as build-deps
+FROM node:26-alpine as build-deps
 
 WORKDIR /usr/src/app
 COPY . .
@@ -8,7 +8,7 @@ ENV NODE_OPTIONS --openssl-legacy-provider
 RUN --mount=type=cache,target=/root/.npm \
     npm ci && npm run build
 
-FROM ghcr.io/ticketz-oss/nginx-alpine
+FROM ghcr.io/ticketz-oss/nginx-alpine-slim
 
 WORKDIR /usr/share/nginx/html
 
