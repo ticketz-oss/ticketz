@@ -47,6 +47,7 @@ export function convertLegacyBaileysSession(
   if (
     !isRecord(session) ||
     !isRecord(session.creds) ||
+    Object.keys(session.creds).length === 0 ||
     !isRecord(session.keys)
   ) {
     throw new Error("Malformed legacy Baileys session");

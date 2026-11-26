@@ -19,7 +19,10 @@ describe("legacy Baileys session conversion", () => {
 
   it("converts embedded historical key categories", () => {
     const result = convertLegacyBaileysSession(
-      encoded({ creds: {}, keys: { sessions: { jid: { value: 1 } } } }),
+      encoded({
+        creds: { registered: true },
+        keys: { sessions: { jid: { value: 1 } } }
+      }),
       []
     );
     expect(result.keys).toEqual([
@@ -30,7 +33,10 @@ describe("legacy Baileys session conversion", () => {
   it("rejects conflicts and malformed data without leaking contents", () => {
     expect(() =>
       convertLegacyBaileysSession(
-        encoded({ creds: {}, keys: { preKeys: { "1": { x: 1 } } } }),
+        encoded({
+          creds: { registered: true },
+          keys: { preKeys: { "1": { x: 1 } } }
+        }),
         [{ type: "pre-key", key: "1", value: encoded({ x: 2 }) }]
       )
     ).toThrow("Conflicting legacy Baileys keys");
@@ -39,9 +45,12 @@ describe("legacy Baileys session conversion", () => {
     );
     expect(() =>
       convertLegacyBaileysSession(
-        encoded({ creds: {}, keys: { unknown: {} } }),
+        encoded({ creds: { registered: true }, keys: { unknown: {} } }),
         []
       )
     ).toThrow("Unsupported legacy Baileys key category");
+    expect(() =>
+      convertLegacyBaileysSession(encoded({ creds: {}, keys: {} }), [])
+    ).toThrow("Malformed legacy Baileys session");
   });
 });
