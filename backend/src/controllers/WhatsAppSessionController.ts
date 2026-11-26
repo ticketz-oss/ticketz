@@ -11,6 +11,7 @@ import {
 } from "../libs/wbot";
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
+import { isWhatsAppSessionStartPending } from "../services/WbotServices/SessionStartTracker";
 import UpdateWhatsAppService from "../services/WhatsappService/UpdateWhatsAppService";
 import ImportWhatsAppSessionService from "../services/WbotServices/ImportWhatsAppSessionService";
 import { startBuildCaptureExtension } from "../services/WbotServices/BuildCaptureExtensionService";
@@ -214,6 +215,10 @@ const reset = async (req: Request, res: Response): Promise<Response> => {
 
   if (whatsapp.channel !== "whatsapp") {
     throw new AppError("ERR_INVALID_CHANNEL", 400);
+  }
+
+  if (isWhatsAppSessionStartPending(whatsapp.id)) {
+    throw new AppError("ERR_WAPP_SESSION_START_PENDING", 409);
   }
 
   const resetResult = await resetBaileysSession(whatsapp.id);

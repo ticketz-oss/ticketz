@@ -1287,6 +1287,8 @@ const messages = {
           "Tidak ada WhatsApp default yang ditemukan. Periksa halaman koneksi.",
         ERR_WAPP_NOT_INITIALIZED:
           "Sesi WhatsApp ini belum diinisialisasi. Periksa halaman koneksi.",
+        ERR_WAPP_SESSION_START_PENDING:
+          "Sesi WhatsApp masih dimulai. Coba lagi sebentar lagi.",
         ERR_WAPP_CHECK_CONTACT:
           "Tidak dapat memeriksa kontak WhatsApp. Periksa halaman koneksi.",
         ERR_WAPP_INVALID_CONTACT: "Ini bukan nomor WhatsApp yang valid.",

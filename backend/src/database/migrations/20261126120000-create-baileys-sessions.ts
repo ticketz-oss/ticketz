@@ -79,8 +79,18 @@ export async function up(queryInterface: QueryInterface): Promise<void> {
   });
 }
 
-export async function down(): Promise<void> {
-  throw new Error(
-    "Cannot downgrade Baileys session isolation without a verified credential export"
-  );
+export async function down(queryInterface: QueryInterface): Promise<void> {
+  await queryInterface.sequelize.transaction(async transaction => {
+    await queryInterface.removeConstraint(
+      "Whatsapps",
+      "whatsapps_active_baileys_session_owner_fk",
+      { transaction }
+    );
+    await queryInterface.removeColumn("Whatsapps", "activeBaileysSessionId", {
+      transaction
+    });
+    await queryInterface.dropTable("BaileysSessionKeys", { transaction });
+    await queryInterface.dropTable("BaileysSessionContacts", { transaction });
+    await queryInterface.dropTable("BaileysSessions", { transaction });
+  });
 }

@@ -1,4 +1,3 @@
-import { isDeepStrictEqual } from "util";
 import { BufferJSON } from "libzapitu-rf";
 
 const legacyKeyTypes: Record<string, string> = {
@@ -36,7 +35,6 @@ export function convertLegacyBaileysSession(
   const id = (type: string, key: string): string => JSON.stringify([type, key]);
 
   storedKeys.forEach(entry => {
-    parseLegacyJson(entry.value);
     keys.set(id(entry.type, entry.key), entry);
   });
 
@@ -60,12 +58,7 @@ export function convertLegacyBaileysSession(
     }
     Object.entries(entries).forEach(([key, value]) => {
       const existing = keys.get(id(type, key));
-      if (existing) {
-        const stored = parseLegacyJson(existing.value);
-        if (!isDeepStrictEqual(stored, value)) {
-          throw new Error("Conflicting legacy Baileys keys");
-        }
-      } else if (value !== null && value !== undefined) {
+      if (!existing && value !== null && value !== undefined) {
         keys.set(id(type, key), {
           type,
           key,

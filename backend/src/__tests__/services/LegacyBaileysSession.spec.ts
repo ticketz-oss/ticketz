@@ -30,16 +30,23 @@ describe("legacy Baileys session conversion", () => {
     ]);
   });
 
-  it("rejects conflicts and malformed data without leaking contents", () => {
-    expect(() =>
-      convertLegacyBaileysSession(
-        encoded({
-          creds: { registered: true },
-          keys: { preKeys: { "1": { x: 1 } } }
-        }),
-        [{ type: "pre-key", key: "1", value: encoded({ x: 2 }) }]
-      )
-    ).toThrow("Conflicting legacy Baileys keys");
+  it("preserves stored key values without parsing them", () => {
+    const storedKey = {
+      type: "pre-key",
+      key: "1",
+      value: "opaque legacy value"
+    };
+    const result = convertLegacyBaileysSession(
+      encoded({
+        creds: { registered: true },
+        keys: { preKeys: { "1": { x: 1 } } }
+      }),
+      [storedKey]
+    );
+    expect(result.keys).toEqual([storedKey]);
+  });
+
+  it("rejects malformed or unsupported serialized sessions", () => {
     expect(() => convertLegacyBaileysSession("{secret", [])).toThrow(
       "Malformed legacy Baileys session data"
     );

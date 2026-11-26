@@ -1392,6 +1392,8 @@ const messages = {
           "No default WhatsApp found. Check the connections page.",
         ERR_WAPP_NOT_INITIALIZED:
           "This WhatsApp session has not been initialized. Check the connections page.",
+        ERR_WAPP_SESSION_START_PENDING:
+          "The WhatsApp session is still starting. Try again shortly.",
         ERR_WAPP_CHECK_CONTACT:
           "Could not check WhatsApp contact. Check the connections page.",
         ERR_WAPP_INVALID_CONTACT: "This is not a valid WhatsApp number.",

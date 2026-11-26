@@ -1277,6 +1277,8 @@ const messages = {
           "Kein Standard-WhatsApp gefunden. Überprüfen Sie die Verbindungsseite.",
         ERR_WAPP_NOT_INITIALIZED:
           "Diese WhatsApp-Sitzung wurde nicht initialisiert. Überprüfen Sie die Verbindungsseite.",
+        ERR_WAPP_SESSION_START_PENDING:
+          "Die WhatsApp-Sitzung wird noch gestartet. Bitte versuchen Sie es gleich erneut.",
         ERR_WAPP_CHECK_CONTACT:
           "WhatsApp-Kontakt konnte nicht überprüft werden. Überprüfen Sie die Verbindungsseite",
         ERR_WAPP_INVALID_CONTACT: "Dies ist keine gültige WhatsApp-Nummer.",

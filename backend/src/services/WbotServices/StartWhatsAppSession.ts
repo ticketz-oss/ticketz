@@ -15,6 +15,7 @@ import {
   StaleBaileysSessionError,
   withActiveBaileysSession
 } from "./BaileysSessionService";
+import { beginWhatsAppSessionStart } from "./SessionStartTracker";
 
 const pendingStarts = new Map<string, Promise<void>>();
 
@@ -24,6 +25,7 @@ export const StartWhatsAppSession = async (
   isRefresh = false,
   expectedSessionId?: string
 ): Promise<void> => {
+  const finishTracking = beginWhatsAppSessionStart(whatsapp.id);
   try {
     const session = await ensureBaileysSession(whatsapp.id, expectedSessionId);
     cancelReconnect(session.id);
@@ -63,5 +65,7 @@ export const StartWhatsAppSession = async (
       );
       throw new AppError("ERR_WAPP_SESSION_START_FAILED", 500);
     }
+  } finally {
+    finishTracking();
   }
 };

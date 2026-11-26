@@ -1328,6 +1328,8 @@ const messages = {
           "Nenhum WhatsApp padrão encontrado. Verifique a página de conexões.",
         ERR_WAPP_NOT_INITIALIZED:
           "Esta sessão do WhatsApp não foi inicializada. Verifique a página de conexões.",
+        ERR_WAPP_SESSION_START_PENDING:
+          "A sessão do WhatsApp ainda está a iniciar. Tente novamente dentro de momentos.",
         ERR_WAPP_CHECK_CONTACT:
           "Não foi possível verificar o contacto do WhatsApp. Verifique a página de conexões",
         ERR_WAPP_INVALID_CONTACT: "Este não é um número de WhatsApp válido.",
