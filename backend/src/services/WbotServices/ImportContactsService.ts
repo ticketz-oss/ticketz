@@ -5,6 +5,10 @@ import ShowBaileysService from "../BaileysServices/ShowBaileysService";
 import CreateContactService from "../ContactServices/CreateContactService";
 import AppError from "../../errors/AppError";
 import Whatsapp from "../../models/Whatsapp";
+import {
+  StaleBaileysSessionError,
+  withActiveBaileysSession
+} from "./BaileysSessionService";
 
 const ImportContactsService = async (
   companyId: number,
@@ -35,29 +39,38 @@ const ImportContactsService = async (
 
   if (Array.isArray(phoneContactsList)) {
     try {
+      // eslint-disable-next-line no-restricted-syntax
       for (const { id, name, notify } of phoneContactsList) {
         if (!id || id === "status@broadcast" || id.includes("g.us")) {
           continue;
         }
 
         const number = id.replace(/\D/g, "");
-        const existingContact = await Contact.findOne({
-          where: { number, companyId }
-        });
-
-        if (existingContact) {
-          existingContact.name = name || notify || number;
-          await existingContact.save();
-          continue;
-        }
-
         try {
-          await CreateContactService({
-            number,
-            name: name || notify || number,
-            companyId
-          });
+          await withActiveBaileysSession(
+            whatsappId,
+            wbot.baileysSessionId,
+            async (_, transaction) => {
+              if (!wbot.isCurrent()) throw new StaleBaileysSessionError();
+              const existingContact = await Contact.findOne({
+                where: { number, companyId },
+                transaction
+              });
+              if (existingContact) {
+                existingContact.name = name || notify || number;
+                await existingContact.save({ transaction });
+              } else {
+                await CreateContactService({
+                  number,
+                  name: name || notify || number,
+                  companyId,
+                  transaction
+                });
+              }
+            }
+          );
         } catch (error) {
+          if (error instanceof StaleBaileysSessionError) throw error;
           logger.error(
             { name, number, companyId },
             `Could not save contact. Err: ${error}`
@@ -72,6 +85,7 @@ const ImportContactsService = async (
       logger.error(
         `Error importing contacts from WhatsApp for company ID: ${companyId} - ${error.message}`
       );
+      throw error;
     }
   }
 };

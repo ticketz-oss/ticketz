@@ -1,4 +1,4 @@
-import { Op, WhereOptions } from "sequelize";
+import { Op, Transaction, WhereOptions } from "sequelize";
 import AppError from "../../errors/AppError";
 import Contact from "../../models/Contact";
 import ContactCustomField from "../../models/ContactCustomField";
@@ -18,6 +18,7 @@ interface Request {
   disableBot?: boolean;
   language?: string;
   returnFound?: boolean;
+  transaction?: Transaction;
 }
 
 const CreateContactService = async ({
@@ -28,7 +29,8 @@ const CreateContactService = async ({
   extraInfo = [],
   disableBot = false,
   language,
-  returnFound = false
+  returnFound = false,
+  transaction
 }: Request): Promise<Contact> => {
   const where: WhereOptions = { number, companyId };
 
@@ -59,7 +61,8 @@ const CreateContactService = async ({
           },
           "extraInfo"
         ]
-      : undefined
+      : undefined,
+    transaction
   });
 
   if (numberExists) {
@@ -80,12 +83,14 @@ const CreateContactService = async ({
       language
     },
     {
-      include: ["extraInfo"]
+      include: ["extraInfo"],
+      transaction
     }
   );
 
   await contact.reload({
-    include: ["tags", "extraInfo"]
+    include: ["tags", "extraInfo"],
+    transaction
   });
 
   return contact;
