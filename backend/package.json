@@ -47,7 +47,7 @@
     "iconv-lite": "^0.6.3",
     "jimp": "^1.7.0",
     "jsonwebtoken": "^9.0.3",
-    "libzapitu-rf": "^1.0.0-alpha.26",
+    "libzapitu-rf": "^1.0.0-alpha.27",
     "link-preview-js": "^3.2.0",
     "luxon": "^3.7.2",
     "mime-types": "^2.1.35",
