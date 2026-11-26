@@ -25,7 +25,6 @@ import authState from "../helpers/authState";
 import AppError from "../errors/AppError";
 import { getIO } from "./socket";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
-import DeleteBaileysService from "../services/BaileysServices/DeleteBaileysService";
 import Contact from "../models/Contact";
 import Ticket from "../models/Ticket";
 import { GitInfo } from "../gitinfo";
@@ -34,7 +33,6 @@ import GetPublicSettingService from "../services/SettingServices/GetPublicSettin
 import waVersion from "../waversion.json";
 import Message from "../models/Message";
 import OutOfTicketMessage from "../models/OutOfTicketMessages";
-import BaileysKeys from "../models/BaileysKeys";
 import { DecoupledDriverServices } from "../services/DecoupledDriverServices/DecoupledDriverServices";
 import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import GetTicketWbot from "../helpers/GetTicketWbot";
@@ -42,44 +40,89 @@ import { getJidOf } from "../services/WbotServices/getJidOf";
 import WhatsappLidMap from "../models/WhatsappLidMap";
 import crypto from "crypto";
 import { GetCompanySetting } from "../helpers/CheckSettings";
+import {
+  withActiveBaileysSession,
+  resetBaileysSession,
+  cleanupRetiredBaileysSessions,
+  StaleBaileysSessionError
+} from "../services/WbotServices/BaileysSessionService";
 
 // const loggerBaileys = MAIN_LOGGER.child({});
 // loggerBaileys.level = process.env.BAILEYS_LOG_LEVEL || "error";
 
-const passkeyTokens = new Map<number, string>();
+const passkeyTokens = new Map<number, { token: string; sessionId: string }>();
 
-export function setPasskeyToken(whatsappId: number, token: string): void {
-  passkeyTokens.set(whatsappId, token);
+export function setPasskeyToken(
+  whatsappId: number,
+  token: string,
+  sessionId: string
+): void {
+  passkeyTokens.set(whatsappId, { token, sessionId });
 }
 
 export function getPasskeyToken(whatsappId: number): string | undefined {
-  return passkeyTokens.get(whatsappId);
+  return passkeyTokens.get(whatsappId)?.token;
 }
 
-export function resolvePasskeyToken(token: string): number | undefined {
-  return Array.from(passkeyTokens.entries()).find(([, t]) => t === token)?.[0];
+export function resolvePasskeyToken(
+  token: string
+): { whatsappId: number; sessionId: string } | undefined {
+  const entry = Array.from(passkeyTokens.entries()).find(
+    ([, t]) => t.token === token
+  );
+  return entry && { whatsappId: entry[0], sessionId: entry[1].sessionId };
 }
 
-export function createCaptureToken(whatsappId: number): string {
+export function createCaptureToken(
+  whatsappId: number,
+  sessionId: string
+): string {
   const token = crypto.randomBytes(24).toString("hex");
-  passkeyTokens.set(whatsappId, token);
+  passkeyTokens.set(whatsappId, { token, sessionId });
   return token;
+}
+
+export function invalidateCaptureToken(
+  whatsappId: number,
+  sessionId?: string
+): void {
+  if (!sessionId || passkeyTokens.get(whatsappId)?.sessionId === sessionId) {
+    passkeyTokens.delete(whatsappId);
+  }
 }
 
 export type Session = WASocket & {
   id?: number;
+  baileysSessionId?: string;
   myJid?: string;
   myLid?: string;
   cacheMessage?: (msg: proto.IWebMessageInfo) => void;
   isRefreshing?: boolean;
+  cancelStart?: () => void;
+  invalidate?: () => void;
+  isCurrent?: () => boolean;
+  publiclyAvailable?: boolean;
 };
 
 const sessions: Session[] = [];
 
-const retriesQrCodeMap = new Map<number, number>();
+const retriesQrCodeMap = new Map<string, number>();
+const reconnectTimers = new Map<string, NodeJS.Timeout>();
+
+export function cancelReconnect(sessionId: string): void {
+  const timer = reconnectTimers.get(sessionId);
+  if (timer) clearTimeout(timer);
+  reconnectTimers.delete(sessionId);
+}
+
+export function clearQrRetries(sessionId: string): void {
+  if (sessionId) retriesQrCodeMap.delete(sessionId);
+}
 
 export const getWbot = (whatsappId: number): Session => {
-  const sessionIndex = sessions.findIndex(s => s.id === whatsappId);
+  const sessionIndex = sessions.findIndex(
+    s => s.id === whatsappId && s.publiclyAvailable
+  );
 
   if (sessionIndex === -1) {
     throw new AppError("ERR_WAPP_NOT_INITIALIZED");
@@ -98,36 +141,36 @@ export const getConnectedNumber = (whatsappId: number): string | undefined => {
 
 export const removeWbot = async (
   whatsappId: number,
-  isLogout = true
+  isLogout = true,
+  expectedSessionId?: string,
+  expectedSocket?: Session
 ): Promise<void> => {
-  try {
-    const sessionIndex = sessions.findIndex(s => s.id === whatsappId);
-    if (sessionIndex !== -1) {
-      if (isLogout) {
-        await sessions[sessionIndex].logout();
-      }
-
-      sessions[sessionIndex].ev.removeAllListeners("connection.update");
-      sessions[sessionIndex].ev.removeAllListeners("creds.update");
-      sessions[sessionIndex].ev.removeAllListeners("presence.update");
-      sessions[sessionIndex].ev.removeAllListeners("groups.upsert");
-      sessions[sessionIndex].ev.removeAllListeners("groups.update");
-      sessions[sessionIndex].ev.removeAllListeners("group-participants.update");
-      sessions[sessionIndex].ev.removeAllListeners("contacts.upsert");
-      sessions[sessionIndex].ev.removeAllListeners("contacts.update");
-      sessions[sessionIndex].end(null);
-
-      sessions[sessionIndex].ws.removeAllListeners();
-      await sessions[sessionIndex].ws.close();
-      sessions.splice(sessionIndex, 1);
+  const sessionIndex = sessions.findIndex(
+    s =>
+      s.id === whatsappId &&
+      (!expectedSessionId || s.baileysSessionId === expectedSessionId) &&
+      (!expectedSocket || s === expectedSocket)
+  );
+  if (sessionIndex !== -1) {
+    const session = sessions[sessionIndex];
+    sessions.splice(sessionIndex, 1);
+    session.cancelStart?.();
+    session.ev.removeAllListeners("connection.update");
+    session.ev.removeAllListeners("creds.update");
+    session.ev.removeAllListeners("presence.update");
+    session.ev.removeAllListeners("groups.upsert");
+    session.ev.removeAllListeners("groups.update");
+    session.ev.removeAllListeners("group-participants.update");
+    session.ev.removeAllListeners("contacts.upsert");
+    session.ev.removeAllListeners("contacts.update");
+    try {
+      if (isLogout) await session.logout();
+    } finally {
+      session.invalidate?.();
+      session.end(null);
+      session.ws.removeAllListeners();
+      await session.ws.close();
     }
-  } catch (err) {
-    logger.error(err);
-  }
-  if (isLogout) {
-    await BaileysKeys.destroy({
-      where: { whatsappId }
-    });
   }
 };
 
@@ -188,7 +231,8 @@ const getProjectWAVersion = async () => {
 export const initWASocket = async (
   whatsapp: Whatsapp,
   proxy?: Agent,
-  isRefresh = false
+  isRefresh = false,
+  sessionId?: string
 ): Promise<Session> => {
   return new Promise((resolve, reject) => {
     try {
@@ -199,7 +243,7 @@ export const initWASocket = async (
           where: { id: whatsapp.id }
         });
 
-        if (!whatsappUpdate) return;
+        if (!whatsappUpdate) throw new AppError("ERR_NO_WAPP_FOUND", 404);
 
         const { id, name, provider } = whatsappUpdate;
 
@@ -313,7 +357,12 @@ export const initWASocket = async (
           return undefined;
         }
 
-        const { state, saveState } = await authState(whatsapp);
+        let isCurrent = true;
+        const { state, saveState } = await authState(
+          whatsapp,
+          sessionId,
+          () => isCurrent
+        );
 
         const msgRetryCounterCache = new NodeCache();
         const internalGroupCache = new NodeCache({
@@ -391,6 +440,34 @@ export const initWASocket = async (
           transactionOpts: { maxCommitRetries: 1, delayBetweenTriesMs: 10 }
         });
 
+        wsocket.id = id;
+        wsocket.baileysSessionId = sessionId;
+        wsocket.invalidate = () => {
+          isCurrent = false;
+        };
+        wsocket.isCurrent = () => isCurrent;
+        wsocket.cancelStart = () => reject(new StaleBaileysSessionError());
+        const previous = sessions.find(s => s.id === id);
+        if (previous && previous.baileysSessionId !== sessionId) {
+          await removeWbot(id, false, previous.baileysSessionId, previous);
+        }
+        await withActiveBaileysSession(id, sessionId, async current => {
+          if (
+            current.status === "passkey_required" ||
+            current.status === "IMPORTING"
+          ) {
+            throw new StaleBaileysSessionError();
+          }
+          const previousIndex = sessions.findIndex(s => s.id === id);
+          if (previousIndex !== -1) {
+            throw new Error("WhatsApp socket already initialized");
+          }
+          sessions.push(wsocket);
+        }).catch(error => {
+          wsocket.end(null);
+          throw error;
+        });
+
         wsocket.ev.on("call", async event => {
           logger.trace({ event }, "Received call event");
         });
@@ -409,154 +486,128 @@ export const initWASocket = async (
           store.set(msg.key.id, msg.message);
         };
 
-        wsocket.ev.on(
-          "connection.update",
-          async ({ connection, lastDisconnect, qr, reachoutTimeLock }) => {
-            if (reachoutTimeLock) {
-              handleReachoutTimelock(reachoutTimeLock, { reachoutTimeLock });
-            }
-
-            logger.info(
-              { lastDisconnect },
-              `Socket  ${name} Connection Update ${connection || ""}`
-            );
-
-            if (connection === "close") {
-              if ((lastDisconnect?.error as Boom)?.output?.statusCode === 403) {
-                // disconnected from whatsapp
-                await removeWbot(id);
-                await whatsapp.update({
-                  status: "DISCONNECTED",
-                  session: "",
-                  qrcode: ""
-                });
-                await DeleteBaileysService(whatsapp.id);
-                io.to(`company-${whatsapp.companyId}-admin`).emit(
-                  `company-${whatsapp.companyId}-whatsappSession`,
-                  {
-                    action: "update",
-                    session: whatsapp
-                  }
-                );
-              } else if (
-                (lastDisconnect?.error as Boom)?.output?.statusCode !==
-                DisconnectReason.loggedOut
-              ) {
-                // connection dropped without logging out
-                await whatsapp.update({ status: "PENDING" });
-                io.to(`company-${whatsapp.companyId}-admin`).emit(
-                  `company-${whatsapp.companyId}-whatsappSession`,
-                  {
-                    action: "update",
-                    session: whatsapp
-                  }
-                );
-                removeWbot(id, false).then(() => {
-                  logger.info(`Reconnecting ${name} in 2 seconds`);
-                  setTimeout(async () => {
-                    await whatsapp.reload();
-                    await StartWhatsAppSession(
-                      whatsapp,
-                      whatsapp.companyId,
-                      true
-                    );
-                  }, 2000);
-                });
-              } else {
-                // logged out
-                await removeWbot(id);
-                await whatsapp.update({
-                  status: "DISCONNECTED",
-                  session: "",
-                  qrcode: ""
-                });
-                await DeleteBaileysService(whatsapp.id);
-                io.to(`company-${whatsapp.companyId}-admin`).emit(
-                  `company-${whatsapp.companyId}-whatsappSession`,
-                  {
-                    action: "update",
-                    session: whatsapp
-                  }
-                );
+        const updateSession = async (values: Partial<Whatsapp>) => {
+          await withActiveBaileysSession(
+            id,
+            sessionId,
+            async (current, transaction) => {
+              if (!isCurrent) throw new StaleBaileysSessionError();
+              await current.update(values, { transaction });
+              if (values.status === "CONNECTED" || values.status === "qrcode") {
+                wsocket.publiclyAvailable = true;
               }
+              io.to(`company-${current.companyId}-admin`).emit(
+                `company-${current.companyId}-whatsappSession`,
+                { action: "update", session: current }
+              );
+              sendWhatsappUpdate(current);
             }
-
+          );
+        };
+        const handleSocketError = (error: Error) => {
+          if (!(error instanceof StaleBaileysSessionError)) {
+            logger.error(
+              { whatsappId: id, errorType: error.name },
+              "Baileys socket event failed"
+            );
+          }
+        };
+        wsocket.ev.on("connection.update", async update => {
+          await (async () => {
+            const { connection, lastDisconnect, qr, reachoutTimeLock } = update;
+            if (reachoutTimeLock) {
+              await withActiveBaileysSession(id, sessionId, async () => {
+                if (!isCurrent) throw new StaleBaileysSessionError();
+                handleReachoutTimelock(reachoutTimeLock, { reachoutTimeLock });
+              });
+            }
+            logger.info(`Socket ${name} connection update ${connection || ""}`);
+            if (connection === "close") {
+              const statusCode = (lastDisconnect?.error as Boom)?.output
+                ?.statusCode;
+              if (
+                statusCode === 403 ||
+                statusCode === DisconnectReason.loggedOut
+              ) {
+                const reset = await resetBaileysSession(
+                  id,
+                  sessionId,
+                  () => isCurrent
+                );
+                invalidateCaptureToken(id, sessionId);
+                clearQrRetries(sessionId);
+                cancelReconnect(sessionId);
+                await removeWbot(id, false, sessionId, wsocket);
+                await cleanupRetiredBaileysSessions(id);
+                await withActiveBaileysSession(
+                  id,
+                  reset.whatsapp.activeBaileysSessionId,
+                  async current => {
+                    io.to(`company-${current.companyId}-admin`).emit(
+                      `company-${current.companyId}-whatsappSession`,
+                      { action: "update", session: current }
+                    );
+                  }
+                );
+              } else {
+                await updateSession({ status: "PENDING" });
+                await removeWbot(id, false, sessionId, wsocket);
+                cancelReconnect(sessionId);
+                const timer = setTimeout(() => {
+                  reconnectTimers.delete(sessionId);
+                  if (getPasskeyToken(id)) return;
+                  StartWhatsAppSession(
+                    whatsapp,
+                    whatsapp.companyId,
+                    true,
+                    sessionId
+                  );
+                }, 2000);
+                reconnectTimers.set(sessionId, timer);
+              }
+              return;
+            }
             if (connection === "open") {
-              wsocket.fetchAccountReachoutTimelock().then(timelock => {
-                handleReachoutTimelock(timelock, { timelock });
-              });
-
-              wsocket.fetchNewChatMessageCap().then(cap => {
-                logger.info({ cap }, "Fetched new chat message cap");
-              });
-
-              await whatsapp.reload({
-                include: ["wavoip"]
-              });
-
               wsocket.myLid = jidNormalizedUser(wsocket.user?.lid);
               wsocket.myJid = jidNormalizedUser(wsocket.user.id);
-
-              await whatsapp.update({
+              await updateSession({
                 status: "CONNECTED",
                 qrcode: "",
                 retries: 0
               });
-
-              logger.debug(
-                {
-                  id: jidNormalizedUser(wsocket.user.id),
-                  name: wsocket.user.name,
-                  lid: jidNormalizedUser(wsocket.user?.lid),
-                  notify: wsocket.user?.notify,
-                  verifiedName: wsocket.user?.verifiedName,
-                  imgUrl: wsocket.user?.imgUrl,
-                  status: wsocket.user?.status
-                },
-                `Session ${name} details`
-              );
-
-              io.to(`company-${whatsapp.companyId}-admin`).emit(
-                `company-${whatsapp.companyId}-whatsappSession`,
-                {
-                  action: "update",
-                  session: whatsapp
-                }
-              );
-
+              clearQrRetries(sessionId);
+              retriesQrCode = 0;
+              wsocket
+                .fetchAccountReachoutTimelock()
+                .then(timelock => {
+                  if (isCurrent) handleReachoutTimelock(timelock, { timelock });
+                })
+                .catch(handleSocketError);
+              wsocket
+                .fetchNewChatMessageCap()
+                .then(cap => {
+                  if (isCurrent)
+                    logger.info({ cap }, "Fetched new chat message cap");
+                })
+                .catch(handleSocketError);
               await checkWbotDuplicity.runExclusive(async () => {
-                const sessionIndex = sessions.findIndex(
-                  s => s.id === whatsapp.id
+                if (!isCurrent) throw new StaleBaileysSessionError();
+                const duplicate = sessions.find(
+                  s => s.id !== id && s.myJid && s.myJid === wsocket.myJid
                 );
-                if (sessionIndex === -1) {
-                  wsocket.id = whatsapp.id;
-                  sessions.push(wsocket);
-                }
-
-                const anotherSameJid =
-                  !!wsocket.myJid &&
-                  sessions.find(
-                    s => s.id !== whatsapp.id && s.myJid === wsocket.myJid
-                  );
-
-                if (anotherSameJid) {
-                  logger.warn(
-                    {
-                      id: anotherSameJid.id,
-                      jid: anotherSameJid.myJid
-                    },
-                    "Another session with the same jid/lid detected"
-                  );
-                  const duplicatedWbot = getWbot(anotherSameJid.id);
-                  duplicatedWbot.logout();
-                  duplicatedWbot.ws.close();
+                if (duplicate) {
+                  await duplicate.logout();
+                  await duplicate.ws.close();
                 }
               });
-
-              sendWhatsappUpdate(whatsapp);
-
+              await withActiveBaileysSession(id, sessionId, async () => {
+                if (!isCurrent) throw new StaleBaileysSessionError();
+                wsocket.cancelStart = undefined;
+                resolve(wsocket);
+              });
               if (wsocket.isRefreshing) {
                 setTimeout(() => {
+                  if (!isCurrent) return;
                   wsocket
                     .resyncAppState(
                       [
@@ -568,90 +619,52 @@ export const initWASocket = async (
                       ],
                       true
                     )
-                    .catch(error => {
-                      logger.error(
-                        { message: error.message },
-                        `Error resyncing app state for session ${name}`
-                      );
-                    });
+                    .catch(handleSocketError);
                 }, 5000);
                 wsocket.isRefreshing = false;
               }
-              resolve(wsocket);
             }
-
             if (qr !== undefined) {
-              if (retriesQrCodeMap.get(id) && retriesQrCodeMap.get(id) >= 3) {
-                await whatsappUpdate.update({
-                  status: "DISCONNECTED",
-                  qrcode: ""
-                });
-                await DeleteBaileysService(whatsappUpdate.id);
-                io.to(`company-${whatsappUpdate.companyId}-admin`).emit(
-                  `company-${whatsappUpdate.companyId}-whatsappSession`,
-                  {
-                    action: "update",
-                    session: whatsappUpdate
-                  }
-                );
-                wsocket.ev.removeAllListeners("connection.update");
-                wsocket.ws.close();
-                wsocket = null;
-                retriesQrCodeMap.delete(id);
+              if ((retriesQrCodeMap.get(sessionId) || 0) >= 3) {
+                await updateSession({ status: "DISCONNECTED", qrcode: "" });
+                clearQrRetries(sessionId);
+                await removeWbot(id, false, sessionId, wsocket);
               } else {
-                logger.info(`Session QRCode Generate ${name}`);
-                retriesQrCodeMap.set(id, (retriesQrCode += 1));
-
-                await whatsapp.update({
+                await updateSession({
                   qrcode: qr,
                   status: "qrcode",
                   retries: 0
                 });
-                const sessionIndex = sessions.findIndex(
-                  s => s.id === whatsapp.id
-                );
-
-                if (sessionIndex === -1) {
-                  wsocket.id = whatsapp.id;
-                  sessions.push(wsocket);
-                }
-
-                io.to(`company-${whatsapp.companyId}-admin`).emit(
-                  `company-${whatsapp.companyId}-whatsappSession`,
-                  {
-                    action: "update",
-                    session: whatsapp
-                  }
-                );
+                retriesQrCodeMap.set(sessionId, ++retriesQrCode);
               }
             }
-          }
-        );
-        wsocket.ev.on("creds.update", saveState);
+          })().catch(handleSocketError);
+        });
+        wsocket.ev.on("creds.update", () => {
+          saveState().catch(handleSocketError);
+        });
 
-        wsocket.ev.on("pair.passkey.request", async () => {
-          logger.info(`Session ${name} requires passkey authentication`);
-          const token = createCaptureToken(whatsapp.id);
-
-          await whatsapp.update({
-            status: "passkey_required",
-            qrcode: token,
-            retries: 0
-          });
-
-          io.to(`company-${whatsapp.companyId}-admin`).emit(
-            `company-${whatsapp.companyId}-whatsappSession`,
-            {
-              action: "update",
-              session: whatsapp
-            }
-          );
-
-          // Close the socket so the ongoing QR-code loop does not overwrite the
-          // capture token that is now stored in the qrcode field. The capture
-          // endpoint will restart the session once the extension posts the dump.
-          wsocket.ev.removeAllListeners("connection.update");
-          wsocket.end(null);
+        wsocket.ev.on("pair.passkey.request", () => {
+          (async () => {
+            await withActiveBaileysSession(
+              id,
+              sessionId,
+              async (current, transaction) => {
+                if (!isCurrent) throw new StaleBaileysSessionError();
+                const token = createCaptureToken(id, sessionId);
+                await current.update(
+                  { status: "passkey_required", qrcode: token, retries: 0 },
+                  { transaction }
+                );
+                io.to(`company-${current.companyId}-admin`).emit(
+                  `company-${current.companyId}-whatsappSession`,
+                  { action: "update", session: current }
+                );
+                isCurrent = false;
+              }
+            );
+            await removeWbot(id, false, sessionId, wsocket);
+          })().catch(handleSocketError);
         });
 
         wsocket.ev.on(
@@ -745,7 +758,7 @@ export const initWASocket = async (
             groupCache.del(event.id);
           }
         });
-      })();
+      })().catch(reject);
     } catch (error) {
       Sentry.captureException(error);
       console.log(error);

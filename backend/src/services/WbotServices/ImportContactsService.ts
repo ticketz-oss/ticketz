@@ -25,7 +25,7 @@ const ImportContactsService = async (
 
   const wbot = getWbot(whatsapp.id);
 
-  const baileysContacts = await ShowBaileysService(wbot.id);
+  const baileysContacts = await ShowBaileysService(wbot.baileysSessionId);
 
   const phoneContactsList = baileysContacts.map(contact => ({
     id: contact.contactId,

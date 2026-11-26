@@ -10,7 +10,12 @@ export const StartAllWhatsAppsSessions = async (
     if (whatsapps.length > 0) {
       whatsapps.forEach(whatsapp => {
         if (whatsapp.channel === "whatsapp") {
-          StartWhatsAppSession(whatsapp, companyId);
+          StartWhatsAppSession(whatsapp, companyId).catch(error => {
+            logger.error(
+              { whatsappId: whatsapp.id, message: error.message },
+              "Failed to start WhatsApp session"
+            );
+          });
         }
       });
     }

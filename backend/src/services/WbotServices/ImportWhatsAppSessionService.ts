@@ -1,8 +1,14 @@
 import { BufferJSON, jidNormalizedUser, proto } from "libzapitu-rf";
 import type { AuthenticationCreds } from "libzapitu-rf/lib/Types";
-import BaileysKeys from "../../models/BaileysKeys";
+import { Transaction } from "sequelize";
+import BaileysSession from "../../models/BaileysSession";
+import BaileysSessionKey from "../../models/BaileysSessionKey";
 import Whatsapp from "../../models/Whatsapp";
 import { logger } from "../../utils/logger";
+import {
+  StaleBaileysSessionError,
+  withActiveBaileysSession
+} from "./BaileysSessionService";
 
 // libzapitu-rf declares key material as Uint8Array, but Node Buffers work at
 // runtime. We use a local key pair type to avoid strict ArrayBufferLike typing
@@ -232,8 +238,9 @@ function buildCreds(dump: WhatsAppSessionDump): AuthenticationCreds {
 }
 
 async function saveKeys(
-  whatsappId: number,
-  dump: WhatsAppSessionDump
+  sessionId: string,
+  dump: WhatsAppSessionDump,
+  transaction: Transaction
 ): Promise<void> {
   const tasks: Promise<unknown>[] = [];
 
@@ -241,12 +248,15 @@ async function saveKeys(
     const keyPair = unwrapKeyPair(preKey.keyPair);
     if (!keyPair) return;
     tasks.push(
-      BaileysKeys.upsert({
-        whatsappId,
-        type: "pre-key",
-        key: preKey.keyId.toString(),
-        value: JSON.stringify(keyPair, BufferJSON.replacer)
-      })
+      BaileysSessionKey.upsert(
+        {
+          sessionId,
+          type: "pre-key",
+          key: preKey.keyId.toString(),
+          value: JSON.stringify(keyPair, BufferJSON.replacer)
+        },
+        { transaction }
+      )
     );
   });
 
@@ -263,12 +273,15 @@ async function saveKeys(
       identifierKey
     };
     tasks.push(
-      BaileysKeys.upsert({
-        whatsappId,
-        type: "signal-identity",
-        key: jid,
-        value: JSON.stringify(value, BufferJSON.replacer)
-      })
+      BaileysSessionKey.upsert(
+        {
+          sessionId,
+          type: "signal-identity",
+          key: jid,
+          value: JSON.stringify(value, BufferJSON.replacer)
+        },
+        { transaction }
+      )
     );
   });
 
@@ -278,12 +291,15 @@ async function saveKeys(
     if (!jid) return;
     const value = deepUnwrapBuffers(session.session);
     tasks.push(
-      BaileysKeys.upsert({
-        whatsappId,
-        type: "session",
-        key: `${jid}:${session.device}`,
-        value: JSON.stringify(value, BufferJSON.replacer)
-      })
+      BaileysSessionKey.upsert(
+        {
+          sessionId,
+          type: "session",
+          key: `${jid}:${session.device}`,
+          value: JSON.stringify(value, BufferJSON.replacer)
+        },
+        { transaction }
+      )
     );
   });
 
@@ -293,12 +309,15 @@ async function saveKeys(
     const senderJid = normalizeJid(senderKey.senderJid) || senderKey.senderJid;
     const value = deepUnwrapBuffers(senderKey.record);
     tasks.push(
-      BaileysKeys.upsert({
-        whatsappId,
-        type: "sender-key",
-        key: `${groupId}::${senderJid}:${senderKey.senderDevice}`,
-        value: JSON.stringify(value, BufferJSON.replacer)
-      })
+      BaileysSessionKey.upsert(
+        {
+          sessionId,
+          type: "sender-key",
+          key: `${groupId}::${senderJid}:${senderKey.senderDevice}`,
+          value: JSON.stringify(value, BufferJSON.replacer)
+        },
+        { transaction }
+      )
     );
   });
 
@@ -312,12 +331,15 @@ async function saveKeys(
         : undefined
     };
     tasks.push(
-      BaileysKeys.upsert({
-        whatsappId,
-        type: "contacts-tc-token",
-        key: token.jid,
-        value: JSON.stringify(value, BufferJSON.replacer)
-      })
+      BaileysSessionKey.upsert(
+        {
+          sessionId,
+          type: "contacts-tc-token",
+          key: token.jid,
+          value: JSON.stringify(value, BufferJSON.replacer)
+        },
+        { transaction }
+      )
     );
   });
 
@@ -341,7 +363,9 @@ function deepUnwrapBuffers(value: unknown): unknown {
 
 const ImportWhatsAppSessionService = async (
   whatsapp: Whatsapp,
-  dump: unknown
+  dump: unknown,
+  sessionId: string,
+  isCurrent: () => boolean
 ): Promise<void> => {
   validateDump(dump);
 
@@ -350,17 +374,20 @@ const ImportWhatsAppSessionService = async (
     "Importing WhatsApp Web session dump"
   );
 
-  await BaileysKeys.destroy({
-    where: { whatsappId: whatsapp.id }
-  });
-
   const creds = buildCreds(dump);
-
-  await saveKeys(whatsapp.id, dump);
-
-  await whatsapp.update({
-    session: JSON.stringify({ creds, keys: {} }, BufferJSON.replacer, 0)
-  });
+  await withActiveBaileysSession(
+    whatsapp.id,
+    sessionId,
+    async (_, transaction) => {
+      if (!isCurrent()) throw new StaleBaileysSessionError();
+      await BaileysSessionKey.destroy({ where: { sessionId }, transaction });
+      await saveKeys(sessionId, dump, transaction);
+      await BaileysSession.update(
+        { credentials: JSON.stringify(creds, BufferJSON.replacer) },
+        { where: { id: sessionId, whatsappId: whatsapp.id }, transaction }
+      );
+    }
+  );
 
   logger.info(
     { whatsappId: whatsapp.id },

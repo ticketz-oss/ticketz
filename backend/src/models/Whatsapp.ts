@@ -37,6 +37,9 @@ class Whatsapp extends Model<Whatsapp> {
   @Column(DataType.TEXT)
   session: string;
 
+  @Column(DataType.UUID)
+  activeBaileysSessionId: string;
+
   @Column(DataType.TEXT)
   qrcode: string;
 

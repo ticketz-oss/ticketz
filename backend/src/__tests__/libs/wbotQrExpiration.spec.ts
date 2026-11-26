@@ -1,6 +1,7 @@
 import { initWASocket } from "../../libs/wbot";
 import Whatsapp from "../../models/Whatsapp";
-import DeleteBaileysService from "../../services/BaileysServices/DeleteBaileysService";
+
+let mockWhatsapp: Whatsapp;
 
 jest.mock("libzapitu-rf", () => ({
   __esModule: true,
@@ -21,9 +22,13 @@ jest.mock("../../helpers/authState", () => ({
   __esModule: true,
   default: jest.fn().mockResolvedValue({ state: {}, saveState: jest.fn() })
 }));
-jest.mock("../../services/BaileysServices/DeleteBaileysService", () => ({
-  __esModule: true,
-  default: jest.fn().mockResolvedValue(undefined)
+jest.mock("../../services/WbotServices/BaileysSessionService", () => ({
+  withActiveBaileysSession: jest.fn(async (_id, _sessionId, work) =>
+    work(mockWhatsapp, {})
+  ),
+  resetBaileysSession: jest.fn(),
+  cleanupRetiredBaileysSessions: jest.fn(),
+  StaleBaileysSessionError: class extends Error {}
 }));
 jest.mock("../../services/SettingServices/GetPublicSettingService", () => ({
   __esModule: true,
@@ -37,10 +42,9 @@ jest.mock("../../utils/logger", () => ({
   loggerBaileys: {}
 }));
 jest.mock("../../services/WbotServices/StartWhatsAppSession", () => ({}));
-jest.mock(
-  "../../services/WhatsappService/SocketSendWhatsappUpdate",
-  () => ({})
-);
+jest.mock("../../services/WhatsappService/SocketSendWhatsappUpdate", () => ({
+  sendWhatsappUpdate: jest.fn()
+}));
 jest.mock("../../models/Contact", () => ({}));
 jest.mock("../../models/Ticket", () => ({}));
 jest.mock("../../models/Message", () => ({}));
@@ -83,6 +87,7 @@ test("QR expiration emits the disconnected session to its company admins", async
         return Promise.resolve(whatsapp);
       })
     });
+    mockWhatsapp = whatsapp;
     jest.mocked(Whatsapp.findOne).mockResolvedValue(whatsapp);
 
     let registerConnectionUpdate: (
@@ -95,6 +100,7 @@ test("QR expiration emits the disconnected session to its company admins", async
     });
     const removeAllListeners = jest.fn();
     const close = jest.fn();
+    const end = jest.fn();
     const baileysModule: { default: jest.Mock } =
       jest.requireMock("libzapitu-rf");
     baileysModule.default.mockReturnValue({
@@ -110,10 +116,11 @@ test("QR expiration emits the disconnected session to its company admins", async
         ),
         removeAllListeners
       },
-      ws: { on: jest.fn(), close }
+      ws: { on: jest.fn(), close, removeAllListeners: jest.fn() },
+      end
     });
 
-    void initWASocket(whatsapp);
+    void initWASocket(whatsapp, null, false, "session-1").catch(() => {});
     const onConnectionUpdate = await connectionUpdate;
     for (let i = 0; i < 4; i += 1) {
       await onConnectionUpdate({ qr: `qr-${i}` });
@@ -121,7 +128,6 @@ test("QR expiration emits the disconnected session to its company admins", async
 
     expect(whatsapp.status).toBe("DISCONNECTED");
     expect(whatsapp.qrcode).toBe("");
-    expect(DeleteBaileysService).toHaveBeenCalledWith(12);
     expect(to).toHaveBeenLastCalledWith("company-7-admin");
     expect(emit).toHaveBeenLastCalledWith("company-7-whatsappSession", {
       action: "update",
@@ -129,6 +135,7 @@ test("QR expiration emits the disconnected session to its company admins", async
     });
     expect(removeAllListeners).toHaveBeenCalledWith("connection.update");
     expect(close).toHaveBeenCalled();
+    expect(end).toHaveBeenCalled();
   } finally {
     global.fetch = originalFetch;
   }

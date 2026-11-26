@@ -3,7 +3,11 @@ import {
   getWbot,
   removeWbot,
   resolvePasskeyToken,
-  createCaptureToken
+  createCaptureToken,
+  getPasskeyToken,
+  invalidateCaptureToken,
+  clearQrRetries,
+  cancelReconnect
 } from "../libs/wbot";
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
@@ -13,7 +17,13 @@ import { startBuildCaptureExtension } from "../services/WbotServices/BuildCaptur
 import AppError from "../errors/AppError";
 import { getIO } from "../libs/socket";
 import { logger } from "../utils/logger";
-import BaileysKeys from "../models/BaileysKeys";
+import {
+  cleanupRetiredBaileysSessions,
+  ensureBaileysSession,
+  resetBaileysSession,
+  StaleBaileysSessionError,
+  withActiveBaileysSession
+} from "../services/WbotServices/BaileysSessionService";
 
 const store = async (req: Request, res: Response): Promise<Response> => {
   const { whatsappId } = req.params;
@@ -27,6 +37,10 @@ const store = async (req: Request, res: Response): Promise<Response> => {
 
   if (!whatsapp) {
     throw new AppError("ERR_NO_WAPP_FOUND", 404);
+  }
+
+  if (whatsapp.channel !== "whatsapp") {
+    throw new AppError("ERR_INVALID_CHANNEL", 400);
   }
 
   await StartWhatsAppSession(whatsapp, companyId);
@@ -67,8 +81,34 @@ const remove = async (req: Request, res: Response): Promise<Response> => {
 
   if (whatsapp.channel === "whatsapp") {
     const wbot = getWbot(whatsapp.id);
-    wbot.logout();
-    wbot.ws.close();
+    const sessionId = wbot.baileysSessionId;
+    await wbot.logout();
+    try {
+      const resetResult = await resetBaileysSession(
+        whatsapp.id,
+        sessionId,
+        wbot.isCurrent
+      );
+      await withActiveBaileysSession(
+        whatsapp.id,
+        resetResult.whatsapp.activeBaileysSessionId,
+        async current => {
+          getIO()
+            .to(`company-${current.companyId}-admin`)
+            .emit(`company-${current.companyId}-whatsappSession`, {
+              action: "update",
+              session: current
+            });
+        }
+      );
+    } catch (error) {
+      if (!(error instanceof StaleBaileysSessionError)) throw error;
+    }
+    invalidateCaptureToken(whatsapp.id, sessionId);
+    clearQrRetries(sessionId);
+    cancelReconnect(sessionId);
+    await removeWbot(whatsapp.id, false, sessionId, wbot);
+    await cleanupRetiredBaileysSessions(whatsapp.id);
   }
 
   if (whatsapp.channel === "facebook" || whatsapp.channel === "instagram") {
@@ -121,30 +161,39 @@ const requestCaptureToken = async (
     throw new AppError("ERR_NO_WAPP_FOUND", 404);
   }
 
-  const token = createCaptureToken(whatsapp.id);
-
-  try {
-    const wbot = getWbot(whatsapp.id);
-    wbot.ev.removeAllListeners("connection.update");
-    wbot.end(null);
-  } catch {
-    // no active socket to terminate
+  if (whatsapp.channel !== "whatsapp") {
+    throw new AppError("ERR_INVALID_CHANNEL", 400);
   }
 
-  await whatsapp.update({
-    status: "passkey_required",
-    qrcode: token,
-    retries: 0
-  });
-
-  const io = getIO();
-  io.to(`company-${whatsapp.companyId}-admin`).emit(
-    `company-${whatsapp.companyId}-whatsappSession`,
-    {
-      action: "update",
-      session: whatsapp
+  const session = await ensureBaileysSession(whatsapp.id);
+  cancelReconnect(session.id);
+  let token: string;
+  try {
+    token = await withActiveBaileysSession(
+      whatsapp.id,
+      session.id,
+      async (current, transaction) => {
+        await removeWbot(whatsapp.id, false, session.id);
+        const captureToken = createCaptureToken(whatsapp.id, session.id);
+        token = captureToken;
+        await current.update(
+          { status: "passkey_required", qrcode: captureToken, retries: 0 },
+          { transaction }
+        );
+        const io = getIO();
+        io.to(`company-${current.companyId}-admin`).emit(
+          `company-${current.companyId}-whatsappSession`,
+          { action: "update", session: current }
+        );
+        return captureToken;
+      }
+    );
+  } catch (error) {
+    if (getPasskeyToken(whatsapp.id) === token) {
+      invalidateCaptureToken(whatsapp.id, session.id);
     }
-  );
+    throw error;
+  }
 
   return res.status(200).json({ token });
 };
@@ -163,21 +212,28 @@ const reset = async (req: Request, res: Response): Promise<Response> => {
     throw new AppError("ERR_NO_WAPP_FOUND", 404);
   }
 
-  await removeWbot(whatsapp.id, false);
-  await BaileysKeys.destroy({ where: { whatsappId: whatsapp.id } });
-  await whatsapp.update({
-    status: "DISCONNECTED",
-    qrcode: "",
-    session: "",
-    retries: 0
-  });
+  if (whatsapp.channel !== "whatsapp") {
+    throw new AppError("ERR_INVALID_CHANNEL", 400);
+  }
 
-  const io = getIO();
-  io.to(`company-${whatsapp.companyId}-admin`).emit(
-    `company-${whatsapp.companyId}-whatsappSession`,
-    {
-      action: "update",
-      session: whatsapp
+  const resetResult = await resetBaileysSession(whatsapp.id);
+  if (resetResult.previousSessionId) {
+    cancelReconnect(resetResult.previousSessionId);
+    invalidateCaptureToken(whatsapp.id, resetResult.previousSessionId);
+    clearQrRetries(resetResult.previousSessionId);
+    await removeWbot(whatsapp.id, false, resetResult.previousSessionId);
+  }
+  await cleanupRetiredBaileysSessions(whatsapp.id);
+
+  await withActiveBaileysSession(
+    whatsapp.id,
+    resetResult.whatsapp.activeBaileysSessionId,
+    async current => {
+      const io = getIO();
+      io.to(`company-${current.companyId}-admin`).emit(
+        `company-${current.companyId}-whatsappSession`,
+        { action: "update", session: current }
+      );
     }
   );
 
@@ -186,17 +242,23 @@ const reset = async (req: Request, res: Response): Promise<Response> => {
 
 const capture = async (req: Request, res: Response): Promise<Response> => {
   const { token } = req.params;
-  const whatsappId = resolvePasskeyToken(token);
+  const captureTarget = resolvePasskeyToken(token);
 
-  if (!whatsappId) {
+  if (!captureTarget) {
     return res
       .status(404)
       .json({ message: "Invalid or expired capture token." });
   }
 
-  const whatsapp = await ShowWhatsAppService(whatsappId.toString());
+  const whatsapp = await ShowWhatsAppService(
+    captureTarget.whatsappId.toString()
+  );
   if (!whatsapp) {
     return res.status(404).json({ message: "Session not found." });
+  }
+
+  if (whatsapp.channel !== "whatsapp") {
+    throw new AppError("ERR_INVALID_CHANNEL", 400);
   }
 
   const dump = req.body;
@@ -205,29 +267,45 @@ const capture = async (req: Request, res: Response): Promise<Response> => {
   }
 
   try {
-    await whatsapp.update({
-      status: "IMPORTING",
-      qrcode: ""
-    });
-
     const io = getIO();
-    io.to(`company-${whatsapp.companyId}-admin`).emit(
-      `company-${whatsapp.companyId}-whatsappSession`,
-      {
-        action: "update",
-        session: whatsapp
+    await withActiveBaileysSession(
+      whatsapp.id,
+      captureTarget.sessionId,
+      async (current, transaction) => {
+        if (resolvePasskeyToken(token)?.sessionId !== captureTarget.sessionId) {
+          throw new AppError("ERR_INVALID_CAPTURE_TOKEN", 404);
+        }
+        await current.update(
+          { status: "IMPORTING", qrcode: "" },
+          { transaction }
+        );
+        io.to(`company-${current.companyId}-admin`).emit(
+          `company-${current.companyId}-whatsappSession`,
+          { action: "update", session: current }
+        );
       }
     );
 
-    await removeWbot(whatsapp.id, false);
-    await ImportWhatsAppSessionService(whatsapp, dump);
+    await ImportWhatsAppSessionService(
+      whatsapp,
+      dump,
+      captureTarget.sessionId,
+      () => resolvePasskeyToken(token)?.sessionId === captureTarget.sessionId
+    );
 
-    await whatsapp.update({ status: "PENDING" });
-    io.to(`company-${whatsapp.companyId}-admin`).emit(
-      `company-${whatsapp.companyId}-whatsappSession`,
-      {
-        action: "update",
-        session: whatsapp
+    await withActiveBaileysSession(
+      whatsapp.id,
+      captureTarget.sessionId,
+      async (current, transaction) => {
+        if (resolvePasskeyToken(token)?.sessionId !== captureTarget.sessionId) {
+          throw new AppError("ERR_INVALID_CAPTURE_TOKEN", 404);
+        }
+        await current.update({ status: "PENDING" }, { transaction });
+        io.to(`company-${current.companyId}-admin`).emit(
+          `company-${current.companyId}-whatsappSession`,
+          { action: "update", session: current }
+        );
+        invalidateCaptureToken(whatsapp.id, captureTarget.sessionId);
       }
     );
 
@@ -235,10 +313,16 @@ const capture = async (req: Request, res: Response): Promise<Response> => {
     // session before this backend tries to connect with the same credentials.
     setTimeout(async () => {
       try {
-        await StartWhatsAppSession(whatsapp, whatsapp.companyId);
+        if (getPasskeyToken(whatsapp.id)) return;
+        await StartWhatsAppSession(
+          whatsapp,
+          whatsapp.companyId,
+          false,
+          captureTarget.sessionId
+        );
       } catch (startErr) {
         logger.error(
-          { err: startErr, whatsappId: whatsapp.id },
+          { errorType: startErr.name, whatsappId: whatsapp.id },
           "Failed to start imported session"
         );
       }
@@ -248,20 +332,11 @@ const capture = async (req: Request, res: Response): Promise<Response> => {
       message: "Session dump received and imported."
     });
   } catch (err) {
-    logger.error({ err, whatsappId: whatsapp.id }, "Failed to import dump");
-    await whatsapp.update({ status: "DISCONNECTED", qrcode: "", session: "" });
-    await BaileysKeys.destroy({ where: { whatsappId: whatsapp.id } });
-    const io = getIO();
-    io.to(`company-${whatsapp.companyId}-admin`).emit(
-      `company-${whatsapp.companyId}-whatsappSession`,
-      {
-        action: "update",
-        session: whatsapp
-      }
+    logger.error(
+      { errorType: err.name, whatsappId: whatsapp.id },
+      "Failed to import dump"
     );
-    return res
-      .status(500)
-      .json({ message: err.message || "Failed to process dump." });
+    return res.status(500).json({ message: "Failed to process dump." });
   }
 };
 

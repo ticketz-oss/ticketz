@@ -1,12 +1,12 @@
-import BaileysContact from "../../models/BaileysContact";
+import BaileysSessionContact from "../../models/BaileysSessionContact";
 import AppError from "../../errors/AppError";
 
 const ShowBaileysService = async (
-  id: string | number
-): Promise<BaileysContact[]> => {
-  const baileysData = await BaileysContact.findAll({
+  sessionId: string
+): Promise<BaileysSessionContact[]> => {
+  const baileysData = await BaileysSessionContact.findAll({
     where: {
-      whatsappId: id
+      sessionId
     },
     order: [["contactId", "ASC"]]
   });

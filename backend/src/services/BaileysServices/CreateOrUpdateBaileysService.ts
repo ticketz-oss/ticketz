@@ -1,12 +1,18 @@
 import { Contact } from "libzapitu-rf";
-import BaileysContact from "../../models/BaileysContact";
+import BaileysSessionContact from "../../models/BaileysSessionContact";
+import {
+  StaleBaileysSessionError,
+  withActiveBaileysSession
+} from "../WbotServices/BaileysSessionService";
 
 interface Request {
   whatsappId: number;
+  sessionId: string;
+  isCurrent: () => boolean;
   contacts?: Contact[];
 }
 
-const toRows = (whatsappId: number, contacts: Contact[]) => {
+const toRows = (sessionId: string, contacts: Contact[]) => {
   const dedupedByJid = contacts.reduce((acc, contact) => {
     if (
       !contact?.id ||
@@ -21,7 +27,7 @@ const toRows = (whatsappId: number, contacts: Contact[]) => {
   }, new Map<string, Contact>());
 
   return Array.from(dedupedByJid.values()).map(contact => ({
-    whatsappId,
+    sessionId,
     contactId: contact.id,
     payload: contact as unknown as Record<string, unknown>
   }));
@@ -29,21 +35,31 @@ const toRows = (whatsappId: number, contacts: Contact[]) => {
 
 const createOrUpdateBaileysService = async ({
   whatsappId,
+  sessionId,
+  isCurrent,
   contacts
 }: Request): Promise<void> => {
   if (!contacts?.length) {
     return;
   }
 
-  const rows = toRows(whatsappId, contacts);
+  const rows = toRows(sessionId, contacts);
 
   if (!rows.length) {
     return;
   }
 
-  await BaileysContact.bulkCreate(rows, {
-    updateOnDuplicate: ["payload", "updatedAt"]
-  });
+  await withActiveBaileysSession(
+    whatsappId,
+    sessionId,
+    async (_, transaction) => {
+      if (!isCurrent()) throw new StaleBaileysSessionError();
+      await BaileysSessionContact.bulkCreate(rows, {
+        updateOnDuplicate: ["payload", "updatedAt"],
+        transaction
+      });
+    }
+  );
 };
 
 export default createOrUpdateBaileysService;

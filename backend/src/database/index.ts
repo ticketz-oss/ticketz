@@ -37,6 +37,9 @@ import ChatMessage from "../models/ChatMessage";
 import Invoices from "../models/Invoices";
 import Subscriptions from "../models/Subscriptions";
 import BaileysKeys from "../models/BaileysKeys";
+import BaileysSession from "../models/BaileysSession";
+import BaileysSessionKey from "../models/BaileysSessionKey";
+import BaileysSessionContact from "../models/BaileysSessionContact";
 import UserSocketSession from "../models/UserSocketSession";
 import OutOfTicketMessage from "../models/OutOfTicketMessages";
 import Translation from "../models/Translation";
@@ -85,6 +88,9 @@ const models = [
   CampaignSetting,
   BaileysContact,
   BaileysKeys,
+  BaileysSession,
+  BaileysSessionKey,
+  BaileysSessionContact,
   CampaignShipping,
   Announcement,
   Chat,

@@ -46,79 +46,47 @@ import type {
 } from "libzapitu-rf";
 import { BufferJSON, initAuthCreds, proto } from "libzapitu-rf";
 import Whatsapp from "../models/Whatsapp";
-import BaileysKeys from "../models/BaileysKeys";
-import { logger } from "../utils/logger";
+import BaileysSession from "../models/BaileysSession";
+import BaileysSessionKey from "../models/BaileysSessionKey";
+import {
+  StaleBaileysSessionError,
+  withActiveBaileysSession
+} from "../services/WbotServices/BaileysSessionService";
 
 const authState = async (
-  whatsapp: Whatsapp
-): Promise<{ state: AuthenticationState; saveState: () => void }> => {
+  whatsapp: Whatsapp,
+  sessionId: string,
+  isCurrent: () => boolean
+): Promise<{ state: AuthenticationState; saveState: () => Promise<void> }> => {
   let creds: AuthenticationCreds;
   const whatsappId = whatsapp.id;
 
-  const saveKey = async (type: string, key: string, value: any) => {
-    logger.debug(
-      `Storing key whatsappId: ${whatsappId} type: ${type} key: ${key}`
-    );
-    return BaileysKeys.upsert({
-      whatsappId,
-      type,
-      key,
-      value: JSON.stringify(value, BufferJSON.replacer)
-    });
-  };
-
-  const getKey = async (type: string, key: string) => {
-    const baileysKey = await BaileysKeys.findOne({
-      where: {
-        whatsappId,
-        type,
-        key
-      }
-    });
-
-    if (!baileysKey) {
-      logger.debug(
-        `Key not found whatsappId: ${whatsappId} type: ${type} key: ${key}`
-      );
-    }
-
-    return baileysKey?.value
-      ? JSON.parse(baileysKey.value, BufferJSON.reviver)
-      : null;
-  };
-
-  const removeKey = async (type: string, key: string) => {
-    logger.debug(
-      `Deleting key whatsappId: ${whatsappId} type: ${type} key: ${key}`
-    );
-    return BaileysKeys.destroy({
-      where: {
-        whatsappId,
-        type,
-        key
-      }
-    });
-  };
-
   const saveState = async () => {
-    try {
-      await whatsapp.update({
-        session: JSON.stringify({ creds, keys: {} }, BufferJSON.replacer, 0)
-      });
-    } catch (error) {
-      console.log(error);
-    }
+    await withActiveBaileysSession(
+      whatsappId,
+      sessionId,
+      async (_, transaction) => {
+        if (!isCurrent()) throw new StaleBaileysSessionError();
+        await BaileysSession.update(
+          { credentials: JSON.stringify(creds, BufferJSON.replacer) },
+          { where: { id: sessionId, whatsappId }, transaction }
+        );
+      }
+    );
   };
 
-  if (whatsapp.session) {
-    const result = JSON.parse(whatsapp.session, BufferJSON.reviver);
-    creds = result.creds;
-    const { keys } = result;
-
-    if (Object.keys(keys).length) {
-      logger.info("Clearing old format session keys data");
-      saveState();
+  const session = await BaileysSession.findOne({
+    where: { id: sessionId, whatsappId }
+  });
+  if (!session) throw new Error("Baileys session not found");
+  if (session.credentials) {
+    try {
+      creds = JSON.parse(session.credentials, BufferJSON.reviver);
+    } catch {
+      throw new Error("Malformed Baileys credentials");
     }
+    if (!creds || typeof creds !== "object")
+      throw new Error("Malformed Baileys credentials");
   } else {
     creds = initAuthCreds();
   }
@@ -129,47 +97,65 @@ const authState = async (
       keys: {
         get: async (type, ids) => {
           const data: { [id: string]: SignalDataTypeMap[typeof type] } = {};
+          ids.forEach(id => {
+            data[id] = null;
+          });
 
-          let counter = 0;
-          // eslint-disable-next-line no-restricted-syntax
-          for await (const id of ids) {
-            try {
-              let value = await getKey(type, id);
-              if (value && type === "app-state-sync-key") {
-                value = proto.Message.AppStateSyncKeyData.fromObject(value);
-              }
-              data[id] = value;
-              if (value) {
-                counter += 1;
-              }
-            } catch (error) {
-              logger.error(`authState (69) -> error: ${error.message}`);
-              logger.error(`authState (72) -> stack: ${error.stack}`);
+          await withActiveBaileysSession(
+            whatsappId,
+            sessionId,
+            async (_, transaction) => {
+              if (!isCurrent()) throw new StaleBaileysSessionError();
+              const entries = await BaileysSessionKey.findAll({
+                where: { sessionId, type, key: ids },
+                transaction
+              });
+              entries.forEach(entry => {
+                let value;
+                try {
+                  value = JSON.parse(entry.value, BufferJSON.reviver);
+                } catch {
+                  throw new Error("Malformed Baileys key data");
+                }
+                if (value && type === "app-state-sync-key") {
+                  value = proto.Message.AppStateSyncKeyData.fromObject(value);
+                }
+                data[entry.key] = value;
+              });
             }
-          }
-
-          logger.debug(
-            `Keys retrieved: whatsappId: ${whatsappId} type: ${type} Counter: ${counter}/${ids.length}`
           );
           return data;
         },
-        set: async (data: any) => {
-          const tasks: Promise<unknown>[] = [];
-          // eslint-disable-next-line no-restricted-syntax, guard-for-in
-          for (const category in data) {
-            if (category === "pre-key") {
-              logger.info({ category: data[category] }, "Setting pre-keys");
-            }
-            // eslint-disable-next-line no-restricted-syntax, guard-for-in
-            for (const id in data[category]) {
-              const value = data[category][id];
-              tasks.push(
-                value ? saveKey(category, id, value) : removeKey(category, id)
+        set: async data => {
+          await withActiveBaileysSession(
+            whatsappId,
+            sessionId,
+            async (_, transaction) => {
+              if (!isCurrent()) throw new StaleBaileysSessionError();
+              await Promise.all(
+                Object.entries(data).flatMap(([type, values]) =>
+                  Object.entries(values).map(async ([key, value]) => {
+                    if (value) {
+                      await BaileysSessionKey.upsert(
+                        {
+                          sessionId,
+                          type,
+                          key,
+                          value: JSON.stringify(value, BufferJSON.replacer)
+                        },
+                        { transaction }
+                      );
+                    } else {
+                      await BaileysSessionKey.destroy({
+                        where: { sessionId, type, key },
+                        transaction
+                      });
+                    }
+                  })
+                )
               );
             }
-          }
-
-          await Promise.all(tasks);
+          );
         }
       }
     },

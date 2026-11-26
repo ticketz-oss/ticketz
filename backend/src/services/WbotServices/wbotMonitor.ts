@@ -12,6 +12,10 @@ import { _t } from "../TranslationServices/i18nService";
 import { Session } from "../../libs/wbot";
 import { cacheLayer } from "../../libs/cache";
 import { GetCompanySetting } from "../../helpers/CheckSettings";
+import {
+  StaleBaileysSessionError,
+  withActiveBaileysSession
+} from "./BaileysSessionService";
 
 const contactMutex = new Mutex();
 
@@ -92,28 +96,53 @@ const wbotMonitor = async (
 
     wbot.ev.on("contacts.upsert", async (contacts: BContact[]) => {
       logger.debug({ contacts }, "contacts.upsert");
-      contactMutex.runExclusive(async () => {
+      await contactMutex.runExclusive(async () => {
         await createOrUpdateBaileysService({
           whatsappId: whatsapp.id,
+          sessionId: wbot.baileysSessionId,
+          isCurrent: wbot.isCurrent,
           contacts
+        }).catch(error => {
+          if (!(error instanceof StaleBaileysSessionError)) {
+            logger.error(
+              { error: error.message, whatsappId: whatsapp.id },
+              "Baileys contact update failed"
+            );
+          }
         });
       });
     });
 
     wbot.ev.on("contacts.update", async (contacts: Partial<BContact[]>) => {
       logger.debug({ contacts }, "contacts.update");
-      contactMutex.runExclusive(async () => {
-        await Promise.all(
-          contacts.map(async (c: BContact) => {
-            if (["changed", "removed"].includes(c.imgUrl)) {
-              await Promise.all([
-                cacheLayer.del(`picurl_preview:${c.id}`),
-                cacheLayer.del(`picurl_image:${c.id}`)
-              ]);
+      await contactMutex
+        .runExclusive(async () => {
+          await withActiveBaileysSession(
+            whatsapp.id,
+            wbot.baileysSessionId,
+            async () => {
+              if (!wbot.isCurrent()) throw new StaleBaileysSessionError();
+              await Promise.all(
+                contacts.map(async (c: BContact) => {
+                  if (["changed", "removed"].includes(c.imgUrl)) {
+                    await Promise.all([
+                      cacheLayer.del(`picurl_preview:${c.id}`),
+                      cacheLayer.del(`picurl_image:${c.id}`)
+                    ]);
+                  }
+                })
+              );
             }
-          })
-        );
-      });
+          );
+        })
+        .catch(error => {
+          if (!(error instanceof StaleBaileysSessionError)) {
+            logger.error(
+              { error: error.message, whatsappId: whatsapp.id },
+              "Baileys contact cache update failed"
+            );
+          }
+        });
     });
   } catch (err) {
     Sentry.captureException(err);

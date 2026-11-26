@@ -14,6 +14,7 @@ import UpdateWhatsAppService from "../services/WhatsappService/UpdateWhatsAppSer
 import AppError from "../errors/AppError";
 import Ticket from "../models/Ticket";
 import { sendWhatsappUpdate } from "../services/WhatsappService/SocketSendWhatsappUpdate";
+import { logger } from "../utils/logger";
 
 interface WhatsappData {
   name: string;
@@ -84,7 +85,14 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     sendWhatsappUpdate(oldDefaultWhatsapp);
   }
 
-  StartWhatsAppSession(whatsapp, companyId);
+  if (whatsapp.channel === "whatsapp") {
+    StartWhatsAppSession(whatsapp, companyId).catch(error => {
+      logger.error(
+        { whatsappId: whatsapp.id, message: error.message },
+        "Failed to start WhatsApp session"
+      );
+    });
+  }
 
   return res.status(200).json(whatsapp);
 };
@@ -196,7 +204,7 @@ export const remove = async (
   if (whatsapp.channel === "whatsapp") {
     await DeleteBaileysService(whatsappId);
     await cacheLayer.delFromPattern(`sessions:${whatsappId}:*`);
-    removeWbot(+whatsappId);
+    await removeWbot(+whatsappId);
   }
 
   await DeleteWhatsAppService(whatsappId);
