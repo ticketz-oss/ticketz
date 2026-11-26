@@ -438,8 +438,7 @@ export const initWASocket = async (
                     session: whatsapp
                   }
                 );
-              }
-              if (
+              } else if (
                 (lastDisconnect?.error as Boom)?.output?.statusCode !==
                 DisconnectReason.loggedOut
               ) {
