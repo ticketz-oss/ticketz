@@ -21,7 +21,7 @@ export const invalidateCompanySettingCacheByPrefix = (
 
 const CheckSettings = async (
   key: string,
-  defaultValue: string = null
+  defaultValue: string | null
 ): Promise<string> => {
   const setting = await GetCompanySetting(1, key, defaultValue, true);
 

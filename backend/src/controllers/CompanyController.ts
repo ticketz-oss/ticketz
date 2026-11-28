@@ -71,11 +71,11 @@ export const signup = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  if ((await CheckSettings("allowSignup")) !== "enabled") {
+  if ((await CheckSettings("allowSignup", "disabled")) !== "enabled") {
     return res.status(401).json("🙎🏻‍♂️ Signup disabled");
   }
 
-  const recaptchaSecret = await CheckSettings("recaptchaSecretKey");
+  const recaptchaSecret = await CheckSettings("recaptchaSecretKey", "");
   if (recaptchaSecret) {
     if (!req.body.captchaToken) {
       return res.status(401).json("empty captcha");
