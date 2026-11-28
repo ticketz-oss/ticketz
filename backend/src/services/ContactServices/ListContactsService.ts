@@ -1,4 +1,4 @@
-import { Sequelize, Op } from "sequelize";
+import { Sequelize, Op, WhereOptions } from "sequelize";
 import Contact from "../../models/Contact";
 
 interface Request {
@@ -19,8 +19,23 @@ const ListContactsService = async ({
   companyId
 }: Request): Promise<Response> => {
   const normalizedSearchParam = searchParam.toLowerCase().trim();
-  const whereCondition = {
-    [Op.or]: [
+  const isNumberSuffixSearch = /^\d+\.$/.test(normalizedSearchParam);
+  const numberSuffix = isNumberSuffixSearch
+    ? normalizedSearchParam.slice(0, -1)
+    : "";
+
+  const whereCondition: WhereOptions<Contact> = {
+    companyId: {
+      [Op.eq]: companyId
+    }
+  };
+
+  if (isNumberSuffixSearch) {
+    whereCondition.number = {
+      [Op.like]: `%${numberSuffix}`
+    };
+  } else if (normalizedSearchParam) {
+    whereCondition[Op.or] = [
       {
         name: Sequelize.where(
           Sequelize.fn(
@@ -35,11 +50,8 @@ const ListContactsService = async ({
         )
       },
       { number: { [Op.like]: `%${normalizedSearchParam}%` } }
-    ],
-    companyId: {
-      [Op.eq]: companyId
-    }
-  };
+    ];
+  }
   const limit = 20;
   const offset = limit * (+pageNumber - 1);
 
